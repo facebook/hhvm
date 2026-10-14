@@ -1,0 +1,8 @@
+ERROR: File "unknown_function_values.php", line 36, characters 3-16:
+Function  `call_dependent` is not dynamically callable. (Typing[4403])
+  File "unknown_function_values.php", line 36, characters 3-16:
+  Typing error
+  File "unknown_function_values.php", line 35, characters 41-53:
+  Expected a function that requires the capability $runner::CRun
+  File "unknown_function_values.php", line 35, characters 32-38:
+  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

@@ -1,0 +1,18 @@
+ERROR: File "context_constants.php", line 16, characters 18-29:
+Invalid argument (Typing[4110])
+  File "context_constants.php", line 3, characters 21-23:
+  Expected `int`
+  File "context_constants.php", line 8, characters 10-13:
+  But got `?int`
+  File "context_constants.php", line 14, characters 7-18:
+  All the local information about `$this->value` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem.
+ERROR: File "context_constants.php", line 31, characters 18-29:
+Invalid argument (Typing[4110])
+  File "context_constants.php", line 3, characters 21-23:
+  Expected `int`
+  File "context_constants.php", line 24, characters 10-13:
+  But got `?int`
+  File "context_constants.php", line 30, characters 7-18:
+  All the local information about `$this->value` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem.

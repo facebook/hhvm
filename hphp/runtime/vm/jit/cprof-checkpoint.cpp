@@ -66,6 +66,41 @@ auto const s_checkpointBytes =
 auto const s_checkpointWriteFailures =
   ServiceData::createCounter("jit.cprof.checkpoint.write_failures");
 
+// Start attempts include eligibility exclusions, but exclude calls with an
+// already-joinable writer. Failures count invalid directories, thread creation
+// failures, and worker failures before the Starting -> Running transition.
+auto const s_writerStartAttempts =
+  ServiceData::createCounter("jit.cprof.writer.start_attempts");
+auto const s_writerStartFailures =
+  ServiceData::createCounter("jit.cprof.writer.start_failures");
+
+// Count every scheduled/final flush, including skips. Empty skips mean no
+// captured records, not an unchanged nonempty checkpoint.
+auto const s_writerCheckpointAttempts =
+  ServiceData::createCounter("jit.cprof.writer.checkpoint_attempts");
+auto const s_writerEmptyCheckpointSkips =
+  ServiceData::createCounter("jit.cprof.writer.empty_checkpoint_skips");
+
+// Eligibility reasons are first-match exclusions counted only by start(),
+// never by the per-function contProfActive() checks.
+auto const s_writerNotServerMode =
+  ServiceData::createCounter("jit.cprof.writer.not_server_mode");
+auto const s_writerCaptureDisabled =
+  ServiceData::createCounter("jit.cprof.writer.capture_disabled");
+auto const s_writerZeroInterval =
+  ServiceData::createCounter("jit.cprof.writer.zero_interval");
+auto const s_writerDeserializedProfData =
+  ServiceData::createCounter("jit.cprof.writer.deserialized_prof_data");
+
+// These identify actual startup failures or an exception escaping the worker's
+// main loop, not recoverable errors within a checkpoint attempt.
+auto const s_writerInvalidDirectory =
+  ServiceData::createCounter("jit.cprof.writer.invalid_directory");
+auto const s_writerThreadStartFailure =
+  ServiceData::createCounter("jit.cprof.writer.thread_start_failure");
+auto const s_writerUnexpectedStop =
+  ServiceData::createCounter("jit.cprof.writer.unexpected_stop");
+
 struct Writer {
   explicit Writer(size_t maxBytes) : m_maxBytes{maxBytes} {}
 
@@ -313,12 +348,26 @@ std::string makeContProfCheckpointPath() {
   );
 }
 
-bool contProfCaptureEligible() {
-  return
-    Cfg::Server::Mode &&
-    Cfg::Jit::ContProfCaptureEnabled &&
-    Cfg::Jit::ContProfCheckpointIntervalSeconds != 0 &&
-    !ProfData::wasDeserialized();
+enum class CaptureEligibility {
+  Eligible,
+  NotServerMode,
+  CaptureDisabled,
+  ZeroInterval,
+  DeserializedProfData,
+};
+
+CaptureEligibility contProfCaptureEligibility() {
+  if (!Cfg::Server::Mode) return CaptureEligibility::NotServerMode;
+  if (!Cfg::Jit::ContProfCaptureEnabled) {
+    return CaptureEligibility::CaptureDisabled;
+  }
+  if (Cfg::Jit::ContProfCheckpointIntervalSeconds == 0) {
+    return CaptureEligibility::ZeroInterval;
+  }
+  if (ProfData::wasDeserialized()) {
+    return CaptureEligibility::DeserializedProfData;
+  }
+  return CaptureEligibility::Eligible;
 }
 
 struct ContProfCheckpointWriter {
@@ -327,16 +376,40 @@ struct ContProfCheckpointWriter {
   }
 
   void start() {
-    if (!contProfCaptureEligible() || m_thread.joinable()) return;
+    if (m_thread.joinable()) return;
+
+    s_writerStartAttempts->increment();
+    switch (contProfCaptureEligibility()) {
+      case CaptureEligibility::NotServerMode:
+        s_writerNotServerMode->increment();
+        return;
+      case CaptureEligibility::CaptureDisabled:
+        s_writerCaptureDisabled->increment();
+        return;
+      case CaptureEligibility::ZeroInterval:
+        s_writerZeroInterval->increment();
+        return;
+      case CaptureEligibility::DeserializedProfData:
+        s_writerDeserializedProfData->increment();
+        return;
+      case CaptureEligibility::Eligible:
+        break;
+    }
 
     m_path = makeContProfCheckpointPath();
-    if (m_path.empty()) return;
+    if (m_path.empty()) {
+      s_writerInvalidDirectory->increment();
+      s_writerStartFailures->increment();
+      return;
+    }
 
     m_state.store(State::Starting, std::memory_order_release);
     try {
       m_thread = std::thread{[this] { run(); }};
     } catch (const std::exception& exception) {
       m_state.store(State::Stopped, std::memory_order_release);
+      s_writerThreadStartFailure->increment();
+      s_writerStartFailures->increment();
       Logger::Warning(
         "Failed to start cont-prof checkpoint writer: %s",
         exception.what()
@@ -377,10 +450,17 @@ private:
   };
 
   void writeCheckpoint() noexcept {
+    s_writerCheckpointAttempts->increment();
     try {
+      auto const recordCount = numContProfProfileRecords();
+      if (recordCount == 0) {
+        s_writerEmptyCheckpointSkips->increment();
+        return;
+      }
+
       // Records are immutable after their first snapshot, so an unchanged
       // count means there is nothing new to write.
-      if (numContProfProfileRecords() == m_lastWrittenRecordCount) return;
+      if (recordCount == m_lastWrittenRecordCount) return;
 
       auto const records = [] {
         Treadmill::Session session{Treadmill::SessionKind::ProfData};
@@ -407,6 +487,7 @@ private:
   }
 
   void run() noexcept {
+    bool failed = false;
     try {
       hphp_thread_init(true /* skipExtensions */);
       SCOPE_EXIT { hphp_thread_exit(true /* skipExtensions */); };
@@ -432,15 +513,23 @@ private:
       lock.unlock();
       writeCheckpoint();
     } catch (const std::exception& exception) {
+      failed = true;
       Logger::Warning(
         "Cont-prof checkpoint writer stopped unexpectedly: %s",
         exception.what()
       );
     } catch (...) {
+      failed = true;
       Logger::Warning("Cont-prof checkpoint writer stopped unexpectedly");
     }
 
-    m_state.store(State::Stopped, std::memory_order_release);
+    auto const previous = m_state.exchange(
+      State::Stopped, std::memory_order_acq_rel
+    );
+    if (failed) {
+      s_writerUnexpectedStop->increment();
+      if (previous == State::Starting) s_writerStartFailures->increment();
+    }
   }
 
   std::string m_path;
@@ -457,11 +546,22 @@ ContProfCheckpointWriter& contProfCheckpointWriter() {
   return *writer;
 }
 
+// Read the actual writer state when exported. Updating a separate gauge from
+// start() could overwrite the worker's zero after an early worker exit.
+ServiceData::CounterCallback s_writerActive{
+  [](ServiceData::CounterMap& counters) {
+    counters.emplace(
+      "jit.cprof.writer.active", contProfCheckpointWriter().running()
+    );
+  },
+  "jit.cprof.writer.active"
+};
+
 }
 
 bool contProfActive() {
   return
-    contProfCaptureEligible() &&
+    contProfCaptureEligibility() == CaptureEligibility::Eligible &&
     contProfCheckpointWriter().running();
 }
 

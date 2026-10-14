@@ -17,19 +17,25 @@
 #include "hphp/runtime/vm/jit/cprof-capture.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
+#include <folly/ScopeGuard.h>
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
@@ -39,6 +45,8 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/sha1.h"
 
 namespace HPHP::jit::cprof {
@@ -272,6 +280,51 @@ void expectEntryOnlyRecord(
   EXPECT_EQ(expected, record->translations);
 }
 
+using Rejection = ContProfCaptureRejection;
+
+void expectRejections(
+  const ContProfCaptureStats& stats,
+  std::initializer_list<std::pair<Rejection, size_t>> counts
+) {
+  decltype(stats.rejections) expected{};
+  for (auto const& [reason, count] : counts) {
+    expected[static_cast<size_t>(reason)] = count;
+  }
+  EXPECT_EQ(expected, stats.rejections);
+}
+
+TEST_F(ContProfCaptureTest, ResetsStatsWhenNoProfileTranslations) {
+  ProfData profData;
+  ContProfCaptureStats stats{};
+  stats.translationsExamined = 7;
+  stats.translationsEligible = 3;
+  stats.rejections.fill(1);
+  std::vector<TransID> sourceTransIds{0};
+
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), &sourceTransIds, &stats
+  ));
+  EXPECT_TRUE(sourceTransIds.empty());
+  EXPECT_EQ(0, stats.translationsExamined);
+  EXPECT_EQ(0, stats.translationsEligible);
+  expectRejections(stats, {{Rejection::NoProfileTranslations, 1}});
+}
+
+TEST(ContProfCapture, CountsInvalidFunctionKey) {
+  auto const builtin = Func::lookup(makeStaticString("strlen"));
+  ASSERT_NE(nullptr, builtin);
+  ASSERT_TRUE(builtin->isBuiltin());
+  ProfData profData;
+  ContProfCaptureStats stats{};
+
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *builtin, nullptr, &stats
+  ));
+  EXPECT_EQ(0, stats.translationsExamined);
+  EXPECT_EQ(0, stats.translationsEligible);
+  expectRejections(stats, {{Rejection::InvalidFuncKey, 1}});
+}
+
 TEST_F(ContProfCaptureTest, PreservesIncomingAcrossProfileRenumbering) {
   ProfData profData;
   profData.resetCounters(100);
@@ -319,8 +372,14 @@ TEST_F(ContProfCaptureTest, CapturesNonzeroTranslations) {
   );
   addProfileTranslation(profData, main, 3, 0);
 
-  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ContProfCaptureStats stats{};
+  auto const record = snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  );
   ASSERT_TRUE(record);
+  EXPECT_EQ(4, stats.translationsExamined);
+  EXPECT_EQ(3, stats.translationsEligible);
+  expectRejections(stats, {{Rejection::ZeroExecutionCount, 1}});
 
   auto const expectedKey = makeContProfFuncKey(*func());
   ASSERT_TRUE(expectedKey);
@@ -352,8 +411,14 @@ TEST_F(ContProfCaptureTest, SelectsBestDuplicate) {
   addProfileTranslation(profData, main, 2, 7);
   addProfileTranslation(profData, main, 1, 7);
 
-  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ContProfCaptureStats stats{};
+  auto const record = snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  );
   ASSERT_TRUE(record);
+  EXPECT_EQ(3, stats.translationsExamined);
+  EXPECT_EQ(3, stats.translationsEligible);
+  expectRejections(stats, {});
 
   std::vector<ContProfProfileTranslation> const expected{
     {ContProfStartKind::FuncEntry, 0, 1, 7},
@@ -394,7 +459,13 @@ TEST_F(ContProfCaptureTest, RequiresEntryTranslation) {
 
   addProfileTranslation(profData, emptyMid(), 1, 7);
 
-  EXPECT_FALSE(snapshotContProfProfileRecord(profData, *func()));
+  ContProfCaptureStats stats{};
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  EXPECT_EQ(1, stats.translationsExamined);
+  EXPECT_EQ(1, stats.translationsEligible);
+  expectRejections(stats, {{Rejection::InvalidFinalRecord, 1}});
 }
 
 TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonzeroStackOffset) {
@@ -406,7 +477,13 @@ TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonzeroStackOffset) {
   addProfileTranslation(profData, mid(), 1, 5, SBInvOffset{1});
   addProfileTranslation(profData, mid(), 1, 11, SBInvOffset{-1});
 
-  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+  ContProfCaptureStats stats{};
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  EXPECT_EQ(3, stats.translationsExamined);
+  EXPECT_EQ(1, stats.translationsEligible);
+  expectRejections(stats, {{Rejection::UnexpectedBlock, 2}});
 }
 
 TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonLocalTypeGuards) {
@@ -432,7 +509,11 @@ TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonLocalTypeGuards) {
     {{Location::MBase{0}, TObj, DataTypeSpecific}}
   );
 
-  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+  ContProfCaptureStats stats{};
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  expectRejections(stats, {{Rejection::InvalidLocalTypeGuards, 2}});
 }
 
 TEST_F(ContProfCaptureTest, SkipsInvalidEntryRegion) {
@@ -442,7 +523,88 @@ TEST_F(ContProfCaptureTest, SkipsInvalidEntryRegion) {
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
   addProfileTranslation(profData, main, 1, 5, SBInvOffset{1});
 
-  EXPECT_FALSE(snapshotContProfProfileRecord(profData, *func()));
+  ContProfCaptureStats stats{};
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  expectRejections(stats, {
+    {Rejection::UnexpectedBlock, 1},
+    {Rejection::NoEligibleCandidates, 1},
+  });
+}
+
+TEST_F(ContProfCaptureTest, CountsFirstTranslationRejection) {
+  ProfData profData;
+  profData.resetCounters(100);
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 1, 0, SBInvOffset{1});
+
+  ContProfCaptureStats stats{};
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  EXPECT_EQ(1, stats.translationsExamined);
+  EXPECT_EQ(0, stats.translationsEligible);
+  expectRejections(stats, {
+    {Rejection::UnexpectedBlock, 1},
+    {Rejection::NoEligibleCandidates, 1},
+  });
+}
+
+TEST_F(ContProfCaptureTest, CountsZeroExecutionCountWithoutCandidates) {
+  ProfData profData;
+  profData.resetCounters(100);
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 1, 0);
+
+  ContProfCaptureStats stats{};
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  expectRejections(stats, {
+    {Rejection::ZeroExecutionCount, 1},
+    {Rejection::NoEligibleCandidates, 1},
+  });
+}
+
+TEST_F(ContProfCaptureTest, CountsUnexpectedMultiblockRegion) {
+  ProfData profData;
+  profData.resetCounters(100);
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  auto const transId = addProfileTranslation(profData, main, 1, 7);
+  // addTransProfile requires one block; alter it afterwards to exercise the
+  // defensive rejection of an unexpected region shape.
+  profData.transRec(transId)->region()->addBlock(emptyMid(), 1, SBInvOffset{0});
+
+  ContProfCaptureStats stats{};
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  expectRejections(stats, {
+    {Rejection::UnexpectedRegion, 1},
+    {Rejection::NoEligibleCandidates, 1},
+  });
+}
+
+TEST_F(ContProfCaptureTest, CountsResumedAndInvalidBytecodeStarts) {
+  ProfData profData;
+  profData.resetCounters(100);
+  addProfileTranslation(
+    profData, SrcKey{func(), emptyMid().offset(), ResumeMode::Async}, 1, 7
+  );
+  addProfileTranslation(profData, SrcKey{func(), 0, ResumeMode::None}, 1, 7);
+
+  ContProfCaptureStats stats{};
+  EXPECT_FALSE(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  EXPECT_EQ(2, stats.translationsExamined);
+  EXPECT_EQ(0, stats.translationsEligible);
+  expectRejections(stats, {
+    {Rejection::PrologueOrResumedTranslation, 1},
+    {Rejection::InvalidEntry, 1},
+    {Rejection::NoEligibleCandidates, 1},
+  });
 }
 
 TEST_F(ContProfCaptureTest, SkipsUnusableTranslations) {
@@ -629,8 +791,12 @@ TEST_F(ContProfCaptureTest, SkipsGuardedEntryBelowRequiredArguments) {
     preconditions
   );
 
-  auto const record = snapshotContProfProfileRecord(profData, *requiredFunc());
+  ContProfCaptureStats stats{};
+  auto const record = snapshotContProfProfileRecord(
+    profData, *requiredFunc(), nullptr, &stats
+  );
   ASSERT_TRUE(record);
+  expectRejections(stats, {{Rejection::InvalidEntryTypeGuards, 1}});
 
   std::vector<ContProfProfileTranslation> const expected{
     {ContProfStartKind::FuncEntry, 0, 1, 5},
@@ -727,15 +893,130 @@ TEST_F(ContProfCaptureTest, CapturesLocalPostConditions) {
   EXPECT_EQ(expected, record->translations.back().localPostConditions);
 }
 
+TEST_F(ContProfCaptureTest, CountsInvalidLocalPostconditions) {
+  ProfData profData;
+  profData.resetCounters(100);
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 2, 7);
+  for (auto const type : {TBottom, TStkPtr}) {
+    PostConditions posts{};
+    posts.changed = {{Location::Local{0}, type}};
+    addProfileTranslation(
+      profData, emptyMid(), 1, 11, SBInvOffset{0}, {}, {}, posts
+    );
+  }
+  PostConditions posts{};
+  posts.refined = {
+    {Location::Local{static_cast<uint32_t>(func()->numLocals())}, TInt},
+  };
+  addProfileTranslation(
+    profData, emptyMid(), 1, 11, SBInvOffset{0}, {}, {}, posts
+  );
+
+  ContProfCaptureStats stats{};
+  expectEntryOnlyRecord(snapshotContProfProfileRecord(
+    profData, *func(), nullptr, &stats
+  ));
+  EXPECT_EQ(4, stats.translationsExamined);
+  EXPECT_EQ(1, stats.translationsEligible);
+  expectRejections(stats, {{Rejection::InvalidLocalPostconditions, 3}});
+}
+
+TEST_F(ContProfCaptureTest, CountsOnlyEnabledCaptureOpportunities) {
+  auto const enabled = std::exchange(Cfg::Jit::ContProfCaptureEnabled, false);
+  SCOPE_EXIT { Cfg::Jit::ContProfCaptureEnabled = enabled; };
+  ProfData profData;
+  auto const opportunities = ServiceData::exportCounterByKey(
+    "jit.cprof.capture.opportunities"
+  );
+  auto const asyncOpportunities = ServiceData::exportCounterByKey(
+    "jit.cprof.capture.async_opportunities"
+  );
+  auto const inactive = ServiceData::exportCounterByKey(
+    "jit.cprof.capture.skipped_inactive"
+  );
+  auto const attempts = ServiceData::exportCounterByKey(
+    "jit.cprof.capture.attempts"
+  );
+  ASSERT_TRUE(opportunities);
+  ASSERT_TRUE(asyncOpportunities);
+  ASSERT_TRUE(inactive);
+  ASSERT_TRUE(attempts);
+
+  maybeCaptureContProfProfile(profData, *func(), true /* async */);
+  EXPECT_EQ(opportunities, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.opportunities"
+  ));
+  EXPECT_EQ(inactive, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.skipped_inactive"
+  ));
+  EXPECT_EQ(asyncOpportunities, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.async_opportunities"
+  ));
+
+  Cfg::Jit::ContProfCaptureEnabled = true;
+  ASSERT_FALSE(contProfActive());
+  maybeCaptureContProfProfile(profData, *func());
+  EXPECT_EQ(*opportunities + 1, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.opportunities"
+  ).value_or(-1));
+  EXPECT_EQ(*inactive + 1, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.skipped_inactive"
+  ).value_or(-1));
+  EXPECT_EQ(asyncOpportunities, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.async_opportunities"
+  ));
+  maybeCaptureContProfProfile(profData, *func(), true /* async */);
+  EXPECT_EQ(*opportunities + 2, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.opportunities"
+  ).value_or(-1));
+  EXPECT_EQ(*asyncOpportunities + 1, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.async_opportunities"
+  ).value_or(-1));
+  EXPECT_EQ(*inactive + 2, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.skipped_inactive"
+  ).value_or(-1));
+  EXPECT_EQ(attempts, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.attempts"
+  ));
+}
+
 TEST_F(ContProfCaptureTest, StoresFirstRecordAndFinalizesTargetProfilesOnce) {
   auto const before = snapshotContProfProfileRecords();
+  auto const counters = [] {
+    return std::array{
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.attempts").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.snapshot_successes").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.snapshot_failures").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.stored_records").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.duplicates").value_or(-1),
+    };
+  };
+  auto const countersBefore = counters();
+  for (auto const count : countersBefore) ASSERT_GE(count, 0);
+  auto const missingProfiles = ServiceData::exportCounterByKey(
+    "jit.cprof.capture.rejected.no_profile_translations"
+  );
+  auto const unexpectedBlocks = ServiceData::exportCounterByKey(
+    "jit.cprof.capture.rejected.unexpected_block"
+  );
+  ASSERT_TRUE(missingProfiles);
+  ASSERT_TRUE(unexpectedBlocks);
 
   ProfData profData;
   profData.resetCounters(100);
+  EXPECT_FALSE(captureContProfProfile(profData, *func()));
 
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
   auto const discardedMainTransId = addProfileTranslation(profData, main, 3, 5);
   auto const selectedMainTransId = addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(profData, main, 1, 5, SBInvOffset{1});
+  addProfileTranslation(profData, main, 1, 5, SBInvOffset{-1});
   auto const midTransId = addProfileTranslation(
     profData,
     emptyMid(),
@@ -890,6 +1171,20 @@ TEST_F(ContProfCaptureTest, StoresFirstRecordAndFinalizesTargetProfilesOnce) {
     selectedDefaultValue,
   };
   EXPECT_EQ(records, snapshotContProfProfileRecords());
+
+  // The direct snapshot above is not a capture attempt. The controller saw
+  // one failure, two new records, and one valid duplicate snapshot.
+  auto const countersAfter = counters();
+  std::array<int64_t, 5> const deltas{4, 3, 1, 2, 1};
+  for (size_t i = 0; i < deltas.size(); ++i) {
+    EXPECT_EQ(countersBefore[i] + deltas[i], countersAfter[i]);
+  }
+  EXPECT_EQ(*missingProfiles + 1, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.rejected.no_profile_translations"
+  ).value_or(-1));
+  EXPECT_EQ(*unexpectedBlocks + 4, ServiceData::exportCounterByKey(
+    "jit.cprof.capture.rejected.unexpected_block"
+  ).value_or(-1));
 }
 
 }

@@ -779,9 +779,7 @@ bool retranslateOpt(FuncId funcId) {
   if (profData()->optimized(funcId)) return true;
   profData()->setOptimized(funcId);
 
-  if (cprof::contProfActive()) {
-    cprof::captureContProfProfile(*profData(), *func);
-  }
+  cprof::maybeCaptureContProfProfile(*profData(), *func);
 
   tracing::Block _b{"retranslate-opt", [&] { return traceProps(func); }};
   tracing::Pause _p;

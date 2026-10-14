@@ -30,7 +30,11 @@ namespace HPHP::jit::cprof {
 /* Whether the process-wide checkpoint writer is accepting profile data. */
 bool contProfActive();
 
-/* Start and stop the process-wide checkpoint writer. */
+/*
+ * Start and stop the process-wide checkpoint writer. Writer counters describe
+ * lifecycle/flush attempts; writer.active reports the running thread state,
+ * independently of the capture eligibility checked by contProfActive().
+ */
 void startContProfCheckpointWriter();
 void stopContProfCheckpointWriter();
 

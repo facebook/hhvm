@@ -29,13 +29,83 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/cprof-capture.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
 
 namespace {
+
+// Cumulative process totals. Opportunities are sync/async profile optimizations
+// with capture configured, including those skipped because the writer is not
+// active. Disabled capture does not touch any counters.
+auto const s_captureOpportunities = ServiceData::createCounter(
+  "jit.cprof.capture.opportunities"
+);
+// The async-only subset, counted after the queued optimization is accepted,
+// not when it is enqueued (enqueueing can deduplicate or reject requests).
+auto const s_asyncCaptureOpportunities = ServiceData::createCounter(
+  "jit.cprof.capture.async_opportunities"
+);
+auto const s_captureSkippedInactive = ServiceData::createCounter(
+  "jit.cprof.capture.skipped_inactive"
+);
+// Attempts count calls to captureContProfProfile. Snapshot outcomes precede
+// duplicate detection, so successes = stored_records + duplicates. Imported
+// records retained for future checkpoints do not contribute to these totals.
+auto const s_captureAttempts = ServiceData::createCounter(
+  "jit.cprof.capture.attempts"
+);
+auto const s_snapshotSuccesses = ServiceData::createCounter(
+  "jit.cprof.capture.snapshot_successes"
+);
+auto const s_snapshotFailures = ServiceData::createCounter(
+  "jit.cprof.capture.snapshot_failures"
+);
+auto const s_storedRecords = ServiceData::createCounter(
+  "jit.cprof.capture.stored_records"
+);
+auto const s_duplicates = ServiceData::createCounter(
+  "jit.cprof.capture.duplicates"
+);
+
+// Rejection scopes and first-rejection semantics are defined by
+// ContProfCaptureStats. Flush at most once per nonzero reason per function.
+struct RejectionCounter {
+  ContProfCaptureRejection reason;
+  ServiceData::ExportedCounter* counter;
+};
+using Rejection = ContProfCaptureRejection;
+RejectionCounter const s_rejections[] = {
+  {Rejection::InvalidFuncKey, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.invalid_func_key")},
+  {Rejection::NoProfileTranslations, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.no_profile_translations")},
+  {Rejection::PrologueOrResumedTranslation, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.prologue_or_resumed_translation")},
+  {Rejection::UnexpectedRegion, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.unexpected_region")},
+  {Rejection::UnexpectedBlock, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.unexpected_block")},
+  {Rejection::InvalidEntry, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.invalid_entry")},
+  {Rejection::InvalidLocalTypeGuards, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.invalid_local_type_guards")},
+  {Rejection::InvalidEntryTypeGuards, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.invalid_entry_type_guards")},
+  {Rejection::InvalidLocalPostconditions, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.invalid_local_postconditions")},
+  {Rejection::ZeroExecutionCount, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.zero_execution_count")},
+  {Rejection::NoEligibleCandidates, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.no_eligible_candidates")},
+  {Rejection::InvalidFinalRecord, ServiceData::createCounter(
+    "jit.cprof.capture.rejected.invalid_final_record")},
+};
 
 /*
  * A captured record plus what the target-profile sweep needs later.
@@ -128,14 +198,41 @@ void snapshotTargetProfiles(std::vector<CapturedRecord>& records) {
 
 }
 
+void maybeCaptureContProfProfile(
+  const ProfData& profData,
+  const Func& func,
+  bool async
+) {
+  if (!Cfg::Jit::ContProfCaptureEnabled) return;
+  s_captureOpportunities->increment();
+  if (async) s_asyncCaptureOpportunities->increment();
+  if (!contProfActive()) {
+    s_captureSkippedInactive->increment();
+    return;
+  }
+  captureContProfProfile(profData, func);
+}
+
 bool captureContProfProfile(const ProfData& profData, const Func& func) {
+  s_captureAttempts->increment();
+  ContProfCaptureStats stats;
   std::vector<TransID> sourceTransIds;
-  auto record = snapshotContProfProfileRecord(profData, func, &sourceTransIds);
-  if (!record) return false;
+  auto record = snapshotContProfProfileRecord(
+    profData, func, &sourceTransIds, &stats
+  );
+  for (auto const& rejection : s_rejections) {
+    auto const count = stats.rejections[static_cast<size_t>(rejection.reason)];
+    if (count) rejection.counter->addValue(count);
+  }
+  if (!record) {
+    s_snapshotFailures->increment();
+    return false;
+  }
+  s_snapshotSuccesses->increment();
 
   auto key = record->header.funcKey;
   auto records = s_records.wlock();
-  return records->try_emplace(
+  auto const inserted = records->try_emplace(
     std::move(key),
     CapturedRecord{
       std::move(*record),
@@ -143,6 +240,8 @@ bool captureContProfProfile(const ProfData& profData, const Func& func) {
       func.bclen(),
     }
   ).second;
+  (inserted ? s_storedRecords : s_duplicates)->increment();
+  return inserted;
 }
 
 size_t numContProfProfileRecords() {

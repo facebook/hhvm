@@ -26,6 +26,7 @@
 #include <folly/testing/TestUtil.h>
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/service-data.h"
@@ -176,12 +177,34 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
 TEST(ContProfCheckpoint, ActivatesOnlyWhileWriterIsRunning) {
   folly::test::TemporaryDirectory temp{"cont-prof-checkpoint-activation"};
 
+  auto const writerCounters = [] {
+    ServiceData::CounterMap counters;
+    ServiceData::exportSelectedCountersByKeys(counters, {
+      "jit.cprof.writer.active",
+      "jit.cprof.writer.start_attempts",
+      "jit.cprof.writer.start_failures",
+      "jit.cprof.writer.checkpoint_attempts",
+      "jit.cprof.writer.empty_checkpoint_skips",
+      "jit.cprof.writer.not_server_mode",
+      "jit.cprof.writer.capture_disabled",
+      "jit.cprof.writer.zero_interval",
+      "jit.cprof.writer.deserialized_prof_data",
+      "jit.cprof.writer.invalid_directory",
+      "jit.cprof.writer.thread_start_failure",
+      "jit.cprof.writer.unexpected_stop",
+    });
+    return counters;
+  };
+  auto expectedCounters = writerCounters();
+  ASSERT_EQ(size_t{12}, expectedCounters.size());
+  ASSERT_EQ(0, expectedCounters.at("jit.cprof.writer.active"));
+
   auto const oldServerMode = std::exchange(Cfg::Server::Mode, false);
   auto const oldCaptureEnabled =
     std::exchange(Cfg::Jit::ContProfCaptureEnabled, true);
   auto const oldInterval = std::exchange(
     Cfg::Jit::ContProfCheckpointIntervalSeconds,
-    uint32_t{60}
+    uint32_t{3600}
   );
   auto const oldDirectory = std::exchange(
     Cfg::Jit::ContProfCheckpointDirectory,
@@ -195,20 +218,78 @@ TEST(ContProfCheckpoint, ActivatesOnlyWhileWriterIsRunning) {
     Cfg::Jit::ContProfCheckpointDirectory = oldDirectory;
   };
 
+  ++expectedCounters["jit.cprof.writer.start_attempts"];
+  ++expectedCounters["jit.cprof.writer.not_server_mode"];
   startContProfCheckpointWriter();
   EXPECT_FALSE(contProfActive());
+  EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
 
   Cfg::Server::Mode = true;
-  Cfg::Jit::ContProfCheckpointDirectory = temp.path().native() + "/missing";
+  Cfg::Jit::ContProfCaptureEnabled = false;
+  ++expectedCounters["jit.cprof.writer.start_attempts"];
+  ++expectedCounters["jit.cprof.writer.capture_disabled"];
   startContProfCheckpointWriter();
   EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
+
+  Cfg::Jit::ContProfCaptureEnabled = true;
+  Cfg::Jit::ContProfCheckpointIntervalSeconds = 0;
+  ++expectedCounters["jit.cprof.writer.start_attempts"];
+  ++expectedCounters["jit.cprof.writer.zero_interval"];
+  startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
+
+  Cfg::Jit::ContProfCheckpointIntervalSeconds = 3600;
+  Cfg::Jit::ContProfCheckpointDirectory.clear();
+  ++expectedCounters["jit.cprof.writer.start_attempts"];
+  ++expectedCounters["jit.cprof.writer.start_failures"];
+  ++expectedCounters["jit.cprof.writer.invalid_directory"];
+  startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
+
+  Cfg::Jit::ContProfCheckpointDirectory = temp.path().native() + "/missing";
+  ++expectedCounters["jit.cprof.writer.start_attempts"];
+  ++expectedCounters["jit.cprof.writer.start_failures"];
+  ++expectedCounters["jit.cprof.writer.invalid_directory"];
+  startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
 
   Cfg::Jit::ContProfCheckpointDirectory = temp.path().native();
+  ++expectedCounters["jit.cprof.writer.start_attempts"];
+  expectedCounters["jit.cprof.writer.active"] = 1;
   startContProfCheckpointWriter();
   EXPECT_TRUE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
 
+  // Already-running starts and eligibility checks must not count new attempts.
+  startContProfCheckpointWriter();
+  EXPECT_TRUE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
+
+  // The writer gauge reports thread state, not dynamic capture eligibility.
+  Cfg::Jit::ContProfCaptureEnabled = false;
+  startContProfCheckpointWriter();
+  EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
+  Cfg::Jit::ContProfCaptureEnabled = true;
+
+  // A standalone run exercises the empty flush; other capture tests may have
+  // already retained records in this process. Stop joins the final flush.
+  if (numContProfProfileRecords() == 0) {
+    ++expectedCounters["jit.cprof.writer.empty_checkpoint_skips"];
+  }
+  ++expectedCounters["jit.cprof.writer.checkpoint_attempts"];
+  expectedCounters["jit.cprof.writer.active"] = 0;
   stopContProfCheckpointWriter();
   EXPECT_FALSE(contProfActive());
+  EXPECT_EQ(expectedCounters, writerCounters());
+
+  stopContProfCheckpointWriter();
+  EXPECT_EQ(expectedCounters, writerCounters());
 }
 
 }

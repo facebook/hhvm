@@ -417,9 +417,7 @@ struct AsyncTranslationWorker
 
     profData()->setOptimized(ctx.funcId);
 
-    if (cprof::contProfActive()) {
-      cprof::captureContProfProfile(*profData(), *func);
-    }
+  cprof::maybeCaptureContProfProfile(*profData(), *func, true /* async */);
 
     optimizeFunc(func);
   }

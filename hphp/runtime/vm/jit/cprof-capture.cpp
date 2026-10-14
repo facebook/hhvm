@@ -187,22 +187,42 @@ std::optional<ContProfProfileRecord>
 snapshotContProfProfileRecord(
   const ProfData& profData,
   const Func& func,
-  std::vector<TransID>* sourceTransIds
+  std::vector<TransID>* sourceTransIds,
+  ContProfCaptureStats* stats
 ) {
   if (sourceTransIds) sourceTransIds->clear();
+  if (stats) *stats = {};
+
+  auto const reject = [&](ContProfCaptureRejection reason) {
+    if (stats) ++stats->rejections[static_cast<size_t>(reason)];
+  };
 
   auto funcKey = makeContProfFuncKey(func);
-  if (!funcKey) return std::nullopt;
+  if (!funcKey) {
+    reject(ContProfCaptureRejection::InvalidFuncKey);
+    return std::nullopt;
+  }
+
+  auto const transIds = profData.funcProfTransIDs(func.getFuncId());
+  if (transIds.empty()) {
+    reject(ContProfCaptureRejection::NoProfileTranslations);
+    return std::nullopt;
+  }
 
   std::vector<TranslationCandidate> candidates;
 
-  for (auto const transId : profData.funcProfTransIDs(func.getFuncId())) {
+  for (auto const transId : transIds) {
+    if (stats) ++stats->translationsExamined;
     auto const record = profData.transRec(transId);
     auto const start = record->srcKey();
-    if (start.prologue() || start.resumeMode() != ResumeMode::None) continue;
+    if (start.prologue() || start.resumeMode() != ResumeMode::None) {
+      reject(ContProfCaptureRejection::PrologueOrResumedTranslation);
+      continue;
+    }
 
     auto const region = record->region();
     if (!region || region->blocks().size() != 1) {
+      reject(ContProfCaptureRejection::UnexpectedRegion);
       TRACE(2, "cont-prof: %s trans %d has an unexpected region\n",
             func.fullName()->data(), transId);
       continue;
@@ -212,6 +232,7 @@ snapshotContProfProfileRecord(
     if (block->start() != start ||
         block->initialSpOffset() != SBInvOffset{0} ||
         block->length() <= 0) {
+      reject(ContProfCaptureRejection::UnexpectedBlock);
       TRACE(2, "cont-prof: %s trans %d has an unexpected block\n",
             func.fullName()->data(), transId);
       continue;
@@ -224,13 +245,17 @@ snapshotContProfProfileRecord(
     translation.regionLength = static_cast<uint32_t>(block->length());
 
     if (start.funcEntry()) {
-      if (start.numEntryArgs() > func.numPositionalParams()) continue;
+      if (start.numEntryArgs() > func.numPositionalParams()) {
+        reject(ContProfCaptureRejection::InvalidEntry);
+        continue;
+      }
 
       translation.startKind = ContProfStartKind::FuncEntry;
       translation.offsetOrNumEntryArgs = start.numEntryArgs();
     } else if (start.namedParamsFuncEntry()) {
       if (!func.hasOptionalNamedParameters() ||
           start.numEntryArgs() != func.numPositionalParams()) {
+        reject(ContProfCaptureRejection::InvalidEntry);
         continue;
       }
 
@@ -238,19 +263,26 @@ snapshotContProfProfileRecord(
     } else {
       auto const offset = start.offset();
 
-      if (!func.contains(offset) || func.isEntry(offset)) continue;
+      if (!func.contains(offset) || func.isEntry(offset)) {
+        reject(ContProfCaptureRejection::InvalidEntry);
+        continue;
+      }
 
       translation.startKind = ContProfStartKind::Bytecode;
       translation.offsetOrNumEntryArgs = static_cast<uint32_t>(offset);
     }
 
     auto localTypeGuards = snapshotLocalTypeGuards(*block, func);
-    if (!localTypeGuards) continue;
+    if (!localTypeGuards) {
+      reject(ContProfCaptureRejection::InvalidLocalTypeGuards);
+      continue;
+    }
 
     if (!localTypeGuards->empty() && start.funcEntry()) {
       auto const numEntryArgs = start.numEntryArgs();
       if (numEntryArgs < func.numRequiredPositionalParams() ||
           start.trivialDVFuncEntry()) {
+        reject(ContProfCaptureRejection::InvalidEntryTypeGuards);
         continue;
       }
     }
@@ -259,19 +291,29 @@ snapshotContProfProfileRecord(
 
     auto localPostConditions =
       snapshotLocalPostConditions(block->postConds(), func);
-    if (!localPostConditions) continue;
+    if (!localPostConditions) {
+      reject(ContProfCaptureRejection::InvalidLocalPostconditions);
+      continue;
+    }
 
     translation.localPostConditions = std::move(*localPostConditions);
 
     auto const count = profData.transCounter(transId);
     assertx(count >= 0);
-    if (count == 0) continue;
+    if (count == 0) {
+      reject(ContProfCaptureRejection::ZeroExecutionCount);
+      continue;
+    }
     translation.executionCount = static_cast<uint64_t>(count);
 
     candidates.push_back(std::move(candidate));
+    if (stats) ++stats->translationsEligible;
   }
 
-  if (candidates.empty()) return std::nullopt;
+  if (candidates.empty()) {
+    reject(ContProfCaptureRejection::NoEligibleCandidates);
+    return std::nullopt;
+  }
 
   std::sort(candidates.begin(), candidates.end(), candidateLess);
 
@@ -330,7 +372,10 @@ snapshotContProfProfileRecord(
 
   result.header.capturedAtMs = static_cast<uint64_t>(capturedAtMs);
 
-  if (!isValidContProfProfileRecord(result)) return std::nullopt;
+  if (!isValidContProfProfileRecord(result)) {
+    reject(ContProfCaptureRejection::InvalidFinalRecord);
+    return std::nullopt;
+  }
 
   if (sourceTransIds) {
     sourceTransIds->reserve(selectedCandidates.size());

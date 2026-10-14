@@ -36,8 +36,16 @@ struct ProfData;
 namespace HPHP::jit::cprof {
 
 /*
+ * Capture at a sync or async profile-optimization boundary, if configured and
+ * active. `async` also records the async-only subset of opportunities.
+ * Startup replay deliberately does not call this hook.
+ */
+void maybeCaptureContProfProfile(const ProfData&, const Func&, bool async = false);
+
+/*
  * Snapshot and retain the first valid profile record for `func`.
- * Returns true iff a new record was inserted.
+ * Returns true iff a new record was inserted. Records capture outcomes, but
+ * does not check capture eligibility (the optimization hook does that).
  */
 bool captureContProfProfile(const ProfData&, const Func&);
 

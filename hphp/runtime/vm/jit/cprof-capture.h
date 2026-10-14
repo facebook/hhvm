@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <optional>
 #include <vector>
 
@@ -34,6 +36,37 @@ struct ProfData;
 
 namespace HPHP::jit::cprof {
 
+enum class ContProfCaptureRejection {
+  InvalidFuncKey,
+  NoProfileTranslations,
+  PrologueOrResumedTranslation,
+  UnexpectedRegion,
+  UnexpectedBlock,
+  InvalidEntry,
+  InvalidLocalTypeGuards,
+  InvalidEntryTypeGuards,
+  InvalidLocalPostconditions,
+  ZeroExecutionCount,
+  NoEligibleCandidates,
+  InvalidFinalRecord,
+  Count,
+};
+
+/*
+ * Per-snapshot counts, reset on each call. InvalidFuncKey,
+ * NoProfileTranslations, NoEligibleCandidates, and InvalidFinalRecord count
+ * terminal function failures. Other reasons count the first rejection of each
+ * examined translation, including when the function snapshot succeeds.
+ * InvalidEntry also covers malformed bytecode starts.
+ * Examined/eligible translation counts precede per-start deduplication.
+ */
+struct ContProfCaptureStats {
+  size_t translationsExamined{};
+  size_t translationsEligible{};
+  std::array<size_t, static_cast<size_t>(ContProfCaptureRejection::Count)>
+    rejections{};
+};
+
 /*
  * Snapshot the representable, positive-count translations for `func`,
  * retaining one preferred translation per start. Returns nullopt if no valid
@@ -44,7 +77,8 @@ std::optional<ContProfProfileRecord>
 snapshotContProfProfileRecord(
   const ProfData&,
   const Func&,
-  std::vector<TransID>* sourceTransIds = nullptr
+  std::vector<TransID>* sourceTransIds = nullptr,
+  ContProfCaptureStats* stats = nullptr
 );
 
 }

@@ -185,6 +185,32 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   ).value_or(-1));
 }
 
+TEST(ContProfCheckpoint, SelectsHottestRecordsWithinLimit) {
+  folly::test::TemporaryDirectory temp{"cont-prof-checkpoint"};
+  auto const path = temp.path().native() + "/checkpoint.cprof";
+  constexpr size_t recordLimit = 100'000;
+
+  std::vector<ContProfProfileRecord> records;
+  records.reserve(recordLimit + 1);
+
+  for (size_t i = 0; i <= recordLimit; ++i) {
+    records.push_back(makeRecord(
+      std::to_string(1'000'000 + i),
+      1,
+      i == recordLimit ? 2 : 1
+    ));
+  }
+
+  ASSERT_TRUE(writeContProfCheckpointFile(path, records));
+  expectCheckpointCounters(path, recordLimit);
+
+  auto const decoded = readContProfCheckpointFile(path);
+  ASSERT_TRUE(decoded);
+
+  records.erase(records.end() - 2);
+  EXPECT_EQ(records, *decoded);
+}
+
 TEST(ContProfCheckpoint, PrunesOnlyOldCheckpointsAndPreservesCurrent) {
   folly::test::TemporaryDirectory temp{"cont-prof-checkpoint-retention"};
   std::filesystem::path const directoryPath{temp.path().native()};

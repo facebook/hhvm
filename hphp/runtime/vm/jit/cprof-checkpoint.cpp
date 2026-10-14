@@ -201,6 +201,44 @@ private:
   size_t m_remaining;
 };
 
+std::vector<const ContProfProfileRecord*>
+selectContProfCheckpointRecords(
+  const std::vector<ContProfProfileRecord>& records
+) {
+  auto const keyLess = [](auto const lhs, auto const rhs) {
+    return lhs->header.funcKey < rhs->header.funcKey;
+  };
+
+  std::vector<const ContProfProfileRecord*> selected;
+  selected.reserve(records.size());
+
+  for (auto const& record : records) {
+    if (!selected.empty() && !keyLess(selected.back(), &record)) {
+      return {};
+    }
+    selected.push_back(&record);
+  }
+
+  if (selected.size() <= kMaxCheckpointRecords) return selected;
+
+  std::nth_element(
+    selected.begin(),
+    selected.begin() + kMaxCheckpointRecords,
+    selected.end(),
+    [&](auto const lhs, auto const rhs) {
+      auto const lhsExecutions = lhs->functionExecutions();
+      auto const rhsExecutions = rhs->functionExecutions();
+      if (lhsExecutions != rhsExecutions) {
+        return lhsExecutions > rhsExecutions;
+      }
+      return keyLess(lhs, rhs);
+    }
+  );
+  selected.resize(kMaxCheckpointRecords);
+  std::sort(selected.begin(), selected.end(), keyLess);
+  return selected;
+}
+
 struct EncodedCheckpoint {
   std::vector<uint8_t> bytes;
   EncodedRecordCount recordCount;
@@ -208,23 +246,16 @@ struct EncodedCheckpoint {
 
 std::optional<EncodedCheckpoint>
 encodeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
-  // TODO(jtwarren): add support for selecting hottest and truncating the rest.
-  if (records.empty() || records.size() > kMaxCheckpointRecords) {
-    return std::nullopt;
-  }
+  auto const selected = selectContProfCheckpointRecords(records);
+  if (selected.empty()) return std::nullopt;
 
   Writer writer{kMaxCheckpointBytes};
 
   if (!writer.writeValue(EncodedRecordCount{0})) return std::nullopt;
 
   EncodedRecordCount recordCount{};
-  for (size_t i = 0; i < records.size(); ++i) {
-    if (i != 0 &&
-        !(records[i - 1].header.funcKey < records[i].header.funcKey)) {
-      return std::nullopt;
-    }
-
-    auto const encoded = serializeContProfProfileRecord(records[i]);
+  for (auto const record : selected) {
+    auto const encoded = serializeContProfProfileRecord(*record);
     if (!encoded || sizeof(EncodedRecordSize) > writer.remaining() ||
         encoded->size() > writer.remaining() - sizeof(EncodedRecordSize)) {
       continue;

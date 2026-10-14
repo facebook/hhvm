@@ -42,7 +42,7 @@ module Fuel : sig
     When out of fuel, it appends the text doc "[out_of_fuel_message]" to the results. *)
   val provide_list :
     t ->
-    ('input -> fuel:t -> t * Doc.t) ->
+    ('input -> fuel:t -> (t * Doc.t) option) ->
     'input list ->
     out_of_fuel_message:string ->
     t * Doc.t list
@@ -65,7 +65,7 @@ end = struct
 
   let provide_list
       (fuel : t)
-      (f : 'input -> fuel:t -> t * Doc.t)
+      (f : 'input -> fuel:t -> (t * Doc.t) option)
       (inputs : 'input list)
       ~(out_of_fuel_message : string) : t * Doc.t list =
     let rec go fuel acc = function
@@ -74,9 +74,9 @@ end = struct
         let acc = Doc.text (Printf.sprintf "[%s]" out_of_fuel_message) :: acc in
         (fuel, List.rev acc)
       | input :: rest ->
-        let fuel = deplete fuel in
-        let (fuel, doc) = f input ~fuel in
-        go fuel (doc :: acc) rest
+        (match f input ~fuel:(deplete fuel) with
+        | Some (fuel, doc) -> go fuel (doc :: acc) rest
+        | _ -> go fuel acc rest)
     in
     go fuel [] inputs
 
@@ -205,10 +205,11 @@ module Full = struct
       items
       rd
 
-  let shape_map
+  let shape_filter_map
       ~fuel
       (fdm : 'field TShapeMap.t)
-      (f_field : tshape_field_name * 'field -> fuel:Fuel.t -> Fuel.t * t) :
+      (f_field :
+        tshape_field_name * 'field -> fuel:Fuel.t -> (Fuel.t * t) option) :
       Fuel.t * t list =
     let compare (k1, _) (k2, _) =
       String.compare
@@ -573,6 +574,7 @@ module Full = struct
   let tshape ~fuel k to_doc penv s is_open_mixed =
     let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } = s in
     let open_mixed = is_open_mixed penv shape_kind in
+    let is_closed = Typing_defs.is_nothing shape_kind in
     let (fuel, fields_doc) =
       let f_field (shape_map_key, { sft_optional; sft_ty }) ~fuel =
         let is_nothing = Typing_defs.is_nothing sft_ty in
@@ -582,16 +584,19 @@ module Full = struct
           | _ -> Nothing
         in
         if sft_optional && is_nothing then
-          let field_doc =
-            Concat
-              [
-                text "absent ";
-                key_delim;
-                to_doc (Typing_defs.TShapeField.name shape_map_key);
-                key_delim;
-              ]
-          in
-          (fuel, field_doc)
+          if is_closed then
+            None
+          else
+            let field_doc =
+              Concat
+                [
+                  text "absent ";
+                  key_delim;
+                  to_doc (Typing_defs.TShapeField.name shape_map_key);
+                  key_delim;
+                ]
+            in
+            Some (fuel, field_doc)
         else
           let (fuel, sft_ty_doc) = k ~fuel sft_ty in
           let field_doc =
@@ -610,13 +615,13 @@ module Full = struct
                 sft_ty_doc;
               ]
           in
-          (fuel, field_doc)
+          Some (fuel, field_doc)
       in
-      shape_map ~fuel fdm f_field
+      shape_filter_map ~fuel fdm f_field
     in
     let (fuel, fields_doc) =
       begin
-        if Typing_defs.is_nothing shape_kind then
+        if is_closed then
           (fuel, fields_doc)
         else if open_mixed then
           (fuel, fields_doc @ [text "..."])

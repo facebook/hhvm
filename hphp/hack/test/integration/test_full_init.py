@@ -75,6 +75,24 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
         self.assertEqual(first, second, msg)
 
 
+def parse_isolation_json(output):
+    """Split `--json` isolation output into its clusters and its summary.
+
+    One JSON object per cluster, then the summary document last. The clusters
+    are written by the server as it finds them, so they arrive as lines rather
+    than inside one document.
+    """
+    lines = [line for line in output.splitlines() if line.strip()]
+    if not lines:
+        raise AssertionError(f"Expected JSON output, got {output!r}")
+    try:
+        summary_doc = json.loads(lines[-1])
+        clusters = [json.loads(line) for line in lines[:-1]]
+    except json.JSONDecodeError as exn:
+        raise AssertionError(f"Unparseable isolation output {output!r} ({exn})")
+    return clusters, summary_doc
+
+
 class TestFreshInit(common_tests.CommonTests):
     @classmethod
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
@@ -248,18 +266,13 @@ class TestFreshInit(common_tests.CommonTests):
                 "--json",
             ],
         )
-        # This mode emits one JSON document and nothing else. Failing here with
-        # the actual output beats an opaque decode error if a stray line appears.
-        try:
-            json_result = json.loads(json_output)
-        except json.JSONDecodeError as exn:
-            self.fail(f"Expected a lone JSON document, got {json_output!r} ({exn})")
+        json_clusters, json_result = parse_isolation_json(json_output)
         summary = json_result["summary"]
         self.assertEqual(seed_count, summary["total_seeds"])
 
         fixture_names = {os.path.basename(name) for name in files}
         fixture_clusters = []
-        for cluster in json_result["clusters"]:
+        for cluster in json_clusters:
             names = {os.path.basename(path) for path in cluster["files"]}
             overlap = names & fixture_names
             if not overlap:
@@ -276,7 +289,7 @@ class TestFreshInit(common_tests.CommonTests):
         # typechecking, which is why isolation_multi_const_test.php is expected
         # inside a cluster below. This one references nothing and so is reached
         # by nothing, leaving it absent rather than absorbed.
-        for cluster in json_result["clusters"]:
+        for cluster in json_clusters:
             for path in cluster["files"]:
                 self.assertNotIn("isolation_excluded_test.php", path)
 
@@ -332,7 +345,8 @@ class TestFreshInit(common_tests.CommonTests):
             expected_output=None,
             options=["--find-isolatable-clusters", "--json"],
         )
-        measured = json.loads(measured_output)["summary"]
+        (_, measured_doc) = parse_isolation_json(measured_output)
+        measured = measured_doc["summary"]
         self.assertFalse(measured["grown"])
         self.assertGreater(measured["total_clusters"], summary["total_clusters"])
 
@@ -416,11 +430,11 @@ class TestFreshInit(common_tests.CommonTests):
                 "--json",
             ],
         )
-        payload = json.loads("\n".join(json_output.splitlines()))
+        (payload_clusters, payload) = parse_isolation_json(json_output)
 
         clusters = [
             frozenset(cluster["files"])
-            for cluster in payload["clusters"]
+            for cluster in payload_clusters
             if any(f.startswith("closure_seed_") for f in cluster["files"])
         ]
         # Seeded from the target alone, the cluster must still come back holding
@@ -467,11 +481,11 @@ class TestFreshInit(common_tests.CommonTests):
                 "--json",
             ],
         )
-        payload = json.loads("\n".join(json_output.splitlines()))
+        (payload_clusters, _) = parse_isolation_json(json_output)
 
         clusters = [
             (frozenset(cluster["files"]), cluster["truncated"])
-            for cluster in payload["clusters"]
+            for cluster in payload_clusters
             if any(f.startswith("cap_") for f in cluster["files"])
         ]
         self.assertEqual(

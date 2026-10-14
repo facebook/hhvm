@@ -19,7 +19,7 @@ let check
     Server_isolation_types.
       {
         grow;
-        output_file = _;
+        clusters_destination = _;
         seed_framework;
         seed_list;
         seed_dir;

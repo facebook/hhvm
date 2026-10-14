@@ -14,7 +14,6 @@ type cluster = {
 
 type result = {
   refused: string option;
-  clusters: cluster list;
   grown: bool;
   total_seeds: int;
   total_isolatable_files: int;
@@ -23,9 +22,13 @@ type result = {
   largest_cluster: int;
 }
 
+type clusters_destination =
+  | To_file of string
+  | Dropped
+
 type options = {
   grow: bool;
-  output_file: string option;
+  clusters_destination: clusters_destination;
   seed_framework: string option;
   seed_list: string option;
   seed_dir: string option;

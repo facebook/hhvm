@@ -309,7 +309,10 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
     Server_isolation_types.
       {
         grow = !isolation_grow;
-        output_file = !isolation_output;
+        clusters_destination =
+          (match !isolation_output with
+          | Some path -> To_file path
+          | None -> Dropped);
         seed_framework = !isolation_seed_framework;
         seed_list = !isolation_seed_list;
         seed_dir = !isolation_seed_dir;

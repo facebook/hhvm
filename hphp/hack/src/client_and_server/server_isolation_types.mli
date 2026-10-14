@@ -19,7 +19,6 @@ type cluster = {
 
 type result = {
   refused: string option;
-  clusters: cluster list;
   grown: bool;
       (** Whether these were grown, or are each the smallest isolatable set
           around a starting file. *)
@@ -27,10 +26,22 @@ type result = {
   total_isolatable_files: int;
   total_clusters: int;
   total_truncated: int;
-      (** Carried as a count rather than counted over [clusters], which is empty
-          whenever the clusters were streamed to a file. *)
+      (** A count, because the clusters themselves never come back here. *)
   largest_cluster: int;
 }
+
+(** Where a run's clusters end up. They never travel in the result: a run can
+    produce hundreds of thousands, so they go to a file as they are found and
+    the result carries only the summary.
+
+    Which file depends on what the caller asked for: [--isolation-output] names
+    one, and for [--json] without it the client makes a temporary file, prints
+    it and removes it — so reaching stdout costs no more memory than reaching a
+    file. *)
+type clusters_destination =
+  | To_file of string
+      (** Written here as they are produced, one JSON object per line. *)
+  | Dropped  (** Counted in the summary and forgotten. *)
 
 (** Where to start growing clusters, and how far to take them. *)
 type options = {
@@ -38,10 +49,7 @@ type options = {
       (** Grow a bigger cluster around each starting file, instead of reporting
           its smallest isolatable set — its closure under reverse
           dependencies. *)
-  output_file: string option;
-      (** Write each cluster as it is produced, one JSON object per line, and
-          return only the summary. A family-sized run cannot hold every cluster
-          in memory to send back through the RPC. *)
+  clusters_destination: clusters_destination;
   seed_framework: string option;
       (** Start from every subclass of this class. *)
   seed_list: string option;

@@ -65,18 +65,6 @@ let output_isolation_result
           match result.refused with
           | None -> `Null
           | Some reason -> `String reason );
-        ( "clusters",
-          `List
-            (List.map result.clusters ~f:(fun cluster ->
-                 `Assoc
-                   [
-                     ( "files",
-                       `List (List.map cluster.files ~f:(fun f -> `String f)) );
-                     ("size", `Int (List.length cluster.files));
-                     ("common_directory", `String cluster.common_directory);
-                     ("grown", `Bool result.grown);
-                     ("truncated", `Bool cluster.truncated);
-                   ])) );
         ( "summary",
           `Assoc
             [
@@ -1108,12 +1096,47 @@ let main_internal
     end else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS options ->
-    let%lwt (result, telemetry) =
-      rpc args (Server_command_types.FIND_ISOLATABLE_CLUSTERS options)
+  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS
+      (options : Server_isolation_types.options) ->
+    (* Clusters are written by the server, never returned: there can be
+       hundreds of thousands. With [--json] and no file of the caller's own,
+       they go to a temporary one that is printed and removed here, so stdout
+       costs no more memory than a file does. *)
+    let temp_file =
+      match (options.clusters_destination, args.output_json) with
+      | (Dropped, true) ->
+        Some (Stdlib.Filename.temp_file "hh_isolation" ".jsonl")
+      | _ -> None
     in
-    output_isolation_result result ~output_json:args.output_json;
-    Lwt.return (isolation_status result, telemetry)
+    let options =
+      match temp_file with
+      | Some path -> { options with clusters_destination = To_file path }
+      | None -> options
+    in
+    (* [Lwt.finalize] rather than wrapping only the printing: the file exists
+       before the query is sent, so a query that raises must still clean it
+       up. *)
+    Lwt.finalize
+      (fun () ->
+        let%lwt (result, telemetry) =
+          rpc args (Server_command_types.FIND_ISOLATABLE_CLUSTERS options)
+        in
+        (* A line at a time. Reading the file into a list first would hold
+           every cluster in memory, which is the cost this avoids. *)
+        (match temp_file with
+        | Some path ->
+          In_channel.with_file path ~f:(fun ic ->
+              In_channel.iter_lines ic ~f:print_endline)
+        | None -> ());
+        output_isolation_result result ~output_json:args.output_json;
+        Lwt.return (isolation_status result, telemetry))
+      (fun () ->
+        (match temp_file with
+        | Some path ->
+          (try Sys.remove path with
+          | _ -> ())
+        | None -> ());
+        Lwt.return_unit)
   | Client_env.MODE_VALIDATE_ISOLATION list_file ->
     (* Read here rather than on the server: the list file is a path on the
        caller's machine, and the server only ever sees repo-relative paths. *)

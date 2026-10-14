@@ -217,7 +217,6 @@ end
 module Sink = struct
   type t = {
     emit: Server_isolation_types.cluster -> unit;
-    collected: unit -> Server_isolation_types.cluster list;
     close: unit -> unit;
   }
 
@@ -244,13 +243,9 @@ module Sink = struct
       | [] -> ""
       | shared -> String.concat ~sep:"/" shared ^ "/")
 
-  let in_memory () =
-    let acc = ref [] in
-    {
-      emit = (fun cluster -> acc := cluster :: !acc);
-      collected = (fun () -> List.rev !acc);
-      close = (fun () -> ());
-    }
+  (** For a run nobody asked the clusters from: counted in the summary, then
+      dropped. Stateless, so there is one of it. *)
+  let discard = { emit = (fun _ -> ()); close = (fun () -> ()) }
 
   (* [grown] is recorded on every line because both modes write sets of files
      called clusters to the same place, and they mean different things: the
@@ -281,7 +276,6 @@ module Sink = struct
           Stdlib.flush out);
       (* The caller is reading the file, so returning them as well would put back
          the memory this exists to avoid. *)
-      collected = (fun () -> []);
       close = (fun () -> Stdlib.close_out out);
     }
 end
@@ -626,7 +620,6 @@ let refused ~grow ~total_seeds message =
   Server_isolation_types.
     {
       refused = Some message;
-      clusters = [];
       grown = grow;
       total_seeds;
       total_isolatable_files = 0;
@@ -638,11 +631,10 @@ let refused ~grow ~total_seeds message =
 (** Each mode reports the sizes of the sets it found, and differs in nothing
     else the caller sees, so the result is assembled here rather than at the end
     of each branch. *)
-let result r ~grow ~total_seeds ~sizes ~clusters =
+let result r ~grow ~total_seeds ~sizes =
   Server_isolation_types.
     {
       refused = None;
-      clusters;
       grown = grow;
       total_seeds;
       total_isolatable_files = List.fold sizes ~init:0 ~f:( + );
@@ -775,17 +767,18 @@ let query r options =
         else
           measure_seeds r seeds ~total_seeds
       in
-      result r ~grow ~total_seeds ~sizes ~clusters:(r.sink.collected ()))
+      result r ~grow ~total_seeds ~sizes)
 
 let go
     (options : Server_isolation_types.options)
     (genv : Server_env.genv)
     (env : Server_env.env) : Server_isolation_types.result =
-  let Server_isolation_types.{ grow; output_file; _ } = options in
+  let Server_isolation_types.{ grow; clusters_destination; _ } = options in
   let sink =
-    match output_file with
-    | Some path -> Sink.to_file ~grow path
-    | None -> Sink.in_memory ()
+    let open Server_isolation_types in
+    match clusters_destination with
+    | To_file path -> Sink.to_file ~grow path
+    | Dropped -> Sink.discard
   in
   (* Non-evictable shared heaps that outlive the query: cleared on the way in so
      a run cannot reuse results from before an edit, and on the way out so it

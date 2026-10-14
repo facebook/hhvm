@@ -135,11 +135,11 @@ void PreClass::enforceInMaybeSealedParentWhitelist(
   const PreClass* parentPreClass) const {
   // if our parent isn't sealed, then we're fine. If we're a mock, YOLO
   if (!(parentPreClass->attrs() & AttrSealed) ||
-      m_userAttributes.find(s___MockClass.get()) != m_userAttributes.end()) {
+      m_userAttributes.contains(s___MockClass.get())) {
     return;
   }
   const UserAttributeMap& parent_attrs = parentPreClass->userAttributes();
-  assertx(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
+  assertx(parent_attrs.contains(s___Sealed.get()));
   const auto& parent_sealed_attr = parent_attrs.find(s___Sealed.get())->second;
   bool in_sealed_whitelist = false;
   IterateV(parent_sealed_attr.m_data.parr,
@@ -161,7 +161,7 @@ void PreClass::enforceInMaybeSealedParentWhitelist(
 
 const StaticString s___EnableMethodTraitDiamond("__EnableMethodTraitDiamond");
 bool PreClass::enableMethodTraitDiamond() {
-  return m_userAttributes.find(s___EnableMethodTraitDiamond.get()) != m_userAttributes.end();
+  return m_userAttributes.contains(s___EnableMethodTraitDiamond.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

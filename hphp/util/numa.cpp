@@ -61,10 +61,6 @@ void init_numa() {
   }
   if (numa_available() < 0) return;
 
-  // set interleave for early code. we'll then force interleave for a few
-  // regions, and switch to local for the threads
-  numa_set_interleave_mask(numa_all_nodes_ptr);
-
   int max_node = numa_max_node();
   if (max_node < 1 || max_node >= 32) return;
 
@@ -90,6 +86,13 @@ void init_numa() {
   if (!ret || numa_num_nodes <= 1) return;
 
   numa_node_mask = folly::nextPowTwo(uint32_t(max_node) + 1) - 1;
+
+  // set interleave for early code. we'll then force interleave for a few
+  // regions, and switch to local for the threads.
+  // Do this only once NUMA will be used. Otherwise this process, and every
+  // child it starts, would keep interleaving across all memory nodes,
+  // including CPU-less ones such as CXL expansion memory.
+  numa_set_interleave_mask(numa_all_nodes_ptr);
 }
 
 static int getL3CacheId(int cpuId) {

@@ -168,6 +168,41 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
         }
     }
 
+    /// The direct dependents of `dep`, stopping early once there are more than
+    /// `max`.
+    ///
+    /// The result is the complete set, or some partial subset of it that is big
+    /// enough to show the limit was exceeded.
+    pub fn get_dependents_bounded(&self, dep: Dep, max: usize) -> HashTrieSet<Dep> {
+        self.iter_dependents_with_duplicates(dep, |iter| {
+            let mut dependents = HashTrieSet::new();
+            insert_until_over(&mut dependents, iter, max);
+            dependents
+        })
+    }
+
+    /// Adds to `acc` the direct dependents of every dep in `query`, stopping
+    /// early once `acc` holds more than `max`.
+    ///
+    /// With `acc` starting as a copy of `query`, the result is the complete
+    /// union, or some partial subset of it that is big enough to show the limit
+    /// was exceeded.
+    pub fn add_dependents_bounded(
+        &self,
+        query: &HashTrieSet<Dep>,
+        acc: &mut HashTrieSet<Dep>,
+        max: usize,
+    ) {
+        for dependency in query.iter() {
+            if acc.size() > max {
+                break;
+            }
+            self.iter_dependents_with_duplicates(*dependency, |iter| {
+                insert_until_over(acc, iter, max)
+            });
+        }
+    }
+
     /// The fanout of a member `m` in type `A` contains:
     /// - the members `m` in descendants of `A` down to the first members `m` which are declared.
     /// - the dependents of those members `m` in descendants,
@@ -434,10 +469,26 @@ impl LockedDepgraphWithDelta {
     }
 }
 
+/// Inserts `dependents` into `acc`, stopping once `acc` holds more than `max`
+/// distinct deps.
+fn insert_until_over(
+    acc: &mut HashTrieSet<Dep>,
+    dependents: &mut dyn Iterator<Item = Dep>,
+    max: usize,
+) {
+    for dependent in dependents {
+        acc.insert_mut(dependent);
+        if acc.size() > max {
+            break;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
     use std::collections::HashSet;
+    use std::ops::RangeInclusive;
     use std::path::Path;
     use std::path::PathBuf;
     use std::time::SystemTime;
@@ -581,6 +632,162 @@ mod tests {
         assert!(dg.has_edge(Dep::new(3), Dep::new(0)));
         assert!(!dg.has_edge(Dep::new(2), Dep::new(0)));
         assert!(!dg.has_edge(Dep::new(2), Dep::new(3)));
+    }
+
+    // The graph for the bounded queries. `WIDE` is the dep with the fan-in the
+    // tests bound. The delta overlaps and trims its base, so that every way of
+    // counting its dependents gives a different number: items yielded, distinct
+    // dependents, base entries, and base entries left after the removal.
+    // `NARROW` is a second dep for the whole-set query to move on to.
+    const WIDE: u64 = 0;
+    const NARROW: u64 = 1;
+    /// A dep nothing depends on.
+    const UNREFERENCED: u64 = 77;
+    const WIDE_BASE: RangeInclusive<u64> = 103..=109;
+    /// Overlaps the low end of `WIDE_BASE`, so the dependents in both are
+    /// yielded twice, and early in the base's turn rather than last.
+    const WIDE_ADDED: RangeInclusive<u64> = 100..=104;
+    /// A dependent in `WIDE_BASE` that the delta removes.
+    const WIDE_REMOVED: u64 = 109;
+    const NARROW_BASE: RangeInclusive<u64> = 200..=203;
+
+    fn graph_with_fan_in() -> DepGraphWithDelta<SimpleDepGraph> {
+        let base = SimpleDepGraph::from([
+            (Dep::new(WIDE), WIDE_BASE.map(Dep::new).collect()),
+            (Dep::new(NARROW), NARROW_BASE.map(Dep::new).collect()),
+        ]);
+        let mut delta = DepGraphDelta::default();
+        WIDE_ADDED.for_each(|dependent| delta.insert(Dep::new(dependent), Dep::new(WIDE)));
+        delta.remove(Dep::new(WIDE_REMOVED), Dep::new(WIDE));
+        DepGraphWithDelta::new(Some(base), delta)
+    }
+
+    /// What `WIDE` should have as dependents, worked out from the constants
+    /// and not by asking the graph.
+    fn expected_wide_dependents() -> HashSet<Dep> {
+        WIDE_BASE
+            .chain(WIDE_ADDED)
+            .filter(|dependent| *dependent != WIDE_REMOVED)
+            .map(Dep::new)
+            .collect()
+    }
+
+    fn dependents_of(dg: &DepGraphWithDelta<SimpleDepGraph>, dep: Dep) -> HashSet<Dep> {
+        dg.iter_dependents_with_duplicates(dep, |iter| iter.collect::<HashSet<_>>())
+    }
+
+    #[test]
+    fn test_graph_with_fan_in_has_duplicates_and_a_removed_edge() {
+        let dg = graph_with_fan_in();
+        let yielded = dg.iter_dependents_with_duplicates(Dep::new(WIDE), |iter| iter.count());
+        let distinct = dependents_of(&dg, Dep::new(WIDE));
+
+        assert_eq!(
+            distinct,
+            expected_wide_dependents(),
+            "the graph should hold exactly what the constants describe"
+        );
+        assert!(
+            yielded > distinct.len(),
+            "the other tests only mean something if some dependents are yielded twice, got {yielded} yielded and {} distinct",
+            distinct.len()
+        );
+        assert!(
+            !distinct.contains(&Dep::new(WIDE_REMOVED)),
+            "the removed edge must not be a dependent"
+        );
+    }
+
+    fn to_set(set: &HashTrieSet<Dep>) -> HashSet<Dep> {
+        set.iter().copied().collect()
+    }
+
+    #[test]
+    fn test_get_dependents_bounded_is_complete_within_bound() {
+        let dg = graph_with_fan_in();
+        let complete = dependents_of(&dg, Dep::new(WIDE));
+        let size = complete.len();
+
+        // Counting the duplicates as they are yielded would stop one short
+        // when `max` equals `size`.
+        (size..=size + 3).for_each(|max| {
+            assert_eq!(
+                to_set(&dg.get_dependents_bounded(Dep::new(WIDE), max)),
+                complete,
+                "max {max} is not below the {size} distinct dependents, so the answer must be complete"
+            );
+        });
+        assert!(
+            dg.get_dependents_bounded(Dep::new(UNREFERENCED), 0)
+                .is_empty(),
+            "a dep nothing depends on has no dependents, whatever the bound"
+        );
+    }
+
+    #[test]
+    fn test_get_dependents_bounded_exceeds_bound_when_truncated() {
+        let dg = graph_with_fan_in();
+        let complete = dependents_of(&dg, Dep::new(WIDE));
+
+        (0..complete.len()).for_each(|max| {
+            let bounded = to_set(&dg.get_dependents_bounded(Dep::new(WIDE), max));
+            assert!(
+                bounded.is_subset(&complete),
+                "max {max}: a truncated answer only holds real dependents, never the removed edge"
+            );
+            assert!(
+                bounded.len() > max,
+                "max {max}: a truncated answer must be strictly larger than the bound, got {}",
+                bounded.len()
+            );
+        });
+    }
+
+    #[test]
+    fn test_add_dependents_bounded() {
+        let dg = graph_with_fan_in();
+        let query: HashTrieSet<Dep> = [WIDE, NARROW].into_iter().map(Dep::new).collect();
+        let query_set = to_set(&query);
+        let complete: HashSet<Dep> = query_set
+            .iter()
+            .flat_map(|dep| dependents_of(&dg, *dep))
+            .chain(query_set.iter().copied())
+            .collect();
+        assert_eq!(
+            complete.len(),
+            query_set.len() + expected_wide_dependents().len() + NARROW_BASE.count(),
+            "the query, the dependents of `WIDE` and the dependents of `NARROW`"
+        );
+
+        (0..=complete.len() + 2).for_each(|max| {
+            let mut acc = query.clone();
+            dg.add_dependents_bounded(&query, &mut acc, max);
+            let got = to_set(&acc);
+
+            assert!(
+                query_set.is_subset(&got),
+                "max {max}: the query is part of the answer"
+            );
+            assert!(
+                got.is_subset(&complete),
+                "max {max}: only real dependents were added"
+            );
+            if max >= complete.len() {
+                assert_eq!(got, complete, "max {max}: within the bound, so complete");
+            } else {
+                assert!(
+                    got.len() > max,
+                    "max {max}: truncated, so strictly larger than the bound, got {}",
+                    got.len()
+                );
+            }
+            if max < query_set.len() {
+                assert_eq!(
+                    got, query_set,
+                    "max {max}: the query alone already passes the bound, so no dependent is read"
+                );
+            }
+        });
     }
 
     #[test]

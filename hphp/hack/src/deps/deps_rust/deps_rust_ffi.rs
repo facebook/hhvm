@@ -190,6 +190,16 @@ ocaml_ffi! {
         query_and_accumulate_typing_deps(mode, query)
     }
 
+    // As above, but stops once the result passes `max`.
+    fn hh_custom_dep_graph_add_typing_deps_bounded(mode: RawTypingDepsMode, query: Custom<DepSet>, max: usize) -> Result<Custom<DepSet>, DepGraphLoadError> {
+        query_and_accumulate_typing_deps_bounded(mode, query, max)
+    }
+
+    // The direct dependents of `dep`, stopping once there are more than `max`.
+    fn hh_custom_dep_graph_get_ideps_from_hash_bounded(mode: RawTypingDepsMode, dep: Dep, max: usize) -> Result<Custom<DepSet>, DepGraphLoadError> {
+        get_ideps_from_hash_bounded(mode, dep, max)
+    }
+
     // Returns the union of the provided dep set and their recursive 'extends' dependents.
     fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Result<Custom<DepSet>, DepGraphLoadError> {
         let mut acc = query.clone();
@@ -283,6 +293,33 @@ fn query_and_accumulate_typing_deps(
         })
     }
     Ok(Custom::from(DepSet::from(acc)))
+}
+
+/// As above, but may stop early once the result is larger than `max`: the
+/// complete union, or some partial subset of it that is big enough to show the
+/// limit was exceeded.
+fn query_and_accumulate_typing_deps_bounded(
+    mode: RawTypingDepsMode,
+    query: Custom<DepSet>,
+    max: usize,
+) -> Result<Custom<DepSet>, DepGraphLoadError> {
+    let mut acc = query.clone();
+    DEP_GRAPH
+        .read(mode)?
+        .add_dependents_bounded(&query, &mut acc, max);
+    Ok(Custom::from(DepSet::from(acc)))
+}
+
+/// The direct dependents of one hash, stopping early once there are more than
+/// `max`: the complete set, or some partial subset of it that is big enough to
+/// show the limit was exceeded.
+fn get_ideps_from_hash_bounded(
+    mode: RawTypingDepsMode,
+    dep: Dep,
+    max: usize,
+) -> Result<Custom<DepSet>, DepGraphLoadError> {
+    let deps = DEP_GRAPH.read(mode)?.get_dependents_bounded(dep, max);
+    Ok(Custom::from(DepSet::from(deps)))
 }
 
 fn save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {

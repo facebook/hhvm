@@ -97,6 +97,11 @@ module Dependents = struct
     match Relative_path.Map.find_opt !cache candidate with
     | Some cached -> cached
     | None ->
+      (* [DepSet.diff] below drops the candidate's own symbols from each answer,
+         at most [cardinal own_set] of them, so ask the graph for [cap] plus
+         that many. A truncated answer then still exceeds [cap] after the
+         drop. *)
+      let graph_cap = cap + Typing_deps.DepSet.cardinal own_set in
       let result =
         List.fold_until
           own
@@ -106,7 +111,10 @@ module Dependents = struct
               Typing_deps.DepSet.union
                 acc
                 (Typing_deps.DepSet.diff
-                   (Typing_deps.get_ideps_from_hash deps_mode dep)
+                   (Typing_deps.get_ideps_from_hash_bounded
+                      deps_mode
+                      dep
+                      ~max:graph_cap)
                    own_set)
             in
             if Typing_deps.DepSet.cardinal acc > cap then

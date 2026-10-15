@@ -277,6 +277,11 @@ val save_discovered_edges :
 
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
+(** As [get_ideps_from_hash], but may stop early once there are more than [max]
+    dependents. The result is the complete set, or some partial subset of it
+    that is big enough to show the limit was exceeded. *)
+val get_ideps_from_hash_bounded : Mode.t -> Dep.t -> max:int -> DepSet.t
+
 val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t
 
 (** Add to accumulator all extend dependencies of source_class. Visited is used
@@ -295,6 +300,11 @@ val add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
 
 (** Grow input set by adding all its typing dependencies (direct only) *)
 val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
+
+(** As [add_typing_deps], but may stop early once the result is larger than
+    [max]. The result is the complete set, or some partial subset of it that is
+    big enough to show the limit was exceeded. *)
+val add_typing_deps_bounded : Mode.t -> DepSet.t -> max:int -> DepSet.t
 
 (** add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : Mode.t -> DepSet.t -> DepSet.t

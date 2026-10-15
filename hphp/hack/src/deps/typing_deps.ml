@@ -573,11 +573,25 @@ module CustomGraph = struct
   let get_ideps_from_hash mode dep =
     get_ideps_from_hash_ffi mode dep |> get_or_raise
 
+  external get_ideps_from_hash_bounded_ffi :
+    Mode.t -> Dep.t -> int -> (DepSet.t, depgraph_load_error) result
+    = "hh_custom_dep_graph_get_ideps_from_hash_bounded"
+
+  let get_ideps_from_hash_bounded mode dep ~max =
+    get_ideps_from_hash_bounded_ffi mode dep max |> get_or_raise
+
   external add_typing_deps_ffi :
     Mode.t -> DepSet.t -> (DepSet.t, depgraph_load_error) result
     = "hh_custom_dep_graph_add_typing_deps"
 
   let add_typing_deps mode deps = add_typing_deps_ffi mode deps |> get_or_raise
+
+  external add_typing_deps_bounded_ffi :
+    Mode.t -> DepSet.t -> int -> (DepSet.t, depgraph_load_error) result
+    = "hh_custom_dep_graph_add_typing_deps_bounded"
+
+  let add_typing_deps_bounded mode deps ~max =
+    add_typing_deps_bounded_ffi mode deps max |> get_or_raise
 
   external add_extend_deps_ffi :
     Mode.t -> DepSet.t -> (DepSet.t, depgraph_load_error) result
@@ -1031,6 +1045,9 @@ let get_ideps_from_hash mode hash =
   | SaveToDiskMode _ ->
     CustomGraph.get_ideps_from_hash mode hash
 
+let get_ideps_from_hash_bounded mode hash ~max =
+  CustomGraph.get_ideps_from_hash_bounded mode hash ~max
+
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 
 let get_extend_deps ~mode ~visited ~source_class ~acc =
@@ -1039,6 +1056,9 @@ let get_extend_deps ~mode ~visited ~source_class ~acc =
 let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 
 let add_typing_deps mode acc = CustomGraph.add_typing_deps mode acc
+
+let add_typing_deps_bounded mode acc ~max =
+  CustomGraph.add_typing_deps_bounded mode acc ~max
 
 let add_all_deps mode acc = CustomGraph.add_all_deps mode acc
 

@@ -57,10 +57,12 @@ let served_count = ref 0
    [None] means the walk passed [max_deps], not that there is no closure. *)
 let rec grow_to_fixpoint deps_mode ~max_deps ~acc frontier =
   let over s = Typing_deps.DepSet.cardinal s > max_deps in
+  (* A truncated result is strictly larger than [max_deps], so it fails [over]
+     exactly as the complete one would. *)
   let typed =
     Typing_deps.DepSet.union
       acc
-      (Typing_deps.add_typing_deps deps_mode frontier)
+      (Typing_deps.add_typing_deps_bounded deps_mode frontier ~max:max_deps)
   in
   if over typed then
     None

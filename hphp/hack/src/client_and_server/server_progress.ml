@@ -481,16 +481,22 @@ module ErrorsWrite = struct
         ()
       | Reporting (fd, n) ->
         let n = n + 1 in
-        if n <= 5 then
+        (if n <= 5 then
+          let (error_count, warning_count) =
+            errors
+            |> Diagnostics.get_diagnostic_list ~drop_fixmed:true
+            |> Diagnostics.count_errors_and_warnings
+          in
           Hh_logger.log
-            "Errors-file: report#%d on %s: %d new errors%s"
+            "Errors-file: report#%d on %s: %d new errors, %d new warnings%s"
             n
             (Sys_utils.show_inode fd)
-            (Diagnostics.count errors)
+            error_count
+            warning_count
             (if n = 5 then
               " [won't report any more this typecheck...]"
             else
-              "");
+              ""));
         (* sort and dedupe *)
         let errors =
           errors

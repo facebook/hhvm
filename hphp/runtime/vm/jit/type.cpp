@@ -1119,14 +1119,25 @@ Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
     if (!tc.isCheckable() || tc.isSoft()) continue;
     auto ty = TBottom;
     auto nullable = false;
+    auto stringCompatible = false;
     if (tc.isUnion()) {
       for (auto& innerTc : eachTypeConstraintInUnion(tc)) {
         ty |= baseForTC(innerTc);
         if (innerTc.isNullable()) nullable = true;
+        if (innerTc.maybeStringCompatible()) stringCompatible = true;
       }
     } else {
       ty |= baseForTC(tc);
       if (tc.isNullable()) nullable = true;
+      stringCompatible = tc.maybeStringCompatible();
+    }
+    // For an inherited string-compatible constraint, if a class or lazy class
+    // will not be converted to a string at runtime, widen the type to include
+    // TCls | TLazyCls. This avoids constructing an implausible type
+    // (e.g. type: TStr, val: Class<C>).
+    if (tc.isInherited() && stringCompatible &&
+        !Cfg::Eval::ConvertClassToStringForInheritedConstraints) {
+      ty |= TCls | TLazyCls;
     }
     // Intersect types from each constraint
     if (nullable) ty |= TInitNull;

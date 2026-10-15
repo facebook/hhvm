@@ -1,0 +1,3 @@
+-vEval.ClassStringHintNoticesSampleRate=1
+-vEval.EnforceOverriddenReturnTypes=2
+-vEval.ConvertClassToStringForInheritedConstraints=true

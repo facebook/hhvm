@@ -1803,6 +1803,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Free random units in the unit cache to make room for new units during tests. Use this is to stress
   test FuncCleanup
 
+- bool Eval.ConvertClassToStringForInheritedConstraints = false, niharikad
+
+  Controls whether inherited type constraints convert class/lazyclass values to string. When true, inherited string type constraints will convert class values to strings in hard enforcement mode. When false, the class value is returned as-is.
+
 # Hack.Lang
 
 - std::vector<std::string> Hack.Lang.TestsBypassVisibilityClasses = {}, UNKNOWN

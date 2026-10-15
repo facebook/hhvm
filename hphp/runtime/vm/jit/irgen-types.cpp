@@ -204,11 +204,14 @@ SSATmp* verifyTypeImpl(IRGS& env,
   auto const checkOneType = [&](SSATmp* val, AnnotAction result) -> SSATmp* {
     assertx(val->type().isKnownDataType());
 
+    auto const skipInheritedConversion = tc.isInherited() &&
+      (tc.isSoft() || !Cfg::Eval::ConvertClassToStringForInheritedConstraints);
+
     auto const emitClassToStringNotice = [&] {
       std::string msg;
       string_printf(
         msg,
-        tc.isInherited() && tc.isSoft()
+        skipInheritedConversion
           ? Strings::CLASS_TO_STRING_IMPLICIT_INHERITED
           : Strings::CLASS_TO_STRING_IMPLICIT,
         getTcInfo().c_str()
@@ -252,7 +255,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
       }
       case AnnotAction::ConvertClassToString:
         assertx(val->type() <= TCls);
-        if (tc.isInherited() && tc.isSoft()) return val;
+        if (skipInheritedConversion) return val;
         return gen(env, LdClsName, val);
 
       case AnnotAction::WarnLazyClassToString: {
@@ -262,7 +265,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
       }
       case AnnotAction::ConvertLazyClassToString:
         assertx(val->type() <= TLazyCls);
-        if (tc.isInherited() && tc.isSoft()) return val;
+        if (skipInheritedConversion) return val;
         return gen(env, LdLazyClsName, val);
 
       case AnnotAction::WarnClassname: {

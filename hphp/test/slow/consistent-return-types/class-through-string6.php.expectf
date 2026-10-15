@@ -1,0 +1,12 @@
+string(%d) "Notice: Inherited type-hint may cause implicit Class to string conversion for return of Derived::fromClassHint()"
+string(1) "C"
+string(%d) "Notice: Inherited type-hint may cause implicit Class to string conversion for return of Derived::fromMixedClass()"
+string(1) "C"
+string(%d) "Notice: Inherited type-hint may cause implicit Class to string conversion for return of Derived::fromMixedLazy()"
+string(1) "C"
+int(1)
+string(%d) "Notice: Inherited type-hint may cause implicit Class to string conversion for return of Derived::fromEnum()"
+string(1) "C"
+string(%d) "Notice: Inherited type-hint may cause implicit Class to string conversion for return of Derived::fromStrAlias()"
+string(1) "C"
+int(1)

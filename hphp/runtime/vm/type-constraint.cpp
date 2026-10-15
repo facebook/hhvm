@@ -1835,15 +1835,17 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
+    auto const skipConversion = isInherited() &&
+      (isSoft() || !Cfg::Eval::ConvertClassToStringForInheritedConstraints);
     if (folly::Random::oneIn(Cfg::Eval::ClassStringHintNoticesSampleRate, threadLocalRng64())) {
       raise_notice(
-        isInherited() && isSoft()
+        skipConversion
           ? Strings::CLASS_TO_STRING_IMPLICIT_INHERITED
           : Strings::CLASS_TO_STRING_IMPLICIT,
         tcInfo().c_str()
       );
     }
-    if (isInherited() && isSoft()) return true;
+    if (skipConversion) return true;
     val.val().pstr = isClassType(val.type()) ?
       const_cast<StringData*>(val.val().pclass->name()) :
       const_cast<StringData*>(val.val().plazyclass.name());

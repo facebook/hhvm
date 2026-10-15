@@ -13,7 +13,10 @@ type parsed_file = {
   pf_file_attributes: Typing_defs.user_attribute list;
   pf_function_attributes: (string * Typing_defs.user_attribute list) list;
   pf_decls: decls;
+  pf_disable_xhp_element_mangling: bool;
   pf_has_first_pass_parse_errors: bool;
+  pf_module_membership: string option;
+  pf_package_membership: string option;
 }
 
 type parsed_file_with_hashes = {

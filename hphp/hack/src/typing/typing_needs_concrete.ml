@@ -49,6 +49,19 @@ let add_uninstantiable_class_via_static env pos class_name decl_pos =
       @@ Primary.Uninstantiable_class_via_static
            { pos; class_name; decl_pos; containing_method_pos })
 
+let check_abstract_access_via_static
+    env class_get_pos def_pos cid mid (e : ('ex, 'en) Aast_defs.class_id_) =
+  match e with
+  | CIstatic when not (Typing_env.static_points_to_concrete_class env) ->
+    add_abstract_access_via_static env class_get_pos cid mid def_pos
+  | CIstatic
+  | CIself
+  | CIparent
+  | CI _
+  | CIreified _
+  | CIexpr _ ->
+    ()
+
 let check_class_get
     (env : Typing_env_types.env)
     (class_get_pos : Pos.t)
@@ -102,17 +115,14 @@ let check_class_get
   | CIparent -> check_needs_concrete_call `Parent
   | CIstatic ->
     let () = check_needs_concrete_call `Static in
-    if
-      Typing_defs.get_ce_abstract ce
-      && not (Typing_env.static_points_to_concrete_class env)
-    then
+    if Typing_defs.get_ce_abstract ce then
       (* We check for abstract access via `static`
        * as part of the "needs concrete" feature, because
        * checking for calls to `abstract` functions for
        * `self`/`parent`/classname, etc. is already covered by other type
        * errors such as Primary.Self_abstract_call, Primary.Parent_abstract_call, etc.
        *)
-      add_abstract_access_via_static env class_get_pos cid mid def_pos
+      check_abstract_access_via_static env class_get_pos def_pos cid mid e
   | CI _ -> ()
   | CIreified _ -> ()
   | CIexpr _ -> ()

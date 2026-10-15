@@ -14235,13 +14235,25 @@ end = struct
           in
           match const with
           | None -> get_smember_from_constraints env class_
-          | Some { cc_type; cc_abstract; cc_pos; _ } ->
+          | Some { cc_type; cc_abstract; cc_pos; cc_synthesized; _ } ->
             let ((env, ty_err_opt), cc_locl_type) =
               Phase.localize ~ety_env env cc_type
             in
             Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
             (match cc_abstract with
             | CCAbstract _ ->
+              if
+                (not cc_synthesized)
+                && TCO.needs_concrete_abstract_class_const_check
+                     (Env.get_tcopt env)
+              then
+                Typing_needs_concrete.check_abstract_access_via_static
+                  env
+                  p
+                  cc_pos
+                  (Cls.name class_)
+                  mid
+                  cid_;
               (match cid_ with
               | CIstatic
               | CIexpr _ ->

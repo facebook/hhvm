@@ -9,6 +9,15 @@
 (** Produce warnings for "needs concrete" violations.
   * https://fburl.com/hack_needs_concrete
 *)
+val check_abstract_access_via_static :
+  Typing_env_types.env ->
+  Pos.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  ('ex, 'en) Aast_defs.class_id_ ->
+  unit
+
 val check_class_get :
   Typing_env_types.env ->
   Pos.t ->

@@ -624,6 +624,10 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
                invalid_arg
                  "needs_concrete_class_function_pointer_check must be 0, 1, or 2";
              Some value))
+    ?needs_concrete_abstract_class_const_check:
+      (bool_opt
+         Config_keys.Hhconfig.needs_concrete_abstract_class_const_check
+         config)
     ?strict_consistent_construct:
       (bool_opt Config_keys.Hhconfig.strict_consistent_construct config)
     ?allow_class_string_cast:

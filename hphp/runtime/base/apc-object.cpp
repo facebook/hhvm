@@ -276,24 +276,18 @@ Object APCObject::createObject(bool pure) const {
   auto const apcProp = persistentProps();
 
   // Re-entry is possible while we're executing toLocal() on each
-  // property, so heap inspectors may see partially initialized objects
-  // not yet exposed to PHP.
-  auto i = 0;
-
+  // property (e.g. a nested object's __wakeup), so heap inspectors such as
+  // objprof may see this object before it is fully initialized. Mark every
+  // slot Uninit up front so they never read the raw allocation.
   objProp->init(numProps);
   auto range = objProp->range(0, numProps);
-  auto it = range.begin();
+  for (auto slot = range.begin(); slot != range.end(); ++slot) {
+    type(tv_lval{slot}) = KindOfUninit;
+  }
 
-  try {
-    for (; it != range.end(); ++it, ++i) {
-      tvCopy(apcProp[i]->toLocal(pure).detach(), tv_lval{it});
-    }
-  } catch (...) {
-    for (; it != range.end(); ++it, ++i) {
-      auto const val = apcProp[i]->toLocal(pure);
-      type(tv_lval{it}) = KindOfUninit;
-    }
-    throw;
+  auto i = 0;
+  for (auto it = range.begin(); it != range.end(); ++it, ++i) {
+    tvCopy(apcProp[i]->toLocal(pure).detach(), tv_lval{it});
   }
 
   // Make sure the unserialized values don't violate any type-hints if they

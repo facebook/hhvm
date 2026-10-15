@@ -111,6 +111,23 @@ module type Member_S = sig
   val constructor_is_changed_inheritance_when_modified : old:t -> new_:t -> bool
 end
 
+(** A module change can alter an internal member's accessibility even if its
+    declaration is unchanged. *)
+let diff_member
+    (type member)
+    (module Member : Member_S with type t = member)
+    ~module_changed
+    ~(old : member)
+    ~(new_ : member) : member_change option =
+  let diff = Member.diff old new_ in
+  match diff with
+  | None
+    when module_changed && Member.is_internal old && Member.is_internal new_ ->
+    Some (Modified MemberModification.Other)
+  | None
+  | Some _ ->
+    diff
+
 (** Returns the diff of two member lists, plus a diff on the constructor if the member changes
   impact the constructor. *)
 let diff_members
@@ -119,16 +136,6 @@ let diff_members
     (module Member : Member_S with type t = member)
     (classish_kind : Ast_defs.classish_kind)
     (module_changed : bool) : member_change S_map.t * constructor_change =
-  (* If both members are internal and the module changed, we have to treat it as a Modified change*)
-  let check_module_change_internal m1 m2 diff =
-    match diff with
-    | None when module_changed && Member.is_internal m1 && Member.is_internal m2
-      ->
-      Some (Modified MemberModification.Other)
-    | None
-    | Some _ ->
-      diff
-  in
   S_map.fold
     (fun name old_and_new (diff, constructor_change) ->
       match old_and_new with
@@ -151,8 +158,11 @@ let diff_members
         (S_map.add name Added diff, constructor_change)
       | (Some old_member, Some new_member) ->
         let member_changes =
-          Member.diff old_member new_member
-          |> check_module_change_internal old_member new_member
+          diff_member
+            (module Member)
+            ~module_changed
+            ~old:old_member
+            ~new_:new_member
           |> Option.fold ~init:diff ~f:(fun diff ch -> S_map.add name ch diff)
         in
         let constructor_change =
@@ -297,7 +307,8 @@ module Method : Member_S with type t = shallow_method = struct
   let constructor_is_changed_inheritance_when_modified ~old:_ ~new_:_ = false
 end
 
-let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
+let diff_constructor old_cls new_cls ~module_changed old_cstr new_cstr :
+    member_change option =
   let consistent1 = Decl_utils.consistent_construct_kind old_cls in
   let consistent2 = Decl_utils.consistent_construct_kind new_cls in
   if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
@@ -307,7 +318,12 @@ let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
     | (None, None) -> None
     | (Some _, None) -> Some Removed
     | (None, Some _) -> Some Added
-    | (Some old_method, Some new_method) -> Method.diff old_method new_method
+    | (Some old_method, Some new_method) ->
+      diff_member
+        (module Method)
+        ~module_changed
+        ~old:old_method
+        ~new_:new_method
 
 let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     Class_diff.member_diff =
@@ -421,7 +437,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
   in
   let diff =
     let constructor =
-      diff_constructor c1 c2 c1.sc_constructor c2.sc_constructor
+      diff_constructor c1 c2 ~module_changed c1.sc_constructor c2.sc_constructor
     in
     {
       diff with

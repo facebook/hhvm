@@ -26,6 +26,6 @@
 (32,38)-(32,40) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
 (35,4)-(35,6) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
 (36,4)-(36,6) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
-(38,31)-(38,33) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
+(38,31)-(38,33) An `inout` argument cannot be combined with `await` in the same statement. Pull it out into a separate statement.
 (39,4)-(39,34) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
-(40,30)-(40,32) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
+(40,30)-(40,32) An `inout` argument cannot be combined with `await` in the same statement. Pull it out into a separate statement.

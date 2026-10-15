@@ -3114,8 +3114,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 _ => {
                     match node_lval_type(node, parents) {
                         LvalTypeFinal | LvalTypeNone => {}
-                        LvalTypeNonFinalInout | LvalTypeNonFinal => {
+                        LvalTypeNonFinal => {
                             acc.push(make_error_from_node(node, errors::lval_as_expression))
+                        }
+                        LvalTypeNonFinalInout => {
+                            acc.push(make_error_from_node(node, errors::inout_argument_in_await))
                         }
                     };
                     (true, acc)

@@ -566,6 +566,9 @@ pub const reified_attribute: Error = Cow::Borrowed(
 pub const lval_as_expression: Error = Cow::Borrowed(
     "Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.",
 );
+pub const inout_argument_in_await: Error = Cow::Borrowed(
+    "An `inout` argument cannot be combined with `await` in the same statement. Pull it out into a separate statement.",
+);
 pub fn elt_abstract_private(elt: &str) -> Error {
     Cow::Owned(format!("Cannot declare abstract {} `private`.", elt))
 }

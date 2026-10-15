@@ -43,9 +43,9 @@ File "bad_type_structure_array.php", line 33, characters 3-29:
 File "bad_type_structure_array.php", line 36, characters 3-22:
   TypeStructureKind
 ERROR: File "bad_type_structure_array.php", line 10, characters 15-25:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_array.php", line 11, characters 15-24:
 The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "typestructure.hhi", line 61, characters 6-15:
@@ -67,9 +67,9 @@ The field `return_type` may not be present in this shape. Use `??` or `Shapes::i
   File "typestructure.hhi", line 68, characters 6-18:
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_array.php", line 28, characters 15-25:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_array.php", line 29, characters 15-24:
 The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "typestructure.hhi", line 61, characters 6-15:

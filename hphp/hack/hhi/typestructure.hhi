@@ -61,7 +61,7 @@ namespace HH {
     ?'nullable' => bool,
     'kind' => TypeStructureKind,
     ?'name' => string,
-    'classname' => ?classname<T>,
+    ?'classname' => classname<T>,
     ?'elem_types' => varray<mixed>,
     ?'optional_elem_types' => varray<mixed>,
     ?'variadic_type' => mixed,
@@ -86,7 +86,7 @@ namespace HH {
     // name for generics (type variables)
     ?'name' => string,
     // classname for classes, interfaces, enums, or traits
-    'classname' => ?classname<T>,
+    ?'classname' => classname<T>,
     // for tuples
     ?'elem_types' => varray<mixed>,
     ?'optional_elem_types' => varray<mixed>,

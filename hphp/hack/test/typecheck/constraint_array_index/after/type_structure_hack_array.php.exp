@@ -1,12 +1,12 @@
 ERROR: File "type_structure_hack_array.php", line 8, characters 6-16:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.
 ERROR: File "type_structure_hack_array.php", line 9, characters 6-16:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.
 ERROR: File "type_structure_hack_array.php", line 10, characters 6-16:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.

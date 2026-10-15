@@ -47,9 +47,9 @@ The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx(
   File "typestructure.hhi", line 61, characters 6-15:
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 10, characters 15-25:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 11, characters 15-26:
 The field `elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "typestructure.hhi", line 65, characters 6-17:
@@ -75,9 +75,9 @@ The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx(
   File "typestructure.hhi", line 61, characters 6-15:
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 28, characters 15-25:
-This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
+The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-16:
+  This is where the field was declared as optional.
 ERROR: File "bad_type_structure_nullable.php", line 29, characters 15-26:
 The field `elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "typestructure.hhi", line 65, characters 6-17:

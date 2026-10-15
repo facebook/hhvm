@@ -136,9 +136,8 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         (env, acc_field_with_type fty)
       | (TSFlit_str (_, "nullable"), (_, Toption fty), (_, Toption _)) ->
         (env, acc_field_with_type fty)
-      | (TSFlit_str (_, "classname"), (_, Toption fty), _)
-        when is_enum_or_classish ty ->
-        (env, acc_field_with_type fty)
+      | (TSFlit_str (_, "classname"), _, _) when is_enum_or_classish ty ->
+        (env, acc_field_with_type sft_ty)
       (* Required elements in a tuple type *)
       | ( TSFlit_str (_, "elem_types"),
           _,

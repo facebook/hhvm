@@ -386,7 +386,7 @@ let rec recheck_until_no_changes_left
      let's clean up now. *)
   let env =
     match env.nonpersistent_client_pending_command_needs_full_check with
-    | Some (_command, _reason, client)
+    | Some (_command, _reason, client, abandon)
       when is_full_check_needed env.full_check_status
            && Float.(start_time - env.last_command_time > 5.0) -> begin
       try
@@ -395,6 +395,7 @@ let rec recheck_until_no_changes_left
       with
       | Client_provider.Client_went_away ->
         Client_provider.shutdown_client client;
+        abandon ();
         {
           env with
           nonpersistent_client_pending_command_needs_full_check = None;
@@ -488,14 +489,15 @@ let new_serve_iteration_id () = Random_id.short_string ()
 let main_loop_command_handler client result =
   match result with
   | Server_utils.Done env -> env
-  | Server_utils.Needs_full_recheck { env; finish_command_handling; reason } ->
+  | Server_utils.Needs_full_recheck
+      { env; finish_command_handling; abandon_command_handling; reason } ->
     (* We should not accept any new clients until this is cleared *)
     assert (
       Option.is_none env.nonpersistent_client_pending_command_needs_full_check);
     {
       env with
       nonpersistent_client_pending_command_needs_full_check =
-        Some (finish_command_handling, reason, client);
+        Some (finish_command_handling, reason, client, abandon_command_handling);
     }
 
 let generate_and_update_recheck_id env =
@@ -576,7 +578,8 @@ let log_recheck_end
 
 let agent_session_id_for_recheck env select_outcome =
   match env.nonpersistent_client_pending_command_needs_full_check with
-  | Some (_command, _reason, client) -> Client_provider.agent_session_id client
+  | Some (_command, _reason, client, _abandon) ->
+    Client_provider.agent_session_id client
   | None ->
     (match select_outcome with
     | Client_provider.Select_new { Client_provider.client; _ } ->
@@ -763,8 +766,8 @@ let serve_one_iteration genv env client_provider =
   in
   let env =
     match env.nonpersistent_client_pending_command_needs_full_check with
-    | Some (f, _reason, _client) when is_full_check_done env.full_check_status
-      ->
+    | Some (f, _reason, _client, _abandon)
+      when is_full_check_done env.full_check_status ->
       {
         (f env) with
         nonpersistent_client_pending_command_needs_full_check = None;

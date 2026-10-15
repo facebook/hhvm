@@ -211,6 +211,7 @@ let main () =
   Daemon.check_entry_point ();
   (* This invokes fbinit logic, which subsumes Folly.ensure_folly_init () *)
   Startup_initializer.init ();
+  Process.stamp_env := Art_cli_lite.stamp_env;
   set_up_signals ();
   let init_proc_stack = Proc.get_proc_stack (Unix.getpid ()) in
   let command =

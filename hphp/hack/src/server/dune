@@ -185,6 +185,7 @@
     server_isolation_outbound
     server_isolation_validate)
   (libraries
+    art_cli_lite_stubs
     ast
     ci_util
     cgroupprofiler

@@ -11,6 +11,7 @@
    server_progress_lwt))
  (libraries
   agent_session_id_stubs
+  art_cli_lite_stubs
   connection_tracker
   client_get_definition
   client_highlight_refs

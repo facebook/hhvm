@@ -15,6 +15,7 @@ type 'env handle_command_result =
       finish_command_handling: 'env -> 'env;
           (** This continuation needs to be run after finished
               full check to complete the handling of the command. *)
+      abandon_command_handling: unit -> unit;
       reason: string;
           (** Reason why this command needs full recheck (for logging/debugging purposes) *)
     }

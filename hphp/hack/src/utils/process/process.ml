@@ -32,6 +32,8 @@ let chunk_size = 65536
 (** Reuse the buffer for reading. Just an allocation optimization. *)
 let buffer = Bytes.create chunk_size
 
+let stamp_env = ref (fun _ env -> env)
+
 let env_to_array (env : Process_types.environment) : string array option =
   match env with
   | Process_types.Default -> None
@@ -350,7 +352,11 @@ let exec_no_chdir
 
   let pid =
     try
-      match env_to_array env with
+      match
+        !stamp_env
+          (String.concat ~sep:" " (Array.to_list args))
+          (env_to_array env)
+      with
       | None ->
         Unix.create_process prog args stdin_child stdout_child stderr_child
       | Some env ->

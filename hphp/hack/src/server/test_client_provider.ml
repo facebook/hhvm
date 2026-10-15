@@ -56,6 +56,14 @@ end
 
 let clear = Refs.clear
 
+let trace_context = ref []
+
+let client_went_away = ref false
+
+let mock_trace_context x = trace_context := x
+
+let mock_client_went_away x = client_went_away := x
+
 let mock_new_client_type x = Refs.set_new_client_type (Some x)
 
 let mock_client_request x = Refs.set_client_request (Some x)
@@ -117,7 +125,13 @@ let send_response_to_client c x = record_client_response x c
 let client_has_message _ = false
 
 let read_client_msg c =
-  let metadata = { Server_command_types.from = "test"; desc = "cmd" } in
+  let metadata =
+    {
+      Server_command_types.from = "test";
+      desc = "cmd";
+      trace_context = !trace_context;
+    }
+  in
   (metadata, Utils.unsafe_opt (get_mocked_client_request c))
 
 let get_channels _ = not_implemented ()
@@ -131,4 +145,4 @@ let agent_session_id _ = None
 
 let shutdown_client _ = ()
 
-let ping _ = ()
+let ping _ = if !client_went_away then raise Client_went_away

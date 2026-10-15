@@ -43,6 +43,7 @@ type conn = {
   conn_root: Path.t;
   conn_deadline: float option;
   from: string;
+  trace_context: (string * string) list;
 }
 
 module For_test : sig

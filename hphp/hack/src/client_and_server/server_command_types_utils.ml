@@ -64,7 +64,7 @@ The intent is that users understand what command hh_server is currently busy wit
 For command-line commands, we show the "--" option that the user used, e.g. --type-at-pos.
 For IDE commands like hover, we show a description like "hover". *)
 let status_describe_cmd (type a) (command : a command) : string =
-  let ({ Server_command_types.from; desc }, _rpc) = command in
+  let ({ Server_command_types.from; desc; _ }, _rpc) = command in
   (if String.equal from "" then
     ""
   else

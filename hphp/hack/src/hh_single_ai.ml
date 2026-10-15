@@ -41,8 +41,6 @@ let comma_string_to_iset (s : string) : I_set.t =
 
 let sound_dynamic = true
 
-let distc = false
-
 let parse_options () =
   let fn_ref = ref [] in
   let extra_builtins = ref [] in
@@ -87,15 +85,6 @@ let parse_options () =
     | (_, None) ->
       die usage
     | (x, Some ai_options) -> (x, ai_options)
-  in
-  let ai_options =
-    Ai_options.
-      {
-        ai_options with
-        run_hh_distc_workers_locally = true;
-        compute_folded_class_decls_with_hh_distc = distc;
-        compute_type_infos_with_hh_distc = distc;
-      }
   in
 
   let popt =

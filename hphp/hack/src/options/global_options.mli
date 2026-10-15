@@ -294,6 +294,8 @@ type t = {
   disable_class_sub_classname_method_override: bool;
       (** Disable class<T> <: classname<T> rewrites in method override checks. *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
+  needs_concrete_abstract_type_const_check: bool;
+      (** When true, error on abstract type constants resolved through `this::` in reified type arguments or `type_structure(static::class, ...)` where `static` might refer to an abstract class (Typing[4529]). *)
   needs_concrete_class_call_check: int;
       (** Configure checks for calls to __NeedsConcrete methods through a named
        * non-concrete class: 0 disables, 1 warns, and 2 errors. *)
@@ -412,6 +414,7 @@ val set :
   ?class_sub_classname:bool ->
   ?disable_class_sub_classname_method_override:bool ->
   ?class_class_type:bool ->
+  ?needs_concrete_abstract_type_const_check:bool ->
   ?needs_concrete_class_call_check:int ->
   ?needs_concrete_class_function_pointer_check:int option ->
   ?strict_consistent_construct:bool ->

@@ -277,6 +277,9 @@ let disable_class_sub_classname_method_override t =
 
 let class_class_type t = t.Global_options.class_class_type
 
+let needs_concrete_abstract_type_const_check t =
+  t.Global_options.needs_concrete_abstract_type_const_check
+
 let needs_concrete_class_call_check t =
   t.Global_options.needs_concrete_class_call_check
 

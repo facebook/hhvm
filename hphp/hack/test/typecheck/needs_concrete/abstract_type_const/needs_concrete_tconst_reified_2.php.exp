@@ -1,0 +1,16 @@
+ERROR: File "needs_concrete_tconst_reified_2.php", line 15, characters 17-23:
+Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
+  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
+  Declaration is here
+ERROR: File "needs_concrete_tconst_reified_2.php", line 20, characters 13-19:
+Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
+  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
+  Declaration is here
+ERROR: File "needs_concrete_tconst_reified_2.php", line 25, characters 16-22:
+Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
+  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
+  Declaration is here
+ERROR: File "needs_concrete_tconst_reified_2.php", line 30, characters 15-21:
+Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
+  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
+  Declaration is here

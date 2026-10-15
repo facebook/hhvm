@@ -161,6 +161,9 @@ module Hhconfig = struct
   let meth_caller_only_public_visibility =
     key "meth_caller_only_public_visibility"
 
+  let needs_concrete_abstract_type_const_check =
+    key "needs_concrete_abstract_type_const_check"
+
   let needs_concrete_class_call_check = key "needs_concrete_class_call_check"
 
   let needs_concrete_class_function_pointer_check =

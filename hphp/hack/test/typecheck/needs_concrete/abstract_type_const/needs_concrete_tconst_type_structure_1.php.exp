@@ -1,0 +1,4 @@
+ERROR: File "needs_concrete_tconst_type_structure_1.php", line 9, characters 10-23:
+Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
+  File "needs_concrete_tconst_type_structure_1.php", line 4, characters 23-23:
+  Declaration is here

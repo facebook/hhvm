@@ -1,0 +1,4 @@
+ERROR: File "needs_concrete_tconst_reified_1.php", line 11, characters 51-66:
+Dangerous access of abstract member `THasAccessors::TAccessors`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
+  File "needs_concrete_tconst_reified_1.php", line 4, characters 23-32:
+  Declaration is here

@@ -740,6 +740,10 @@ and obj_get_concrete_class_with_member_info
           ft.ft_tparams
           (List.map ~f:snd args.explicit_targs)
       in
+      Typing_needs_concrete.check_reified_targs
+        env
+        ft.ft_tparams
+        args.explicit_targs;
       let ft =
         Typing_enforceability.compute_enforced_and_pessimize_fun_type
           ~this_class:(Some class_info)

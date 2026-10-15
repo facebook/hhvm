@@ -147,6 +147,7 @@ impl Default for GlobalOptions {
             class_sub_classname: true,
             disable_class_sub_classname_method_override: false,
             class_class_type: true,
+            needs_concrete_abstract_type_const_check: false,
             needs_concrete_class_call_check: 0,
             needs_concrete_class_function_pointer_check: None,
             strict_consistent_construct: false,

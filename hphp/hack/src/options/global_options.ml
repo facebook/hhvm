@@ -198,6 +198,7 @@ type t = {
   class_sub_classname: bool;
   disable_class_sub_classname_method_override: bool;
   class_class_type: bool;
+  needs_concrete_abstract_type_const_check: bool;
   needs_concrete_class_call_check: int;
   needs_concrete_class_function_pointer_check: int option;
   strict_consistent_construct: bool;
@@ -312,6 +313,7 @@ let default =
     class_sub_classname = true;
     disable_class_sub_classname_method_override = false;
     class_class_type = true;
+    needs_concrete_abstract_type_const_check = false;
     needs_concrete_class_call_check = 0;
     needs_concrete_class_function_pointer_check = None;
     strict_consistent_construct = false;
@@ -423,6 +425,7 @@ let set
     ?class_sub_classname
     ?disable_class_sub_classname_method_override
     ?class_class_type
+    ?needs_concrete_abstract_type_const_check
     ?needs_concrete_class_call_check
     ?needs_concrete_class_function_pointer_check
     ?strict_consistent_construct
@@ -719,6 +722,10 @@ let set
         disable_class_sub_classname_method_override
         options.disable_class_sub_classname_method_override;
     class_class_type = setting class_class_type options.class_class_type;
+    needs_concrete_abstract_type_const_check =
+      setting
+        needs_concrete_abstract_type_const_check
+        options.needs_concrete_abstract_type_const_check;
     needs_concrete_class_call_check =
       setting
         needs_concrete_class_call_check

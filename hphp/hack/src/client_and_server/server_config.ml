@@ -605,6 +605,10 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
          Config_keys.Hhconfig.disable_class_sub_classname_method_override
          config)
     ?class_class_type:(bool_opt Config_keys.Hhconfig.class_class_type config)
+    ?needs_concrete_abstract_type_const_check:
+      (bool_opt
+         Config_keys.Hhconfig.needs_concrete_abstract_type_const_check
+         config)
     ?needs_concrete_class_call_check:
       (int_opt Config_keys.Hhconfig.needs_concrete_class_call_check config
       |> Option.map ~f:(fun value ->

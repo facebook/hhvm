@@ -1478,6 +1478,7 @@ end = struct
         (List.map ~f:snd ty_args)
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) tyargs_err_opt;
+    Typing_needs_concrete.check_reified_targs env fun_ty.ft_tparams ty_args;
     let ((env, ty_err_opt), fun_ty) =
       Phase.(
         localize_ft
@@ -6191,6 +6192,12 @@ end = struct
                 primary
                 @@ Primary.Illegal_type_structure
                      { pos; msg = "Could not resolve the type constant"; fn })
+          | _ -> ()
+        in
+        let () =
+          match cid with
+          | (_, _, CIstatic) ->
+            Typing_needs_concrete.check_abstract_tconst_via_static env pos cst
           | _ -> ()
         in
         result
@@ -12451,6 +12458,7 @@ end = struct
                (Cls.tparams class_)
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        Typing_needs_concrete.check_reified_targs env (Cls.tparams class_) tal;
         make_result env tal (Aast.CI c) ty)
     | CIreified ((p, id) as c) ->
       let r = Reason.hint (Pos_or_decl.of_raw_pos p) in
@@ -14345,6 +14353,10 @@ end = struct
                 Option.iter
                   ~f:(Typing_error_utils.add_typing_error ~env)
                   ty_err_opt1;
+                Typing_needs_concrete.check_reified_targs
+                  env
+                  ft.ft_tparams
+                  explicit_targs;
                 let ft =
                   Typing_enforceability.compute_enforced_and_pessimize_fun_type
                     ~this_class:(Some class_)

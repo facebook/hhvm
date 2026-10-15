@@ -147,6 +147,65 @@ let check_instantiation
   | CIexpr _ ->
     ()
 
+let check_abstract_tconst_via_static
+    (env : Typing_env_types.env) (pos : Pos.t) (tconst_name : string) : unit =
+  if
+    Typechecker_options.needs_concrete_abstract_type_const_check env.genv.tcopt
+    && not (Typing_env.static_points_to_concrete_class env)
+  then
+    Typing_env.get_self_class env
+    |> Decl_entry.to_option
+    |> Option.iter ~f:(fun (class_ : Decl_provider.class_decl) ->
+           match Typing_env.get_typeconst env class_ tconst_name with
+           | Some
+               ({
+                  Typing_defs.ttc_kind =
+                    Typing_defs.TCAbstract { Typing_defs.atc_default = None; _ };
+                  _;
+                } as tc) ->
+             (* Resolving an abstract type constant without a default through
+              * `static`/`this` requires a runtime value that an abstract class
+              * does not have.
+              * We treat this like abstract member access via `static`
+              * (see [check_class_get]) so the containing method must be
+              * `__NeedsConcrete`. *)
+             add_abstract_access_via_static
+               env
+               pos
+               (Folded_class.name class_)
+               tconst_name
+               (fst tc.Typing_defs.ttc_name)
+           | _ -> ())
+
+let check_reified_targ
+    (env : Typing_env_types.env)
+    (tparam : Typing_defs.decl_tparam)
+    (hint : Nast.hint) : unit =
+  match tparam.Typing_defs.tp_reified with
+  | Ast_defs.Erased -> ()
+  | Ast_defs.SoftReified
+  | Ast_defs.Reified ->
+    let visitor =
+      object
+        inherit [_] Aast.iter as super
+
+        method! on_hint env hint =
+          match hint with
+          | (pos, Aast.Haccess ((_, Aast.Hthis), (_, tconst_name) :: _)) ->
+            check_abstract_tconst_via_static env pos tconst_name
+          | _ -> super#on_hint env hint
+      end
+    in
+    visitor#on_hint env hint
+
+let check_reified_targs
+    (env : Typing_env_types.env)
+    (tparams : Typing_defs.decl_tparam list)
+    (targs : ('ex * Aast.hint) list) : unit =
+  List.iter2 tparams targs ~f:(fun tparam (_, hint) ->
+      check_reified_targ env tparam hint)
+  |> (ignore : _ List.Or_unequal_lengths.t -> unit)
+
 let check_class_def
     (env : Typing_env_types.env)
     (c : Nast.class_)

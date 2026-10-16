@@ -296,6 +296,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let no_load = ref false in
   let output_json = ref false in
   let isolation_grow = ref false in
+  let isolation_movable = ref false in
   let isolation_output = ref None in
   let isolation_seed_framework = ref None in
   let isolation_seed_list = ref None in
@@ -313,7 +314,9 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
     Server_isolation_types.
       {
         mode =
-          (if !isolation_grow then
+          (if !isolation_movable then
+            Check_movability
+          else if !isolation_grow then
             Grow
           else
             Measure);
@@ -570,6 +573,10 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
             set_mode (MODE_FIND_ISOLATABLE_CLUSTERS (isolation_options ()))),
         " find clusters of files that can be isolated from the codebase",
         (Arg_non_user_facing, Help_modes) );
+      ( "--isolation-movable",
+        Arg.Set isolation_movable,
+        " ask whether the starting files can move as they stand, naming the files that block it; reads the dependency graph only, so a typecheck can still object",
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-grow",
         Arg.Set isolation_grow,
         " grow a bigger cluster around each starting file, instead of reporting its smallest isolatable set",
@@ -1309,6 +1316,17 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
       (match
          Client_isolation_args.validate
            ~max_dependents_given:(Option.is_some !isolation_max_dependents)
+           ~mode_flags_given:
+             (List.filter_map
+                [
+                  ("--isolation-movable", !isolation_movable);
+                  ("--isolation-grow", !isolation_grow);
+                ]
+                ~f:(fun (flag, given) ->
+                  if given then
+                    Some flag
+                  else
+                    None))
            options
        with
       | Ok () -> ()

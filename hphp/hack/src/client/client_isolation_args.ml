@@ -16,6 +16,7 @@ let warn message = Printf.eprintf "warning: %s\n%!" message
 
 let check
     ~max_dependents_given
+    ~mode_flags_given
     Server_isolation_types.
       {
         mode;
@@ -31,6 +32,7 @@ let check
         seed_offset;
       } =
   let grow = Server_isolation_types.is_grow mode in
+  let movable = Server_isolation_types.is_check_movability mode in
   (match max_seeds with
   | Some n when n < 1 ->
     reject (Printf.sprintf "--isolation-max-seeds must be at least 1, got %d" n)
@@ -84,6 +86,33 @@ let check
       (Printf.sprintf
          "%s each name where to start; pass one"
          (String.concat ~sep:" and " seed_sources_given));
+  if List.length mode_flags_given > 1 then
+    reject
+      (Printf.sprintf
+         "%s each answer a different question; pass one"
+         (String.concat ~sep:" and " mode_flags_given));
+  (* Movability asks about one named set of files. Everything that would
+     change which files that is, or what happens to them afterwards, asks a
+     different question — and answering a different question from the one the
+     caller spelled is worse than refusing. *)
+  if movable then begin
+    (* The whole-repository scan collects the files nothing references, which
+       is already the answer to a different question: asking whether they can
+       collectively move would always say yes and mean nothing. *)
+    if
+      Option.is_none seed_dir
+      && Option.is_none seed_list
+      && Option.is_none seed_framework
+    then
+      reject
+        "--isolation-movable asks about a named set of files; name it with --isolation-seed-dir, --isolation-seed-list or --isolation-seed-framework";
+    (* A window would answer for part of the directory, and a part of a package
+       is not a package: the files left out reference in, so the answer would
+       be no for a reason the caller created. *)
+    if Option.is_some max_seeds || seed_offset > 0 then
+      reject
+        "--isolation-max-seeds and --isolation-seed-offset take a window of the starting files, and --isolation-movable asks about all of them"
+  end;
   (* Nothing grows without [--isolation-grow], so there is no cluster to cap. *)
   if (not grow) && Option.is_some max_cluster_size then
     reject
@@ -108,7 +137,7 @@ let check
          "--isolation-seed-offset %d without --isolation-max-seeds runs to the end of the seed list, not a window of it"
          seed_offset)
 
-let validate ~max_dependents_given options =
-  match check ~max_dependents_given options with
+let validate ~max_dependents_given ~mode_flags_given options =
+  match check ~max_dependents_given ~mode_flags_given options with
   | () -> Ok ()
   | exception Invalid message -> Error message

@@ -12,8 +12,13 @@ type cluster = {
   truncated: bool;
 }
 
+type movability =
+  | Movable
+  | Blocked of string list
+
 type result = {
   refused: string option;
+  movability: movability option;
   grown: bool;
   total_seeds: int;
   total_isolatable_files: int;
@@ -29,10 +34,19 @@ type clusters_destination =
 type mode =
   | Measure
   | Grow
+  | Check_movability
 
 let is_grow = function
   | Grow -> true
-  | Measure -> false
+  | Measure
+  | Check_movability ->
+    false
+
+let is_check_movability = function
+  | Check_movability -> true
+  | Measure
+  | Grow ->
+    false
 
 type options = {
   mode: mode;

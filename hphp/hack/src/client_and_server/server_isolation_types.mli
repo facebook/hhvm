@@ -17,8 +17,18 @@ type cluster = {
           taken, leaving it a prefix of a package rather than a package. *)
 }
 
+(** Whether a named set of files can move as it stands, judged from the
+    dependency graph alone. [Blocked] lists every file outside the set that
+    references into it. [Movable] does not promise that a typecheck of the
+    moved files will pass. *)
+type movability =
+  | Movable
+  | Blocked of string list
+
 type result = {
   refused: string option;
+  movability: movability option;
+      (** The answer to [Check_movability]; [None] in the other modes. *)
   grown: bool;
       (** Whether these were grown, or are each the smallest isolatable set
           around a starting file. *)
@@ -49,9 +59,15 @@ type mode =
       (** Report the smallest isolatable set around each starting file: its
           closure under reverse dependencies. *)
   | Grow  (** Grow a bigger cluster around each starting file. *)
+  | Check_movability
+      (** Ask whether the starting files, taken together, can move as they
+          stand, naming what blocks it if not. *)
 
 (** Whether the mode grows clusters. *)
 val is_grow : mode -> bool
+
+(** Whether the mode asks if the starting files can move. *)
+val is_check_movability : mode -> bool
 
 (** Where to start growing clusters, and how far to take them. *)
 type options = {

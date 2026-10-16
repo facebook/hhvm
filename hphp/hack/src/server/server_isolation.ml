@@ -82,7 +82,7 @@ module Seeds = struct
       family rather than direct children. The name is normalised to a leading
       backslash, which is how the graph spells a top-level class and not how a
       caller types one. *)
-  let from_framework ctx deps_mode base =
+  let from_framework ctx deps_mode ~keep_excluded_paths base =
     let base =
       if String.is_prefix base ~prefix:"\\" then
         base
@@ -98,7 +98,7 @@ module Seeds = struct
       |> Relative_path.Set.elements
       |> List.filter ~f:(fun path ->
              Relative_path.is_root (Relative_path.prefix path)
-             && (not (is_excluded_path path))
+             && (keep_excluded_paths || not (is_excluded_path path))
              && not (Relative_path.Set.mem base_files path))
     in
     Hh_logger.log
@@ -153,7 +153,8 @@ module Seeds = struct
       (List.length unknown);
     known
 
-  (** The repo-relative paths in [file], one per line. *)
+  (** The repo-relative paths in [file], one per line, taken as given: no path
+      is dropped for being a test or excluded. *)
   let from_list naming_table file =
     In_channel.read_lines file
     |> List.filter_map ~f:(fun line ->
@@ -172,7 +173,7 @@ module Seeds = struct
       The same walk the typechecker indexes the repository with, so it finds the
       same files under [dir] that the naming table holds, and is then filtered
       against the table exactly as a hand-written seed list is. *)
-  let from_directory ctx naming_table dir =
+  let from_directory ctx naming_table ~keep_excluded_paths dir =
     let is_excluded_path = excluded_path_filter ctx in
     Find.find
       ~file_only:true
@@ -181,15 +182,28 @@ module Seeds = struct
     |> List.map ~f:Relative_path.create_detect_prefix
     |> List.filter ~f:(fun path ->
            Relative_path.is_root (Relative_path.prefix path)
-           && not (is_excluded_path path))
+           && (keep_excluded_paths || not (is_excluded_path path)))
     |> List.sort ~compare:Relative_path.compare
     |> known_paths naming_table ~seed_source:(Printf.sprintf "seed dir %s" dir)
 
-  let select ctx deps_mode naming_table ~seed_framework ~seed_list ~seed_dir =
+  (** [keep_excluded_paths] turns off the test filter, which is a seed-finding
+      heuristic and not part of any question about a named set of files. A
+      directory's own tests move with it, so dropping them would both shrink
+      the package and report each of them as referencing in. *)
+  let select
+      ctx
+      deps_mode
+      naming_table
+      ~keep_excluded_paths
+      ~seed_framework
+      ~seed_list
+      ~seed_dir =
     match (seed_framework, seed_list, seed_dir) with
-    | (Some base, _, _) -> from_framework ctx deps_mode base
+    | (Some base, _, _) ->
+      from_framework ctx deps_mode ~keep_excluded_paths base
     | (None, Some file, _) -> from_list naming_table file
-    | (None, None, Some dir) -> from_directory ctx naming_table dir
+    | (None, None, Some dir) ->
+      from_directory ctx naming_table ~keep_excluded_paths dir
     | (None, None, None) ->
       let seeds = scan ctx deps_mode naming_table in
       Hh_logger.log "[isolation] seed scan: found %d seeds" (List.length seeds);
@@ -596,6 +610,39 @@ let grow_seeds r seeds ~total_seeds ~since =
   log_growth_result r ~sizes;
   sizes
 
+(** [movability_of_seeds r seeds] is whether [seeds], taken together, can move as
+    they stand, paired with the sizes of the clusters emitted: the whole set as
+    one cluster when movable, none when blocked. *)
+let movability_of_seeds r seeds =
+  let candidate = Relative_path.Set.of_list seeds in
+  let since = Unix.gettimeofday () in
+  let blockers =
+    Server_isolation_inbound.referrers r.ctx r.naming_table candidate
+  in
+  let _t = Hh_logger.log_duration "[isolation] movability" since in
+  if Relative_path.Set.is_empty blockers then begin
+    let files = Relative_path.Set.elements candidate in
+    Hh_logger.log
+      "[isolation] movability: movable, %d files"
+      (List.length files);
+    r.sink.emit
+      Server_isolation_types.
+        {
+          files = List.map files ~f:Relative_path.suffix;
+          common_directory = common_directory files;
+          truncated = false;
+        };
+    (Server_isolation_types.Movable, [List.length files])
+  end else begin
+    let blockers =
+      Relative_path.Set.elements blockers |> List.map ~f:Relative_path.suffix
+    in
+    Hh_logger.log
+      "[isolation] movability: %d files reference in"
+      (List.length blockers);
+    (Server_isolation_types.Blocked blockers, [])
+  end
+
 let make_run options genv env sink =
   let Server_isolation_types.{ max_dependents; max_cluster_size; batch_size; _ }
       =
@@ -620,6 +667,7 @@ let refused ~grow ~total_seeds message =
   Server_isolation_types.
     {
       refused = Some message;
+      movability = None;
       grown = grow;
       total_seeds;
       total_isolatable_files = 0;
@@ -631,10 +679,11 @@ let refused ~grow ~total_seeds message =
 (** Each mode reports the sizes of the sets it found, and differs in nothing
     else the caller sees, so the result is assembled here rather than at the end
     of each branch. *)
-let result r ~grow ~total_seeds ~sizes =
+let result r ~grow ~movability ~total_seeds ~sizes =
   Server_isolation_types.
     {
       refused = None;
+      movability;
       grown = grow;
       total_seeds;
       total_isolatable_files = List.fold sizes ~init:0 ~f:( + );
@@ -728,6 +777,7 @@ let query r options =
     options
   in
   let grow = Server_isolation_types.is_grow mode in
+  let ask_movability = Server_isolation_types.is_check_movability mode in
   (* Accumulates across a run; a second query in the same server would otherwise
      report the first one's totals. *)
   Growth.reset_stats ();
@@ -747,6 +797,7 @@ let query r options =
         r.ctx
         r.deps_mode
         r.naming_table
+        ~keep_excluded_paths:ask_movability
         ~seed_framework
         ~seed_list
         ~seed_dir
@@ -759,16 +810,29 @@ let query r options =
       ~seed_offset
       ~max_seeds
       ~available:(List.length all_seeds);
-    (match too_long_to_run ~grow ~total_seeds ~allow_long_run with
+    (* The estimate is per seed, because both cluster modes walk once per seed.
+       Movability walks once for the whole set however many files it holds, so
+       the guard does not describe it and would refuse a large directory that
+       answers in under a second. *)
+    (match
+       if ask_movability then
+         None
+       else
+         too_long_to_run ~grow ~total_seeds ~allow_long_run
+     with
     | Some refusal -> refuse ~total_seeds refusal
     | None ->
-      let sizes =
-        if grow then
-          grow_seeds r seeds ~total_seeds ~since:t
-        else
-          measure_seeds r seeds ~total_seeds
+      let (movability, sizes) =
+        match mode with
+        | Server_isolation_types.Check_movability ->
+          let (verdict, sizes) = movability_of_seeds r seeds in
+          (Some verdict, sizes)
+        | Server_isolation_types.Grow ->
+          (None, grow_seeds r seeds ~total_seeds ~since:t)
+        | Server_isolation_types.Measure ->
+          (None, measure_seeds r seeds ~total_seeds)
       in
-      result r ~grow ~total_seeds ~sizes)
+      result r ~grow ~movability ~total_seeds ~sizes)
 
 let go
     (options : Server_isolation_types.options)

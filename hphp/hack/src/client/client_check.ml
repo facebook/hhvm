@@ -65,6 +65,16 @@ let output_isolation_result
           match result.refused with
           | None -> `Null
           | Some reason -> `String reason );
+        ( "movability",
+          match result.movability with
+          | None -> `Null
+          | Some Movable -> `String "movable"
+          | Some (Blocked _) -> `String "blocked" );
+        ( "blockers",
+          match result.movability with
+          | Some (Blocked blockers) ->
+            `List (List.map blockers ~f:(fun f -> `String f))
+          | _ -> `Null );
         ( "summary",
           `Assoc
             [
@@ -79,9 +89,19 @@ let output_isolation_result
     |> Yojson.Safe.to_string
     |> print_endline
   else begin
-    match result.refused with
-    | Some reason -> Printf.printf "Did not run: %s\n" reason
-    | None ->
+    match (result.refused, result.movability) with
+    | (Some reason, _) -> Printf.printf "Did not run: %s\n" reason
+    | (None, Some Movable) ->
+      Printf.printf
+        "Movable: %d files, nothing outside references in.\n"
+        result.total_isolatable_files
+    | (None, Some (Blocked blockers)) ->
+      (match blockers with
+      | [_] -> Printf.printf "Blocked: 1 file references in.\n"
+      | _ ->
+        Printf.printf "Blocked: %d files reference in.\n" (List.length blockers));
+      List.iter blockers ~f:(Printf.printf "  %s\n")
+    | (None, None) ->
       Printf.printf "Started from %d files.\n" result.total_seeds;
       (* Both modes report sets of files called clusters, and they mean different
          things, so the line a person reads has to say which. *)

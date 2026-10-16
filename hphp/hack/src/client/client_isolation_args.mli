@@ -12,8 +12,12 @@
 
     [max_dependents_given] tells the two apart for that bound: it reaches here
     resolved to its default, and warning about a value the caller never chose
-    would report their own default back at them. *)
+    would report their own default back at them.
+
+    [mode_flags_given] names the flags that each select a mode: the options
+    carry one mode, so two flags given together could not be seen in them. *)
 val validate :
   max_dependents_given:bool ->
+  mode_flags_given:string list ->
   Server_isolation_types.options ->
   (unit, string) Stdlib.result

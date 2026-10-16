@@ -1,8 +1,31 @@
-ERROR: File "file_attributes_modules.php--file2.php", line 3, characters 31-41:
-Unbound name: `NonExistent` (an object type) (Naming[2049])
-ERROR: File "file_attributes_modules.php--file2.php", line 3, characters 21-22:
-Invalid argument (Typing[4110])
-  File "file_attributes_modules.php--file1.php", line 8, characters 33-38:
-  Expected `string`
-  File "file_attributes_modules.php--file2.php", line 3, characters 21-22:
-  But got `int`
+error: Naming[2049] Unbound name: `NonExistent` (an object type) [1]
+
+file_attributes_modules.php--file2.php:3:31
+1 | <?hh
+2 | 
+3 | <<file:Ok(''), Err1(10), Err2(NonExistent::class)>>
+  |                               ^^^^^^^^^^^ [1]
+4 | 
+5 | new module example {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+file_attributes_modules.php--file2.php:3:21
+ 1 | <?hh
+ 2 | 
+ 3 | <<file:Ok(''), Err1(10), Err2(NonExistent::class)>>
+   |                     ^^ [1]
+ 4 | 
+ 5 | new module example {}
+
+file_attributes_modules.php--file1.php:8:33
+ 6 | 
+ 7 | class Err1 implements \HH\FileAttribute {
+ 8 |     public function __construct(string $_) {}
+   |                                 ^^^^^^ [2]
+ 9 | }
+10 | 
+
+2 errors found

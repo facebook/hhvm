@@ -1,12 +1,42 @@
-ERROR: File "user-defined-type_as_context.php", line 4, characters 42-48:
-Illegal context: `\Clazz`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "user-defined-type_as_context.php", line 7, characters 46-52:
-Illegal context: `\Iface`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "user-defined-type_as_context.php", line 10, characters 33-39:
-Illegal context: `\Clazz`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "user-defined-type_as_context.php", line 11, characters 37-43:
-Illegal context: `\Iface`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+error: NastCheck[3090] Illegal context: `\Clazz`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+user-defined-type_as_context.php:4:42
+2 | 
+3 | class Clazz {
+4 |   public function unqualified_class_bad()[Clazz]: void {}
+  |                                          ^^^^^^^ [1]
+5 | }
+6 | interface Iface {
+
+error: NastCheck[3090] Illegal context: `\Iface`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+user-defined-type_as_context.php:7:46
+5 | }
+6 | interface Iface {
+7 |   public function unqualified_interface_bad()[Iface]: void;
+  |                                              ^^^^^^^ [1]
+8 | }
+9 | 
+
+error: NastCheck[3090] Illegal context: `\Clazz`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+user-defined-type_as_context.php:10:33
+ 8 | }
+ 9 | 
+10 | function unqualified_class_bad()[Clazz]: void {}
+   |                                 ^^^^^^^ [1]
+11 | function unqualified_interface_bad()[Iface]: void {}
+
+error: NastCheck[3090] Illegal context: `\Iface`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+user-defined-type_as_context.php:11:37
+ 9 | 
+10 | function unqualified_class_bad()[Clazz]: void {}
+11 | function unqualified_interface_bad()[Iface]: void {}
+   |                                     ^^^^^^^ [1]
+
+4 errors found

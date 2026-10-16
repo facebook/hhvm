@@ -1,8 +1,23 @@
 File "akempty_promotion_3.php", line 10, characters 3-13:
   vec<nothing>
-ERROR: File "akempty_promotion_3.php", line 12, characters 5-6:
-Invalid argument (Typing[4110])
-  File "akempty_promotion_3.php", line 15, characters 12-14:
-  Expected `int`
-  File "akempty_promotion_3.php", line 7, characters 8-12:
-  But got `vec<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `vec<string>` [3]
+
+akempty_promotion_3.php:12:5
+ 5 |  */
+ 6 | function test(bool $b): void {
+ 7 |   $a = vec[];
+   |        ^^^^^ [3]
+ 8 |   if ($b) {
+ 9 |   }
+10 |   hh_show($a); // should by unresolved type inside a typevar
+11 |   $a[] = 'aaa';
+12 |   f($a);
+   |     ^^ [1]
+13 | }
+14 | 
+15 | function f(int $_): void {}
+   |            ^^^ [2]
+
+1 error found

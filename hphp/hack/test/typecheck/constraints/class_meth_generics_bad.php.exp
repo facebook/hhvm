@@ -1,40 +1,101 @@
-ERROR: File "class_meth_generics_bad.php", line 21, characters 12-13:
-Invalid argument (Typing[4323])
-  File "class_meth_generics_bad.php", line 4, characters 9-9:
-  `T` is a constrained type parameter
-  File "class_meth_generics_bad.php", line 4, characters 14-21:
-  This type constraint is violated
-  File "class_meth_generics_bad.php", line 4, characters 14-21:
-  Expected `arraykey`
-  File "class_meth_generics_bad.php", line 19, characters 24-27:
-  But got `bool`
-ERROR: File "class_meth_generics_bad.php", line 27, characters 12-13:
-Invalid argument (Typing[4323])
-  File "class_meth_generics_bad.php", line 4, characters 9-9:
-  `T` is a constrained type parameter
-  File "class_meth_generics_bad.php", line 4, characters 14-21:
-  This type constraint is violated
-  File "class_meth_generics_bad.php", line 4, characters 14-21:
-  Expected `arraykey`
-  File "class_meth_generics_bad.php", line 25, characters 24-28:
-  But got `float`
-ERROR: File "class_meth_generics_bad.php", line 32, characters 12-13:
-Invalid argument (Typing[4323])
-  File "class_meth_generics_bad.php", line 4, characters 9-9:
-  `T` is a constrained type parameter
-  File "class_meth_generics_bad.php", line 4, characters 14-21:
-  This type constraint is violated
-  File "class_meth_generics_bad.php", line 4, characters 14-21:
-  Expected `arraykey`
-  File "class_meth_generics_bad.php", line 30, characters 24-28:
-  But got `float`
-ERROR: File "class_meth_generics_bad.php", line 32, characters 16-17:
-Invalid argument (Typing[4323])
-  File "class_meth_generics_bad.php", line 11, characters 45-46:
-  `Tu` is a constrained type parameter
-  File "class_meth_generics_bad.php", line 11, characters 51-58:
-  This type constraint is violated
-  File "class_meth_generics_bad.php", line 11, characters 51-58:
-  Expected `arraykey`
-  File "class_meth_generics_bad.php", line 30, characters 34-41:
-  But got `vec<int>`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+class_meth_generics_bad.php:21:12
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<T as arraykey> {
+   |         ^ [2]
+   |              ^^^^^^^^ [3]
+ 5 |   public static function nongeneric(T $x): T {
+ 6 |     return $x;
+   :
+17 | }
+18 | 
+19 | function testindirect1(bool $b): bool {
+   |                        ^^^^ [4]
+20 |   $f = C::nongeneric<>;
+21 |   $fr = $f($b);
+   |            ^^ [1]
+22 |   return $fr;
+23 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `float` [4]
+
+class_meth_generics_bad.php:27:12
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<T as arraykey> {
+   |         ^ [2]
+   |              ^^^^^^^^ [3]
+ 5 |   public static function nongeneric(T $x): T {
+ 6 |     return $x;
+   :
+23 | }
+24 | 
+25 | function testindirect2(float $f, vec<int> $v): (float, vec<int>) {
+   |                        ^^^^^ [4]
+26 |   $g = C::generic<>;
+27 |   $gr = $g($f, $v);
+   |            ^^ [1]
+28 |   return $gr;
+29 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `float` [4]
+
+class_meth_generics_bad.php:32:12
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<T as arraykey> {
+   |         ^ [2]
+   |              ^^^^^^^^ [3]
+ 5 |   public static function nongeneric(T $x): T {
+ 6 |     return $x;
+   :
+28 |   return $gr;
+29 | }
+30 | function testindirect3(float $f, vec<int> $v): (float, vec<int>) {
+   |                        ^^^^^ [4]
+31 |   $g = C::genericConstrained<>;
+32 |   $gr = $g($f, $v);
+   |            ^^ [1]
+33 |   return $gr;
+34 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `Tu` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `vec<int>` [4]
+
+class_meth_generics_bad.php:32:16
+ 9 |     return tuple($x, $y);
+10 |   }
+11 |   public static function genericConstrained<Tu as arraykey>(
+   |                                             ^^ [2]
+   |                                                   ^^^^^^^^ [3]
+12 |     T $x,
+13 |     Tu $y,
+   :
+28 |   return $gr;
+29 | }
+30 | function testindirect3(float $f, vec<int> $v): (float, vec<int>) {
+   |                                  ^^^^^^^^ [4]
+31 |   $g = C::genericConstrained<>;
+32 |   $gr = $g($f, $v);
+   |                ^^ [1]
+33 |   return $gr;
+34 | }
+
+4 errors found

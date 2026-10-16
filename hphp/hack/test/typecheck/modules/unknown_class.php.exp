@@ -1,28 +1,96 @@
-WARN: File "unknown_class.php--file2.php", line 8, characters 3-9:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "unknown_class.php--file1.php", line 5, characters 16-19:
-  This expression has type `dynamic` because this is an internal symbol from module foo, which is opaque outside of the module.
-ERROR: File "unknown_class.php--file2.php", line 6, characters 14-15:
-Invalid argument (Typing[4110])
-  File "unknown_class.php--file1.php", line 29, characters 21-24:
-  Expected `IFoo`
-  File "unknown_class.php--file1.php", line 5, characters 16-19:
-  But got `mixed` because this is an internal symbol from module foo, which is opaque outside of the module.
-  File "unknown_class.php--file1.php", line 13, characters 12-15:
-  The type originated from here
-  File "unknown_class.php--file1.php", line 10, characters 11-11:
-    via this generic `T`
-  File "unknown_class.php--file1.php", line 22, characters 32-32:
-    via this generic `T`
-  File "unknown_class.php--file1.php", line 5, characters 16-19:
-    by the definition of `Sens` because this is an internal symbol from module foo, which is opaque outside of the module.
-  File "unknown_class.php--file1.php", line 13, characters 12-15:
-  The type originated from here
-  File "unknown_class.php--file1.php", line 10, characters 11-11:
-    via this generic `T`
-ERROR: File "unknown_class.php--file2.php", line 7, characters 7-9:
-You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "unknown_class.php--file1.php", line 5, characters 16-19:
-  Definition is here
-ERROR: File "unknown_class.php--file2.php", line 8, characters 3-4:
-Was expecting a class, but got a value of type Sens (Typing[4026])
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` because this is an internal symbol from module foo, which is opaque outside of the module. [2]
+
+unknown_class.php--file2.php:8:3
+6 |   takes_ifoo($y);
+7 |   $y->foo();
+8 |   $y::foo(); // TODO: improve error message
+  |   ^^^^^^^ [1]
+9 | }
+
+unknown_class.php--file1.php:5:16
+3 | module foo;
+4 | interface IFoo {}
+5 | internal class Sens implements IFoo {
+  |                ^^^^ [2]
+6 |   public static function bar(): void {}
+7 |   public function foo(): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `IFoo` [2]
+-> But got `mixed` because this is an internal symbol from module foo, which is opaque outside of the module. [3]
+-> The type originated from here [4]
+->   via this generic `T` [5]
+->   via this generic `T` [6]
+->   by the definition of `Sens` because this is an internal symbol from module foo, which is opaque outside of the module. [3]
+-> The type originated from here [4]
+->   via this generic `T` [5]
+
+unknown_class.php--file2.php:6:14
+ 4 |   $y = nullthrows($x->x);
+ 5 | 
+ 6 |   takes_ifoo($y);
+   |              ^^ [1]
+ 7 |   $y->foo();
+ 8 |   $y::foo(); // TODO: improve error message
+
+unknown_class.php--file1.php:29:21
+ 3 | module foo;
+ 4 | interface IFoo {}
+ 5 | internal class Sens implements IFoo {
+   |                ^^^^ [3]
+ 6 |   public static function bar(): void {}
+ 7 |   public function foo(): void {}
+ 8 | }
+ 9 | trait TFoo<T> {
+10 |   public ?T $x;
+   |           ^ [5]
+11 | }
+12 | class Foo {
+13 |   use TFoo<Sens>;
+   |            ^^^^ [4]
+14 | }
+15 | 
+   :
+20 | }
+21 | 
+22 | function nullthrows<T>(?T $x): T {
+   |                                ^ [6]
+23 |   if ($x is null) {
+24 |     throw new  Exception("");
+   :
+27 |   }
+28 | }
+29 | function takes_ifoo(IFoo $if) : void {
+   |                     ^^^^ [2]
+30 | }
+
+error: Typing[4064] You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+unknown_class.php--file2.php:7:7
+5 | 
+6 |   takes_ifoo($y);
+7 |   $y->foo();
+  |       ^^^ [1]
+8 |   $y::foo(); // TODO: improve error message
+9 | }
+
+unknown_class.php--file1.php:5:16
+3 | module foo;
+4 | interface IFoo {}
+5 | internal class Sens implements IFoo {
+  |                ^^^^ [2]
+6 |   public static function bar(): void {}
+7 |   public function foo(): void {}
+
+error: Typing[4026] Was expecting a class, but got a value of type Sens [1]
+
+unknown_class.php--file2.php:8:3
+6 |   takes_ifoo($y);
+7 |   $y->foo();
+8 |   $y::foo(); // TODO: improve error message
+  |   ^^ [1]
+9 | }
+
+4 errors found

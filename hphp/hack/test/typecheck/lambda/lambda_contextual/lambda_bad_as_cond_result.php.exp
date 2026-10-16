@@ -1,24 +1,75 @@
-ERROR: File "lambda_bad_as_cond_result.php", line 30, characters 17-30:
-No instance method `missing_method` in `MyClass` (Typing[4053])
-  File "lambda_bad_as_cond_result.php", line 5, characters 19-23:
-  Did you mean `hello` instead?
-  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
-  This is why I think it is an object of type MyClass
-  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
-  This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
-  File "lambda_bad_as_cond_result.php", line 11, characters 49-49:
-    via this generic `T`
-  File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
-  Declaration of `MyClass` is here
-ERROR: File "lambda_bad_as_cond_result.php", line 36, characters 17-39:
-No instance method `another_missing_methodO` in `MyClass` (Typing[4053])
-  File "lambda_bad_as_cond_result.php", line 5, characters 19-23:
-  Did you mean `hello` instead?
-  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
-  This is why I think it is an object of type MyClass
-  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
-  This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
-  File "lambda_bad_as_cond_result.php", line 11, characters 49-49:
-    via this generic `T`
-  File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
-  Declaration of `MyClass` is here
+error: Typing[4053] No instance method `missing_method` in `MyClass` [1]
+-> Did you mean `hello` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> This type argument to `MyClosureRunner` only allows supertypes (it is contravariant) [3]
+->   via this generic `T` [4]
+-> Declaration of `MyClass` is here [5]
+
+lambda_bad_as_cond_result.php:30:17
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class MyClass {
+   |       ^^^^^^^ [5]
+ 5 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 6 |     return 'world';
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | class MyClosureRunner<-T> {
+11 |   public function __construct(private (function(T): string) $closure) {}
+   |                                                 ^ [4]
+12 |   public function get(): (function(T): string) {
+13 |     return $this->closure;
+   :
+24 |   return $x;
+25 | }
+26 | function getThing1(bool $b): MyClosureRunner<MyClass> {
+   |                                              ^^^^^^^ [3]
+27 |   return $b
+28 |     ? new MyClosureRunner(
+29 |         function($arg) {
+30 |           $arg->missing_method();
+   |                 ^^^^^^^^^^^^^^ [1]
+31 |           return "ok";
+32 |         },
+
+error: Typing[4053] No instance method `another_missing_methodO` in `MyClass` [1]
+-> Did you mean `hello` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> This type argument to `MyClosureRunner` only allows supertypes (it is contravariant) [3]
+->   via this generic `T` [4]
+-> Declaration of `MyClass` is here [5]
+
+lambda_bad_as_cond_result.php:36:17
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class MyClass {
+   |       ^^^^^^^ [5]
+ 5 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 6 |     return 'world';
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | class MyClosureRunner<-T> {
+11 |   public function __construct(private (function(T): string) $closure) {}
+   |                                                 ^ [4]
+12 |   public function get(): (function(T): string) {
+13 |     return $this->closure;
+   :
+24 |   return $x;
+25 | }
+26 | function getThing1(bool $b): MyClosureRunner<MyClass> {
+   |                                              ^^^^^^^ [3]
+27 |   return $b
+28 |     ? new MyClosureRunner(
+   :
+34 |     : new MyClosureRunner(
+35 |         function($arg) {
+36 |           $arg->another_missing_methodO();
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 |           return "ok";
+38 |         },
+
+2 errors found

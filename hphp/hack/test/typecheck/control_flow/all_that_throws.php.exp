@@ -1,4 +1,13 @@
 File "all_that_throws.php", line 69, characters 5-15:
   (A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P)
-WARN: File "all_that_throws.php", line 64, characters 5-16:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `string`. (Warn[12012])
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `string`. [1]
+
+all_that_throws.php:64:5
+62 |     (string) $i;
+63 |     $x = new N();
+64 |     $i as string;
+   |     ^^^^^^^^^^^^ [1]
+65 |     $x = new O();
+66 |     await $a;
+
+1 error found

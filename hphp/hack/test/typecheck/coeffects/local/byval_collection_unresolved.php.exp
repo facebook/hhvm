@@ -1,7 +1,30 @@
-ERROR: File "byval_collection_unresolved.php", line 26, characters 3-32:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "byval_collection_unresolved.php", line 21, characters 3-12:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "byval_collection_unresolved.php", line 14, characters 46-47:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+byval_collection_unresolved.php:26:3
+24 | 
+25 | function succeed_when_WriteProperty<Tv as arraykey>(bool $c, Tv $v)[
+26 |   \HH\Capabilities\WriteProperty
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 | ]: mixed {
+28 |   $result = vec[];
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+byval_collection_unresolved.php:21:3
+12 | }
+13 | 
+14 | function fail<Tv as arraykey>(bool $c, Tv $v)[]: mixed {
+   |                                              ^^ [2]
+15 |   $result = vec[];
+16 |   if ($c) {
+   :
+19 |     $result = Vector { $v };
+20 |   }
+21 |   $result[0] = $v; // ERROR
+   |   ^^^^^^^^^^ [1]
+22 |   return $result;
+23 | }
+
+2 errors found

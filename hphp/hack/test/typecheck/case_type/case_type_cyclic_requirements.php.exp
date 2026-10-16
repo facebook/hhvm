@@ -1,2 +1,11 @@
-WARN: File "case_type_cyclic_requirements.php", line 4, characters 12-24:
-Trait `Trait1` in sealed allowlist for `I1`, but does not implement `I1` (Warn[12035])
+warning: Warn[12035] Trait `Trait1` in sealed allowlist for `I1`, but does not implement `I1` [1]
+
+case_type_cyclic_requirements.php:4:12
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | <<__Sealed(Trait1::class)>>
+  |            ^^^^^^^^^^^^^ [1]
+5 | interface I1 {}
+6 | 
+
+1 error found

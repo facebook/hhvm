@@ -18,5 +18,14 @@ File "lambda.php", line 86, characters 3-13:
   (A | B | C | E)
 File "lambda.php", line 87, characters 3-13:
   (A | B | C | E)
-ERROR: File "lambda.php", line 48, characters 11-19:
-`continue` can only be used inside loops (NastCheck[3023])
+error: NastCheck[3023] `continue` can only be used inside loops [1]
+
+lambda.php:48:11
+46 |           $x = new K();
+47 |           $y = new K();
+48 |           continue;
+   |           ^^^^^^^^^ [1]
+49 |         }
+50 |         while ($b) {
+
+1 error found

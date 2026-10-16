@@ -1,6 +1,15 @@
-ERROR: File "unpack_call_mixed.php", line 5, characters 9-13:
-Typing error (Typing[4110])
-  File "unpack_call_mixed.php", line 5, characters 9-13:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call_mixed.php", line 3, characters 25-35:
-  But got `?vec<mixed>`
+error: Typing[4110] Typing error [1]
+-> Expected `Traversable<_>` (it is unpacked with `...`) [1]
+-> But got `?vec<mixed>` [2]
+
+unpack_call_mixed.php:5:9
+1 | <?hh
+2 | 
+3 | function call(mixed $f, ?vec<mixed> $args): void {
+  |                         ^^^^^^^^^^^ [2]
+4 |   /* HH_FIXME[4009] We want to test the unpacking error */
+5 |   $f(...$args);
+  |         ^^^^^ [1]
+6 | }
+
+1 error found

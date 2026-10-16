@@ -1,6 +1,30 @@
-ERROR: File "function_async_bad_arity.php", line 5, characters 23-41:
-`Awaitable<_>` takes exactly one type argument. (Parsing[1002])
-ERROR: File "function_async_bad_arity.php", line 5, characters 23-41:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "classes.hhi", line 167, characters 18-26:
-  Definition is here
+error: Parsing[1002] `Awaitable<_>` takes exactly one type argument. [1]
+
+function_async_bad_arity.php:5:23
+3 | // This should be a parse error, because we don't know what runtime
+4 | // type enforcement to do.
+5 | async function foo(): Awaitable<int, int> {
+  |                       ^^^^^^^^^^^^^^^^^^^ [1]
+6 |   throw new Exception();
+7 | }
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+function_async_bad_arity.php:5:23
+  3 | // This should be a parse error, because we don't know what runtime
+  4 | // type enforcement to do.
+  5 | async function foo(): Awaitable<int, int> {
+    |                       ^^^^^^^^^^^^^^^^^^^ [1]
+  6 |   throw new Exception();
+  7 | }
+
+classes.hhi:167:18
+165 |     __SupportDynamicType,
+166 |   >>
+167 |   abstract class Awaitable<+T> {
+    |                  ^^^^^^^^^ [2]
+168 |     public static function setOnIOWaitEnterCallback(
+169 |       ?(function(): void) $callback,
+
+2 errors found

@@ -1,8 +1,32 @@
-ERROR: File "f.php", line 5, characters 3-7:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "f.php", line 3, characters 14-18:
-  This is what makes me believe it can be `null`
-ERROR: File "f.php", line 11, characters 3-11:
-a mixed value does not allow array append (Typing[4006])
-  File "f.php", line 3, characters 14-18:
-  Definition is here
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+f.php:5:3
+1 | <?hh
+2 | 
+3 | function foo(mixed $m): void {
+  |              ^^^^^ [2]
+4 |   /* HH_IGNORE_ERROR[4063] */
+5 |   $m[3];
+  |   ^^^^^ [1]
+6 | 
+7 |   /* HH_FIXME[4063] */
+
+error: Typing[4006] a mixed value does not allow array append [1]
+-> Definition is here [2]
+
+f.php:11:3
+ 1 | <?hh
+ 2 | 
+ 3 | function foo(mixed $m): void {
+   |              ^^^^^ [2]
+ 4 |   /* HH_IGNORE_ERROR[4063] */
+ 5 |   $m[3];
+   :
+ 9 | 
+10 |   /* HH_IGNORE_ERROR[4006] */
+11 |   $m[] = 42;
+   |   ^^^^^^^^^ [1]
+12 | }
+
+2 errors found

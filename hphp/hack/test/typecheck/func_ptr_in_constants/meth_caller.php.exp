@@ -1,6 +1,29 @@
-ERROR: File "meth_caller.php", line 10, characters 45-75:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "meth_caller.php", line 14, characters 42-72:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "meth_caller.php", line 14, characters 42-72:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+meth_caller.php:10:45
+ 8 | 
+ 9 | class A {
+10 |   public static (function(Cls): int) $arr = meth_caller(Cls::class, 'meth');
+   |                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+meth_caller.php:14:42
+12 | 
+13 | abstract class B {
+14 |   const (function(Cls): int) const_arr = meth_caller(Cls::class, 'meth');
+   |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+
+error: Naming[2023] Illegal constant value [1]
+
+meth_caller.php:14:42
+12 | 
+13 | abstract class B {
+14 |   const (function(Cls): int) const_arr = meth_caller(Cls::class, 'meth');
+   |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+
+3 errors found

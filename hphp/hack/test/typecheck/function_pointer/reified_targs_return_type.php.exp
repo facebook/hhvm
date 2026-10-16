@@ -1,16 +1,41 @@
-ERROR: File "reified_targs_return_type.php", line 8, characters 10-17:
-Invalid return type (Typing[4110])
-  File "reified_targs_return_type.php", line 7, characters 37-42:
-  Expected `string`
-  File "reified_targs_return_type.php", line 8, characters 14-16:
-  But got `int`
-  File "reified_targs_return_type.php", line 3, characters 30-30:
-    via this generic `T`
-ERROR: File "reified_targs_return_type.php", line 8, characters 10-17:
-Invalid return type (Typing[4110])
-  File "reified_targs_return_type.php", line 8, characters 14-16:
-  Expected `int`
-  File "reified_targs_return_type.php", line 3, characters 23-23:
-    via this generic `T`
-  File "reified_targs_return_type.php", line 7, characters 28-33:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+->   via this generic `T` [4]
+
+reified_targs_return_type.php:8:10
+1 | <?hh
+2 | 
+3 | function foo<reify T>(T $x): T {
+  |                              ^ [4]
+4 |   return $x;
+5 | }
+6 | 
+7 | function test(): (function(string): string) {
+  |                                     ^^^^^^ [2]
+8 |   return foo<int>;
+  |          ^^^^^^^^ [1]
+  |              ^^^ [3]
+9 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `string` [4]
+
+reified_targs_return_type.php:8:10
+1 | <?hh
+2 | 
+3 | function foo<reify T>(T $x): T {
+  |                       ^ [3]
+4 |   return $x;
+5 | }
+6 | 
+7 | function test(): (function(string): string) {
+  |                            ^^^^^^ [4]
+8 |   return foo<int>;
+  |          ^^^^^^^^ [1]
+  |              ^^^ [2]
+9 | }
+
+2 errors found

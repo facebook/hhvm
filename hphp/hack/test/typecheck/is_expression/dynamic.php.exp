@@ -1,2 +1,11 @@
-ERROR: File "dynamic.php", line 4, characters 13-19:
-dynamic typehints are not allowed in this position (Naming[2125])
+error: Naming[2125] dynamic typehints are not allowed in this position [1]
+
+dynamic.php:4:13
+2 | 
+3 | function main(int $x): void {
+4 |   if ($x is dynamic) {
+  |             ^^^^^^^ [1]
+5 |     expect_int($x);
+6 |     expect_dynamic($x);
+
+1 error found

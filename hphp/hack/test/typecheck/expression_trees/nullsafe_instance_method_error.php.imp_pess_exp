@@ -1,6 +1,21 @@
-ERROR: File "nullsafe_instance_method_error.php", line 8, characters 16-26:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 574, characters 26-36:
-  Expected `~int`
-  File "nullsafe_instance_method_error.php", line 8, characters 16-26:
-  But got `?int` (use of `?->` operator)
+error: Typing[4110] Invalid argument [1]
+-> Expected `~int` [2]
+-> But got `?int` (use of `?->` operator) [1]
+
+nullsafe_instance_method_error.php:8:16
+  6 |   ExampleDsl`(?MyState $x) ==> {
+  7 |     // Expected error: $x is nullable, $x?->bar(1) is also nullable
+  8 |     return 1 + $x?->bar(1);
+    |                ^^^^^^^^^^^ [1]
+  9 |   }`;
+ 10 | }
+
+expr_tree.php:574:26
+572 | 
+573 | interface ExampleIntOpType extends ExampleMixedOpType {
+574 |   public function __plus(~ExampleInt $_): ExampleInt;
+    |                          ^^^^^^^^^^^ [2]
+575 |   public function __minus(~ExampleInt $_): ExampleInt;
+576 |   public function __star(~ExampleInt $_): ExampleInt;
+
+1 error found

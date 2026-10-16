@@ -1,6 +1,30 @@
-ERROR: File "all.php", line 3, characters 3-23:
-This trait is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly (Naming[2118])
-ERROR: File "all.php", line 6, characters 3-23:
-This class is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly (Naming[2118])
-ERROR: File "all.php", line 9, characters 3-23:
-This interface is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly (Naming[2118])
+error: Naming[2118] This trait is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly [1]
+
+all.php:3:3
+1 | <?hh
+2 | 
+3 | <<__ConsistentConstruct>>
+  |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+4 | trait T {}
+5 | 
+
+error: Naming[2118] This class is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly [1]
+
+all.php:6:3
+4 | trait T {}
+5 | 
+6 | <<__ConsistentConstruct>>
+  |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | class C {}
+8 | 
+
+error: Naming[2118] This interface is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly [1]
+
+all.php:9:3
+ 7 | class C {}
+ 8 | 
+ 9 | <<__ConsistentConstruct>>
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+10 | interface I {}
+
+3 errors found

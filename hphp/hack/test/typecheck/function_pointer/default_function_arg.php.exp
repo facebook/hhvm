@@ -1,2 +1,11 @@
-ERROR: File "default_function_arg.php", line 4, characters 52-76:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+default_function_arg.php:4:52
+2 | 
+3 | // Reported in https://github.com/facebook/hhvm/issues/8867 but could not repro
+4 | function example((function(int, int): int) $pick = HH\Lib\SecureRandom\int<>): int {
+  |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   return $pick(0, 1000);
+6 | }
+
+1 error found

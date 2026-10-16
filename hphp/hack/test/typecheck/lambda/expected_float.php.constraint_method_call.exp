@@ -1,8 +1,17 @@
-ERROR: File "expected_float.php", line 6, characters 10-31:
-Invalid return type (Typing[4110])
-  File "expected_float.php", line 4, characters 42-46:
-  Expected `float`
-  File "expected_float.php", line 6, characters 25-30:
-  But got `num` because it is the result of a division `/`
-  File "expected_float.php", line 6, characters 25-30:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `float` [2]
+-> But got `num` because it is the result of a division `/` [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+expected_float.php:6:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function testit(Vector<float> $v):Vector<float> {
+  |                                          ^^^^^ [2]
+5 |   $v = new Vector($v);
+6 |   return $v->map($w ==> $w / 3);
+  |          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                         ^^^^^^ [3]
+7 | }
+
+1 error found

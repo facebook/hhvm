@@ -1,8 +1,29 @@
-ERROR: File "private_access.php", line 7, characters 5-6:
-It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. (Typing[4482])
-  File "private_access.php", line 6, characters 28-41:
-  Definition is here
-ERROR: File "private_access.php", line 7, characters 9-9:
-Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
-  File "private_access.php", line 4, characters 27-27:
-  This member is private
+error: Typing[4482] It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. [1]
+-> Definition is here [2]
+
+private_access.php:7:5
+4 |   private static function f(): void {}
+5 | 
+6 |   public static function g(classname<Foo> $x): void {
+  |                            ^^^^^^^^^^^^^^ [2]
+7 |     $x::f();
+  |     ^^ [1]
+8 |   }
+9 | }
+
+error: Typing[4112] Private members cannot be accessed dynamically. Did you mean to use 'self::'? [1]
+-> This member is private [2]
+
+private_access.php:7:9
+2 | 
+3 | class Foo {
+4 |   private static function f(): void {}
+  |                           ^ [2]
+5 | 
+6 |   public static function g(classname<Foo> $x): void {
+7 |     $x::f();
+  |         ^ [1]
+8 |   }
+9 | }
+
+2 errors found

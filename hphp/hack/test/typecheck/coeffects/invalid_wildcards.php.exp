@@ -1,4 +1,19 @@
-ERROR: File "invalid_wildcards.php", line 3, characters 14-14:
-A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}` (Naming[2117])
-ERROR: File "invalid_wildcards.php", line 5, characters 27-27:
-A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}` (Naming[2117])
+error: Naming[2117] A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}` [1]
+
+invalid_wildcards.php:3:14
+1 | <?hh
+2 | 
+3 | function f()[_]: void {}
+  |              ^ [1]
+4 | 
+5 | function hof((function ()[_]: void) $f): void {}
+
+error: Naming[2117] A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}` [1]
+
+invalid_wildcards.php:5:27
+3 | function f()[_]: void {}
+4 | 
+5 | function hof((function ()[_]: void) $f): void {}
+  |                           ^ [1]
+
+2 errors found

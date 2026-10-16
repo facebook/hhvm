@@ -1,4 +1,14 @@
-ERROR: File "async_lambda3.php", line 15, characters 3-10:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "async_lambda3.php", line 13, characters 8-22:
-  This is why I think it is `Awaitable`
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+async_lambda3.php:15:3
+11 | 
+12 | function f(): void {
+13 |   $x = async $v ==> $v;
+   |        ^^^^^^^^^^^^^^^ [2]
+14 |   /* HH_IGNORE_ERROR[4273] */
+15 |   $x(true);
+   |   ^^^^^^^^ [1]
+16 | }
+
+1 error found

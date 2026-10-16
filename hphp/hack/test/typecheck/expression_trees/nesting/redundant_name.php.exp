@@ -1,16 +1,61 @@
-ERROR: File "redundant_name.php", line 7, characters 22-34:
-Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl inside of ExampleDsl2 (Parsing[1002])
-ERROR: File "redundant_name.php", line 8, characters 21-34:
-Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl2 inside of ExampleDsl (Parsing[1002])
-ERROR: File "redundant_name.php", line 7, characters 20-35:
-Invalid argument (Typing[4110])
-  File "redundant_name.php", line 7, characters 8-18:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
-ERROR: File "redundant_name.php", line 8, characters 33-33:
-Invalid argument (Typing[4110])
-  File "redundant_name.php", line 8, characters 21-31:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
+error: Parsing[1002] Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl inside of ExampleDsl2 [1]
+
+redundant_name.php:7:22
+5 | function f(): void {
+6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+7 |   $y = ExampleDsl2`${ExampleDsl`1`}`; // Error: DSL name must match
+  |                      ^^^^^^^^^^^^^ [1]
+8 |   $y = ExampleDsl`${ExampleDsl2`1`}`; // Error: DSL name must match
+9 | }
+
+error: Parsing[1002] Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl2 inside of ExampleDsl [1]
+
+redundant_name.php:8:21
+6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+7 |   $y = ExampleDsl2`${ExampleDsl`1`}`; // Error: DSL name must match
+8 |   $y = ExampleDsl`${ExampleDsl2`1`}`; // Error: DSL name must match
+  |                     ^^^^^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+redundant_name.php:7:20
+  5 | function f(): void {
+  6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+  7 |   $y = ExampleDsl2`${ExampleDsl`1`}`; // Error: DSL name must match
+    |        ^^^^^^^^^^^ [2]
+    |                    ^^^^^^^^^^^^^^^^ [1]
+  8 |   $y = ExampleDsl`${ExampleDsl2`1`}`; // Error: DSL name must match
+  9 | }
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+redundant_name.php:8:33
+  6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+  7 |   $y = ExampleDsl2`${ExampleDsl`1`}`; // Error: DSL name must match
+  8 |   $y = ExampleDsl`${ExampleDsl2`1`}`; // Error: DSL name must match
+    |                     ^^^^^^^^^^^ [2]
+    |                                 ^ [1]
+  9 | }
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+4 errors found

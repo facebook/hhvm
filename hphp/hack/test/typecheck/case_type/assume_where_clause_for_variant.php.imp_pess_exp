@@ -1,54 +1,124 @@
-ERROR: File "assume_where_clause_for_variant.php", line 7, characters 5-13:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 50-50:
-  `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 55-62:
-  This type constraint is violated
-  File "hackarray.hhi", line 43, characters 55-62:
-  Expected `arraykey`
-  File "assume_where_clause_for_variant.php", line 7, characters 12-12:
-  But got `T`
-ERROR: File "assume_where_clause_for_variant.php", line 7, characters 5-13:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 50-50:
-  `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 55-62:
-  This type constraint is violated
-  File "hackarray.hhi", line 43, characters 55-62:
-  Expected `arraykey`
-  File "assume_where_clause_for_variant.php", line 7, characters 12-12:
-  But got `mixed`
-  File "assume_where_clause_for_variant.php", line 5, characters 14-14:
-    by the definition of `T`
-ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
-Invalid constraint on `newtype` (Typing[4332])
-  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
-  Expected `string`
-  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
-  But got `T`
-  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
-    via this generic `T`
-  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
-  This type argument to `IFoo` must match exactly (it is invariant)
-ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
-Invalid constraint on `newtype` (Typing[4332])
-  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
-  Expected `string`
-  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
-  But got `mixed`
-  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
-    via this generic `T`
-  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
-  This type argument to `IFoo` must match exactly (it is invariant)
-  File "assume_where_clause_for_variant.php", line 16, characters 25-25:
-    by the definition of `T`
-ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
-Invalid constraint on `newtype` (Typing[4332])
-  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
-  Expected `T`
-  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
-    via this generic `T`
-  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
-  But got `string`
-  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
-  This type argument to `IFoo` must match exactly (it is invariant)
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `T` [4]
+
+assume_where_clause_for_variant.php:7:5
+ 5 | case type CT<T> =
+ 6 |   | dict<T, mixed> where T as arraykey // should not error
+ 7 |   | keyset<T>; // should error
+   |     ^^^^^^^^^ [1]
+   |            ^ [4]
+ 8 | 
+ 9 | interface IFoo<T> {}
+
+hackarray.hhi:43:50
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                                                  ^ [2]
+   |                                                       ^^^^^^^^ [3]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+assume_where_clause_for_variant.php:7:5
+ 3 | // I have these variants in the same case type so that we know one variant's
+ 4 | // where clause does not affect the checking of the other
+ 5 | case type CT<T> =
+   |              ^ [5]
+ 6 |   | dict<T, mixed> where T as arraykey // should not error
+ 7 |   | keyset<T>; // should error
+   |     ^^^^^^^^^ [1]
+   |            ^ [4]
+ 8 | 
+ 9 | interface IFoo<T> {}
+
+hackarray.hhi:43:50
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                                                  ^ [2]
+   |                                                       ^^^^^^^^ [3]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `string` [2]
+-> But got `T` [3]
+->   via this generic `T` [4]
+-> This type argument to `IFoo` must match exactly (it is invariant) [3]
+
+assume_where_clause_for_variant.php:16:11
+10 | 
+11 | final class Foo<T> implements IFoo<T> {}
+12 | final class Bar<T> implements IFoo<T> {}
+   |                                    ^ [4]
+13 | 
+14 | // I have these variants in the same case type so that we know one variant's
+15 | // where clause does not affect the checking of the other
+16 | case type CTWithAsBound<T> as IFoo<string> =
+   |           ^^^^^^^^^^^^^ [1]
+   |                                    ^^^^^^ [2]
+17 |   | Foo<T> where T = string // should not error
+18 |   | Bar<T>; // should error
+   |         ^ [3]
+19 | 
+20 | case type CT2<T1, T2> =
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   via this generic `T` [4]
+-> This type argument to `IFoo` must match exactly (it is invariant) [3]
+->   by the definition of `T` [5]
+
+assume_where_clause_for_variant.php:16:11
+10 | 
+11 | final class Foo<T> implements IFoo<T> {}
+12 | final class Bar<T> implements IFoo<T> {}
+   |                                    ^ [4]
+13 | 
+14 | // I have these variants in the same case type so that we know one variant's
+15 | // where clause does not affect the checking of the other
+16 | case type CTWithAsBound<T> as IFoo<string> =
+   |           ^^^^^^^^^^^^^ [1]
+   |                         ^ [5]
+   |                                    ^^^^^^ [2]
+17 |   | Foo<T> where T = string // should not error
+18 |   | Bar<T>; // should error
+   |         ^ [3]
+19 | 
+20 | case type CT2<T1, T2> =
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `T` [2]
+->   via this generic `T` [3]
+-> But got `string` [4]
+-> This type argument to `IFoo` must match exactly (it is invariant) [4]
+
+assume_where_clause_for_variant.php:16:11
+10 | 
+11 | final class Foo<T> implements IFoo<T> {}
+12 | final class Bar<T> implements IFoo<T> {}
+   |                                    ^ [3]
+13 | 
+14 | // I have these variants in the same case type so that we know one variant's
+15 | // where clause does not affect the checking of the other
+16 | case type CTWithAsBound<T> as IFoo<string> =
+   |           ^^^^^^^^^^^^^ [1]
+   |                                    ^^^^^^ [4]
+17 |   | Foo<T> where T = string // should not error
+18 |   | Bar<T>; // should error
+   |         ^ [2]
+19 | 
+20 | case type CT2<T1, T2> =
+
+5 errors found

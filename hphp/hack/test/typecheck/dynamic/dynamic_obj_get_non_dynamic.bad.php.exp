@@ -1,94 +1,300 @@
-WARN: File "dynamic_obj_get_non_dynamic.bad.php", line 80, characters 3-15:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 18, characters 3-7:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 17, characters 24-40:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 22, characters 3-7:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 21, characters 21-37:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 26, characters 3-7:
-Dynamic access of a method is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 25, characters 22-38:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 30, characters 3-8:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `shape('foo' => int)` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 29, characters 25-43:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 34, characters 3-8:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `(C | dict<string, int>)` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 33, characters 25-47:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 38, characters 3-7:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `~dict<string, int>` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 37, characters 29-46:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 42, characters 3-7:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `T` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 41, characters 62-62:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 46, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?C` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 45, characters 35-36:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 50, characters 3-7:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?dict<string, int>` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 49, characters 33-50:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 54, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?C` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 53, characters 35-36:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 58, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `C` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 57, characters 26-26:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 62, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `C` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 61, characters 32-32:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 66, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `T` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 65, characters 48-48:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 70, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `T` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 69, characters 51-51:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 74, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?dynamic` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 73, characters 36-43:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 77, characters 10-20:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 89, characters 3-9:
-Typing error (Typing[4053])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 89, characters 12-18:
-  No property `missing` in `ErrorTyvarReceiver`
-  File "dynamic_obj_get_non_dynamic.bad.php", line 86, characters 3-20:
-  This is why I think it is an object of type ErrorTyvarReceiver
-  File "dynamic_obj_get_non_dynamic.bad.php", line 83, characters 7-24:
-  Declaration of `ErrorTyvarReceiver` is here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 95, characters 3-9:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `((nonnull & dynamic) | C)` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 93, characters 3-27:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 103, characters 3-7:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 103, characters 10-18:
-  Did you mean `->property` instead?
-  File "dynamic_obj_get_non_dynamic.bad.php", line 100, characters 3-19:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 107, characters 3-8:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `mixed` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 107, characters 11-19:
-  Did you mean `->property` instead?
-  File "dynamic_obj_get_non_dynamic.bad.php", line 106, characters 34-38:
-  The receiver's type is defined here
-ERROR: File "dynamic_obj_get_non_dynamic.bad.php", line 114, characters 3-8:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `nonnull` (Typing[4525])
-  File "dynamic_obj_get_non_dynamic.bad.php", line 114, characters 11-19:
-  Did you mean `->property` instead?
-  File "dynamic_obj_get_non_dynamic.bad.php", line 111, characters 3-9:
-  The receiver's type is defined here
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+dynamic_obj_get_non_dynamic.bad.php:80:3
+78 | 
+79 | function tany_receiver(string $property): void {
+80 |   tany_source()->$property;
+   |   ^^^^^^^^^^^^^ [1]
+81 | }
+82 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:18:3
+15 | 
+16 | // Typing[4525]: computed member expressions on non-dynamic receivers.
+17 | function dict_receiver(dict<string, int> $dict): void {
+   |                        ^^^^^^^^^^^^^^^^^ [2]
+18 |   $dict->{property_name()};
+   |   ^^^^^ [1]
+19 | }
+20 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:22:3
+19 | }
+20 | 
+21 | function dict_write(dict<string, int> $dict): void {
+   |                     ^^^^^^^^^^^^^^^^^ [2]
+22 |   $dict->{property_name()} = 1;
+   |   ^^^^^ [1]
+23 | }
+24 | 
+
+error: Typing[4525] Dynamic access of a method is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:26:3
+23 | }
+24 | 
+25 | function dict_method(dict<string, int> $dict): void {
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+26 |   $dict->{method_name()}();
+   |   ^^^^^ [1]
+27 | }
+28 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `shape('foo' => int)` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:30:3
+27 | }
+28 | 
+29 | function shape_receiver(shape('foo' => int) $shape): void {
+   |                         ^^^^^^^^^^^^^^^^^^^ [2]
+30 |   $shape->{property_name()};
+   |   ^^^^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `(C | dict<string, int>)` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:34:3
+31 | }
+32 | 
+33 | function union_receiver((C | dict<string, int>) $value): void {
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+34 |   $value->{property_name()};
+   |   ^^^^^^ [1]
+35 | }
+36 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `~dict<string, int>` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:38:3
+35 | }
+36 | 
+37 | function like_dict_receiver(~dict<string, int> $dict): void {
+   |                             ^^^^^^^^^^^^^^^^^^ [2]
+38 |   $dict->{property_name()};
+   |   ^^^^^ [1]
+39 | }
+40 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `T` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:42:3
+39 | }
+40 | 
+41 | function generic_like_dict_receiver<T as ~dict<string, int>>(T $dict): void {
+   |                                                              ^ [2]
+42 |   $dict->{property_name()};
+   |   ^^^^^ [1]
+43 | }
+44 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?C` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:46:3
+43 | }
+44 | 
+45 | function nullable_object_receiver(?C $object): void {
+   |                                   ^^ [2]
+46 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+47 | }
+48 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?dict<string, int>` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:50:3
+47 | }
+48 | 
+49 | function nullsafe_dict_receiver(?dict<string, int> $dict): void {
+   |                                 ^^^^^^^^^^^^^^^^^^ [2]
+50 |   $dict?->{property_name()};
+   |   ^^^^^ [1]
+51 | }
+52 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?C` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:54:3
+51 | }
+52 | 
+53 | function nullsafe_object_receiver(?C $object): void {
+   |                                   ^^ [2]
+54 |   $object?->{property_name()};
+   |   ^^^^^^^ [1]
+55 | }
+56 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `C` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:58:3
+55 | }
+56 | 
+57 | function object_receiver(C $object): void {
+   |                          ^ [2]
+58 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+59 | }
+60 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `C` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:62:3
+59 | }
+60 | 
+61 | function like_object_receiver(~C $object): void {
+   |                                ^ [2]
+62 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+63 | }
+64 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `T` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:66:3
+63 | }
+64 | 
+65 | function generic_like_object_receiver<T as ~C>(T $object): void {
+   |                                                ^ [2]
+66 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+67 | }
+68 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `T` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:70:3
+67 | }
+68 | 
+69 | function generic_cycle_receiver<T as Tu, Tu as T>(T $object): void {
+   |                                                   ^ [2]
+70 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+71 | }
+72 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `?dynamic` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:74:3
+71 | }
+72 | 
+73 | function nullable_dynamic_receiver(?dynamic $object): void {
+   |                                    ^^^^^^^^ [2]
+74 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+75 | }
+76 | 
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+dynamic_obj_get_non_dynamic.bad.php:77:10
+75 | }
+76 | 
+77 | function tany_source() {}
+   |          ^^^^^^^^^^^ [1]
+78 | 
+79 | function tany_receiver(string $property): void {
+
+error: Typing[4053] Typing error [1]
+-> No property `missing` in `ErrorTyvarReceiver` [2]
+-> This is why I think it is an object of type ErrorTyvarReceiver [3]
+-> Declaration of `ErrorTyvarReceiver` is here [4]
+
+dynamic_obj_get_non_dynamic.bad.php:89:3
+81 | }
+82 | 
+83 | class ErrorTyvarReceiver {}
+   |       ^^^^^^^^^^^^^^^^^^ [4]
+84 | 
+85 | function error_tyvar_receiver(
+86 |   ErrorTyvarReceiver $object,
+   |   ^^^^^^^^^^^^^^^^^^ [3]
+87 |   string $property,
+88 | ): void {
+89 |   $object->missing->$property;
+   |   ^^^^^^^ [1]
+   |            ^^^^^^^ [2]
+90 | }
+91 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `((nonnull & dynamic) | C)` [1]
+-> The receiver's type is defined here [2]
+
+dynamic_obj_get_non_dynamic.bad.php:95:3
+91 | 
+92 | function dynamic_nonnull_union_receiver(
+93 |   ((dynamic & nonnull) | C) $object,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+94 | ): void {
+95 |   $object->{property_name()};
+   |   ^^^^^^^ [1]
+96 | }
+97 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `dict<string, int>` [1]
+-> Did you mean `->property` instead? [2]
+-> The receiver's type is defined here [3]
+
+dynamic_obj_get_non_dynamic.bad.php:103:3
+ 98 | // Typing[4525]: local-variable member names on non-dynamic receivers.
+ 99 | function dict_variable_receiver(
+100 |   dict<string, int> $dict,
+    |   ^^^^^^^^^^^^^^^^^ [3]
+101 |   string $property,
+102 | ): void {
+103 |   $dict->$property;
+    |   ^^^^^ [1]
+    |          ^^^^^^^^^ [2]
+104 | }
+105 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `mixed` [1]
+-> Did you mean `->property` instead? [2]
+-> The receiver's type is defined here [3]
+
+dynamic_obj_get_non_dynamic.bad.php:107:3
+104 | }
+105 | 
+106 | function mixed_variable_receiver(mixed $value, string $property): void {
+    |                                  ^^^^^ [3]
+107 |   $value->$property;
+    |   ^^^^^^ [1]
+    |           ^^^^^^^^^ [2]
+108 | }
+109 | 
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `nonnull` [1]
+-> Did you mean `->property` instead? [2]
+-> The receiver's type is defined here [3]
+
+dynamic_obj_get_non_dynamic.bad.php:114:3
+109 | 
+110 | function nonnull_variable_receiver(
+111 |   nonnull $value,
+    |   ^^^^^^^ [3]
+112 |   string $property,
+113 | ): void {
+114 |   $value->$property;
+    |   ^^^^^^ [1]
+    |           ^^^^^^^^^ [2]
+115 | }
+
+22 errors found

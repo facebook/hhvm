@@ -1,10 +1,29 @@
-ERROR: File "expr_dep_escapes_2.php", line 19, characters 10-13:
-Invalid return type (Typing[4110])
-  File "expr_dep_escapes_2.php", line 14, characters 18-20:
-  Expected `int`
-  File "expr_dep_escapes_2.php", line 15, characters 9-28:
-  But got `Foo<I>` because `<expr#4>::T` escaped from lambda
-  File "expr_dep_escapes_2.php", line 7, characters 26-32:
-    where `<expr#4>::T` originates from
-  File "expr_dep_escapes_2.php", line 15, characters 16-21:
-    where `<expr#4>` is a reference to this expression
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `Foo<I>` because `<expr#4>::T` escaped from lambda [3]
+->   where `<expr#4>::T` originates from [4]
+->   where `<expr#4>` is a reference to this expression [5]
+
+expr_dep_escapes_2.php:19:10
+ 5 | interface I {
+ 6 |   abstract const type T as Foo<this>;
+ 7 |   public function get(): this::T;
+   |                          ^^^^^^^ [4]
+ 8 | }
+ 9 | 
+   :
+12 | }
+13 | 
+14 | function test(): int {
+   |                  ^^^ [2]
+15 |   $f = (() ==> getI()->get());
+   |         ^^^^^^^^^^^^^^^^^^^^ [3]
+   |                ^^^^^^ [5]
+16 |   $f();
+17 |   // the return type of $f should
+18 |   // be Foo<I>
+19 |   return $f();
+   |          ^^^^ [1]
+20 | }
+
+1 error found

@@ -2,15 +2,45 @@ File "classname.php", line 5, characters 3-13:
   dynamic
 File "classname.php", line 7, characters 3-13:
   dynamic
-WARN: File "classname.php", line 4, characters 8-21:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "classname.php", line 3, characters 34-40:
-  This expression has type `dynamic`
-ERROR: File "classname.php", line 4, characters 8-9:
-It is no longer allowed to use a `classname<dynamic>` in this position. Please use a `class<dynamic>` instead. (Typing[4482])
-  File "classname.php", line 3, characters 24-41:
-  Definition is here
-ERROR: File "classname.php", line 6, characters 8-9:
-It is no longer allowed to use a `classname<dynamic>` in this position. Please use a `class<dynamic>` instead. (Typing[4482])
-  File "classname.php", line 3, characters 24-41:
-  Definition is here
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+classname.php:4:8
+1 | <?hh
+2 | 
+3 | function testClassName(classname<dynamic> $x): void {
+  |                                  ^^^^^^^ [2]
+4 |   $y = $x::staticMeth(); // $y : dynamic
+  |        ^^^^^^^^^^^^^^ [1]
+5 |   hh_show($y);
+6 |   $y = $x::staticProp; // $y : dynamic
+
+error: Typing[4482] It is no longer allowed to use a `classname<dynamic>` in this position. Please use a `class<dynamic>` instead. [1]
+-> Definition is here [2]
+
+classname.php:4:8
+1 | <?hh
+2 | 
+3 | function testClassName(classname<dynamic> $x): void {
+  |                        ^^^^^^^^^^^^^^^^^^ [2]
+4 |   $y = $x::staticMeth(); // $y : dynamic
+  |        ^^ [1]
+5 |   hh_show($y);
+6 |   $y = $x::staticProp; // $y : dynamic
+
+error: Typing[4482] It is no longer allowed to use a `classname<dynamic>` in this position. Please use a `class<dynamic>` instead. [1]
+-> Definition is here [2]
+
+classname.php:6:8
+1 | <?hh
+2 | 
+3 | function testClassName(classname<dynamic> $x): void {
+  |                        ^^^^^^^^^^^^^^^^^^ [2]
+4 |   $y = $x::staticMeth(); // $y : dynamic
+5 |   hh_show($y);
+6 |   $y = $x::staticProp; // $y : dynamic
+  |        ^^ [1]
+7 |   hh_show($y);
+8 | }
+
+3 errors found

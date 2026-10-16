@@ -1,42 +1,57 @@
-ERROR: File "lambda_wellformed_bad.php", line 13, characters 35-43:
-Some type arguments violate their constraints (Typing[4323])
-  File "lambda_wellformed_bad.php", line 10, characters 18-19:
-  `T2` is a constrained type parameter
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  This type constraint is violated
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  Expected a class with `{type TA as T1}`
-  File "lambda_wellformed_bad.php", line 13, characters 41-42:
-  But got `T2 as B`
-ERROR: File "lambda_wellformed_bad.php", line 13, characters 35-43:
-Some type arguments violate their constraints (Typing[4323])
-  File "lambda_wellformed_bad.php", line 10, characters 18-19:
-  `T2` is a constrained type parameter
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  This type constraint is violated
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  Expected a class with `{type TA as T1}`
-  File "lambda_wellformed_bad.php", line 13, characters 41-42:
-  But got `T2 as B`
-  File "lambda_wellformed_bad.php", line 10, characters 18-19:
-  `T2` is a constrained type parameter
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  This type constraint is violated
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  Expected a class with `{type TA as T1}`
-  File "lambda_wellformed_bad.php", line 13, characters 41-42:
-  But got `B`
-  File "lambda_wellformed_bad.php", line 13, characters 32-32:
-    by the definition of `T2`
-  File "lambda_wellformed_bad.php", line 13, characters 37-38:
-  This `as` or `=` refinement constraint is violated
-  File "lambda_wellformed_bad.php", line 10, characters 18-19:
-  `T2` is a constrained type parameter
-  File "lambda_wellformed_bad.php", line 10, characters 24-47:
-  This type constraint is violated
-  File "lambda_wellformed_bad.php", line 13, characters 37-38:
-  Expected `T1`
-  File "lambda_wellformed_bad.php", line 10, characters 44-45:
-    via this generic `T1`
-  File "lambda_wellformed_bad.php", line 7, characters 29-29:
-  But got `A`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TA as T1}` [3]
+-> But got `T2 as B` [4]
+
+lambda_wellformed_bad.php:13:35
+ 8 | }
+ 9 | 
+10 | class C<T1 as A, T2 as B with { type TA as T1 }> {}
+   |                  ^^ [2]
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+11 | 
+12 | function wellformed_bad(): void {
+13 |   $_ = function<T1 as A, T2 as B>(C<T1, T2> $_): void {};
+   |                                   ^^^^^^^^^ [1]
+   |                                         ^^ [4]
+14 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TA as T1}` [3]
+-> But got `T2 as B` [4]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TA as T1}` [3]
+-> But got `B` [4]
+->   by the definition of `T2` [5]
+-> This `as` or `=` refinement constraint is violated [6]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `T1` [6]
+->   via this generic `T1` [7]
+-> But got `A` [8]
+
+lambda_wellformed_bad.php:13:35
+ 5 | 
+ 6 | abstract class B {
+ 7 |   abstract const type TA as A;
+   |                             ^ [8]
+ 8 | }
+ 9 | 
+10 | class C<T1 as A, T2 as B with { type TA as T1 }> {}
+   |                  ^^ [2]
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                            ^^ [7]
+11 | 
+12 | function wellformed_bad(): void {
+13 |   $_ = function<T1 as A, T2 as B>(C<T1, T2> $_): void {};
+   |                                ^ [5]
+   |                                   ^^^^^^^^^ [1]
+   |                                     ^^ [6]
+   |                                         ^^ [4]
+14 | }
+
+2 errors found

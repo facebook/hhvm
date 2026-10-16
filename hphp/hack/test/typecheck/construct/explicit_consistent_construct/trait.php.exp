@@ -1,2 +1,11 @@
-ERROR: File "trait.php", line 3, characters 3-23:
-This trait is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly (Naming[2118])
+error: Naming[2118] This trait is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly [1]
+
+trait.php:3:3
+1 | <?hh
+2 | 
+3 | <<__ConsistentConstruct>>
+  |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+4 | trait T {}
+5 | 
+
+1 error found

@@ -1,10 +1,30 @@
-ERROR: File "lambda_bad_predicate.php", line 40, characters 27-30:
-No instance method `hell` in `MyClass` (Typing[4053])
-  File "lambda_bad_predicate.php", line 27, characters 19-23:
-  Did you mean `hello` instead?
-  File "lambda_bad_predicate.php", line 32, characters 45-51:
-  This is why I think it is an object of type MyClass
-  File "lambda_bad_predicate.php", line 32, characters 45-51:
-  This type argument to `IPredicate` only allows supertypes (it is contravariant)
-  File "lambda_bad_predicate.php", line 26, characters 7-13:
-  Declaration of `MyClass` is here
+error: Typing[4053] No instance method `hell` in `MyClass` [1]
+-> Did you mean `hello` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> This type argument to `IPredicate` only allows supertypes (it is contravariant) [3]
+-> Declaration of `MyClass` is here [4]
+
+lambda_bad_predicate.php:40:27
+24 | }
+25 | 
+26 | class MyClass {
+   |       ^^^^^^^ [4]
+27 |   public function hello(): string {
+   |                   ^^^^^ [2]
+28 |     return 'world';
+29 |   }
+30 | }
+31 | 
+32 | function expectsPredicateMyClass(IPredicate<MyClass> $x): IPredicate<MyClass> {
+   |                                             ^^^^^^^ [3]
+33 |   return $x;
+34 | }
+   :
+38 |     P::lambda(
+39 |       function($predicate_param) {
+40 |         $predicate_param->hell();
+   |                           ^^^^ [1]
+41 |         return true;
+42 |       },
+
+1 error found

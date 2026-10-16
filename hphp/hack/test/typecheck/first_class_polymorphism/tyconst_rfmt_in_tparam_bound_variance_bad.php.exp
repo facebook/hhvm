@@ -1,144 +1,390 @@
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 102, characters 53-63:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 30, characters 5-6:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 30, characters 11-18:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 30, characters 11-18:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 103, characters 58-68:
-Invalid argument (Typing[4110])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 34, characters 5-40:
-  Expected a class with `{type TC as arraykey}`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 18, characters 23-39:
-  But got `ConcreteTC3_Mixed`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 34, characters 31-38:
-  This `as` or `=` refinement constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 34, characters 31-38:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 106, characters 49-59:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 5-6:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 11-18:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 11-18:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 107, characters 54-64:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 5-6:
-  `T1` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 11-46:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 11-46:
-  Expected a class with `{type TC as arraykey}`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 18, characters 23-39:
-  But got `ConcreteTC3_Mixed`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 37-44:
-  This `as` or `=` refinement constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 5-6:
-  `T1` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 11-46:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 46, characters 37-44:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 110, characters 56-67:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 54, characters 5-6:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 54, characters 14-16:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
-  Expected `string`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 54, characters 14-16:
-  But got `int`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 111, characters 61-72:
-Invalid argument (Typing[4110])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 58, characters 5-38:
-  Expected a class with `{type TC super int}`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 21, characters 24-41:
-  But got `ConcreteTC3_String`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 58, characters 34-36:
-  This `super` refinement constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
-  Expected `string`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 58, characters 34-36:
-  But got `int`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 114, characters 52-63:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 64, characters 5-6:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 64, characters 14-16:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
-  Expected `string`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 64, characters 14-16:
-  But got `int`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 115, characters 57-68:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 5-6:
-  `T1` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 11-44:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 11-44:
-  Expected a class with `{type TC super int}`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 21, characters 24-41:
-  But got `ConcreteTC3_String`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 40-42:
-  This `super` refinement constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 5-6:
-  `T1` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 11-44:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-24:
-  Expected `string`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 70, characters 40-42:
-  But got `int`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 118, characters 56-66:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 78, characters 5-6:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 78, characters 11-18:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 78, characters 11-18:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 119, characters 61-71:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 81, characters 57-58:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 81, characters 63-70:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 81, characters 63-70:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 122, characters 53-63:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 88, characters 5-6:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 88, characters 11-18:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 88, characters 11-18:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 123, characters 58-68:
-Invalid argument (Typing[4323])
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 93, characters 54-55:
-  `T2` is a constrained type parameter
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 93, characters 60-67:
-  This type constraint is violated
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 93, characters 60-67:
-  Expected `arraykey`
-  File "tyconst_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:102:53
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [4]
+ 11 | }
+ 12 | 
+    :
+ 28 |   public static function as_rfmt_in_contrav_pos<
+ 29 |     T1 as WithTC3 with { type TC as T2 },
+ 30 |     T2 as arraykey,
+    |     ^^ [2]
+    |           ^^^^^^^^ [3]
+ 31 |   >(T1 $_): void {}
+ 32 | 
+    :
+100 | function test_reject(): void {
+101 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+102 |   ExistentialVarianceReject::as_rfmt_in_contrav_pos(tc3_mixed());
+    |                                                     ^^^^^^^^^^^ [1]
+103 |   ExistentialVarianceReject::as_rfmt_in_contrav_pos_simp(tc3_mixed());
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with `{type TC as arraykey}` [2]
+-> But got `ConcreteTC3_Mixed` [3]
+-> This `as` or `=` refinement constraint is violated [4]
+-> Expected `arraykey` [4]
+-> But got `mixed` [5]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:103:58
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [5]
+ 11 | }
+ 12 | 
+    :
+ 16 | 
+ 17 | // Factory functions to produce values that should be REJECTED
+ 18 | function tc3_mixed(): ConcreteTC3_Mixed {
+    |                       ^^^^^^^^^^^^^^^^^ [3]
+ 19 |   throw new Exception();
+ 20 | }
+    :
+ 32 | 
+ 33 |   public static function as_rfmt_in_contrav_pos_simp(
+ 34 |     WithTC3 with { type TC as arraykey } $_,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    |                               ^^^^^^^^ [4]
+ 35 |   ): void {}
+ 36 | 
+    :
+101 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+102 |   ExistentialVarianceReject::as_rfmt_in_contrav_pos(tc3_mixed());
+103 |   ExistentialVarianceReject::as_rfmt_in_contrav_pos_simp(tc3_mixed());
+    |                                                          ^^^^^^^^^^^ [1]
+104 | 
+105 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:106:49
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [4]
+ 11 | }
+ 12 | 
+    :
+ 38 |   public static function as_rfmt_in_inv_pos<
+ 39 |     T1 as WithTC3 with { type TC as T2 },
+ 40 |     T2 as arraykey,
+    |     ^^ [2]
+    |           ^^^^^^^^ [3]
+ 41 |   >(T1 $_): ?T1 {
+ 42 |     return null;
+    :
+104 | 
+105 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+106 |   ExistentialVarianceReject::as_rfmt_in_inv_pos(tc3_mixed());
+    |                                                 ^^^^^^^^^^^ [1]
+107 |   ExistentialVarianceReject::as_rfmt_in_inv_pos_simp(tc3_mixed());
+108 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC as arraykey}` [3]
+-> But got `ConcreteTC3_Mixed` [4]
+-> This `as` or `=` refinement constraint is violated [5]
+-> `T1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [5]
+-> But got `mixed` [6]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:107:54
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [6]
+ 11 | }
+ 12 | 
+    :
+ 16 | 
+ 17 | // Factory functions to produce values that should be REJECTED
+ 18 | function tc3_mixed(): ConcreteTC3_Mixed {
+    |                       ^^^^^^^^^^^^^^^^^ [4]
+ 19 |   throw new Exception();
+ 20 | }
+    :
+ 44 | 
+ 45 |   public static function as_rfmt_in_inv_pos_simp<
+ 46 |     T1 as WithTC3 with { type TC as arraykey },
+    |     ^^ [2]
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                     ^^^^^^^^ [5]
+ 47 |   >(T1 $_): ?T1 {
+ 48 |     return null;
+    :
+105 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+106 |   ExistentialVarianceReject::as_rfmt_in_inv_pos(tc3_mixed());
+107 |   ExistentialVarianceReject::as_rfmt_in_inv_pos_simp(tc3_mixed());
+    |                                                      ^^^^^^^^^^^ [1]
+108 | 
+109 |   // ConcreteTC3_String rejected: string is not >: int
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [4]
+-> But got `int` [3]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:110:56
+ 12 | 
+ 13 | class ConcreteTC3_String extends WithTC3 {
+ 14 |   const type TC = string;
+    |                   ^^^^^^ [4]
+ 15 | }
+ 16 | 
+    :
+ 52 |   public static function super_rfmt_in_contrav_pos<
+ 53 |     T1 as WithTC3 with { type TC super T2 },
+ 54 |     T2 super int,
+    |     ^^ [2]
+    |              ^^^ [3]
+ 55 |   >(T1 $_): void {}
+ 56 | 
+    :
+108 | 
+109 |   // ConcreteTC3_String rejected: string is not >: int
+110 |   ExistentialVarianceReject::super_rfmt_in_contrav_pos(tc3_string());
+    |                                                        ^^^^^^^^^^^^ [1]
+111 |   ExistentialVarianceReject::super_rfmt_in_contrav_pos_simp(tc3_string());
+112 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with `{type TC super int}` [2]
+-> But got `ConcreteTC3_String` [3]
+-> This `super` refinement constraint is violated [4]
+-> Expected `string` [5]
+-> But got `int` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:111:61
+ 12 | 
+ 13 | class ConcreteTC3_String extends WithTC3 {
+ 14 |   const type TC = string;
+    |                   ^^^^^^ [5]
+ 15 | }
+ 16 | 
+    :
+ 19 |   throw new Exception();
+ 20 | }
+ 21 | function tc3_string(): ConcreteTC3_String {
+    |                        ^^^^^^^^^^^^^^^^^^ [3]
+ 22 |   throw new Exception();
+ 23 | }
+    :
+ 56 | 
+ 57 |   public static function super_rfmt_in_contrav_pos_simp(
+ 58 |     WithTC3 with { type TC super int } $_,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    |                                  ^^^ [4]
+ 59 |   ): void {}
+ 60 | 
+    :
+109 |   // ConcreteTC3_String rejected: string is not >: int
+110 |   ExistentialVarianceReject::super_rfmt_in_contrav_pos(tc3_string());
+111 |   ExistentialVarianceReject::super_rfmt_in_contrav_pos_simp(tc3_string());
+    |                                                             ^^^^^^^^^^^^ [1]
+112 | 
+113 |   // ConcreteTC3_String rejected: string is not >: int
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [4]
+-> But got `int` [3]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:114:52
+ 12 | 
+ 13 | class ConcreteTC3_String extends WithTC3 {
+ 14 |   const type TC = string;
+    |                   ^^^^^^ [4]
+ 15 | }
+ 16 | 
+    :
+ 62 |   public static function super_rfmt_in_inv_pos<
+ 63 |     T1 as WithTC3 with { type TC super T2 },
+ 64 |     T2 super int,
+    |     ^^ [2]
+    |              ^^^ [3]
+ 65 |   >(T1 $_): ?T1 {
+ 66 |     return null;
+    :
+112 | 
+113 |   // ConcreteTC3_String rejected: string is not >: int
+114 |   ExistentialVarianceReject::super_rfmt_in_inv_pos(tc3_string());
+    |                                                    ^^^^^^^^^^^^ [1]
+115 |   ExistentialVarianceReject::super_rfmt_in_inv_pos_simp(tc3_string());
+116 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC super int}` [3]
+-> But got `ConcreteTC3_String` [4]
+-> This `super` refinement constraint is violated [5]
+-> `T1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [6]
+-> But got `int` [5]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:115:57
+ 12 | 
+ 13 | class ConcreteTC3_String extends WithTC3 {
+ 14 |   const type TC = string;
+    |                   ^^^^^^ [6]
+ 15 | }
+ 16 | 
+    :
+ 19 |   throw new Exception();
+ 20 | }
+ 21 | function tc3_string(): ConcreteTC3_String {
+    |                        ^^^^^^^^^^^^^^^^^^ [4]
+ 22 |   throw new Exception();
+ 23 | }
+    :
+ 68 | 
+ 69 |   public static function super_rfmt_in_inv_pos_simp<
+ 70 |     T1 as WithTC3 with { type TC super int },
+    |     ^^ [2]
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                        ^^^ [5]
+ 71 |   >(T1 $_): ?T1 {
+ 72 |     return null;
+    :
+113 |   // ConcreteTC3_String rejected: string is not >: int
+114 |   ExistentialVarianceReject::super_rfmt_in_inv_pos(tc3_string());
+115 |   ExistentialVarianceReject::super_rfmt_in_inv_pos_simp(tc3_string());
+    |                                                         ^^^^^^^^^^^^ [1]
+116 | 
+117 |   // ConcreteTC3_Mixed rejected: T2=mixed, mixed is not <: arraykey
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:118:56
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [4]
+ 11 | }
+ 12 | 
+    :
+ 76 |   public static function exact_rfmt_in_contrav_pos<
+ 77 |     T1 as WithTC3 with { type TC = T2 },
+ 78 |     T2 as arraykey,
+    |     ^^ [2]
+    |           ^^^^^^^^ [3]
+ 79 |   >(T1 $_): void {}
+ 80 | 
+    :
+116 | 
+117 |   // ConcreteTC3_Mixed rejected: T2=mixed, mixed is not <: arraykey
+118 |   ExistentialVarianceReject::exact_rfmt_in_contrav_pos(tc3_mixed());
+    |                                                        ^^^^^^^^^^^ [1]
+119 |   ExistentialVarianceReject::exact_rfmt_in_contrav_pos_simp(tc3_mixed());
+120 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:119:61
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [4]
+ 11 | }
+ 12 | 
+    :
+ 79 |   >(T1 $_): void {}
+ 80 | 
+ 81 |   public static function exact_rfmt_in_contrav_pos_simp<T2 as arraykey>(
+    |                                                         ^^ [2]
+    |                                                               ^^^^^^^^ [3]
+ 82 |     WithTC3 with { type TC = T2 } $_,
+ 83 |   ): void {}
+    :
+117 |   // ConcreteTC3_Mixed rejected: T2=mixed, mixed is not <: arraykey
+118 |   ExistentialVarianceReject::exact_rfmt_in_contrav_pos(tc3_mixed());
+119 |   ExistentialVarianceReject::exact_rfmt_in_contrav_pos_simp(tc3_mixed());
+    |                                                             ^^^^^^^^^^^ [1]
+120 | 
+121 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:122:53
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [4]
+ 11 | }
+ 12 | 
+    :
+ 86 |   public static function as_rfmt_tkey_in_return<
+ 87 |     T1 as WithTC3 with { type TC as T2 },
+ 88 |     T2 as arraykey,
+    |     ^^ [2]
+    |           ^^^^^^^^ [3]
+ 89 |   >(T1 $_): ?T2 {
+ 90 |     return null;
+    :
+120 | 
+121 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+122 |   ExistentialVarianceReject::as_rfmt_tkey_in_return(tc3_mixed());
+    |                                                     ^^^^^^^^^^^ [1]
+123 |   ExistentialVarianceReject::as_rfmt_tkey_in_return_simp(tc3_mixed());
+124 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tyconst_rfmt_in_tparam_bound_variance_bad.php:123:58
+  8 | 
+  9 | class ConcreteTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [4]
+ 11 | }
+ 12 | 
+    :
+ 91 |   }
+ 92 | 
+ 93 |   public static function as_rfmt_tkey_in_return_simp<T2 as arraykey>(
+    |                                                      ^^ [2]
+    |                                                            ^^^^^^^^ [3]
+ 94 |     WithTC3 with { type TC as T2 } $_,
+ 95 |   ): ?T2 {
+    :
+121 |   // ConcreteTC3_Mixed rejected: mixed is not <: arraykey
+122 |   ExistentialVarianceReject::as_rfmt_tkey_in_return(tc3_mixed());
+123 |   ExistentialVarianceReject::as_rfmt_tkey_in_return_simp(tc3_mixed());
+    |                                                          ^^^^^^^^^^^ [1]
+124 | }
+
+12 errors found

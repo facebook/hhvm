@@ -1,2 +1,15 @@
-ERROR: File "concurrent_non_expr_stmt.php", line 8, characters 5-46:
-`concurrent` block must contain a compound statement of two or more expression statements, IE concurrent `{ <expr>; <expr>; }`. (Parsing[1002])
+error: Parsing[1002] `concurrent` block must contain a compound statement of two or more expression statements, IE concurrent `{ <expr>; <expr>; }`. [1]
+
+concurrent_non_expr_stmt.php:8:5
+ 6 |   concurrent {
+ 7 |     $x = await genx();
+ 8 |     if (true) {
+   |     ^^^^^^^^^^^ [1]
+ 9 |       $y = await genx();
+   |       ^^^^^^^^^^^^^^^^^^ [1]
+10 |     }
+   |     ^ [1]
+11 |   }
+12 | }
+
+1 error found

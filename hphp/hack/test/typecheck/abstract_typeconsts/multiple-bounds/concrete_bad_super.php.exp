@@ -1,6 +1,19 @@
-ERROR: File "concrete_bad_super.php", line 15, characters 14-15:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "concrete_bad_super.php", line 15, characters 19-20:
-  Expected `W1`
-  File "concrete_bad_super.php", line 10, characters 47-48:
-  But got `W2`
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `W1` [2]
+-> But got `W2` [3]
+
+concrete_bad_super.php:15:14
+ 8 | 
+ 9 | abstract class C {
+10 |   abstract const type TA as UA super W1 super W2;
+   |                                               ^^ [3]
+11 | }
+12 | 
+13 | class Bad extends C {
+14 |   // `W1` sits above `super W1` but not above `super W2`.
+15 |   const type TA = W1;
+   |              ^^ [1]
+   |                   ^^ [2]
+16 | }
+
+1 error found

@@ -1,10 +1,41 @@
-ERROR: File "parse_constants.php", line 8, characters 23-30:
-Global constants are not supported in expression trees. (Parsing[1002])
-ERROR: File "parse_constants.php", line 8, characters 23-30:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 239, characters 5-20:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "parse_constants.php", line 5, characters 7-9:
-  But got `int`
+error: Parsing[1002] Global constants are not supported in expression trees. [1]
+
+parse_constants.php:8:23
+6 | 
+7 | function test(): void {
+8 |   $g = ExampleDsl`1 + MY_CONST`;
+  |                       ^^^^^^^^ [1]
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `int` [4]
+
+parse_constants.php:8:23
+  3 | <<file:__EnableUnstableFeatures('expression_trees')>>
+  4 | 
+  5 | const int MY_CONST = 123;
+    |       ^^^ [4]
+  6 | 
+  7 | function test(): void {
+  8 |   $g = ExampleDsl`1 + MY_CONST`;
+    |                       ^^^^^^^^ [1]
+  9 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+237 |     ExampleDsl::TAst $lhs,
+238 |     string $op,
+239 |     ExampleDsl::TAst $rhs,
+    |     ^^^^^^^^^^^^^^^^ [3]
+240 |   )[]: ExampleDsl::TAst {
+241 |     return "$lhs $op $rhs";
+
+2 errors found

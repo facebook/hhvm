@@ -1,8 +1,32 @@
-ERROR: File "namespaces_in_context.php", line 9, characters 37-51:
-Unbound name: `MyOuterNs\MyInnerNs\MyOuterNs\Outer` (Naming[2049])
-ERROR: File "namespaces_in_context.php", line 12, characters 34-50:
-Illegal context: `\MyOuterNs\MyInnerNs\Inner`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "namespaces_in_context.php", line 16, characters 33-60:
-Illegal context: `\MyOuterNs\MyInnerNs\Inner`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+error: Naming[2049] Unbound name: `MyOuterNs\MyInnerNs\MyOuterNs\Outer` [1]
+
+namespaces_in_context.php:9:37
+ 7 |     class Inner {}
+ 8 | 
+ 9 |     function outer_from_inner_bad()[MyOuterNs\Outer]: void {}
+   |                                     ^^^^^^^^^^^^^^^ [1]
+10 |   }
+11 | 
+
+error: NastCheck[3090] Illegal context: `\MyOuterNs\MyInnerNs\Inner`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+namespaces_in_context.php:12:34
+10 |   }
+11 | 
+12 |   function inner_from_outer_bad()[MyInnerNs\Inner]: void {}
+   |                                  ^^^^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: NastCheck[3090] Illegal context: `\MyOuterNs\MyInnerNs\Inner`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+namespaces_in_context.php:16:33
+14 | 
+15 | namespace MyNamespace {
+16 |   function fully_qualified_bad()[\MyOuterNs\MyInnerNs\Inner]: void {}
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+
+3 errors found

@@ -8,5 +8,14 @@ File "static_props.php", line 28, characters 3-24:
   ~float
 File "static_props.php", line 29, characters 3-26:
   ~float
-ERROR: File "static_props.php", line 6, characters 44-51:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_props.php:6:44
+4 |   const int bar = 42;
+5 |   public static string $bar = 'bar';
+6 |   public static (function(): float) $baz = Foo::g<>;
+  |                                            ^^^^^^^^ [1]
+7 |   public static function bar(): bool {
+8 |     return true;
+
+1 error found

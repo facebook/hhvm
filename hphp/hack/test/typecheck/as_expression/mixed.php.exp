@@ -1,6 +1,31 @@
-WARN: File "mixed.php", line 4, characters 14-24:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Warn[12011])
-WARN: File "mixed.php", line 5, characters 14-24:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Warn[12011])
-WARN: File "mixed.php", line 9, characters 3-13:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. [1]
+
+mixed.php:4:14
+2 | 
+3 | function f(int $x): void {
+4 |   expect_int($x as mixed);
+  |              ^^^^^^^^^^^ [1]
+5 |   expect_int(42 as mixed);
+6 | }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. [1]
+
+mixed.php:5:14
+3 | function f(int $x): void {
+4 |   expect_int($x as mixed);
+5 |   expect_int(42 as mixed);
+  |              ^^^^^^^^^^^ [1]
+6 | }
+7 | 
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. [1]
+
+mixed.php:9:3
+ 7 | 
+ 8 | function g(int $x): void {
+ 9 |   $x as mixed;
+   |   ^^^^^^^^^^^ [1]
+10 |   expect_int($x);
+11 | }
+
+3 errors found

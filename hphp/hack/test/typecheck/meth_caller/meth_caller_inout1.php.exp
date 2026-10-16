@@ -1,4 +1,17 @@
-ERROR: File "meth_caller_inout1.php", line 9, characters 8-40:
-`meth_caller` does not support methods with the `inout` calling convention (Typing[4416])
-  File "meth_caller_inout1.php", line 4, characters 33-34:
-  This is why I think this method uses the `inout` calling convention
+error: Typing[4416] `meth_caller` does not support methods with the `inout` calling convention [1]
+-> This is why I think this method uses the `inout` calling convention [2]
+
+meth_caller_inout1.php:9:8
+ 2 | 
+ 3 | class Foo {
+ 4 |   public function bar(inout int $_): void {}
+   |                                 ^^ [2]
+ 5 | }
+ 6 | 
+ 7 | 
+ 8 | function test(): void {
+ 9 |   $x = HH\meth_caller(Foo::class, 'bar');
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

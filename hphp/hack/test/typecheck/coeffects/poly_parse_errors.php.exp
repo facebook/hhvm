@@ -1,42 +1,211 @@
-ERROR: File "poly_parse_errors.php", line 4, characters 3-8:
-Could not find parameter $f for dependent context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 5, characters 3-4:
-Could not find parameter $g for dependent context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 9, characters 3-4:
-Parameter $f used for dependent context must have a type hint (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 10, characters 3-4:
-Parameter $g used for dependent context must have a type hint (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 17, characters 3-5:
-Type hint for parameter $f used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 18, characters 3-21:
-Type hint for parameter $g used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 19, characters 15-16:
-Type hint for parameter $h used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 20, characters 16-23:
-Type hint for parameter $j used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 31, characters 3-9:
-Type hint for parameter $x used for dependent context must be a class or a generic (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 32, characters 8-9:
-Parameter $y used for dependent context cannot be variadic (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 38, characters 3-11:
-This function cannot be memoized because it has a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 42, characters 5-13:
-This method cannot be memoized because it has a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 47, characters 13-18:
-A lambda cannot have a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 48, characters 13-17:
-A lambda cannot have a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 50, characters 21-26:
-An anonymous function cannot have a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 55, characters 19-25:
-Context constants cannot alias polymorphic contexts (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 56, characters 32-38:
-Contexts cannot be bounded by polymorphic contexts (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 62, characters 18-23:
-A closure type hint cannot have a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 66, characters 18-21:
-A closure type hint cannot have a polymorphic context (Parsing[1002])
-ERROR: File "poly_parse_errors.php", line 9, characters 3-4:
-Was expecting a type hint (Typing[4032])
-ERROR: File "poly_parse_errors.php", line 10, characters 3-4:
-Was expecting a type hint (Typing[4032])
+error: Parsing[1002] Could not find parameter $f for dependent context [1]
+
+poly_parse_errors.php:4:3
+2 | 
+3 | function missing_param()[
+4 |   ctx $f,
+  |   ^^^^^^ [1]
+5 |   $g::C
+6 | ]: void {}
+
+error: Parsing[1002] Could not find parameter $g for dependent context [1]
+
+poly_parse_errors.php:5:3
+3 | function missing_param()[
+4 |   ctx $f,
+5 |   $g::C
+  |   ^^ [1]
+6 | ]: void {}
+7 | 
+
+error: Parsing[1002] Parameter $f used for dependent context must have a type hint [1]
+
+poly_parse_errors.php:9:3
+ 7 | 
+ 8 | function missing_hint(
+ 9 |   $f,
+   |   ^^ [1]
+10 |   $g,
+11 | )[
+
+error: Parsing[1002] Parameter $g used for dependent context must have a type hint [1]
+
+poly_parse_errors.php:10:3
+ 8 | function missing_hint(
+ 9 |   $f,
+10 |   $g,
+   |   ^^ [1]
+11 | )[
+12 |   ctx $f,
+
+error: Parsing[1002] Type hint for parameter $f used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` [1]
+
+poly_parse_errors.php:17:3
+15 | 
+16 | function fun_improper_form(
+17 |   int $f,
+   |   ^^^ [1]
+18 |   (function (): void) $g,
+19 |   (function ()[]: void) $h,
+
+error: Parsing[1002] Type hint for parameter $g used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` [1]
+
+poly_parse_errors.php:18:3
+16 | function fun_improper_form(
+17 |   int $f,
+18 |   (function (): void) $g,
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+19 |   (function ()[]: void) $h,
+20 |   (function ()[defaults]: void) $j,
+
+error: Parsing[1002] Type hint for parameter $h used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` [1]
+
+poly_parse_errors.php:19:15
+17 |   int $f,
+18 |   (function (): void) $g,
+19 |   (function ()[]: void) $h,
+   |               ^^ [1]
+20 |   (function ()[defaults]: void) $j,
+21 | )[
+
+error: Parsing[1002] Type hint for parameter $j used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` [1]
+
+poly_parse_errors.php:20:16
+18 |   (function (): void) $g,
+19 |   (function ()[]: void) $h,
+20 |   (function ()[defaults]: void) $j,
+   |                ^^^^^^^^ [1]
+21 | )[
+22 |   ctx $f,
+
+error: Parsing[1002] Type hint for parameter $x used for dependent context must be a class or a generic [1]
+
+poly_parse_errors.php:31:3
+29 | 
+30 | function var_improper_form(
+31 |   shape() $x,
+   |   ^^^^^^^ [1]
+32 |   V ...$y
+33 | )[
+
+error: Parsing[1002] Parameter $y used for dependent context cannot be variadic [1]
+
+poly_parse_errors.php:32:8
+30 | function var_improper_form(
+31 |   shape() $x,
+32 |   V ...$y
+   |        ^^ [1]
+33 | )[
+34 |   $x::C,
+
+error: Parsing[1002] This function cannot be memoized because it has a polymorphic context [1]
+
+poly_parse_errors.php:38:3
+36 | ]: void {}
+37 | 
+38 | <<__Memoize>>
+   |   ^^^^^^^^^ [1]
+39 | function memo(V $v)[$v::C]: void {}
+40 | 
+
+error: Parsing[1002] This method cannot be memoized because it has a polymorphic context [1]
+
+poly_parse_errors.php:42:5
+40 | 
+41 | class C {
+42 |   <<__Memoize>>
+   |     ^^^^^^^^^ [1]
+43 |   public function memo(V $v)[$v::C]: void {}
+44 | }
+
+error: Parsing[1002] A lambda cannot have a polymorphic context [1]
+
+poly_parse_errors.php:47:13
+45 | 
+46 | function lambdas(): void {
+47 |   $x = ($f)[ctx $f] ==> {};
+   |             ^^^^^^ [1]
+48 |   $y = ($a)[$a::C] ==> {};
+49 | 
+
+error: Parsing[1002] A lambda cannot have a polymorphic context [1]
+
+poly_parse_errors.php:48:13
+46 | function lambdas(): void {
+47 |   $x = ($f)[ctx $f] ==> {};
+48 |   $y = ($a)[$a::C] ==> {};
+   |             ^^^^^ [1]
+49 | 
+50 |   $y = function($x)[ctx $x] {};
+
+error: Parsing[1002] An anonymous function cannot have a polymorphic context [1]
+
+poly_parse_errors.php:50:21
+48 |   $y = ($a)[$a::C] ==> {};
+49 | 
+50 |   $y = function($x)[ctx $x] {};
+   |                     ^^^^^^ [1]
+51 | }
+52 | 
+
+error: Parsing[1002] Context constants cannot alias polymorphic contexts [1]
+
+poly_parse_errors.php:55:19
+53 | abstract class A {
+54 |   const ctx C = [];
+55 |   const ctx C2 = [this::C];
+   |                   ^^^^^^^ [1]
+56 |   abstract const ctx C3 super [this::C];
+57 | }
+
+error: Parsing[1002] Contexts cannot be bounded by polymorphic contexts [1]
+
+poly_parse_errors.php:56:32
+54 |   const ctx C = [];
+55 |   const ctx C2 = [this::C];
+56 |   abstract const ctx C3 super [this::C];
+   |                                ^^^^^^^ [1]
+57 | }
+58 | 
+
+error: Parsing[1002] A closure type hint cannot have a polymorphic context [1]
+
+poly_parse_errors.php:62:18
+60 |   public function m(
+61 |     (function ()[_]: void) $f,
+62 |     (function ()[ctx $f]: void) $g,
+   |                  ^^^^^^ [1]
+63 |   )[ctx $f]: void {}
+64 | 
+
+error: Parsing[1002] A closure type hint cannot have a polymorphic context [1]
+
+poly_parse_errors.php:66:18
+64 | 
+65 |   public function n(
+66 |     (function ()[T::C]: void) $f
+   |                  ^^^^ [1]
+67 |   ): void {}
+68 | }
+
+error: Typing[4032] Was expecting a type hint [1]
+
+poly_parse_errors.php:9:3
+ 7 | 
+ 8 | function missing_hint(
+ 9 |   $f,
+   |   ^^ [1]
+10 |   $g,
+11 | )[
+
+error: Typing[4032] Was expecting a type hint [1]
+
+poly_parse_errors.php:10:3
+ 8 | function missing_hint(
+ 9 |   $f,
+10 |   $g,
+   |   ^^ [1]
+11 | )[
+12 |   ctx $f,
+
+21 errors found

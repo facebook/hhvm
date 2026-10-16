@@ -1,40 +1,135 @@
-ERROR: File "generic_enum_class.php", line 24, characters 12-15:
-It is no longer allowed to use a `classname<HH\GenericEnumClass<Tclass, mixed>>` in this position. Please use a `class<HH\GenericEnumClass<Tclass, mixed>>` instead. (Typing[4482])
-  File "generic_enum_class.php", line 17, characters 13-57:
-  Definition is here
-ERROR: File "generic_enum_class.php", line 37, characters 18-21:
-Invalid argument (Typing[4110])
-  File "generic_enum_class.php", line 37, characters 18-21:
-  Expected a class with a constant `Int`
-  File "generic_enum_class.php", line 29, characters 20-23:
-  But got `Base`
-  File "generic_enum_class.php", line 21, characters 25-30:
-    via this generic `Tclass`
-  File "generic_enum_class.php", line 3, characters 21-24:
-  `Base` is defined here
-  File "generic_enum_class.php", line 4, characters 9-13:
-  Did you mean `Float`?
-ERROR: File "generic_enum_class.php", line 41, characters 18-22:
-Invalid argument (Typing[4110])
-  File "generic_enum_class.php", line 41, characters 18-22:
-  Expected a class with a constant `Bool`
-  File "generic_enum_class.php", line 29, characters 20-23:
-  But got `Base`
-  File "generic_enum_class.php", line 21, characters 25-30:
-    via this generic `Tclass`
-  File "generic_enum_class.php", line 3, characters 21-24:
-  `Base` is defined here
-  File "generic_enum_class.php", line 4, characters 9-13:
-  Did you mean `Float`?
-ERROR: File "generic_enum_class.php", line 42, characters 16-20:
-Invalid argument (Typing[4110])
-  File "generic_enum_class.php", line 42, characters 16-20:
-  Expected a class with a constant `Bool`
-  File "generic_enum_class.php", line 30, characters 20-24:
-  But got `Enum1`
-  File "generic_enum_class.php", line 21, characters 25-30:
-    via this generic `Tclass`
-  File "generic_enum_class.php", line 7, characters 12-16:
-  `Enum1` is defined here
-  File "generic_enum_class.php", line 4, characters 9-13:
-  Did you mean `Float`?
+error: Typing[4482] It is no longer allowed to use a `classname<HH\GenericEnumClass<Tclass, mixed>>` in this position. Please use a `class<HH\GenericEnumClass<Tclass, mixed>>` instead. [1]
+-> Definition is here [2]
+
+generic_enum_class.php:24:12
+15 | class EnumClassWrapper<Tclass> {
+16 |   public function __construct(
+17 |     private classname<HH\GenericEnumClass<Tclass, mixed>> $cls,
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+18 |   ){}
+19 | 
+   :
+22 |   )[write_props]: HH\MemberOf<Tclass, TType> {
+23 |     $cls = $this->cls;
+24 |     return $cls::valueOf($label);
+   |            ^^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `Int` [1]
+-> But got `Base` [2]
+->   via this generic `Tclass` [3]
+-> `Base` is defined here [4]
+-> Did you mean `Float`? [5]
+
+generic_enum_class.php:37:18
+ 1 | <?hh
+ 2 | 
+ 3 | abstract enum class Base: mixed {
+   |                     ^^^^ [4]
+ 4 |   float Float = 0.0;
+   |         ^^^^^ [5]
+ 5 | }
+ 6 | 
+   :
+19 | 
+20 |   public function valueOf<TType>(
+21 |     \HH\EnumClass\Label<Tclass, TType> $label,
+   |                         ^^^^^^ [3]
+22 |   )[write_props]: HH\MemberOf<Tclass, TType> {
+23 |     $cls = $this->cls;
+   :
+27 | 
+28 | function test(
+29 |   EnumClassWrapper<Base> $base,
+   |                    ^^^^ [2]
+30 |   EnumClassWrapper<Enum1> $e1,
+31 |   EnumClassWrapper<Enum2> $e2,
+   :
+35 |   hh_expect<float>($e2->valueOf(#Float));
+36 | 
+37 |   $base->valueOf(#Int); // Error
+   |                  ^^^^ [1]
+38 |   hh_expect<int>($e1->valueOf(#Int));
+39 |   hh_expect<int>($e2->valueOf(#Int));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `Bool` [1]
+-> But got `Base` [2]
+->   via this generic `Tclass` [3]
+-> `Base` is defined here [4]
+-> Did you mean `Float`? [5]
+
+generic_enum_class.php:41:18
+ 1 | <?hh
+ 2 | 
+ 3 | abstract enum class Base: mixed {
+   |                     ^^^^ [4]
+ 4 |   float Float = 0.0;
+   |         ^^^^^ [5]
+ 5 | }
+ 6 | 
+   :
+19 | 
+20 |   public function valueOf<TType>(
+21 |     \HH\EnumClass\Label<Tclass, TType> $label,
+   |                         ^^^^^^ [3]
+22 |   )[write_props]: HH\MemberOf<Tclass, TType> {
+23 |     $cls = $this->cls;
+   :
+27 | 
+28 | function test(
+29 |   EnumClassWrapper<Base> $base,
+   |                    ^^^^ [2]
+30 |   EnumClassWrapper<Enum1> $e1,
+31 |   EnumClassWrapper<Enum2> $e2,
+   :
+39 |   hh_expect<int>($e2->valueOf(#Int));
+40 | 
+41 |   $base->valueOf(#Bool); // Error
+   |                  ^^^^^ [1]
+42 |   $e1->valueOf(#Bool); // Error
+43 |   hh_expect<bool>($e2->valueOf(#Bool));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `Bool` [1]
+-> But got `Enum1` [2]
+->   via this generic `Tclass` [3]
+-> `Enum1` is defined here [4]
+-> Did you mean `Float`? [5]
+
+generic_enum_class.php:42:16
+ 2 | 
+ 3 | abstract enum class Base: mixed {
+ 4 |   float Float = 0.0;
+   |         ^^^^^ [5]
+ 5 | }
+ 6 | 
+ 7 | enum class Enum1 : mixed extends Base {
+   |            ^^^^^ [4]
+ 8 |   int Int = 1;
+ 9 | }
+   :
+19 | 
+20 |   public function valueOf<TType>(
+21 |     \HH\EnumClass\Label<Tclass, TType> $label,
+   |                         ^^^^^^ [3]
+22 |   )[write_props]: HH\MemberOf<Tclass, TType> {
+23 |     $cls = $this->cls;
+   :
+28 | function test(
+29 |   EnumClassWrapper<Base> $base,
+30 |   EnumClassWrapper<Enum1> $e1,
+   |                    ^^^^^ [2]
+31 |   EnumClassWrapper<Enum2> $e2,
+32 | ): void {
+   :
+40 | 
+41 |   $base->valueOf(#Bool); // Error
+42 |   $e1->valueOf(#Bool); // Error
+   |                ^^^^^ [1]
+43 |   hh_expect<bool>($e2->valueOf(#Bool));
+44 | }
+
+4 errors found

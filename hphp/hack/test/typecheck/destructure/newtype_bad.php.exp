@@ -1,10 +1,29 @@
-ERROR: File "newtype_bad.php--use.php", line 6, characters 3-34:
-Typing error (Typing[4163])
-  File "newtype_bad.php--def.php", line 4, characters 23-44:
-  The field `y` is **optional**
-  File "newtype_bad.php--use.php", line 6, characters 3-34:
-  The field `y` is defined as **required**
-  File "newtype_bad.php--use.php", line 6, characters 20-22:
-  `y` is defined here
-ERROR: File "newtype_bad.php--use.php", line 6, characters 20-22:
-Field `'y'` does not exist in the shape type (Typing[4512])
+error: Typing[4163] Typing error [1]
+-> The field `y` is **optional** [2]
+-> The field `y` is defined as **required** [1]
+-> `y` is defined here [3]
+
+newtype_bad.php--use.php:6:3
+4 | // Cross-file: 'y' is hidden behind the newtype upper bound
+5 | function test_cross_file_hidden_field(ShapeAlias $s): void {
+6 |   shape('x' => $x, 'y' => $y, ...) = $s; // Field 'y' does not exist in the shape type
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                    ^^^ [3]
+7 | }
+
+newtype_bad.php--def.php:4:23
+2 | <<file:__EnableUnstableFeatures('shape_and_tuple_destructuring')>>
+3 | 
+4 | newtype ShapeAlias as shape('x' => int, ...) = shape('x' => int, 'y' => string);
+  |                       ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+error: Typing[4512] Field `'y'` does not exist in the shape type [1]
+
+newtype_bad.php--use.php:6:20
+4 | // Cross-file: 'y' is hidden behind the newtype upper bound
+5 | function test_cross_file_hidden_field(ShapeAlias $s): void {
+6 |   shape('x' => $x, 'y' => $y, ...) = $s; // Field 'y' does not exist in the shape type
+  |                    ^^^ [1]
+7 | }
+
+2 errors found

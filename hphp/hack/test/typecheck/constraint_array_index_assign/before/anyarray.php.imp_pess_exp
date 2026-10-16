@@ -2,11 +2,44 @@ File "anyarray.php", line 65, characters 5-15:
   AnyArray<arraykey, mixed>
 File "anyarray.php", line 74, characters 5-15:
   nothing
-WARN: File "anyarray.php", line 67, characters 14-29:
-This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `dict<Tk#1, Tv#1>`. (Warn[12010])
-WARN: File "anyarray.php", line 69, characters 14-25:
-This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `vec<T#1>`. (Warn[12010])
-WARN: File "anyarray.php", line 71, characters 14-28:
-This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `keyset<T#1>`. (Warn[12010])
-WARN: File "anyarray.php", line 73, characters 14-33:
-This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `AnyArray<Tk#1, Tv#1>`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `dict<Tk#1, Tv#1>`. [1]
+
+anyarray.php:67:14
+65 |     hh_show($m);
+66 |     takes_any_array($m);
+67 |   } else if ($m is dict<_, _>) {
+   |              ^^^^^^^^^^^^^^^^ [1]
+68 |     takes_any_array($m);
+69 |   } else if ($m is vec<_>) {
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `vec<T#1>`. [1]
+
+anyarray.php:69:14
+67 |   } else if ($m is dict<_, _>) {
+68 |     takes_any_array($m);
+69 |   } else if ($m is vec<_>) {
+   |              ^^^^^^^^^^^^ [1]
+70 |     takes_any_array($m);
+71 |   } else if ($m is keyset<_>) {
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `keyset<T#1>`. [1]
+
+anyarray.php:71:14
+69 |   } else if ($m is vec<_>) {
+70 |     takes_any_array($m);
+71 |   } else if ($m is keyset<_>) {
+   |              ^^^^^^^^^^^^^^^ [1]
+72 |     takes_any_array($m);
+73 |   } else if ($m is AnyArray<_, _>) {
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `?(nonnull & not AnyArray<_, _>)` which shares no values with `AnyArray<Tk#1, Tv#1>`. [1]
+
+anyarray.php:73:14
+71 |   } else if ($m is keyset<_>) {
+72 |     takes_any_array($m);
+73 |   } else if ($m is AnyArray<_, _>) {
+   |              ^^^^^^^^^^^^^^^^^^^^ [1]
+74 |     hh_show($m);
+75 |     takes_any_array($m);
+
+4 errors found

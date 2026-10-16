@@ -1,6 +1,13 @@
-ERROR: File "disjoint_reified.php", line 9, characters 11-15:
-Invalid case type declaration. More than one variant of `CTBad` could contain values with the same runtime tag (Typing[4475])
-  File "disjoint_reified.php", line 9, characters 19-37:
-  This is the type `ReifiedBox<MyAlias>`, which includes **instances of the final class ReifiedBox<float>**
-  File "disjoint_reified.php", line 9, characters 41-57:
-  It overlaps with `ReifiedBox<float>`, which also includes **instances of the final class ReifiedBox<float>**
+error: Typing[4475] Invalid case type declaration. More than one variant of `CTBad` could contain values with the same runtime tag [1]
+-> This is the type `ReifiedBox<MyAlias>`, which includes **instances of the final class ReifiedBox<float>** [2]
+-> It overlaps with `ReifiedBox<float>`, which also includes **instances of the final class ReifiedBox<float>** [3]
+
+disjoint_reified.php:9:11
+7 | case type CTGood = ReifiedBox<int> | ReifiedBox<string>;
+8 | 
+9 | case type CTBad = ReifiedBox<MyAlias> | ReifiedBox<float>;
+  |           ^^^^^ [1]
+  |                   ^^^^^^^^^^^^^^^^^^^ [2]
+  |                                         ^^^^^^^^^^^^^^^^^ [3]
+
+1 error found

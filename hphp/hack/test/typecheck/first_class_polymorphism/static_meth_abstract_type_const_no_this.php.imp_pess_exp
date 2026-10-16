@@ -1,6 +1,26 @@
-ERROR: File "static_meth_abstract_type_const_no_this.php", line 25, characters 3-135:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "static_meth_abstract_type_const_no_this.php", line 15, characters 63-66:
-  Expected `void`
-  File "static_meth_abstract_type_const_no_this.php", line 28, characters 16-19:
-  But got `dynamic`
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `void` [2]
+-> But got `dynamic` [3]
+
+static_meth_abstract_type_const_no_this.php:25:3
+13 |     throw new Exception();
+14 |   }
+15 |   public static function takeT(this::TA $_, this::TA::TB $_): void {}
+   |                                                               ^^^^ [2]
+16 | }
+17 | 
+   :
+23 | 
+24 |   $g = A::takeT<>;
+25 |   hh_expect_equivalent<HH\FunctionRef<(readonly function<
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |     TA0 as B with { type TB = TB0 },
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |     TB0 as C,
+   |     ^^^^^^^^^ [1]
+28 |   >(TA0, TB0): void)>>($g);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                ^^^^ [3]
+29 | }
+
+1 error found

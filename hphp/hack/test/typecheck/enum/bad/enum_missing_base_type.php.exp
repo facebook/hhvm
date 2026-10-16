@@ -1,4 +1,21 @@
-ERROR: File "enum_missing_base_type.php", line 3, characters 6-6:
-Enums must have a base type, such as `arraykey` or `int`. (Parsing[1002])
-ERROR: File "enum_missing_base_type.php", line 3, characters 8-8:
-Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+error: Parsing[1002] Enums must have a base type, such as `arraykey` or `int`. [1]
+
+enum_missing_base_type.php:3:6
+1 | <?hh
+2 | 
+3 | enum X {
+  |      ^ [1]
+4 |   Y = 2;
+5 | }
+
+error: Parsing[1002] Encountered unexpected text ``, was expecting a type hint. [1]
+
+enum_missing_base_type.php:3:8
+1 | <?hh
+2 | 
+3 | enum X {
+  |        ^ [1]
+4 |   Y = 2;
+5 | }
+
+2 errors found

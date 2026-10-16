@@ -1,24 +1,108 @@
-ERROR: File "this_param_invariant_container.php", line 29, characters 14-22:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_invariant_container.php", line 16, characters 46-47:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_invariant_container.php", line 29, characters 14-22:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_invariant_container.php", line 16, characters 60-61:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_invariant_container.php", line 30, characters 14-27:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_invariant_container.php", line 18, characters 59-60:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_invariant_container.php", line 31, characters 14-27:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_invariant_container.php", line 20, characters 46-47:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_invariant_container.php", line 31, characters 14-27:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_invariant_container.php", line 20, characters 60-61:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_invariant_container.php", line 32, characters 33-39:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_invariant_container.php", line 23, characters 35-36:
-  a value of type `this` can be obtained from this parameter
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_invariant_container.php:29:14
+14 | 
+15 |   // obtainable=2  -> ERROR
+16 |   public static function s_box_two(Box<this> $_, Box<this> $_): void {}
+   |                                              ^^ [2]
+17 |   // both `this` are under the invariant Box: obtainable=2 (one param) -> ERROR
+18 |   public static function s_box_of_tuple(Box<(this, this)> $_): void {}
+   :
+27 |   $ok1 = A::s_box_one<>;
+28 | 
+29 |   $bad1 = A::s_box_two<>;
+   |              ^^^^^^^^^ [1]
+30 |   $bad2 = A::s_box_of_tuple<>;
+31 |   $bad3 = A::s_bare_and_box<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_invariant_container.php:29:14
+14 | 
+15 |   // obtainable=2  -> ERROR
+16 |   public static function s_box_two(Box<this> $_, Box<this> $_): void {}
+   |                                                            ^^ [2]
+17 |   // both `this` are under the invariant Box: obtainable=2 (one param) -> ERROR
+18 |   public static function s_box_of_tuple(Box<(this, this)> $_): void {}
+   :
+27 |   $ok1 = A::s_box_one<>;
+28 | 
+29 |   $bad1 = A::s_box_two<>;
+   |              ^^^^^^^^^ [1]
+30 |   $bad2 = A::s_box_of_tuple<>;
+31 |   $bad3 = A::s_bare_and_box<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_invariant_container.php:30:14
+16 |   public static function s_box_two(Box<this> $_, Box<this> $_): void {}
+17 |   // both `this` are under the invariant Box: obtainable=2 (one param) -> ERROR
+18 |   public static function s_box_of_tuple(Box<(this, this)> $_): void {}
+   |                                                           ^^ [2]
+19 |   // mixed bare (contravariant) + Box (invariant): obtainable=2 -> ERROR
+20 |   public static function s_bare_and_box(this $_, Box<this> $_): void {}
+   :
+28 | 
+29 |   $bad1 = A::s_box_two<>;
+30 |   $bad2 = A::s_box_of_tuple<>;
+   |              ^^^^^^^^^^^^^^ [1]
+31 |   $bad3 = A::s_bare_and_box<>;
+32 |   $bad4 = meth_caller(A::class, 'i_box');
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_invariant_container.php:31:14
+18 |   public static function s_box_of_tuple(Box<(this, this)> $_): void {}
+19 |   // mixed bare (contravariant) + Box (invariant): obtainable=2 -> ERROR
+20 |   public static function s_bare_and_box(this $_, Box<this> $_): void {}
+   |                                              ^^ [2]
+21 | 
+22 |   // instance: receiver(1) + Box(1) = 2 -> ERROR
+   :
+29 |   $bad1 = A::s_box_two<>;
+30 |   $bad2 = A::s_box_of_tuple<>;
+31 |   $bad3 = A::s_bare_and_box<>;
+   |              ^^^^^^^^^^^^^^ [1]
+32 |   $bad4 = meth_caller(A::class, 'i_box');
+33 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_invariant_container.php:31:14
+18 |   public static function s_box_of_tuple(Box<(this, this)> $_): void {}
+19 |   // mixed bare (contravariant) + Box (invariant): obtainable=2 -> ERROR
+20 |   public static function s_bare_and_box(this $_, Box<this> $_): void {}
+   |                                                            ^^ [2]
+21 | 
+22 |   // instance: receiver(1) + Box(1) = 2 -> ERROR
+   :
+29 |   $bad1 = A::s_box_two<>;
+30 |   $bad2 = A::s_box_of_tuple<>;
+31 |   $bad3 = A::s_bare_and_box<>;
+   |              ^^^^^^^^^^^^^^ [1]
+32 |   $bad4 = meth_caller(A::class, 'i_box');
+33 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_invariant_container.php:32:33
+21 | 
+22 |   // instance: receiver(1) + Box(1) = 2 -> ERROR
+23 |   public function i_box(Box<this> $_): void {}
+   |                                   ^^ [2]
+24 | }
+25 | 
+   :
+30 |   $bad2 = A::s_box_of_tuple<>;
+31 |   $bad3 = A::s_bare_and_box<>;
+32 |   $bad4 = meth_caller(A::class, 'i_box');
+   |                                 ^^^^^^^ [1]
+33 | }
+
+6 errors found

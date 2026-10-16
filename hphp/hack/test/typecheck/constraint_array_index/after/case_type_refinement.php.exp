@@ -1,2 +1,11 @@
-WARN: File "case_type_refinement.php", line 73, characters 7-22:
-This `is` check is always `true`. The expression on the left has type `(T & dict<int, string>)` which is a subtype of `dict<int, string>`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `(T & dict<int, string>)` which is a subtype of `dict<int, string>`. [1]
+
+case_type_refinement.php:73:7
+71 |   }
+72 | 
+73 |   if ($v is dict<_, _>) {
+   |       ^^^^^^^^^^^^^^^^ [1]
+74 |     foreach($v as $value) {
+75 |       return $value;
+
+1 error found

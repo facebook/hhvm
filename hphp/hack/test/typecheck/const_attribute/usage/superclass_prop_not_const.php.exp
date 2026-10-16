@@ -1,4 +1,17 @@
-ERROR: File "superclass_prop_not_const.php", line 9, characters 10-12:
-This property is `__Const` (Typing[4204])
-  File "superclass_prop_not_const.php", line 4, characters 10-12:
-  This property is not `__Const`
+error: Typing[4204] This property is `__Const` [1]
+-> This property is not `__Const` [2]
+
+superclass_prop_not_const.php:9:10
+ 2 | 
+ 3 | class A {
+ 4 |   public int $x = 4;
+   |          ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | class B extends A {
+ 8 |   <<__Const>>
+ 9 |   public int $x = 42;
+   |          ^^^ [1]
+10 | }
+
+1 error found

@@ -1,8 +1,33 @@
-ERROR: File "shape_creation_wrong_type.php", line 11, characters 5-36:
-Expression trees only support string literal shape field names. (Parsing[1002])
-ERROR: File "shape_creation_wrong_type.php", line 8, characters 8-32:
-Invalid argument (Typing[4110])
-  File "shape_creation_wrong_type.php", line 7, characters 56-68:
-  Expected `string`
-  File "expr_tree.php", line 155, characters 39-41:
-  But got `int`
+error: Parsing[1002] Expression trees only support string literal shape field names. [1]
+
+shape_creation_wrong_type.php:11:5
+ 9 | 
+10 |     // class constants are not allowed as shape keys
+11 |     shape(MyConstantClass::KEY => 3);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   }`;
+13 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+shape_creation_wrong_type.php:8:8
+  5 | function g(): void {
+  6 |   ExampleDsl`{
+  7 |     $f = (ExampleShape<shape('x' => ExampleInt, 'y' => ExampleString)> $shape) ==> 3;
+    |                                                        ^^^^^^^^^^^^^ [2]
+  8 |     $f(shape('x' => 2, 'y' => 3));
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  9 | 
+ 10 |     // class constants are not allowed as shape keys
+
+expr_tree.php:155:39
+153 |   // in the virtualized version of the expression tree, to work out the virtual type
+154 |   // of literals during type checking.
+155 |   public static function intType()[]: int {
+    |                                       ^^^ [3]
+156 |     throw new Exception();
+157 |   }
+
+2 errors found

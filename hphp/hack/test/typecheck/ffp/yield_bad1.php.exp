@@ -1,12 +1,40 @@
-ERROR: File "yield_bad1.php", line 5, characters 7-13:
-`yield` can only appear as a statement or on the right of an assignment (Parsing[1002])
-ERROR: File "yield_bad1.php", line 5, characters 3-5:
-Unbound name: `foo` (a global function) (Naming[2049])
-ERROR: File "yield_bad1.php", line 4, characters 18-21:
-Invalid return type (Typing[4110])
-  File "yield_bad1.php", line 4, characters 18-21:
-  Expected `void`
-  File "yield_bad1.php", line 4, characters 18-21:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
-ERROR: File "yield_bad1.php", line 5, characters 3-5:
-Unbound name (typing): `foo` (Typing[4107])
+error: Parsing[1002] `yield` can only appear as a statement or on the right of an assignment [1]
+
+yield_bad1.php:5:7
+3 | 
+4 | function test(): void {
+5 |   foo(yield 3);
+  |       ^^^^^^^ [1]
+6 | }
+
+error: Naming[2049] Unbound name: `foo` (a global function) [1]
+
+yield_bad1.php:5:3
+3 | 
+4 | function test(): void {
+5 |   foo(yield 3);
+  |   ^^^ [1]
+6 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+yield_bad1.php:4:18
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(): void {
+  |                  ^^^^ [1]
+5 |   foo(yield 3);
+6 | }
+
+error: Typing[4107] Unbound name (typing): `foo` [1]
+
+yield_bad1.php:5:3
+3 | 
+4 | function test(): void {
+5 |   foo(yield 3);
+  |   ^^^ [1]
+6 | }
+
+4 errors found

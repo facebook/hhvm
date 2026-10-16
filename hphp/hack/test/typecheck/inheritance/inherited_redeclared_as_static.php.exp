@@ -1,24 +1,87 @@
-ERROR: File "inherited_redeclared_as_static.php", line 11, characters 7-9:
-This class overrides some members with a different staticness (Typing[4091])
-  File "inherited_redeclared_as_static.php", line 4, characters 13-18:
-  The property `$non_static_property` is declared as non-static here
-  File "inherited_redeclared_as_static.php", line 12, characters 17-22:
-  But it conflicts with an inherited static declaration here
-ERROR: File "inherited_redeclared_as_static.php", line 11, characters 7-9:
-This class overrides some members with a different staticness (Typing[4091])
-  File "inherited_redeclared_as_static.php", line 7, characters 22-36:
-  The method `nonStaticMethod` is declared as non-static here
-  File "inherited_redeclared_as_static.php", line 15, characters 29-43:
-  But it conflicts with an inherited static declaration here
-ERROR: File "inherited_redeclared_as_static.php", line 11, characters 7-9:
-This class overrides some members with a different staticness (Typing[4091])
-  File "inherited_redeclared_as_static.php", line 13, characters 10-15:
-  The property `static_property` is declared as non-static here
-  File "inherited_redeclared_as_static.php", line 5, characters 20-25:
-  But it conflicts with an inherited static declaration here
-ERROR: File "inherited_redeclared_as_static.php", line 11, characters 7-9:
-This class overrides some members with a different staticness (Typing[4091])
-  File "inherited_redeclared_as_static.php", line 16, characters 22-33:
-  The method `staticMethod` is declared as non-static here
-  File "inherited_redeclared_as_static.php", line 8, characters 29-40:
-  But it conflicts with an inherited static declaration here
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The property `$non_static_property` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+inherited_redeclared_as_static.php:11:7
+ 2 | 
+ 3 | class ABC {
+ 4 |   protected string $non_static_property = "";
+   |             ^^^^^^ [2]
+ 5 |   protected static string $static_property = "";
+ 6 | 
+   :
+ 9 | }
+10 | 
+11 | class DEF extends ABC {
+   |       ^^^ [1]
+12 |   public static string $non_static_property = "";
+   |                 ^^^^^^ [3]
+13 |   public string $static_property = "";
+14 | 
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The method `nonStaticMethod` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+inherited_redeclared_as_static.php:11:7
+ 5 |   protected static string $static_property = "";
+ 6 | 
+ 7 |   protected function nonStaticMethod(): void {}
+   |                      ^^^^^^^^^^^^^^^ [2]
+ 8 |   protected static function staticMethod(): void {}
+ 9 | }
+10 | 
+11 | class DEF extends ABC {
+   |       ^^^ [1]
+12 |   public static string $non_static_property = "";
+13 |   public string $static_property = "";
+14 | 
+15 |   protected static function nonStaticMethod(): void {}
+   |                             ^^^^^^^^^^^^^^^ [3]
+16 |   protected function staticMethod(): void {}
+17 | }
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The property `static_property` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+inherited_redeclared_as_static.php:11:7
+ 3 | class ABC {
+ 4 |   protected string $non_static_property = "";
+ 5 |   protected static string $static_property = "";
+   |                    ^^^^^^ [3]
+ 6 | 
+ 7 |   protected function nonStaticMethod(): void {}
+ 8 |   protected static function staticMethod(): void {}
+ 9 | }
+10 | 
+11 | class DEF extends ABC {
+   |       ^^^ [1]
+12 |   public static string $non_static_property = "";
+13 |   public string $static_property = "";
+   |          ^^^^^^ [2]
+14 | 
+15 |   protected static function nonStaticMethod(): void {}
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The method `staticMethod` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+inherited_redeclared_as_static.php:11:7
+ 6 | 
+ 7 |   protected function nonStaticMethod(): void {}
+ 8 |   protected static function staticMethod(): void {}
+   |                             ^^^^^^^^^^^^ [3]
+ 9 | }
+10 | 
+11 | class DEF extends ABC {
+   |       ^^^ [1]
+12 |   public static string $non_static_property = "";
+13 |   public string $static_property = "";
+14 | 
+15 |   protected static function nonStaticMethod(): void {}
+16 |   protected function staticMethod(): void {}
+   |                      ^^^^^^^^^^^^ [2]
+17 | }
+
+4 errors found

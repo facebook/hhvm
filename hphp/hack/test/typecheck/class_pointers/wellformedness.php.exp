@@ -1,20 +1,46 @@
-ERROR: File "wellformedness.php", line 8, characters 3-13:
-Some type arguments violate their constraints (Typing[4323])
-  File "wellformedness.php", line 3, characters 9-9:
-  `T` is a constrained type parameter
-  File "wellformedness.php", line 3, characters 14-19:
-  This type constraint is violated
-  File "wellformedness.php", line 3, characters 14-19:
-  Expected `string`
-  File "wellformedness.php", line 8, characters 5-12:
-  But got `class<C>`
-ERROR: File "wellformedness.php", line 10, characters 3-26:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "wellformedness.php", line 10, characters 8-15:
-  But got `class<C>`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `class<C>` [4]
+
+wellformedness.php:8:3
+ 1 | <?hh
+ 2 | 
+ 3 | class G<T as string> {}
+   |         ^ [2]
+   |              ^^^^^^ [3]
+ 4 | class C {}
+ 5 | 
+ 6 | function f(
+ 7 |   G<classname<C>> $g_cn,
+ 8 |   G<class<C>> $g_c,
+   |   ^^^^^^^^^^^ [1]
+   |     ^^^^^^^^ [4]
+ 9 |   dict<classname<C>, class<C>> $d_cn_to_c,
+10 |   dict<class<C>, class<C>> $d_c_to_c,
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `class<C>` [4]
+
+wellformedness.php:10:3
+ 8 |   G<class<C>> $g_c,
+ 9 |   dict<classname<C>, class<C>> $d_cn_to_c,
+10 |   dict<class<C>, class<C>> $d_c_to_c,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^^^^^ [4]
+11 | ): void {}
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+2 errors found

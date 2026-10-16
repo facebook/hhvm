@@ -1,14 +1,34 @@
-ERROR: File "abstract_typeconst_bound_impl_2.php", line 21, characters 14-15:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "abstract_typeconst_bound_impl_2.php", line 6, characters 29-84:
-  Expected a class with `{type TUserData = UserDataA}`
-  File "abstract_typeconst_bound_impl_2.php", line 21, characters 19-23:
-  But got `UserB`
-  File "abstract_typeconst_bound_impl_2.php", line 22, characters 26-34:
-  This `as` or `=` refinement constraint is violated
-  File "abstract_typeconst_bound_impl_2.php", line 22, characters 26-34:
-  Expected `UserDataA`
-  File "abstract_typeconst_bound_impl_2.php", line 7, characters 22-36:
-    resulting from expanding the type constant `this::TUserData`
-  File "abstract_typeconst_bound_impl_2.php", line 26, characters 26-34:
-  But got `UserDataB`
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected a class with `{type TUserData = UserDataA}` [2]
+-> But got `UserB` [3]
+-> This `as` or `=` refinement constraint is violated [4]
+-> Expected `UserDataA` [4]
+->   resulting from expanding the type constant `this::TUserData` [5]
+-> But got `UserDataB` [6]
+
+abstract_typeconst_bound_impl_2.php:21:14
+ 4 | 
+ 5 | abstract class FrameworkA {
+ 6 |   abstract const type TB as FrameworkB with {
+   |                             ^^^^^^^^^^^^^^^^^ [2]
+ 7 |     type TUserData = this::TUserData };
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                      ^^^^^^^^^^^^^^^ [5]
+ 8 |   abstract const type TUserData as IUserData;
+ 9 | }
+   :
+19 |   /* TB should fail because UserB has different TUserData
+20 |    * from the one defined here */
+21 |   const type TB = UserB;
+   |              ^^ [1]
+   |                   ^^^^^ [3]
+22 |   const type TUserData = UserDataA;
+   |                          ^^^^^^^^^ [4]
+23 | }
+24 | 
+25 | class UserB extends FrameworkB {
+26 |   const type TUserData = UserDataB;
+   |                          ^^^^^^^^^ [6]
+27 | }
+
+1 error found

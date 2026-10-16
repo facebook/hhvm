@@ -1,96 +1,289 @@
-ERROR: File "subtyping_completeness1.php", line 8, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 8, characters 13-13:
-  Expected `A`
-  File "subtyping_completeness1.php", line 4, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 8, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 8, characters 13-13:
-  Expected `A`
-  File "subtyping_completeness1.php", line 7, characters 21-21:
-  But got `mixed`
-  File "subtyping_completeness1.php", line 4, characters 11-11:
-    by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 8, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 8, characters 13-13:
-  Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 4, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 8, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 8, characters 13-13:
-  Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 7, characters 21-21:
-  But got `mixed`
-  File "subtyping_completeness1.php", line 4, characters 11-11:
-    by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 9, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 9, characters 13-13:
-  Expected `A`
-  File "subtyping_completeness1.php", line 5, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 9, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 9, characters 13-13:
-  Expected `A`
-  File "subtyping_completeness1.php", line 7, characters 27-27:
-  But got `mixed`
-  File "subtyping_completeness1.php", line 5, characters 11-11:
-    by the definition of `C` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 9, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 9, characters 13-13:
-  Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 5, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 9, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 9, characters 13-13:
-  Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 7, characters 27-27:
-  But got `mixed`
-  File "subtyping_completeness1.php", line 5, characters 11-11:
-    by the definition of `C` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 10, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 10, characters 13-13:
-  Expected `C`
-  File "subtyping_completeness1.php", line 3, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 10, characters 3-18:
-hh_expect type mismatch (Typing[4453])
-  File "subtyping_completeness1.php", line 10, characters 13-13:
-  Expected `C`
-  File "subtyping_completeness1.php", line 7, characters 15-15:
-  But got `mixed`
-  File "subtyping_completeness1.php", line 3, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 10, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 10, characters 13-13:
-  Expected `C`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 3, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_completeness1.php", line 10, characters 16-17:
-Invalid argument (Typing[4110])
-  File "subtyping_completeness1.php", line 10, characters 13-13:
-  Expected `C`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "subtyping_completeness1.php", line 7, characters 15-15:
-  But got `mixed`
-  File "subtyping_completeness1.php", line 3, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `A` [2]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+subtyping_completeness1.php:8:3
+ 2 | 
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+   |           ^ [3]
+ 5 | case type C = vec<vec<C>>;
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+ 8 |   hh_expect<A>($b);
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |             ^ [2]
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `A` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_completeness1.php:8:3
+ 2 | 
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+   |           ^ [4]
+ 5 | case type C = vec<vec<C>>;
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+   |                     ^ [3]
+ 8 |   hh_expect<A>($b);
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |             ^ [2]
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+->   via this generic `T` [3]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_completeness1.php:8:16
+ 2 | 
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+   |           ^ [4]
+ 5 | case type C = vec<vec<C>>;
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+ 8 |   hh_expect<A>($b);
+   |             ^ [2]
+   |                ^^ [1]
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type [5]
+
+subtyping_completeness1.php:8:16
+ 2 | 
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+   |           ^ [5]
+ 5 | case type C = vec<vec<C>>;
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+   |                     ^ [4]
+ 8 |   hh_expect<A>($b);
+   |             ^ [2]
+   |                ^^ [1]
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `A` [2]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+subtyping_completeness1.php:9:3
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+   |           ^ [3]
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |             ^ [2]
+10 |   hh_expect<C>($a);
+11 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `A` [2]
+-> But got `mixed` [3]
+->   by the definition of `C` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_completeness1.php:9:3
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+   |           ^ [4]
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+   |                           ^ [3]
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |             ^ [2]
+10 |   hh_expect<C>($a);
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+->   via this generic `T` [3]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_completeness1.php:9:16
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+   |           ^ [4]
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+   |             ^ [2]
+   |                ^^ [1]
+10 |   hh_expect<C>($a);
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `C` arising from an implicit `as ?nonnull` constraint on this type [5]
+
+subtyping_completeness1.php:9:16
+ 3 | case type A = vec<A>;
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+   |           ^ [5]
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+   |                           ^ [4]
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+   |             ^ [2]
+   |                ^^ [1]
+10 |   hh_expect<C>($a);
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `C` [2]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+subtyping_completeness1.php:10:3
+ 1 | <?hh <<file: __EnableUnstableFeatures('recursive_case_types')>>
+ 2 | 
+ 3 | case type A = vec<A>;
+   |           ^ [3]
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+   :
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |             ^ [2]
+11 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `C` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_completeness1.php:10:3
+ 1 | <?hh <<file: __EnableUnstableFeatures('recursive_case_types')>>
+ 2 | 
+ 3 | case type A = vec<A>;
+   |           ^ [4]
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+   |               ^ [3]
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |             ^ [2]
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+->   via this generic `T` [3]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_completeness1.php:10:16
+ 1 | <?hh <<file: __EnableUnstableFeatures('recursive_case_types')>>
+ 2 | 
+ 3 | case type A = vec<A>;
+   |           ^ [4]
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+   :
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+   |             ^ [2]
+   |                ^^ [1]
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [5]
+
+subtyping_completeness1.php:10:16
+ 1 | <?hh <<file: __EnableUnstableFeatures('recursive_case_types')>>
+ 2 | 
+ 3 | case type A = vec<A>;
+   |           ^ [5]
+ 4 | case type B = vec<B>;
+ 5 | case type C = vec<vec<C>>;
+ 6 | 
+ 7 | function test(A $a, B $b, C $c): void {
+   |               ^ [4]
+ 8 |   hh_expect<A>($b);
+ 9 |   hh_expect<A>($c);
+10 |   hh_expect<C>($a);
+   |             ^ [2]
+   |                ^^ [1]
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+12 errors found

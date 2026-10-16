@@ -1,6 +1,21 @@
-ERROR: File "builtins2.php", line 7, characters 38-49:
-Invalid argument (Typing[4110])
-  File "dyn_func_pointers.hhi", line 12, characters 24-29:
-  Expected `string`
-  File "dyn_func_pointers.hhi", line 12, characters 46-52:
-  But got `dynamic`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `dynamic` [3]
+
+builtins2.php:7:38
+ 5 | function get_dynamic(): void {
+ 6 |   $foo_dynamic = HH\dynamic_fun('foo');
+ 7 |   $foo_more_dynamic = HH\dynamic_fun($foo_dynamic);
+   |                                      ^^^^^^^^^^^^ [1]
+ 8 | }
+
+dyn_func_pointers.hhi:12:24
+10 | 
+11 | namespace HH {
+12 |   function dynamic_fun(string $func_name)[]: dynamic;
+   |                        ^^^^^^ [2]
+   |                                              ^^^^^^^ [3]
+13 |   function dynamic_class_meth(class<mixed> $cls_name, string $meth_name)[]: dynamic;
+14 |   function dynamic_meth_caller(class_or_classname<mixed> $cls_name, string $meth_name)[]: dynamic;
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "dunion_bad_syntax.php", line 4, characters 26-26:
-Expected matching separator here. (Parsing[1002])
+error: Parsing[1002] Expected matching separator here. [1]
+
+dunion_bad_syntax.php:4:26
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | function foo((int | bool & string) $ib):string {
+  |                          ^ [1]
+5 |   if ($ib is int) {
+6 |     return "is an int";
+
+1 error found

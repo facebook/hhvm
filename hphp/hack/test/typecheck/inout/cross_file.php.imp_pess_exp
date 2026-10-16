@@ -1,12 +1,39 @@
-ERROR: File "cross_file.php--file2.php", line 4, characters 5-14:
-Invalid argument (Typing[4110])
-  File "cross_file.php--file1.php", line 3, characters 18-20:
-  Expected `int`
-  File "cross_file.php--file2.php", line 3, characters 18-23:
-  But got `string`
-ERROR: File "cross_file.php--file2.php", line 4, characters 11-14:
-Invalid assignment to an `inout` parameter (Typing[4337])
-  File "cross_file.php--file2.php", line 3, characters 25-28:
-  Expected `string`
-  File "cross_file.php--file1.php", line 3, characters 18-20:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+cross_file.php--file2.php:4:5
+1 | <?hh
+2 | 
+3 | function g(inout string $arg): void {
+  |                  ^^^^^^ [3]
+4 |   f(inout $arg);
+  |     ^^^^^^^^^^ [1]
+5 | }
+
+cross_file.php--file1.php:3:18
+1 | <?hh
+2 | 
+3 | function f(inout int $arg): void {}
+  |                  ^^^ [2]
+
+error: Typing[4337] Invalid assignment to an `inout` parameter [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+cross_file.php--file2.php:4:11
+1 | <?hh
+2 | 
+3 | function g(inout string $arg): void {
+  |                         ^^^^ [2]
+4 |   f(inout $arg);
+  |           ^^^^ [1]
+5 | }
+
+cross_file.php--file1.php:3:18
+1 | <?hh
+2 | 
+3 | function f(inout int $arg): void {}
+  |                  ^^^ [3]
+
+2 errors found

@@ -1,12 +1,30 @@
-ERROR: File "unpack_call3.php", line 7, characters 8-12:
-Invalid argument (Typing[4359])
-  File "unpack_call3.php", line 7, characters 8-12:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call3.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call3.php", line 7, characters 8-12:
-Invalid argument (Typing[4110])
-  File "unpack_call3.php", line 7, characters 8-12:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call3.php", line 6, characters 11-18:
-  But got `string`
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call3.php:7:8
+1 | <?hh
+2 | 
+3 | function f(int $foo, mixed ...$args): void {}
+  |          ^ [2]
+4 | 
+5 | function test(): void {
+6 |   $args = 'string';
+7 |   f(...$args); // should be error
+  |        ^^^^^ [1]
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Traversable<_>` (it is unpacked with `...`) [1]
+-> But got `string` [2]
+
+unpack_call3.php:7:8
+4 | 
+5 | function test(): void {
+6 |   $args = 'string';
+  |           ^^^^^^^^ [2]
+7 |   f(...$args); // should be error
+  |        ^^^^^ [1]
+8 | }
+
+2 errors found

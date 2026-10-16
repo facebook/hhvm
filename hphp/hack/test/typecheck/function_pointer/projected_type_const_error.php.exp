@@ -1,6 +1,19 @@
-ERROR: File "projected_type_const_error.php", line 22, characters 22-28:
-Invalid argument (Typing[4110])
-  File "projected_type_const_error.php", line 9, characters 23-25:
-  Expected `int`
-  File "projected_type_const_error.php", line 22, characters 22-28:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+projected_type_const_error.php:22:22
+ 7 | 
+ 8 | class IntBox extends MyBox {
+ 9 |   const type TInner = int;
+   |                       ^^^ [2]
+10 |   public function set(int $_): void {}
+11 | }
+   :
+20 | function test(): void {
+21 |   $fun = set_a_box<>;
+22 |   $fun(new IntBox(), "hello");
+   |                      ^^^^^^^ [1]
+23 | }
+
+1 error found

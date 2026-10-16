@@ -1,6 +1,29 @@
-ERROR: File "reified_generic_memoize_error.php", line 9, characters 5-13:
-This method cannot be memoized because it has a polymorphic context (Parsing[1002])
-ERROR: File "reified_generic_memoize_error.php", line 11, characters 5-13:
-This method cannot be memoized because it has a polymorphic context (Parsing[1002])
-ERROR: File "reified_generic_memoize_error.php", line 16, characters 3-11:
-This function cannot be memoized because it has a polymorphic context (Parsing[1002])
+error: Parsing[1002] This method cannot be memoized because it has a polymorphic context [1]
+
+reified_generic_memoize_error.php:9:5
+ 7 | 
+ 8 | class C<reify T as A> {
+ 9 |   <<__Memoize>> public function m()[T::C]: void {} // not ok
+   |     ^^^^^^^^^ [1]
+10 | 
+11 |   <<__Memoize>> public function n<reify Tm as A>()[Tm::C]: void {} // not ok
+
+error: Parsing[1002] This method cannot be memoized because it has a polymorphic context [1]
+
+reified_generic_memoize_error.php:11:5
+ 9 |   <<__Memoize>> public function m()[T::C]: void {} // not ok
+10 | 
+11 |   <<__Memoize>> public function n<reify Tm as A>()[Tm::C]: void {} // not ok
+   |     ^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Parsing[1002] This function cannot be memoized because it has a polymorphic context [1]
+
+reified_generic_memoize_error.php:16:3
+14 | <<__Memoize>> function f()[T::C]: void {} // ok, T is an alias
+15 | 
+16 | <<__Memoize>> function g<reify T as A>()[T::C]: void {} // not ok
+   |   ^^^^^^^^^ [1]
+
+3 errors found

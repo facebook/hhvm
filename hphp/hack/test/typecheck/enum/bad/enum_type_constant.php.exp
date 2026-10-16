@@ -1,6 +1,16 @@
-ERROR: File "enum_type_constant.php", line 6, characters 15-22:
-Invalid type hint (Typing[4062])
-  File "enum_type_constant.php", line 6, characters 18-22:
-  You are trying to access the type constant `class` but this is an int
-  File "enum_type_constant.php", line 3, characters 15-17:
-  Definition is here
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `class` but this is an int [2]
+-> Definition is here [3]
+
+enum_type_constant.php:6:15
+1 | <?hh
+2 | 
+3 | enum E:int as int {}
+  |               ^^^ [3]
+4 | 
+5 | // Should fail since E is a newtype for int, not a class
+6 | function f(): E::class {}
+  |               ^^^^^^^^ [1]
+  |                  ^^^^^ [2]
+
+1 error found

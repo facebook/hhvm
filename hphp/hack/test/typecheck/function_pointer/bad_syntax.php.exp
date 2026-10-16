@@ -1,4 +1,21 @@
-ERROR: File "bad_syntax.php", line 9, characters 8-20:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
-ERROR: File "bad_syntax.php", line 16, characters 8-15:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+bad_syntax.php:9:8
+ 7 | function qux(): void {
+ 8 |   $y = new Foo();
+ 9 |   $x = $y::{'bar'}<>;
+   |        ^^^^^^^^^^^^^ [1]
+10 |   $x(4);
+11 | }
+
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+bad_syntax.php:16:8
+14 |   $y = new Foo();
+15 |   $z = 'bar';
+16 |   $x = $y::$z<>;
+   |        ^^^^^^^^ [1]
+17 |   $x(4);
+18 | }
+
+2 errors found

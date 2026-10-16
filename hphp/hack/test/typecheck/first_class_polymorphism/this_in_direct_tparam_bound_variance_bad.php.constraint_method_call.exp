@@ -1,82 +1,201 @@
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 3-62:
-Typing error (Typing[4323])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 8, characters 37-37:
-  `T` is a constrained type parameter
-  File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 8-23:
-  This type constraint is violated
-  File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 8-23:
-  Expected `ConcBase_Direct3`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 51-59:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 73, characters 5-19:
-Invalid argument (Typing[4110])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 21, characters 5-16:
-  Expected `Base_Direct3`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 73, characters 9-17:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 3-58:
-Typing error (Typing[4323])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 10, characters 33-33:
-  `T` is a constrained type parameter
-  File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 8-23:
-  This type constraint is violated
-  File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 8-23:
-  Expected `ConcBase_Direct3`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 47-55:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 80, characters 5-19:
-Invalid argument (Typing[4323])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 25, characters 45-45:
-  `T` is a constrained type parameter
-  File "this_in_direct_tparam_bound_variance_bad.php", line 25, characters 50-61:
-  This type constraint is violated
-  File "this_in_direct_tparam_bound_variance_bad.php", line 25, characters 50-61:
-  Expected `Base_Direct3`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 80, characters 9-17:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 3-72:
-Typing error (Typing[4323])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 38, characters 37-37:
-  `T` is a constrained type parameter
-  File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 8-30:
-  This type constraint is violated
-  File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 8-30:
-  Expected `ConcBase_Direct3_WithTC`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 58-66:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 5-19:
-Invalid argument (Typing[4110])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 52, characters 5-52:
-  Expected `Base_Direct3_WithTC`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 9-17:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 5-19:
-Invalid argument (Typing[4110])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 52, characters 5-52:
-  Expected a class with `{type TBase = _}`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 9-17:
-  But got `Unrelated`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 9-17:
-  Class `Unrelated` has no constant `TBase`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 3-68:
-Typing error (Typing[4323])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 40, characters 33-33:
-  `T` is a constrained type parameter
-  File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 8-30:
-  This type constraint is violated
-  File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 8-30:
-  Expected `ConcBase_Direct3_WithTC`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 54-62:
-  But got `Unrelated`
-ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 95, characters 5-19:
-Invalid argument (Typing[4323])
-  File "this_in_direct_tparam_bound_variance_bad.php", line 58, characters 5-5:
-  `T` is a constrained type parameter
-  File "this_in_direct_tparam_bound_variance_bad.php", line 58, characters 10-57:
-  This type constraint is violated
-  File "this_in_direct_tparam_bound_variance_bad.php", line 58, characters 10-57:
-  Expected a class with `{type TBase = _}`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 95, characters 9-17:
-  But got `Unrelated`
-  File "this_in_direct_tparam_bound_variance_bad.php", line 95, characters 9-17:
-  Class `Unrelated` has no constant `TBase`
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase_Direct3` [3]
+-> But got `Unrelated` [4]
+
+this_in_direct_tparam_bound_variance_bad.php:70:3
+ 6 | 
+ 7 | abstract class Base_Direct3 {
+ 8 |   public function direct_as_contrav<T as this>(T $_): void {}
+   |                                     ^ [2]
+ 9 | 
+10 |   public function direct_as_inv<T as this>(T $_): ?T {
+   :
+68 | function test_reject(): void {
+69 |   // direct_as_contrav: Unrelated is NOT <: ConcBase_Direct3 → rejected
+70 |   (new ConcBase_Direct3())->direct_as_contrav(new Unrelated());
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^^^^^^^^^^^^^ [3]
+   |                                                   ^^^^^^^^^ [4]
+71 |   RejectDirect::direct_as_contrav_simp(
+72 |     new ConcBase_Direct3(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base_Direct3` [2]
+-> But got `Unrelated` [3]
+
+this_in_direct_tparam_bound_variance_bad.php:73:5
+19 |   public static function direct_as_contrav_simp(
+20 |     Base_Direct3 $_,
+21 |     Base_Direct3 $_,
+   |     ^^^^^^^^^^^^ [2]
+22 |   ): void {}
+23 | 
+   :
+71 |   RejectDirect::direct_as_contrav_simp(
+72 |     new ConcBase_Direct3(),
+73 |     new Unrelated(),
+   |     ^^^^^^^^^^^^^^^ [1]
+   |         ^^^^^^^^^ [3]
+74 |   );
+75 | 
+
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase_Direct3` [3]
+-> But got `Unrelated` [4]
+
+this_in_direct_tparam_bound_variance_bad.php:77:3
+ 8 |   public function direct_as_contrav<T as this>(T $_): void {}
+ 9 | 
+10 |   public function direct_as_inv<T as this>(T $_): ?T {
+   |                                 ^ [2]
+11 |     return null;
+12 |   }
+   :
+75 | 
+76 |   // direct_as_inv: Unrelated is NOT <: ConcBase_Direct3 → rejected
+77 |   (new ConcBase_Direct3())->direct_as_inv(new Unrelated());
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^^^^^^^^^^^^^ [3]
+   |                                               ^^^^^^^^^ [4]
+78 |   RejectDirect::direct_as_inv_simp(
+79 |     new ConcBase_Direct3(),
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Base_Direct3` [3]
+-> But got `Unrelated` [4]
+
+this_in_direct_tparam_bound_variance_bad.php:80:5
+23 | 
+24 |   // Simplified direct_as_inv (this eliminated, T kept)
+25 |   public static function direct_as_inv_simp<T as Base_Direct3>(
+   |                                             ^ [2]
+   |                                                  ^^^^^^^^^^^^ [3]
+26 |     Base_Direct3 $_,
+27 |     T $_,
+   :
+78 |   RejectDirect::direct_as_inv_simp(
+79 |     new ConcBase_Direct3(),
+80 |     new Unrelated(),
+   |     ^^^^^^^^^^^^^^^ [1]
+   |         ^^^^^^^^^ [4]
+81 |   );
+82 | 
+
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase_Direct3_WithTC` [3]
+-> But got `Unrelated` [4]
+
+this_in_direct_tparam_bound_variance_bad.php:85:3
+36 |   abstract const type TBase as arraykey;
+37 | 
+38 |   public function direct_as_contrav<T as this>(T $_, this::TBase $_): void {}
+   |                                     ^ [2]
+39 | 
+40 |   public function direct_as_inv<T as this>(T $_, this::TBase $_): ?T {
+   :
+83 |   // === With class type constants ===
+84 | 
+85 |   (new ConcBase_Direct3_WithTC())->direct_as_contrav(new Unrelated(), 0);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                          ^^^^^^^^^ [4]
+86 |   RejectDirect_WithTC::direct_as_contrav_simp(
+87 |     new ConcBase_Direct3_WithTC(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base_Direct3_WithTC` [2]
+-> But got `Unrelated` [3]
+
+this_in_direct_tparam_bound_variance_bad.php:88:5
+50 |   public static function direct_as_contrav_simp<TBase0 as arraykey>(
+51 |     Base_Direct3_WithTC with { type TBase = TBase0 } $_,
+52 |     Base_Direct3_WithTC with { type TBase = TBase0 } $_,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+53 |     TBase0 $_,
+54 |   ): void {}
+   :
+86 |   RejectDirect_WithTC::direct_as_contrav_simp(
+87 |     new ConcBase_Direct3_WithTC(),
+88 |     new Unrelated(),
+   |     ^^^^^^^^^^^^^^^ [1]
+   |         ^^^^^^^^^ [3]
+89 |     0,
+90 |   );
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with `{type TBase = _}` [2]
+-> But got `Unrelated` [3]
+-> Class `Unrelated` has no constant `TBase` [3]
+
+this_in_direct_tparam_bound_variance_bad.php:88:5
+50 |   public static function direct_as_contrav_simp<TBase0 as arraykey>(
+51 |     Base_Direct3_WithTC with { type TBase = TBase0 } $_,
+52 |     Base_Direct3_WithTC with { type TBase = TBase0 } $_,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+53 |     TBase0 $_,
+54 |   ): void {}
+   :
+86 |   RejectDirect_WithTC::direct_as_contrav_simp(
+87 |     new ConcBase_Direct3_WithTC(),
+88 |     new Unrelated(),
+   |     ^^^^^^^^^^^^^^^ [1]
+   |         ^^^^^^^^^ [3]
+89 |     0,
+90 |   );
+
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase_Direct3_WithTC` [3]
+-> But got `Unrelated` [4]
+
+this_in_direct_tparam_bound_variance_bad.php:92:3
+38 |   public function direct_as_contrav<T as this>(T $_, this::TBase $_): void {}
+39 | 
+40 |   public function direct_as_inv<T as this>(T $_, this::TBase $_): ?T {
+   |                                 ^ [2]
+41 |     return null;
+42 |   }
+   :
+90 |   );
+91 | 
+92 |   (new ConcBase_Direct3_WithTC())->direct_as_inv(new Unrelated(), 0);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                      ^^^^^^^^^ [4]
+93 |   RejectDirect_WithTC::direct_as_inv_simp(
+94 |     new ConcBase_Direct3_WithTC(),
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TBase = _}` [3]
+-> But got `Unrelated` [4]
+-> Class `Unrelated` has no constant `TBase` [4]
+
+this_in_direct_tparam_bound_variance_bad.php:95:5
+56 |   public static function direct_as_inv_simp<
+57 |     TBase0 as arraykey,
+58 |     T as Base_Direct3_WithTC with { type TBase = TBase0 },
+   |     ^ [2]
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+59 |   >(
+60 |     Base_Direct3_WithTC with { type TBase = TBase0 } $_,
+   :
+93 |   RejectDirect_WithTC::direct_as_inv_simp(
+94 |     new ConcBase_Direct3_WithTC(),
+95 |     new Unrelated(),
+   |     ^^^^^^^^^^^^^^^ [1]
+   |         ^^^^^^^^^ [4]
+96 |     0,
+97 |   );
+
+9 errors found

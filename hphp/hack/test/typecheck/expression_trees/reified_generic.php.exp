@@ -1,2 +1,10 @@
-ERROR: File "reified_generic.php", line 14, characters 14-19:
-Static method calls on reified generics are not permitted in Expression Trees. (Typing[4440])
+error: Typing[4440] Static method calls on reified generics are not permitted in Expression Trees. [1]
+
+reified_generic.php:14:14
+12 | 
+13 | function takes_reified<reify T as Foo>(): void {
+14 |   ExampleDsl`T::bar()`;
+   |              ^^^^^^ [1]
+15 | }
+
+1 error found

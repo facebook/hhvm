@@ -1,8 +1,27 @@
-ERROR: File "mutually_recursive_where_clauses.php", line 3, characters 11-11:
-Recursion is not supported via case type where clauses. (Typing[4485])
-  File "mutually_recursive_where_clauses.php", line 4, characters 36-44:
-  `A` appears here
-ERROR: File "mutually_recursive_where_clauses.php", line 4, characters 11-11:
-Recursion is not supported via case type where clauses. (Typing[4485])
-  File "mutually_recursive_where_clauses.php", line 3, characters 33-38:
-  `B` appears here
+error: Typing[4485] Recursion is not supported via case type where clauses. [1]
+-> `A` appears here [2]
+
+mutually_recursive_where_clauses.php:3:11
+1 | <?hh
+2 | 
+3 | case type A<T> = int where T as B<int> | bool;
+  |           ^ [1]
+4 | case type B<T> = string where T as A<string> | null;
+  |                                    ^^^^^^^^^ [2]
+5 | 
+6 | function f(): void {
+
+error: Typing[4485] Recursion is not supported via case type where clauses. [1]
+-> `B` appears here [2]
+
+mutually_recursive_where_clauses.php:4:11
+1 | <?hh
+2 | 
+3 | case type A<T> = int where T as B<int> | bool;
+  |                                 ^^^^^^ [2]
+4 | case type B<T> = string where T as A<string> | null;
+  |           ^ [1]
+5 | 
+6 | function f(): void {
+
+2 errors found

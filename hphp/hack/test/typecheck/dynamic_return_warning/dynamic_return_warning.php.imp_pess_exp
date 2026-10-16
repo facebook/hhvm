@@ -1,24 +1,77 @@
-WARN: File "dynamic_return_warning.php", line 5, characters 10-15:
-Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` (Warn[12044])
-  File "dynamic_return_warning.php", line 4, characters 49-56:
-  This return type is not fully enforced at runtime
-WARN: File "dynamic_return_warning.php", line 29, characters 10-15:
-Returning a value of type `dynamic` through a non-fully-enforced return type `T` (Warn[12044])
-  File "dynamic_return_warning.php", line 28, characters 71-71:
-  This return type is not fully enforced at runtime
-WARN: File "dynamic_return_warning.php", line 39, characters 10-15:
-Returning a value of type `dynamic` through a non-fully-enforced return type `PartiallyEnforcedEnum` (Warn[12044])
-  File "dynamic_return_warning.php", line 38, characters 4-24:
-  This return type is not fully enforced at runtime
-WARN: File "dynamic_return_warning.php", line 63, characters 10-15:
-Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` (Warn[12044])
-  File "dynamic_return_warning.php", line 62, characters 14-21:
-  This return type is not fully enforced at runtime
-WARN: File "dynamic_return_warning.php", line 80, characters 12-17:
-Returning a value of type `dynamic` through a non-fully-enforced return type `dict<string, int>` (Warn[12044])
-  File "dynamic_return_warning.php", line 79, characters 6-22:
-  This return type is not fully enforced at runtime
-WARN: File "dynamic_return_warning.php", line 85, characters 41-46:
-Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` (Warn[12044])
-  File "dynamic_return_warning.php", line 85, characters 28-35:
-  This return type is not fully enforced at runtime
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+dynamic_return_warning.php:5:10
+2 | <<file:__EnableUnstableFeatures('like_type_hints')>>
+3 | 
+4 | function return_dynamic_as_vec(dynamic $value): vec<int> {
+  |                                                 ^^^^^^^^ [2]
+5 |   return $value;
+  |          ^^^^^^ [1]
+6 | }
+7 | 
+
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `T` [1]
+-> This return type is not fully enforced at runtime [2]
+
+dynamic_return_warning.php:29:10
+26 | }
+27 | 
+28 | function return_dynamic_as_generic<<<__Explicit>> T>(dynamic $value): T {
+   |                                                                       ^ [2]
+29 |   return $value;
+   |          ^^^^^^ [1]
+30 | }
+31 | 
+
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `PartiallyEnforcedEnum` [1]
+-> This return type is not fully enforced at runtime [2]
+
+dynamic_return_warning.php:39:10
+36 | function return_dynamic_as_enum(
+37 |   dynamic $value,
+38 | ): PartiallyEnforcedEnum {
+   |    ^^^^^^^^^^^^^^^^^^^^^ [2]
+39 |   return $value;
+   |          ^^^^^^ [1]
+40 | }
+41 | 
+
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+dynamic_return_warning.php:63:10
+60 | async function return_dynamic_as_async_vec(
+61 |   dynamic $value,
+62 | ): Awaitable<vec<int>> {
+   |              ^^^^^^^^ [2]
+63 |   return $value;
+   |          ^^^^^^ [1]
+64 | }
+65 | 
+
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `dict<string, int>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+dynamic_return_warning.php:80:12
+77 |   public function returnDynamicAsDict(
+78 |     dynamic $value,
+79 |   ): dict<string, int> {
+   |      ^^^^^^^^^^^^^^^^^ [2]
+80 |     return $value;
+   |            ^^^^^^ [1]
+81 |   }
+82 | }
+
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `vec<int>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+dynamic_return_warning.php:85:41
+83 | 
+84 | function make_dynamic_returning_closure(): (function(dynamic): vec<int>) {
+85 |   return (dynamic $value): vec<int> ==> $value;
+   |                            ^^^^^^^^ [2]
+   |                                         ^^^^^^ [1]
+86 | }
+
+6 errors found

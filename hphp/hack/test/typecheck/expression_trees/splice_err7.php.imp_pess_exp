@@ -1,70 +1,223 @@
-ERROR: File "splice_err7.php", line 5, characters 23-27:
-Splicing can only occur inside expression tree literals (between backticks) (Parsing[1002])
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 49, characters 5-29:
-  Expected `ExampleExpression<_>`
-  File "", line 0, characters 0-0:
-  But got `(function($x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 49, characters 5-29:
-  Expected `ExampleExpression<_>`
-  File "splice_err7.php", line 5, characters 16-27:
-  But got `(function(~Spliceable<_, mixed, _> $x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4323])
-  File "expr_tree.php", line 139, characters 31-35:
-  `THack` is a constrained type parameter
-  File "expr_tree.php", line 139, characters 50-69:
-  This type constraint is violated
-  File "expr_tree.php", line 139, characters 51-69:
-  Expected `ExampleAutoLiftable`
-  File "", line 0, characters 0-0:
-  But got `(function($x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4323])
-  File "expr_tree.php", line 139, characters 31-35:
-  `THack` is a constrained type parameter
-  File "expr_tree.php", line 139, characters 50-69:
-  This type constraint is violated
-  File "expr_tree.php", line 139, characters 51-69:
-  Expected `ExampleAutoLiftable`
-  File "splice_err7.php", line 5, characters 16-27:
-  But got `(function(~Spliceable<_, mixed, _> $x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 140, characters 5-31:
-  Expected `ExampleUnion<_, _>`
-  File "", line 0, characters 0-0:
-  But got `(function($x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 140, characters 5-31:
-  Expected `ExampleUnion<_, _>`
-  File "splice_err7.php", line 5, characters 16-27:
-  But got `(function(~Spliceable<_, mixed, _> $x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 140, characters 5-31:
-  Expected `dynamic`
-  File "", line 0, characters 0-0:
-  But got `(function($x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 140, characters 5-31:
-  Expected `dynamic`
-  File "splice_err7.php", line 5, characters 16-27:
-  But got `(function(~Spliceable<_, mixed, _> $x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 140, characters 5-31:
-  Expected `~ExampleUnion<_, _>`
-  File "", line 0, characters 0-0:
-  But got `(function($x): _)`
-ERROR: File "splice_err7.php", line 5, characters 16-27:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 140, characters 5-31:
-  Expected `~ExampleUnion<_, _>`
-  File "splice_err7.php", line 5, characters 16-27:
-  But got `(function(~Spliceable<_, mixed, _> $x): _)`
+error: Parsing[1002] Splicing can only occur inside expression tree literals (between backticks) [1]
+
+splice_err7.php:5:23
+3 | 
+4 | function f(): void {
+5 |   ExampleDsl`${$x ==> ${$x}}`;
+  |                       ^^^^^ [1]
+6 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleExpression<_>` [2]
+-> But got `(function($x): _)` [3]
+
+splice_err7.php:5:16
+ 3 | 
+ 4 | function f(): void {
+ 5 |   ExampleDsl`${$x ==> ${$x}}`;
+   |                ^^^^^^^^^^^^ [1]
+ 6 | }
+
+expr_tree.php:49:5
+47 | case type ExampleUnion<+THack as ?HackValue, +TInfer> =
+48 |   | THack
+49 |   | ExampleExpression<TInfer>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+50 | 
+51 | case type ExampleAutoLiftable as HackValue,ExprTreeOpType<ExampleMixedOpType> =
+
+:0:0
+ 0 | No source found
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleExpression<_>` [2]
+-> But got `(function(~Spliceable<_, mixed, _> $x): _)` [1]
+
+splice_err7.php:5:16
+ 3 | 
+ 4 | function f(): void {
+ 5 |   ExampleDsl`${$x ==> ${$x}}`;
+   |                ^^^^^^^^^^^^ [1]
+ 6 | }
+
+expr_tree.php:49:5
+47 | case type ExampleUnion<+THack as ?HackValue, +TInfer> =
+48 |   | THack
+49 |   | ExampleExpression<TInfer>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+50 | 
+51 | case type ExampleAutoLiftable as HackValue,ExprTreeOpType<ExampleMixedOpType> =
+
+error: Typing[4323] Invalid argument [1]
+-> `THack` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ExampleAutoLiftable` [4]
+-> But got `(function($x): _)` [5]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:139:31
+137 |   }
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+    |                               ^^^^^ [2]
+    |                                                  ^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                   ^^^^^^^^^^^^^^^^^^^ [4]
+140 |     ExampleUnion<THack, TInfer> $e,
+141 |   ): ExampleExpression<TInfer> {
+
+:0:0
+  0 | No source found
+
+error: Typing[4323] Invalid argument [1]
+-> `THack` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ExampleAutoLiftable` [4]
+-> But got `(function(~Spliceable<_, mixed, _> $x): _)` [1]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:139:31
+137 |   }
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+    |                               ^^^^^ [2]
+    |                                                  ^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                   ^^^^^^^^^^^^^^^^^^^ [4]
+140 |     ExampleUnion<THack, TInfer> $e,
+141 |   ): ExampleExpression<TInfer> {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleUnion<_, _>` [2]
+-> But got `(function($x): _)` [3]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:140:5
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+141 |   ): ExampleExpression<TInfer> {
+142 |     if ($e is ExampleExpression<_>) {
+
+:0:0
+  0 | No source found
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleUnion<_, _>` [2]
+-> But got `(function(~Spliceable<_, mixed, _> $x): _)` [1]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:140:5
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+141 |   ): ExampleExpression<TInfer> {
+142 |     if ($e is ExampleExpression<_>) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> But got `(function($x): _)` [3]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:140:5
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+141 |   ): ExampleExpression<TInfer> {
+142 |     if ($e is ExampleExpression<_>) {
+
+:0:0
+  0 | No source found
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> But got `(function(~Spliceable<_, mixed, _> $x): _)` [1]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:140:5
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+141 |   ): ExampleExpression<TInfer> {
+142 |     if ($e is ExampleExpression<_>) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~ExampleUnion<_, _>` [2]
+-> But got `(function($x): _)` [3]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:140:5
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+141 |   ): ExampleExpression<TInfer> {
+142 |     if ($e is ExampleExpression<_>) {
+
+:0:0
+  0 | No source found
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~ExampleUnion<_, _>` [2]
+-> But got `(function(~Spliceable<_, mixed, _> $x): _)` [1]
+
+splice_err7.php:5:16
+  3 | 
+  4 | function f(): void {
+  5 |   ExampleDsl`${$x ==> ${$x}}`;
+    |                ^^^^^^^^^^^^ [1]
+  6 | }
+
+expr_tree.php:140:5
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+141 |   ): ExampleExpression<TInfer> {
+142 |     if ($e is ExampleExpression<_>) {
+
+11 errors found

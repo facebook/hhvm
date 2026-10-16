@@ -1,6 +1,28 @@
-ERROR: File "context_alias_no_equals.php--g.php", line 7, characters 5-57:
-Invalid argument (Typing[4403])
-  File "context_alias_no_equals.php--f.php", line 8, characters 16-23:
-  Expected a function that requires the capability Codegen
-  File "context_alias_no_equals.php--g.php", line 5, characters 10-13:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability Codegen [2]
+-> But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+context_alias_no_equals.php--g.php:7:5
+ 3 | // client code
+ 4 | <<__EntryPoint>>
+ 5 | function main(): void {
+   |          ^^^^ [3]
+ 6 |   enter_codegen(
+ 7 |     () ==> {
+   |     ^^^^^^^^ [1]
+ 8 |       echo "break purity"; // illegal!
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |     }
+   |     ^ [1]
+10 |   );
+11 | }
+
+context_alias_no_equals.php--f.php:8:16
+ 6 | 
+ 7 | function enter_codegen(
+ 8 |   (function ()[\Codegen]: void) $f
+   |                ^^^^^^^^ [2]
+ 9 | ): void {
+10 |   echo "Hello I can secretly do IO";
+
+1 error found

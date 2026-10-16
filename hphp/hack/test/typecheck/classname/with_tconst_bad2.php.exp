@@ -1,10 +1,26 @@
-ERROR: File "with_tconst_bad2.php", line 13, characters 29-34:
-Wrong type hint (Typing[4338])
-  File "with_tconst_bad2.php", line 12, characters 19-19:
-  Expected `C`
-  File "with_tconst_bad2.php", line 13, characters 19-26:
-    resulting from expanding the type constant `this::Ti`
-  File "with_tconst_bad2.php", line 13, characters 38-45:
-  But got `stdClass`
-  File "classes.hhi", line 31, characters 15-22:
-    via this generic `this`; implicitly defined constant `::class` is a reference to class `stdClass`
+error: Typing[4338] Wrong type hint [1]
+-> Expected `C` [2]
+->   resulting from expanding the type constant `this::Ti` [3]
+-> But got `stdClass` [4]
+->   via this generic `this`; implicitly defined constant `::class` is a reference to class `stdClass` [5]
+
+with_tconst_bad2.php:13:29
+10 | 
+11 | class CLoader extends ALoader {
+12 |   const type Ti = C;
+   |                   ^ [2]
+13 |   const classname<this::Ti> I_NAME = stdClass::class;
+   |                   ^^^^^^^^ [3]
+   |                             ^^^^^^ [1]
+   |                                      ^^^^^^^^ [4]
+14 | }
+
+classes.hhi:31:15
+29 |   }
+30 | 
+31 |   final class stdClass {}
+   |               ^^^^^^^^ [5]
+32 | 
+33 | } // namespace
+
+1 error found

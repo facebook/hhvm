@@ -1,4 +1,11 @@
-ERROR: File "abstract_class_extends_interface_bad.php", line 13, characters 16-16:
-Classes can only extend other classes. Did you mean `implements A`? (Typing[4115])
-  File "abstract_class_extends_interface_bad.php", line 13, characters 26-26:
-  This is an interface.
+error: Typing[4115] Classes can only extend other classes. Did you mean `implements A`? [1]
+-> This is an interface. [2]
+
+abstract_class_extends_interface_bad.php:13:16
+11 | 
+12 | interface A {}
+13 | abstract class B extends A {}
+   |                ^ [1]
+   |                          ^ [2]
+
+1 error found

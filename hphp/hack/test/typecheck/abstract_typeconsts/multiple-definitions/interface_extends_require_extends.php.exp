@@ -1,18 +1,49 @@
-ERROR: File "interface_extends_require_extends.php", line 32, characters 22-23:
-Some members in class `I4` are incompatible with those declared in type `I2` (Typing[4340])
-  File "interface_extends_require_extends.php", line 32, characters 22-23:
-  Some members in class `I4` are incompatible with those declared in type `I2`
-  File "interface_extends_require_extends.php", line 22, characters 23-24:
-  The constraint on this type constant is inconsistent with its parent
-  File "interface_extends_require_extends.php", line 18, characters 29-39:
-  Expected `UpperBound2`
-  File "interface_extends_require_extends.php", line 22, characters 29-39:
-  But got `UpperBound1`
-  File "interface_extends_require_extends.php", line 22, characters 23-24:
-  This declaration was inherited from an object of type `C2`. Redeclare this member in `I4` with a compatible signature.
-ERROR: File "interface_extends_require_extends.php", line 34, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "interface_extends_require_extends.php", line 34, characters 38-39:
-  No type constant `T2` in `UpperBound1`
-  File "interface_extends_require_extends.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
+error: Typing[4340] Some members in class `I4` are incompatible with those declared in type `I2` [1]
+-> Some members in class `I4` are incompatible with those declared in type `I2` [1]
+-> The constraint on this type constant is inconsistent with its parent [2]
+-> Expected `UpperBound2` [3]
+-> But got `UpperBound1` [4]
+-> This declaration was inherited from an object of type `C2`. Redeclare this member in `I4` with a compatible signature. [2]
+
+interface_extends_require_extends.php:32:22
+16 | 
+17 | interface I2 {
+18 |   abstract const type T1 as UpperBound2;
+   |                             ^^^^^^^^^^^ [3]
+19 | }
+20 | 
+21 | abstract class C2 {
+22 |   abstract const type T1 as UpperBound1;
+   |                       ^^ [2]
+   |                             ^^^^^^^^^^^ [4]
+23 | }
+24 | 
+   :
+30 | 
+31 | // Error
+32 | interface I4 extends I2 {
+   |                      ^^ [1]
+33 |   require extends C2;
+34 |   abstract const type T2 = this::T1::T2;
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+interface_extends_require_extends.php:34:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {}
+   |           ^^^^^^^^^^^ [3]
+ 4 | 
+ 5 | interface UpperBound2 extends UpperBound1 {
+   :
+32 | interface I4 extends I2 {
+33 |   require extends C2;
+34 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+35 | }
+36 | 
+
+2 errors found

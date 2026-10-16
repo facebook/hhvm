@@ -1,6 +1,29 @@
-ERROR: File "polymorphic_function_hint_not_enabled.php", line 3, characters 19-44:
-Cannot use unstable feature: `polymorphic_function_hints` (Parsing[1002])
-ERROR: File "polymorphic_function_hint_not_enabled.php", line 5, characters 14-31:
-Cannot use unstable feature: `polymorphic_function_hints` (Parsing[1002])
-ERROR: File "polymorphic_function_hint_not_enabled.php", line 7, characters 20-45:
-Cannot use unstable feature: `polymorphic_function_hints` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `polymorphic_function_hints` [1]
+
+polymorphic_function_hint_not_enabled.php:3:19
+1 | <?hh
+2 | 
+3 | type blah<TOut> = (function<TIn>(TIn): TOut);
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+4 | 
+5 | function foo((function<T>(T):T) $_): void {}
+
+error: Parsing[1002] Cannot use unstable feature: `polymorphic_function_hints` [1]
+
+polymorphic_function_hint_not_enabled.php:5:14
+3 | type blah<TOut> = (function<TIn>(TIn): TOut);
+4 | 
+5 | function foo((function<T>(T):T) $_): void {}
+  |              ^^^^^^^^^^^^^^^^^^ [1]
+6 | 
+7 | function bar<Tbar>((function<T as Tbar>(T):T) $_): void {}
+
+error: Parsing[1002] Cannot use unstable feature: `polymorphic_function_hints` [1]
+
+polymorphic_function_hint_not_enabled.php:7:20
+5 | function foo((function<T>(T):T) $_): void {}
+6 | 
+7 | function bar<Tbar>((function<T as Tbar>(T):T) $_): void {}
+  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+3 errors found

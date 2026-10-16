@@ -1,10 +1,50 @@
-WARN: File "like_casts4.php", line 8, characters 3-15:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Cov<T#1>`. (Warn[12011])
-WARN: File "like_casts4.php", line 9, characters 3-18:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Contra<T#1>`. (Warn[12011])
-WARN: File "like_casts4.php", line 10, characters 3-15:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Inv<T#1>`. (Warn[12011])
-WARN: File "like_casts4.php", line 14, characters 3-29:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => vec<T#1>)`. (Warn[12011])
-WARN: File "like_casts4.php", line 16, characters 3-32:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => Vector<Tv#1>)`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Cov<T#1>`. [1]
+
+like_casts4.php:8:3
+ 6 | 
+ 7 | function basics(dynamic $d): void {
+ 8 |   $d as ~Cov<_>;
+   |   ^^^^^^^^^^^^^ [1]
+ 9 |   $d as ~Contra<_>;
+10 |   $d as ~Inv<_>;
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Contra<T#1>`. [1]
+
+like_casts4.php:9:3
+ 7 | function basics(dynamic $d): void {
+ 8 |   $d as ~Cov<_>;
+ 9 |   $d as ~Contra<_>;
+   |   ^^^^^^^^^^^^^^^^ [1]
+10 |   $d as ~Inv<_>;
+11 | }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Inv<T#1>`. [1]
+
+like_casts4.php:10:3
+ 8 |   $d as ~Cov<_>;
+ 9 |   $d as ~Contra<_>;
+10 |   $d as ~Inv<_>;
+   |   ^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => vec<T#1>)`. [1]
+
+like_casts4.php:14:3
+12 | 
+13 | function inner_types(dynamic $d): void {
+14 |   $d as ~shape('a' => vec<_>);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | 
+16 |   $d as ~shape('a' => Vector<_>);
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => Vector<Tv#1>)`. [1]
+
+like_casts4.php:16:3
+14 |   $d as ~shape('a' => vec<_>);
+15 | 
+16 |   $d as ~shape('a' => Vector<_>);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+
+5 errors found

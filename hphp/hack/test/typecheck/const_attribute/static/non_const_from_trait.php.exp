@@ -1,2 +1,9 @@
-ERROR: File "non_const_from_trait.php", line 5, characters 1-30:
-Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
+error: Parsing[1002] Classes, interfaces, traits and enums may not be declared `__Const` [1]
+
+non_const_from_trait.php:5:1
+3 | 
+4 | trait T { public static int $p = 1; }
+5 | <<__Const>> class C { use T; }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

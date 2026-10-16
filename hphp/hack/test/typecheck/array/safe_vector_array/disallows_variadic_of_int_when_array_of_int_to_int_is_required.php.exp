@@ -1,6 +1,17 @@
-ERROR: File "disallows_variadic_of_int_when_array_of_int_to_int_is_required.php", line 6, characters 26-39:
-Invalid argument (Typing[4110])
-  File "disallows_variadic_of_int_when_array_of_int_to_int_is_required.php", line 3, characters 33-48:
-  Expected `dict<int, int>`
-  File "disallows_variadic_of_int_when_array_of_int_to_int_is_required.php", line 5, characters 22-35:
-  But got `vec<int>` (variadic argument)
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<int, int>` [2]
+-> But got `vec<int>` (variadic argument) [3]
+
+disallows_variadic_of_int_when_array_of_int_to_int_is_required.php:6:26
+1 | <?hh
+2 | 
+3 | function consumeArrayOfIntToInt(darray<int, int> $_): void {}
+  |                                 ^^^^^^^^^^^^^^^^ [2]
+4 | 
+5 | function test(int ...$variadicOfInt): void {
+  |                      ^^^^^^^^^^^^^^ [3]
+6 |   consumeArrayOfIntToInt($variadicOfInt);
+  |                          ^^^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

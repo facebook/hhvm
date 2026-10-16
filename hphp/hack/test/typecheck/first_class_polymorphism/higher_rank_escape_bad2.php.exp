@@ -1,8 +1,20 @@
-ERROR: File "higher_rank_escape_bad2.php", line 11, characters 18-19:
-Invalid argument (Typing[4110])
-  File "higher_rank_escape_bad2.php", line 7, characters 42-47:
-  Expected a first-class polymorphic function type.
-  File "higher_rank_escape_bad2.php", line 7, characters 35-35:
-  A higher rank generic `T#1` will escape its scope where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "higher_rank_escape_bad2.php", line 10, characters 13-13:
-  Please make this type explicit
+error: Typing[4110] Invalid argument [1]
+-> Expected a first-class polymorphic function type. [2]
+-> A higher rank generic `T#1` will escape its scope where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+-> Please make this type explicit [4]
+
+higher_rank_escape_bad2.php:11:18
+ 5 | class Box<T> {}
+ 6 | 
+ 7 | function takePolyNested((function<T>(Box<Box<T>>): void) $g): void {}
+   |                                   ^ [3]
+   |                                          ^^^^^^ [2]
+ 8 | 
+ 9 | function passWithTvar(): void {
+10 |   $g = (Box<_> $_): void ==> {};
+   |             ^ [4]
+11 |   takePolyNested($g);
+   |                  ^^ [1]
+12 | }
+
+1 error found

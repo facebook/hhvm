@@ -1,12 +1,36 @@
-ERROR: File "pseudofunction_function_pointers.php", line 6, characters 3-13:
-The two arguments to `meth_caller()` must be:
+error: Naming[2026] The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
- - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
-ERROR: File "pseudofunction_function_pointers.php", line 7, characters 3-13:
-The two arguments to `meth_caller()` must be:
+ - second: a single-quoted string literal containing the name of a non-static method of that class [1]
+
+pseudofunction_function_pointers.php:6:3
+4 |   $z = 'foo';
+5 |   $w = 'bar';
+6 |   meth_caller(inout $z, inout $w);
+  |   ^^^^^^^^^^^ [1]
+7 |   meth_caller($z, inout $w);
+8 |   meth_caller(inout $z, $w);
+
+error: Naming[2026] The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
- - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
-ERROR: File "pseudofunction_function_pointers.php", line 8, characters 3-13:
-The two arguments to `meth_caller()` must be:
+ - second: a single-quoted string literal containing the name of a non-static method of that class [1]
+
+pseudofunction_function_pointers.php:7:3
+5 |   $w = 'bar';
+6 |   meth_caller(inout $z, inout $w);
+7 |   meth_caller($z, inout $w);
+  |   ^^^^^^^^^^^ [1]
+8 |   meth_caller(inout $z, $w);
+9 | }
+
+error: Naming[2026] The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
- - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
+ - second: a single-quoted string literal containing the name of a non-static method of that class [1]
+
+pseudofunction_function_pointers.php:8:3
+6 |   meth_caller(inout $z, inout $w);
+7 |   meth_caller($z, inout $w);
+8 |   meth_caller(inout $z, $w);
+  |   ^^^^^^^^^^^ [1]
+9 | }
+
+3 errors found

@@ -1,54 +1,149 @@
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 9, characters 23-25:
-  Expected `int`
-  File "projected_type_const_error2.php", line 20, characters 60-65:
-  But got `string`
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4323])
-  File "projected_type_const_error2.php", line 13, characters 20-23:
-  `TBox` is a constrained type parameter
-  File "projected_type_const_error2.php", line 13, characters 28-60:
-  This type constraint is violated
-  File "projected_type_const_error2.php", line 20, characters 52-57:
-  Expected `IntBox`
-  File "projected_type_const_error2.php", line 13, characters 20-23:
-  But got `MyBox with { type TInner = TVal#1 }` where `TBox#1` corresponds to the rank-2 type parameter `TBox` in the polymorphic function
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4323])
-  File "projected_type_const_error2.php", line 13, characters 63-66:
-  `TVal` is a constrained type parameter
-  File "projected_type_const_error2.php", line 13, characters 10-18:
-  This type constraint is violated
-  File "projected_type_const_error2.php", line 20, characters 60-65:
-  Expected `string`
-  File "projected_type_const_error2.php", line 13, characters 63-66:
-  But got `mixed` where `TVal#1` corresponds to the rank-2 type parameter `TVal` in the polymorphic function
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 20, characters 33-73:
-  Expected `dynamic`
-  File "projected_type_const_error2.php", line 13, characters 10-18:
-  But got `(readonly function<TBox as MyBox with { type TInner = TVal }, TVal>(TBox $b, TVal $v): void)` because method or function was called on dynamic or like-type
-  File "projected_type_const_error2.php", line 13, characters 10-18:
-  This type argument to `HH\FunctionRef` must match exactly (it is invariant)
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 20, characters 33-73:
-  Expected `~(readonly function(IntBox, string): ~void)`
-  File "projected_type_const_error2.php", line 13, characters 10-18:
-  But got `(readonly function<TBox as MyBox with { type TInner = TVal }, TVal>(TBox $b, TVal $v): void)` because method or function was called on dynamic or like-type
-  File "projected_type_const_error2.php", line 13, characters 10-18:
-  This type argument to `HH\FunctionRef` must match exactly (it is invariant)
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 20, characters 52-57:
-  Expected `IntBox`
-  File "projected_type_const_error2.php", line 13, characters 20-23:
-  But got `TBox#1` which corresponds to the rank-2 type parameter `TBox` in the polymorphic function
-ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 20, characters 60-65:
-  Expected `string`
-  File "projected_type_const_error2.php", line 13, characters 63-66:
-  But got `TVal#1` which corresponds to the rank-2 type parameter `TVal` in the polymorphic function
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+projected_type_const_error2.php:21:10
+ 7 | 
+ 8 | class IntBox extends MyBox {
+ 9 |   const type TInner = int;
+   |                       ^^^ [2]
+10 |   public function set(int $_): void {}
+11 | }
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                                            ^^^^^^ [3]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+error: Typing[4323] Invalid return type [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `IntBox` [4]
+-> But got `MyBox with { type TInner = TVal#1 }` where `TBox#1` corresponds to the rank-2 type parameter `TBox` in the polymorphic function [2]
+
+projected_type_const_error2.php:21:10
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |                    ^^^^ [2]
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                                    ^^^^^^ [4]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+error: Typing[4323] Invalid return type [1]
+-> `TVal` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [4]
+-> But got `mixed` where `TVal#1` corresponds to the rank-2 type parameter `TVal` in the polymorphic function [2]
+
+projected_type_const_error2.php:21:10
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |          ^^^^^^^^^ [3]
+   |                                                               ^^^^ [2]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                                            ^^^^^^ [4]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `(readonly function<TBox as MyBox with { type TInner = TVal }, TVal>(TBox $b, TVal $v): void)` because method or function was called on dynamic or like-type [3]
+-> This type argument to `HH\FunctionRef` must match exactly (it is invariant) [3]
+
+projected_type_const_error2.php:21:10
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |          ^^^^^^^^^ [3]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~(readonly function(IntBox, string): ~void)` [2]
+-> But got `(readonly function<TBox as MyBox with { type TInner = TVal }, TVal>(TBox $b, TVal $v): void)` because method or function was called on dynamic or like-type [3]
+-> This type argument to `HH\FunctionRef` must match exactly (it is invariant) [3]
+
+projected_type_const_error2.php:21:10
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |          ^^^^^^^^^ [3]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `IntBox` [2]
+-> But got `TBox#1` which corresponds to the rank-2 type parameter `TBox` in the polymorphic function [3]
+
+projected_type_const_error2.php:21:10
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |                    ^^^^ [3]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                                    ^^^^^^ [2]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `TVal#1` which corresponds to the rank-2 type parameter `TVal` in the polymorphic function [3]
+
+projected_type_const_error2.php:21:10
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |                                                               ^^^^ [3]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+18 | }
+19 | 
+20 | function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
+   |                                                            ^^^^^^ [2]
+21 |   return set_a_box<>;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+7 errors found

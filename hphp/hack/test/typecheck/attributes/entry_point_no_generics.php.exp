@@ -1,2 +1,9 @@
-ERROR: File "entry_point_no_generics.php", line 4, characters 15-15:
-`__EntryPoint` functions cannot have generic parameters. (NastCheck[3094])
+error: NastCheck[3094] `__EntryPoint` functions cannot have generic parameters. [1]
+
+entry_point_no_generics.php:4:15
+2 | 
+3 | <<__EntryPoint>>
+4 | function main<T>() : void {}
+  |               ^ [1]
+
+1 error found

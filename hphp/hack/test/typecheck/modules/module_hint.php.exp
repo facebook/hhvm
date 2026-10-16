@@ -1,50 +1,240 @@
-WARN: File "module_hint.php--here.php", line 12, characters 5-11:
-This `is` check is always `true`. The expression on the left has type `(D & (D, int) & G<T#1>)` which is a subtype of `D`. (Warn[12009])
-WARN: File "module_hint.php--here.php", line 14, characters 5-17:
-This `is` check is always `true`. The expression on the left has type `(D & (D, int) & G<T#1>)` which is a subtype of `(D, int)`. (Warn[12009])
-WARN: File "module_hint.php--here.php", line 15, characters 5-11:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `(G<T#1> & D & (D, int))` which shares no values with `E`. (Warn[12012])
-ERROR: File "module_hint.php--here.php", line 9, characters 11-11:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 10, characters 11-14:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 8, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 11, characters 12-12:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 12, characters 11-11:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 13, characters 11-14:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 8, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 14, characters 12-12:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 15, characters 11-11:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 10, characters 15-15:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 16, characters 11-11:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 10, characters 15-15:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 17, characters 12-12:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 18, characters 14-14:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_hint.php--here.php", line 19, characters 21-21:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_hint.php--there.php", line 6, characters 16-16:
-  This is from module `there`
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `(D & (D, int) & G<T#1>)` which is a subtype of `D`. [1]
+
+module_hint.php--here.php:12:5
+10 |     $m as G<_>;
+11 |     $m as (D,int);
+12 |     $m is D;
+   |     ^^^^^^^ [1]
+13 |     $m is G<_>;
+14 |     $m is (D,int);
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `(D & (D, int) & G<T#1>)` which is a subtype of `(D, int)`. [1]
+
+module_hint.php--here.php:14:5
+12 |     $m is D;
+13 |     $m is G<_>;
+14 |     $m is (D,int);
+   |     ^^^^^^^^^^^^^ [1]
+15 |     $m as E;
+16 |     $m is E;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `(G<T#1> & D & (D, int))` which shares no values with `E`. [1]
+
+module_hint.php--here.php:15:5
+13 |     $m is G<_>;
+14 |     $m is (D,int);
+15 |     $m as E;
+   |     ^^^^^^^ [1]
+16 |     $m is E;
+17 |     genfun<D>(null);
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:9:11
+ 7 |   public function bar(mixed $m):void {
+ 8 |     // All not ok
+ 9 |     $m as D;
+   |           ^ [1]
+10 |     $m as G<_>;
+11 |     $m as (D,int);
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:10:11
+ 8 |     // All not ok
+ 9 |     $m as D;
+10 |     $m as G<_>;
+   |           ^^^^ [1]
+11 |     $m as (D,int);
+12 |     $m is D;
+
+module_hint.php--there.php:8:16
+ 6 | internal class D {
+ 7 | }
+ 8 | internal class G<T> {
+   |                ^ [2]
+ 9 | }
+10 | internal enum E : int {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:11:12
+ 9 |     $m as D;
+10 |     $m as G<_>;
+11 |     $m as (D,int);
+   |            ^ [1]
+12 |     $m is D;
+13 |     $m is G<_>;
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:12:11
+10 |     $m as G<_>;
+11 |     $m as (D,int);
+12 |     $m is D;
+   |           ^ [1]
+13 |     $m is G<_>;
+14 |     $m is (D,int);
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:13:11
+11 |     $m as (D,int);
+12 |     $m is D;
+13 |     $m is G<_>;
+   |           ^^^^ [1]
+14 |     $m is (D,int);
+15 |     $m as E;
+
+module_hint.php--there.php:8:16
+ 6 | internal class D {
+ 7 | }
+ 8 | internal class G<T> {
+   |                ^ [2]
+ 9 | }
+10 | internal enum E : int {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:14:12
+12 |     $m is D;
+13 |     $m is G<_>;
+14 |     $m is (D,int);
+   |            ^ [1]
+15 |     $m as E;
+16 |     $m is E;
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:15:11
+13 |     $m is G<_>;
+14 |     $m is (D,int);
+15 |     $m as E;
+   |           ^ [1]
+16 |     $m is E;
+17 |     genfun<D>(null);
+
+module_hint.php--there.php:10:15
+ 8 | internal class G<T> {
+ 9 | }
+10 | internal enum E : int {
+   |               ^ [2]
+11 |   A = 1;
+12 | }
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:16:11
+14 |     $m is (D,int);
+15 |     $m as E;
+16 |     $m is E;
+   |           ^ [1]
+17 |     genfun<D>(null);
+18 |     $x = vec<D>[];
+
+module_hint.php--there.php:10:15
+ 8 | internal class G<T> {
+ 9 | }
+10 | internal enum E : int {
+   |               ^ [2]
+11 |   A = 1;
+12 | }
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:17:12
+15 |     $m as E;
+16 |     $m is E;
+17 |     genfun<D>(null);
+   |            ^ [1]
+18 |     $x = vec<D>[];
+19 |     $x = new MyList<D>();
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:18:14
+16 |     $m is E;
+17 |     genfun<D>(null);
+18 |     $x = vec<D>[];
+   |              ^ [1]
+19 |     $x = new MyList<D>();
+20 |     // All ok
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_hint.php--here.php:19:21
+17 |     genfun<D>(null);
+18 |     $x = vec<D>[];
+19 |     $x = new MyList<D>();
+   |                     ^ [1]
+20 |     // All ok
+21 |     $m as C;
+
+module_hint.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 | }
+ 8 | internal class G<T> {
+
+14 errors found

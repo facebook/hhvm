@@ -1,4 +1,23 @@
-ERROR: File "entry_point_multiple.php", line 6, characters 1-38:
-Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_multiple.php:3) (Parsing[1002])
-ERROR: File "entry_point_multiple.php", line 9, characters 1-38:
-Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_multiple.php:6) (Parsing[1002])
+error: Parsing[1002] Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_multiple.php:3) [1]
+
+entry_point_multiple.php:6:1
+4 | function f(): void {}
+5 | 
+6 | <<__EntryPoint>>
+  | ^^^^^^^^^^^^^^^^ [1]
+7 | function g(): void {}
+  | ^^^^^^^^^^^^^^^^^^^^^ [1]
+8 | 
+9 | <<__EntryPoint>>
+
+error: Parsing[1002] Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_multiple.php:6) [1]
+
+entry_point_multiple.php:9:1
+ 7 | function g(): void {}
+ 8 | 
+ 9 | <<__EntryPoint>>
+   | ^^^^^^^^^^^^^^^^ [1]
+10 | function h(): void {}
+   | ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+2 errors found

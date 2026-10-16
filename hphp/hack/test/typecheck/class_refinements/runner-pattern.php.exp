@@ -1,30 +1,80 @@
-ERROR: File "runner-pattern.php", line 21, characters 64-67:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "runner-pattern.php", line 39, characters 12-17:
-A `where` type constraint is violated here (Typing[4323])
-  File "runner-pattern.php", line 25, characters 19-24:
-  This is the method with `where` type constraints
-  File "runner-pattern.php", line 27, characters 13-35:
-  Expected a class with `{type T = _}`
-  File "runner-pattern.php", line 18, characters 20-23:
-  But got `TBox as Box`
-  File "runner-pattern.php", line 27, characters 5-8:
-    via this generic `TBox`
-ERROR: File "runner-pattern.php", line 39, characters 12-17:
-A `where` type constraint is violated here (Typing[4323])
-  File "runner-pattern.php", line 25, characters 19-24:
-  This is the method with `where` type constraints
-  File "runner-pattern.php", line 27, characters 13-35:
-  Expected a class with `{type T = _}`
-  File "runner-pattern.php", line 18, characters 20-23:
-  But got `TBox as Box`
-  File "runner-pattern.php", line 27, characters 5-8:
-    via this generic `TBox`
-  File "runner-pattern.php", line 27, characters 13-35:
-  Expected a class with `{type T = _}`
-  File "runner-pattern.php", line 18, characters 20-23:
-  But got `Box`
-  File "runner-pattern.php", line 27, characters 5-8:
-    via this generic `TBox`
-  File "runner-pattern.php", line 18, characters 28-30:
-    by the definition of `TBox`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+runner-pattern.php:21:64
+19 |   public function __construct(private TBox $box) {}
+20 | 
+21 |   public function helperShady<T>(Space<T> $in): void where T = TBox::T {
+   |                                                                ^^^^ [1]
+22 |     $this->box->set($in->unwrap()); // OK
+23 |   }
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = _}` [3]
+-> But got `TBox as Box` [4]
+->   via this generic `TBox` [5]
+
+runner-pattern.php:39:12
+16 | }
+17 | 
+18 | final class Runner<TBox as Box> {
+   |                    ^^^^ [4]
+19 |   public function __construct(private TBox $box) {}
+20 | 
+   :
+23 |   }
+24 | 
+25 |   public function helper<T>(Space<T> $inv_t): void
+   |                   ^^^^^^ [2]
+26 |   where
+27 |     TBox as Box with { type T = T } {
+   |     ^^^^ [5]
+   |             ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+28 |     $this->box->set($inv_t->unwrap()); // OK
+29 |   }
+   :
+37 |     // T; indeed TBox is free to be instantiated
+38 |     // with Box.
+39 |     $this->helper($inv_t); // ERROR
+   |            ^^^^^^ [1]
+40 |   }
+41 | 
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = _}` [3]
+-> But got `TBox as Box` [4]
+->   via this generic `TBox` [5]
+-> Expected a class with `{type T = _}` [3]
+-> But got `Box` [4]
+->   via this generic `TBox` [5]
+->   by the definition of `TBox` [6]
+
+runner-pattern.php:39:12
+16 | }
+17 | 
+18 | final class Runner<TBox as Box> {
+   |                    ^^^^ [4]
+   |                            ^^^ [6]
+19 |   public function __construct(private TBox $box) {}
+20 | 
+   :
+23 |   }
+24 | 
+25 |   public function helper<T>(Space<T> $inv_t): void
+   |                   ^^^^^^ [2]
+26 |   where
+27 |     TBox as Box with { type T = T } {
+   |     ^^^^ [5]
+   |             ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+28 |     $this->box->set($inv_t->unwrap()); // OK
+29 |   }
+   :
+37 |     // T; indeed TBox is free to be instantiated
+38 |     // with Box.
+39 |     $this->helper($inv_t); // ERROR
+   |            ^^^^^^ [1]
+40 |   }
+41 | 
+
+3 errors found

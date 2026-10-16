@@ -1,18 +1,59 @@
-ERROR: File "await_new_precedence.php", line 10, characters 14-15:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "await_new_precedence.php", line 8, characters 40-54:
-  This is why I think it is `Awaitable`
-ERROR: File "await_new_precedence.php", line 10, characters 19-20:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "await_new_precedence.php", line 8, characters 60-74:
-  This is why I think it is `Awaitable`
-ERROR: File "await_new_precedence.php", line 20, characters 3-30:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "await_new_precedence.php", line 17, characters 35-46:
-  This is why I think it is `Awaitable`
-ERROR: File "await_new_precedence.php", line 20, characters 18-19:
-Invalid argument (Typing[4110])
-  File "await_new_precedence.php", line 17, characters 16-27:
-  Expected `Awaitable<_>`
-  File "await_new_precedence.php", line 19, characters 30-32:
-  But got `int`
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+await_new_precedence.php:10:14
+ 6 | }
+ 7 | 
+ 8 | async function foo(Awaitable<bool> $a, Awaitable<bool> $b, Awaitable<bool> $c)
+   |                                        ^^^^^^^^^^^^^^^ [2]
+ 9 |   : Awaitable<void> {
+10 |   await $a ? $b : $c;
+   |              ^^ [1]
+11 | }
+12 | 
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+await_new_precedence.php:10:19
+ 6 | }
+ 7 | 
+ 8 | async function foo(Awaitable<bool> $a, Awaitable<bool> $b, Awaitable<bool> $c)
+   |                                                            ^^^^^^^^^^^^^^^ [2]
+ 9 |   : Awaitable<void> {
+10 |   await $a ? $b : $c;
+   |                   ^^ [1]
+11 | }
+12 | 
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+await_new_precedence.php:20:3
+15 | }
+16 | 
+17 | function id<T>(Awaitable<T> $a) : Awaitable<T> { return $a; }
+   |                                   ^^^^^^^^^^^^ [2]
+18 | 
+19 | async function baz(Awaitable<int> $a) : Awaitable<void> {
+20 |   await $a |> id($$) |> id($$);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Awaitable<_>` [2]
+-> But got `int` [3]
+
+await_new_precedence.php:20:18
+15 | }
+16 | 
+17 | function id<T>(Awaitable<T> $a) : Awaitable<T> { return $a; }
+   |                ^^^^^^^^^^^^ [2]
+18 | 
+19 | async function baz(Awaitable<int> $a) : Awaitable<void> {
+   |                              ^^^ [3]
+20 |   await $a |> id($$) |> id($$);
+   |                  ^^ [1]
+21 | }
+
+4 errors found

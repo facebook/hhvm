@@ -2,7 +2,20 @@ File "foreach.php", line 6, characters 5-16:
   dynamic
 File "foreach.php", line 10, characters 3-13:
   dynamic
-WARN: File "foreach.php", line 7, characters 10-22:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "foreach.php", line 3, characters 22-28:
-  This expression has type `dynamic`
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+foreach.php:7:10
+1 | <?hh
+2 | 
+3 | function testForEach(dynamic $x): void {
+  |                      ^^^^^^^ [2]
+4 |   foreach ($x as $id) {
+5 |     // $id : dynamic
+6 |     hh_show($id);
+7 |     $id->anyMethodCall();
+  |          ^^^^^^^^^^^^^ [1]
+8 |   }
+9 |   // $x : dynamic
+
+1 error found

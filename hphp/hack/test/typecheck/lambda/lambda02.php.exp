@@ -1,2 +1,10 @@
-ERROR: File "lambda02.php", line 13, characters 15-15:
-An expression is expected here. (Parsing[1002])
+error: Parsing[1002] An expression is expected here. [1]
+
+lambda02.php:13:15
+11 | 
+12 | function foo(): void {
+13 |   $x = $y ==> ; // parse error: expected expression
+   |               ^ [1]
+14 | }
+
+1 error found

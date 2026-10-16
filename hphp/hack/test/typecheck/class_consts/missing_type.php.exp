@@ -1,2 +1,11 @@
-ERROR: File "missing_type.php", line 4, characters 18-18:
-Please add a type hint (Naming[2035])
+error: Naming[2035] Please add a type hint [1]
+
+missing_type.php:4:18
+2 | 
+3 | abstract class A {
+4 |   abstract const X;
+  |                  ^ [1]
+5 |   const Y = 4;
+6 | }
+
+1 error found

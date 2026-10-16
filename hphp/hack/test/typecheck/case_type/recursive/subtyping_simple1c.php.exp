@@ -1,2 +1,11 @@
-ERROR: File "subtyping_simple1c.php", line 4, characters 11-11:
-This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])
+error: Typing[4485] This recursive case type is not supported. `A` should not be at the top-level. [1]
+
+subtyping_simple1c.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A as string = A; // A is essentially nothing, so technically that's fine
+  |           ^ [1]
+5 | 
+6 | function expect_A(A $_): void {}
+
+1 error found

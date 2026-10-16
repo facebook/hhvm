@@ -1,10 +1,46 @@
-ERROR: File "lambda_bad_arity2.php", line 15, characters 7-80:
-Invalid argument (Typing[4041])
-  File "lambda_bad_arity2.php", line 15, characters 7-80:
-  Too many mandatory arguments (expected 2 but got 3)
-  File "lambda_bad_arity2.php", line 6, characters 5-32:
-  Because of this definition
-ERROR: File "lambda_bad_arity2.php", line 15, characters 7-80:
-Too many positional arguments (expected 2 but got 3) (Typing[4105])
-  File "lambda_bad_arity2.php", line 6, characters 5-32:
-  Definition is here
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 2 but got 3) [1]
+-> Because of this definition [2]
+
+lambda_bad_arity2.php:15:7
+ 4 | class C {
+ 5 |   public static function funcApply<Treturn, T1, T2>(
+ 6 |     (function(T1, T2): ?Treturn) $func,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 7 |     T1 $input1,
+ 8 |     T2 $input2,
+   :
+13 |   public static function example2(): ?int {
+14 |     return self::funcApply(
+15 |       function(int $x, int $y, string $z): int {
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |         return $x + $y;
+   |         ^^^^^^^^^^^^^^^ [1]
+17 |       },
+   |       ^ [1]
+18 |       1,
+19 |       2,
+
+error: Typing[4105] Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+
+lambda_bad_arity2.php:15:7
+ 4 | class C {
+ 5 |   public static function funcApply<Treturn, T1, T2>(
+ 6 |     (function(T1, T2): ?Treturn) $func,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 7 |     T1 $input1,
+ 8 |     T2 $input2,
+   :
+13 |   public static function example2(): ?int {
+14 |     return self::funcApply(
+15 |       function(int $x, int $y, string $z): int {
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |         return $x + $y;
+   |         ^^^^^^^^^^^^^^^ [1]
+17 |       },
+   |       ^ [1]
+18 |       1,
+19 |       2,
+
+2 errors found

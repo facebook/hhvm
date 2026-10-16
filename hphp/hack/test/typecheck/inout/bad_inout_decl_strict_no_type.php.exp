@@ -1,2 +1,11 @@
-ERROR: File "bad_inout_decl_strict_no_type.php", line 3, characters 21-22:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+bad_inout_decl_strict_no_type.php:3:21
+1 | <?hh
+2 | 
+3 | function test(inout $x): noreturn {
+  |                     ^^ [1]
+4 |   throw new Exception('foo');
+5 | }
+
+1 error found

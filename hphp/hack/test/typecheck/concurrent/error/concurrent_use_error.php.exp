@@ -1,4 +1,13 @@
-ERROR: File "concurrent_use_error.php", line 5, characters 10-23:
-You are using the return value of a `void` function (Typing[4119])
-  File "concurrent_use_error.php", line 5, characters 16-23:
-  A `void` function doesn't return a value. because this function does not always return a value
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. because this function does not always return a value [2]
+
+concurrent_use_error.php:5:10
+3 | async function foo(): Awaitable<void> {
+4 |   concurrent {
+5 |     $x = await async {};
+  |          ^^^^^^^^^^^^^^ [1]
+  |                ^^^^^^^^ [2]
+6 |     await async {};
+7 |   }
+
+1 error found

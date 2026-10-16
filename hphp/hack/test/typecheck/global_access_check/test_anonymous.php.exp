@@ -1,8 +1,41 @@
-ERROR: File "test_anonymous.php", line 14, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_anonymous.php", line 16, characters 7-27:
-[Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_anonymous.php", line 17, characters 7-21:
-[Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_anonymous.php", line 24, characters 5-16:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_anonymous.php:14:10
+12 | class Test {
+13 |   public function test_method_call(): void {
+14 |     $a = Foo::$bar;
+   |          ^^^^^^^^^ [1]
+15 |     $fun = (int $val): Bar ==> {
+16 |       Foo::$static_prop = 2; // A global variable is written.
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_anonymous.php:16:7
+14 |     $a = Foo::$bar;
+15 |     $fun = (int $val): Bar ==> {
+16 |       Foo::$static_prop = 2; // A global variable is written.
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |       $a->prop = $val; // A global variable is written.
+18 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. [1]
+
+test_anonymous.php:17:7
+15 |     $fun = (int $val): Bar ==> {
+16 |       Foo::$static_prop = 2; // A global variable is written.
+17 |       $a->prop = $val; // A global variable is written.
+   |       ^^^^^^^^^^^^^^^ [1]
+18 | 
+19 |       $a = new Bar();
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_anonymous.php:24:5
+22 |       return $a;
+23 |     };
+24 |     $a->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^ [1]
+25 | 
+26 |     $b = $fun(3);
+
+4 errors found

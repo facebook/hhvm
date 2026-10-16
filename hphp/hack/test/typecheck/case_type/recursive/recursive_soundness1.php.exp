@@ -1,24 +1,101 @@
-ERROR: File "recursive_soundness1.php", line 21, characters 13-20:
-Invalid argument (Typing[4110])
-  File "recursive_soundness1.php", line 8, characters 20-21:
-  Expected `CT`
-  File "recursive_soundness1.php", line 11, characters 3-10:
-  But got `vec<Bar>`
-ERROR: File "recursive_soundness1.php", line 23, characters 13-20:
-Invalid argument (Typing[4110])
-  File "recursive_soundness1.php", line 8, characters 20-21:
-  Expected `CT`
-  File "recursive_soundness1.php", line 13, characters 3-13:
-  But got `vec<string>`
-ERROR: File "recursive_soundness1.php", line 25, characters 13-22:
-Invalid argument (Typing[4110])
-  File "recursive_soundness1.php", line 8, characters 20-21:
-  Expected `CT`
-  File "recursive_soundness1.php", line 15, characters 3-15:
-  But got `vec<vec<Bar>>`
-ERROR: File "recursive_soundness1.php", line 27, characters 13-16:
-Invalid argument (Typing[4110])
-  File "recursive_soundness1.php", line 8, characters 20-21:
-  Expected `CT`
-  File "recursive_soundness1.php", line 17, characters 3-5:
-  But got `Bar`
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT` [2]
+-> But got `vec<Bar>` [3]
+
+recursive_soundness1.php:21:13
+ 6 | class Bar {}
+ 7 | 
+ 8 | function expect_CT(CT $x): void {}
+   |                    ^^ [2]
+ 9 | 
+10 | function test(
+11 |   vec<Bar> $vec_bar,        // should fail
+   |   ^^^^^^^^ [3]
+12 |   vec<int> $vec_int,        // should succeed
+13 |   vec<string> $vec_str,     // should fail
+   :
+19 |   vec<CT> $vct,             // should succeed
+20 | ): void {
+21 |   expect_CT($vec_bar);
+   |             ^^^^^^^^ [1]
+22 |   expect_CT($vec_int);
+23 |   expect_CT($vec_str);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT` [2]
+-> But got `vec<string>` [3]
+
+recursive_soundness1.php:23:13
+ 6 | class Bar {}
+ 7 | 
+ 8 | function expect_CT(CT $x): void {}
+   |                    ^^ [2]
+ 9 | 
+10 | function test(
+11 |   vec<Bar> $vec_bar,        // should fail
+12 |   vec<int> $vec_int,        // should succeed
+13 |   vec<string> $vec_str,     // should fail
+   |   ^^^^^^^^^^^ [3]
+14 |   vec<vec<int>> $vec_vec,   // should succeed
+15 |   vec<vec<Bar>> $vec_vec_b, // should fail
+   :
+21 |   expect_CT($vec_bar);
+22 |   expect_CT($vec_int);
+23 |   expect_CT($vec_str);
+   |             ^^^^^^^^ [1]
+24 |   expect_CT($vec_vec);
+25 |   expect_CT($vec_vec_b);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT` [2]
+-> But got `vec<vec<Bar>>` [3]
+
+recursive_soundness1.php:25:13
+ 6 | class Bar {}
+ 7 | 
+ 8 | function expect_CT(CT $x): void {}
+   |                    ^^ [2]
+ 9 | 
+10 | function test(
+   :
+13 |   vec<string> $vec_str,     // should fail
+14 |   vec<vec<int>> $vec_vec,   // should succeed
+15 |   vec<vec<Bar>> $vec_vec_b, // should fail
+   |   ^^^^^^^^^^^^^ [3]
+16 |   int $i,                   // should succeed
+17 |   Bar $bar,                 // should fail
+   :
+23 |   expect_CT($vec_str);
+24 |   expect_CT($vec_vec);
+25 |   expect_CT($vec_vec_b);
+   |             ^^^^^^^^^^ [1]
+26 |   expect_CT($i);
+27 |   expect_CT($bar);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT` [2]
+-> But got `Bar` [3]
+
+recursive_soundness1.php:27:13
+ 6 | class Bar {}
+ 7 | 
+ 8 | function expect_CT(CT $x): void {}
+   |                    ^^ [2]
+ 9 | 
+10 | function test(
+   :
+15 |   vec<vec<Bar>> $vec_vec_b, // should fail
+16 |   int $i,                   // should succeed
+17 |   Bar $bar,                 // should fail
+   |   ^^^ [3]
+18 |   CT $ct,                   // should succeed
+19 |   vec<CT> $vct,             // should succeed
+   :
+25 |   expect_CT($vec_vec_b);
+26 |   expect_CT($i);
+27 |   expect_CT($bar);
+   |             ^^^^ [1]
+28 |   expect_CT($ct);
+29 |   expect_CT($vct);
+
+4 errors found

@@ -1,24 +1,85 @@
-ERROR: File "leak_safe_shallow+local.php", line 10, characters 5-21:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_shallow+local.php", line 9, characters 28-36:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_shallow+local.php", line 33, characters 30-44:
-  But the function being called requires the capability set {ReadGlobals, SystemLocal, WriteProperty}
-ERROR: File "leak_safe_shallow+local.php", line 29, characters 5-19:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_shallow+local.php", line 28, characters 36-52:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, SystemLocal, WriteProperty}
-  File "leak_safe_shallow+local.php", line 16, characters 28-40:
-  But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
-ERROR: File "leak_safe_shallow+local.php", line 30, characters 5-13:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_shallow+local.php", line 28, characters 36-52:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, SystemLocal, WriteProperty}
-  File "leak_safe_shallow+local.php", line 5, characters 22-28:
-  But the function being called requires the capability AccessGlobals
-ERROR: File "leak_safe_shallow+local.php", line 41, characters 5-23:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_shallow+local.php", line 40, characters 35-56:
-  From this declaration, the context of this function body provides the capability set {AccessGlobals, WriteProperty}
-  File "leak_safe_shallow+local.php", line 23, characters 32-48:
-  But the function being called requires the capability set {ReadGlobals, SystemShallow, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {ReadGlobals, SystemLocal, WriteProperty} [3]
+
+leak_safe_shallow+local.php:10:5
+ 7 | function f_leak_safe()[leak_safe]: void {}
+ 8 | 
+ 9 | function f_leak_safe_bad()[leak_safe]: void {
+   |                            ^^^^^^^^^ [2]
+10 |     f_leak_safe_local();  // ERROR: missing SystemLocal
+   |     ^^^^^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+   :
+31 | }
+32 | 
+33 | function f_leak_safe_local()[leak_safe_local]: void {
+   |                              ^^^^^^^^^^^^^^^ [3]
+34 |     f_zoned_local();  // OK
+35 |     f_defaults();     // OK
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, SystemLocal, WriteProperty} [2]
+-> But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty} [3]
+
+leak_safe_shallow+local.php:29:5
+14 |     f_leak_safe();  // OK
+15 | }
+16 | function f_zoned_shallow()[zoned_shallow]: void {
+   |                            ^^^^^^^^^^^^^ [3]
+17 |     f_leak_safe_shallow();  // OK
+18 | }
+   :
+26 | }
+27 | 
+28 | function f_leak_safe_shallow_bad()[leak_safe_shallow]: void {
+   |                                    ^^^^^^^^^^^^^^^^^ [2]
+29 |     f_zoned_shallow();  // ERROR: missing ImplicitPolicyShallow FIXME
+   |     ^^^^^^^^^^^^^^^ [1]
+30 |     f_globals();        // ERROR: missing AccessGlobals
+31 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, SystemLocal, WriteProperty} [2]
+-> But the function being called requires the capability AccessGlobals [3]
+
+leak_safe_shallow+local.php:30:5
+ 3 | function f_write_props()[write_props]: void {}
+ 4 | 
+ 5 | function f_globals()[globals]: void {}
+   |                      ^^^^^^^ [3]
+ 6 | 
+ 7 | function f_leak_safe()[leak_safe]: void {}
+   :
+26 | }
+27 | 
+28 | function f_leak_safe_shallow_bad()[leak_safe_shallow]: void {
+   |                                    ^^^^^^^^^^^^^^^^^ [2]
+29 |     f_zoned_shallow();  // ERROR: missing ImplicitPolicyShallow FIXME
+30 |     f_globals();        // ERROR: missing AccessGlobals
+   |     ^^^^^^^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {AccessGlobals, WriteProperty} [2]
+-> But the function being called requires the capability set {ReadGlobals, SystemShallow, WriteProperty} [3]
+
+leak_safe_shallow+local.php:41:5
+21 | }
+22 | 
+23 | function f_leak_safe_shallow()[leak_safe_shallow]: void {
+   |                                ^^^^^^^^^^^^^^^^^ [3]
+24 |     f_leak_safe();   // OK
+25 |     f_write_props(); // OK
+   :
+38 | function f_defaults(): void {}
+39 | 
+40 | function f_leak_safe_globals_bad()[write_props, globals]: void {
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^ [2]
+41 |     f_leak_safe_shallow();  // ERROR: missing SystemShallow
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+42 | }
+
+4 errors found

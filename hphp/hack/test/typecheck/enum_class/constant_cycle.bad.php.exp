@@ -1,6 +1,30 @@
-ERROR: File "constant_cycle.bad.php", line 4, characters 7-7:
-Cannot declare self-referencing constant X in B (Typing[4424])
-ERROR: File "constant_cycle.bad.php", line 5, characters 7-7:
-Cannot declare self-referencing constant Y in B (Typing[4424])
-ERROR: File "constant_cycle.bad.php", line 13, characters 7-7:
-Cannot declare self-referencing constant X in E (Typing[4424])
+error: Typing[4424] Cannot declare self-referencing constant X in B [1]
+
+constant_cycle.bad.php:4:7
+2 | 
+3 | enum class B : int {
+4 |   int X = B::X;
+  |       ^ [1]
+5 |   int Y = self::Y;
+6 | }
+
+error: Typing[4424] Cannot declare self-referencing constant Y in B [1]
+
+constant_cycle.bad.php:5:7
+3 | enum class B : int {
+4 |   int X = B::X;
+5 |   int Y = self::Y;
+  |       ^ [1]
+6 | }
+7 | 
+
+error: Typing[4424] Cannot declare self-referencing constant X in E [1]
+
+constant_cycle.bad.php:13:7
+11 | 
+12 | enum class E : int {
+13 |   int X = F::X;
+   |       ^ [1]
+14 | }
+
+3 errors found

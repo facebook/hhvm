@@ -1,6 +1,24 @@
-ERROR: File "dict_error.php", line 79, characters 12-13:
-Invalid argument (Typing[4110])
-  File "dict_error.php", line 25, characters 5-50:
-  Expected `Spliceable<DictError, mixed, _>`
-  File "dict_error.php", line 76, characters 15-24:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `Spliceable<DictError, mixed, _>` [2]
+-> But got `int` [3]
+
+dict_error.php:79:12
+23 | 
+24 |   public static function lift<TInfer>(
+25 |     Spliceable<DictError, DictError::TAst, TInfer> $x,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+26 |   )[]: Spliceable<DictError, DictError::TAst, TInfer> {
+27 |     return $x;
+   :
+74 | }
+75 | 
+76 | function test(ExampleInt $x): void {
+   |               ^^^^^^^^^^ [3]
+77 |   DictError`() ==> {
+78 |     // Error about dict values being incompatible should refer to the Visitor hint
+79 |     $y = ${$x};
+   |            ^^ [1]
+80 |   }`;
+81 | }
+
+1 error found

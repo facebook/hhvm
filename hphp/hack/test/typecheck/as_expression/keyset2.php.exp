@@ -1,20 +1,89 @@
-ERROR: File "keyset2.php", line 12, characters 33-38:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 43, characters 24-29:
-  Definition is here
-ERROR: File "keyset2.php", line 13, characters 18-38:
-Invalid argument (Typing[4110])
-  File "keyset2.php", line 23, characters 32-37:
-  Expected `string`
-  File "hackarray.hhi", line 43, characters 55-62:
-  But got `arraykey`
-ERROR: File "keyset2.php", line 13, characters 33-38:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 43, characters 24-29:
-  Definition is here
-ERROR: File "keyset2.php", line 16, characters 18-41:
-Invalid argument (Typing[4110])
-  File "keyset2.php", line 23, characters 32-37:
-  Expected `string`
-  File "hackarray.hhi", line 43, characters 55-62:
-  But got `arraykey`
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+keyset2.php:12:33
+10 | 
+11 | function f(): void {
+12 |   expect_keyset1(get_mixed() as keyset); // ok
+   |                                 ^^^^^^ [1]
+13 |   expect_keyset2(get_mixed() as keyset); // error
+14 | 
+
+hackarray.hhi:43:24
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                        ^^^^^^ [2]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+keyset2.php:13:18
+11 | function f(): void {
+12 |   expect_keyset1(get_mixed() as keyset); // ok
+13 |   expect_keyset2(get_mixed() as keyset); // error
+   |                  ^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | 
+15 |   expect_keyset1(get_mixed() as keyset<_>); // ok
+   :
+21 | 
+22 | function expect_keyset1(keyset<arraykey> $keyset): void {}
+23 | function expect_keyset2(keyset<string> $keyset): void {}
+   |                                ^^^^^^ [2]
+
+hackarray.hhi:43:55
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                                                       ^^^^^^^^ [3]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+keyset2.php:13:33
+11 | function f(): void {
+12 |   expect_keyset1(get_mixed() as keyset); // ok
+13 |   expect_keyset2(get_mixed() as keyset); // error
+   |                                 ^^^^^^ [1]
+14 | 
+15 |   expect_keyset1(get_mixed() as keyset<_>); // ok
+
+hackarray.hhi:43:24
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                        ^^^^^^ [2]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+keyset2.php:16:18
+14 | 
+15 |   expect_keyset1(get_mixed() as keyset<_>); // ok
+16 |   expect_keyset2(get_mixed() as keyset<_>); // error
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | 
+18 |   expect_keyset1(get_container() as keyset<_>); // ok
+   :
+21 | 
+22 | function expect_keyset1(keyset<arraykey> $keyset): void {}
+23 | function expect_keyset2(keyset<string> $keyset): void {}
+   |                                ^^^^^^ [2]
+
+hackarray.hhi:43:55
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                                                       ^^^^^^^^ [3]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+4 errors found

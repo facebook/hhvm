@@ -1,6 +1,17 @@
-ERROR: File "instanceof_generic_bad_2.php", line 11, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instanceof_generic_bad_2.php", line 9, characters 40-40:
-  Expected `T`
-  File "instanceof_generic_bad_2.php", line 9, characters 33-33:
-  But got `I`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `I` [3]
+
+instanceof_generic_bad_2.php:11:12
+ 7 | class B implements I {}
+ 8 | 
+ 9 | function does_is_check<T>(T $t, I $i): T {
+   |                                 ^ [3]
+   |                                        ^ [2]
+10 |   if($t is I) {
+11 |     return $i;
+   |            ^^ [1]
+12 |   }
+13 | 
+
+1 error found

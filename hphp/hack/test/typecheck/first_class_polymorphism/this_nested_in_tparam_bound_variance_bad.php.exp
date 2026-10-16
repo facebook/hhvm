@@ -1,40 +1,112 @@
-ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 41, characters 43-52:
-Invalid argument (Typing[4323])
-  File "this_nested_in_tparam_bound_variance_bad.php", line 9, characters 33-33:
-  `T` is a constrained type parameter
-  File "this_nested_in_tparam_bound_variance_bad.php", line 9, characters 38-47:
-  This type constraint is violated
-  File "this_nested_in_tparam_bound_variance_bad.php", line 41, characters 8-23:
-  Expected `ConcBase_Nested3`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 9, characters 43-46:
-    via this generic `this`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 17, characters 27-29:
-  But got `int`
-ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 42, characters 60-69:
-Invalid argument (Typing[4110])
-  File "this_nested_in_tparam_bound_variance_bad.php", line 28, characters 10-21:
-  Expected `Base_Nested3`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 17, characters 27-29:
-  But got `int`
-ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 46, characters 47-60:
-Invalid argument (Typing[4323])
-  File "this_nested_in_tparam_bound_variance_bad.php", line 11, characters 37-37:
-  `T` is a constrained type parameter
-  File "this_nested_in_tparam_bound_variance_bad.php", line 11, characters 42-55:
-  This type constraint is violated
-  File "this_nested_in_tparam_bound_variance_bad.php", line 20, characters 35-37:
-  Expected `int`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 46, characters 8-23:
-  But got `ConcBase_Nested3`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 11, characters 51-54:
-    via this generic `this`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 46, characters 8-23:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
-ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 47, characters 64-77:
-Invalid argument (Typing[4110])
-  File "this_nested_in_tparam_bound_variance_bad.php", line 20, characters 35-37:
-  Expected `int`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 47, characters 44-59:
-  But got `ConcBase_Nested3`
-  File "this_nested_in_tparam_bound_variance_bad.php", line 47, characters 44-59:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase_Nested3` [4]
+->   via this generic `this` [5]
+-> But got `int` [6]
+
+this_nested_in_tparam_bound_variance_bad.php:41:43
+ 7 | 
+ 8 | abstract class Base_Nested3 {
+ 9 |   public function nested_cov_as<T as Cov3<this>>(T $_): void {}
+   |                                 ^ [2]
+   |                                      ^^^^^^^^^^ [3]
+   |                                           ^^^^ [5]
+10 | 
+11 |   public function nested_contrav_as<T as Contrav3<this>>(T $_): void {}
+   :
+15 | 
+16 | // Factory functions to produce values that should be REJECTED
+17 | function cov3_int(): Cov3<int> {
+   |                           ^^^ [6]
+18 |   throw new Exception();
+19 | }
+   :
+39 |   // nested_cov_as: Cov3<int> is NOT <: Cov3<ConcBase_Nested3> → rejected
+40 |   // (int is not <: ConcBase_Nested3)
+41 |   (new ConcBase_Nested3())->nested_cov_as(cov3_int());
+   |        ^^^^^^^^^^^^^^^^ [4]
+   |                                           ^^^^^^^^^^ [1]
+42 |   RejectNested::nested_cov_as_simp(new ConcBase_Nested3(), cov3_int());
+43 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base_Nested3` [2]
+-> But got `int` [3]
+
+this_nested_in_tparam_bound_variance_bad.php:42:60
+15 | 
+16 | // Factory functions to produce values that should be REJECTED
+17 | function cov3_int(): Cov3<int> {
+   |                           ^^^ [3]
+18 |   throw new Exception();
+19 | }
+   :
+26 |   public static function nested_cov_as_simp(
+27 |     Base_Nested3 $_,
+28 |     Cov3<Base_Nested3> $_,
+   |          ^^^^^^^^^^^^ [2]
+29 |   ): void {}
+30 | 
+   :
+40 |   // (int is not <: ConcBase_Nested3)
+41 |   (new ConcBase_Nested3())->nested_cov_as(cov3_int());
+42 |   RejectNested::nested_cov_as_simp(new ConcBase_Nested3(), cov3_int());
+   |                                                            ^^^^^^^^^^ [1]
+43 | 
+44 |   // nested_contrav_as: Contrav3<int> is NOT <: Contrav3<ConcBase_Nested3> → rejected
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [4]
+-> But got `ConcBase_Nested3` [5]
+->   via this generic `this` [6]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [5]
+
+this_nested_in_tparam_bound_variance_bad.php:46:47
+ 9 |   public function nested_cov_as<T as Cov3<this>>(T $_): void {}
+10 | 
+11 |   public function nested_contrav_as<T as Contrav3<this>>(T $_): void {}
+   |                                     ^ [2]
+   |                                          ^^^^^^^^^^^^^^ [3]
+   |                                                   ^^^^ [6]
+12 | }
+13 | 
+   :
+18 |   throw new Exception();
+19 | }
+20 | function contrav3_int(): Contrav3<int> {
+   |                                   ^^^ [4]
+21 |   throw new Exception();
+22 | }
+   :
+44 |   // nested_contrav_as: Contrav3<int> is NOT <: Contrav3<ConcBase_Nested3> → rejected
+45 |   // (would need ConcBase_Nested3 <: int, which is false)
+46 |   (new ConcBase_Nested3())->nested_contrav_as(contrav3_int());
+   |        ^^^^^^^^^^^^^^^^ [5]
+   |                                               ^^^^^^^^^^^^^^ [1]
+47 |   RejectNested::nested_contrav_as_simp(new ConcBase_Nested3(), contrav3_int());
+48 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `ConcBase_Nested3` [3]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [3]
+
+this_nested_in_tparam_bound_variance_bad.php:47:64
+18 |   throw new Exception();
+19 | }
+20 | function contrav3_int(): Contrav3<int> {
+   |                                   ^^^ [2]
+21 |   throw new Exception();
+22 | }
+   :
+45 |   // (would need ConcBase_Nested3 <: int, which is false)
+46 |   (new ConcBase_Nested3())->nested_contrav_as(contrav3_int());
+47 |   RejectNested::nested_contrav_as_simp(new ConcBase_Nested3(), contrav3_int());
+   |                                            ^^^^^^^^^^^^^^^^ [3]
+   |                                                                ^^^^^^^^^^^^^^ [1]
+48 | }
+
+4 errors found

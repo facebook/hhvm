@@ -1,4 +1,17 @@
-ERROR: File "explicit_targs2.php", line 8, characters 25-25:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_targs2.php", line 3, characters 42-42:
-  Definition is here
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_targs2.php:8:25
+1 | <?hh
+2 | 
+3 | function values_are_equal<<<__Explicit>> T>(T $x, T $y): bool {
+  |                                          ^ [2]
+4 |   return $x === $y;
+5 | }
+6 | 
+7 | function test(): void {
+8 |   $x = values_are_equal<_>;
+  |                         ^ [1]
+9 | }
+
+1 error found

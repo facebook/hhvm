@@ -1,6 +1,18 @@
-ERROR: File "abstract_constructor3.php", line 7, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract method `__construct` (Typing[4047])
-  File "abstract_constructor3.php", line 7, characters 17-17:
-  `D` uses `C`
-  File "abstract_constructor3.php", line 4, characters 28-38:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `__construct` [1]
+-> `D` uses `C` [2]
+-> The method is defined here [3]
+
+abstract_constructor3.php:7:7
+2 | 
+3 | abstract class C {
+4 |   public abstract function __construct();
+  |                            ^^^^^^^^^^^ [3]
+5 | }
+6 | 
+7 | class D extends C {}
+  |       ^ [1]
+  |                 ^ [2]
+8 | 
+9 | class E extends D {
+
+1 error found

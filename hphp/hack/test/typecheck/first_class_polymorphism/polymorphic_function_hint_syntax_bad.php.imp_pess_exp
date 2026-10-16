@@ -1,30 +1,128 @@
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 6, characters 25-26:
-Variance annotation are not allowed on generics in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 9, characters 25-31:
-Reified generics are not allowed in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 17, characters 25-46:
-Attributes with parameters are not allowed for type parameters in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 20, characters 28-28:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "polymorphic_function_hint_syntax_bad.php", line 20, characters 15-15:
-  `T` is already bound here
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 23, characters 38-39:
-You cannot re-bind the type parameter `Tm` (Naming[2041])
-  File "polymorphic_function_hint_syntax_bad.php", line 23, characters 24-25:
-  `Tm` is already bound here
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 23, characters 41-42:
-You cannot re-bind the type parameter `Tc` (Naming[2041])
-  File "polymorphic_function_hint_syntax_bad.php", line 22, characters 9-10:
-  `Tc` is already bound here
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 27, characters 16-16:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 28, characters 19-19:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 29, characters 16-16:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 29, characters 19-19:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 20, characters 15-15:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "polymorphic_function_hint_syntax_bad.php", line 23, characters 24-25:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Parsing[1002] Variance annotation are not allowed on generics in polymorphic function hints or polymorphic lambda signatures. [1]
+
+polymorphic_function_hint_syntax_bad.php:6:25
+4 | 
+5 | // Error because variance annotations are not allowed on type parameters of polymorphic function hints
+6 | function bad1((function<-T>(T):void) $_ ): void {}
+  |                         ^^ [1]
+7 | 
+8 | // Error because type parameters of polymorphic function hints cannot be reified
+
+error: Parsing[1002] Reified generics are not allowed in polymorphic function hints or polymorphic lambda signatures. [1]
+
+polymorphic_function_hint_syntax_bad.php:9:25
+ 7 | 
+ 8 | // Error because type parameters of polymorphic function hints cannot be reified
+ 9 | function bad2((function<reify T>(T):void) $_ ): void {}
+   |                         ^^^^^^^ [1]
+10 | 
+11 | 
+
+error: Parsing[1002] Attributes with parameters are not allowed for type parameters in polymorphic function hints or polymorphic lambda signatures. [1]
+
+polymorphic_function_hint_syntax_bad.php:17:25
+15 | 
+16 | // Error because type parameters of polymorphic function hints cannot have attributes with parameters
+17 | function bad3((function<<<__MyAttr("nope")>> T>(T):void) $_ ): void {}
+   |                         ^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | 
+19 | // Error because type parameters of polymorphic function hints cannot shadow class or method/function type parameters
+
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+polymorphic_function_hint_syntax_bad.php:20:28
+18 | 
+19 | // Error because type parameters of polymorphic function hints cannot shadow class or method/function type parameters
+20 | function bad4<T>((function<T>(T):void) $_ ): void {}
+   |               ^ [2]
+   |                            ^ [1]
+21 | 
+22 | class C<Tc> {
+
+error: Naming[2041] You cannot re-bind the type parameter `Tm` [1]
+-> `Tm` is already bound here [2]
+
+polymorphic_function_hint_syntax_bad.php:23:38
+21 | 
+22 | class C<Tc> {
+23 |   public function bad5<Tm>((function<Tm,Tc>(Tm,Tc):void) $_ ): void {}
+   |                        ^^ [2]
+   |                                      ^^ [1]
+24 | }
+25 | 
+
+error: Naming[2041] You cannot re-bind the type parameter `Tc` [1]
+-> `Tc` is already bound here [2]
+
+polymorphic_function_hint_syntax_bad.php:23:41
+20 | function bad4<T>((function<T>(T):void) $_ ): void {}
+21 | 
+22 | class C<Tc> {
+   |         ^^ [2]
+23 |   public function bad5<Tm>((function<Tm,Tc>(Tm,Tc):void) $_ ): void {}
+   |                                         ^^ [1]
+24 | }
+25 | 
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+polymorphic_function_hint_syntax_bad.php:27:16
+25 | 
+26 | function bad6(
+27 |   (function<T>(_):T) $_,
+   |                ^ [1]
+28 |   (function<T>(T):_) $_,
+29 |   (function<_>(_):_) $_,
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+polymorphic_function_hint_syntax_bad.php:28:19
+26 | function bad6(
+27 |   (function<T>(_):T) $_,
+28 |   (function<T>(T):_) $_,
+   |                   ^ [1]
+29 |   (function<_>(_):_) $_,
+30 | ): void {
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+polymorphic_function_hint_syntax_bad.php:29:16
+27 |   (function<T>(_):T) $_,
+28 |   (function<T>(T):_) $_,
+29 |   (function<_>(_):_) $_,
+   |                ^ [1]
+30 | ): void {
+31 | }
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+polymorphic_function_hint_syntax_bad.php:29:19
+27 |   (function<T>(_):T) $_,
+28 |   (function<T>(T):_) $_,
+29 |   (function<_>(_):_) $_,
+   |                   ^ [1]
+30 | ): void {
+31 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+polymorphic_function_hint_syntax_bad.php:20:15
+18 | 
+19 | // Error because type parameters of polymorphic function hints cannot shadow class or method/function type parameters
+20 | function bad4<T>((function<T>(T):void) $_ ): void {}
+   |               ^ [1]
+21 | 
+22 | class C<Tc> {
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+polymorphic_function_hint_syntax_bad.php:23:24
+21 | 
+22 | class C<Tc> {
+23 |   public function bad5<Tm>((function<Tm,Tc>(Tm,Tc):void) $_ ): void {}
+   |                        ^^ [1]
+24 | }
+25 | 
+
+12 errors found

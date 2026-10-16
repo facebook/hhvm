@@ -1,4 +1,16 @@
-ERROR: File "user_attr.php", line 8, characters 3-7:
-The `CAttr` attribute cannot be used on a function. (Typing[4231])
-  File "user_attr.php", line 4, characters 7-11:
-  The attribute's class is defined here. To be available for use on a function, the `CAttr` class must implement `HH\FunctionAttribute`.
+error: Typing[4231] The `CAttr` attribute cannot be used on a function. [1]
+-> The attribute's class is defined here. To be available for use on a function, the `CAttr` class must implement `HH\FunctionAttribute`. [2]
+
+user_attr.php:8:3
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class CAttr implements HH\ClassAttribute {
+  |       ^^^^^ [2]
+5 |   public function __construct() {}
+6 | }
+7 | 
+8 | <<CAttr>>
+  |   ^^^^^ [1]
+9 | function f(): void {}
+
+1 error found

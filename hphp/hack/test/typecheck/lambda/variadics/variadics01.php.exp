@@ -1,8 +1,25 @@
-ERROR: File "variadics01.php", line 41, characters 26-30:
-Was expecting an object but type is unknown (Typing[4297])
-  File "variadics01.php", line 41, characters 18-19:
-  It is unknown because a type could not be determined here
-ERROR: File "variadics01.php", line 49, characters 26-30:
-Was expecting an object but type is unknown (Typing[4297])
-  File "variadics01.php", line 49, characters 18-19:
-  It is unknown because a type could not be determined here
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+variadics01.php:41:26
+39 |   expect_variadic((D ...$y) ==> $y[0]->bar());
+40 | 
+41 |   $lambda1 = (...$y) ==> $y[0]->bar();
+   |                  ^^ [2]
+   |                          ^^^^^ [1]
+42 |   expect_variadic($lambda1);
+43 | 
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+variadics01.php:49:26
+47 |   expect_non_variadic((...$y) ==> $y[0]->bar());
+48 | 
+49 |   $lambda3 = (...$y) ==> $y[0]->bar();
+   |                  ^^ [2]
+   |                          ^^^^^ [1]
+50 |   expect_non_variadic($lambda3);
+51 | }
+
+2 errors found

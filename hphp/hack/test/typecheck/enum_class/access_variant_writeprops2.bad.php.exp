@@ -1,12 +1,33 @@
-ERROR: File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
-  The local (enclosing) context provides the capability set {}
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [1]
+
+access_variant_writeprops2.bad.php:9:21
+ 7 | 
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+   |                     ^^^^^^^^^^^ [1]
+10 |   private MyClass $prop = MyEnum::AAA;
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [1]
+
+access_variant_writeprops2.bad.php:10:27
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+10 |   private MyClass $prop = MyEnum::AAA;
+   |                           ^^^^^^^^^^^ [1]
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+12 | }
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [1]
+
+access_variant_writeprops2.bad.php:11:40
+ 9 |   const MyClass X = MyEnum::AAA;
+10 |   private MyClass $prop = MyEnum::AAA;
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+   |                                        ^^^^^^^^^^^ [1]
+12 | }
+
+3 errors found

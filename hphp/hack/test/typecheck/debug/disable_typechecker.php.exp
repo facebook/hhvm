@@ -1,4 +1,21 @@
-ERROR: File "disable_typechecker.php", line 4, characters 10-10:
-Internal error: Type inference for this function has been disabled by the __DisableTypecheckerInternal attribute (Other[0000])
-ERROR: File "disable_typechecker.php", line 10, characters 19-19:
-Internal error: Type inference for this function has been disabled by the __DisableTypecheckerInternal attribute (Other[0000])
+error: Other[0000] Internal error: Type inference for this function has been disabled by the __DisableTypecheckerInternal attribute [1]
+
+disable_typechecker.php:4:10
+2 | 
+3 | <<__DisableTypecheckerInternal>>
+4 | function f(): void {
+  |          ^ [1]
+5 |   3 + "4";
+6 | }
+
+error: Other[0000] Internal error: Type inference for this function has been disabled by the __DisableTypecheckerInternal attribute [1]
+
+disable_typechecker.php:10:19
+ 8 | class C {
+ 9 |   <<__DisableTypecheckerInternal>>
+10 |   public function g(): void {
+   |                   ^ [1]
+11 |     3 + "4";
+12 |   }
+
+2 errors found

@@ -1,24 +1,93 @@
-ERROR: File "leak_safe_caller.php", line 12, characters 3-17:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_caller.php", line 11, characters 23-31:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_caller.php", line 20, characters 28-34:
-  But the function being called requires the capability AccessGlobals
-ERROR: File "leak_safe_caller.php", line 14, characters 3-12:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_caller.php", line 11, characters 23-31:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_caller.php", line 21, characters 23-27:
-  But the function being called requires the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-ERROR: File "leak_safe_caller.php", line 16, characters 3-15:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_caller.php", line 11, characters 23-31:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_caller.php", line 22, characters 10-22:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "leak_safe_caller.php", line 17, characters 3-12:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_caller.php", line 11, characters 23-31:
-  From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_caller.php", line 23, characters 23-30:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability AccessGlobals [3]
+
+leak_safe_caller.php:12:3
+ 9 | function f_write_props()[write_props]: void {}
+10 | 
+11 | function caller_bad()[leak_safe]: void {
+   |                       ^^^^^^^^^ [2]
+12 |   f_write_globals(); // ERROR: missing `AccessGlobals`
+   |   ^^^^^^^^^^^^^^^ [1]
+13 | 
+14 |   f_policied(); // ERROR: missing `ImplicitPolicy`
+   :
+18 | }
+19 | 
+20 | function f_write_globals()[globals]: void {}
+   |                            ^^^^^^^ [3]
+21 | function f_policied()[zoned]: void {}
+22 | function f_unannotated(): void {}
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [3]
+
+leak_safe_caller.php:14:3
+ 9 | function f_write_props()[write_props]: void {}
+10 | 
+11 | function caller_bad()[leak_safe]: void {
+   |                       ^^^^^^^^^ [2]
+12 |   f_write_globals(); // ERROR: missing `AccessGlobals`
+13 | 
+14 |   f_policied(); // ERROR: missing `ImplicitPolicy`
+   |   ^^^^^^^^^^ [1]
+15 | 
+16 |   f_unannotated(); // ERROR
+   :
+19 | 
+20 | function f_write_globals()[globals]: void {}
+21 | function f_policied()[zoned]: void {}
+   |                       ^^^^^ [3]
+22 | function f_unannotated(): void {}
+23 | function f_defaults()[defaults]: void {}
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+leak_safe_caller.php:16:3
+ 9 | function f_write_props()[write_props]: void {}
+10 | 
+11 | function caller_bad()[leak_safe]: void {
+   |                       ^^^^^^^^^ [2]
+12 |   f_write_globals(); // ERROR: missing `AccessGlobals`
+13 | 
+14 |   f_policied(); // ERROR: missing `ImplicitPolicy`
+15 | 
+16 |   f_unannotated(); // ERROR
+   |   ^^^^^^^^^^^^^ [1]
+17 |   f_defaults(); // ERROR
+18 | }
+19 | 
+20 | function f_write_globals()[globals]: void {}
+21 | function f_policied()[zoned]: void {}
+22 | function f_unannotated(): void {}
+   |          ^^^^^^^^^^^^^ [3]
+23 | function f_defaults()[defaults]: void {}
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+leak_safe_caller.php:17:3
+ 9 | function f_write_props()[write_props]: void {}
+10 | 
+11 | function caller_bad()[leak_safe]: void {
+   |                       ^^^^^^^^^ [2]
+12 |   f_write_globals(); // ERROR: missing `AccessGlobals`
+13 | 
+14 |   f_policied(); // ERROR: missing `ImplicitPolicy`
+15 | 
+16 |   f_unannotated(); // ERROR
+17 |   f_defaults(); // ERROR
+   |   ^^^^^^^^^^ [1]
+18 | }
+19 | 
+20 | function f_write_globals()[globals]: void {}
+21 | function f_policied()[zoned]: void {}
+22 | function f_unannotated(): void {}
+23 | function f_defaults()[defaults]: void {}
+   |                       ^^^^^^^^ [3]
+
+4 errors found

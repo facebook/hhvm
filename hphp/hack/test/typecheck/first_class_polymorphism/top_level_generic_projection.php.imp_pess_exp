@@ -1,52 +1,160 @@
-ERROR: File "top_level_generic_projection.php", line 17, characters 3-5:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Invalid return type (Typing[4110])
-  File "top_level_generic_projection.php", line 21, characters 37-47:
-  Expected `ImplementsI`
-  File "top_level_generic_projection.php", line 15, characters 56-59:
-  But got `TIn::TBase`
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Invalid return type (Typing[4110])
-  File "top_level_generic_projection.php", line 21, characters 37-47:
-  Expected `ImplementsI`
-  File "top_level_generic_projection.php", line 15, characters 56-59:
-  But got `mixed`
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Invalid return type (Typing[4110])
-  File "top_level_generic_projection.php", line 21, characters 37-47:
-  Expected `ImplementsI`
-  File "top_level_generic_projection.php", line 17, characters 16-19:
-  But got `TIn::TBase`
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Invalid return type (Typing[4110])
-  File "top_level_generic_projection.php", line 21, characters 37-47:
-  Expected `ImplementsI`
-  File "top_level_generic_projection.php", line 17, characters 16-19:
-  But got `mixed`
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Typing error (Typing[4110])
-  File "top_level_generic_projection.php", line 15, characters 10-20:
-  Expected `dynamic`
-  File "top_level_generic_projection.php", line 17, characters 16-19:
-  Type `TIn::TBase` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Typing error (Typing[4323])
-  File "top_level_generic_projection.php", line 15, characters 35-38:
-  `TOut` is a constrained type parameter
-  File "top_level_generic_projection.php", line 15, characters 43-43:
-  This type constraint is violated
-  File "top_level_generic_projection.php", line 15, characters 43-43:
-  Expected `I`
-  File "top_level_generic_projection.php", line 17, characters 16-19:
-  But got `TIn::TBase`
-ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
-Typing error (Typing[4323])
-  File "top_level_generic_projection.php", line 15, characters 35-38:
-  `TOut` is a constrained type parameter
-  File "top_level_generic_projection.php", line 15, characters 43-43:
-  This type constraint is violated
-  File "top_level_generic_projection.php", line 15, characters 43-43:
-  Expected `I`
-  File "top_level_generic_projection.php", line 17, characters 16-19:
-  But got `mixed`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+top_level_generic_projection.php:17:3
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+16 | where
+17 |   TIn::TBase = TOut {
+   |   ^^^ [1]
+18 |   throw new Exception();
+19 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `ImplementsI` [2]
+-> But got `TIn::TBase` [3]
+
+top_level_generic_projection.php:23:10
+13 | }
+14 | 
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+   |                                                        ^^^^ [3]
+16 | where
+17 |   TIn::TBase = TOut {
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+   |                                     ^^^^^^^^^^^ [2]
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `ImplementsI` [2]
+-> But got `mixed` [3]
+
+top_level_generic_projection.php:23:10
+13 | }
+14 | 
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+   |                                                        ^^^^ [3]
+16 | where
+17 |   TIn::TBase = TOut {
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+   |                                     ^^^^^^^^^^^ [2]
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `ImplementsI` [2]
+-> But got `TIn::TBase` [3]
+
+top_level_generic_projection.php:23:10
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+16 | where
+17 |   TIn::TBase = TOut {
+   |                ^^^^ [3]
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+   |                                     ^^^^^^^^^^^ [2]
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `ImplementsI` [2]
+-> But got `mixed` [3]
+
+top_level_generic_projection.php:23:10
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+16 | where
+17 |   TIn::TBase = TOut {
+   |                ^^^^ [3]
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+   |                                     ^^^^^^^^^^^ [2]
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `TIn::TBase` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+top_level_generic_projection.php:23:10
+13 | }
+14 | 
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+   |          ^^^^^^^^^^^ [2]
+16 | where
+17 |   TIn::TBase = TOut {
+   |                ^^^^ [3]
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4323] Typing error [1]
+-> `TOut` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `TIn::TBase` [4]
+
+top_level_generic_projection.php:23:10
+13 | }
+14 | 
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+   |                                   ^^^^ [2]
+   |                                           ^ [3]
+16 | where
+17 |   TIn::TBase = TOut {
+   |                ^^^^ [4]
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4323] Typing error [1]
+-> `TOut` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `mixed` [4]
+
+top_level_generic_projection.php:23:10
+13 | }
+14 | 
+15 | function the_problem<TIn as Base, TOut as I>(TIn $in): TOut
+   |                                   ^^^^ [2]
+   |                                           ^ [3]
+16 | where
+17 |   TIn::TBase = TOut {
+   |                ^^^^ [4]
+18 |   throw new Exception();
+19 | }
+20 | 
+21 | function ref_it(Concrete $conrete): ImplementsI {
+22 |   $fptr = the_problem<>;
+23 |   return $fptr($conrete);
+   |          ^^^^^^^^^^^^^^^ [1]
+24 | }
+
+8 errors found

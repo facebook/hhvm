@@ -1,4 +1,14 @@
-ERROR: File "recursive_constraint_bad_7.php", line 5, characters 12-14:
-You are trying to access the method `Foo` but this is a value of generic type Tv (Typing[4062])
-  File "recursive_constraint_bad_7.php", line 4, characters 34-35:
-  Definition is here
+error: Typing[4062] You are trying to access the method `Foo` but this is a value of generic type Tv [1]
+-> Definition is here [2]
+
+recursive_constraint_bad_7.php:5:12
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function Foo<Tv as Tu, Tu as Tv>(Tv $x): int {
+  |                                  ^^ [2]
+5 |   $y = $x->Foo();
+  |            ^^^ [1]
+6 |   return $y;
+7 | }
+
+1 error found

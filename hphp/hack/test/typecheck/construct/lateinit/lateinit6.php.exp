@@ -1,4 +1,17 @@
-ERROR: File "lateinit6.php", line 9, characters 10-12:
-Redeclared properties must be consistently declared `__LateInit` (Typing[4282])
-  File "lateinit6.php", line 4, characters 10-12:
-  The property is not declared `__LateInit` here
+error: Typing[4282] Redeclared properties must be consistently declared `__LateInit` [1]
+-> The property is not declared `__LateInit` here [2]
+
+lateinit6.php:9:10
+ 2 | 
+ 3 | abstract class C {
+ 4 |   public int $foo;
+   |          ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | final class D extends C {
+ 8 |   <<__LateInit>>
+ 9 |   public int $foo;
+   |          ^^^ [1]
+10 | }
+
+1 error found

@@ -1,6 +1,23 @@
-ERROR: File "list_increment_nested.php", line 6, characters 15-16:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "list_increment_nested.php", line 6, characters 15-16:
-Unsequenced modification and access to local variable. Modified here (Typing[4143])
-  File "list_increment_nested.php", line 6, characters 27-28:
-  And accessed here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+list_increment_nested.php:6:15
+4 | function test(varray<varray<int>> $a, varray<int> $b): int {
+5 |   $x = 0;
+6 |   list($y, $b[$x++]) = $a[$x];
+  |               ^^ [1]
+7 |   return $x;
+8 | }
+
+error: Typing[4143] Unsequenced modification and access to local variable. Modified here [1]
+-> And accessed here [2]
+
+list_increment_nested.php:6:15
+4 | function test(varray<varray<int>> $a, varray<int> $b): int {
+5 |   $x = 0;
+6 |   list($y, $b[$x++]) = $a[$x];
+  |               ^^ [1]
+  |                           ^^ [2]
+7 |   return $x;
+8 | }
+
+2 errors found

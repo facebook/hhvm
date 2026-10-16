@@ -1,6 +1,21 @@
-ERROR: File "covariant.php", line 17, characters 7-8:
-Invalid argument (Typing[4110])
-  File "covariant.php", line 5, characters 27-33:
-  Expected `dynamic`
-  File "covariant.php", line 16, characters 25-29:
-  But got `mixed`
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> But got `mixed` [3]
+
+covariant.php:17:7
+ 3 | class Foo<-Tcontra, +Tco> {}
+ 4 | 
+ 5 | function bar(Foo<dynamic, dynamic> $x): void {}
+   |                           ^^^^^^^ [2]
+ 6 | 
+ 7 | function baz(): void {
+   :
+14 |   //now fail because mixed is not a subtype of dynamic,
+15 |   //and thus not covariant
+16 |   $c = new Foo<dynamic, mixed>();
+   |                         ^^^^^ [3]
+17 |   bar($c);
+   |       ^^ [1]
+18 | }
+
+1 error found

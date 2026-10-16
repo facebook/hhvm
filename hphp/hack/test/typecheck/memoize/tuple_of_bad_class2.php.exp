@@ -1,4 +1,11 @@
-ERROR: File "tuple_of_bad_class2.php", line 6, characters 43-46:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "tuple_of_bad_class2.php", line 6, characters 30-32:
-  This is an object of type Bar
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type Bar [2]
+
+tuple_of_bad_class2.php:6:43
+4 | 
+5 | <<__Memoize>>
+6 | function some_function((int, Bar, string) $tup): void {}
+  |                              ^^^ [2]
+  |                                           ^^^^ [1]
+
+1 error found

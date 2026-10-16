@@ -1,12 +1,37 @@
-ERROR: File "invariant-dep-2.php", line 47, characters 26-27:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "invariant-dep-2.php", line 48, characters 12-36:
-Invalid return type (Typing[4110])
-  File "invariant-dep-2.php", line 47, characters 70-71:
-  Expected `T2`
-  File "invariant-dep-2.php", line 15, characters 18-20:
-  But got `int`
-  File "invariant-dep-2.php", line 16, characters 26-32:
-    resulting from expanding the type constant `<expr#4> as ConcreteIntBox::T`
-  File "invariant-dep-2.php", line 48, characters 12-29:
-    where `<expr#4>` is a reference to this expression
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+invariant-dep-2.php:47:26
+45 | 
+46 |   <<__Override>>
+47 |   public function boxGet<T2 as int>(Invariant<self::TBox> $inv_box): T2 {
+   |                          ^^ [1]
+48 |     return $inv_box->unwrap()->get();
+49 |     // ERROR: expected T2 but got int
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T2` [2]
+-> But got `int` [3]
+->   resulting from expanding the type constant `<expr#4> as ConcreteIntBox::T` [4]
+->   where `<expr#4>` is a reference to this expression [5]
+
+invariant-dep-2.php:48:12
+13 | }
+14 | class ConcreteIntBox implements ArraykeyBox {
+15 |   const type T = int;
+   |                  ^^^ [3]
+16 |   public function get(): this::T {
+   |                          ^^^^^^^ [4]
+17 |     return 0;
+18 |   }
+   :
+45 | 
+46 |   <<__Override>>
+47 |   public function boxGet<T2 as int>(Invariant<self::TBox> $inv_box): T2 {
+   |                                                                      ^^ [2]
+48 |     return $inv_box->unwrap()->get();
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^^^^^^^^^^^^^ [5]
+49 |     // ERROR: expected T2 but got int
+50 |     // As expected, since T2 could be, for
+
+2 errors found

@@ -1,14 +1,55 @@
-ERROR: File "type_errors_bad.php", line 6, characters 3-7:
-Missing required fields in destructuring pattern: 'y' (Typing[4511])
-ERROR: File "type_errors_bad.php", line 11, characters 3-29:
-Typing error (Typing[4057])
-  File "type_errors_bad.php", line 10, characters 29-45:
-  The field `z` is missing
-  File "type_errors_bad.php", line 11, characters 20-22:
-  The field `z` is required here
-ERROR: File "type_errors_bad.php", line 11, characters 20-22:
-Field `'z'` does not exist in the shape type (Typing[4512])
-ERROR: File "type_errors_bad.php", line 16, characters 3-7:
-Missing required fields in destructuring pattern: 'c', 'b' (Typing[4511])
-ERROR: File "type_errors_bad.php", line 21, characters 3-7:
-Tuple arity mismatch: expected 1 element in destructuring pattern but the tuple type has 2 (Typing[4513])
+error: Typing[4511] Missing required fields in destructuring pattern: 'y' [1]
+
+type_errors_bad.php:6:3
+4 | // Error: missing required field 'y' in closed pattern
+5 | function test_missing_field(shape('x' => int, 'y' => int) $s): void {
+6 |   shape('x' => $x) = $s;
+  |   ^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4057] Typing error [1]
+-> The field `z` is missing [2]
+-> The field `z` is required here [3]
+
+type_errors_bad.php:11:3
+ 8 | 
+ 9 | // Error: unknown field 'z' not in shape type
+10 | function test_unknown_field(shape('x' => int) $s): void {
+   |                             ^^^^^^^^^^^^^^^^^ [2]
+11 |   shape('x' => $x, 'z' => $z) = $s;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^ [3]
+12 | }
+13 | 
+
+error: Typing[4512] Field `'z'` does not exist in the shape type [1]
+
+type_errors_bad.php:11:20
+ 9 | // Error: unknown field 'z' not in shape type
+10 | function test_unknown_field(shape('x' => int) $s): void {
+11 |   shape('x' => $x, 'z' => $z) = $s;
+   |                    ^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4511] Missing required fields in destructuring pattern: 'c', 'b' [1]
+
+type_errors_bad.php:16:3
+14 | // Error: multiple missing required fields reported in one error
+15 | function test_multiple_missing(shape('a' => int, 'b' => int, 'c' => int) $s): void {
+16 |   shape('a' => $a) = $s;
+   |   ^^^^^ [1]
+17 | }
+18 | 
+
+error: Typing[4513] Tuple arity mismatch: expected 1 element in destructuring pattern but the tuple type has 2 [1]
+
+type_errors_bad.php:21:3
+19 | // Error: tuple arity mismatch
+20 | function test_tuple_arity((int, int) $t): void {
+21 |   tuple($a) = $t;
+   |   ^^^^^ [1]
+22 | }
+
+5 errors found

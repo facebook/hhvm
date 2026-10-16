@@ -1,8 +1,22 @@
-ERROR: File "method_call_splice_error.php", line 11, characters 21-23:
-No instance method `bar` in `Foo` (Typing[4053])
-  File "method_call_splice_error.php", line 6, characters 19-21:
-  Did you mean `boo` instead?
-  File "method_call_splice_error.php", line 10, characters 12-14:
-  This is why I think it is an object of type Foo
-  File "method_call_splice_error.php", line 5, characters 7-9:
-  Declaration of `Foo` is here
+error: Typing[4053] No instance method `bar` in `Foo` [1]
+-> Did you mean `boo` instead? [2]
+-> This is why I think it is an object of type Foo [3]
+-> Declaration of `Foo` is here [4]
+
+method_call_splice_error.php:11:21
+ 3 | <<file:__EnableUnstableFeatures('expression_trees')>>
+ 4 | 
+ 5 | class Foo {
+   |       ^^^ [4]
+ 6 |   public function boo(): void {}
+   |                   ^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | function test(): void {
+10 |   $x = new Foo();
+   |            ^^^ [3]
+11 |   ExampleDsl`${ $x->bar() }`;
+   |                     ^^^ [1]
+12 | }
+
+1 error found

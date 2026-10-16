@@ -1,10 +1,50 @@
-ERROR: File "test_enforcement_on_polymorphic_coeffects.php", line 11, characters 9-24:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_enforcement_on_polymorphic_coeffects.php", line 22, characters 9-24:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_enforcement_on_polymorphic_coeffects.php", line 27, characters 5-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_enforcement_on_polymorphic_coeffects.php", line 31, characters 5-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_enforcement_on_polymorphic_coeffects.php", line 38, characters 5-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_enforcement_on_polymorphic_coeffects.php:11:9
+ 9 | 
+10 |     public function error_polymorphic_1(Foo $foo)[self::C] : void {
+11 |         ++$foo->prop_int; // Error
+   |         ^^^^^^^^^^^^^^^^ [1]
+12 |     }
+13 | }
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_enforcement_on_polymorphic_coeffects.php:22:9
+20 | class Baz extends Bar {
+21 |     public function error_polymorphic_2(Foo $foo)[this::C]: void {
+22 |         ++$foo->prop_int; // Error
+   |         ^^^^^^^^^^^^^^^^ [1]
+23 |     }
+24 | }
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_enforcement_on_polymorphic_coeffects.php:27:5
+25 | 
+26 | function error_polymorphic_3(Foo $foo)[Foo::C] : void {
+27 |     ++$foo->prop_int; // Error
+   |     ^^^^^^^^^^^^^^^^ [1]
+28 | }
+29 | 
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_enforcement_on_polymorphic_coeffects.php:31:5
+29 | 
+30 | function error_dependent_1(Foo $foo)[$foo::C] : void {
+31 |     ++$foo->prop_int; // Error
+   |     ^^^^^^^^^^^^^^^^ [1]
+32 | }
+33 | 
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_enforcement_on_polymorphic_coeffects.php:38:5
+36 |     ?(function()[_]: void) $f,
+37 |   )[ctx $f]: void {
+38 |     ++$foo->prop_int; // Error
+   |     ^^^^^^^^^^^^^^^^ [1]
+39 | }
+
+5 errors found

@@ -1,8 +1,22 @@
-ERROR: File "contravariant2.php", line 17, characters 7-8:
-Invalid argument (Typing[4110])
-  File "contravariant2.php", line 16, characters 16-22:
-  Expected `dynamic`
-  File "contravariant2.php", line 5, characters 18-22:
-  But got `mixed`
-  File "contravariant2.php", line 5, characters 18-22:
-  This type argument to `Foo` only allows supertypes (it is contravariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> But got `mixed` [3]
+-> This type argument to `Foo` only allows supertypes (it is contravariant) [3]
+
+contravariant2.php:17:7
+ 3 | class Foo<-Tcontra, +Tco> {}
+ 4 | 
+ 5 | function bar(Foo<mixed, mixed> $x): void {}
+   |                  ^^^^^ [3]
+ 6 | 
+ 7 | function baz(): void {
+   :
+14 |   //now fail because dynamic is not a supertype of mixed,
+15 |   //and thus not contravariant
+16 |   $c = new Foo<dynamic, dynamic>();
+   |                ^^^^^^^ [2]
+17 |   bar($c);
+   |       ^^ [1]
+18 | }
+
+1 error found

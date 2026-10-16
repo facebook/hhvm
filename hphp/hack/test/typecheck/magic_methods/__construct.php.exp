@@ -1,2 +1,10 @@
-ERROR: File "__construct.php", line 11, characters 10-20:
-`__construct` is a magic method and cannot be called directly (NastCheck[3011])
+error: NastCheck[3011] `__construct` is a magic method and cannot be called directly [1]
+
+__construct.php:11:10
+ 9 | function test(): void {
+10 |   $test = new Example();
+11 |   $test->__construct();
+   |          ^^^^^^^^^^^ [1]
+12 | }
+
+1 error found

@@ -1,16 +1,48 @@
-ERROR: File "duplicate_binding_bad.php", line 6, characters 27-28:
-Variable `$a` is bound multiple times in this destructuring pattern (Typing[4110])
-  File "duplicate_binding_bad.php", line 6, characters 16-17:
-  First binding was here
-ERROR: File "duplicate_binding_bad.php", line 11, characters 13-14:
-Variable `$a` is bound multiple times in this destructuring pattern (Typing[4110])
-  File "duplicate_binding_bad.php", line 11, characters 9-10:
-  First binding was here
-ERROR: File "duplicate_binding_bad.php", line 16, characters 33-34:
-Variable `$a` is bound multiple times in this destructuring pattern (Typing[4110])
-  File "duplicate_binding_bad.php", line 16, characters 16-17:
-  First binding was here
-ERROR: File "duplicate_binding_bad.php", line 21, characters 27-28:
-Variable `$_` is bound multiple times in this destructuring pattern (Typing[4110])
-  File "duplicate_binding_bad.php", line 21, characters 16-17:
-  First binding was here
+error: Typing[4110] Variable `$a` is bound multiple times in this destructuring pattern [1]
+-> First binding was here [2]
+
+duplicate_binding_bad.php:6:27
+4 | // Duplicate in same shape --should error
+5 | function test_dup_shape(shape('x' => int, 'y' => int) $s): void {
+6 |   shape('x' => $a, 'y' => $a) = $s;
+  |                ^^ [2]
+  |                           ^^ [1]
+7 | }
+8 | 
+
+error: Typing[4110] Variable `$a` is bound multiple times in this destructuring pattern [1]
+-> First binding was here [2]
+
+duplicate_binding_bad.php:11:13
+ 9 | // Duplicate in same tuple --should error
+10 | function test_dup_tuple((int, int) $t): void {
+11 |   tuple($a, $a) = $t;
+   |         ^^ [2]
+   |             ^^ [1]
+12 | }
+13 | 
+
+error: Typing[4110] Variable `$a` is bound multiple times in this destructuring pattern [1]
+-> First binding was here [2]
+
+duplicate_binding_bad.php:16:33
+14 | // Duplicate across nesting -- should error
+15 | function test_dup_nested(shape('x' => int, 'y' => (int, int)) $s): void {
+16 |   shape('x' => $a, 'y' => tuple($a, $b)) = $s;
+   |                ^^ [2]
+   |                                 ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Variable `$_` is bound multiple times in this destructuring pattern [1]
+-> First binding was here [2]
+
+duplicate_binding_bad.php:21:27
+19 | // Duplicate $_ -- wildcard should be used instead
+20 | function test_dup_dollar_underscore(shape('a' => int, 'b' => int) $s): void {
+21 |   shape('a' => $_, 'b' => $_) = $s;
+   |                ^^ [2]
+   |                           ^^ [1]
+22 | }
+
+4 errors found

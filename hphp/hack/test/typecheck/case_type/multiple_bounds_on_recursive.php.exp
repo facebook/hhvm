@@ -1,4 +1,13 @@
-ERROR: File "multiple_bounds_on_recursive.php", line 7, characters 11-17:
-Cyclic type definition (Typing[4498])
-  File "multiple_bounds_on_recursive.php", line 5, characters 27-33:
-  Cyclic use is here
+error: Typing[4498] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+multiple_bounds_on_recursive.php:7:11
+3 | <<file: __EnableUnstableFeatures('case_types')>>
+4 | 
+5 | case type CTSub as mixed, CTSuper = int;
+  |                           ^^^^^^^ [2]
+6 | 
+7 | case type CTSuper = int | vec<CTSub>;
+  |           ^^^^^^^ [1]
+
+1 error found

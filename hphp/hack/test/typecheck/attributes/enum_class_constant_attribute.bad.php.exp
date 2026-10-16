@@ -1,4 +1,21 @@
-ERROR: File "enum_class_constant_attribute.bad.php", line 5, characters 26-26:
-A colon `:` is expected here. (Parsing[1002])
-ERROR: File "enum_class_constant_attribute.bad.php", line 5, characters 26-26:
-Encountered unexpected text `{`, was expecting a type hint. (Parsing[1002])
+error: Parsing[1002] A colon `:` is expected here. [1]
+
+enum_class_constant_attribute.bad.php:5:26
+3 | class Cc implements HH\ClassConstantAttribute {}
+4 | 
+5 | enum class SomeEnumClass {
+  |                          ^ [1]
+6 |   <<Cc>>int NOT_ALLOWED = 42;
+7 | }
+
+error: Parsing[1002] Encountered unexpected text `{`, was expecting a type hint. [1]
+
+enum_class_constant_attribute.bad.php:5:26
+3 | class Cc implements HH\ClassConstantAttribute {}
+4 | 
+5 | enum class SomeEnumClass {
+  |                          ^ [1]
+6 |   <<Cc>>int NOT_ALLOWED = 42;
+7 | }
+
+2 errors found

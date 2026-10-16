@@ -1,8 +1,29 @@
-ERROR: File "variadics02.php", line 22, characters 14-22:
-Was expecting an object but type is unknown (Typing[4297])
-  File "variadics02.php", line 20, characters 31-36:
-  It is unknown because a type could not be determined here
-ERROR: File "variadics02.php", line 32, characters 14-22:
-Was expecting an object but type is unknown (Typing[4297])
-  File "variadics02.php", line 30, characters 28-33:
-  It is unknown because a type could not be determined here
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+variadics02.php:22:14
+18 | // Inferred types
+19 | function test1(): void {
+20 |   $lambda = ($i, $str, $d, ...$d_var) ==> {
+   |                               ^^^^^^ [2]
+21 |     if ($str == "foo") {
+22 |       return $d_var[0]->bar();
+   |              ^^^^^^^^^ [1]
+23 |     }
+24 |     return 0;
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+variadics02.php:32:14
+28 |   // Note: Variadic $d_var covers both D and D... in
+29 |   // expect_multiple_params_trailing_variadic
+30 |   $lambda2 = ($i, $str, ...$d_var) ==> {
+   |                            ^^^^^^ [2]
+31 |     if ($str == "foo") {
+32 |       return $d_var[0]->bar();
+   |              ^^^^^^^^^ [1]
+33 |     }
+34 |     return 0;
+
+2 errors found

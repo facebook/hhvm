@@ -1,8 +1,20 @@
 File "explicit_type_collection_passing_keyset1.php", line 6, characters 3-13:
   keyset<arraykey>
-ERROR: File "explicit_type_collection_passing_keyset1.php", line 7, characters 7-8:
-Invalid argument (Typing[4110])
-  File "explicit_type_collection_passing_keyset1.php", line 3, characters 21-23:
-  Expected `int`
-  File "explicit_type_collection_passing_keyset1.php", line 5, characters 8-25:
-  But got `arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+explicit_type_collection_passing_keyset1.php:7:7
+1 | <?hh
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | function foo(keyset<int> $x): void {}
+  |                     ^^^ [2]
+4 | function bar(): void {
+5 |   $x = keyset<arraykey>[];
+  |        ^^^^^^^^^^^^^^^^^^ [3]
+6 |   hh_show($x);
+7 |   foo($x);
+  |       ^^ [1]
+8 | }
+
+1 error found

@@ -58,53 +58,199 @@ File "dynamic1.php", line 67, characters 3-13:
   dynamic
 File "dynamic1.php", line 71, characters 3-13:
   dynamic
-WARN: File "dynamic1.php", line 12, characters 12-24:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "dynamic1.php", line 11, characters 21-27:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 14, characters 7-20:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "dynamic1.php", line 12, characters 12-24:
-  This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
-WARN: File "dynamic1.php", line 16, characters 12-19:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "dynamic1.php", line 11, characters 21-27:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 18, characters 12-19:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "dynamic1.php", line 11, characters 21-27:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 32, characters 8-23:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "dynamic1.php", line 11, characters 39-45:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 34, characters 8-22:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "dynamic1.php", line 11, characters 21-27:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 52, characters 3-4:
-Appending to a value of type `dynamic` (Warn[12040])
-  File "dynamic1.php", line 3, characters 36-42:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 53, characters 3-4:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic1.php", line 3, characters 36-42:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 55, characters 8-9:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic1.php", line 3, characters 36-42:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 55, characters 8-12:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic1.php", line 55, characters 8-12:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 55, characters 8-16:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic1.php", line 55, characters 8-16:
-  This expression has type `dynamic`
-WARN: File "dynamic1.php", line 55, characters 8-21:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic1.php", line 55, characters 8-21:
-  This expression has type `dynamic`
-ERROR: File "dynamic1.php", line 11, characters 64-65:
-Was expecting a type hint (Typing[4032])
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:12:12
+ 9 | }
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+   |                     ^^^^^^^ [2]
+12 |   $y = $x->read_property;
+   |            ^^^^^^^^^^^^^ [1]
+13 |   hh_show($y);
+14 |   $y->write_property = 10;
+
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic`, the result of accessing a property of a `dynamic` type [2]
+
+dynamic1.php:14:7
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+12 |   $y = $x->read_property;
+   |            ^^^^^^^^^^^^^ [2]
+13 |   hh_show($y);
+14 |   $y->write_property = 10;
+   |       ^^^^^^^^^^^^^^ [1]
+15 |   hh_show($y);
+16 |   $y = $x->any_meth();
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:16:12
+ 9 | }
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+   |                     ^^^^^^^ [2]
+12 |   $y = $x->read_property;
+13 |   hh_show($y);
+14 |   $y->write_property = 10;
+15 |   hh_show($y);
+16 |   $y = $x->any_meth();
+   |            ^^^^^^^^ [1]
+17 |   hh_show($y);
+18 |   $y = $x->any_meth(1, 'f', null);
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:18:12
+ 9 | }
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+   |                     ^^^^^^^ [2]
+12 |   $y = $x->read_property;
+13 |   hh_show($y);
+   :
+16 |   $y = $x->any_meth();
+17 |   hh_show($y);
+18 |   $y = $x->any_meth(1, 'f', null);
+   |            ^^^^^^^^ [1]
+19 |   hh_show($y);
+20 |   $y = $cx::$static_prop;
+
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:32:8
+ 9 | }
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+   |                                       ^^^^^^^ [2]
+12 |   $y = $x->read_property;
+13 |   hh_show($y);
+   :
+30 |   $y = $x::CONST;
+31 |   hh_show($y);
+32 |   $y = $cx::static_meth();
+   |        ^^^^^^^^^^^^^^^^ [1]
+33 |   hh_show($y);
+34 |   $y = $x::static_meth(true, 19, 'afe');
+
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:34:8
+ 9 | }
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+   |                     ^^^^^^^ [2]
+12 |   $y = $x->read_property;
+13 |   hh_show($y);
+   :
+32 |   $y = $cx::static_meth();
+33 |   hh_show($y);
+34 |   $y = $x::static_meth(true, 19, 'afe');
+   |        ^^^^^^^^^^^^^^^ [1]
+35 |   hh_show($y);
+36 |   $y = $x * 10;
+
+warning: Warn[12040] Appending to a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:52:3
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_string(string $x): dynamic {
+   |                                    ^^^^^^^ [2]
+ 4 |   return $x;
+ 5 | }
+   :
+50 |   $x = expect_string($x);
+51 |   hh_show($x);
+52 |   $x[] = 10;
+   |   ^^ [1]
+53 |   $x['foo'] = 2;
+54 |   hh_show($x);
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:53:3
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_string(string $x): dynamic {
+   |                                    ^^^^^^^ [2]
+ 4 |   return $x;
+ 5 | }
+   :
+51 |   hh_show($x);
+52 |   $x[] = 10;
+53 |   $x['foo'] = 2;
+   |   ^^ [1]
+54 |   hh_show($x);
+55 |   $y = $x[0][10]['f'][true];
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic1.php:55:8
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_string(string $x): dynamic {
+   |                                    ^^^^^^^ [2]
+ 4 |   return $x;
+ 5 | }
+   :
+53 |   $x['foo'] = 2;
+54 |   hh_show($x);
+55 |   $y = $x[0][10]['f'][true];
+   |        ^^ [1]
+56 |   hh_show($y);
+57 |   $y = -$x;
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [1]
+
+dynamic1.php:55:8
+53 |   $x['foo'] = 2;
+54 |   hh_show($x);
+55 |   $y = $x[0][10]['f'][true];
+   |        ^^^^^ [1]
+56 |   hh_show($y);
+57 |   $y = -$x;
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [1]
+
+dynamic1.php:55:8
+53 |   $x['foo'] = 2;
+54 |   hh_show($x);
+55 |   $y = $x[0][10]['f'][true];
+   |        ^^^^^^^^^ [1]
+56 |   hh_show($y);
+57 |   $y = -$x;
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [1]
+
+dynamic1.php:55:8
+53 |   $x['foo'] = 2;
+54 |   hh_show($x);
+55 |   $y = $x[0][10]['f'][true];
+   |        ^^^^^^^^^^^^^^ [1]
+56 |   hh_show($y);
+57 |   $y = -$x;
+
+error: Typing[4032] Was expecting a type hint [1]
+
+dynamic1.php:11:64
+ 9 | }
+10 | 
+11 | async function test(dynamic $x, class<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
+   |                                                                ^^ [1]
+12 |   $y = $x->read_property;
+13 |   hh_show($y);
+
+13 errors found

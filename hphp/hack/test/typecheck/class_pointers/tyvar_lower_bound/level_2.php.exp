@@ -1,16 +1,72 @@
-ERROR: File "level_2.php", line 31, characters 3-9:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_2.php", line 25, characters 31-38:
-  Definition is here
-ERROR: File "level_2.php", line 33, characters 3-11:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_2.php", line 25, characters 31-38:
-  Definition is here
-ERROR: File "level_2.php", line 35, characters 3-12:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_2.php", line 25, characters 31-38:
-  Definition is here
-ERROR: File "level_2.php", line 37, characters 3-16:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_2.php", line 21, characters 35-42:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_2.php:31:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+28 | 
+29 | function test(): void {
+30 |   $string = id_string(get_class_pointer());
+31 |   $string::method();
+   |   ^^^^^^^ [1]
+32 |   $arraykey = id_arraykey(get_class_pointer());
+33 |   $arraykey::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_2.php:33:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+   :
+31 |   $string::method();
+32 |   $arraykey = id_arraykey(get_class_pointer());
+33 |   $arraykey::method();
+   |   ^^^^^^^^^ [1]
+34 |   $stringish = id_stringish(get_class_pointer());
+35 |   $stringish::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_2.php:35:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+   :
+33 |   $arraykey::method();
+34 |   $stringish = id_stringish(get_class_pointer());
+35 |   $stringish::method();
+   |   ^^^^^^^^^^ [1]
+36 |   $upper_arrives = lower_then_upper(get_class_pointer());
+37 |   $upper_arrives::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_2.php:37:3
+19 | }
+20 | 
+21 | function lower_then_upper<T super class<C> as arraykey>(T $value): T {
+   |                                   ^^^^^^^^ [2]
+22 |   return $value;
+23 | }
+   :
+35 |   $stringish::method();
+36 |   $upper_arrives = lower_then_upper(get_class_pointer());
+37 |   $upper_arrives::method();
+   |   ^^^^^^^^^^^^^^ [1]
+38 | }
+
+4 errors found

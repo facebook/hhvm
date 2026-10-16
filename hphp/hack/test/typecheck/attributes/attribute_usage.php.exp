@@ -1,6 +1,19 @@
-ERROR: File "attribute_usage.php", line 17, characters 5-11:
-Invalid argument (Typing[4110])
-  File "attribute_usage.php", line 8, characters 38-40:
-  Expected `int`
-  File "attribute_usage.php", line 17, characters 5-11:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+attribute_usage.php:17:5
+ 6 | 
+ 7 | class B implements HH\FunctionAttribute {
+ 8 |   public function __construct(public int $i) {}
+   |                                      ^^^ [2]
+ 9 | }
+10 | 
+   :
+15 | function g(): void {}
+16 | 
+17 | <<B("wrong")>>
+   |     ^^^^^^^ [1]
+18 | function h(): void {}
+
+1 error found

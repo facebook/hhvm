@@ -1,8 +1,41 @@
-ERROR: File "allowed_func_ptr_builtins2.php", line 11, characters 14-18:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "allowed_func_ptr_builtins2.php", line 12, characters 15-25:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "allowed_func_ptr_builtins2.php", line 18, characters 14-18:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "allowed_func_ptr_builtins2.php", line 19, characters 15-25:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+allowed_func_ptr_builtins2.php:11:14
+ 9 | class A {
+10 |   public static dict<string,mixed> $arr = dict[
+11 |     'foo' => foo<>,
+   |              ^^^^^ [1]
+12 |     'meth' => Cls::meth<>,
+13 |   ];
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+allowed_func_ptr_builtins2.php:12:15
+10 |   public static dict<string,mixed> $arr = dict[
+11 |     'foo' => foo<>,
+12 |     'meth' => Cls::meth<>,
+   |               ^^^^^^^^^^^ [1]
+13 |   ];
+14 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+allowed_func_ptr_builtins2.php:18:14
+16 | abstract class B {
+17 |   const dict<string,mixed> const_arr = dict[
+18 |     'foo' => foo<>,
+   |              ^^^^^ [1]
+19 |     'meth' => Cls::meth<>,
+20 |   ];
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+allowed_func_ptr_builtins2.php:19:15
+17 |   const dict<string,mixed> const_arr = dict[
+18 |     'foo' => foo<>,
+19 |     'meth' => Cls::meth<>,
+   |               ^^^^^^^^^^^ [1]
+20 |   ];
+21 | }
+
+4 errors found

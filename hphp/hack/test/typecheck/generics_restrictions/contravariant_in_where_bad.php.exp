@@ -1,24 +1,76 @@
-ERROR: File "contravariant_in_where_bad.php", line 9, characters 39-39:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "contravariant_in_where_bad.php", line 4, characters 15-15:
-  This is where the parameter was declared as contravariant `-`
-  File "contravariant_in_where_bad.php", line 9, characters 39-39:
-  `where _ as _` constraints are covariant on the left, contravariant on the right
-ERROR: File "contravariant_in_where_bad.php", line 13, characters 48-48:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "contravariant_in_where_bad.php", line 4, characters 15-15:
-  This is where the parameter was declared as contravariant `-`
-  File "contravariant_in_where_bad.php", line 13, characters 48-48:
-  `where _ super _` constraints are contravariant on the left, covariant on the right
-ERROR: File "contravariant_in_where_bad.php", line 17, characters 39-39:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "contravariant_in_where_bad.php", line 4, characters 15-15:
-  This is where the parameter was declared as contravariant `-`
-  File "contravariant_in_where_bad.php", line 17, characters 39-39:
-  `where _ = _` constraints are invariant on the left and right
-ERROR: File "contravariant_in_where_bad.php", line 21, characters 36-36:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "contravariant_in_where_bad.php", line 4, characters 15-15:
-  This is where the parameter was declared as contravariant `-`
-  File "contravariant_in_where_bad.php", line 21, characters 36-36:
-  `where _ as _` constraints are covariant on the left, contravariant on the right
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `where _ as _` constraints are covariant on the left, contravariant on the right [1]
+
+contravariant_in_where_bad.php:9:39
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Contra<-T> {
+   |               ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function set(T $x): void { $this->item = $x; }
+ 7 | 
+ 8 |   // Now some fake getters
+ 9 |   public function get1<Tu>():Tu where T as Tu {
+   |                                       ^ [1]
+10 |     return $this->item;
+11 |   }
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `where _ super _` constraints are contravariant on the left, covariant on the right [1]
+
+contravariant_in_where_bad.php:13:48
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Contra<-T> {
+   |               ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function set(T $x): void { $this->item = $x; }
+   :
+11 |   }
+12 | 
+13 |   public function get2<Tu>():Tu where Tu super T {
+   |                                                ^ [1]
+14 |     return $this->item;
+15 |   }
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `where _ = _` constraints are invariant on the left and right [1]
+
+contravariant_in_where_bad.php:17:39
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Contra<-T> {
+   |               ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function set(T $x): void { $this->item = $x; }
+   :
+15 |   }
+16 | 
+17 |   public function get3<Tu>():Tu where T = Tu {
+   |                                       ^ [1]
+18 |     return $this->item;
+19 |   }
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `where _ as _` constraints are covariant on the left, contravariant on the right [1]
+
+contravariant_in_where_bad.php:21:36
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Contra<-T> {
+   |               ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function set(T $x): void { $this->item = $x; }
+   :
+19 |   }
+20 | 
+21 |   public function get4():int where T as int {
+   |                                    ^ [1]
+22 |     return $this->item;
+23 |   }
+
+4 errors found

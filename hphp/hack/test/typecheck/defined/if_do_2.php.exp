@@ -1,4 +1,18 @@
-ERROR: File "if_do_2.php", line 14, characters 10-11:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
-  File "if_do_2.php", line 6, characters 7-12:
-  Did you mean `$x` instead?
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+-> Did you mean `$x` instead? [2]
+
+if_do_2.php:14:10
+ 4 |   if ($b) {
+ 5 |     do {
+ 6 |       $x = 1;
+   |       ^^^^^^ [2]
+ 7 |       $y = 42;
+ 8 |     } while (false);
+   :
+12 |     } while (false);
+13 |   }
+14 |   return $y;
+   |          ^^ [1]
+15 | }
+
+1 error found

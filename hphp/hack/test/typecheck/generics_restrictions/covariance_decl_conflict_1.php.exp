@@ -1,6 +1,12 @@
-ERROR: File "covariance_decl_conflict_1.php", line 5, characters 27-27:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariance_decl_conflict_1.php", line 5, characters 12-12:
-  This is where the parameter was declared as covariant `+`
-  File "covariance_decl_conflict_1.php", line 5, characters 27-27:
-  The type parameter was declared as contravariant (-)
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> The type parameter was declared as contravariant (-) [1]
+
+covariance_decl_conflict_1.php:5:27
+3 | class Foo<-Tu> {}
+4 | 
+5 | class Bar<+T> extends Foo<T> {}
+  |            ^ [2]
+  |                           ^ [1]
+
+1 error found

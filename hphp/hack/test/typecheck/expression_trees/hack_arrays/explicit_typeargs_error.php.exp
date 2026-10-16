@@ -1,18 +1,90 @@
-ERROR: File "explicit_typeargs_error.php", line 10, characters 14-37:
-`vec` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 14, characters 14-30:
-`vec` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 18, characters 14-54:
-`dict` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 22, characters 14-46:
-`dict` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 26, characters 14-40:
-`keyset` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 30, characters 14-33:
-`keyset` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 36, characters 14-56:
-`vec` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 36, characters 35-55:
-`vec` in expression trees must not have explicit type hints (Parsing[1002])
-ERROR: File "explicit_typeargs_error.php", line 41, characters 21-41:
-`vec` in expression trees must not have explicit type hints (Parsing[1002])
+error: Parsing[1002] `vec` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:10:14
+ 8 | 
+ 9 | function test_vec_explicit_typearg(): void {
+10 |   ExampleDsl`vec<ExampleInt>[1, 2, 3]`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+
+error: Parsing[1002] `vec` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:14:14
+12 | 
+13 | function test_vec_explicit_typearg_empty(): void {
+14 |   ExampleDsl`vec<ExampleInt>[]`;
+   |              ^^^^^^^^^^^^^^^^^ [1]
+15 | }
+16 | 
+
+error: Parsing[1002] `dict` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:18:14
+16 | 
+17 | function test_dict_explicit_typeargs(): void {
+18 |   ExampleDsl`dict<ExampleString, ExampleInt>["a" => 1]`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+20 | 
+
+error: Parsing[1002] `dict` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:22:14
+20 | 
+21 | function test_dict_explicit_typeargs_empty(): void {
+22 |   ExampleDsl`dict<ExampleString, ExampleInt>[]`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 | }
+24 | 
+
+error: Parsing[1002] `keyset` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:26:14
+24 | 
+25 | function test_keyset_explicit_typearg(): void {
+26 |   ExampleDsl`keyset<ExampleInt>[1, 2, 3]`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 | }
+28 | 
+
+error: Parsing[1002] `keyset` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:30:14
+28 | 
+29 | function test_keyset_explicit_typearg_empty(): void {
+30 |   ExampleDsl`keyset<ExampleInt>[]`;
+   |              ^^^^^^^^^^^^^^^^^^^^ [1]
+31 | }
+32 | 
+
+error: Parsing[1002] `vec` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:36:14
+34 | // (desugaring recurses through values).
+35 | function test_nested_explicit_typeargs(): void {
+36 |   ExampleDsl`vec<vec<ExampleInt>>[vec<ExampleInt>[1, 2]]`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Parsing[1002] `vec` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:36:35
+34 | // (desugaring recurses through values).
+35 | function test_nested_explicit_typeargs(): void {
+36 |   ExampleDsl`vec<vec<ExampleInt>>[vec<ExampleInt>[1, 2]]`;
+   |                                   ^^^^^^^^^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Parsing[1002] `vec` in expression trees must not have explicit type hints [1]
+
+explicit_typeargs_error.php:41:21
+39 | // Inside a lambda body — error position should still resolve.
+40 | function test_explicit_typearg_in_lambda(): void {
+41 |   ExampleDsl`() ==> vec<ExampleInt>[1, 2]`;
+   |                     ^^^^^^^^^^^^^^^^^^^^^ [1]
+42 | }
+
+9 errors found

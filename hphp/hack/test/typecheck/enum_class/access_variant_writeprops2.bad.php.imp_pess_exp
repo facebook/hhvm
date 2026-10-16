@@ -1,30 +1,89 @@
-ERROR: File "access_variant_writeprops2.bad.php", line 9, characters 17-17:
-Wrong type hint (Typing[4338])
-  File "access_variant_writeprops2.bad.php", line 9, characters 9-15:
-  Expected `MyClass`
-  File "access_variant_writeprops2.bad.php", line 5, characters 3-9:
-  But got `dynamic`
-ERROR: File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops2.bad.php", line 9, characters 21-31:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_variant_writeprops2.bad.php", line 10, characters 19-37:
-Wrong type hint (Typing[4339])
-  File "access_variant_writeprops2.bad.php", line 10, characters 11-17:
-  Expected `MyClass`
-  File "access_variant_writeprops2.bad.php", line 5, characters 3-9:
-  But got `dynamic`
-ERROR: File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops2.bad.php", line 10, characters 27-37:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_variant_writeprops2.bad.php", line 11, characters 26-50:
-Wrong type hint (Typing[4339])
-  File "access_variant_writeprops2.bad.php", line 11, characters 18-24:
-  Expected `MyClass`
-  File "access_variant_writeprops2.bad.php", line 5, characters 3-9:
-  But got `dynamic`
-ERROR: File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_variant_writeprops2.bad.php", line 11, characters 40-50:
-  The local (enclosing) context provides the capability set {}
+error: Typing[4338] Wrong type hint [1]
+-> Expected `MyClass` [2]
+-> But got `dynamic` [3]
+
+access_variant_writeprops2.bad.php:9:17
+ 3 | class MyClass {}
+ 4 | enum class MyEnum: MyClass {
+ 5 |   MyClass AAA = new MyClass();
+   |   ^^^^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+   |         ^^^^^^^ [2]
+   |                 ^ [1]
+10 |   private MyClass $prop = MyEnum::AAA;
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [1]
+
+access_variant_writeprops2.bad.php:9:21
+ 7 | 
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+   |                     ^^^^^^^^^^^ [1]
+10 |   private MyClass $prop = MyEnum::AAA;
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+
+error: Typing[4339] Wrong type hint [1]
+-> Expected `MyClass` [2]
+-> But got `dynamic` [3]
+
+access_variant_writeprops2.bad.php:10:19
+ 3 | class MyClass {}
+ 4 | enum class MyEnum: MyClass {
+ 5 |   MyClass AAA = new MyClass();
+   |   ^^^^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+10 |   private MyClass $prop = MyEnum::AAA;
+   |           ^^^^^^^ [2]
+   |                   ^^^^^^^^^^^^^^^^^^^ [1]
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+12 | }
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [1]
+
+access_variant_writeprops2.bad.php:10:27
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+10 |   private MyClass $prop = MyEnum::AAA;
+   |                           ^^^^^^^^^^^ [1]
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+12 | }
+
+error: Typing[4339] Wrong type hint [1]
+-> Expected `MyClass` [2]
+-> But got `dynamic` [3]
+
+access_variant_writeprops2.bad.php:11:26
+ 3 | class MyClass {}
+ 4 | enum class MyEnum: MyClass {
+ 5 |   MyClass AAA = new MyClass();
+   |   ^^^^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | class C {
+ 9 |   const MyClass X = MyEnum::AAA;
+10 |   private MyClass $prop = MyEnum::AAA;
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+   |                  ^^^^^^^ [2]
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 | }
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [1]
+
+access_variant_writeprops2.bad.php:11:40
+ 9 |   const MyClass X = MyEnum::AAA;
+10 |   private MyClass $prop = MyEnum::AAA;
+11 |   private static MyClass $staticProp = MyEnum::AAA;
+   |                                        ^^^^^^^^^^^ [1]
+12 | }
+
+6 errors found

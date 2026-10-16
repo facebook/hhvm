@@ -1,52 +1,204 @@
-ERROR: File "cipp.php", line 27, characters 28-37:
-Unbound name: `HH\Contexts\Unsafe\zoned_with` (Naming[2049])
-ERROR: File "cipp.php", line 27, characters 28-37:
-Unbound name: `HH\Contexts\zoned_with` (Naming[2049])
-ERROR: File "cipp.php", line 6, characters 3-22:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-29:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "cipp.php", line 12, characters 33-45:
-  But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
-ERROR: File "cipp.php", line 7, characters 3-20:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-29:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "cipp.php", line 19, characters 31-41:
-  But the function being called requires the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
-ERROR: File "cipp.php", line 8, characters 3-17:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-29:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "cipp.php", line 27, characters 28-40:
-  But the function being called requires the capability zoned_with<A>
-ERROR: File "cipp.php", line 9, characters 3-10:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 5, characters 25-29:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "cipp.php", line 34, characters 10-17:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "cipp.php", line 15, characters 3-17:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 12, characters 33-45:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
-  File "cipp.php", line 27, characters 28-40:
-  But the function being called requires the capability zoned_with<A>
-ERROR: File "cipp.php", line 16, characters 3-10:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 12, characters 33-45:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty}
-  File "cipp.php", line 34, characters 10-17:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "cipp.php", line 23, characters 3-17:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 19, characters 31-41:
-  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-  File "cipp.php", line 27, characters 28-40:
-  But the function being called requires the capability zoned_with<A>
-ERROR: File "cipp.php", line 39, characters 3-17:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "cipp.php", line 34, characters 10-17:
-  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-  File "cipp.php", line 27, characters 28-40:
-  But the function being called requires the capability zoned_with<A>
+error: Naming[2049] Unbound name: `HH\Contexts\Unsafe\zoned_with` [1]
+
+cipp.php:27:28
+25 | }
+26 | 
+27 | function ctx_policied_of()[zoned_with<A>]: void {
+   |                            ^^^^^^^^^^ [1]
+28 |   ctx_policied();
+29 |   ctx_policied_shallow(); // fail
+
+error: Naming[2049] Unbound name: `HH\Contexts\zoned_with` [1]
+
+cipp.php:27:28
+25 | }
+26 | 
+27 | function ctx_policied_of()[zoned_with<A>]: void {
+   |                            ^^^^^^^^^^ [1]
+28 |   ctx_policied();
+29 |   ctx_policied_shallow(); // fail
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty} [3]
+
+cipp.php:6:3
+ 3 | class A {}
+ 4 | 
+ 5 | function ctx_policied()[zoned]: void {
+   |                         ^^^^^ [2]
+ 6 |   ctx_policied_shallow(); // fail
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+ 7 |   ctx_policied_local(); // fail
+ 8 |   ctx_policied_of(); // fail
+ 9 |   defaults(); // fail
+10 | }
+11 | 
+12 | function ctx_policied_shallow()[zoned_shallow]: void {
+   |                                 ^^^^^^^^^^^^^ [3]
+13 |   ctx_policied();
+14 |   ctx_policied_local();
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty} [3]
+
+cipp.php:7:3
+ 3 | class A {}
+ 4 | 
+ 5 | function ctx_policied()[zoned]: void {
+   |                         ^^^^^ [2]
+ 6 |   ctx_policied_shallow(); // fail
+ 7 |   ctx_policied_local(); // fail
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+ 8 |   ctx_policied_of(); // fail
+ 9 |   defaults(); // fail
+   :
+17 | }
+18 | 
+19 | function ctx_policied_local()[zoned_local]: void {
+   |                               ^^^^^^^^^^^ [3]
+20 |   ctx_policied();
+21 |   ctx_policied_shallow();
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability zoned_with<A> [3]
+
+cipp.php:8:3
+ 3 | class A {}
+ 4 | 
+ 5 | function ctx_policied()[zoned]: void {
+   |                         ^^^^^ [2]
+ 6 |   ctx_policied_shallow(); // fail
+ 7 |   ctx_policied_local(); // fail
+ 8 |   ctx_policied_of(); // fail
+   |   ^^^^^^^^^^^^^^^ [1]
+ 9 |   defaults(); // fail
+10 | }
+   :
+25 | }
+26 | 
+27 | function ctx_policied_of()[zoned_with<A>]: void {
+   |                            ^^^^^^^^^^^^^ [3]
+28 |   ctx_policied();
+29 |   ctx_policied_shallow(); // fail
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+cipp.php:9:3
+ 3 | class A {}
+ 4 | 
+ 5 | function ctx_policied()[zoned]: void {
+   |                         ^^^^^ [2]
+ 6 |   ctx_policied_shallow(); // fail
+ 7 |   ctx_policied_local(); // fail
+ 8 |   ctx_policied_of(); // fail
+ 9 |   defaults(); // fail
+   |   ^^^^^^^^ [1]
+10 | }
+11 | 
+   :
+32 | }
+33 | 
+34 | function defaults(): void {
+   |          ^^^^^^^^ [3]
+35 |   ctx_policied();
+36 |   ctx_policied_shallow();
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty} [2]
+-> But the function being called requires the capability zoned_with<A> [3]
+
+cipp.php:15:3
+10 | }
+11 | 
+12 | function ctx_policied_shallow()[zoned_shallow]: void {
+   |                                 ^^^^^^^^^^^^^ [2]
+13 |   ctx_policied();
+14 |   ctx_policied_local();
+15 |   ctx_policied_of(); // fail
+   |   ^^^^^^^^^^^^^^^ [1]
+16 |   defaults(); // fail
+17 | }
+   :
+25 | }
+26 | 
+27 | function ctx_policied_of()[zoned_with<A>]: void {
+   |                            ^^^^^^^^^^^^^ [3]
+28 |   ctx_policied();
+29 |   ctx_policied_shallow(); // fail
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicyLocal, ReadGlobals, SystemLocal, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+cipp.php:16:3
+10 | }
+11 | 
+12 | function ctx_policied_shallow()[zoned_shallow]: void {
+   |                                 ^^^^^^^^^^^^^ [2]
+13 |   ctx_policied();
+14 |   ctx_policied_local();
+15 |   ctx_policied_of(); // fail
+16 |   defaults(); // fail
+   |   ^^^^^^^^ [1]
+17 | }
+18 | 
+   :
+32 | }
+33 | 
+34 | function defaults(): void {
+   |          ^^^^^^^^ [3]
+35 |   ctx_policied();
+36 |   ctx_policied_shallow();
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [2]
+-> But the function being called requires the capability zoned_with<A> [3]
+
+cipp.php:23:3
+17 | }
+18 | 
+19 | function ctx_policied_local()[zoned_local]: void {
+   |                               ^^^^^^^^^^^ [2]
+20 |   ctx_policied();
+21 |   ctx_policied_shallow();
+22 |   // TODO(cipp): these three should fail
+23 |   ctx_policied_of(); // fail
+   |   ^^^^^^^^^^^^^^^ [1]
+24 |   defaults();
+25 | }
+26 | 
+27 | function ctx_policied_of()[zoned_with<A>]: void {
+   |                            ^^^^^^^^^^^^^ [3]
+28 |   ctx_policied();
+29 |   ctx_policied_shallow(); // fail
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [2]
+-> But the function being called requires the capability zoned_with<A> [3]
+
+cipp.php:39:3
+25 | }
+26 | 
+27 | function ctx_policied_of()[zoned_with<A>]: void {
+   |                            ^^^^^^^^^^^^^ [3]
+28 |   ctx_policied();
+29 |   ctx_policied_shallow(); // fail
+   :
+32 | }
+33 | 
+34 | function defaults(): void {
+   |          ^^^^^^^^ [2]
+35 |   ctx_policied();
+36 |   ctx_policied_shallow();
+37 |   ctx_policied_local();
+38 |   // TODO(cipp): these three should fail
+39 |   ctx_policied_of();
+   |   ^^^^^^^^^^^^^^^ [1]
+40 | }
+
+10 errors found

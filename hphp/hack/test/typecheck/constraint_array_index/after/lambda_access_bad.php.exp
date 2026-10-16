@@ -1,6 +1,14 @@
-ERROR: File "lambda_access_bad.php", line 4, characters 6-6:
-Invalid argument (Typing[4110])
-  File "lambda_access_bad.php", line 3, characters 16-20:
-  Expected an array that can be indexed
-  File "lambda_access_bad.php", line 4, characters 6-6:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected an array that can be indexed [2]
+-> But got `int` [1]
+
+lambda_access_bad.php:4:6
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v[0]);
+  |                ^^^^^ [2]
+4 |   $f(0);
+  |      ^ [1]
+5 | }
+
+1 error found

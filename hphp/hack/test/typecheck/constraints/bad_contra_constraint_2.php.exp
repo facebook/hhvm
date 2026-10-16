@@ -1,10 +1,41 @@
-ERROR: File "bad_contra_constraint_2.php", line 25, characters 21-34:
-Invalid argument (Typing[4110])
-  File "bad_contra_constraint_2.php", line 17, characters 52-57:
-  Expected `string`
-  File "bad_contra_constraint_2.php", line 19, characters 20-24:
-  But got `mixed`
-  File "collections/interfaces.hhi", line 845, characters 26-27:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 49-50:
-    via this generic `Tv`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+
+bad_contra_constraint_2.php:25:21
+ 15 | interface IConfigChooserProcessor<-TContextProvider, +TResult> {}
+ 16 | function getProductionModelID(
+ 17 |   IConfigChooserProcessor<KeyedTraversable<string, string>, string>
+    |                                                    ^^^^^^ [2]
+ 18 |     $model_id_config_processor,
+ 19 |   ConstMap<string, mixed> $processor_map,
+    |                    ^^^^^ [3]
+ 20 | ): string {
+ 21 |   $c = new ConfigChooser($model_id_config_processor);
+ 22 |   // We expect $c to have type ConfigChooser<v1, v2>
+ 23 |   // where IConfigChooserProcessorf<KeyedTraversable<string,string>, string> <: IConfigChooserProcessor<v1, v2>
+ 24 |   // so v1 <: KeyedTraversable<string,string> and string <: v2
+ 25 |   $v = $c->getValue($processor_map);
+    |                     ^^^^^^^^^^^^^^ [1]
+ 26 |   // So now we have ConstMap<string,mixed> <: v1
+ 27 |   // and $v will have type v2
+
+collections/interfaces.hhi:845:26
+843 |   interface ConstMap<Tk as arraykey, +Tv>
+844 |     extends
+845 |       KeyedContainer<Tk, Tv>,
+    |                          ^^ [4]
+846 |       ConstCollection<Pair<Tk, Tv>>,
+847 |       ConstMapAccess<Tk, Tv>,
+
+interfaces.hhi:115:49
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                                                 ^^ [5]
+116 | 
+117 |   /**
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "meth_caller8.php", line 9, characters 3-16:
-Too few positional arguments (required 3 but got 2) (Typing[4104])
-  File "meth_caller8.php", line 8, characters 13-41:
-  Definition is here
+error: Typing[4104] Too few positional arguments (required 3 but got 2) [1]
+-> Definition is here [2]
+
+meth_caller8.php:9:3
+ 6 | 
+ 7 | function test(C $c): void {
+ 8 |   $caller = meth_caller(C::class, 'foo2');
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   $caller($c, 0);
+   |   ^^^^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

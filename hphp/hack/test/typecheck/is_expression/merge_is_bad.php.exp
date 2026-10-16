@@ -1,16 +1,61 @@
-ERROR: File "merge_is_bad.php", line 27, characters 11-12:
-Invalid argument (Typing[4110])
-  File "merge_is_bad.php", line 19, characters 18-18:
-  Expected `J`
-  File "merge_is_bad.php", line 22, characters 21-24:
-  But got `I` from this `is` expression test
-  File "merge_is_bad.php", line 11, characters 25-25:
-    via this generic `T`
-ERROR: File "merge_is_bad.php", line 27, characters 11-12:
-Invalid argument (Typing[4110])
-  File "merge_is_bad.php", line 19, characters 18-18:
-  Expected `J`
-  File "merge_is_bad.php", line 22, characters 21-24:
-  But got `T#4 as I` from this `is` expression test
-  File "merge_is_bad.php", line 11, characters 25-25:
-    via this generic `T`
+error: Typing[4110] Invalid argument [1]
+-> Expected `J` [2]
+-> But got `I` from this `is` expression test [3]
+->   via this generic `T` [4]
+
+merge_is_bad.php:27:11
+ 9 | class C<T as I> implements IGet<T> {
+10 |   public function __construct(private T $item) { }
+11 |   public function get():T { return $this->item; }
+   |                         ^ [4]
+12 | }
+13 | class D<T as J> implements IGet<T> {
+   :
+17 | 
+18 | class E implements I { }
+19 | function expectJ(J $x):void { }
+   |                  ^ [2]
+20 | function testit(mixed $m, bool $b):void {
+21 |   if ($b) {
+22 |     invariant($m is C<_>, "C");
+   |                     ^^^^ [3]
+23 |   } else {
+24 |     invariant($m is D<_>, "D");
+25 |   }
+26 |   $a = $m->get();
+27 |   expectJ($a);
+   |           ^^ [1]
+28 | }
+29 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `J` [2]
+-> But got `T#4 as I` from this `is` expression test [3]
+->   via this generic `T` [4]
+
+merge_is_bad.php:27:11
+ 9 | class C<T as I> implements IGet<T> {
+10 |   public function __construct(private T $item) { }
+11 |   public function get():T { return $this->item; }
+   |                         ^ [4]
+12 | }
+13 | class D<T as J> implements IGet<T> {
+   :
+17 | 
+18 | class E implements I { }
+19 | function expectJ(J $x):void { }
+   |                  ^ [2]
+20 | function testit(mixed $m, bool $b):void {
+21 |   if ($b) {
+22 |     invariant($m is C<_>, "C");
+   |                     ^^^^ [3]
+23 |   } else {
+24 |     invariant($m is D<_>, "D");
+25 |   }
+26 |   $a = $m->get();
+27 |   expectJ($a);
+   |           ^^ [1]
+28 | }
+29 | 
+
+2 errors found

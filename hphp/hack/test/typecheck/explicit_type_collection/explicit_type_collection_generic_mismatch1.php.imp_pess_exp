@@ -1,6 +1,13 @@
-ERROR: File "explicit_type_collection_generic_mismatch1.php", line 4, characters 14-14:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_generic_mismatch1.php", line 4, characters 14-14:
-  Expected `T`
-  File "explicit_type_collection_generic_mismatch1.php", line 4, characters 33-36:
-  But got `null`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `T` [1]
+-> But got `null` [2]
+
+explicit_type_collection_generic_mismatch1.php:4:14
+2 | 
+3 | function f<T>(T $value): vec<T> {
+4 |   return vec<T>[$value, $value, null];
+  |              ^ [1]
+  |                                 ^^^^ [2]
+5 | }
+
+1 error found

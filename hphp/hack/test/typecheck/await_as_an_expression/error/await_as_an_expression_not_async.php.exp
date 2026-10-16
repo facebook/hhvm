@@ -1,8 +1,26 @@
-ERROR: File "await_as_an_expression_not_async.php", line 6, characters 8-19:
-`await` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "await_as_an_expression_not_async.php", line 7, characters 10-11:
-Invalid return type (Typing[4110])
-  File "await_as_an_expression_not_async.php", line 5, characters 17-31:
-  Expected `Awaitable<void>`
-  File "await_as_an_expression_not_async.php", line 6, characters 8-24:
-  But got `int` because this is the result of an integer arithmetic operation
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+await_as_an_expression_not_async.php:6:8
+4 | 
+5 | function foo(): Awaitable<void> {
+6 |   $x = await genx() + 42;
+  |        ^^^^^^^^^^^^ [1]
+7 |   return $x;
+8 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Awaitable<void>` [2]
+-> But got `int` because this is the result of an integer arithmetic operation [3]
+
+await_as_an_expression_not_async.php:7:10
+3 | async function genx(): Awaitable<int> { return 42; }
+4 | 
+5 | function foo(): Awaitable<void> {
+  |                 ^^^^^^^^^^^^^^^ [2]
+6 |   $x = await genx() + 42;
+  |        ^^^^^^^^^^^^^^^^^ [3]
+7 |   return $x;
+  |          ^^ [1]
+8 | }
+
+2 errors found

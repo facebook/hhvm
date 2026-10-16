@@ -1,6 +1,19 @@
-ERROR: File "ctor.php", line 24, characters 14-27:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "ctor.php", line 23, characters 32-33:
-  From this declaration, the context of this function body provides the capability set {}
-  File "ctor.php", line 20, characters 33-37:
-  But the function being called requires the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [3]
+
+ctor.php:24:14
+18 | 
+19 | class WithImpureCtor implements \HH\FunctionAttribute {
+20 |   public function __construct()[zoned] {}
+   |                                 ^^^^^ [3]
+21 | }
+22 | 
+23 | function call_impure_ctor_bad()[]: WithImpureCtor {
+   |                                ^^ [2]
+24 |   return new WithImpureCtor(); // error
+   |              ^^^^^^^^^^^^^^ [1]
+25 | }
+26 | 
+
+1 error found

@@ -1,10 +1,56 @@
-ERROR: File "switch_case_assn.php", line 6, characters 11-12:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "switch_case_assn.php", line 3, characters 10-12:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "switch_case_assn.php", line 5, characters 3-131:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_case_assn.php", line 5, characters 11-12:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "switch_case_assn.php", line 6, characters 11-12:
-Don't assign to variables inside of case labels (Typing[4145])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+switch_case_assn.php:6:11
+4 |   $a = 1;
+5 |   switch ($a) {
+6 |     case ($a = 0):
+  |           ^^ [1]
+7 |       echo "what in the world\n";
+8 |       break;
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+switch_case_assn.php:3:10
+1 | <?hh
+2 | 
+3 | function wut() {
+  |          ^^^ [1]
+4 |   $a = 1;
+5 |   switch ($a) {
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_case_assn.php:5:3
+ 3 | function wut() {
+ 4 |   $a = 1;
+ 5 |   switch ($a) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 6 |     case ($a = 0):
+   |     ^^^^^^^^^^^^^^ [1]
+ 7 |       echo "what in the world\n";
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 8 |       break;
+   |       ^^^^^^ [1]
+ 9 |     case 1:
+   |     ^^^^^^^ [1]
+10 |       echo "argh\n";
+   |       ^^^^^^^^^^^^^^ [1]
+11 |       break;
+   |       ^^^^^^ [1]
+12 |   }
+   |   ^ [1]
+13 | }
+
+error: Typing[4145] Don't assign to variables inside of case labels [1]
+
+switch_case_assn.php:6:11
+4 |   $a = 1;
+5 |   switch ($a) {
+6 |     case ($a = 0):
+  |           ^^ [1]
+7 |       echo "what in the world\n";
+8 |       break;
+
+4 errors found

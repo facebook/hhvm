@@ -1,18 +1,54 @@
-ERROR: File "typing5.bad.php", line 11, characters 22-22:
-Unbound name: `T` (Naming[2049])
-ERROR: File "typing5.bad.php", line 11, characters 22-22:
-Unbound name: `T` (an object type) (Naming[2049])
-ERROR: File "typing5.bad.php", line 12, characters 16-16:
-Constant does not match the type of the enum it is in (Typing[4328])
-  File "typing5.bad.php", line 11, characters 22-22:
-  Expected `T`
-  File "typing5.bad.php", line 12, characters 8-13:
-  But got `string`
-  File "typing5.bad.php", line 12, characters 8-13:
-  This type argument to `Box` must match exactly (it is invariant)
-  File "typing5.bad.php", line 6, characters 31-31:
-    via this generic `T`
-  File "typing5.bad.php", line 12, characters 8-13:
-  This type argument to `ExBox` must match exactly (it is invariant)
-ERROR: File "typing5.bad.php", line 16, characters 12-12:
-Invalid base type for an enum class: `dynamic` (Typing[4024])
+error: Naming[2049] Unbound name: `T` [1]
+
+typing5.bad.php:11:22
+ 9 | 
+10 | // only types without parameters are allowed
+11 | enum class F : ExBox<T> {
+   |                      ^ [1]
+12 |    Box<string> A = new Box('zuck');
+13 | }
+
+error: Naming[2049] Unbound name: `T` (an object type) [1]
+
+typing5.bad.php:11:22
+ 9 | 
+10 | // only types without parameters are allowed
+11 | enum class F : ExBox<T> {
+   |                      ^ [1]
+12 |    Box<string> A = new Box('zuck');
+13 | }
+
+error: Typing[4328] Constant does not match the type of the enum it is in [1]
+-> Expected `T` [2]
+-> But got `string` [3]
+-> This type argument to `Box` must match exactly (it is invariant) [3]
+->   via this generic `T` [4]
+-> This type argument to `ExBox` must match exactly (it is invariant) [3]
+
+typing5.bad.php:12:16
+ 4 | interface ExBox<T> {}
+ 5 | 
+ 6 | class Box<T> implements ExBox<T> {
+   |                               ^ [4]
+ 7 |   public function __construct(public T $data)[] {}
+ 8 | }
+ 9 | 
+10 | // only types without parameters are allowed
+11 | enum class F : ExBox<T> {
+   |                      ^ [2]
+12 |    Box<string> A = new Box('zuck');
+   |        ^^^^^^ [3]
+   |                ^ [1]
+13 | }
+14 | 
+
+error: Typing[4024] Invalid base type for an enum class: `dynamic` [1]
+
+typing5.bad.php:16:12
+14 | 
+15 | // dynamic is not allwed
+16 | enum class D : dynamic {
+   |            ^ [1]
+17 | }
+
+4 errors found

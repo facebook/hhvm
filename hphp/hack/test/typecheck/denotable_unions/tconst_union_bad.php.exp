@@ -1,6 +1,29 @@
-ERROR: File "tconst_union_bad.php", line 13, characters 56-56:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_union_bad.php", line 13, characters 59-60:
-No type constant `TP` in `C` (Typing[4090])
-  File "tconst_union_bad.php", line 5, characters 7-7:
-  Declaration of `C` is here
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_union_bad.php:13:56
+11 | }
+12 | 
+13 | function foo<T as (I & (C|D)), TP>(T $x):TP where TP = T::TP {
+   |                                                        ^ [1]
+14 |   return $x->get()[0];
+15 | }
+
+error: Typing[4090] No type constant `TP` in `C` [1]
+-> Declaration of `C` is here [2]
+
+tconst_union_bad.php:13:59
+ 3 | 
+ 4 | interface I { }
+ 5 | class C implements I {
+   |       ^ [2]
+ 6 |   public function get():(int, this) { return tuple(3, $this); }
+ 7 | }
+   :
+11 | }
+12 | 
+13 | function foo<T as (I & (C|D)), TP>(T $x):TP where TP = T::TP {
+   |                                                           ^^ [1]
+14 |   return $x->get()[0];
+15 | }
+
+2 errors found

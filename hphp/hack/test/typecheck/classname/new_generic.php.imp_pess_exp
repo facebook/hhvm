@@ -4,11 +4,28 @@ File "new_generic.php", line 18, characters 3-32:
   ~<expr#2> as C<int>
 File "new_generic.php", line 19, characters 3-38:
   ~<expr#2> as C<int>
-ERROR: File "new_generic.php", line 17, characters 10-21:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "new_generic.php", line 19, characters 29-36:
-Invalid argument (Typing[4110])
-  File "new_generic.php", line 17, characters 31-33:
-  Expected `int`
-  File "new_generic.php", line 19, characters 29-36:
-  But got `string`
+error: Typing[4030] Was expecting a return type hint [1]
+
+new_generic.php:17:10
+15 | }
+16 | 
+17 | function test_factory(class<C<int>> $klass) {
+   |          ^^^^^^^^^^^^ [1]
+18 |   hh_show(factory_c($klass, 10));
+19 |   hh_show(factory_c($klass, 'string'));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+new_generic.php:19:29
+15 | }
+16 | 
+17 | function test_factory(class<C<int>> $klass) {
+   |                               ^^^ [2]
+18 |   hh_show(factory_c($klass, 10));
+19 |   hh_show(factory_c($klass, 'string'));
+   |                             ^^^^^^^^ [1]
+20 | }
+
+2 errors found

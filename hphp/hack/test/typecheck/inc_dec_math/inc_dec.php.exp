@@ -1,24 +1,62 @@
-ERROR: File "inc_dec.php", line 11, characters 3-6:
-Typing error (Typing[4427])
-  File "inc_dec.php", line 11, characters 3-6:
-  Expected `num` because this is used in an arithmetic operation
-  File "inc_dec.php", line 10, characters 22-27:
-  But got `string`
-ERROR: File "inc_dec.php", line 12, characters 3-6:
-Typing error (Typing[4427])
-  File "inc_dec.php", line 12, characters 3-6:
-  Expected `num` because this is used in an arithmetic operation
-  File "inc_dec.php", line 10, characters 22-27:
-  But got `string`
-ERROR: File "inc_dec.php", line 13, characters 3-6:
-Typing error (Typing[4427])
-  File "inc_dec.php", line 13, characters 3-6:
-  Expected `num` because this is used in an arithmetic operation
-  File "inc_dec.php", line 10, characters 33-40:
-  But got `arraykey`
-ERROR: File "inc_dec.php", line 14, characters 3-6:
-Typing error (Typing[4427])
-  File "inc_dec.php", line 14, characters 3-6:
-  Expected `num` because this is used in an arithmetic operation
-  File "inc_dec.php", line 10, characters 46-49:
-  But got `bool`
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `string` [2]
+
+inc_dec.php:11:3
+ 8 | }
+ 9 | 
+10 | function bad_inc_dec(string $a, arraykey $b, bool $c): void {
+   |                      ^^^^^^ [2]
+11 |   --$a;
+   |   ^^^^ [1]
+12 |   $a--;
+13 |   ++$b;
+
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `string` [2]
+
+inc_dec.php:12:3
+ 8 | }
+ 9 | 
+10 | function bad_inc_dec(string $a, arraykey $b, bool $c): void {
+   |                      ^^^^^^ [2]
+11 |   --$a;
+12 |   $a--;
+   |   ^^^^ [1]
+13 |   ++$b;
+14 |   $c++;
+
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `arraykey` [2]
+
+inc_dec.php:13:3
+ 8 | }
+ 9 | 
+10 | function bad_inc_dec(string $a, arraykey $b, bool $c): void {
+   |                                 ^^^^^^^^ [2]
+11 |   --$a;
+12 |   $a--;
+13 |   ++$b;
+   |   ^^^^ [1]
+14 |   $c++;
+15 | }
+
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `bool` [2]
+
+inc_dec.php:14:3
+ 8 | }
+ 9 | 
+10 | function bad_inc_dec(string $a, arraykey $b, bool $c): void {
+   |                                              ^^^^ [2]
+11 |   --$a;
+12 |   $a--;
+13 |   ++$b;
+14 |   $c++;
+   |   ^^^^ [1]
+15 | }
+
+4 errors found

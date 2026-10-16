@@ -1,4 +1,13 @@
-ERROR: File "tparam_class_method_ambiguous.php", line 17, characters 12-13:
-It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. (Typing[4482])
-  File "tparam_class_method_ambiguous.php", line 16, characters 28-39:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. [1]
+-> Definition is here [2]
+
+tparam_class_method_ambiguous.php:17:12
+14 | function expect_B(B $_): void {}
+15 | 
+16 | function test<T as J as I>(classname<T> $c): void {
+   |                            ^^^^^^^^^^^^ [2]
+17 |   expect_B($c::f());
+   |            ^^ [1]
+18 | }
+
+1 error found

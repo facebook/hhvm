@@ -1,16 +1,81 @@
-ERROR: File "test_superglobals.php", line 27, characters 10-23:
-[Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-ERROR: File "test_superglobals.php", line 28, characters 5-18:
-[Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
-ERROR: File "test_superglobals.php", line 29, characters 16-29:
-[Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-ERROR: File "test_superglobals.php", line 31, characters 10-29:
-[Test::test_method_call]{$TEST}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-ERROR: File "test_superglobals.php", line 32, characters 5-24:
-[Test::test_method_call]{$Test}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
-ERROR: File "test_superglobals.php", line 33, characters 11-30:
-[Test::test_method_call]{$TEST}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-ERROR: File "test_superglobals.php", line 36, characters 10-29:
-[Test::test_method_call]{$_}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-ERROR: File "test_superglobals.php", line 37, characters 5-24:
-[Test::test_method_call]{$_}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
+error: Other[11004] [Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. [1]
+
+test_superglobals.php:27:10
+25 | class Test {
+26 |   public function test_method_call(): void {
+27 |     $a = GlobalENV::get("key1"); // global read
+   |          ^^^^^^^^^^^^^^ [1]
+28 |     GlobalENV::set("key2", $a); // global write
+29 |     call_mixed(GlobalENV::get("key3")); // global read
+
+error: Other[11001] [Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. [1]
+
+test_superglobals.php:28:5
+26 |   public function test_method_call(): void {
+27 |     $a = GlobalENV::get("key1"); // global read
+28 |     GlobalENV::set("key2", $a); // global write
+   |     ^^^^^^^^^^^^^^ [1]
+29 |     call_mixed(GlobalENV::get("key3")); // global read
+30 | 
+
+error: Other[11004] [Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. [1]
+
+test_superglobals.php:29:16
+27 |     $a = GlobalENV::get("key1"); // global read
+28 |     GlobalENV::set("key2", $a); // global write
+29 |     call_mixed(GlobalENV::get("key3")); // global read
+   |                ^^^^^^^^^^^^^^ [1]
+30 | 
+31 |     $b = GlobalVARIABLES::get('TEST'); // global read
+
+error: Other[11004] [Test::test_method_call]{$TEST}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. [1]
+
+test_superglobals.php:31:10
+29 |     call_mixed(GlobalENV::get("key3")); // global read
+30 | 
+31 |     $b = GlobalVARIABLES::get('TEST'); // global read
+   |          ^^^^^^^^^^^^^^^^^^^^ [1]
+32 |     GlobalVARIABLES::set('Test', false); // global write
+33 |     $c = (GlobalVARIABLES::get('TEST') !== null) ? "a" : "b"; // global read
+
+error: Other[11001] [Test::test_method_call]{$Test}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. [1]
+
+test_superglobals.php:32:5
+30 | 
+31 |     $b = GlobalVARIABLES::get('TEST'); // global read
+32 |     GlobalVARIABLES::set('Test', false); // global write
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+33 |     $c = (GlobalVARIABLES::get('TEST') !== null) ? "a" : "b"; // global read
+34 | 
+
+error: Other[11004] [Test::test_method_call]{$TEST}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. [1]
+
+test_superglobals.php:33:11
+31 |     $b = GlobalVARIABLES::get('TEST'); // global read
+32 |     GlobalVARIABLES::set('Test', false); // global write
+33 |     $c = (GlobalVARIABLES::get('TEST') !== null) ? "a" : "b"; // global read
+   |           ^^^^^^^^^^^^^^^^^^^^ [1]
+34 | 
+35 |     $d = 'TEST';
+
+error: Other[11004] [Test::test_method_call]{$_}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. [1]
+
+test_superglobals.php:36:10
+34 | 
+35 |     $d = 'TEST';
+36 |     $e = GlobalVARIABLES::get($d); // global read
+   |          ^^^^^^^^^^^^^^^^^^^^ [1]
+37 |     GlobalVARIABLES::set($d, false); // global write
+38 |   }
+
+error: Other[11001] [Test::test_method_call]{$_}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. [1]
+
+test_superglobals.php:37:5
+35 |     $d = 'TEST';
+36 |     $e = GlobalVARIABLES::get($d); // global read
+37 |     GlobalVARIABLES::set($d, false); // global write
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+38 |   }
+39 | }
+
+8 errors found

@@ -1,4 +1,16 @@
-ERROR: File "talias2.php", line 7, characters 13-15:
-Invalid `is` expression hint (Typing[4195])
-  File "talias2.php", line 4, characters 12-22:
-  The `is` operator cannot be used with a type with generics, because generics are erased at runtime
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with generics, because generics are erased at runtime [2]
+
+talias2.php:7:13
+2 | 
+3 | type Foo<T> = (int, T);
+4 | type Bar = Foo<string>;
+  |            ^^^^^^^^^^^ [2]
+5 | 
+6 | function f(mixed $x): void {
+7 |   if ($x is Bar) {
+  |             ^^^ [1]
+8 |     expect_tuple($x);
+9 |   }
+
+1 error found

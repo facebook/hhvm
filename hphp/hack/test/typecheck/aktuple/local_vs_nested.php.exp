@@ -1,12 +1,41 @@
-ERROR: File "local_vs_nested.php", line 11, characters 15-19:
-Invalid argument (Typing[4110])
-  File "local_vs_nested.php", line 20, characters 22-27:
-  Expected `string`
-  File "local_vs_nested.php", line 8, characters 12-12:
-  But got `int`
-ERROR: File "local_vs_nested.php", line 16, characters 15-23:
-Invalid argument (Typing[4110])
-  File "local_vs_nested.php", line 20, characters 22-27:
-  Expected `string`
-  File "local_vs_nested.php", line 13, characters 21-21:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+local_vs_nested.php:11:15
+ 6 | function test(int $i, int $j, int $k): void {
+ 7 | 
+ 8 |   $a = vec[4];
+   |            ^ [3]
+ 9 |   $a[0] = 'aaa'; // $a is a local variable, so at this point we can forget
+10 |   // about 0 prevoiusly storing an int
+11 |   take_string($a[0]); // no error
+   |               ^^^^^ [1]
+12 | 
+13 |   $v = Vector { vec[4] };
+   :
+18 | }
+19 | 
+20 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+local_vs_nested.php:16:15
+11 |   take_string($a[0]); // no error
+12 | 
+13 |   $v = Vector { vec[4] };
+   |                     ^ [3]
+14 |   $v[$i][0] = 'aaa'; // we don't know anything about $i and $j, so
+15 |   // $v[$j][0] can be both string and int
+16 |   take_string($v[$j][0]); // should be an error
+   |               ^^^^^^^^^ [1]
+17 | 
+18 | }
+19 | 
+20 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+2 errors found

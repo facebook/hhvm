@@ -1,2 +1,11 @@
-ERROR: File "make_type_const_equal.php", line 9, characters 65-65:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+make_type_const_equal.php:9:65
+ 7 | class Inv<T> {}
+ 8 | 
+ 9 | function get<T as Box, TData>(Inv<T> $inv): TData where TData = T::TData {
+   |                                                                 ^ [1]
+10 |   while (true) {
+11 |   }
+
+1 error found

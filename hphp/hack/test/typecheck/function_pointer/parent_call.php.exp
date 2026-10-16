@@ -1,2 +1,11 @@
-ERROR: File "parent_call.php", line 14, characters 5-10:
-Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `BaseClass::foo` instead (Naming[2112])
+error: Naming[2112] Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `BaseClass::foo` instead [1]
+
+parent_call.php:14:5
+12 | final class Foo extends BaseClass {
+13 |   public static function bar(): void {
+14 |     parent::foo<>;
+   |     ^^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

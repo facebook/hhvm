@@ -1,24 +1,64 @@
-ERROR: File "static_property_generic_bad.php", line 5, characters 18-18:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_property_generic_bad.php", line 5, characters 17-18:
-  This is where the type of the static property was declared
-  File "static_property_generic_bad.php", line 4, characters 7-7:
-  This is the class containing the static property
-ERROR: File "static_property_generic_bad.php", line 6, characters 21-21:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_property_generic_bad.php", line 6, characters 17-22:
-  This is where the type of the static property was declared
-  File "static_property_generic_bad.php", line 4, characters 7-7:
-  This is the class containing the static property
-ERROR: File "static_property_generic_bad.php", line 7, characters 21-21:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_property_generic_bad.php", line 7, characters 18-22:
-  This is where the type of the static property was declared
-  File "static_property_generic_bad.php", line 4, characters 7-7:
-  This is the class containing the static property
-ERROR: File "static_property_generic_bad.php", line 11, characters 22-23:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_property_generic_bad.php", line 11, characters 18-30:
-  This is where the type of the static property was declared
-  File "static_property_generic_bad.php", line 10, characters 7-20:
-  This is the class containing the static property
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_property_generic_bad.php:5:18
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<T> {
+  |       ^ [3]
+5 |   public static ?T $fld = null;
+  |                 ^^ [2]
+  |                  ^ [1]
+6 |   public static vec<T> $vec_fld = vec[];
+7 |   private static ?C<T> $private_fld = null;
+
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_property_generic_bad.php:6:21
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<T> {
+  |       ^ [3]
+5 |   public static ?T $fld = null;
+6 |   public static vec<T> $vec_fld = vec[];
+  |                 ^^^^^^ [2]
+  |                     ^ [1]
+7 |   private static ?C<T> $private_fld = null;
+8 | }
+
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_property_generic_bad.php:7:21
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<T> {
+  |       ^ [3]
+5 |   public static ?T $fld = null;
+6 |   public static vec<T> $vec_fld = vec[];
+7 |   private static ?C<T> $private_fld = null;
+  |                  ^^^^^ [2]
+  |                     ^ [1]
+8 | }
+9 | 
+
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_property_generic_bad.php:11:22
+ 8 | }
+ 9 | 
+10 | class GenericStorage<Tk as arraykey, TVal> {
+   |       ^^^^^^^^^^^^^^ [3]
+11 |   private static Map<Tk, TVal> $storage = Map {};
+   |                  ^^^^^^^^^^^^^ [2]
+   |                      ^^ [1]
+12 |   public function write(Tk $key, TVal $val): void {
+13 |     self::$storage[$key] = $val;
+
+4 errors found

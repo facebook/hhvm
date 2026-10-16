@@ -1,1 +1,2 @@
 --config 'class_sub_classname=false'
+--error-format plain_highlighted

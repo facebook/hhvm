@@ -1,12 +1,44 @@
-WARN: File "trivial_compare_int_arraykey_enum_good.php", line 16, characters 10-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `A` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_good.php", line 20, characters 10-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `A` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_good.php", line 32, characters 10-20:
-Invalid comparison: This expression will always return `true`.
-A value of type `A` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_good.php", line 36, characters 10-20:
-Invalid comparison: This expression will always return `true`.
-A value of type `string` can never be equal to a value of type `A` (Warn[12007])
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `A` can never be equal to a value of type `string` [1]
+
+trivial_compare_int_arraykey_enum_good.php:16:10
+14 | 
+15 | function f3(string $x): bool {
+16 |   return A::X === $x;
+   |          ^^^^^^^^^^^ [1]
+17 | }
+18 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `A` [1]
+
+trivial_compare_int_arraykey_enum_good.php:20:10
+18 | 
+19 | function f4(string $x): bool {
+20 |   return $x === A::X;
+   |          ^^^^^^^^^^^ [1]
+21 | }
+22 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `A` can never be equal to a value of type `string` [1]
+
+trivial_compare_int_arraykey_enum_good.php:32:10
+30 | 
+31 | function f7(string $x): bool {
+32 |   return A::X !== $x;
+   |          ^^^^^^^^^^^ [1]
+33 | }
+34 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `string` can never be equal to a value of type `A` [1]
+
+trivial_compare_int_arraykey_enum_good.php:36:10
+34 | 
+35 | function f8(string $x): bool {
+36 |   return $x !== A::X;
+   |          ^^^^^^^^^^^ [1]
+37 | }
+
+4 errors found

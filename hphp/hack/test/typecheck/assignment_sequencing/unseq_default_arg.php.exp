@@ -1,12 +1,53 @@
-ERROR: File "unseq_default_arg.php", line 4, characters 33-34:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "unseq_default_arg.php", line 4, characters 33-36:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "unseq_default_arg.php", line 4, characters 40-41:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "unseq_default_arg.php", line 4, characters 40-43:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "unseq_default_arg.php", line 4, characters 33-34:
-Unsequenced modifications to local variable. Modified here (Typing[4144])
-  File "unseq_default_arg.php", line 4, characters 40-41:
-  And also modified here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+unseq_default_arg.php:4:33
+2 | 
+3 | // Lurrrrrrrrrrrr
+4 | function g(int $y = 0, int $x = $y++ + $y++): int {
+  |                                 ^^ [1]
+5 |   return $y;
+6 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+unseq_default_arg.php:4:33
+2 | 
+3 | // Lurrrrrrrrrrrr
+4 | function g(int $y = 0, int $x = $y++ + $y++): int {
+  |                                 ^^^^ [1]
+5 |   return $y;
+6 | }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+unseq_default_arg.php:4:40
+2 | 
+3 | // Lurrrrrrrrrrrr
+4 | function g(int $y = 0, int $x = $y++ + $y++): int {
+  |                                        ^^ [1]
+5 |   return $y;
+6 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+unseq_default_arg.php:4:40
+2 | 
+3 | // Lurrrrrrrrrrrr
+4 | function g(int $y = 0, int $x = $y++ + $y++): int {
+  |                                        ^^^^ [1]
+5 |   return $y;
+6 | }
+
+error: Typing[4144] Unsequenced modifications to local variable. Modified here [1]
+-> And also modified here [2]
+
+unseq_default_arg.php:4:33
+2 | 
+3 | // Lurrrrrrrrrrrr
+4 | function g(int $y = 0, int $x = $y++ + $y++): int {
+  |                                 ^^ [1]
+  |                                        ^^ [2]
+5 |   return $y;
+6 | }
+
+5 errors found

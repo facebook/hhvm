@@ -1,20 +1,50 @@
-ERROR: File "invariant-delegate.php", line 28, characters 29-40:
-Invalid argument (Typing[4110])
-  File "invariant-delegate.php", line 24, characters 37-42:
-  Expected `IntBox`
-  File "invariant-delegate.php", line 33, characters 13-37:
-  But got `Box with { type T = int }`
-  File "invariant-delegate.php", line 33, characters 13-37:
-  This type argument to `Invariant` must match exactly (it is invariant)
-ERROR: File "invariant-delegate.php", line 37, characters 34-41:
-Invalid argument (Typing[4323])
-  File "invariant-delegate.php", line 12, characters 41-44:
-  `TBox` is a constrained type parameter
-  File "invariant-delegate.php", line 12, characters 49-72:
-  This type constraint is violated
-  File "invariant-delegate.php", line 12, characters 49-72:
-  Expected a class with `{type T = _}`
-  File "invariant-delegate.php", line 36, characters 33-35:
-  But got `Box`
-  File "invariant-delegate.php", line 36, characters 33-35:
-  This type argument to `Invariant` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `IntBox` [2]
+-> But got `Box with { type T = int }` [3]
+-> This type argument to `Invariant` must match exactly (it is invariant) [3]
+
+invariant-delegate.php:28:29
+22 | }
+23 | 
+24 | function delegate_int_box(Invariant<IntBox> $inv_int_box): void {
+   |                                     ^^^^^^ [2]
+25 |   accepts_sub($inv_int_box); // OK
+26 |   accepts_sub_generic_refinement($inv_int_box); // OK
+27 |   accepts_sub_int_refinement($inv_int_box); // OK
+28 |   accepts_eq_int_refinement($inv_int_box); // ERROR
+   |                             ^^^^^^^^^^^^ [1]
+29 | }
+30 | 
+31 | // Note: this should never be transitively usable, consider linting against
+32 | function accepts_eq_int_refinement(
+33 |   Invariant<Box with { type T = int }> $_,
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+34 | ): void {}
+35 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type T = _}` [3]
+-> But got `Box` [4]
+-> This type argument to `Invariant` must match exactly (it is invariant) [4]
+
+invariant-delegate.php:37:34
+10 | function accepts_sub<TBox as Box>(Invariant<TBox> $_): void {}
+11 | 
+12 | function accepts_sub_generic_refinement<TBox as Box with { type T = T0 }, T0>(
+   |                                         ^^^^ [2]
+   |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+13 |   Invariant<TBox> $_,
+14 | ): void {}
+   :
+34 | ): void {}
+35 | 
+36 | function delegate_box(Invariant<Box> $inv_box): void {
+   |                                 ^^^ [4]
+37 |   accepts_sub_generic_refinement($inv_box); // ERROR
+   |                                  ^^^^^^^^ [1]
+38 |   // this is because accepts_sub_generic_refinement would
+39 |   // have to infer some path-dependant existential type:
+
+2 errors found

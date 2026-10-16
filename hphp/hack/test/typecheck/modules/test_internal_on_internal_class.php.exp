@@ -1,22 +1,97 @@
-ERROR: File "test_internal_on_internal_class.php--def.php", line 27, characters 40-48:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
-  It is declared as `internal` here
-ERROR: File "test_internal_on_internal_class.php--def.php", line 37, characters 17-17:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "test_internal_on_internal_class.php--def.php", line 31, characters 16-16:
-  It is declared as `internal` here
-ERROR: File "test_internal_on_internal_class.php--file.php", line 6, characters 9-11:
-You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
-  This type is mixed because this is an internal symbol from module b, which is opaque outside of the module.
-  File "test_internal_on_internal_class.php--def.php", line 20, characters 20-28:
-  The type originated from here
-  File "test_internal_on_internal_class.php--def.php", line 15, characters 10-10:
-    via this generic `T`
-ERROR: File "test_internal_on_internal_class.php--file.php", line 10, characters 9-11:
-You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
-  This type is mixed because this is an internal symbol from module b, which is opaque outside of the module.
-  File "test_internal_on_internal_class.php--def.php", line 32, characters 37-45:
-  The type originated from here
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+test_internal_on_internal_class.php--def.php:27:40
+ 3 | module b;
+ 4 | 
+ 5 | internal class SecretKey{
+   |                ^^^^^^^^^ [2]
+ 6 |   public function get(): int {
+ 7 |     return 5;
+   :
+25 |   }
+26 | 
+27 |   public function returnInternalBad(): SecretKey { // error, do not allow in public class
+   |                                        ^^^^^^^^^ [1]
+28 |     return new SecretKey();
+29 |   }
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+test_internal_on_internal_class.php--def.php:37:17
+29 |   }
+30 | }
+31 | internal class X extends User {
+   |                ^ [2]
+32 |   public function returnInternal(): SecretKey {
+33 |     return new SecretKey();
+34 |   }
+35 | }
+36 | 
+37 | class Y extends X {}
+   |                 ^ [1]
+38 | 
+39 | 
+
+error: Typing[4064] You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> This type is mixed because this is an internal symbol from module b, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+->   via this generic `T` [4]
+
+test_internal_on_internal_class.php--file.php:6:9
+ 4 |     $x->secret = $x->secret;
+ 5 |     $a = $x->secret; // ok, but opaque
+ 6 |     $a->get();
+   |         ^^^ [1]
+ 7 | 
+ 8 |     $y = new Y();
+
+test_internal_on_internal_class.php--def.php:5:16
+ 3 | module b;
+ 4 | 
+ 5 | internal class SecretKey{
+   |                ^^^^^^^^^ [2]
+ 6 |   public function get(): int {
+ 7 |     return 5;
+   :
+13 | public trait SecretHolder<T, Tv> {
+14 |   // Ooops, we shouldn't have made this public, but we did...
+15 |   public T $secret;
+   |          ^ [4]
+16 |   public Tv $secret2;
+17 | }
+18 | 
+19 | public class User {
+20 |   use SecretHolder<SecretKey, SecretKey2>;
+   |                    ^^^^^^^^^ [3]
+21 | 
+22 |   public function __construct() {
+
+error: Typing[4064] You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> This type is mixed because this is an internal symbol from module b, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+
+test_internal_on_internal_class.php--file.php:10:9
+ 8 |     $y = new Y();
+ 9 |     $b = $y->returnInternal(); // ok, but opaque
+10 |     $b->get();
+   |         ^^^ [1]
+11 | }
+
+test_internal_on_internal_class.php--def.php:5:16
+ 3 | module b;
+ 4 | 
+ 5 | internal class SecretKey{
+   |                ^^^^^^^^^ [2]
+ 6 |   public function get(): int {
+ 7 |     return 5;
+   :
+30 | }
+31 | internal class X extends User {
+32 |   public function returnInternal(): SecretKey {
+   |                                     ^^^^^^^^^ [3]
+33 |     return new SecretKey();
+34 |   }
+
+4 errors found

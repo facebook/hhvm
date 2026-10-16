@@ -1,16 +1,71 @@
-ERROR: File "meth_caller_visibility_errors.php", line 7, characters 34-38:
-You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4432])
-  File "meth_caller_visibility_errors.php", line 12, characters 22-24:
-  It is declared as `protected` here
-ERROR: File "meth_caller_visibility_errors.php", line 17, characters 34-39:
-You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4432])
-  File "meth_caller_visibility_errors.php", line 4, characters 22-25:
-  It is declared as `protected` here
-ERROR: File "meth_caller_visibility_errors.php", line 18, characters 34-38:
-You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4432])
-  File "meth_caller_visibility_errors.php", line 12, characters 22-24:
-  It is declared as `protected` here
-ERROR: File "meth_caller_visibility_errors.php", line 19, characters 34-38:
-You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4431])
-  File "meth_caller_visibility_errors.php", line 14, characters 20-22:
-  It is declared as `private` here
+error: Typing[4432] You cannot access this method with `meth_caller` (even from the same class hierarchy) [1]
+-> It is declared as `protected` here [2]
+
+meth_caller_visibility_errors.php:7:34
+ 5 | 
+ 6 |   public function test(): void {
+ 7 |     $x = meth_caller(Foo::class, 'bar');
+   |                                  ^^^^^ [1]
+ 8 |   }
+ 9 | }
+10 | 
+11 | class Foo extends MyChild {
+12 |   protected function bar(): void {}
+   |                      ^^^ [2]
+13 | 
+14 |   private function baz(): void {}
+
+error: Typing[4432] You cannot access this method with `meth_caller` (even from the same class hierarchy) [1]
+-> It is declared as `protected` here [2]
+
+meth_caller_visibility_errors.php:17:34
+ 2 | 
+ 3 | class MyChild {
+ 4 |   protected function quux(): void {}
+   |                      ^^^^ [2]
+ 5 | 
+ 6 |   public function test(): void {
+   :
+15 | 
+16 |   public function test(): void {
+17 |     $x = meth_caller(Foo::class, 'quux');
+   |                                  ^^^^^^ [1]
+18 |     $y = meth_caller(Foo::class, 'bar');
+19 |     $z = meth_caller(Foo::class, 'baz');
+
+error: Typing[4432] You cannot access this method with `meth_caller` (even from the same class hierarchy) [1]
+-> It is declared as `protected` here [2]
+
+meth_caller_visibility_errors.php:18:34
+10 | 
+11 | class Foo extends MyChild {
+12 |   protected function bar(): void {}
+   |                      ^^^ [2]
+13 | 
+14 |   private function baz(): void {}
+15 | 
+16 |   public function test(): void {
+17 |     $x = meth_caller(Foo::class, 'quux');
+18 |     $y = meth_caller(Foo::class, 'bar');
+   |                                  ^^^^^ [1]
+19 |     $z = meth_caller(Foo::class, 'baz');
+20 |   }
+
+error: Typing[4431] You cannot access this method with `meth_caller` (even from the same class hierarchy) [1]
+-> It is declared as `private` here [2]
+
+meth_caller_visibility_errors.php:19:34
+12 |   protected function bar(): void {}
+13 | 
+14 |   private function baz(): void {}
+   |                    ^^^ [2]
+15 | 
+16 |   public function test(): void {
+17 |     $x = meth_caller(Foo::class, 'quux');
+18 |     $y = meth_caller(Foo::class, 'bar');
+19 |     $z = meth_caller(Foo::class, 'baz');
+   |                                  ^^^^^ [1]
+20 |   }
+21 | }
+
+4 errors found

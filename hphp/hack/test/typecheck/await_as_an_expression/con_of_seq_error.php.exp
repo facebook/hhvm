@@ -1,20 +1,101 @@
-ERROR: File "con_of_seq_error.php", line 14, characters 5-44:
-Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 15, characters 5-44:
-Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 16, characters 5-38:
-Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 17, characters 5-38:
-Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 21, characters 5-29:
-Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 25, characters 5-29:
-Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 31, characters 5-23:
-Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 35, characters 5-23:
-Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 40, characters 7-40:
-Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
-ERROR: File "con_of_seq_error.php", line 47, characters 20-59:
-Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
+error: Parsing[1002] Nested or piped `await` expressions cannot be used alongside other concurrent awaits [1]
+
+con_of_seq_error.php:14:5
+12 | 
+13 | async function f(): Awaitable<void> {
+14 |   h(await g(1) + (await g(2) |> await g($$)));
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   h((await g(2) |> await g($$)) + await g(1));
+16 |   h(await g(1) + (await g(await g(2))));
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used alongside other concurrent awaits [1]
+
+con_of_seq_error.php:15:5
+13 | async function f(): Awaitable<void> {
+14 |   h(await g(1) + (await g(2) |> await g($$)));
+15 |   h((await g(2) |> await g($$)) + await g(1));
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   h(await g(1) + (await g(await g(2))));
+17 |   h((await g(await g(2))) + await g(1));
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used alongside other concurrent awaits [1]
+
+con_of_seq_error.php:16:5
+14 |   h(await g(1) + (await g(2) |> await g($$)));
+15 |   h((await g(2) |> await g($$)) + await g(1));
+16 |   h(await g(1) + (await g(await g(2))));
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   h((await g(await g(2))) + await g(1));
+18 | 
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used alongside other concurrent awaits [1]
+
+con_of_seq_error.php:17:5
+15 |   h((await g(2) |> await g($$)) + await g(1));
+16 |   h(await g(1) + (await g(await g(2))));
+17 |   h((await g(await g(2))) + await g(1));
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | 
+19 |   concurrent {
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used in concurrent block [1]
+
+con_of_seq_error.php:21:5
+19 |   concurrent {
+20 |     await g(1);
+21 |     await g(1) |> await g($$);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 |   }
+23 | 
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used in concurrent block [1]
+
+con_of_seq_error.php:25:5
+23 | 
+24 |   concurrent {
+25 |     await g(1) |> await g($$);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |     await g(1);
+27 |   }
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used in concurrent block [1]
+
+con_of_seq_error.php:31:5
+29 |   concurrent {
+30 |     await g(1);
+31 |     await g(await g(1));
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+32 |   }
+33 | 
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used in concurrent block [1]
+
+con_of_seq_error.php:35:5
+33 | 
+34 |   concurrent {
+35 |     await g(await g(1));
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+36 |     await g(1);
+37 |   }
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used in concurrent block [1]
+
+con_of_seq_error.php:40:7
+38 | 
+39 |   concurrent {
+40 |     h((await g(await g(2))) + await g(1));
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+41 |     await g(1);
+42 |   }
+
+error: Parsing[1002] Nested or piped `await` expressions cannot be used alongside other concurrent awaits [1]
+
+con_of_seq_error.php:47:20
+45 |     await g(1);
+46 |     await async { await g(1) |> await g($$); };
+47 |     await async { (await g(1) + (await g(1) |> await g($$))); };
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+48 |   }
+49 | }
+
+10 errors found

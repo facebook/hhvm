@@ -1,4 +1,13 @@
-ERROR: File "deep.php", line 8, characters 77-78:
-Variable `$x` is undefined in this `ExampleDsl` expression tree. (Naming[2050])
-  File "deep.php", line 7, characters 3-89:
-  Did you forget to splice in `$y`?
+error: Naming[2050] Variable `$x` is undefined in this `ExampleDsl` expression tree. [1]
+-> Did you forget to splice in `$y`? [2]
+
+deep.php:8:77
+5 | function f(): void {
+6 |   $y = ExampleDsl`1 + ${ExampleDsl`2 + ${ExampleDsl`3`}`}`; // Ok
+7 |   $y = ExampleDsl`1 + ${(() ==> { $x = ExampleDsl`1`; return ExampleDsl`2 + ${$x}`;})()}`; // ok
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+8 |   $y = ExampleDsl`1 + ${(() ==> { $x = ExampleDsl`1`; return ExampleDsl`2 + $x`;})()}`; // error $x is unbound
+  |                                                                             ^^ [1]
+9 | }
+
+1 error found

@@ -1,52 +1,179 @@
-ERROR: File "arities01.php", line 19, characters 12-45:
-Invalid argument (Typing[4041])
-  File "arities01.php", line 19, characters 12-45:
-  Too many mandatory arguments (expected 0 but got 1)
-  File "arities01.php", line 10, characters 19-39:
-  Because of this definition
-ERROR: File "arities01.php", line 19, characters 12-45:
-Invalid argument (Typing[4110])
-  File "arities01.php", line 19, characters 13-15:
-  Expected `int`
-  File "arities01.php", line 10, characters 29-29:
-  But got `D`
-ERROR: File "arities01.php", line 22, characters 12-18:
-Invalid argument (Typing[4041])
-  File "arities01.php", line 21, characters 13-46:
-  Too many mandatory arguments (expected 0 but got 1)
-  File "arities01.php", line 10, characters 19-39:
-  Because of this definition
-ERROR: File "arities01.php", line 22, characters 12-18:
-Invalid argument (Typing[4110])
-  File "arities01.php", line 21, characters 14-16:
-  Expected `int`
-  File "arities01.php", line 10, characters 29-29:
-  But got `D`
-ERROR: File "arities01.php", line 24, characters 13-52:
-Invalid argument (Typing[4041])
-  File "arities01.php", line 24, characters 13-52:
-  Too many mandatory arguments (expected 1 but got 2)
-  File "arities01.php", line 14, characters 20-37:
-  Because of this definition
-ERROR: File "arities01.php", line 26, characters 12-19:
-Invalid argument (Typing[4042])
-  File "arities01.php", line 26, characters 12-19:
-  Should have a variadic argument
-  File "arities01.php", line 10, characters 19-39:
-  Because of this definition
-ERROR: File "arities01.php", line 29, characters 12-18:
-Invalid argument (Typing[4042])
-  File "arities01.php", line 28, characters 13-20:
-  Should have a variadic argument
-  File "arities01.php", line 10, characters 19-39:
-  Because of this definition
-ERROR: File "arities01.php", line 31, characters 13-20:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "arities01.php", line 14, characters 20-37:
-  Definition is here
-ERROR: File "arities01.php", line 34, characters 13-19:
-Invalid argument (Typing[4040])
-  File "arities01.php", line 33, characters 13-20:
-  Too few positional arguments (required 1 but got 0)
-  File "arities01.php", line 14, characters 20-37:
-  Because of this definition
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 0 but got 1) [1]
+-> Because of this definition [2]
+
+arities01.php:19:12
+ 8 | }
+ 9 | 
+10 | function expect_D((function(D...): int) $f): void {
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+11 |   $f(new D("first"));
+12 | }
+   :
+17 | 
+18 | function test(): void {
+19 |   expect_D((int $a, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+20 | 
+21 |   $lambda = (int $a, D ...$y) ==> $y[0]->bar(); //Too many mandatory args
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `D` [3]
+
+arities01.php:19:12
+ 8 | }
+ 9 | 
+10 | function expect_D((function(D...): int) $f): void {
+   |                             ^ [3]
+11 |   $f(new D("first"));
+12 | }
+   :
+17 | 
+18 | function test(): void {
+19 |   expect_D((int $a, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^^ [2]
+20 | 
+21 |   $lambda = (int $a, D ...$y) ==> $y[0]->bar(); //Too many mandatory args
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 0 but got 1) [2]
+-> Because of this definition [3]
+
+arities01.php:22:12
+ 8 | }
+ 9 | 
+10 | function expect_D((function(D...): int) $f): void {
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+11 |   $f(new D("first"));
+12 | }
+   :
+19 |   expect_D((int $a, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+20 | 
+21 |   $lambda = (int $a, D ...$y) ==> $y[0]->bar(); //Too many mandatory args
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+22 |   expect_D($lambda);
+   |            ^^^^^^^ [1]
+23 | 
+24 |   expect_D2((D $d1, D $d2, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `D` [3]
+
+arities01.php:22:12
+ 8 | }
+ 9 | 
+10 | function expect_D((function(D...): int) $f): void {
+   |                             ^ [3]
+11 |   $f(new D("first"));
+12 | }
+   :
+19 |   expect_D((int $a, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+20 | 
+21 |   $lambda = (int $a, D ...$y) ==> $y[0]->bar(); //Too many mandatory args
+   |              ^^^ [2]
+22 |   expect_D($lambda);
+   |            ^^^^^^^ [1]
+23 | 
+24 |   expect_D2((D $d1, D $d2, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+arities01.php:24:13
+12 | }
+13 | 
+14 | function expect_D2((function(D): int) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^ [2]
+15 |   $f(new D("first"));
+16 | }
+   :
+22 |   expect_D($lambda);
+23 | 
+24 |   expect_D2((D $d1, D $d2, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 | 
+26 |   expect_D(() ==> 1); //Expects variaidc parameters
+
+error: Typing[4042] Invalid argument [1]
+-> Should have a variadic argument [1]
+-> Because of this definition [2]
+
+arities01.php:26:12
+ 8 | }
+ 9 | 
+10 | function expect_D((function(D...): int) $f): void {
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+11 |   $f(new D("first"));
+12 | }
+   :
+24 |   expect_D2((D $d1, D $d2, D ...$y) ==> $y[0]->bar()); //Too many mandatory args
+25 | 
+26 |   expect_D(() ==> 1); //Expects variaidc parameters
+   |            ^^^^^^^^ [1]
+27 | 
+28 |   $lambda = () ==> 1;
+
+error: Typing[4042] Invalid argument [1]
+-> Should have a variadic argument [2]
+-> Because of this definition [3]
+
+arities01.php:29:12
+ 8 | }
+ 9 | 
+10 | function expect_D((function(D...): int) $f): void {
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+11 |   $f(new D("first"));
+12 | }
+   :
+26 |   expect_D(() ==> 1); //Expects variaidc parameters
+27 | 
+28 |   $lambda = () ==> 1;
+   |             ^^^^^^^^ [2]
+29 |   expect_D($lambda); //Expects variaidc parameters
+   |            ^^^^^^^ [1]
+30 | 
+31 |   expect_D2(() ==> 1); //Too few args
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+arities01.php:31:13
+12 | }
+13 | 
+14 | function expect_D2((function(D): int) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^ [2]
+15 |   $f(new D("first"));
+16 | }
+   :
+29 |   expect_D($lambda); //Expects variaidc parameters
+30 | 
+31 |   expect_D2(() ==> 1); //Too few args
+   |             ^^^^^^^^ [1]
+32 | 
+33 |   $lambda = () ==> 1;
+
+error: Typing[4040] Invalid argument [1]
+-> Too few positional arguments (required 1 but got 0) [2]
+-> Because of this definition [3]
+
+arities01.php:34:13
+12 | }
+13 | 
+14 | function expect_D2((function(D): int) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^ [3]
+15 |   $f(new D("first"));
+16 | }
+   :
+31 |   expect_D2(() ==> 1); //Too few args
+32 | 
+33 |   $lambda = () ==> 1;
+   |             ^^^^^^^^ [2]
+34 |   expect_D2($lambda); //Too few args
+   |             ^^^^^^^ [1]
+35 | }
+
+9 errors found

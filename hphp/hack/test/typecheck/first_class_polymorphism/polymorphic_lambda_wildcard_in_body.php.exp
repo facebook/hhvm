@@ -1,2 +1,11 @@
-ERROR: File "polymorphic_lambda_wildcard_in_body.php", line 13, characters 34-34:
-Wildcard typehints are not allowed in this position (Naming[2084])
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+polymorphic_lambda_wildcard_in_body.php:13:34
+11 |   $g = function<T>(I<T> $x): void {
+12 |     if ($x is A<_>) {
+13 |       $_ = function<T1>(T1 $_, A<_> $_): void {};
+   |                                  ^ [1]
+14 |     }
+15 |   };
+
+1 error found

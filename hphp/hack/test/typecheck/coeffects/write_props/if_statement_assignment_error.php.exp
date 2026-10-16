@@ -1,11 +1,44 @@
-ERROR: File "if_statement_assignment_error.php", line 19, characters 7-19:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "if_statement_assignment_error.php", line 19, characters 7-26:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "if_statement_assignment_error.php", line 23, characters 7-19:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "if_statement_assignment_error.php", line 19, characters 7-19:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "if_statement_assignment_error.php", line 18, characters 31-32:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+if_statement_assignment_error.php:19:7
+17 | 
+18 | function pure_function(Bar $x)[] : void {
+19 |   if ($x->prop_bool = true) {} // write_props error
+   |       ^^^^^^^^^^^^^ [1]
+20 | }
+21 | 
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+if_statement_assignment_error.php:19:7
+17 | 
+18 | function pure_function(Bar $x)[] : void {
+19 |   if ($x->prop_bool = true) {} // write_props error
+   |       ^^^^^^^^^^^^^^^^^^^^ [1]
+20 | }
+21 | 
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+if_statement_assignment_error.php:23:7
+21 | 
+22 | function write_props_function(Bar $x)[write_props] : void {
+23 |   if ($x->prop_bool = true) {} // No write_props error
+   |       ^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+if_statement_assignment_error.php:19:7
+16 | }
+17 | 
+18 | function pure_function(Bar $x)[] : void {
+   |                               ^^ [2]
+19 |   if ($x->prop_bool = true) {} // write_props error
+   |       ^^^^^^^^^^^^^ [1]
+20 | }
+21 | 
+
+4 errors found

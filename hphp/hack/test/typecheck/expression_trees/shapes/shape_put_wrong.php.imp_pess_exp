@@ -1,60 +1,262 @@
-ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
-Invalid return type (Typing[4110])
-  File "shape_put_wrong.php", line 8, characters 15-43:
-  Expected `dynamic`
-  File "expr_tree.php", line 109, characters 8-32:
-  But got `ExampleExpression<_>`
-ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
-Invalid return type (Typing[4110])
-  File "shape_put_wrong.php", line 8, characters 15-43:
-  Expected `~ExampleExpression<int>`
-  File "shape_put_wrong.php", line 9, characters 21-151:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
-ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
-Invalid return type (Typing[4110])
-  File "shape_put_wrong.php", line 8, characters 33-42:
-  Expected `int`
-  File "expr_tree.php", line 161, characters 38-41:
-  But got `bool`
-ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 181, characters 26-34:
-  Expected `dynamic`
-  File "Shapes.hhi", line 112, characters 10-19:
-  Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
-Too many positional arguments (expected 3 but got 4) (Typing[4105])
-  File "Shapes.hhi", line 108, characters 28-30:
-  Definition is here
-ERROR: File "shape_put_wrong.php", line 22, characters 5-32:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 181, characters 26-34:
-  Expected `dynamic`
-  File "Shapes.hhi", line 112, characters 10-19:
-  Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "shape_put_wrong.php", line 22, characters 5-32:
-Too few positional arguments (required 3 but got 1) (Typing[4104])
-  File "Shapes.hhi", line 108, characters 28-30:
-  Definition is here
-ERROR: File "shape_put_wrong.php", line 25, characters 34-39:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shape_put_wrong.php", line 28, characters 26-28:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 109, characters 7-16:
-  Expected `shape(...)`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
-ERROR: File "shape_put_wrong.php", line 28, characters 26-28:
-Invalid assignment (Typing[4110])
-  File "shape_put_wrong.php", line 28, characters 26-28:
-  Expected `string`
-  File "expr_tree.php", line 155, characters 39-41:
-  But got `int`
-ERROR: File "shape_put_wrong.php", line 28, characters 26-28:
-Invalid index type for this array (Typing[4324])
-  File "shape_put_wrong.php", line 28, characters 31-33:
-  Expected `int`
-  File "expr_tree.php", line 164, characters 40-45:
-  This can only be indexed with integers
-  File "shape_put_wrong.php", line 28, characters 31-33:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `ExampleExpression<_>` [3]
+
+shape_put_wrong.php:9:10
+  6 | 
+  7 | // wrong return type
+  8 | function f(): ExampleExpression<ExampleInt> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+  9 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 10 |     $x = shape('y' => 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 11 |     $shape = ExampleDsl::shapePut($x, 'y', true);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 12 |     return ExampleDsl::shapeAt($shape, 'y');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 13 |   }`;
+    |   ^^ [1]
+ 14 | }
+ 15 | 
+
+expr_tree.php:109:8
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~ExampleExpression<int>` [2]
+-> But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type [3]
+
+shape_put_wrong.php:9:10
+ 6 | 
+ 7 | // wrong return type
+ 8 | function f(): ExampleExpression<ExampleInt> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+10 |     $x = shape('y' => 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+11 |     $shape = ExampleDsl::shapePut($x, 'y', true);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+12 |     return ExampleDsl::shapeAt($shape, 'y');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+13 |   }`;
+   |   ^^ [1]
+   |   ^ [3]
+14 | }
+15 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+shape_put_wrong.php:9:10
+  6 | 
+  7 | // wrong return type
+  8 | function f(): ExampleExpression<ExampleInt> {
+    |                                 ^^^^^^^^^^ [2]
+  9 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 10 |     $x = shape('y' => 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 11 |     $shape = ExampleDsl::shapePut($x, 'y', true);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 12 |     return ExampleDsl::shapeAt($shape, 'y');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 13 |   }`;
+    |   ^^ [1]
+ 14 | }
+ 15 | 
+
+expr_tree.php:161:38
+159 |     throw new Exception();
+160 |   }
+161 |   public static function boolType(): bool {
+    |                                      ^^^^ [3]
+162 |     throw new Exception();
+163 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+shape_put_wrong.php:19:5
+ 17 |   ExampleDsl`(MyExampleShape $shape) ==> {
+ 18 |     // Too many arguments
+ 19 |     ExampleDsl::shapePut($shape, 'x', 'y', 'z');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 20 | 
+ 21 |     // Too few args
+
+expr_tree.php:181:26
+179 |   }
+180 |   <<__NoAutoLikes>>
+181 |   public static function shapeType<T>(T $_): ExampleShape<T> {
+    |                          ^^^^^^^^^ [2]
+182 |     throw new Exception();
+183 |   }
+
+Shapes.hhi:112:10
+110 |       arraykey $index,
+111 |       mixed $value,
+112 |     )[]: shape(...);
+    |          ^^^^^^^^^^ [3]
+113 |   }
+114 | 
+
+error: Typing[4105] Too many positional arguments (expected 3 but got 4) [1]
+-> Definition is here [2]
+
+shape_put_wrong.php:19:5
+ 17 |   ExampleDsl`(MyExampleShape $shape) ==> {
+ 18 |     // Too many arguments
+ 19 |     ExampleDsl::shapePut($shape, 'x', 'y', 'z');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 20 | 
+ 21 |     // Too few args
+
+Shapes.hhi:108:28
+106 |      */
+107 |     <<__NoAutoDynamic, __SupportDynamicType>>
+108 |     public static function put(
+    |                            ^^^ [2]
+109 |       shape(...) $shape,
+110 |       arraykey $index,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `shape(...)` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+shape_put_wrong.php:22:5
+ 20 | 
+ 21 |     // Too few args
+ 22 |     ExampleDsl::shapePut($shape);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 23 | 
+ 24 |     // Not a literal key
+
+expr_tree.php:181:26
+179 |   }
+180 |   <<__NoAutoLikes>>
+181 |   public static function shapeType<T>(T $_): ExampleShape<T> {
+    |                          ^^^^^^^^^ [2]
+182 |     throw new Exception();
+183 |   }
+
+Shapes.hhi:112:10
+110 |       arraykey $index,
+111 |       mixed $value,
+112 |     )[]: shape(...);
+    |          ^^^^^^^^^^ [3]
+113 |   }
+114 | 
+
+error: Typing[4104] Too few positional arguments (required 3 but got 1) [1]
+-> Definition is here [2]
+
+shape_put_wrong.php:22:5
+ 20 | 
+ 21 |     // Too few args
+ 22 |     ExampleDsl::shapePut($shape);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 23 | 
+ 24 |     // Not a literal key
+
+Shapes.hhi:108:28
+106 |      */
+107 |     <<__NoAutoDynamic, __SupportDynamicType>>
+108 |     public static function put(
+    |                            ^^^ [2]
+109 |       shape(...) $shape,
+110 |       arraykey $index,
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shape_put_wrong.php:25:34
+23 | 
+24 |     // Not a literal key
+25 |     ExampleDsl::shapePut($shape, ''.'y', 3);
+   |                                  ^^^^^^ [1]
+26 | 
+27 |     // Not a shape
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape(...)` [2]
+-> But got `string` [3]
+
+shape_put_wrong.php:28:26
+ 26 | 
+ 27 |     // Not a shape
+ 28 |     ExampleDsl::shapePut('y', 'y', 3);
+    |                          ^^^ [1]
+ 29 |   }`;
+ 30 | }
+
+Shapes.hhi:109:7
+107 |     <<__NoAutoDynamic, __SupportDynamicType>>
+108 |     public static function put(
+109 |       shape(...) $shape,
+    |       ^^^^^^^^^^ [2]
+110 |       arraykey $index,
+111 |       mixed $value,
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `string` [1]
+-> But got `int` [2]
+
+shape_put_wrong.php:28:26
+ 26 | 
+ 27 |     // Not a shape
+ 28 |     ExampleDsl::shapePut('y', 'y', 3);
+    |                          ^^^ [1]
+ 29 |   }`;
+ 30 | }
+
+expr_tree.php:155:39
+153 |   // in the virtualized version of the expression tree, to work out the virtual type
+154 |   // of literals during type checking.
+155 |   public static function intType()[]: int {
+    |                                       ^^^ [2]
+156 |     throw new Exception();
+157 |   }
+
+error: Typing[4324] Invalid index type for this array [1]
+-> Expected `int` [2]
+-> This can only be indexed with integers [3]
+-> But got `string` [2]
+
+shape_put_wrong.php:28:26
+ 26 | 
+ 27 |     // Not a shape
+ 28 |     ExampleDsl::shapePut('y', 'y', 3);
+    |                          ^^^ [1]
+    |                               ^^^ [2]
+ 29 |   }`;
+ 30 | }
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+11 errors found

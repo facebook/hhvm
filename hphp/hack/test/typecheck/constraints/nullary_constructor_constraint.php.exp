@@ -1,10 +1,22 @@
-ERROR: File "nullary_constructor_constraint.php", line 15, characters 14-20:
-Invalid assignment (Typing[4323])
-  File "nullary_constructor_constraint.php", line 10, characters 9-9:
-  `T` is a constrained type parameter
-  File "nullary_constructor_constraint.php", line 10, characters 14-14:
-  This type constraint is violated
-  File "nullary_constructor_constraint.php", line 10, characters 14-14:
-  Expected `B`
-  File "nullary_constructor_constraint.php", line 15, characters 18-18:
-  But got `A`
+error: Typing[4323] Invalid assignment [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `B` [3]
+-> But got `A` [4]
+
+nullary_constructor_constraint.php:15:14
+ 8 |   }
+ 9 | }
+10 | class C<T as B> {
+   |         ^ [2]
+   |              ^ [3]
+11 |   public ?T $item;
+12 | }
+13 | function TestIt(): void {
+14 |   $x = new C();
+15 |   $x->item = new A();
+   |              ^^^^^^^ [1]
+   |                  ^ [4]
+16 | }
+
+1 error found

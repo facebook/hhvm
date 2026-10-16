@@ -1,10 +1,45 @@
-ERROR: File "php_lambda.php", line 6, characters 14-44:
-Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. (Parsing[1002])
-ERROR: File "php_lambda.php", line 6, characters 14-44:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 108, characters 29-44:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "php_lambda.php", line 6, characters 14-44:
-  But got `(function(): int)`
+error: Parsing[1002] Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. [1]
+
+php_lambda.php:6:14
+4 | 
+5 | function test(): void {
+6 |   ExampleDsl`function () {
+  |              ^^^^^^^^^^^^^ [1]
+7 |     return 1;
+  |     ^^^^^^^^^ [1]
+8 |   }`;
+  |   ^ [1]
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `(function(): int)` [1]
+
+php_lambda.php:6:14
+  4 | 
+  5 | function test(): void {
+  6 |   ExampleDsl`function () {
+    |              ^^^^^^^^^^^^^ [1]
+  7 |     return 1;
+    |     ^^^^^^^^^ [1]
+  8 |   }`;
+    |   ^ [1]
+  9 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                             ^^^^^^^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+2 errors found

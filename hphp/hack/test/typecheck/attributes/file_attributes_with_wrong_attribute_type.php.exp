@@ -1,4 +1,15 @@
-ERROR: File "file_attributes_with_wrong_attribute_type.php", line 3, characters 9-9:
-The `X` attribute cannot be used on a file. (Typing[4231])
-  File "file_attributes_with_wrong_attribute_type.php", line 5, characters 7-7:
-  The attribute's class is defined here. To be available for use on a file, the `X` class must implement `HH\FileAttribute`.
+error: Typing[4231] The `X` attribute cannot be used on a file. [1]
+-> The attribute's class is defined here. To be available for use on a file, the `X` class must implement `HH\FileAttribute`. [2]
+
+file_attributes_with_wrong_attribute_type.php:3:9
+1 | <?hh
+2 | 
+3 | <<file: X(3)>>
+  |         ^ [1]
+4 | 
+5 | class X implements \HH\ClassAttribute {
+  |       ^ [2]
+6 |   public function __construct(public int $x) {}
+7 | }
+
+1 error found

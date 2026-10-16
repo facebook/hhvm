@@ -1,2 +1,11 @@
-WARN: File "valid_hints.php", line 18, characters 7-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `mixed` which is a subtype of `mixed`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `mixed` which is a subtype of `mixed`. [1]
+
+valid_hints.php:18:7
+16 |   expect_MyEnum($y);
+17 |   $y = $x;
+18 |   if ($y as mixed !== null) {
+   |       ^^^^^^^^^^^ [1]
+19 |     expect_mixed($y);
+20 |   }
+
+1 error found

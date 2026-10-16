@@ -1,6 +1,21 @@
-ERROR: File "as.php", line 4, characters 3-22:
-You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4195, and this cannot be enabled by configuration (Typing[4195])
-ERROR: File "as.php", line 5, characters 9-16:
-Invalid `as` expression hint (Typing[4195])
-  File "as.php", line 5, characters 9-16:
-  The `as` operator cannot be used with a type with an erased generic type argument
+error: Typing[4195] You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4195, and this cannot be enabled by configuration [1]
+
+as.php:4:3
+2 | 
+3 | function f(mixed $m): void {
+4 |   /* HH_FIXME[4195] */
+  |   ^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   $m as vec<int>;
+6 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with an erased generic type argument [1]
+
+as.php:5:9
+3 | function f(mixed $m): void {
+4 |   /* HH_FIXME[4195] */
+5 |   $m as vec<int>;
+  |         ^^^^^^^^ [1]
+6 | }
+
+2 errors found

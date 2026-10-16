@@ -1,1 +1,2 @@
 --report-pos-from-reason
+--error-format plain_highlighted

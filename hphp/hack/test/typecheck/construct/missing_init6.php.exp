@@ -1,4 +1,15 @@
-ERROR: File "missing_init6.php", line 7, characters 19-29:
-Class `B` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "missing_init6.php", line 5, characters 17-24:
-  `$this->batchID` is not initialized.
+error: NastCheck[3015] Class `B` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->batchID` is not initialized. [2]
+
+missing_init6.php:7:19
+3 | 
+4 | final class B {
+5 |   protected int $batchID;
+  |                 ^^^^^^^^ [2]
+6 | 
+7 |   public function __construct(string $batch_id) {
+  |                   ^^^^^^^^^^^ [1]
+8 |     switch ($batch_id) {
+9 |       case 'test1':
+
+1 error found

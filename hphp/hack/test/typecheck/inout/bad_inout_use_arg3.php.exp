@@ -1,2 +1,10 @@
-ERROR: File "bad_inout_use_arg3.php", line 15, characters 11-15:
-You cannot decorate this argument as `inout` (Parsing[1002])
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_arg3.php:15:11
+13 | function test(): void {
+14 |   $c = launder(new C());
+15 |   f(inout $c->x);
+   |           ^^^^^ [1]
+16 | }
+
+1 error found

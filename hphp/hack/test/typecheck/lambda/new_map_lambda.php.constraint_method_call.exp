@@ -1,16 +1,54 @@
-ERROR: File "new_map_lambda.php", line 24, characters 25-66:
-Invalid argument (Typing[4110])
-  File "new_map_lambda.php", line 18, characters 36-41:
-  Expected `MyEnum`
-  File "new_map_lambda.php", line 22, characters 30-35:
-  But got `string`
-  File "new_map_lambda.php", line 11, characters 15-16:
-    via this generic `Tk`
-ERROR: File "new_map_lambda.php", line 25, characters 25-73:
-Invalid argument (Typing[4110])
-  File "new_map_lambda.php", line 25, characters 26-31:
-  Expected `MyEnum`
-  File "new_map_lambda.php", line 22, characters 30-35:
-  But got `string`
-  File "new_map_lambda.php", line 11, characters 15-16:
-    via this generic `Tk`
+error: Typing[4110] Invalid argument [1]
+-> Expected `MyEnum` [2]
+-> But got `string` [3]
+->   via this generic `Tk` [4]
+
+new_map_lambda.php:24:25
+ 9 | class MyMap<Tk, Tv> {
+10 |   public function mapWithKey<Tu>(
+11 |     (function(Tk, Tv): Tu) $callback,
+   |               ^^ [4]
+12 |   ): MyMap<Tk, Tu> {
+13 |     throw new Exception();
+   :
+16 | class C {
+17 | 
+18 |   private static function getLabel(MyEnum $option): string {
+   |                                    ^^^^^^ [2]
+19 |     return "a";
+20 |   }
+21 | 
+22 |   public function bong(MyMap<string, string> $m): void {
+   |                              ^^^^^^ [3]
+23 |     // Different error position behaviour
+24 |     $x = $m->mapWithKey(($value, $name) ==> self::getLabel($value));
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 |     $y = $m->mapWithKey((MyEnum $value, $name) ==> self::getLabel($value));
+26 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `MyEnum` [2]
+-> But got `string` [3]
+->   via this generic `Tk` [4]
+
+new_map_lambda.php:25:25
+ 9 | class MyMap<Tk, Tv> {
+10 |   public function mapWithKey<Tu>(
+11 |     (function(Tk, Tv): Tu) $callback,
+   |               ^^ [4]
+12 |   ): MyMap<Tk, Tu> {
+13 |     throw new Exception();
+   :
+20 |   }
+21 | 
+22 |   public function bong(MyMap<string, string> $m): void {
+   |                              ^^^^^^ [3]
+23 |     // Different error position behaviour
+24 |     $x = $m->mapWithKey(($value, $name) ==> self::getLabel($value));
+25 |     $y = $m->mapWithKey((MyEnum $value, $name) ==> self::getLabel($value));
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                          ^^^^^^ [2]
+26 |   }
+27 | }
+
+2 errors found

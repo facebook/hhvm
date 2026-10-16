@@ -1,2 +1,11 @@
-ERROR: File "const_union_and_generics_fail.php", line 24, characters 9-10:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_union_and_generics_fail.php:24:9
+22 |   // the mutual dependency between Tx and Ty will test type-checker termination
+23 |   public function fail((T | C) $a): void {
+24 |     $a->CA = 42;
+   |         ^^ [1]
+25 |   }
+26 | }
+
+1 error found

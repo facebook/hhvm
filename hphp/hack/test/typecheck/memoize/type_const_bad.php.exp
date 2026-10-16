@@ -1,6 +1,16 @@
-ERROR: File "type_const_bad.php", line 10, characters 40-41:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "type_const_bad.php", line 8, characters 20-22:
-  This is an object of type Bar
-  File "type_const_bad.php", line 10, characters 30-38:
-    resulting from expanding the type constant `this::TID`
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type Bar [2]
+->   resulting from expanding the type constant `this::TID` [3]
+
+type_const_bad.php:10:40
+ 6 | 
+ 7 | class EntPhoto implements GenericEnt<this::TID> {
+ 8 |   const type TID = Bar;
+   |                    ^^^ [2]
+ 9 |   <<__Memoize>>
+10 |   public function someMethod(this::TID $i): void {}
+   |                              ^^^^^^^^^ [3]
+   |                                        ^^ [1]
+11 | }
+
+1 error found

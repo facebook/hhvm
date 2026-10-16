@@ -1,2 +1,9 @@
-ERROR: File "typing.extends4.bad.php", line 23, characters 30-30:
-Enum F includes enum E but their base types are incompatible (Typing[4388])
+error: Typing[4388] Enum F includes enum E but their base types are incompatible [1]
+
+typing.extends4.bad.php:23:30
+21 | interface ExBox2 {}
+22 | 
+23 | enum class F: ExBox2 extends E {}
+   |                              ^ [1]
+
+1 error found

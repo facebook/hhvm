@@ -1,12 +1,39 @@
-ERROR: File "override_bad.php", line 20, characters 23-24:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "override_bad.php", line 15, characters 35-36:
-  Expected `UB`
-  File "override_bad.php", line 20, characters 29-30:
-  But got `UA`
-ERROR: File "override_bad.php", line 25, characters 23-24:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "override_bad.php", line 25, characters 57-59:
-  Expected `Lo2`
-  File "override_bad.php", line 15, characters 44-45:
-  But got `Lo`
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `UB` [2]
+-> But got `UA` [3]
+
+override_bad.php:20:23
+13 | 
+14 | abstract class P {
+15 |   abstract const type TA as UA as UB super Lo;
+   |                                   ^^ [2]
+16 | }
+17 | 
+18 | abstract class WidenAs extends P {
+19 |   // ERROR: `as UA` is not a subtype of the parent's `as UA & UB`.
+20 |   abstract const type TA as UA super Lo super Lo2;
+   |                       ^^ [1]
+   |                             ^^ [3]
+21 | }
+22 | 
+
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `Lo2` [2]
+-> But got `Lo` [3]
+
+override_bad.php:25:23
+13 | 
+14 | abstract class P {
+15 |   abstract const type TA as UA as UB super Lo;
+   |                                            ^^ [3]
+16 | }
+17 | 
+   :
+23 | abstract class NarrowSuper extends P {
+24 |   // ERROR: parent's `super Lo` is not below the child's `super VeryLo | Lo2`.
+25 |   abstract const type TA as UA as UB super VeryLo super Lo2;
+   |                       ^^ [1]
+   |                                                         ^^^ [2]
+26 | }
+
+2 errors found

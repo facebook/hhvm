@@ -1,2 +1,11 @@
-ERROR: File "sibling-tconst+dep.php", line 9, characters 5-8:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+sibling-tconst+dep.php:9:5
+ 7 |   public function __construct(private TBox $box, private T $t): void
+ 8 |   where
+ 9 |     TBox::T = T {} // NO ERROR
+   |     ^^^^ [1]
+10 | }
+11 | 
+
+1 error found

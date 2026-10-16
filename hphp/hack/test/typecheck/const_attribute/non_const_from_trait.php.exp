@@ -1,4 +1,17 @@
-ERROR: File "non_const_from_trait.php", line 5, characters 1-30:
-Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
-ERROR: File "non_const_from_trait.php", line 5, characters 19-19:
-Trait declaration of non-const property `p` is incompatible with a const class (Typing[4344])
+error: Parsing[1002] Classes, interfaces, traits and enums may not be declared `__Const` [1]
+
+non_const_from_trait.php:5:1
+3 | 
+4 | trait T { public int $p = 1; }
+5 | <<__Const>> class C { use T; }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+error: Typing[4344] Trait declaration of non-const property `p` is incompatible with a const class [1]
+
+non_const_from_trait.php:5:19
+3 | 
+4 | trait T { public int $p = 1; }
+5 | <<__Const>> class C { use T; }
+  |                   ^ [1]
+
+2 errors found

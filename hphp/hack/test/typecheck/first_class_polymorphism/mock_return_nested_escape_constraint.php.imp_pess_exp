@@ -1,36 +1,101 @@
-ERROR: File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
-A `where` type constraint is violated here (Typing[4323])
-  File "mock_return_nested_escape_constraint.php", line 22, characters 19-28:
-  This is the method with `where` type constraints
-  File "mock_return_nested_escape_constraint.php", line 29, characters 32-63:
-  Expected a first-class polymorphic function type.
-  File "mock_return_nested_escape_constraint.php", line 29, characters 26-26:
-  A higher rank generic `T#2` will escape its scope where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
-  Please make this type explicit
-ERROR: File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
-A `where` type constraint is violated here (Typing[4323])
-  File "mock_return_nested_escape_constraint.php", line 22, characters 19-28:
-  This is the method with `where` type constraints
-  File "mock_return_nested_escape_constraint.php", line 29, characters 32-63:
-  Expected a first-class polymorphic function type.
-  File "mock_return_nested_escape_constraint.php", line 29, characters 26-26:
-  A higher rank generic `T#3` will escape its scope where `T#3` corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
-  Please make this type explicit
-ERROR: File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
-A `where` type constraint is violated here (Typing[4323])
-  File "mock_return_nested_escape_constraint.php", line 22, characters 19-28:
-  This is the method with `where` type constraints
-  File "mock_return_nested_escape_constraint.php", line 34, characters 22-36:
-  Expected `dynamic`
-  File "mock_return_nested_escape_constraint.php", line 24, characters 16-50:
-  But got `(readonly function(mixed...)[]: ~_)`
-ERROR: File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
-A `where` type constraint is violated here (Typing[4323])
-  File "mock_return_nested_escape_constraint.php", line 22, characters 19-28:
-  This is the method with `where` type constraints
-  File "mock_return_nested_escape_constraint.php", line 34, characters 22-36:
-  Expected `~(readonly function<T>(): ~(function<U as Box<T>>(U): ~void))`
-  File "mock_return_nested_escape_constraint.php", line 24, characters 16-50:
-  But got `(readonly function(mixed...)[]: ~_)`
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a first-class polymorphic function type. [3]
+-> A higher rank generic `T#2` will escape its scope where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function [4]
+-> Please make this type explicit [1]
+
+mock_return_nested_escape_constraint.php:34:42
+20 |   }
+21 | 
+22 |   public function mockReturn<Tr>(Tr $v): this
+   |                   ^^^^^^^^^^ [2]
+23 |   where
+24 |     Tfun super (readonly function(mixed...)[]: Tr) {
+   :
+27 | }
+28 | 
+29 | function get_constrained<T>(): (function<U as Box<T>>(U): void) {
+   |                          ^ [4]
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+30 |   throw new Exception();
+31 | }
+32 | 
+33 | function test_nested_escape_in_constraint(): void {
+34 |   Mock::mockFunction(get_constrained<>)->mockReturn(($_x) ==> {});
+   |                                          ^^^^^^^^^^ [1]
+35 | }
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a first-class polymorphic function type. [3]
+-> A higher rank generic `T#3` will escape its scope where `T#3` corresponds to the rank-2 type parameter `T` in the polymorphic function [4]
+-> Please make this type explicit [1]
+
+mock_return_nested_escape_constraint.php:34:42
+20 |   }
+21 | 
+22 |   public function mockReturn<Tr>(Tr $v): this
+   |                   ^^^^^^^^^^ [2]
+23 |   where
+24 |     Tfun super (readonly function(mixed...)[]: Tr) {
+   :
+27 | }
+28 | 
+29 | function get_constrained<T>(): (function<U as Box<T>>(U): void) {
+   |                          ^ [4]
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+30 |   throw new Exception();
+31 | }
+32 | 
+33 | function test_nested_escape_in_constraint(): void {
+34 |   Mock::mockFunction(get_constrained<>)->mockReturn(($_x) ==> {});
+   |                                          ^^^^^^^^^^ [1]
+35 | }
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected `dynamic` [3]
+-> But got `(readonly function(mixed...)[]: ~_)` [4]
+
+mock_return_nested_escape_constraint.php:34:42
+20 |   }
+21 | 
+22 |   public function mockReturn<Tr>(Tr $v): this
+   |                   ^^^^^^^^^^ [2]
+23 |   where
+24 |     Tfun super (readonly function(mixed...)[]: Tr) {
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+25 |     return $this;
+26 |   }
+   :
+32 | 
+33 | function test_nested_escape_in_constraint(): void {
+34 |   Mock::mockFunction(get_constrained<>)->mockReturn(($_x) ==> {});
+   |                      ^^^^^^^^^^^^^^^ [3]
+   |                                          ^^^^^^^^^^ [1]
+35 | }
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected `~(readonly function<T>(): ~(function<U as Box<T>>(U): ~void))` [3]
+-> But got `(readonly function(mixed...)[]: ~_)` [4]
+
+mock_return_nested_escape_constraint.php:34:42
+20 |   }
+21 | 
+22 |   public function mockReturn<Tr>(Tr $v): this
+   |                   ^^^^^^^^^^ [2]
+23 |   where
+24 |     Tfun super (readonly function(mixed...)[]: Tr) {
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+25 |     return $this;
+26 |   }
+   :
+32 | 
+33 | function test_nested_escape_in_constraint(): void {
+34 |   Mock::mockFunction(get_constrained<>)->mockReturn(($_x) ==> {});
+   |                      ^^^^^^^^^^^^^^^ [3]
+   |                                          ^^^^^^^^^^ [1]
+35 | }
+
+4 errors found

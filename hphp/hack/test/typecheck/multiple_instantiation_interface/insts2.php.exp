@@ -1,20 +1,50 @@
-ERROR: File "insts2.php", line 12, characters 25-26:
-This makes L extends J<int> but it already extends J at another instantiation (Typing[4480])
-  File "insts2.php", line 12, characters 21-22:
-  It already extends J<num> via I2
-  File "insts2.php", line 6, characters 22-22:
-  This is where I2 implements J
-  File "insts2.php", line 5, characters 22-22:
-  This is where I1 implements J
-  File "insts2.php", line 6, characters 22-22:
-  J<num> should be a subtype of J<int>, but it's not because
-  File "insts2.php", line 5, characters 24-26:
-  Expected `int`
-  File "insts2.php", line 6, characters 24-26:
-  But got `num`
-ERROR: File "insts2.php", line 16, characters 14-15:
-Invalid argument (Typing[4110])
-  File "insts2.php", line 14, characters 23-25:
-  Expected `int`
-  File "insts2.php", line 6, characters 24-26:
-  But got `num`
+error: Typing[4480] This makes L extends J<int> but it already extends J at another instantiation [1]
+-> It already extends J<num> via I2 [2]
+-> This is where I2 implements J [3]
+-> This is where I1 implements J [4]
+-> J<num> should be a subtype of J<int>, but it's not because [3]
+-> Expected `int` [5]
+-> But got `num` [6]
+
+insts2.php:12:25
+ 3 | 
+ 4 | interface J<+T> { }
+ 5 | interface I1 extends J<int> { }
+   |                      ^ [4]
+   |                        ^^^ [5]
+ 6 | interface I2 extends J<num> { }
+   |                      ^ [3]
+   |                        ^^^ [6]
+ 7 | 
+ 8 | // Legal (cos J<int> <: J<num>)
+ 9 | interface K extends I1, I2 { }
+10 | 
+11 | // Illegal
+12 | interface L extends I2, I1 { }
+   |                     ^^ [2]
+   |                         ^^ [1]
+13 | 
+14 | function expectJInt(J<int> $_):void { }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+
+insts2.php:16:14
+ 4 | interface J<+T> { }
+ 5 | interface I1 extends J<int> { }
+ 6 | interface I2 extends J<num> { }
+   |                        ^^^ [3]
+ 7 | 
+ 8 | // Legal (cos J<int> <: J<num>)
+   :
+12 | interface L extends I2, I1 { }
+13 | 
+14 | function expectJInt(J<int> $_):void { }
+   |                       ^^^ [2]
+15 | function test(L $l):void {
+16 |   expectJInt($l);
+   |              ^^ [1]
+17 |   }
+
+2 errors found

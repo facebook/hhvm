@@ -1,4 +1,13 @@
-ERROR: File "list_lhs_use.php", line 7, characters 18-19:
-Unsequenced modification and access to local variable. Modified here (Typing[4143])
-  File "list_lhs_use.php", line 7, characters 41-42:
-  And accessed here
+error: Typing[4143] Unsequenced modification and access to local variable. Modified here [1]
+-> And accessed here [2]
+
+list_lhs_use.php:7:18
+5 | function test(varray<varray<varray<int>>> $a, varray<int> $b): int {
+6 |   $x = 0;
+7 |   list(list(list($x)), list($y, list($b[$x]))) = $a;
+  |                  ^^ [1]
+  |                                         ^^ [2]
+8 |   return $x;
+9 | }
+
+1 error found

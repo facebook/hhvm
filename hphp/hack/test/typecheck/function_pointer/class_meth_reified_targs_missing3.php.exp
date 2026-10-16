@@ -1,6 +1,17 @@
-ERROR: File "class_meth_reified_targs_missing3.php", line 8, characters 22-22:
-Invalid reified hint (Typing[4305])
-  File "class_meth_reified_targs_missing3.php", line 8, characters 22-22:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "class_meth_reified_targs_missing3.php", line 4, characters 45-46:
-  `T2` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `T2` is reified [2]
+
+class_meth_reified_targs_missing3.php:8:22
+2 | 
+3 | final class Foo {
+4 |   public static function bar<reify T, reify T2>(T $_): void {}
+  |                                             ^^ [2]
+5 | }
+6 | 
+7 | function test(): void {
+8 |   $x = Foo::bar<int, _>;
+  |                      ^ [1]
+9 | }
+
+1 error found

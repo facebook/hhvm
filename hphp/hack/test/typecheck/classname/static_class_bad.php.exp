@@ -1,2 +1,11 @@
-ERROR: File "static_class_bad.php", line 5, characters 8-13:
-`static` is undefined outside of a class (Typing[4061])
+error: Typing[4061] `static` is undefined outside of a class [1]
+
+static_class_bad.php:5:8
+3 | 
+4 | function not_in_class(): bool {
+5 |   $x = static::class;
+  |        ^^^^^^ [1]
+6 |   return false;
+7 | }
+
+1 error found

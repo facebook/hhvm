@@ -1,20 +1,80 @@
-ERROR: File "module_non_internal_trait.php--A.php", line 17, characters 5-10:
-Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_non_internal_trait.php--A.php", line 12, characters 7-23:
-  This trait must be made `internal` to access other internal members
-ERROR: File "module_non_internal_trait.php--A.php", line 18, characters 9-14:
-Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_non_internal_trait.php--A.php", line 12, characters 7-23:
-  This trait must be made `internal` to access other internal members
-ERROR: File "module_non_internal_trait.php--A.php", line 19, characters 14-17:
-Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_non_internal_trait.php--A.php", line 12, characters 7-23:
-  This trait must be made `internal` to access other internal members
-ERROR: File "module_non_internal_trait.php--also-A.php", line 12, characters 3-34:
-You cannot make this trait member `internal` (NastCheck[3099])
-  File "module_non_internal_trait.php--also-A.php", line 10, characters 7-11:
-  Only `internal` or `<<__ModuleLevelTrait>>` traits can have `internal` methods
-ERROR: File "module_non_internal_trait.php--also-A.php", line 11, characters 7-10:
-Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_non_internal_trait.php--also-A.php", line 10, characters 7-11:
-  This trait must be made `internal` to access other internal members
+error: Typing[4444] Cannot access `internal` members inside a non-internal trait [1]
+-> This trait must be made `internal` to access other internal members [2]
+
+module_non_internal_trait.php--A.php:17:5
+10 | internal function foobar(): void {}
+11 | 
+12 | trait NonInternalCaller {
+   |       ^^^^^^^^^^^^^^^^^ [2]
+13 |   public function test(Quxx $q): void {
+14 |     // All of these lines are Hack errors: they're `internal` to the new module we
+15 |     // are currently in, but this trait might be included in another module
+16 |     // that doesn't have access to these symbols.
+17 |     foobar();
+   |     ^^^^^^ [1]
+18 |     $q->doFlip();
+19 |     $_ = new Bing();
+
+error: Typing[4444] Cannot access `internal` members inside a non-internal trait [1]
+-> This trait must be made `internal` to access other internal members [2]
+
+module_non_internal_trait.php--A.php:18:9
+10 | internal function foobar(): void {}
+11 | 
+12 | trait NonInternalCaller {
+   |       ^^^^^^^^^^^^^^^^^ [2]
+13 |   public function test(Quxx $q): void {
+14 |     // All of these lines are Hack errors: they're `internal` to the new module we
+15 |     // are currently in, but this trait might be included in another module
+16 |     // that doesn't have access to these symbols.
+17 |     foobar();
+18 |     $q->doFlip();
+   |         ^^^^^^ [1]
+19 |     $_ = new Bing();
+20 |   }
+
+error: Typing[4444] Cannot access `internal` members inside a non-internal trait [1]
+-> This trait must be made `internal` to access other internal members [2]
+
+module_non_internal_trait.php--A.php:19:14
+10 | internal function foobar(): void {}
+11 | 
+12 | trait NonInternalCaller {
+   |       ^^^^^^^^^^^^^^^^^ [2]
+13 |   public function test(Quxx $q): void {
+14 |     // All of these lines are Hack errors: they're `internal` to the new module we
+   :
+17 |     foobar();
+18 |     $q->doFlip();
+19 |     $_ = new Bing();
+   |              ^^^^ [1]
+20 |   }
+21 | }
+
+error: NastCheck[3099] You cannot make this trait member `internal` [1]
+-> Only `internal` or `<<__ModuleLevelTrait>>` traits can have `internal` methods [2]
+
+module_non_internal_trait.php--also-A.php:12:3
+ 8 | }
+ 9 | 
+10 | trait Corge {
+   |       ^^^^^ [2]
+11 |   use Quuz;
+12 |   internal function lol(): void {}
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4444] Cannot access `internal` members inside a non-internal trait [1]
+-> This trait must be made `internal` to access other internal members [2]
+
+module_non_internal_trait.php--also-A.php:11:7
+ 8 | }
+ 9 | 
+10 | trait Corge {
+   |       ^^^^^ [2]
+11 |   use Quuz;
+   |       ^^^^ [1]
+12 |   internal function lol(): void {}
+13 | }
+
+5 errors found

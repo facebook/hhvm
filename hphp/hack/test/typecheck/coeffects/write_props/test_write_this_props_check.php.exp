@@ -1,24 +1,98 @@
-ERROR: File "test_write_this_props_check.php", line 10, characters 9-27:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_write_this_props_check.php", line 23, characters 5-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_write_this_props_check.php", line 31, characters 5-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_write_this_props_check.php", line 17, characters 49-64:
-Unbound name: `HH\Contexts\Unsafe\write_this_props` (Naming[2049])
-ERROR: File "test_write_this_props_check.php", line 17, characters 49-64:
-Unbound name: `HH\Contexts\write_this_props` (Naming[2049])
-ERROR: File "test_write_this_props_check.php", line 30, characters 44-59:
-Unbound name: `HH\Contexts\Unsafe\write_this_props` (Naming[2049])
-ERROR: File "test_write_this_props_check.php", line 30, characters 44-59:
-Unbound name: `HH\Contexts\write_this_props` (Naming[2049])
-ERROR: File "test_write_this_props_check.php", line 10, characters 9-23:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_write_this_props_check.php", line 9, characters 34-35:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_write_this_props_check.php", line 23, characters 5-16:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_write_this_props_check.php", line 22, characters 31-32:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_write_this_props_check.php:10:9
+ 8 | 
+ 9 |     public function pure_method()[] : void {
+10 |         $this->prop_int = 5; // write_props error
+   |         ^^^^^^^^^^^^^^^^^^^ [1]
+11 |     }
+12 | 
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_write_this_props_check.php:23:5
+21 | 
+22 | function pure_function(Foo $x)[] : void {
+23 |     $x->prop_int = 5; // write_props error
+   |     ^^^^^^^^^^^^^^^^ [1]
+24 | }
+25 | 
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_write_this_props_check.php:31:5
+29 | 
+30 | function write_this_props_function(Foo $x)[write_this_props]: void {
+31 |     $x->prop_int = 5; // write_props error
+   |     ^^^^^^^^^^^^^^^^ [1]
+32 | }
+
+error: Naming[2049] Unbound name: `HH\Contexts\Unsafe\write_this_props` [1]
+
+test_write_this_props_check.php:17:49
+15 |     }
+16 | 
+17 |     public function write_this_props_function()[write_this_props]: void {
+   |                                                 ^^^^^^^^^^^^^^^^ [1]
+18 |         $this->prop_int = 5; // no error
+19 |     }
+
+error: Naming[2049] Unbound name: `HH\Contexts\write_this_props` [1]
+
+test_write_this_props_check.php:17:49
+15 |     }
+16 | 
+17 |     public function write_this_props_function()[write_this_props]: void {
+   |                                                 ^^^^^^^^^^^^^^^^ [1]
+18 |         $this->prop_int = 5; // no error
+19 |     }
+
+error: Naming[2049] Unbound name: `HH\Contexts\Unsafe\write_this_props` [1]
+
+test_write_this_props_check.php:30:44
+28 | }
+29 | 
+30 | function write_this_props_function(Foo $x)[write_this_props]: void {
+   |                                            ^^^^^^^^^^^^^^^^ [1]
+31 |     $x->prop_int = 5; // write_props error
+32 | }
+
+error: Naming[2049] Unbound name: `HH\Contexts\write_this_props` [1]
+
+test_write_this_props_check.php:30:44
+28 | }
+29 | 
+30 | function write_this_props_function(Foo $x)[write_this_props]: void {
+   |                                            ^^^^^^^^^^^^^^^^ [1]
+31 |     $x->prop_int = 5; // write_props error
+32 | }
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_write_this_props_check.php:10:9
+ 7 |     ) {}
+ 8 | 
+ 9 |     public function pure_method()[] : void {
+   |                                  ^^ [2]
+10 |         $this->prop_int = 5; // write_props error
+   |         ^^^^^^^^^^^^^^^ [1]
+11 |     }
+12 | 
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_write_this_props_check.php:23:5
+20 | }
+21 | 
+22 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+23 |     $x->prop_int = 5; // write_props error
+   |     ^^^^^^^^^^^^ [1]
+24 | }
+25 | 
+
+9 errors found

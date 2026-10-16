@@ -1,10 +1,31 @@
-ERROR: File "function_public_bad.php", line 4, characters 7-12:
-`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "function_public_bad.php", line 4, characters 30-33:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "function_public_bad.php", line 4, characters 23-25:
-Invalid return type (Typing[4336])
-  File "function_public_bad.php", line 4, characters 30-33:
-  Expected `void`
-  File "function_public_bad.php", line 4, characters 23-25:
-  But got `Awaitable<void>` because this function does not always return a value
+error: Parsing[1002] `public` on toplevel entities cannot be used outside of a module. Please define a module for this file. [1]
+
+function_public_bad.php:4:7
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | async public function foo(): void {
+  |       ^^^^^^ [1]
+5 | }
+
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+function_public_bad.php:4:30
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | async public function foo(): void {
+  |                              ^^^^ [1]
+5 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `Awaitable<void>` because this function does not always return a value [1]
+
+function_public_bad.php:4:23
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | async public function foo(): void {
+  |                       ^^^ [1]
+  |                              ^^^^ [2]
+5 | }
+
+3 errors found

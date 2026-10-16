@@ -1,12 +1,32 @@
-ERROR: File "unnecessary_attributes.php", line 4, characters 5-9:
-The attribute `__LSB` is unnecessary (Typing[4392])
-  File "unnecessary_attributes.php", line 3, characters 13-13:
-  It is unnecessary because the class `C` is final
-  File "unnecessary_attributes.php", line 4, characters 5-9:
-  Try deleting this attribute
-ERROR: File "unnecessary_attributes.php", line 7, characters 5-16:
-The attribute `__MemoizeLSB` is unnecessary (Typing[4392])
-  File "unnecessary_attributes.php", line 3, characters 13-13:
-  It is unnecessary because the class `C` is final
-  File "unnecessary_attributes.php", line 7, characters 5-16:
-  Try using the attribute `__Memoize` instead
+error: Typing[4392] The attribute `__LSB` is unnecessary [1]
+-> It is unnecessary because the class `C` is final [2]
+-> Try deleting this attribute [1]
+
+unnecessary_attributes.php:4:5
+1 | <?hh
+2 | 
+3 | final class C {
+  |             ^ [2]
+4 |   <<__LSB>>
+  |     ^^^^^ [1]
+5 |   private static bool $flag = false;
+6 | 
+
+error: Typing[4392] The attribute `__MemoizeLSB` is unnecessary [1]
+-> It is unnecessary because the class `C` is final [2]
+-> Try using the attribute `__Memoize` instead [1]
+
+unnecessary_attributes.php:7:5
+1 | <?hh
+2 | 
+3 | final class C {
+  |             ^ [2]
+4 |   <<__LSB>>
+5 |   private static bool $flag = false;
+6 | 
+7 |   <<__MemoizeLSB>>
+  |     ^^^^^^^^^^^^ [1]
+8 |   public static function memo(): void {}
+9 | }
+
+2 errors found

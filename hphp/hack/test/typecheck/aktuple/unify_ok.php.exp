@@ -1,12 +1,48 @@
-ERROR: File "unify_ok.php", line 14, characters 12-16:
-Invalid argument (Typing[4110])
-  File "unify_ok.php", line 3, characters 19-21:
-  Expected `num`
-  File "unify_ok.php", line 11, characters 20-24:
-  But got `string`
-ERROR: File "unify_ok.php", line 15, characters 15-19:
-Invalid argument (Typing[4110])
-  File "unify_ok.php", line 4, characters 22-27:
-  Expected `string`
-  File "unify_ok.php", line 9, characters 14-14:
-  But got `num`
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+unify_ok.php:14:12
+ 1 | <?hh
+ 2 | 
+ 3 | function take_num(num $_): void {}
+   |                   ^^^ [2]
+ 4 | function take_string(string $_): void {}
+ 5 | 
+   :
+ 9 |     $a = vec[4];
+10 |   } else {
+11 |     $a = vec[3.14, 'aaa'];
+   |                    ^^^^^ [3]
+12 |   }
+13 | 
+14 |   take_num($a[0]);
+   |            ^^^^^ [1]
+15 |   take_string($a[1]);
+16 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `num` [3]
+
+unify_ok.php:15:15
+ 2 | 
+ 3 | function take_num(num $_): void {}
+ 4 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+ 5 | 
+ 6 | function test(bool $b): void {
+ 7 | 
+ 8 |   if ($b) {
+ 9 |     $a = vec[4];
+   |              ^ [3]
+10 |   } else {
+11 |     $a = vec[3.14, 'aaa'];
+12 |   }
+13 | 
+14 |   take_num($a[0]);
+15 |   take_string($a[1]);
+   |               ^^^^^ [1]
+16 | }
+
+2 errors found

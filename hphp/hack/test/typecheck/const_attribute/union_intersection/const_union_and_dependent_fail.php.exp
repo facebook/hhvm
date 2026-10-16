@@ -1,2 +1,10 @@
-ERROR: File "const_union_and_dependent_fail.php", line 28, characters 7-8:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_union_and_dependent_fail.php:28:7
+26 | function pass(R $r): void {
+27 |   $a = $r->get();
+28 |   $a->CA = 42;
+   |       ^^ [1]
+29 | }
+
+1 error found

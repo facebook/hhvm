@@ -1,44 +1,71 @@
-ERROR: File "projected_type_const_error3.php", line 21, characters 10-18:
-Some type arguments violate their constraints (Typing[4323])
-  File "projected_type_const_error3.php", line 13, characters 20-23:
-  `TBox` is a constrained type parameter
-  File "projected_type_const_error3.php", line 13, characters 28-60:
-  This type constraint is violated
-  File "projected_type_const_error3.php", line 13, characters 28-60:
-  Expected a class with `{type TInner = string}`
-  File "projected_type_const_error3.php", line 21, characters 20-25:
-  But got `IntBox`
-  File "projected_type_const_error3.php", line 21, characters 28-33:
-  This `as` or `=` refinement constraint is violated
-  File "projected_type_const_error3.php", line 13, characters 20-23:
-  `TBox` is a constrained type parameter
-  File "projected_type_const_error3.php", line 13, characters 28-60:
-  This type constraint is violated
-  File "projected_type_const_error3.php", line 21, characters 28-33:
-  Expected `string`
-  File "projected_type_const_error3.php", line 13, characters 55-58:
-    via this generic `TVal`
-  File "projected_type_const_error3.php", line 9, characters 23-25:
-  But got `int`
-ERROR: File "projected_type_const_error3.php", line 21, characters 10-18:
-Some type arguments violate their constraints (Typing[4323])
-  File "projected_type_const_error3.php", line 13, characters 20-23:
-  `TBox` is a constrained type parameter
-  File "projected_type_const_error3.php", line 13, characters 28-60:
-  This type constraint is violated
-  File "projected_type_const_error3.php", line 13, characters 28-60:
-  Expected a class with `{type TInner = string}`
-  File "projected_type_const_error3.php", line 21, characters 20-25:
-  But got `IntBox`
-  File "projected_type_const_error3.php", line 21, characters 28-33:
-  This `super` refinement constraint is violated
-  File "projected_type_const_error3.php", line 13, characters 20-23:
-  `TBox` is a constrained type parameter
-  File "projected_type_const_error3.php", line 13, characters 28-60:
-  This type constraint is violated
-  File "projected_type_const_error3.php", line 9, characters 23-25:
-  Expected `int`
-  File "projected_type_const_error3.php", line 21, characters 28-33:
-  But got `string`
-  File "projected_type_const_error3.php", line 13, characters 55-58:
-    via this generic `TVal`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TInner = string}` [3]
+-> But got `IntBox` [4]
+-> This `as` or `=` refinement constraint is violated [5]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [5]
+->   via this generic `TVal` [6]
+-> But got `int` [7]
+
+projected_type_const_error3.php:21:10
+ 7 | 
+ 8 | class IntBox extends MyBox {
+ 9 |   const type TInner = int;
+   |                       ^^^ [7]
+10 |   public function set(int $_): void {}
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |                    ^^^^ [2]
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                       ^^^^ [6]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+19 | 
+20 | function test(): void {
+21 |   $fun = set_a_box<IntBox, string>;
+   |          ^^^^^^^^^ [1]
+   |                    ^^^^^^ [4]
+   |                            ^^^^^^ [5]
+22 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TInner = string}` [3]
+-> But got `IntBox` [4]
+-> This `super` refinement constraint is violated [5]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [6]
+-> But got `string` [5]
+->   via this generic `TVal` [7]
+
+projected_type_const_error3.php:21:10
+ 7 | 
+ 8 | class IntBox extends MyBox {
+ 9 |   const type TInner = int;
+   |                       ^^^ [6]
+10 |   public function set(int $_): void {}
+11 | }
+12 | 
+13 | function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+   |                    ^^^^ [2]
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                       ^^^^ [7]
+14 |   TBox $b,
+15 |   TVal $v,
+   :
+19 | 
+20 | function test(): void {
+21 |   $fun = set_a_box<IntBox, string>;
+   |          ^^^^^^^^^ [1]
+   |                    ^^^^^^ [4]
+   |                            ^^^^^^ [5]
+22 | }
+
+2 errors found

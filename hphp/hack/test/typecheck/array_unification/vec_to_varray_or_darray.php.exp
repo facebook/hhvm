@@ -1,10 +1,35 @@
-ERROR: File "vec_to_varray_or_darray.php", line 11, characters 26-41:
-Too few type arguments for this type (Naming[2071])
-ERROR: File "vec_to_varray_or_darray.php", line 11, characters 26-41:
-Unbound name: `varray_or_darray` (Naming[2049])
-ERROR: File "vec_to_varray_or_darray.php", line 12, characters 10-11:
-Invalid return type (Typing[4110])
-  File "vec_to_varray_or_darray.php", line 11, characters 26-41:
-  Expected `varray_or_darray`
-  File "vec_to_varray_or_darray.php", line 11, characters 12-19:
-  But got `vec<int>`
+error: Naming[2071] Too few type arguments for this type [1]
+
+vec_to_varray_or_darray.php:11:26
+ 9 | }
+10 | 
+11 | function h(vec<int> $v): varray_or_darray {
+   |                          ^^^^^^^^^^^^^^^^ [1]
+12 |   return $v;
+13 | }
+
+error: Naming[2049] Unbound name: `varray_or_darray` [1]
+
+vec_to_varray_or_darray.php:11:26
+ 9 | }
+10 | 
+11 | function h(vec<int> $v): varray_or_darray {
+   |                          ^^^^^^^^^^^^^^^^ [1]
+12 |   return $v;
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `varray_or_darray` [2]
+-> But got `vec<int>` [3]
+
+vec_to_varray_or_darray.php:12:10
+ 9 | }
+10 | 
+11 | function h(vec<int> $v): varray_or_darray {
+   |            ^^^^^^^^ [3]
+   |                          ^^^^^^^^^^^^^^^^ [2]
+12 |   return $v;
+   |          ^^ [1]
+13 | }
+
+3 errors found

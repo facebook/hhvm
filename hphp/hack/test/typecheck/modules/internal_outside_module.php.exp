@@ -1,10 +1,49 @@
-ERROR: File "internal_outside_module.php", line 3, characters 1-8:
-`internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "internal_outside_module.php", line 5, characters 1-8:
-`internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "internal_outside_module.php", line 6, characters 3-10:
-`internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "internal_outside_module.php", line 7, characters 13-20:
-`internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "internal_outside_module.php", line 10, characters 1-8:
-`internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+error: Parsing[1002] `internal` cannot be used outside of a module. Please define a module for this file. [1]
+
+internal_outside_module.php:3:1
+1 | <?hh
+2 | 
+3 | internal function f(): void {}
+  | ^^^^^^^^ [1]
+4 | 
+5 | internal class A {
+
+error: Parsing[1002] `internal` cannot be used outside of a module. Please define a module for this file. [1]
+
+internal_outside_module.php:5:1
+3 | internal function f(): void {}
+4 | 
+5 | internal class A {
+  | ^^^^^^^^ [1]
+6 |   internal function g(): void {}
+7 |   protected internal function h(): void {}
+
+error: Parsing[1002] `internal` cannot be used outside of a module. Please define a module for this file. [1]
+
+internal_outside_module.php:6:3
+4 | 
+5 | internal class A {
+6 |   internal function g(): void {}
+  |   ^^^^^^^^ [1]
+7 |   protected internal function h(): void {}
+8 | }
+
+error: Parsing[1002] `internal` cannot be used outside of a module. Please define a module for this file. [1]
+
+internal_outside_module.php:7:13
+5 | internal class A {
+6 |   internal function g(): void {}
+7 |   protected internal function h(): void {}
+  |             ^^^^^^^^ [1]
+8 | }
+9 | 
+
+error: Parsing[1002] `internal` cannot be used outside of a module. Please define a module for this file. [1]
+
+internal_outside_module.php:10:1
+ 8 | }
+ 9 | 
+10 | internal type Foobar = int;
+   | ^^^^^^^^ [1]
+
+5 errors found

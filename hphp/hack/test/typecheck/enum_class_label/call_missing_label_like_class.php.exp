@@ -1,10 +1,25 @@
-ERROR: File "call_missing_label_like_class.php", line 11, characters 15-21:
-Invalid argument (Typing[4110])
-  File "call_missing_label_like_class.php", line 11, characters 15-21:
-  Expected a class with a constant `classy`
-  File "call_missing_label_like_class.php", line 7, characters 41-41:
-  But got `E`
-  File "call_missing_label_like_class.php", line 3, characters 12-12:
-  `E` is defined here
-  File "call_missing_label_like_class.php", line 4, characters 10-20:
-  Did you mean `very_classy`?
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `classy` [1]
+-> But got `E` [2]
+-> `E` is defined here [3]
+-> Did you mean `very_classy`? [4]
+
+call_missing_label_like_class.php:11:15
+ 1 | <?hh
+ 2 | 
+ 3 | enum class E: mixed {
+   |            ^ [3]
+ 4 |   string very_classy = "top hat";
+   |          ^^^^^^^^^^^ [4]
+ 5 | }
+ 6 | 
+ 7 | function takes_label(HH\EnumClass\Label<E, mixed> $_): void {}
+   |                                         ^ [2]
+ 8 | 
+ 9 | function call_it(): void {
+10 |   // We want #very_classy, not #class.
+11 |   takes_label(#classy);
+   |               ^^^^^^^ [1]
+12 | }
+
+1 error found

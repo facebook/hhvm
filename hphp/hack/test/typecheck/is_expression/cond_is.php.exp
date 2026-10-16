@@ -1,6 +1,21 @@
-ERROR: File "cond_is.php", line 14, characters 10-16:
-Invalid return type (Typing[4110])
-  File "cond_is.php", line 8, characters 44-44:
-  Expected `T`
-  File "cond_is.php", line 14, characters 14-14:
-  But got `B`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `B` [3]
+
+cond_is.php:14:10
+ 6 | class E extends C<B> { }
+ 7 | 
+ 8 | function test_flow<T>(C<T> $c, bool $flag):T {
+   |                                            ^ [2]
+ 9 |   if ($flag) {
+10 |     echo "do nothing";
+11 |   } else {
+12 |     invariant($c is E, "e");
+13 |   }
+14 |   return new B();
+   |          ^^^^^^^ [1]
+   |              ^ [3]
+15 | }
+16 | 
+
+1 error found

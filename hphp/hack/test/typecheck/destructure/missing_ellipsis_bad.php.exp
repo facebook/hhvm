@@ -1,4 +1,20 @@
-ERROR: File "missing_ellipsis_bad.php", line 5, characters 3-7:
-Tuple arity mismatch: expected 1 element in destructuring pattern but the tuple type has 2 (Typing[4513])
-ERROR: File "missing_ellipsis_bad.php", line 10, characters 3-7:
-Missing `...`: the shape type has unknown fields, so the destructuring pattern must end with `...` (Typing[4510])
+error: Typing[4513] Tuple arity mismatch: expected 1 element in destructuring pattern but the tuple type has 2 [1]
+
+missing_ellipsis_bad.php:5:3
+3 | 
+4 | function test_tuple_arity_mismatch((int, optional string) $t): void {
+5 |   tuple($x) = $t; // error: Tuple arity mismatch
+  |   ^^^^^ [1]
+6 | 
+7 | }
+
+error: Typing[4510] Missing `...`: the shape type has unknown fields, so the destructuring pattern must end with `...` [1]
+
+missing_ellipsis_bad.php:10:3
+ 8 | 
+ 9 | function test_open_shape(shape('x' => int, ...) $s): void {
+10 |   shape('x' => $x) = $s; // error: Missing `...`
+   |   ^^^^^ [1]
+11 | }
+
+2 errors found

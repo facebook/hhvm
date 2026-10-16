@@ -1,7 +1,25 @@
-ERROR: File "class_static_method_write_error.php", line 10, characters 5-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "class_static_method_write_error.php", line 10, characters 5-16:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "class_static_method_write_error.php", line 9, characters 52-53:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+class_static_method_write_error.php:10:5
+ 8 | 
+ 9 |   public static function pure_static_method(Foo $x)[] : void {
+10 |     $x->prop_int = 4; // Error
+   |     ^^^^^^^^^^^^^^^^ [1]
+11 |   }
+12 | 
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+class_static_method_write_error.php:10:5
+ 7 |    ) {}
+ 8 | 
+ 9 |   public static function pure_static_method(Foo $x)[] : void {
+   |                                                    ^^ [2]
+10 |     $x->prop_int = 4; // Error
+   |     ^^^^^^^^^^^^ [1]
+11 |   }
+12 | 
+
+2 errors found

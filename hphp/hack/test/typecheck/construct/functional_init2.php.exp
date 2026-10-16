@@ -1,2 +1,11 @@
-ERROR: File "functional_init2.php", line 17, characters 23-23:
-Read access to `$this->x` before initialization (Typing[4083])
+error: Typing[4083] Read access to `$this->x` before initialization [1]
+
+functional_init2.php:17:23
+15 |   public function __construct() {
+16 |     // use of $this->x before it is initialized
+17 |     $this->x = $this->x;
+   |                       ^ [1]
+18 |   }
+19 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "invalid_call2.php", line 15, characters 5-15:
-Only classnames and variables are allowed before `::`. (Parsing[1002])
-ERROR: File "invalid_call2.php", line 15, characters 5-22:
-Expression trees only support static method calls on `static` and named classes. (Parsing[1002])
+error: Parsing[1002] Only classnames and variables are allowed before `::`. [1]
+
+invalid_call2.php:15:5
+13 | function foo(): void {
+14 |   $fun_call = ExampleDsl`((function(): MyClass) $y) ==> {
+15 |     ($y())::bar("baz");
+   |     ^^^^^^^^^^^ [1]
+16 |   }`;
+17 | }
+
+error: Parsing[1002] Expression trees only support static method calls on `static` and named classes. [1]
+
+invalid_call2.php:15:5
+13 | function foo(): void {
+14 |   $fun_call = ExampleDsl`((function(): MyClass) $y) ==> {
+15 |     ($y())::bar("baz");
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+16 |   }`;
+17 | }
+
+2 errors found

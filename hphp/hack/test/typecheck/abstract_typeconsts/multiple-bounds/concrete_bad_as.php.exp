@@ -1,6 +1,19 @@
-ERROR: File "concrete_bad_as.php", line 15, characters 14-15:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "concrete_bad_as.php", line 10, characters 35-36:
-  Expected `UB`
-  File "concrete_bad_as.php", line 15, characters 19-23:
-  But got `OnlyA`
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `UB` [2]
+-> But got `OnlyA` [3]
+
+concrete_bad_as.php:15:14
+ 8 | 
+ 9 | abstract class C {
+10 |   abstract const type TA as UA as UB;
+   |                                   ^^ [2]
+11 | }
+12 | 
+13 | class Bad extends C {
+14 |   // `OnlyA` satisfies `as UA` but not `as UB`.
+15 |   const type TA = OnlyA;
+   |              ^^ [1]
+   |                   ^^^^^ [3]
+16 | }
+
+1 error found

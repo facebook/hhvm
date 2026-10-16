@@ -1,20 +1,83 @@
-ERROR: File "array_write_key.php", line 13, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "array_write_key.php", line 9, characters 21-28:
-  Definition is here
-ERROR: File "array_write_key.php", line 21, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "array_write_key.php", line 17, characters 20-27:
-  Definition is here
-ERROR: File "array_write_key.php", line 31, characters 7-8:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "array_write_key.php", line 25, characters 23-30:
-  Definition is here
-ERROR: File "array_write_key.php", line 44, characters 5-10:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "array_write_key.php", line 40, characters 24-31:
-  Definition is here
-ERROR: File "array_write_key.php", line 52, characters 5-10:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "array_write_key.php", line 48, characters 21-28:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+array_write_key.php:13:5
+ 7 | }
+ 8 | 
+ 9 | function dict_write(class<A> $c): void {
+   |                     ^^^^^^^^ [2]
+10 |   $d = dict[];
+11 |   $d[$c] = 1;
+12 |   foreach ($d as $k => $_) {
+13 |     $k::meth();
+   |     ^^ [1]
+14 |   }
+15 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+array_write_key.php:21:5
+15 | }
+16 | 
+17 | function map_write(class<A> $c): void {
+   |                    ^^^^^^^^ [2]
+18 |   $m = Map {};
+19 |   $m[$c] = 1;
+20 |   foreach ($m as $k => $_) {
+21 |     $k::meth();
+   |     ^^ [1]
+22 |   }
+23 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+array_write_key.php:31:7
+23 | }
+24 | 
+25 | function nested_write(class<A> $c): void {
+   |                       ^^^^^^^^ [2]
+26 |   $d = dict[];
+27 |   $d[$c] = dict[];
+28 |   $d[$c][$c] = 1;
+29 |   foreach ($d as $_ => $inner) {
+30 |     foreach ($inner as $k => $_) {
+31 |       $k::meth();
+   |       ^^ [1]
+32 |     }
+33 |   }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+array_write_key.php:44:5
+38 | }
+39 | 
+40 | function keyset_append(class<A> $c): void {
+   |                        ^^^^^^^^ [2]
+41 |   $ks = keyset[];
+42 |   $ks[] = $c;
+43 |   foreach ($ks as $value) {
+44 |     $value::meth();
+   |     ^^^^^^ [1]
+45 |   }
+46 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+array_write_key.php:52:5
+46 | }
+47 | 
+48 | function set_append(class<A> $c): void {
+   |                     ^^^^^^^^ [2]
+49 |   $set = Set {};
+50 |   $set[] = $c;
+51 |   foreach ($set as $value) {
+52 |     $value::meth();
+   |     ^^^^^^ [1]
+53 |   }
+54 | }
+
+5 errors found

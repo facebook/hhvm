@@ -1,8 +1,29 @@
-ERROR: File "abstract_method_via_trait.php", line 18, characters 7-9:
-This class must be declared `abstract`, or provide an implementation for the abstract method `foo` (Typing[4047])
-  File "abstract_method_via_trait.php", line 19, characters 7-13:
-  `Bar` uses `THasFoo`
-  File "abstract_method_via_trait.php", line 9, characters 26-32:
-  `THasFoo` uses `IHasFoo`
-  File "abstract_method_via_trait.php", line 4, characters 19-21:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `foo` [1]
+-> `Bar` uses `THasFoo` [2]
+-> `THasFoo` uses `IHasFoo` [3]
+-> The method is defined here [4]
+
+abstract_method_via_trait.php:18:7
+ 2 | 
+ 3 | interface IHasFoo {
+ 4 |   public function foo(): void;
+   |                   ^^^ [4]
+ 5 | }
+ 6 | 
+ 7 | interface IHasNothing {}
+ 8 | 
+ 9 | trait THasFoo implements IHasFoo {
+   |                          ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+16 | // Bar is missing the `foo` method, but it's not clear how we ended up
+17 | // with this dependency without showing the route.
+18 | class Bar extends AbstractClass implements IHasNothing {
+   |       ^^^ [1]
+19 |   use THasFoo; // It's actually this trait that caused us to need the
+   |       ^^^^^^^ [2]
+20 |                // `foo` method.
+21 |   use THasBar;
+
+1 error found

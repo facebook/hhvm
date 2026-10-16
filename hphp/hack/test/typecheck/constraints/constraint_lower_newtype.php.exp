@@ -1,2 +1,10 @@
-ERROR: File "constraint_lower_newtype.php--file2.php", line 2, characters 21-21:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `MyType` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `MyType` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+constraint_lower_newtype.php--file2.php:2:21
+1 | <?hh
+2 | function test_bound<T super MyType>(MyType $x): T {
+  |                     ^ [1]
+3 |   return $x;
+4 | }
+
+1 error found

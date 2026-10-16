@@ -1,12 +1,22 @@
-ERROR: File "4341-bad_method_override.php", line 9, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "4341-bad_method_override.php", line 9, characters 19-21:
-  Method `foo` has type `(function(string $x): void)` in `B`
-  File "4341-bad_method_override.php", line 5, characters 19-21:
-  But it has type `(function(int $x): void)` in parent `A`
-  File "4341-bad_method_override.php", line 9, characters 19-21:
-  Type `(function(string $x): void)` is not a subtype of `(function(int $x): void)`
-  File "4341-bad_method_override.php", line 9, characters 23-28:
-  Expected `string`
-  File "4341-bad_method_override.php", line 5, characters 23-25:
-  But got `int`
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(string $x): void)` in `B` [1]
+-> But it has type `(function(int $x): void)` in parent `A` [2]
+-> Type `(function(string $x): void)` is not a subtype of `(function(int $x): void)` [1]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+4341-bad_method_override.php:9:19
+ 3 | 
+ 4 | class A {
+ 5 |   public function foo(int $x): void {}
+   |                   ^^^ [2]
+   |                       ^^^ [4]
+ 6 | }
+ 7 | 
+ 8 | class B extends A {
+ 9 |   public function foo(string $x): void {}
+   |                   ^^^ [1]
+   |                       ^^^^^^ [3]
+10 | }
+
+1 error found

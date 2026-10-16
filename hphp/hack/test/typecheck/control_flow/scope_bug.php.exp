@@ -1,15 +1,55 @@
-WARN: File "scope_bug.php", line 18, characters 9-19:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `null` (Warn[12007])
-ERROR: File "scope_bug.php", line 11, characters 19-20:
-Invalid argument (Typing[4110])
-  File "scope_bug.php", line 4, characters 25-30:
-  Expected `string`
-  File "scope_bug.php", line 9, characters 12-12:
-  But got `int`
-ERROR: File "scope_bug.php", line 21, characters 19-20:
-Invalid argument (Typing[4110])
-  File "scope_bug.php", line 4, characters 25-30:
-  Expected `string`
-  File "scope_bug.php", line 19, characters 12-12:
-  But got `int`
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `null` [1]
+
+scope_bug.php:18:9
+16 |   $b = "foo";
+17 |   $l = async () ==> {
+18 |     if ($b === null) {
+   |         ^^^^^^^^^^^ [1]
+19 |       $b = 4;
+20 |     }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+scope_bug.php:11:19
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function expect_string(?string $s): void {}
+   |                         ^^^^^^ [2]
+ 5 | 
+ 6 | function repro(?string $b): void {
+ 7 |   $l = async () ==> {
+ 8 |     if ($b === null) {
+ 9 |       $b = 4;
+   |            ^ [3]
+10 |     }
+11 |     expect_string($b); // error, $b can be int
+   |                   ^^ [1]
+12 |   };
+13 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+scope_bug.php:21:19
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function expect_string(?string $s): void {}
+   |                         ^^^^^^ [2]
+ 5 | 
+ 6 | function repro(?string $b): void {
+   :
+17 |   $l = async () ==> {
+18 |     if ($b === null) {
+19 |       $b = 4;
+   |            ^ [3]
+20 |     }
+21 |     expect_string($b); // error, $b can be int
+   |                   ^^ [1]
+22 |   };
+23 | }
+
+3 errors found

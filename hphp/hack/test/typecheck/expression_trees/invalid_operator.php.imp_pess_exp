@@ -1,40 +1,164 @@
-WARN: File "invalid_operator.php", line 29, characters 38-39:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "invalid_operator.php", line 29, characters 20-26:
-  This expression has type `dynamic`
-ERROR: File "invalid_operator.php", line 13, characters 19-27:
-`new` is not supported in expression trees. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 16, characters 19-26:
-Global constants are not supported in expression trees. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 19, characters 19-42:
-Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 22, characters 28-45:
-Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 23, characters 43-67:
-Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 32, characters 34-40:
-Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])
-ERROR: File "invalid_operator.php", line 13, characters 19-27:
-Invalid return type (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 108, characters 29-44:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "invalid_operator.php", line 13, characters 23-25:
-  But got `Foo`
-ERROR: File "invalid_operator.php", line 16, characters 19-26:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 237, characters 5-20:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "invalid_operator.php", line 9, characters 7-9:
-  But got `int`
-ERROR: File "invalid_operator.php", line 19, characters 19-42:
-Invalid return type (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 108, characters 29-44:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "invalid_operator.php", line 19, characters 19-42:
-  But got `(function(): int)`
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+invalid_operator.php:29:38
+27 | 
+28 |   // Ban assignment to things that aren't simple variables.
+29 |   $f = ExampleDsl`(dynamic $x) ==> { $x[0] = 1; }`;
+   |                    ^^^^^^^ [2]
+   |                                      ^^ [1]
+30 | 
+31 |   // Ban assignments that mutate a local.
+
+error: Parsing[1002] `new` is not supported in expression trees. [1]
+
+invalid_operator.php:13:19
+11 | function foo(): void {
+12 |   // Ban instantiation.
+13 |   $z = ExampleDsl`new Foo()`;
+   |                   ^^^^^^^^^ [1]
+14 | 
+15 |   // Ban globals.
+
+error: Parsing[1002] Global constants are not supported in expression trees. [1]
+
+invalid_operator.php:16:19
+14 | 
+15 |   // Ban globals.
+16 |   $g = ExampleDsl`MY_CONST + 1`;
+   |                   ^^^^^^^^ [1]
+17 | 
+18 |   // Ban PHP-style lambdas.
+
+error: Parsing[1002] Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. [1]
+
+invalid_operator.php:19:19
+17 | 
+18 |   // Ban PHP-style lambdas.
+19 |   $f = ExampleDsl`function() { return 1; }`;
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+20 | 
+21 |   // Ban do-while and foreach loops.
+
+error: Parsing[1002] Expression trees do not support `do while` loops. Consider using a `while` loop instead. [1]
+
+invalid_operator.php:22:28
+20 | 
+21 |   // Ban do-while and foreach loops.
+22 |   $f = ExampleDsl`() ==> { do {} while(true); }`;
+   |                            ^^^^^^^^^^^^^^^^^^ [1]
+23 |   $f = ExampleDsl`(vec<int> $items) ==> { foreach ($items as $_) {} }`;
+24 | 
+
+error: Parsing[1002] Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. [1]
+
+invalid_operator.php:23:43
+21 |   // Ban do-while and foreach loops.
+22 |   $f = ExampleDsl`() ==> { do {} while(true); }`;
+23 |   $f = ExampleDsl`(vec<int> $items) ==> { foreach ($items as $_) {} }`;
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+24 | 
+25 |   // Ban lambdas with default arguments.
+
+error: Parsing[1002] Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. [1]
+
+invalid_operator.php:32:34
+30 | 
+31 |   // Ban assignments that mutate a local.
+32 |   $f = ExampleDsl`(int $x) ==> { $x += 1; }`;
+   |                                  ^^^^^^^ [1]
+33 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `Foo` [4]
+
+invalid_operator.php:13:19
+ 11 | function foo(): void {
+ 12 |   // Ban instantiation.
+ 13 |   $z = ExampleDsl`new Foo()`;
+    |                   ^^^^^^^^^ [1]
+    |                       ^^^ [4]
+ 14 | 
+ 15 |   // Ban globals.
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                             ^^^^^^^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `int` [4]
+
+invalid_operator.php:16:19
+  7 | }
+  8 | 
+  9 | const int MY_CONST = 1;
+    |       ^^^ [4]
+ 10 | 
+ 11 | function foo(): void {
+    :
+ 14 | 
+ 15 |   // Ban globals.
+ 16 |   $g = ExampleDsl`MY_CONST + 1`;
+    |                   ^^^^^^^^ [1]
+ 17 | 
+ 18 |   // Ban PHP-style lambdas.
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+235 |   public function visitBinop(
+236 |     ?ExprPos $_,
+237 |     ExampleDsl::TAst $lhs,
+    |     ^^^^^^^^^^^^^^^^ [3]
+238 |     string $op,
+239 |     ExampleDsl::TAst $rhs,
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `(function(): int)` [1]
+
+invalid_operator.php:19:19
+ 17 | 
+ 18 |   // Ban PHP-style lambdas.
+ 19 |   $f = ExampleDsl`function() { return 1; }`;
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 20 | 
+ 21 |   // Ban do-while and foreach loops.
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                             ^^^^^^^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+10 errors found

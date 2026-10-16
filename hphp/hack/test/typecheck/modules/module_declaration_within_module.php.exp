@@ -1,6 +1,26 @@
-ERROR: File "module_declaration_within_module.php", line 3, characters 8-10:
-`module foo;` must be unique, and precede any other declarations in a file. (Parsing[1002])
-ERROR: File "module_declaration_within_module.php", line 4, characters 12-14:
-You cannot declare more than one module within a file (Parsing[1002])
-ERROR: File "module_declaration_within_module.php", line 4, characters 12-14:
-You cannot declare new modules within an existing module (Parsing[1002])
+error: Parsing[1002] `module foo;` must be unique, and precede any other declarations in a file. [1]
+
+module_declaration_within_module.php:3:8
+1 | <?hh
+2 | new module foo {} // not ok
+3 | module foo;
+  |        ^^^ [1]
+4 | new module bar {} // not ok
+
+error: Parsing[1002] You cannot declare more than one module within a file [1]
+
+module_declaration_within_module.php:4:12
+2 | new module foo {} // not ok
+3 | module foo;
+4 | new module bar {} // not ok
+  |            ^^^ [1]
+
+error: Parsing[1002] You cannot declare new modules within an existing module [1]
+
+module_declaration_within_module.php:4:12
+2 | new module foo {} // not ok
+3 | module foo;
+4 | new module bar {} // not ok
+  |            ^^^ [1]
+
+3 errors found

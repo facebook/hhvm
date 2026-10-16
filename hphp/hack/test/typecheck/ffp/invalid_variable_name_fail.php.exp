@@ -1,2 +1,10 @@
-ERROR: File "invalid_variable_name_fail.php", line 13, characters 3-3:
-A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
+error: Parsing[1002] A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores [1]
+
+invalid_variable_name_fail.php:13:3
+11 | 
+12 | function test(): void {
+13 |   $123 = 10;
+   |   ^ [1]
+14 | }
+
+1 error found

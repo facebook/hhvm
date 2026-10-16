@@ -1,12 +1,25 @@
-ERROR: File "explicit_type_collection_mismatch6.php", line 4, characters 13-18:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch6.php", line 4, characters 13-18:
-  Expected `string`
-  File "explicit_type_collection_mismatch6.php", line 4, characters 26-26:
-  But got `int`
-ERROR: File "explicit_type_collection_mismatch6.php", line 4, characters 21-23:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch6.php", line 4, characters 21-23:
-  Expected `int`
-  File "explicit_type_collection_mismatch6.php", line 4, characters 31-36:
-  But got `string`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `string` [1]
+-> But got `int` [2]
+
+explicit_type_collection_mismatch6.php:4:13
+2 | 
+3 | function f(): void {
+4 |   $e = dict<string, int>[9 => "nine"];
+  |             ^^^^^^ [1]
+  |                          ^ [2]
+5 | }
+
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `string` [2]
+
+explicit_type_collection_mismatch6.php:4:21
+2 | 
+3 | function f(): void {
+4 |   $e = dict<string, int>[9 => "nine"];
+  |                     ^^^ [1]
+  |                               ^^^^^^ [2]
+5 | }
+
+2 errors found

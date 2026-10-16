@@ -1,12 +1,39 @@
-ERROR: File "vec_literal_ok.php", line 6, characters 12-16:
-Invalid argument (Typing[4110])
-  File "vec_literal_ok.php", line 10, characters 19-21:
-  Expected `int`
-  File "vec_literal_ok.php", line 4, characters 15-19:
-  But got `string`
-ERROR: File "vec_literal_ok.php", line 7, characters 15-19:
-Invalid argument (Typing[4110])
-  File "vec_literal_ok.php", line 11, characters 22-27:
-  Expected `string`
-  File "vec_literal_ok.php", line 4, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+vec_literal_ok.php:6:12
+ 2 | 
+ 3 | function test(): void {
+ 4 |   $a = vec[4, 'aaa'];
+   |               ^^^^^ [3]
+ 5 | 
+ 6 |   take_int($a[0]);
+   |            ^^^^^ [1]
+ 7 |   take_string($a[1]);
+ 8 | }
+ 9 | 
+10 | function take_int(int $_): void {}
+   |                   ^^^ [2]
+11 | function take_string(string $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+vec_literal_ok.php:7:15
+ 2 | 
+ 3 | function test(): void {
+ 4 |   $a = vec[4, 'aaa'];
+   |            ^ [3]
+ 5 | 
+ 6 |   take_int($a[0]);
+ 7 |   take_string($a[1]);
+   |               ^^^^^ [1]
+ 8 | }
+ 9 | 
+10 | function take_int(int $_): void {}
+11 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+2 errors found

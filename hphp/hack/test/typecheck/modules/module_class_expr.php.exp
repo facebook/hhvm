@@ -1,12 +1,58 @@
-ERROR: File "module_class_expr.php--here.php", line 9, characters 15-15:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_class_expr.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_class_expr.php--here.php", line 10, characters 11-11:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_class_expr.php--there.php", line 6, characters 16-16:
-  This is from module `there`
-ERROR: File "module_class_expr.php--here.php", line 11, characters 5-5:
-Cannot access an internal element from module `there` in module `here` (Typing[4444])
-  File "module_class_expr.php--there.php", line 6, characters 16-16:
-  This is from module `there`
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_class_expr.php--here.php:9:15
+ 7 |   public function bar(mixed $m):void {
+ 8 |     // All not ok
+ 9 |     $x1 = new D();
+   |               ^ [1]
+10 |     $y1 = D::class;
+11 |     D::foo();
+
+module_class_expr.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 |   public static function foo():void { }
+ 8 | }
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_class_expr.php--here.php:10:11
+ 8 |     // All not ok
+ 9 |     $x1 = new D();
+10 |     $y1 = D::class;
+   |           ^ [1]
+11 |     D::foo();
+12 |     // All ok
+
+module_class_expr.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 |   public static function foo():void { }
+ 8 | }
+
+error: Typing[4444] Cannot access an internal element from module `there` in module `here` [1]
+-> This is from module `there` [2]
+
+module_class_expr.php--here.php:11:5
+ 9 |     $x1 = new D();
+10 |     $y1 = D::class;
+11 |     D::foo();
+   |     ^ [1]
+12 |     // All ok
+13 |     $x2 = new C();
+
+module_class_expr.php--there.php:6:16
+ 4 | module there;
+ 5 | 
+ 6 | internal class D {
+   |                ^ [2]
+ 7 |   public static function foo():void { }
+ 8 | }
+
+3 errors found

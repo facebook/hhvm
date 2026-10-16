@@ -1,10 +1,30 @@
-ERROR: File "tuple4.php", line 6, characters 9-54:
-Invalid `as` expression hint (Typing[4195])
-  File "tuple4.php", line 6, characters 10-30:
-  The `as` operator cannot be used with a function type
-ERROR: File "tuple4.php", line 7, characters 5-6:
-Invalid argument (Typing[4110])
-  File "tuple4.php", line 3, characters 13-15:
-  Expected `int`
-  File "tuple4.php", line 6, characters 9-54:
-  But got `((function(int): ~?int), (function(int): ~?int))`
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a function type [2]
+
+tuple4.php:6:9
+4 | 
+5 | function f(mixed $x): void {
+6 |   $x as ((function(int): ?int), (function(int): ?int));
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |          ^^^^^^^^^^^^^^^^^^^^^ [2]
+7 |   g($x);
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `((function(int): ~?int), (function(int): ~?int))` [3]
+
+tuple4.php:7:5
+1 | <?hh
+2 | 
+3 | function g(?int $x): void {}
+  |             ^^^ [2]
+4 | 
+5 | function f(mixed $x): void {
+6 |   $x as ((function(int): ?int), (function(int): ?int));
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+7 |   g($x);
+  |     ^^ [1]
+8 | }
+
+2 errors found

@@ -1,6 +1,15 @@
-ERROR: File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 10-18:
-Some elements in this collection are incompatible (Typing[4110])
-  File "disallow_incompatible_type_parameter_for_varray.php", line 3, characters 25-27:
-  Expected `int`
-  File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 14-17:
-  But got `bool`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+disallow_incompatible_type_parameter_for_varray.php:4:10
+1 | <?hh
+2 | 
+3 | function test(): varray<int> {
+  |                         ^^^ [2]
+4 |   return vec[true];
+  |          ^^^^^^^^^ [1]
+  |              ^^^^ [3]
+5 | }
+
+1 error found

@@ -1,36 +1,103 @@
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 8, characters 10-18:
-Invalid comparison: This expression will always return `false`.
-A value of type `float` can never be equal to a value of type `A` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 8, characters 10-18:
-This expression is likely always `false` (Warn[12001])
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 7, characters 13-17:
-  This is a float
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 7, characters 23-23:
-  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 12, characters 10-18:
-Invalid comparison: This expression will always return `false`.
-A value of type `A` can never be equal to a value of type `float` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 12, characters 10-18:
-This expression is likely always `false` (Warn[12001])
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 11, characters 23-23:
-  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 11, characters 13-17:
-  This is a float
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 16, characters 10-18:
-Invalid comparison: This expression will always return `true`.
-A value of type `float` can never be equal to a value of type `A` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 16, characters 10-18:
-This expression is likely always `true` (Warn[12001])
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 15, characters 13-17:
-  This is a float
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 15, characters 23-23:
-  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 20, characters 10-18:
-Invalid comparison: This expression will always return `true`.
-A value of type `A` can never be equal to a value of type `float` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 20, characters 10-18:
-This expression is likely always `true` (Warn[12001])
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 19, characters 23-23:
-  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
-  File "trivial_compare_int_arraykey_enum_to_float_args_bad.php", line 19, characters 13-17:
-  This is a float
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `float` can never be equal to a value of type `A` [1]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:8:10
+ 6 | 
+ 7 | function f1(float $x, A $y): bool {
+ 8 |   return $x === $y;
+   |          ^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is a float [2]
+-> This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type [3]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:8:10
+ 5 | }
+ 6 | 
+ 7 | function f1(float $x, A $y): bool {
+   |             ^^^^^ [2]
+   |                       ^ [3]
+ 8 |   return $x === $y;
+   |          ^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `A` can never be equal to a value of type `float` [1]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:12:10
+10 | 
+11 | function f2(float $x, A $y): bool {
+12 |   return $y === $x;
+   |          ^^^^^^^^^ [1]
+13 | }
+14 | 
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type [2]
+-> This is a float [3]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:12:10
+ 9 | }
+10 | 
+11 | function f2(float $x, A $y): bool {
+   |             ^^^^^ [3]
+   |                       ^ [2]
+12 |   return $y === $x;
+   |          ^^^^^^^^^ [1]
+13 | }
+14 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `float` can never be equal to a value of type `A` [1]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:16:10
+14 | 
+15 | function f3(float $x, A $y): bool {
+16 |   return $x !== $y;
+   |          ^^^^^^^^^ [1]
+17 | }
+18 | 
+
+warning: Warn[12001] This expression is likely always `true` [1]
+-> This is a float [2]
+-> This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type [3]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:16:10
+13 | }
+14 | 
+15 | function f3(float $x, A $y): bool {
+   |             ^^^^^ [2]
+   |                       ^ [3]
+16 |   return $x !== $y;
+   |          ^^^^^^^^^ [1]
+17 | }
+18 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `A` can never be equal to a value of type `float` [1]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:20:10
+18 | 
+19 | function f4(float $x, A $y): bool {
+20 |   return $y !== $x;
+   |          ^^^^^^^^^ [1]
+21 | }
+
+warning: Warn[12001] This expression is likely always `true` [1]
+-> This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type [2]
+-> This is a float [3]
+
+trivial_compare_int_arraykey_enum_to_float_args_bad.php:20:10
+17 | }
+18 | 
+19 | function f4(float $x, A $y): bool {
+   |             ^^^^^ [3]
+   |                       ^ [2]
+20 |   return $y !== $x;
+   |          ^^^^^^^^^ [1]
+21 | }
+
+8 errors found

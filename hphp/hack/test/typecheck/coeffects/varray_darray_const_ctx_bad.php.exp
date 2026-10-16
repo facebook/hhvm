@@ -1,12 +1,49 @@
-ERROR: File "varray_darray_const_ctx_bad.php", line 5, characters 47-49:
-No type constant `bad` in `vec` (Typing[4090])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Declaration of `vec` is here
-ERROR: File "varray_darray_const_ctx_bad.php", line 7, characters 52-54:
-No type constant `bad` in `dict` (Typing[4090])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Declaration of `dict` is here
-ERROR: File "varray_darray_const_ctx_bad.php", line 9, characters 67-69:
-You are trying to access the type constant `bad` but this is a vec_or_dict (Typing[4062])
-  File "varray_darray_const_ctx_bad.php", line 9, characters 37-57:
-  Definition is here
+error: Typing[4090] No type constant `bad` in `vec` [1]
+-> Declaration of `vec` is here [2]
+
+varray_darray_const_ctx_bad.php:5:47
+ 3 | 
+ 4 | 
+ 5 | function reads_off_varray(varray<int> $v)[$v::bad]: void {}
+   |                                               ^^^ [1]
+ 6 | 
+ 7 | function reads_off_darray(darray<int, int> $v)[$v::bad]: void {}
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4090] No type constant `bad` in `dict` [1]
+-> Declaration of `dict` is here [2]
+
+varray_darray_const_ctx_bad.php:7:52
+ 5 | function reads_off_varray(varray<int> $v)[$v::bad]: void {}
+ 6 | 
+ 7 | function reads_off_darray(darray<int, int> $v)[$v::bad]: void {}
+   |                                                    ^^^ [1]
+ 8 | 
+ 9 | function reads_off_varray_or_darray(varray_or_darray<int> $v)[$v::bad]: void {}
+
+hackarray.hhi:32:24
+30 |    */
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+   |                        ^^^^ [2]
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+34 |     <<__NoAutoBound>> +Tv,
+
+error: Typing[4062] You are trying to access the type constant `bad` but this is a vec_or_dict [1]
+-> Definition is here [2]
+
+varray_darray_const_ctx_bad.php:9:67
+7 | function reads_off_darray(darray<int, int> $v)[$v::bad]: void {}
+8 | 
+9 | function reads_off_varray_or_darray(varray_or_darray<int> $v)[$v::bad]: void {}
+  |                                     ^^^^^^^^^^^^^^^^^^^^^ [2]
+  |                                                                   ^^^ [1]
+
+3 errors found

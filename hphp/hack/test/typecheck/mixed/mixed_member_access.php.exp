@@ -1,18 +1,54 @@
-ERROR: File "mixed_member_access.php", line 4, characters 9-11:
-You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "mixed_member_access.php", line 3, characters 23-27:
-  Definition is here
-ERROR: File "mixed_member_access.php", line 8, characters 8-11:
-Typing error (Typing[4064])
-  File "mixed_member_access.php", line 8, characters 14-16:
-  You are trying to access the property `bar` but this is a mixed value. Use a **specific** class or interface name.
-  File "mixed_member_access.php", line 7, characters 25-29:
-  Definition is here
-ERROR: File "mixed_member_access.php", line 12, characters 9-11:
-You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "mixed_member_access.php", line 11, characters 34-38:
-  Definition is here
-ERROR: File "mixed_member_access.php", line 16, characters 9-11:
-You are trying to access the method `bar` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "mixed_member_access.php", line 15, characters 25-31:
-  Definition is here
+error: Typing[4064] You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+mixed_member_access.php:4:9
+1 | <?hh
+2 | 
+3 | function mixed_method(mixed $foo): void {
+  |                       ^^^^^ [2]
+4 |   $foo->bar();
+  |         ^^^ [1]
+5 | }
+6 | 
+
+error: Typing[4064] Typing error [1]
+-> You are trying to access the property `bar` but this is a mixed value. Use a **specific** class or interface name. [2]
+-> Definition is here [3]
+
+mixed_member_access.php:8:8
+ 5 | }
+ 6 | 
+ 7 | function mixed_property(mixed $foo): void {
+   |                         ^^^^^ [3]
+ 8 |   $x = $foo->bar;
+   |        ^^^^ [1]
+   |              ^^^ [2]
+ 9 | }
+10 | 
+
+error: Typing[4064] You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+mixed_member_access.php:12:9
+ 9 | }
+10 | 
+11 | function mixed_method_null_check(mixed $foo): void {
+   |                                  ^^^^^ [2]
+12 |   $foo->bar();
+   |         ^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4062] You are trying to access the method `bar` but this is a nonnull value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+mixed_member_access.php:16:9
+13 | }
+14 | 
+15 | function nonnull_method(nonnull $foo): void {
+   |                         ^^^^^^^ [2]
+16 |   $foo->bar();
+   |         ^^^ [1]
+17 | }
+
+4 errors found

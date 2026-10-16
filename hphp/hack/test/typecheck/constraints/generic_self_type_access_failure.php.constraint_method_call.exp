@@ -1,80 +1,192 @@
-ERROR: File "generic_self_type_access_failure.php", line 13, characters 9-10:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "generic_self_type_access_failure.php", line 19, characters 9-10:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  `TX` is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This type constraint is violated
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  Expected `Box`
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `Box::T where \Box::T super TX::T, \Box::T as Intf`
-  File "generic_self_type_access_failure.php", line 19, characters 9-13:
-    by the definition of `T`
-ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  `TX` is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This type constraint is violated
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  Expected `Box`
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `Intf`
-  File "generic_self_type_access_failure.php", line 18, characters 30-33:
-    by the definition of `T`
-ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  `TX` is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This type constraint is violated
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  Expected `Box`
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `Intf`
-  File "generic_self_type_access_failure.php", line 19, characters 9-13:
-    by the definition of `T`
-ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  `TX` is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This type constraint is violated
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  Expected `Box`
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `T = TX::T`
-ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  `TX` is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This type constraint is violated
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  Expected `Box`
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `T = TX::T`
-  File "generic_self_type_access_failure.php", line 19, characters 9-13:
-    by the definition of `T`
-ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  `TX` is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This type constraint is violated
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  Expected `Box`
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  But got `TX::T = T`
-  File "generic_self_type_access_failure.php", line 19, characters 9-13:
-    by the definition of `T`
-ERROR: File "generic_self_type_access_failure.php", line 20, characters 5-15:
-Typing error (Typing[4110])
-  File "generic_self_type_access_failure.php", line 20, characters 5-15:
-  Expected `(function(<expr#4> as T): _)`
-  File "generic_self_type_access_failure.php", line 12, characters 28-28:
-  But got `dynamic`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+generic_self_type_access_failure.php:13:9
+11 | abstract class AbstractGeneric<TX as Box> {
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   |         ^^ [1]
+14 | }
+15 | 
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+generic_self_type_access_failure.php:19:9
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+19 |   where TX::T = T {
+   |         ^^ [1]
+20 |     $arg->f($t);
+21 |   }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TX` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `Box::T where \Box::T super TX::T, \Box::T as Intf` [4]
+->   by the definition of `T` [5]
+
+generic_self_type_access_failure.php:18:36
+ 9 | 
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+   |                                ^^ [2]
+   |                                      ^^^ [3]
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   :
+16 | class Consumer<TX as Box> {
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+   |                                                    ^ [4]
+19 |   where TX::T = T {
+   |         ^^^^^ [5]
+20 |     $arg->f($t);
+21 |   }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TX` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `Intf` [4]
+->   by the definition of `T` [5]
+
+generic_self_type_access_failure.php:18:36
+ 9 | 
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+   |                                ^^ [2]
+   |                                      ^^^ [3]
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   :
+16 | class Consumer<TX as Box> {
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+   |                              ^^^^ [5]
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+   |                                                    ^ [4]
+19 |   where TX::T = T {
+20 |     $arg->f($t);
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TX` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `Intf` [4]
+->   by the definition of `T` [5]
+
+generic_self_type_access_failure.php:18:36
+ 9 | 
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+   |                                ^^ [2]
+   |                                      ^^^ [3]
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   :
+16 | class Consumer<TX as Box> {
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+   |                                                    ^ [4]
+19 |   where TX::T = T {
+   |         ^^^^^ [5]
+20 |     $arg->f($t);
+21 |   }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TX` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `T = TX::T` [4]
+
+generic_self_type_access_failure.php:18:36
+ 9 | 
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+   |                                ^^ [2]
+   |                                      ^^^ [3]
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   :
+16 | class Consumer<TX as Box> {
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+   |                                                    ^ [4]
+19 |   where TX::T = T {
+20 |     $arg->f($t);
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TX` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `T = TX::T` [4]
+->   by the definition of `T` [5]
+
+generic_self_type_access_failure.php:18:36
+ 9 | 
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+   |                                ^^ [2]
+   |                                      ^^^ [3]
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   :
+16 | class Consumer<TX as Box> {
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+   |                                                    ^ [4]
+19 |   where TX::T = T {
+   |         ^^^^^ [5]
+20 |     $arg->f($t);
+21 |   }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TX` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `TX::T = T` [4]
+->   by the definition of `T` [5]
+
+generic_self_type_access_failure.php:18:36
+ 9 | 
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+   |                                ^^ [2]
+   |                                      ^^^ [3]
+12 |   abstract public function f<T>(T $t): void
+13 |   where TX::T = T;
+   :
+16 | class Consumer<TX as Box> {
+17 |   // incorrectly constrains AbstractGeneric class
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+   |                                                    ^ [4]
+19 |   where TX::T = T {
+   |         ^^^^^ [5]
+20 |     $arg->f($t);
+21 |   }
+
+error: Typing[4110] Typing error [1]
+-> Expected `(function(<expr#4> as T): _)` [1]
+-> But got `dynamic` [2]
+
+generic_self_type_access_failure.php:20:5
+10 | // class provides constrained function
+11 | abstract class AbstractGeneric<TX as Box> {
+12 |   abstract public function f<T>(T $t): void
+   |                            ^ [2]
+13 |   where TX::T = T;
+14 | }
+   :
+18 |   public function crash<T as Intf>(AbstractGeneric<T> $arg, T $t): void
+19 |   where TX::T = T {
+20 |     $arg->f($t);
+   |     ^^^^^^^^^^^ [1]
+21 |   }
+22 | }
+
+9 errors found

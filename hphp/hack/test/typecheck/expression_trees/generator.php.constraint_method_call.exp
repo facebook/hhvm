@@ -1,26 +1,86 @@
-ERROR: File "generator.php", line 6, characters 23-29:
-Internal error: Return type is not a generator (Other[0000])
-ERROR: File "generator.php", line 6, characters 23-29:
-`yield` is not supported in expression trees. (Parsing[1002])
-ERROR: File "generator.php", line 5, characters 18-21:
-Invalid return type (Typing[4110])
-  File "generator.php", line 5, characters 18-21:
-  Expected `void`
-  File "generator.php", line 5, characters 18-21:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
-ERROR: File "generator.php", line 6, characters 14-32:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 108, characters 29-44:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "generator.php", line 6, characters 23-29:
-  But got `AsyncGenerator<?nothing, int, nothing>` (result of `async function` with `yield` in the body)
-ERROR: File "generator.php", line 6, characters 23-29:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 272, characters 9-24:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "generator.php", line 6, characters 23-29:
-  But got `null` (`$generator->send()` can always send a `null` back to a `yield`)
+error: Other[0000] Internal error: Return type is not a generator [1]
+
+generator.php:6:23
+4 | 
+5 | function test(): void {
+6 |   ExampleDsl`() ==> { yield 1; }`;
+  |                       ^^^^^^^ [1]
+7 | }
+
+error: Parsing[1002] `yield` is not supported in expression trees. [1]
+
+generator.php:6:23
+4 | 
+5 | function test(): void {
+6 |   ExampleDsl`() ==> { yield 1; }`;
+  |                       ^^^^^^^ [1]
+7 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+generator.php:5:18
+3 | <<file:__EnableUnstableFeatures('expression_trees')>>
+4 | 
+5 | function test(): void {
+  |                  ^^^^ [1]
+6 |   ExampleDsl`() ==> { yield 1; }`;
+7 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `AsyncGenerator<?nothing, int, nothing>` (result of `async function` with `yield` in the body) [4]
+
+generator.php:6:14
+  4 | 
+  5 | function test(): void {
+  6 |   ExampleDsl`() ==> { yield 1; }`;
+    |              ^^^^^^^^^^^^^^^^^^^ [1]
+    |                       ^^^^^^^ [4]
+  7 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                             ^^^^^^^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `null` (`$generator->send()` can always send a `null` back to a `yield`) [1]
+
+generator.php:6:23
+  4 | 
+  5 | function test(): void {
+  6 |   ExampleDsl`() ==> { yield 1; }`;
+    |                       ^^^^^^^ [1]
+  7 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+270 |     ?ExprPos $_,
+271 |     vec<string> $args,
+272 |     vec<ExampleDsl::TAst> $body,
+    |         ^^^^^^^^^^^^^^^^ [3]
+273 |     vec<ExampleDsl::TAst> $args_with_optional_params = vec[],
+274 |   )[]: ExampleDsl::TAst {
+
+5 errors found

@@ -1,16 +1,72 @@
-ERROR: File "level_3.php", line 31, characters 3-11:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_3.php", line 25, characters 31-38:
-  Definition is here
-ERROR: File "level_3.php", line 33, characters 3-12:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_3.php", line 25, characters 31-38:
-  Definition is here
-ERROR: File "level_3.php", line 35, characters 3-12:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_3.php", line 25, characters 31-38:
-  Definition is here
-ERROR: File "level_3.php", line 37, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_3.php", line 25, characters 31-38:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_3.php:31:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+28 | 
+29 | function test(): void {
+30 |   $arraykey = id_arraykey(get_class_pointer());
+31 |   $arraykey::method();
+   |   ^^^^^^^^^ [1]
+32 |   $stringish = id_stringish(get_class_pointer());
+33 |   $stringish::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_3.php:33:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+   :
+31 |   $arraykey::method();
+32 |   $stringish = id_stringish(get_class_pointer());
+33 |   $stringish::method();
+   |   ^^^^^^^^^^ [1]
+34 |   $xhp_child = id_xhp_child(get_class_pointer());
+35 |   $xhp_child::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_3.php:35:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+   :
+33 |   $stringish::method();
+34 |   $xhp_child = id_xhp_child(get_class_pointer());
+35 |   $xhp_child::method();
+   |   ^^^^^^^^^^ [1]
+36 |   $nullable_string = id_nullable_string(get_class_pointer());
+37 |   $nullable_string::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_3.php:37:3
+23 | }
+24 | 
+25 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+26 |   return C::class;
+27 | }
+   :
+35 |   $xhp_child::method();
+36 |   $nullable_string = id_nullable_string(get_class_pointer());
+37 |   $nullable_string::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+38 | }
+
+4 errors found

@@ -1,10 +1,39 @@
-ERROR: File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
-You cannot use this syntax with `inout`. (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue6.php", line 16, characters 11-13:
-You cannot use this syntax with `inout`. (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
-Invalid argument to an `inout` parameter (Typing[4110])
-  File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
-  Expected `int`
-  File "bad_inout_use_lvalue6.php", line 3, characters 22-23:
-  But got `dynamic` because the type of this inout parameter is implicitly a like-type
+error: Parsing[1002] You cannot use this syntax with `inout`. [1]
+
+bad_inout_use_lvalue6.php:15:11
+13 | 
+14 | function test(): void {
+15 |   f(inout g());
+   |           ^^^ [1]
+16 |   f(inout h()['foo']);
+17 | }
+
+error: Parsing[1002] You cannot use this syntax with `inout`. [1]
+
+bad_inout_use_lvalue6.php:16:11
+14 | function test(): void {
+15 |   f(inout g());
+16 |   f(inout h()['foo']);
+   |           ^^^ [1]
+17 | }
+
+error: Typing[4110] Invalid argument to an `inout` parameter [1]
+-> Expected `int` [1]
+-> But got `dynamic` because the type of this inout parameter is implicitly a like-type [2]
+
+bad_inout_use_lvalue6.php:15:11
+ 1 | <?hh
+ 2 | 
+ 3 | function f(inout int $i): void {}
+   |                      ^^ [2]
+ 4 | 
+ 5 | function g(): int {
+   :
+13 | 
+14 | function test(): void {
+15 |   f(inout g());
+   |           ^^^ [1]
+16 |   f(inout h()['foo']);
+17 | }
+
+3 errors found

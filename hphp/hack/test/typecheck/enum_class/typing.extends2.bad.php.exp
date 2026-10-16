@@ -1,6 +1,19 @@
-ERROR: File "typing.extends2.bad.php", line 19, characters 12-12:
-Enum classes can only extend other enum classes. (Typing[4115])
-  File "typing.extends2.bad.php", line 19, characters 29-29:
-  This is a class.
-ERROR: File "typing.extends2.bad.php", line 19, characters 29-29:
-Enum X includes C which is not an enum (Typing[4388])
+error: Typing[4115] Enum classes can only extend other enum classes. [1]
+-> This is a class. [2]
+
+typing.extends2.bad.php:19:12
+17 | 
+18 | // enum class can't extend regular classes
+19 | enum class X: ExBox extends C {}
+   |            ^ [1]
+   |                             ^ [2]
+
+error: Typing[4388] Enum X includes C which is not an enum [1]
+
+typing.extends2.bad.php:19:29
+17 | 
+18 | // enum class can't extend regular classes
+19 | enum class X: ExBox extends C {}
+   |                             ^ [1]
+
+2 errors found

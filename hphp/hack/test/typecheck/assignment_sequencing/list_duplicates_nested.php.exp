@@ -1,4 +1,13 @@
-ERROR: File "list_duplicates_nested.php", line 6, characters 8-9:
-Unsequenced modification and access to local variable. Modified here (Typing[4143])
-  File "list_duplicates_nested.php", line 6, characters 15-16:
-  And accessed here
+error: Typing[4143] Unsequenced modification and access to local variable. Modified here [1]
+-> And accessed here [2]
+
+list_duplicates_nested.php:6:8
+4 | function test(varray<int> $a, varray<int> $b): int {
+5 |   $x = 0;
+6 |   list($x, $b[$x]) = $a;
+  |        ^^ [1]
+  |               ^^ [2]
+7 |   return $x;
+8 | }
+
+1 error found

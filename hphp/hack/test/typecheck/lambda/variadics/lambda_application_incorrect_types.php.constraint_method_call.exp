@@ -1,16 +1,53 @@
-ERROR: File "lambda_application_incorrect_types.php", line 17, characters 33-35:
-No instance method `foo` in `string` (Typing[4053])
-  File "lambda_application_incorrect_types.php", line 20, characters 12-18:
-  This is why I think it is an object of type HH\string
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "lambda_application_incorrect_types.php", line 29, characters 12-18:
-Invalid argument (Typing[4110])
-  File "lambda_application_incorrect_types.php", line 27, characters 20-21:
-  Expected `D` (variadic argument)
-  File "lambda_application_incorrect_types.php", line 29, characters 16-16:
-  But got `C`
-ERROR: File "lambda_application_incorrect_types.php", line 38, characters 33-35:
-You are trying to access the method `foo` but this is an int (Typing[4062])
-  File "lambda_application_incorrect_types.php", line 39, characters 39-39:
-  Definition is here
+error: Typing[4053] No instance method `foo` in `string` [1]
+-> This is why I think it is an object of type HH\string [2]
+-> Declaration of `string` is here [3]
+
+lambda_application_incorrect_types.php:17:33
+15 | // Lambda application, incorrect types
+16 | function test(): void {
+17 |   $lambda1 = (...$y) ==> $y[0]->foo(); //OK
+   |                                 ^^^ [1]
+18 |   $lambda1(new D()); //OK
+19 |   $lambda1(new C()); //OK
+20 |   $lambda1("hello"); //Error
+   |            ^^^^^^^ [2]
+21 | 
+22 |   $lambda2 = (C ...$y) ==> $y[0]->foo();
+
+string.hhi:6:15
+ 4 | 
+ 5 |   <<__SupportDynamicType>>
+ 6 |   final class string {
+   |               ^^^^^^ [3]
+ 7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+ 8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `D` (variadic argument) [2]
+-> But got `C` [3]
+
+lambda_application_incorrect_types.php:29:12
+25 |   $lambda2(new C(), new D(), new C()); //OK
+26 | 
+27 |   $lambda3 = (D ...$y) ==> $y[0]->foo();
+   |                    ^^ [2]
+28 |   $lambda3(new D()); //OK
+29 |   $lambda3(new C()); //Error
+   |            ^^^^^^^ [1]
+   |                ^ [3]
+30 | 
+31 |   // OK
+
+error: Typing[4062] You are trying to access the method `foo` but this is an int [1]
+-> Definition is here [2]
+
+lambda_application_incorrect_types.php:38:33
+36 | 
+37 |   // Error: This will fail due to the int
+38 |   $lambda5 = (...$y) ==> $y[0]->foo();
+   |                                 ^^^ [1]
+39 |   $lambda5(new C(), new D(), new C(), 1);
+   |                                       ^ [2]
+40 | }
+
+3 errors found

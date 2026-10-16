@@ -1,16 +1,48 @@
-ERROR: File "simple_hint.php", line 9, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_hint.php", line 8, characters 30-45:
-  Expected `classname<mixed>`
-  File "simple_hint.php", line 8, characters 12-23:
-  But got `class<mixed>`
-ERROR: File "simple_hint.php", line 12, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_hint.php", line 11, characters 34-45:
-  Expected `class<mixed>`
-  File "simple_hint.php", line 11, characters 12-27:
-  But got `string`
-  File "classname.hhi", line 21, characters 28-38:
-    by the definition of `classname`
-  File "classname.hhi", line 14, characters 27-32:
-    by the definition of `typename`
+error: Typing[4110] Invalid return type [1]
+-> Expected `classname<mixed>` [2]
+-> But got `class<mixed>` [3]
+
+simple_hint.php:9:10
+ 6 |   return $t;
+ 7 | }
+ 8 | function g(class<mixed> $t): classname<mixed> {
+   |            ^^^^^^^^^^^^ [3]
+   |                              ^^^^^^^^^^^^^^^^ [2]
+ 9 |   return $t;
+   |          ^^ [1]
+10 | }
+11 | function h(classname<mixed> $t): class<mixed> {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `class<mixed>` [2]
+-> But got `string` [3]
+->   by the definition of `classname` [4]
+->   by the definition of `typename` [5]
+
+simple_hint.php:12:10
+ 9 |   return $t;
+10 | }
+11 | function h(classname<mixed> $t): class<mixed> {
+   |            ^^^^^^^^^^^^^^^^ [3]
+   |                                  ^^^^^^^^^^^^ [2]
+12 |   return $t;
+   |          ^^ [1]
+13 | }
+14 | function j(classname<mixed> $t): classname<mixed> {
+
+classname.hhi:21:28
+12 |    */
+13 |   <<__NoAutoDynamic>>
+14 |   newtype typename<+T> as string = string;
+   |                           ^^^^^^ [5]
+15 | 
+16 |   /**
+   :
+19 |    * package boundaries. */
+20 |   <<__NoAutoDynamic>>
+21 |   newtype classname<+T> as typename<T> = typename<T>;
+   |                            ^^^^^^^^^^^ [4]
+22 | 
+23 |   /**
+
+2 errors found

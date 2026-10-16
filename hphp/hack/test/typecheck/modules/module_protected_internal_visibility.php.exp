@@ -1,64 +1,301 @@
-ERROR: File "module_protected_internal_visibility.php--C.php", line 8, characters 8-18:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--C.php", line 10, characters 8-17:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--C.php", line 12, characters 16-18:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--C.php", line 14, characters 23-25:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--D.php", line 8, characters 8-18:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--D.php", line 10, characters 8-17:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--D.php", line 12, characters 12-14:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--D.php", line 14, characters 19-21:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--E.php", line 8, characters 8-18:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--E.php", line 8, characters 8-18:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 10, characters 29-31:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--E.php", line 10, characters 8-17:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--E.php", line 10, characters 8-17:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 6, characters 38-47:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--E.php", line 12, characters 16-18:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--E.php", line 12, characters 16-18:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 16, characters 22-24:
-  This member is protected internal
-ERROR: File "module_protected_internal_visibility.php--E.php", line 14, characters 23-25:
-Cannot access an internal element from module `M1` in module `M2` (Typing[4444])
-  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
-  This is from module `M1`
-ERROR: File "module_protected_internal_visibility.php--E.php", line 14, characters 23-25:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "module_protected_internal_visibility.php--A.php", line 12, characters 31-33:
-  This member is protected internal
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--C.php:8:8
+ 6 |   public function foobar(): string {
+ 7 |     // Not OK since static_bar is protected
+ 8 |     A::$static_bar = 322;
+   |        ^^^^^^^^^^^ [1]
+ 9 |     // Not OK since static_foo is protected
+10 |     A::static_foo().'bar';
+
+module_protected_internal_visibility.php--A.php:10:29
+ 8 |   }
+ 9 | 
+10 |   protected internal static int $static_bar = 42;
+   |                             ^^^ [2]
+11 | 
+12 |   protected internal function foo(): string {
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--C.php:10:8
+ 8 |     A::$static_bar = 322;
+ 9 |     // Not OK since static_foo is protected
+10 |     A::static_foo().'bar';
+   |        ^^^^^^^^^^ [1]
+11 |     // Not OK since bar is protected
+12 |     (new A())->bar = 322;
+
+module_protected_internal_visibility.php--A.php:6:38
+ 4 | 
+ 5 | class A {
+ 6 |   protected internal static function static_foo(): string {
+   |                                      ^^^^^^^^^^ [2]
+ 7 |     return "static_foo";
+ 8 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--C.php:12:16
+10 |     A::static_foo().'bar';
+11 |     // Not OK since bar is protected
+12 |     (new A())->bar = 322;
+   |                ^^^ [1]
+13 |     // Not OK since foo is protected
+14 |     return (new A())->foo().'bar';
+
+module_protected_internal_visibility.php--A.php:16:22
+14 |   }
+15 | 
+16 |   protected internal int $bar = 42;
+   |                      ^^^ [2]
+17 | }
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--C.php:14:23
+12 |     (new A())->bar = 322;
+13 |     // Not OK since foo is protected
+14 |     return (new A())->foo().'bar';
+   |                       ^^^ [1]
+15 |   }
+16 | }
+
+module_protected_internal_visibility.php--A.php:12:31
+10 |   protected internal static int $static_bar = 42;
+11 | 
+12 |   protected internal function foo(): string {
+   |                               ^^^ [2]
+13 |     return "foo";
+14 |   }
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--D.php:8:8
+ 6 |   public function foobar(): string {
+ 7 |     // Not OK since static_bar is internal
+ 8 |     A::$static_bar = 322;
+   |        ^^^^^^^^^^^ [1]
+ 9 |     // Not OK since static_foo is internal
+10 |     A::static_foo().'bar';
+
+module_protected_internal_visibility.php--A.php:10:29
+ 8 |   }
+ 9 | 
+10 |   protected internal static int $static_bar = 42;
+   |                             ^^^ [2]
+11 | 
+12 |   protected internal function foo(): string {
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--D.php:10:8
+ 8 |     A::$static_bar = 322;
+ 9 |     // Not OK since static_foo is internal
+10 |     A::static_foo().'bar';
+   |        ^^^^^^^^^^ [1]
+11 |     // Not OK since bar is internal
+12 |     $this->bar = 322;
+
+module_protected_internal_visibility.php--A.php:6:38
+ 4 | 
+ 5 | class A {
+ 6 |   protected internal static function static_foo(): string {
+   |                                      ^^^^^^^^^^ [2]
+ 7 |     return "static_foo";
+ 8 |   }
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--D.php:12:12
+10 |     A::static_foo().'bar';
+11 |     // Not OK since bar is internal
+12 |     $this->bar = 322;
+   |            ^^^ [1]
+13 |     // Not OK since foo is internal
+14 |     return $this->foo().'bar';
+
+module_protected_internal_visibility.php--A.php:16:22
+14 |   }
+15 | 
+16 |   protected internal int $bar = 42;
+   |                      ^^^ [2]
+17 | }
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--D.php:14:19
+12 |     $this->bar = 322;
+13 |     // Not OK since foo is internal
+14 |     return $this->foo().'bar';
+   |                   ^^^ [1]
+15 |   }
+16 | }
+
+module_protected_internal_visibility.php--A.php:12:31
+10 |   protected internal static int $static_bar = 42;
+11 | 
+12 |   protected internal function foo(): string {
+   |                               ^^^ [2]
+13 |     return "foo";
+14 |   }
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--E.php:8:8
+ 6 |   public function foobar(): string {
+ 7 |     // Not OK since static_bar is both protected and internal
+ 8 |     A::$static_bar = 322;
+   |        ^^^^^^^^^^^ [1]
+ 9 |     // Not OK since static_foo is both protected and internal
+10 |     A::static_foo().'bar';
+
+module_protected_internal_visibility.php--A.php:10:29
+ 8 |   }
+ 9 | 
+10 |   protected internal static int $static_bar = 42;
+   |                             ^^^ [2]
+11 | 
+12 |   protected internal function foo(): string {
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--E.php:8:8
+ 6 |   public function foobar(): string {
+ 7 |     // Not OK since static_bar is both protected and internal
+ 8 |     A::$static_bar = 322;
+   |        ^^^^^^^^^^^ [1]
+ 9 |     // Not OK since static_foo is both protected and internal
+10 |     A::static_foo().'bar';
+
+module_protected_internal_visibility.php--A.php:10:29
+ 8 |   }
+ 9 | 
+10 |   protected internal static int $static_bar = 42;
+   |                             ^^^ [2]
+11 | 
+12 |   protected internal function foo(): string {
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--E.php:10:8
+ 8 |     A::$static_bar = 322;
+ 9 |     // Not OK since static_foo is both protected and internal
+10 |     A::static_foo().'bar';
+   |        ^^^^^^^^^^ [1]
+11 |     // Not OK since bar is both protected and internal
+12 |     (new A())->bar = 322;
+
+module_protected_internal_visibility.php--A.php:6:38
+ 4 | 
+ 5 | class A {
+ 6 |   protected internal static function static_foo(): string {
+   |                                      ^^^^^^^^^^ [2]
+ 7 |     return "static_foo";
+ 8 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--E.php:10:8
+ 8 |     A::$static_bar = 322;
+ 9 |     // Not OK since static_foo is both protected and internal
+10 |     A::static_foo().'bar';
+   |        ^^^^^^^^^^ [1]
+11 |     // Not OK since bar is both protected and internal
+12 |     (new A())->bar = 322;
+
+module_protected_internal_visibility.php--A.php:6:38
+ 4 | 
+ 5 | class A {
+ 6 |   protected internal static function static_foo(): string {
+   |                                      ^^^^^^^^^^ [2]
+ 7 |     return "static_foo";
+ 8 |   }
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--E.php:12:16
+10 |     A::static_foo().'bar';
+11 |     // Not OK since bar is both protected and internal
+12 |     (new A())->bar = 322;
+   |                ^^^ [1]
+13 |     // Not OK since foo is both protected and internal
+14 |     return (new A())->foo().'bar';
+
+module_protected_internal_visibility.php--A.php:16:22
+14 |   }
+15 | 
+16 |   protected internal int $bar = 42;
+   |                      ^^^ [2]
+17 | }
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--E.php:12:16
+10 |     A::static_foo().'bar';
+11 |     // Not OK since bar is both protected and internal
+12 |     (new A())->bar = 322;
+   |                ^^^ [1]
+13 |     // Not OK since foo is both protected and internal
+14 |     return (new A())->foo().'bar';
+
+module_protected_internal_visibility.php--A.php:16:22
+14 |   }
+15 | 
+16 |   protected internal int $bar = 42;
+   |                      ^^^ [2]
+17 | }
+
+error: Typing[4444] Cannot access an internal element from module `M1` in module `M2` [1]
+-> This is from module `M1` [2]
+
+module_protected_internal_visibility.php--E.php:14:23
+12 |     (new A())->bar = 322;
+13 |     // Not OK since foo is both protected and internal
+14 |     return (new A())->foo().'bar';
+   |                       ^^^ [1]
+15 |   }
+16 | }
+
+module_protected_internal_visibility.php--A.php:12:31
+10 |   protected internal static int $static_bar = 42;
+11 | 
+12 |   protected internal function foo(): string {
+   |                               ^^^ [2]
+13 |     return "foo";
+14 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected internal [2]
+
+module_protected_internal_visibility.php--E.php:14:23
+12 |     (new A())->bar = 322;
+13 |     // Not OK since foo is both protected and internal
+14 |     return (new A())->foo().'bar';
+   |                       ^^^ [1]
+15 |   }
+16 | }
+
+module_protected_internal_visibility.php--A.php:12:31
+10 |   protected internal static int $static_bar = 42;
+11 | 
+12 |   protected internal function foo(): string {
+   |                               ^^^ [2]
+13 |     return "foo";
+14 |   }
+
+16 errors found

@@ -1,2 +1,10 @@
-ERROR: File "await_as_an_expression_pipe.php", line 8, characters 16-24:
-`await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled. (Parsing[1002])
+error: Parsing[1002] `await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled. [1]
+
+await_as_an_expression_pipe.php:8:16
+6 | 
+7 | async function g(): Awaitable<void> {
+8 |   await f() |> await f();
+  |                ^^^^^^^^^ [1]
+9 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "module_first7.php", line 4, characters 10-12:
-`module bar;` must be unique, and precede any other declarations in a file. (Parsing[1002])
+error: Parsing[1002] `module bar;` must be unique, and precede any other declarations in a file. [1]
+
+module_first7.php:4:10
+2 | 
+3 | namespace Bar {
+4 |   module bar;
+  |          ^^^ [1]
+5 | }
+
+1 error found

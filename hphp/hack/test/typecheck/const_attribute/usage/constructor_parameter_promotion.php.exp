@@ -1,2 +1,11 @@
-ERROR: File "constructor_parameter_promotion.php", line 8, characters 12-12:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+constructor_parameter_promotion.php:8:12
+ 6 | 
+ 7 |   public function fail(): void {
+ 8 |     $this->i = 42;
+   |            ^ [1]
+ 9 |   }
+10 | }
+
+1 error found

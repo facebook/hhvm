@@ -1,18 +1,56 @@
-WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 9, characters 11-21:
-Invalid comparison: This expression will always return `false`.
-A value of type `bool` can never be equal to a value of type `X` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 9, characters 11-21:
-This expression is likely always `false` (Warn[12001])
-  File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 8, characters 19-22:
-  This is a bool
-  File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 3, characters 6-6:
-  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
-WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 13, characters 11-19:
-Invalid comparison: This expression will always return `false`.
-A value of type `X` can never be equal to a value of type `bool` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 13, characters 11-19:
-This expression is likely always `false` (Warn[12001])
-  File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 12, characters 13-13:
-  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
-  File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 12, characters 19-22:
-  This is a bool
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `bool` can never be equal to a value of type `X` [1]
+
+trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php:9:11
+ 7 | 
+ 8 | function f1(X $x, bool $b): bool {
+ 9 |   return ($b === X::A);
+   |           ^^^^^^^^^^^ [1]
+10 | }
+11 | 
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is a bool [2]
+-> This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type [3]
+
+trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php:9:11
+ 1 | <?hh
+ 2 | 
+ 3 | enum X: int {
+   |      ^ [3]
+ 4 |   A = 0;
+ 5 |   B = 1;
+ 6 | }
+ 7 | 
+ 8 | function f1(X $x, bool $b): bool {
+   |                   ^^^^ [2]
+ 9 |   return ($b === X::A);
+   |           ^^^^^^^^^^^ [1]
+10 | }
+11 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `X` can never be equal to a value of type `bool` [1]
+
+trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php:13:11
+11 | 
+12 | function f2(X $x, bool $b): bool {
+13 |   return ($x === $b);
+   |           ^^^^^^^^^ [1]
+14 | }
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type [2]
+-> This is a bool [3]
+
+trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php:13:11
+10 | }
+11 | 
+12 | function f2(X $x, bool $b): bool {
+   |             ^ [2]
+   |                   ^^^^ [3]
+13 |   return ($x === $b);
+   |           ^^^^^^^^^ [1]
+14 | }
+
+4 errors found

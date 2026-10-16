@@ -1,10 +1,24 @@
-ERROR: File "sound_top_level.php", line 49, characters 15-17:
-Invalid argument (Typing[4110])
-  File "sound_top_level.php", line 10, characters 20-28:
-  Expected `class<C1>`
-  File "sound_top_level.php", line 48, characters 7-16:
-  But got `string` from this equality test
-  File "sound_top_level.php", line 48, characters 7-16:
-    by the definition of `classname` from this equality test
-  File "sound_top_level.php", line 48, characters 7-16:
-    by the definition of `typename` from this equality test
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `string` from this equality test [3]
+->   by the definition of `classname` from this equality test [3]
+->   by the definition of `typename` from this equality test [3]
+
+sound_top_level.php:49:15
+ 8 | }
+ 9 | 
+10 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+11 | 
+12 | enum E: string {
+   :
+46 |   $cn = HH\class_to_classname(get_class($p));
+47 |   $c = C1::class;
+48 |   if ($cn === $c) {
+   |       ^^^^^^^^^^ [3]
+49 |     expect_c1($cn);
+   |               ^^^ [1]
+50 |   }
+51 | }
+
+1 error found

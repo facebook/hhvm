@@ -1,18 +1,85 @@
-ERROR: File "boolean_operators.php", line 27, characters 7-33:
-`ExampleMixedOpType` does not support this operator (it has no instance method named `__barbar`) (Typing[4053])
-ERROR: File "boolean_operators.php", line 28, characters 19-33:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 598, characters 28-39:
-  Expected `~bool`
-  File "boolean_operators.php", line 7, characters 61-72:
-  But got `?bool`
-ERROR: File "boolean_operators.php", line 32, characters 7-33:
-`ExampleMixedOpType` does not support this operator (it has no instance method named `__ampamp`) (Typing[4053])
-ERROR: File "boolean_operators.php", line 33, characters 19-33:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 597, characters 28-39:
-  Expected `~bool`
-  File "boolean_operators.php", line 7, characters 61-72:
-  But got `?bool`
-ERROR: File "boolean_operators.php", line 37, characters 7-22:
-`ExampleMixedOpType` does not support this operator (it has no instance method named `__exclamationMark`) (Typing[4053])
+error: Typing[4053] `ExampleMixedOpType` does not support this operator (it has no instance method named `__barbar`) [1]
+
+boolean_operators.php:27:7
+25 |     () ==> {
+26 |       // Boolean ||
+27 |       nullable_bool() || a_bool();
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 |       a_bool() || nullable_bool();
+29 |       a_bool() || a_bool();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~bool` [2]
+-> But got `?bool` [3]
+
+boolean_operators.php:28:19
+  5 | async function nullable_bool(
+  6 |   ExampleContext $_,
+  7 | ): Awaitable<ExampleExpression<ExampleFunction<(function(): ?ExampleBool)>>> {
+    |                                                             ^^^^^^^^^^^^ [3]
+  8 |   throw new Exception();
+  9 | }
+    :
+ 26 |       // Boolean ||
+ 27 |       nullable_bool() || a_bool();
+ 28 |       a_bool() || nullable_bool();
+    |                   ^^^^^^^^^^^^^^^ [1]
+ 29 |       a_bool() || a_bool();
+ 30 | 
+
+expr_tree.php:598:28
+596 | interface ExampleBoolOpType extends ExampleMixedOpType {
+597 |   public function __ampamp(~ExampleBool $_): ExampleBool;
+598 |   public function __barbar(~ExampleBool $_): ExampleBool;
+    |                            ^^^^^^^^^^^^ [2]
+599 |   public function __bool(): bool;
+600 |   public function __exclamationMark(): ExampleBool;
+
+error: Typing[4053] `ExampleMixedOpType` does not support this operator (it has no instance method named `__ampamp`) [1]
+
+boolean_operators.php:32:7
+30 | 
+31 |       // Boolean &&
+32 |       nullable_bool() && a_bool();
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+33 |       a_bool() && nullable_bool();
+34 |       a_bool() && a_bool();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~bool` [2]
+-> But got `?bool` [3]
+
+boolean_operators.php:33:19
+  5 | async function nullable_bool(
+  6 |   ExampleContext $_,
+  7 | ): Awaitable<ExampleExpression<ExampleFunction<(function(): ?ExampleBool)>>> {
+    |                                                             ^^^^^^^^^^^^ [3]
+  8 |   throw new Exception();
+  9 | }
+    :
+ 31 |       // Boolean &&
+ 32 |       nullable_bool() && a_bool();
+ 33 |       a_bool() && nullable_bool();
+    |                   ^^^^^^^^^^^^^^^ [1]
+ 34 |       a_bool() && a_bool();
+ 35 | 
+
+expr_tree.php:597:28
+595 | 
+596 | interface ExampleBoolOpType extends ExampleMixedOpType {
+597 |   public function __ampamp(~ExampleBool $_): ExampleBool;
+    |                            ^^^^^^^^^^^^ [2]
+598 |   public function __barbar(~ExampleBool $_): ExampleBool;
+599 |   public function __bool(): bool;
+
+error: Typing[4053] `ExampleMixedOpType` does not support this operator (it has no instance method named `__exclamationMark`) [1]
+
+boolean_operators.php:37:7
+35 | 
+36 |       // Boolean !
+37 |       !nullable_bool();
+   |       ^^^^^^^^^^^^^^^^ [1]
+38 |       !a_bool();
+39 |     }
+
+5 errors found

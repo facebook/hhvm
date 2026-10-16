@@ -1,10 +1,26 @@
-WARN: File "multi_class_bad1.php", line 20, characters 7-13:
-This `is` check is always `true`. The expression on the left has type `D` which is a subtype of `D`. (Warn[12009])
-ERROR: File "multi_class_bad1.php", line 4, characters 11-20:
-Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
-  File "multi_class_bad1.php", line 4, characters 24-24:
-  This is the type `C`, which includes **instances of the class C**
-  File "multi_class_bad1.php", line 4, characters 32-32:
-  It overlaps with `E`, which includes **instances of the class E**
-  File "multi_class_bad1.php", line 4, characters 11-20:
-  Because **instances of the class C** contains **instances of the class E**, `C` and `E` cannot be in the same case type
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `D` which is a subtype of `D`. [1]
+
+multi_class_bad1.php:20:7
+18 | function impl1(MultiClass $x): int {
+19 |   if ($x is C) return $x->g();
+20 |   if ($x is D) return $x->f();
+   |       ^^^^^^^ [1]
+21 |   return $x->val;
+22 | }
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag [1]
+-> This is the type `C`, which includes **instances of the class C** [2]
+-> It overlaps with `E`, which includes **instances of the class E** [3]
+-> Because **instances of the class C** contains **instances of the class E**, `C` and `E` cannot be in the same case type [1]
+
+multi_class_bad1.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type MultiClass = C | D | E ;
+  |           ^^^^^^^^^^ [1]
+  |                        ^ [2]
+  |                                ^ [3]
+5 | 
+6 | class C {
+
+2 errors found

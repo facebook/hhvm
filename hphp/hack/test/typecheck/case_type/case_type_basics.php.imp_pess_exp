@@ -1,78 +1,289 @@
-ERROR: File "case_type_basics.php", line 16, characters 14-21:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 4, characters 25-32:
-  Expected `(int | not arraykey)`
-  File "case_type_basics.php", line 15, characters 18-27:
-  But got `<expr#2> as XHPChild`
-  File "case_type_basics.php", line 16, characters 14-21:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "case_type_basics.php", line 16, characters 14-21:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 4, characters 25-32:
-  Expected `nothing`
-  File "case_type_basics.php", line 4, characters 35-42:
-  But got `XHPChild`
-ERROR: File "case_type_basics.php", line 16, characters 14-21:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 8, characters 21-23:
-  Expected `int`
-  File "case_type_basics.php", line 4, characters 35-42:
-  But got `XHPChild`
-ERROR: File "case_type_basics.php", line 21, characters 20-27:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 4, characters 25-32:
-  Expected `(CT_No_Bounds | not arraykey)`
-  File "case_type_basics.php", line 15, characters 18-27:
-  But got `<expr#2> as XHPChild`
-  File "case_type_basics.php", line 21, characters 20-27:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "case_type_basics.php", line 21, characters 20-27:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 4, characters 25-32:
-  Expected `nothing`
-  File "case_type_basics.php", line 4, characters 35-42:
-  But got `XHPChild`
-ERROR: File "case_type_basics.php", line 21, characters 20-27:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 13, characters 27-38:
-  Expected `CT_No_Bounds`
-  File "case_type_basics.php", line 4, characters 35-42:
-  But got `XHPChild`
-ERROR: File "case_type_basics.php", line 23, characters 14-23:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 8, characters 21-23:
-  Expected `int`
-  File "case_type_basics.php", line 15, characters 39-50:
-  But got `mixed`
-  File "case_type_basics.php", line 6, characters 11-22:
-    by the definition of `CT_No_Bounds`
-ERROR: File "case_type_basics.php", line 24, characters 19-28:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 9, characters 26-33:
-  Expected `XHPChild`
-  File "case_type_basics.php", line 15, characters 39-50:
-  But got `mixed`
-  File "case_type_basics.php", line 6, characters 11-22:
-    by the definition of `CT_No_Bounds`
-ERROR: File "case_type_basics.php", line 25, characters 13-22:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 10, characters 20-27:
-  Expected `arraykey`
-  File "case_type_basics.php", line 15, characters 39-50:
-  But got `mixed`
-  File "case_type_basics.php", line 6, characters 11-22:
-    by the definition of `CT_No_Bounds`
-ERROR: File "case_type_basics.php", line 27, characters 18-27:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 12, characters 25-34:
-  Expected `CT_Bounded`
-  File "case_type_basics.php", line 6, characters 11-22:
-  But got `nonnull`
-ERROR: File "case_type_basics.php", line 27, characters 18-27:
-Invalid argument (Typing[4110])
-  File "case_type_basics.php", line 12, characters 25-34:
-  Expected `CT_Bounded`
-  File "case_type_basics.php", line 15, characters 39-50:
-  But got `mixed`
-  File "case_type_basics.php", line 6, characters 11-22:
-    by the definition of `CT_No_Bounds`
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int | not arraykey)` [2]
+-> But got `<expr#2> as XHPChild` [3]
+->   where `<expr#2>` is a reference to this expression [1]
+
+case_type_basics.php:16:14
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+   |                         ^^^^^^^^ [2]
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   :
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   |                  ^^^^^^^^^^ [3]
+16 |   expect_int($bounded); // Error
+   |              ^^^^^^^^ [1]
+17 |   expect_xhpchild($bounded); // Ok
+18 |   expect_ak($bounded); // Ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `nothing` [2]
+-> But got `XHPChild` [3]
+
+case_type_basics.php:16:14
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+   |                         ^^^^^^^^ [2]
+   |                                   ^^^^^^^^ [3]
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   :
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+16 |   expect_int($bounded); // Error
+   |              ^^^^^^^^ [1]
+17 |   expect_xhpchild($bounded); // Ok
+18 |   expect_ak($bounded); // Ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `XHPChild` [3]
+
+case_type_basics.php:16:14
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+   |                                   ^^^^^^^^ [3]
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+ 7 | 
+ 8 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+ 9 | function expect_xhpchild(XHPChild $x): void {}
+10 | function expect_ak(arraykey $x): void {}
+   :
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+16 |   expect_int($bounded); // Error
+   |              ^^^^^^^^ [1]
+17 |   expect_xhpchild($bounded); // Ok
+18 |   expect_ak($bounded); // Ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(CT_No_Bounds | not arraykey)` [2]
+-> But got `<expr#2> as XHPChild` [3]
+->   where `<expr#2>` is a reference to this expression [1]
+
+case_type_basics.php:21:20
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+   |                         ^^^^^^^^ [2]
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   :
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   |                  ^^^^^^^^^^ [3]
+16 |   expect_int($bounded); // Error
+17 |   expect_xhpchild($bounded); // Ok
+18 |   expect_ak($bounded); // Ok
+19 |   expect_mixed($bounded); // Ok
+20 |   expect_bounded($bounded); // Ok
+21 |   expect_unbounded($bounded); // Error
+   |                    ^^^^^^^^ [1]
+22 | 
+23 |   expect_int($unbounded); // Error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `nothing` [2]
+-> But got `XHPChild` [3]
+
+case_type_basics.php:21:20
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+   |                         ^^^^^^^^ [2]
+   |                                   ^^^^^^^^ [3]
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   :
+19 |   expect_mixed($bounded); // Ok
+20 |   expect_bounded($bounded); // Ok
+21 |   expect_unbounded($bounded); // Error
+   |                    ^^^^^^^^ [1]
+22 | 
+23 |   expect_int($unbounded); // Error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT_No_Bounds` [2]
+-> But got `XHPChild` [3]
+
+case_type_basics.php:21:20
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+   |                                   ^^^^^^^^ [3]
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   :
+11 | function expect_mixed(mixed $x): void {}
+12 | function expect_bounded(CT_Bounded $x): void {}
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+   |                           ^^^^^^^^^^^^ [2]
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   :
+19 |   expect_mixed($bounded); // Ok
+20 |   expect_bounded($bounded); // Ok
+21 |   expect_unbounded($bounded); // Error
+   |                    ^^^^^^^^ [1]
+22 | 
+23 |   expect_int($unbounded); // Error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+->   by the definition of `CT_No_Bounds` [4]
+
+case_type_basics.php:23:14
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   |           ^^^^^^^^^^^^ [4]
+ 7 | 
+ 8 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+ 9 | function expect_xhpchild(XHPChild $x): void {}
+10 | function expect_ak(arraykey $x): void {}
+   :
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   |                                       ^^^^^^^^^^^^ [3]
+16 |   expect_int($bounded); // Error
+17 |   expect_xhpchild($bounded); // Ok
+   :
+21 |   expect_unbounded($bounded); // Error
+22 | 
+23 |   expect_int($unbounded); // Error
+   |              ^^^^^^^^^^ [1]
+24 |   expect_xhpchild($unbounded); // Error
+25 |   expect_ak($unbounded); // Error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `XHPChild` [2]
+-> But got `mixed` [3]
+->   by the definition of `CT_No_Bounds` [4]
+
+case_type_basics.php:24:19
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   |           ^^^^^^^^^^^^ [4]
+ 7 | 
+ 8 | function expect_int(int $x): void {}
+ 9 | function expect_xhpchild(XHPChild $x): void {}
+   |                          ^^^^^^^^ [2]
+10 | function expect_ak(arraykey $x): void {}
+11 | function expect_mixed(mixed $x): void {}
+12 | function expect_bounded(CT_Bounded $x): void {}
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   |                                       ^^^^^^^^^^^^ [3]
+16 |   expect_int($bounded); // Error
+17 |   expect_xhpchild($bounded); // Ok
+   :
+22 | 
+23 |   expect_int($unbounded); // Error
+24 |   expect_xhpchild($unbounded); // Error
+   |                   ^^^^^^^^^^ [1]
+25 |   expect_ak($unbounded); // Error
+26 |   expect_mixed($unbounded); // Ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+->   by the definition of `CT_No_Bounds` [4]
+
+case_type_basics.php:25:13
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   |           ^^^^^^^^^^^^ [4]
+ 7 | 
+ 8 | function expect_int(int $x): void {}
+ 9 | function expect_xhpchild(XHPChild $x): void {}
+10 | function expect_ak(arraykey $x): void {}
+   |                    ^^^^^^^^ [2]
+11 | function expect_mixed(mixed $x): void {}
+12 | function expect_bounded(CT_Bounded $x): void {}
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   |                                       ^^^^^^^^^^^^ [3]
+16 |   expect_int($bounded); // Error
+17 |   expect_xhpchild($bounded); // Ok
+   :
+23 |   expect_int($unbounded); // Error
+24 |   expect_xhpchild($unbounded); // Error
+25 |   expect_ak($unbounded); // Error
+   |             ^^^^^^^^^^ [1]
+26 |   expect_mixed($unbounded); // Ok
+27 |   expect_bounded($unbounded); // Error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT_Bounded` [2]
+-> But got `nonnull` [3]
+
+case_type_basics.php:27:18
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   |           ^^^^^^^^^^^^ [3]
+ 7 | 
+ 8 | function expect_int(int $x): void {}
+ 9 | function expect_xhpchild(XHPChild $x): void {}
+10 | function expect_ak(arraykey $x): void {}
+11 | function expect_mixed(mixed $x): void {}
+12 | function expect_bounded(CT_Bounded $x): void {}
+   |                         ^^^^^^^^^^ [2]
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+   :
+25 |   expect_ak($unbounded); // Error
+26 |   expect_mixed($unbounded); // Ok
+27 |   expect_bounded($unbounded); // Error
+   |                  ^^^^^^^^^^ [1]
+28 |   expect_unbounded($unbounded); // Ok
+29 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT_Bounded` [2]
+-> But got `mixed` [3]
+->   by the definition of `CT_No_Bounds` [4]
+
+case_type_basics.php:27:18
+ 4 | case type CT_Bounded as arraykey, XHPChild = int;
+ 5 | 
+ 6 | case type CT_No_Bounds = int;
+   |           ^^^^^^^^^^^^ [4]
+ 7 | 
+ 8 | function expect_int(int $x): void {}
+ 9 | function expect_xhpchild(XHPChild $x): void {}
+10 | function expect_ak(arraykey $x): void {}
+11 | function expect_mixed(mixed $x): void {}
+12 | function expect_bounded(CT_Bounded $x): void {}
+   |                         ^^^^^^^^^^ [2]
+13 | function expect_unbounded(CT_No_Bounds $x): void {}
+14 | 
+15 | function bounded(CT_Bounded $bounded, CT_No_Bounds $unbounded): void {
+   |                                       ^^^^^^^^^^^^ [3]
+16 |   expect_int($bounded); // Error
+17 |   expect_xhpchild($bounded); // Ok
+   :
+25 |   expect_ak($unbounded); // Error
+26 |   expect_mixed($unbounded); // Ok
+27 |   expect_bounded($unbounded); // Error
+   |                  ^^^^^^^^^^ [1]
+28 |   expect_unbounded($unbounded); // Ok
+29 | }
+
+11 errors found

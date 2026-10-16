@@ -1,6 +1,16 @@
-ERROR: File "contravariance_inout.php", line 6, characters 29-29:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "contravariance_inout.php", line 4, characters 10-10:
-  This is where the parameter was declared as contravariant `-`
-  File "contravariance_inout.php", line 6, characters 29-29:
-  Inout/ref function parameters are both covariant and contravariant
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> Inout/ref function parameters are both covariant and contravariant [1]
+
+contravariance_inout.php:6:29
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | class C<-T> {
+  |          ^ [2]
+5 |   public function __construct(private T $item) { }
+6 |   public function foo(inout T $x):void {
+  |                             ^ [1]
+7 |     $x = $this->item;
+8 |   }
+
+1 error found

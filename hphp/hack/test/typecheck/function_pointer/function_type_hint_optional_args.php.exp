@@ -1,28 +1,119 @@
-ERROR: File "function_type_hint_optional_args.php", line 50, characters 18-61:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
-ERROR: File "function_type_hint_optional_args.php", line 52, characters 3-62:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
-ERROR: File "function_type_hint_optional_args.php", line 54, characters 43-47:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "function_type_hint_optional_args.php", line 17, characters 9-13:
-Invalid argument (Typing[4110])
-  File "function_type_hint_optional_args.php", line 11, characters 27-32:
-  Expected `string`
-  File "function_type_hint_optional_args.php", line 17, characters 9-13:
-  But got `bool`
-ERROR: File "function_type_hint_optional_args.php", line 19, characters 3-21:
-Too many positional arguments (expected 3 but got 4) (Typing[4105])
-  File "function_type_hint_optional_args.php", line 11, characters 3-55:
-  Definition is here
-ERROR: File "function_type_hint_optional_args.php", line 38, characters 11-19:
-Invalid argument (Typing[4040])
-  File "function_type_hint_optional_args.php", line 28, characters 10-16:
-  Too few positional arguments (required 3 but got 1)
-  File "function_type_hint_optional_args.php", line 11, characters 3-55:
-  Because of this definition
-ERROR: File "function_type_hint_optional_args.php", line 40, characters 11-20:
-Invalid argument (Typing[4041])
-  File "function_type_hint_optional_args.php", line 29, characters 10-17:
-  Too many mandatory arguments (expected 1 but got 3)
-  File "function_type_hint_optional_args.php", line 11, characters 3-55:
-  Because of this definition
+error: Parsing[1002] Optional parameter cannot precede non-optional parameter [1]
+
+function_type_hint_optional_args.php:50:18
+48 | 
+49 | // All should be rejected
+50 | function badhint((function(int, optional bool, string): void) $_): void {}
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+51 | function badhint2(
+52 |   (function(int, optional bool, optional float, string): void) $_,
+
+error: Parsing[1002] Optional parameter cannot precede non-optional parameter [1]
+
+function_type_hint_optional_args.php:52:3
+50 | function badhint((function(int, optional bool, string): void) $_): void {}
+51 | function badhint2(
+52 |   (function(int, optional bool, optional float, string): void) $_,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+53 | ): void {}
+54 | function badhint3((function(int, optional inout bool): void) $_): void {}
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+function_type_hint_optional_args.php:54:43
+52 |   (function(int, optional bool, optional float, string): void) $_,
+53 | ): void {}
+54 | function badhint3((function(int, optional inout bool): void) $_): void {}
+   |                                           ^^^^^ [1]
+55 | // Optional and inout are incompatible.
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [1]
+
+function_type_hint_optional_args.php:17:9
+ 9 | function expect2((function(int): void) $_): void {}
+10 | function expect3(
+11 |   (function(int, optional string, optional bool): void) $f,
+   |                           ^^^^^^ [2]
+12 | ): void {
+13 |   $f(3);
+14 |   $f(4, 'a');
+15 |   $f(5, 'b', true);
+16 |   // Should be an error
+17 |   $f(3, false);
+   |         ^^^^^ [1]
+18 |   // Should be an error
+19 |   $f(3, 'b', true, 2);
+
+error: Typing[4105] Too many positional arguments (expected 3 but got 4) [1]
+-> Definition is here [2]
+
+function_type_hint_optional_args.php:19:3
+ 9 | function expect2((function(int): void) $_): void {}
+10 | function expect3(
+11 |   (function(int, optional string, optional bool): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 | ): void {
+13 |   $f(3);
+   :
+17 |   $f(3, false);
+18 |   // Should be an error
+19 |   $f(3, 'b', true, 2);
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+20 | }
+21 | function expect4((function(int, optional string, bool...): void) $f): void {
+
+error: Typing[4040] Invalid argument [1]
+-> Too few positional arguments (required 3 but got 1) [2]
+-> Because of this definition [3]
+
+function_type_hint_optional_args.php:38:11
+ 9 | function expect2((function(int): void) $_): void {}
+10 | function expect3(
+11 |   (function(int, optional string, optional bool): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+12 | ): void {
+13 |   $f(3);
+   :
+26 | }
+27 | 
+28 | function too_few(int $x): void {}
+   |          ^^^^^^^ [2]
+29 | function too_many(int $x, string $y, bool $b): void {}
+30 | 
+   :
+36 |   expect4(bar<>);
+37 |   // Should be an error
+38 |   expect3(too_few<>);
+   |           ^^^^^^^^^ [1]
+39 |   // Should be an error
+40 |   expect3(too_many<>);
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 3) [2]
+-> Because of this definition [3]
+
+function_type_hint_optional_args.php:40:11
+ 9 | function expect2((function(int): void) $_): void {}
+10 | function expect3(
+11 |   (function(int, optional string, optional bool): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+12 | ): void {
+13 |   $f(3);
+   :
+27 | 
+28 | function too_few(int $x): void {}
+29 | function too_many(int $x, string $y, bool $b): void {}
+   |          ^^^^^^^^ [2]
+30 | 
+31 | function testit(): void {
+   :
+38 |   expect3(too_few<>);
+39 |   // Should be an error
+40 |   expect3(too_many<>);
+   |           ^^^^^^^^^^ [1]
+41 | }
+42 | 
+
+7 errors found

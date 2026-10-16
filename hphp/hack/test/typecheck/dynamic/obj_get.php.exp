@@ -2,11 +2,35 @@ File "obj_get.php", line 5, characters 3-13:
   dynamic
 File "obj_get.php", line 7, characters 3-13:
   dynamic
-WARN: File "obj_get.php", line 6, characters 12-19:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "obj_get.php", line 3, characters 21-27:
-  This expression has type `dynamic`
-WARN: File "obj_get.php", line 8, characters 7-14:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "obj_get.php", line 3, characters 21-27:
-  This expression has type `dynamic`
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+obj_get.php:6:12
+1 | <?hh
+2 | 
+3 | function testObjGet(dynamic $x): void {
+  |                     ^^^^^^^ [2]
+4 |   $y = $x::staticProp; // $y : dynamic
+5 |   hh_show($y);
+6 |   $y = $x->property; // $y : dynamic
+  |            ^^^^^^^^ [1]
+7 |   hh_show($y);
+8 |   $x->property = 7;
+
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+obj_get.php:8:7
+1 | <?hh
+2 | 
+3 | function testObjGet(dynamic $x): void {
+  |                     ^^^^^^^ [2]
+4 |   $y = $x::staticProp; // $y : dynamic
+5 |   hh_show($y);
+6 |   $y = $x->property; // $y : dynamic
+7 |   hh_show($y);
+8 |   $x->property = 7;
+  |       ^^^^^^^^ [1]
+9 | }
+
+2 errors found

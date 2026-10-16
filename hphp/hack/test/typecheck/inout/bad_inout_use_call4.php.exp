@@ -1,14 +1,84 @@
-ERROR: File "bad_inout_use_call4.php", line 10, characters 3-122:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "bad_inout_use_call4.php", line 10, characters 11-23:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "bad_inout_use_call4.php", line 21, characters 3-168:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "bad_inout_use_call4.php", line 21, characters 11-23:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "bad_inout_use_call4.php", line 40, characters 5-12:
-Invalid argument (Typing[4110])
-  File "bad_inout_use_call4.php", line 9, characters 18-19:
-  Expected `C2`
-  File "bad_inout_use_call4.php", line 20, characters 18-19:
-  But got `C1`
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+bad_inout_use_call4.php:10:3
+ 8 | 
+ 9 | function f(inout C2 $c): void {
+10 |   switch (mt_rand() % 2) {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |           ^^^^^^^^^^^^^ [2]
+11 |     case 0:
+   |     ^^^^^^^ [1]
+12 |       $c = new C2();
+   |       ^^^^^^^^^^^^^^ [1]
+13 |       break;
+   |       ^^^^^^ [1]
+14 |     case 1:
+   |     ^^^^^^^ [1]
+15 |       $c = new C3();
+   |       ^^^^^^^^^^^^^^ [1]
+16 |       break;
+   |       ^^^^^^ [1]
+17 |   }
+   |   ^ [1]
+18 | }
+19 | 
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+bad_inout_use_call4.php:21:3
+19 | 
+20 | function g(inout C1 $c): void {
+21 |   switch (mt_rand() % 3) {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |           ^^^^^^^^^^^^^ [2]
+22 |     case 0:
+   |     ^^^^^^^ [1]
+23 |       $c = new C1();
+   |       ^^^^^^^^^^^^^^ [1]
+24 |       break;
+   |       ^^^^^^ [1]
+25 |     case 1:
+   |     ^^^^^^^ [1]
+26 |       $c = new C2();
+   |       ^^^^^^^^^^^^^^ [1]
+27 |       break;
+   |       ^^^^^^ [1]
+28 |     case 2:
+   |     ^^^^^^^ [1]
+29 |       $c = new C3();
+   |       ^^^^^^^^^^^^^^ [1]
+30 |       break;
+   |       ^^^^^^ [1]
+31 |   }
+   |   ^ [1]
+32 | }
+33 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C2` [2]
+-> But got `C1` [3]
+
+bad_inout_use_call4.php:40:5
+ 7 | class C3 extends C2 {}
+ 8 | 
+ 9 | function f(inout C2 $c): void {
+   |                  ^^ [2]
+10 |   switch (mt_rand() % 2) {
+11 |     case 0:
+   :
+18 | }
+19 | 
+20 | function g(inout C1 $c): void {
+   |                  ^^ [3]
+21 |   switch (mt_rand() % 3) {
+22 |     case 0:
+   :
+38 |   f(inout $c);
+39 |   g(inout $c);
+40 |   f(inout $c);
+   |     ^^^^^^^^ [1]
+41 | }
+
+3 errors found

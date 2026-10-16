@@ -1,6 +1,30 @@
-ERROR: File "hack_arrays_feature_gate.php", line 6, characters 14-25:
-Cannot use unstable feature: `expression_tree_hack_arrays` (Parsing[1002])
-ERROR: File "hack_arrays_feature_gate.php", line 10, characters 14-27:
-Cannot use unstable feature: `expression_tree_hack_arrays` (Parsing[1002])
-ERROR: File "hack_arrays_feature_gate.php", line 14, characters 14-28:
-Cannot use unstable feature: `expression_tree_hack_arrays` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `expression_tree_hack_arrays` [1]
+
+hack_arrays_feature_gate.php:6:14
+4 | 
+5 | function test_vec_without_feature(): void {
+6 |   ExampleDsl`vec[1, 2, 3]`;
+  |              ^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Parsing[1002] Cannot use unstable feature: `expression_tree_hack_arrays` [1]
+
+hack_arrays_feature_gate.php:10:14
+ 8 | 
+ 9 | function test_dict_without_feature(): void {
+10 |   ExampleDsl`dict["a" => 1]`;
+   |              ^^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+
+error: Parsing[1002] Cannot use unstable feature: `expression_tree_hack_arrays` [1]
+
+hack_arrays_feature_gate.php:14:14
+12 | 
+13 | function test_keyset_without_feature(): void {
+14 |   ExampleDsl`keyset[1, 2, 3]`;
+   |              ^^^^^^^^^^^^^^^ [1]
+15 | }
+
+3 errors found

@@ -1,30 +1,107 @@
-ERROR: File "callsite_inference.php", line 27, characters 21-27:
-Invalid argument (Typing[4110])
-  File "callsite_inference.php", line 12, characters 18-22:
-  Expected `CT<_>`
-  File "callsite_inference.php", line 27, characters 21-27:
-  But got `string`
-ERROR: File "callsite_inference.php", line 27, characters 21-27:
-Invalid argument (Typing[4110])
-  File "callsite_inference.php", line 17, characters 23-27:
-  Expected `MyInt`
-  File "callsite_inference.php", line 10, characters 24-31:
-  But got `MyString`
-ERROR: File "callsite_inference.php", line 28, characters 24-24:
-Invalid argument (Typing[4110])
-  File "callsite_inference.php", line 10, characters 3-8:
-  Expected `string`
-  File "callsite_inference.php", line 28, characters 24-24:
-  But got `int`
-ERROR: File "callsite_inference.php", line 28, characters 24-24:
-Invalid argument (Typing[4110])
-  File "callsite_inference.php", line 12, characters 18-22:
-  Expected `CT<_>`
-  File "callsite_inference.php", line 28, characters 24-24:
-  But got `int`
-ERROR: File "callsite_inference.php", line 28, characters 24-24:
-Invalid argument (Typing[4110])
-  File "callsite_inference.php", line 18, characters 26-33:
-  Expected `MyString`
-  File "callsite_inference.php", line 9, characters 21-25:
-  But got `MyInt`
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT<_>` [2]
+-> But got `string` [1]
+
+callsite_inference.php:27:21
+10 | | string where T super MyString;
+11 | 
+12 | function lift<T>(CT<T> $ct): T {
+   |                  ^^^^^ [2]
+13 |   // haven't implemented the logic to support this implementation yet
+14 |   throw new Exception();
+   :
+25 | 
+26 | function bad(): void {
+27 |   takes_my_int(lift("hello"));
+   |                     ^^^^^^^ [1]
+28 |   takes_my_string(lift(1));
+29 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `MyInt` [2]
+-> But got `MyString` [3]
+
+callsite_inference.php:27:21
+ 8 | case type CT<T> =
+ 9 | | int where T super MyInt
+10 | | string where T super MyString;
+   |                        ^^^^^^^^ [3]
+11 | 
+12 | function lift<T>(CT<T> $ct): T {
+   :
+15 | }
+16 | 
+17 | function takes_my_int(MyInt $x): void {}
+   |                       ^^^^^ [2]
+18 | function takes_my_string(MyString $x): void {}
+19 | 
+   :
+25 | 
+26 | function bad(): void {
+27 |   takes_my_int(lift("hello"));
+   |                     ^^^^^^^ [1]
+28 |   takes_my_string(lift(1));
+29 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+callsite_inference.php:28:24
+ 8 | case type CT<T> =
+ 9 | | int where T super MyInt
+10 | | string where T super MyString;
+   |   ^^^^^^ [2]
+11 | 
+12 | function lift<T>(CT<T> $ct): T {
+   :
+26 | function bad(): void {
+27 |   takes_my_int(lift("hello"));
+28 |   takes_my_string(lift(1));
+   |                        ^ [1]
+29 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT<_>` [2]
+-> But got `int` [1]
+
+callsite_inference.php:28:24
+10 | | string where T super MyString;
+11 | 
+12 | function lift<T>(CT<T> $ct): T {
+   |                  ^^^^^ [2]
+13 |   // haven't implemented the logic to support this implementation yet
+14 |   throw new Exception();
+   :
+26 | function bad(): void {
+27 |   takes_my_int(lift("hello"));
+28 |   takes_my_string(lift(1));
+   |                        ^ [1]
+29 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `MyString` [2]
+-> But got `MyInt` [3]
+
+callsite_inference.php:28:24
+ 7 | 
+ 8 | case type CT<T> =
+ 9 | | int where T super MyInt
+   |                     ^^^^^ [3]
+10 | | string where T super MyString;
+11 | 
+   :
+16 | 
+17 | function takes_my_int(MyInt $x): void {}
+18 | function takes_my_string(MyString $x): void {}
+   |                          ^^^^^^^^ [2]
+19 | 
+20 | function good(): void {
+   :
+26 | function bad(): void {
+27 |   takes_my_int(lift("hello"));
+28 |   takes_my_string(lift(1));
+   |                        ^ [1]
+29 | }
+
+5 errors found

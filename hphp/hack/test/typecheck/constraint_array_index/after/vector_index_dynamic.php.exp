@@ -1,16 +1,38 @@
-ERROR: File "vector_index_dynamic.php", line 5, characters 3-32:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "vector_index_dynamic.php", line 4, characters 8-14:
-  Expected `int`
-  File "vector_index_dynamic.php", line 3, characters 44-46:
-    from this definition
-  File "vector_index_dynamic.php", line 5, characters 24-27:
-  But got `dynamic`
-ERROR: File "vector_index_dynamic.php", line 13, characters 5-34:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "vector_index_dynamic.php", line 12, characters 10-22:
-  Expected `int`
-  File "vector_index_dynamic.php", line 10, characters 46-48:
-    from this definition
-  File "vector_index_dynamic.php", line 13, characters 26-29:
-  But got `dynamic`
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `int` [2]
+->   from this definition [3]
+-> But got `dynamic` [4]
+
+vector_index_dynamic.php:5:3
+1 | <?hh
+2 | 
+3 | function test_dyn_index(dynamic $d, Vector<int> $v2) : void {
+  |                                            ^^^ [3]
+4 |   $a = $v2[$d];
+  |        ^^^^^^^ [2]
+5 |   hh_expect_equivalent<~int>($a);
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                        ^^^^ [4]
+6 |   $v2[$d] = 1;
+7 | }
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `int` [2]
+->   from this definition [3]
+-> But got `dynamic` [4]
+
+vector_index_dynamic.php:13:5
+ 8 | 
+ 9 | class C {
+10 |   public function __construct(private Vector<int> $v2) {}
+   |                                              ^^^ [3]
+11 |   public function f(dynamic $d): void {
+12 |     $a = $this->v2[$d];
+   |          ^^^^^^^^^^^^^ [2]
+13 |     hh_expect_equivalent<~int>($a);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                          ^^^^ [4]
+14 |     $this->v2[$d] = 1;
+15 |   }
+
+2 errors found

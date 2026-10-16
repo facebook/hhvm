@@ -1,12 +1,31 @@
-ERROR: File "lambda_hof_bad.php", line 16, characters 21-22:
-Typing error (Typing[4429])
-  File "lambda_hof_bad.php", line 16, characters 21-26:
-  Expected `num` because this is used in an arithmetic operation
-  File "lambda_hof_bad.php", line 15, characters 19-24:
-  But got `string`
-ERROR: File "lambda_hof_bad.php", line 17, characters 29-30:
-Typing error (Typing[4429])
-  File "lambda_hof_bad.php", line 17, characters 29-34:
-  Expected `num` because this is used in an arithmetic operation
-  File "lambda_hof_bad.php", line 15, characters 19-24:
-  But got `string`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `string` [3]
+
+lambda_hof_bad.php:16:21
+13 | }
+14 | 
+15 | function f(varray<string> $a): void {
+   |                   ^^^^^^ [3]
+16 |   array_mapp($x ==> $x + 1, $a);
+   |                     ^^ [1]
+   |                     ^^^^^^ [2]
+17 |   rev_array_mapp($a, $x ==> $x + 1);
+18 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `string` [3]
+
+lambda_hof_bad.php:17:29
+13 | }
+14 | 
+15 | function f(varray<string> $a): void {
+   |                   ^^^^^^ [3]
+16 |   array_mapp($x ==> $x + 1, $a);
+17 |   rev_array_mapp($a, $x ==> $x + 1);
+   |                             ^^ [1]
+   |                             ^^^^^^ [2]
+18 | }
+
+2 errors found

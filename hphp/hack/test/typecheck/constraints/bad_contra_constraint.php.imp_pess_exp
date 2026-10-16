@@ -1,22 +1,59 @@
-ERROR: File "bad_contra_constraint.php", line 22, characters 21-25:
-Invalid argument (Typing[4110])
-  File "bad_contra_constraint.php", line 13, characters 17-23:
-  Expected `nothing` from this `is` expression test
-  File "bad_contra_constraint.php", line 9, characters 67-68:
-  But got `Td`
-  File "bad_contra_constraint.php", line 9, characters 67-68:
-  This type argument to `Derived` must match exactly (it is invariant)
-  File "bad_contra_constraint.php", line 9, characters 67-68:
-  This type argument to `Base` only allows supertypes (it is contravariant)
-ERROR: File "bad_contra_constraint.php", line 22, characters 21-25:
-Invalid argument (Typing[4110])
-  File "bad_contra_constraint.php", line 13, characters 17-23:
-  Expected `nothing` from this `is` expression test
-  File "bad_contra_constraint.php", line 9, characters 67-68:
-  But got `mixed`
-  File "bad_contra_constraint.php", line 9, characters 67-68:
-  This type argument to `Derived` must match exactly (it is invariant)
-  File "bad_contra_constraint.php", line 9, characters 67-68:
-  This type argument to `Base` only allows supertypes (it is contravariant)
-  File "bad_contra_constraint.php", line 5, characters 15-16:
-    by the definition of `Td`
+error: Typing[4110] Invalid argument [1]
+-> Expected `nothing` from this `is` expression test [2]
+-> But got `Td` [3]
+-> This type argument to `Derived` must match exactly (it is invariant) [3]
+-> This type argument to `Base` only allows supertypes (it is contravariant) [3]
+
+bad_contra_constraint.php:22:21
+ 7 |     private ConstVector<Pair<Base<Td>, float>> $item,
+ 8 |   ) {}
+ 9 |   public static function getStuff(ConstVector<mixed> $v): Derived<Td> {
+   |                                                                   ^^ [3]
+10 |     $args = Vector {};
+11 |     $i = 0;
+12 |     $el = $v[$i];
+13 |     if (!$el is Base<_>) {
+   |                 ^^^^^^^ [2]
+14 |       throw new Exception('a');
+15 |     }
+   :
+20 |     // So by contravariance we require Td <: Tb#1
+21 |     // Why would these be related??
+22 |     return new self($args);
+   |                     ^^^^^ [1]
+23 |   }
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `nothing` from this `is` expression test [2]
+-> But got `mixed` [3]
+-> This type argument to `Derived` must match exactly (it is invariant) [3]
+-> This type argument to `Base` only allows supertypes (it is contravariant) [3]
+->   by the definition of `Td` [4]
+
+bad_contra_constraint.php:22:21
+ 3 | 
+ 4 | class Base<-Tb> {}
+ 5 | class Derived<Td> extends Base<Td> {
+   |               ^^ [4]
+ 6 |   public function __construct(
+ 7 |     private ConstVector<Pair<Base<Td>, float>> $item,
+ 8 |   ) {}
+ 9 |   public static function getStuff(ConstVector<mixed> $v): Derived<Td> {
+   |                                                                   ^^ [3]
+10 |     $args = Vector {};
+11 |     $i = 0;
+12 |     $el = $v[$i];
+13 |     if (!$el is Base<_>) {
+   |                 ^^^^^^^ [2]
+14 |       throw new Exception('a');
+15 |     }
+   :
+20 |     // So by contravariance we require Td <: Tb#1
+21 |     // Why would these be related??
+22 |     return new self($args);
+   |                     ^^^^^ [1]
+23 |   }
+24 | }
+
+2 errors found

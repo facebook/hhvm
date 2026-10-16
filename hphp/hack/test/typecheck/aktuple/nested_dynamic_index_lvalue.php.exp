@@ -1,6 +1,18 @@
-ERROR: File "nested_dynamic_index_lvalue.php", line 11, characters 15-22:
-Invalid argument (Typing[4110])
-  File "nested_dynamic_index_lvalue.php", line 14, characters 22-27:
-  Expected `string`
-  File "nested_dynamic_index_lvalue.php", line 9, characters 21-21:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+nested_dynamic_index_lvalue.php:11:15
+ 7 | 
+ 8 | function test(int $key): void {
+ 9 |   $a = Vector { vec[4, 'aaa'] };
+   |                     ^ [3]
+10 |   $a[0][$key] = 4;
+11 |   take_string($a[0][1]);
+   |               ^^^^^^^^ [1]
+12 | }
+13 | 
+14 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+1 error found

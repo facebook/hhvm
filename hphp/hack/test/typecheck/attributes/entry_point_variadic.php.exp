@@ -1,2 +1,9 @@
-ERROR: File "entry_point_variadic.php", line 6, characters 32-33:
-`__EntryPoint` functions cannot take arguments. (NastCheck[3085])
+error: NastCheck[3085] `__EntryPoint` functions cannot take arguments. [1]
+
+entry_point_variadic.php:6:32
+4 | // pass arguments to entry points.
+5 | <<__EntryPoint>>
+6 | function bad_variadic(mixed ...$_): void {}
+  |                                ^^ [1]
+
+1 error found

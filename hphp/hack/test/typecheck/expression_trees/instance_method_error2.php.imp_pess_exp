@@ -1,12 +1,42 @@
-ERROR: File "instance_method_error2.php", line 8, characters 12-17:
-Expression trees only support named property or instance method access. (Parsing[1002])
-ERROR: File "instance_method_error2.php", line 8, characters 16-17:
-Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "instance_method_error2.php", line 5, characters 41-42:
-  Did you mean `$y` instead?
-ERROR: File "instance_method_error2.php", line 8, characters 12-13:
-Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `MyState` (Typing[4525])
-  File "instance_method_error2.php", line 8, characters 16-17:
-  Did you mean `->z` instead?
-  File "instance_method_error2.php", line 6, characters 15-21:
-  The receiver's type is defined here
+error: Parsing[1002] Expression trees only support named property or instance method access. [1]
+
+instance_method_error2.php:8:12
+ 6 |   ExampleDsl`(MyState $x) ==> {
+ 7 |     $z = ${ $y };
+ 8 |     return $x->$z;
+   |            ^^^^^^ [1]
+ 9 |   }`;
+10 | }
+
+error: Naming[2050] Variable `$z` is undefined, or not always defined. [1]
+-> Did you mean `$y` instead? [2]
+
+instance_method_error2.php:8:16
+ 3 | <<file:__EnableUnstableFeatures('expression_trees')>>
+ 4 | 
+ 5 | function test(ExampleExpression<string> $y): void {
+   |                                         ^^ [2]
+ 6 |   ExampleDsl`(MyState $x) ==> {
+ 7 |     $z = ${ $y };
+ 8 |     return $x->$z;
+   |                ^^ [1]
+ 9 |   }`;
+10 | }
+
+error: Typing[4525] Dynamic access of a property is only permitted on a receiver of type `dynamic`, but this receiver has type `MyState` [1]
+-> Did you mean `->z` instead? [2]
+-> The receiver's type is defined here [3]
+
+instance_method_error2.php:8:12
+ 4 | 
+ 5 | function test(ExampleExpression<string> $y): void {
+ 6 |   ExampleDsl`(MyState $x) ==> {
+   |               ^^^^^^^ [3]
+ 7 |     $z = ${ $y };
+ 8 |     return $x->$z;
+   |            ^^ [1]
+   |                ^^ [2]
+ 9 |   }`;
+10 | }
+
+3 errors found

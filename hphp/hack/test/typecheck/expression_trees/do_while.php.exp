@@ -1,2 +1,15 @@
-ERROR: File "do_while.php", line 8, characters 5-49:
-Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])
+error: Parsing[1002] Expression trees do not support `do while` loops. Consider using a `while` loop instead. [1]
+
+do_while.php:8:5
+ 6 |   ExampleDsl`() ==> {
+ 7 |     $x = 0;
+ 8 |     do {
+   |     ^^^^ [1]
+ 9 |       $x = $x + 1;
+   |       ^^^^^^^^^^^^ [1]
+10 |     } while ($x < 0);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+11 |   }`;
+12 | }
+
+1 error found

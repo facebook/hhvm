@@ -1,10 +1,29 @@
-ERROR: File "internal_trait_leak_typeconstant_bad.php--B.php", line 6, characters 10-10:
-Invalid argument (Typing[4110])
-  File "internal_trait_leak_typeconstant_bad.php--A.php", line 5, characters 16-16:
-  Expected `T::TC` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_trait_leak_typeconstant_bad.php--A.php", line 12, characters 30-37:
-  The type originated from here
-  File "internal_trait_leak_typeconstant_bad.php--A.php", line 12, characters 30-37:
-    resulting from expanding the type constant `T::TC`
-  File "internal_trait_leak_typeconstant_bad.php--B.php", line 6, characters 10-10:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `T::TC` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+->   resulting from expanding the type constant `T::TC` [3]
+-> But got `int` [1]
+
+internal_trait_leak_typeconstant_bad.php--B.php:6:10
+ 4 | 
+ 5 | function main(): void {
+ 6 |   C::foo(1);
+   |          ^ [1]
+ 7 | }
+
+internal_trait_leak_typeconstant_bad.php--A.php:5:16
+ 3 | module A;
+ 4 | 
+ 5 | internal trait T {
+   |                ^ [2]
+ 6 |   require class C;
+ 7 | 
+   :
+10 |   );
+11 | 
+12 |   public static function foo(self::TC $data): void {}
+   |                              ^^^^^^^^ [3]
+13 | }
+14 | 
+
+1 error found

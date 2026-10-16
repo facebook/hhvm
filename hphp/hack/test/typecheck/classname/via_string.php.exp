@@ -1,8 +1,39 @@
-ERROR: File "via_string.php", line 6, characters 3-14:
-Dynamic class names are not allowed in compile-time `::class` fetch (Parsing[1002])
-ERROR: File "via_string.php", line 6, characters 3-14:
-Only classnames and variables are allowed before `::`. (Parsing[1002])
-ERROR: File "via_string.php", line 7, characters 3-14:
-Dynamic class names are not allowed in compile-time `::class` fetch (Parsing[1002])
-ERROR: File "via_string.php", line 7, characters 3-14:
-Only classnames and variables are allowed before `::`. (Parsing[1002])
+error: Parsing[1002] Dynamic class names are not allowed in compile-time `::class` fetch [1]
+
+via_string.php:6:3
+4 | 
+5 | function test(): void {
+6 |   "Foo"::class;
+  |   ^^^^^^^^^^^^ [1]
+7 |   'Foo'::class;
+8 | }
+
+error: Parsing[1002] Only classnames and variables are allowed before `::`. [1]
+
+via_string.php:6:3
+4 | 
+5 | function test(): void {
+6 |   "Foo"::class;
+  |   ^^^^^^^^^^^^ [1]
+7 |   'Foo'::class;
+8 | }
+
+error: Parsing[1002] Dynamic class names are not allowed in compile-time `::class` fetch [1]
+
+via_string.php:7:3
+5 | function test(): void {
+6 |   "Foo"::class;
+7 |   'Foo'::class;
+  |   ^^^^^^^^^^^^ [1]
+8 | }
+
+error: Parsing[1002] Only classnames and variables are allowed before `::`. [1]
+
+via_string.php:7:3
+5 | function test(): void {
+6 |   "Foo"::class;
+7 |   'Foo'::class;
+  |   ^^^^^^^^^^^^ [1]
+8 | }
+
+4 errors found

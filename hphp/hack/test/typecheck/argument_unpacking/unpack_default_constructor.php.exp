@@ -1,2 +1,10 @@
-ERROR: File "unpack_default_constructor.php", line 8, characters 7-9:
-This constructor expects no argument (Typing[4012])
+error: Typing[4012] This constructor expects no argument [1]
+
+unpack_default_constructor.php:8:7
+6 | function call_constructor(): void {
+7 |   $args = vec[1, 2, 3];
+8 |   new MyC(...$args);
+  |       ^^^ [1]
+9 | }
+
+1 error found

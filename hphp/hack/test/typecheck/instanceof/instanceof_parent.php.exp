@@ -1,4 +1,21 @@
-ERROR: File "instanceof_parent.php", line 16, characters 15-20:
-A type specifier is expected here. (Parsing[1002])
-ERROR: File "instanceof_parent.php", line 16, characters 15-20:
-Encountered unexpected text `parent`, was expecting a type hint. (Parsing[1002])
+error: Parsing[1002] A type specifier is expected here. [1]
+
+instanceof_parent.php:16:15
+14 | 
+15 |   public static function test(mixed $x): void {
+16 |     if ($x is parent) {
+   |               ^^^^^^ [1]
+17 |       hh_show($x);
+18 |       $x->g();
+
+error: Parsing[1002] Encountered unexpected text `parent`, was expecting a type hint. [1]
+
+instanceof_parent.php:16:15
+14 | 
+15 |   public static function test(mixed $x): void {
+16 |     if ($x is parent) {
+   |               ^^^^^^ [1]
+17 |       hh_show($x);
+18 |       $x->g();
+
+2 errors found

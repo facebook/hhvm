@@ -1,12 +1,23 @@
-ERROR: File "tapply_is_typedef.php", line 8, characters 18-39:
-Some type arguments violate their constraints (Typing[4323])
-  File "tapply_is_typedef.php", line 3, characters 22-22:
-  `T` is a constrained type parameter
-  File "tapply_is_typedef.php", line 3, characters 27-29:
-  This type constraint is violated
-  File "tapply_is_typedef.php", line 3, characters 27-29:
-  Expected `num`
-  File "tapply_is_typedef.php", line 8, characters 34-38:
-  But got `mixed`
-  File "tapply_is_typedef.php", line 5, characters 38-38:
-    via this generic `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `mixed` [4]
+->   via this generic `T` [5]
+
+tapply_is_typedef.php:8:18
+1 | <?hh
+2 | 
+3 | interface Constraint<T as num> {}
+  |                      ^ [2]
+  |                           ^^^ [3]
+4 | 
+5 | type AliasConstraint<T> = Constraint<T>;
+  |                                      ^ [5]
+6 | 
+7 | // Test that we check constraints after expand the type alias
+8 | function invalid(AliasConstraint<mixed> $x): void {}
+  |                  ^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                  ^^^^^ [4]
+
+1 error found

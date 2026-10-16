@@ -1,4 +1,17 @@
-ERROR: File "module_internal_type_alias.php--B.php", line 6, characters 29-32:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_internal_type_alias.php--A.php", line 6, characters 15-18:
-  This is from module `A`
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_internal_type_alias.php--B.php:6:29
+4 | module B;
+5 | 
+6 | internal type BVecInt = vec<AInt>; // Error
+  |                             ^^^^ [1]
+
+module_internal_type_alias.php--A.php:6:15
+4 | module A;
+5 | 
+6 | internal type AInt = int;
+  |               ^^^^ [2]
+7 | internal type AVecInt = vec<AInt>; // Ok
+
+1 error found

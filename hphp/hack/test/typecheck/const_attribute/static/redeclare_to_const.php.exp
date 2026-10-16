@@ -1,8 +1,22 @@
-WARN: File "redeclare_to_const.php", line 5, characters 17-17:
-Static property is overridden: `$p` (Warn[12021])
-  File "redeclare_to_const.php", line 5, characters 47-49:
-  Overriding static property is here
-ERROR: File "redeclare_to_const.php", line 5, characters 47-49:
-This property is `__Const` (Typing[4204])
-  File "redeclare_to_const.php", line 4, characters 28-30:
-  This property is not `__Const`
+warning: Warn[12021] Static property is overridden: `$p` [1]
+-> Overriding static property is here [2]
+
+redeclare_to_const.php:5:17
+3 | 
+4 | class C { protected static int $p = 1; }
+5 | class D extends C { <<__Const>> public static int $p = 2; }
+  |                 ^ [1]
+  |                                               ^^^ [2]
+
+error: Typing[4204] This property is `__Const` [1]
+-> This property is not `__Const` [2]
+
+redeclare_to_const.php:5:47
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C { protected static int $p = 1; }
+  |                            ^^^ [2]
+5 | class D extends C { <<__Const>> public static int $p = 2; }
+  |                                               ^^^ [1]
+
+2 errors found

@@ -1,10 +1,28 @@
-ERROR: File "mock_return_nested_escape.php", line 33, characters 39-48:
-A `where` type constraint is violated here (Typing[4323])
-  File "mock_return_nested_escape.php", line 18, characters 19-28:
-  This is the method with `where` type constraints
-  File "mock_return_nested_escape.php", line 28, characters 37-53:
-  Expected a first-class polymorphic function type.
-  File "mock_return_nested_escape.php", line 28, characters 23-23:
-  A higher rank generic `T#2` will escape its scope where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "mock_return_nested_escape.php", line 33, characters 39-48:
-  Please make this type explicit
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a first-class polymorphic function type. [3]
+-> A higher rank generic `T#2` will escape its scope where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function [4]
+-> Please make this type explicit [1]
+
+mock_return_nested_escape.php:33:39
+16 |   }
+17 | 
+18 |   public function mockReturn<Tr>(Tr $v): this
+   |                   ^^^^^^^^^^ [2]
+19 |   where
+20 |     Tfun super (readonly function(mixed...)[]: Tr) {
+   :
+26 | // check_rank sees (Tvar(Tr) <: Awaitable<Box<T>>)
+27 | // and must find T inside Awaitable's type arg list element Box<T>.
+28 | function gen_make_box<T>(T $value): Awaitable<Box<T>> {
+   |                       ^ [4]
+   |                                     ^^^^^^^^^^^^^^^^^ [3]
+29 |   throw new Exception();
+30 | }
+31 | 
+32 | function test_nested_escape(): void {
+33 |   Mock::mockFunction(gen_make_box<>)->mockReturn(new Box());
+   |                                       ^^^^^^^^^^ [1]
+34 | }
+
+1 error found

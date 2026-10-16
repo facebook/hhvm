@@ -1,12 +1,41 @@
-ERROR: File "coeffects.bad.php", line 46, characters 15-15:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "coeffects.bad.php", line 46, characters 11-17:
-  From this declaration, the context of this function body provides the capability WriteProperty
-  File "coeffects.bad.php", line 10, characters 19-29:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "coeffects.bad.php", line 47, characters 12-14:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "coeffects.bad.php", line 47, characters 12-16:
-  From this declaration, the context of this function body provides the capability WriteProperty
-  File "coeffects.bad.php", line 3, characters 10-12:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability WriteProperty [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+coeffects.bad.php:46:15
+ 8 | // defaults
+ 9 | class C {
+10 |   public function __construct() {
+   |                   ^^^^^^^^^^^ [3]
+11 |     echo "C\n";
+12 |   }
+   :
+44 |    int X = 3;                   // ok
+45 |    string Y = "zuck";           // ok
+46 |    C Z0 = new C();              // should be a problem, echo in C's constructor
+   |           ^^^^^^^ [2]
+   |               ^ [1]
+47 |    int W = foo();               // should be a problem
+48 |    D Z1 = new D();              // ok
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability WriteProperty [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+coeffects.bad.php:47:12
+ 1 | <?hh
+ 2 | 
+ 3 | function foo(): int {
+   |          ^^^ [3]
+ 4 |   echo "bla\n";
+ 5 |   return 42;
+   :
+45 |    string Y = "zuck";           // ok
+46 |    C Z0 = new C();              // should be a problem, echo in C's constructor
+47 |    int W = foo();               // should be a problem
+   |            ^^^ [1]
+   |            ^^^^^ [2]
+48 |    D Z1 = new D();              // ok
+49 |    F Z2 = Factory::get()->set(1664); // ok
+
+2 errors found

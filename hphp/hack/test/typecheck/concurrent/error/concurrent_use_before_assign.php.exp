@@ -1,2 +1,11 @@
-ERROR: File "concurrent_use_before_assign.php", line 9, characters 21-22:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+concurrent_use_before_assign.php:9:21
+ 7 |   concurrent {
+ 8 |     $x = await genx();
+ 9 |     $y = await geny($x);
+   |                     ^^ [1]
+10 |   }
+11 |   return $x;
+
+1 error found

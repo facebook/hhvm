@@ -1,6 +1,23 @@
-ERROR: File "list_rhs_increment.php", line 6, characters 21-22:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "list_rhs_increment.php", line 6, characters 8-9:
-Unsequenced modifications to local variable. Modified here (Typing[4144])
-  File "list_rhs_increment.php", line 6, characters 21-22:
-  And also modified here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+list_rhs_increment.php:6:21
+4 | function test(varray<varray<int>> $a): int {
+5 |   $x = 0;
+6 |   list($x, $y) = $a[$x++];
+  |                     ^^ [1]
+7 |   return $x;
+8 | }
+
+error: Typing[4144] Unsequenced modifications to local variable. Modified here [1]
+-> And also modified here [2]
+
+list_rhs_increment.php:6:8
+4 | function test(varray<varray<int>> $a): int {
+5 |   $x = 0;
+6 |   list($x, $y) = $a[$x++];
+  |        ^^ [1]
+  |                     ^^ [2]
+7 |   return $x;
+8 | }
+
+2 errors found

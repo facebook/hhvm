@@ -1,8 +1,33 @@
-ERROR: File "list_double_increment.php", line 6, characters 13-14:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "list_double_increment.php", line 6, characters 23-24:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "list_double_increment.php", line 6, characters 13-14:
-Unsequenced modifications to local variable. Modified here (Typing[4144])
-  File "list_double_increment.php", line 6, characters 23-24:
-  And also modified here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+list_double_increment.php:6:13
+4 | function test(varray<int> $a, varray<int> $b): int {
+5 |   $x = 0;
+6 |   list($b[++$x], $b[++$x]) = $a;
+  |             ^^ [1]
+7 |   return $x;
+8 | }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+list_double_increment.php:6:23
+4 | function test(varray<int> $a, varray<int> $b): int {
+5 |   $x = 0;
+6 |   list($b[++$x], $b[++$x]) = $a;
+  |                       ^^ [1]
+7 |   return $x;
+8 | }
+
+error: Typing[4144] Unsequenced modifications to local variable. Modified here [1]
+-> And also modified here [2]
+
+list_double_increment.php:6:13
+4 | function test(varray<int> $a, varray<int> $b): int {
+5 |   $x = 0;
+6 |   list($b[++$x], $b[++$x]) = $a;
+  |             ^^ [1]
+  |                       ^^ [2]
+7 |   return $x;
+8 | }
+
+3 errors found

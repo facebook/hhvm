@@ -1,6 +1,18 @@
-ERROR: File "unpack_call4.php", line 8, characters 18-22:
-Invalid argument (Typing[4359])
-  File "unpack_call4.php", line 8, characters 18-22:
-  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-  File "unpack_call4.php", line 3, characters 10-10:
-  Definition is here
+error: Typing[4359] Invalid argument [1]
+-> A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array [1]
+-> Definition is here [2]
+
+unpack_call4.php:8:18
+1 | <?hh
+2 | 
+3 | function f(string $foo): void {}
+  |          ^ [2]
+4 | 
+5 | function test(): void {
+6 |   $args = vec[];
+7 |   // arity error
+8 |   f('string', ...$args);
+  |                  ^^^^^ [1]
+9 | }
+
+1 error found

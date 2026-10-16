@@ -1,4 +1,21 @@
-ERROR: File "default_parameter.php", line 5, characters 50-62:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "default_parameter.php", line 9, characters 40-52:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+default_parameter.php:5:50
+3 | <<file:__EnableUnstableFeatures('expression_trees')>>
+4 | 
+5 | function test(ExampleExpression<ExampleInt> $x = ExampleDsl`1`): void {}
+  |                                                  ^^^^^^^^^^^^^ [1]
+6 | 
+7 | class MyTestClass {
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+default_parameter.php:9:40
+ 7 | class MyTestClass {
+ 8 |   public function test(
+ 9 |     ExampleExpression<ExampleInt> $x = ExampleDsl`1`,
+   |                                        ^^^^^^^^^^^^^ [1]
+10 |   ): void {}
+11 | }
+
+2 errors found

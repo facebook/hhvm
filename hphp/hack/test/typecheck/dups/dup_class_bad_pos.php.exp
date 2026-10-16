@@ -1,4 +1,19 @@
-ERROR: File "dup_class_bad_pos.php--file2.php", line 6, characters 16-16:
-Name already bound: `C` (Naming[2012])
-  File "dup_class_bad_pos.php--file1.php", line 7, characters 16-16:
-  Previous definition is here
+error: Naming[2012] Name already bound: `C` [1]
+-> Previous definition is here [2]
+
+dup_class_bad_pos.php--file2.php:6:16
+4 |   require extends A;
+5 | }
+6 | abstract class C {
+  |                ^ [1]
+7 |   use MyTrait;
+8 |   const type T = int;
+
+dup_class_bad_pos.php--file1.php:7:16
+5 |   abstract const type T as mixed;
+6 | }
+7 | abstract class C {
+  |                ^ [2]
+8 | }
+
+1 error found

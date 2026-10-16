@@ -1,2 +1,10 @@
-ERROR: File "await_in_splice_error.php", line 10, characters 20-42:
-Cannot use unstable feature: `await_in_splice` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `await_in_splice` [1]
+
+await_in_splice_error.php:10:20
+ 8 | <<__EntryPoint>>
+ 9 | async function myTestFunction(): Awaitable<void> {
+10 |   ExampleDsl`1 + ${await myTestFunction2()}`;
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

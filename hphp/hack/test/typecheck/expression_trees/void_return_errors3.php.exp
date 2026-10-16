@@ -1,12 +1,41 @@
-ERROR: File "void_return_errors3.php", line 6, characters 14-87:
-Invalid return type (Typing[4336])
-  File "void_return_errors3.php", line 6, characters 32-41:
-  Expected `int`
-  File "void_return_errors3.php", line 6, characters 14-87:
-  But got `void` because this function does not always return a value
-ERROR: File "void_return_errors3.php", line 6, characters 14-87:
-This function can exit with and without returning a value (Typing[4421])
-  File "void_return_errors3.php", line 8, characters 7-15:
-  Returning a value here.
-  File "void_return_errors3.php", line 6, characters 14-87:
-  This function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+void_return_errors3.php:6:14
+ 4 | 
+ 5 | function test(): void {
+ 6 |   ExampleDsl`(ExampleBool $b): ExampleInt ==> {
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                ^^^^^^^^^^ [2]
+ 7 |     if ($b) {
+   |     ^^^^^^^^^ [1]
+ 8 |       return 1;
+   |       ^^^^^^^^^ [1]
+ 9 |     }
+   |     ^ [1]
+10 |   }`;
+   |   ^ [1]
+11 | }
+
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> This function does not always return a value [1]
+
+void_return_errors3.php:6:14
+ 4 | 
+ 5 | function test(): void {
+ 6 |   ExampleDsl`(ExampleBool $b): ExampleInt ==> {
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 7 |     if ($b) {
+   |     ^^^^^^^^^ [1]
+ 8 |       return 1;
+   |       ^^^^^^^^^ [1]
+   |       ^^^^^^^^^ [2]
+ 9 |     }
+   |     ^ [1]
+10 |   }`;
+   |   ^ [1]
+11 | }
+
+2 errors found

@@ -1,6 +1,15 @@
-ERROR: File "lambda_called_on_immvector_bad.php", line 4, characters 6-29:
-Invalid argument (Typing[4110])
-  File "lambda_called_on_immvector_bad.php", line 3, characters 16-17:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "lambda_called_on_immvector_bad.php", line 3, characters 19-21:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+lambda_called_on_immvector_bad.php:4:6
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v["a"]);
+  |                ^^ [2]
+  |                   ^^^ [3]
+4 |   $f(Vector{0}->toImmVector());
+  |      ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

@@ -1,30 +1,78 @@
-ERROR: File "closures_subtyping_explicit.bad.php", line 4, characters 10-31:
-Invalid return type (Typing[4403])
-  File "closures_subtyping_explicit.bad.php", line 3, characters 52-56:
-  Expected a function that requires the capability set {Rx, WriteProperty}
-  File "closures_subtyping_explicit.bad.php", line 4, characters 13-23:
-  But got a function that requires the capability set {RxLocal, WriteProperty}
-ERROR: File "closures_subtyping_explicit.bad.php", line 8, characters 10-31:
-Invalid return type (Typing[4403])
-  File "closures_subtyping_explicit.bad.php", line 7, characters 49-50:
-  Expected a function that requires the capability set {}
-  File "closures_subtyping_explicit.bad.php", line 8, characters 13-23:
-  But got a function that requires the capability WriteProperty
-ERROR: File "closures_subtyping_explicit.bad.php", line 13, characters 12-33:
-Invalid return type (Typing[4403])
-  File "closures_subtyping_explicit.bad.php", line 12, characters 59-63:
-  Expected a function that requires the capability set {Rx, WriteProperty}
-  File "closures_subtyping_explicit.bad.php", line 13, characters 15-25:
-  But got a function that requires the capability set {RxLocal, WriteProperty}
-ERROR: File "closures_subtyping_explicit.bad.php", line 17, characters 12-33:
-Invalid return type (Typing[4403])
-  File "closures_subtyping_explicit.bad.php", line 16, characters 56-57:
-  Expected a function that requires the capability set {}
-  File "closures_subtyping_explicit.bad.php", line 17, characters 15-25:
-  But got a function that requires the capability WriteProperty
-ERROR: File "closures_subtyping_explicit.bad.php", line 25, characters 22-23:
-Invalid argument (Typing[4403])
-  File "closures_subtyping_explicit.bad.php", line 21, characters 41-45:
-  Expected a function that requires the capability set {Rx, WriteProperty}
-  File "closures_subtyping_explicit.bad.php", line 24, characters 11-21:
-  But got a function that requires the capability set {RxLocal, WriteProperty}
+error: Typing[4403] Invalid return type [1]
+-> Expected a function that requires the capability set {Rx, WriteProperty} [2]
+-> But got a function that requires the capability set {RxLocal, WriteProperty} [3]
+
+closures_subtyping_explicit.bad.php:4:10
+1 | <?hh
+2 | 
+3 | function f_ret_unsafe_supertype_bad(): (function()[oldrx]: void) {
+  |                                                    ^^^^^ [2]
+4 |   return ()[oldrx_local] ==> {}; // ERROR
+  |          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |             ^^^^^^^^^^^ [3]
+5 | }
+6 | 
+
+error: Typing[4403] Invalid return type [1]
+-> Expected a function that requires the capability set {} [2]
+-> But got a function that requires the capability WriteProperty [3]
+
+closures_subtyping_explicit.bad.php:8:10
+ 5 | }
+ 6 | 
+ 7 | function f_ret_safe_supertype_bad(): (function()[]: void) {
+   |                                                 ^^ [2]
+ 8 |   return ()[write_props] ==> {}; // ERROR
+   |          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^^^^^^^ [3]
+ 9 | }
+10 | 
+
+error: Typing[4403] Invalid return type [1]
+-> Expected a function that requires the capability set {Rx, WriteProperty} [2]
+-> But got a function that requires the capability set {RxLocal, WriteProperty} [3]
+
+closures_subtyping_explicit.bad.php:13:12
+10 | 
+11 | class MyClass {
+12 |   public function ret_unsafe_supertype_bad(): (function()[oldrx]: void) {
+   |                                                           ^^^^^ [2]
+13 |     return ()[oldrx_local] ==> {}; // ERROR
+   |            ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |               ^^^^^^^^^^^ [3]
+14 |   }
+15 | 
+
+error: Typing[4403] Invalid return type [1]
+-> Expected a function that requires the capability set {} [2]
+-> But got a function that requires the capability WriteProperty [3]
+
+closures_subtyping_explicit.bad.php:17:12
+14 |   }
+15 | 
+16 |   public function ret_safe_supertype_bad(): (function()[]: void) {
+   |                                                        ^^ [2]
+17 |     return ()[write_props] ==> {}; // ERROR
+   |            ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |               ^^^^^^^^^^^ [3]
+18 |   }
+19 | }
+
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability set {Rx, WriteProperty} [2]
+-> But got a function that requires the capability set {RxLocal, WriteProperty} [3]
+
+closures_subtyping_explicit.bad.php:25:22
+19 | }
+20 | 
+21 | function expects_rx_closure((function()[oldrx]: void) $_): void {}
+   |                                         ^^^^^ [2]
+22 | 
+23 | function passes_rx_local_as_rx_closure(): void {
+24 |   $f = ()[oldrx_local] ==> {};
+   |           ^^^^^^^^^^^ [3]
+25 |   expects_rx_closure($f);
+   |                      ^^ [1]
+26 | }
+
+5 errors found

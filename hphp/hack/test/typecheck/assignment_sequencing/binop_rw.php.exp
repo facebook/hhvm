@@ -1,6 +1,23 @@
-ERROR: File "binop_rw.php", line 8, characters 17-18:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "binop_rw.php", line 8, characters 17-18:
-Unsequenced modification and access to local variable. Modified here (Typing[4143])
-  File "binop_rw.php", line 8, characters 10-11:
-  And accessed here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+binop_rw.php:8:17
+ 6 | function x(int $x): int {
+ 7 |   $z = vec[];
+ 8 |   $ret = $x + f($x = $z);
+   |                 ^^ [1]
+ 9 |   return $ret;
+10 | }
+
+error: Typing[4143] Unsequenced modification and access to local variable. Modified here [1]
+-> And accessed here [2]
+
+binop_rw.php:8:17
+ 6 | function x(int $x): int {
+ 7 |   $z = vec[];
+ 8 |   $ret = $x + f($x = $z);
+   |          ^^ [2]
+   |                 ^^ [1]
+ 9 |   return $ret;
+10 | }
+
+2 errors found

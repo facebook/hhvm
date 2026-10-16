@@ -1,12 +1,40 @@
-ERROR: File "callable.php", line 6, characters 13-33:
-`__Callable` typehints cannot be used with `is` expressions (Parsing[1002])
-ERROR: File "callable.php", line 6, characters 13-33:
-Invalid `is` expression hint (Typing[4195])
-  File "callable.php", line 6, characters 13-33:
-  The `is` operator cannot be used with a function type
-ERROR: File "callable.php", line 7, characters 7-8:
-Invalid argument (Typing[4110])
-  File "callable.php", line 3, characters 12-14:
-  Expected `int`
-  File "callable.php", line 5, characters 12-16:
-  But got `mixed`
+error: Parsing[1002] `__Callable` typehints cannot be used with `is` expressions [1]
+
+callable.php:6:13
+4 | 
+5 | function f(mixed $x, bool $b): void {
+6 |   if ($x is (function(int): ?int)) {
+  |             ^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |     g($x);
+8 |   }
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a function type [1]
+
+callable.php:6:13
+4 | 
+5 | function f(mixed $x, bool $b): void {
+6 |   if ($x is (function(int): ?int)) {
+  |             ^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |     g($x);
+8 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+callable.php:7:7
+1 | <?hh
+2 | 
+3 | function g(int $x): void {}
+  |            ^^^ [2]
+4 | 
+5 | function f(mixed $x, bool $b): void {
+  |            ^^^^^ [3]
+6 |   if ($x is (function(int): ?int)) {
+7 |     g($x);
+  |       ^^ [1]
+8 |   }
+9 | }
+
+3 errors found

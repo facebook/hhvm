@@ -1,24 +1,121 @@
-ERROR: File "static_prop.php", line 7, characters 19-28:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 11, characters 19-28:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 11, characters 19-28:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "static_prop.php", line 15, characters 19-26:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 19, characters 19-26:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 19, characters 19-26:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "static_prop.php", line 24, characters 17-22:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 28, characters 17-22:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 28, characters 17-22:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "static_prop.php", line 32, characters 17-22:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 37, characters 19-24:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_prop.php", line 41, characters 19-28:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:7:19
+5 | 
+6 |   public static function accessStaticPropWithDefaultCtx(
+7 |     Set<int> $x = static::$s // OK
+  |                   ^^^^^^^^^^ [1]
+8 |   ): void {}
+9 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:11:19
+ 9 | 
+10 |   public static function accessStaticPropWithPureCtx(
+11 |     Set<int> $x = static::$s  // ERROR
+   |                   ^^^^^^^^^^ [1]
+12 |   )[]: void {}
+13 | 
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+static_prop.php:11:19
+ 9 | 
+10 |   public static function accessStaticPropWithPureCtx(
+11 |     Set<int> $x = static::$s  // ERROR
+   |                   ^^^^^^^^^^ [1]
+12 |   )[]: void {}
+13 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:15:19
+13 | 
+14 |   public function accessStaticPropWithDefaultCtxNonStatic(
+15 |     Set<int> $x = self::$s // OK
+   |                   ^^^^^^^^ [1]
+16 |   ): void {}
+17 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:19:19
+17 | 
+18 |   public function accessStaticPropWithPureCtxNonStatic(
+19 |     Set<int> $x = self::$s  // ERROR
+   |                   ^^^^^^^^ [1]
+20 |   )[]: void {}
+21 | }
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+static_prop.php:19:19
+17 | 
+18 |   public function accessStaticPropWithPureCtxNonStatic(
+19 |     Set<int> $x = self::$s  // ERROR
+   |                   ^^^^^^^^ [1]
+20 |   )[]: void {}
+21 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:24:17
+22 | 
+23 | function accessStaticPropWithDefaultCtx(
+24 |   Set<int> $x = AC::$s  // OK
+   |                 ^^^^^^ [1]
+25 | ): void {}
+26 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:28:17
+26 | 
+27 | function accessStaticPropWithPureCtx(
+28 |   Set<int> $x = AC::$s  // ERROR
+   |                 ^^^^^^ [1]
+29 | )[]: void {}
+30 | 
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+static_prop.php:28:17
+26 | 
+27 | function accessStaticPropWithPureCtx(
+28 |   Set<int> $x = AC::$s  // ERROR
+   |                 ^^^^^^ [1]
+29 | )[]: void {}
+30 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:32:17
+30 | 
+31 | function accessStaticPropWithAccessGlobalsCtx(
+32 |   Set<int> $x = AC::$s  // OK
+   |                 ^^^^^^ [1]
+33 | )[globals]: void {}
+34 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:37:19
+35 | abstract class AC2 extends AC {
+36 |   public static function accessStaticPropWithAccessGlobalsCtx(
+37 |     Set<int> $x = AC::$s  // OK
+   |                   ^^^^^^ [1]
+38 |   )[globals]: void {}
+39 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_prop.php:41:19
+39 | 
+40 |   public function accessStaticPropWithAccessGlobalsCtxNonStatic(
+41 |     Set<int> $x = parent::$s  // OK
+   |                   ^^^^^^^^^^ [1]
+42 |   )[globals]: void {}
+43 | }
+
+12 errors found

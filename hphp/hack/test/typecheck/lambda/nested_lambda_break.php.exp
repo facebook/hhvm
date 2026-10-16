@@ -1,2 +1,11 @@
-ERROR: File "nested_lambda_break.php", line 15, characters 7-12:
-`break` can only be used inside loops or `switch` statements (NastCheck[3022])
+error: NastCheck[3022] `break` can only be used inside loops or `switch` statements [1]
+
+nested_lambda_break.php:15:7
+13 |   while (true) {
+14 |     return $x ==> {
+15 |       break;
+   |       ^^^^^^ [1]
+16 |     };
+17 |   }
+
+1 error found

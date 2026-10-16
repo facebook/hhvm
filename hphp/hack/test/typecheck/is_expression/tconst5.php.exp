@@ -1,10 +1,35 @@
-ERROR: File "tconst5.php", line 16, characters 13-24:
-Invalid `is` expression hint (Typing[4195])
-  File "tconst5.php", line 12, characters 23-23:
-  The `is` operator cannot be used with the abstract type constant T because it is not marked `<<__Enforceable>>`
-ERROR: File "tconst5.php", line 16, characters 13-24:
-Invalid type hint (Typing[4352])
-  File "tconst5.php", line 16, characters 24-24:
-  An abstract type constant is not allowed in this position. Did you mean `this::T`?
-  File "tconst5.php", line 12, characters 23-23:
-  `T` is abstract here.
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with the abstract type constant T because it is not marked `<<__Enforceable>>` [2]
+
+tconst5.php:16:13
+10 | 
+11 | abstract class E {
+12 |   abstract const type T as arraykey;
+   |                       ^ [2]
+13 | }
+14 | 
+15 | function f(mixed $x): void {
+16 |   if ($x is C::TD::TE::T) {
+   |             ^^^^^^^^^^^^ [1]
+17 |     expect_arraykey($x);
+18 |   }
+
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::T`? [2]
+-> `T` is abstract here. [3]
+
+tconst5.php:16:13
+10 | 
+11 | abstract class E {
+12 |   abstract const type T as arraykey;
+   |                       ^ [3]
+13 | }
+14 | 
+15 | function f(mixed $x): void {
+16 |   if ($x is C::TD::TE::T) {
+   |             ^^^^^^^^^^^^ [1]
+   |                        ^ [2]
+17 |     expect_arraykey($x);
+18 |   }
+
+2 errors found

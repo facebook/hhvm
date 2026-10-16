@@ -1,38 +1,83 @@
-ERROR: File "insts5.php", line 10, characters 23-34:
-This makes Derived implements I<string> but it already implements I at another instantiation (Typing[4480])
-  File "insts5.php", line 10, characters 47-47:
-  It already implements I<arraykey> via J
-  File "insts5.php", line 5, characters 21-21:
-  This is where J implements I
-  File "insts5.php", line 6, characters 26-26:
-  This is where Base implements I
-  File "insts5.php", line 5, characters 21-21:
-  I<arraykey> should be a subtype of I<string>, but it's not because
-  File "insts5.php", line 10, characters 28-33:
-  Expected `string`
-  File "insts5.php", line 6, characters 28-28:
-    via this generic `T`
-  File "insts5.php", line 5, characters 23-30:
-  But got `arraykey`
-ERROR: File "insts5.php", line 14, characters 24-30:
-This makes Derived2 implements I<string> but it already implements I at another instantiation (Typing[4480])
-  File "insts5.php", line 14, characters 43-43:
-  It already implements I<arraykey> via J
-  File "insts5.php", line 5, characters 21-21:
-  This is where J implements I
-  File "insts5.php", line 6, characters 26-26:
-  This is where Another implements I
-  File "insts5.php", line 5, characters 21-21:
-  I<arraykey> should be a subtype of I<string>, but it's not because
-  File "insts5.php", line 12, characters 28-33:
-  Expected `string`
-  File "insts5.php", line 6, characters 28-28:
-    via this generic `T`
-  File "insts5.php", line 5, characters 23-30:
-  But got `arraykey`
-ERROR: File "insts5.php", line 22, characters 10-11:
-Invalid argument (Typing[4110])
-  File "insts5.php", line 19, characters 19-24:
-  Expected `string`
-  File "insts5.php", line 5, characters 23-30:
-  But got `arraykey`
+error: Typing[4480] This makes Derived implements I<string> but it already implements I at another instantiation [1]
+-> It already implements I<arraykey> via J [2]
+-> This is where J implements I [3]
+-> This is where Base implements I [4]
+-> I<arraykey> should be a subtype of I<string>, but it's not because [3]
+-> Expected `string` [5]
+->   via this generic `T` [6]
+-> But got `arraykey` [7]
+
+insts5.php:10:23
+ 3 | 
+ 4 | interface I<+T> { }
+ 5 | interface J extends I<arraykey> { }
+   |                     ^ [3]
+   |                       ^^^^^^^^ [7]
+ 6 | class Base<T> implements I<T> { }
+   |                          ^ [4]
+   |                            ^ [6]
+ 7 | // Should this be allowed?
+ 8 | // We were thinking that implements should override inherited stuff
+ 9 | // But perhaps only when there is a direct instantiation in the declaration
+10 | class Derived extends Base<string> implements J { }
+   |                       ^^^^^^^^^^^^ [1]
+   |                            ^^^^^^ [5]
+   |                                               ^ [2]
+11 | 
+12 | class Another extends Base<string> { }
+
+error: Typing[4480] This makes Derived2 implements I<string> but it already implements I at another instantiation [1]
+-> It already implements I<arraykey> via J [2]
+-> This is where J implements I [3]
+-> This is where Another implements I [4]
+-> I<arraykey> should be a subtype of I<string>, but it's not because [3]
+-> Expected `string` [5]
+->   via this generic `T` [6]
+-> But got `arraykey` [7]
+
+insts5.php:14:24
+ 3 | 
+ 4 | interface I<+T> { }
+ 5 | interface J extends I<arraykey> { }
+   |                     ^ [3]
+   |                       ^^^^^^^^ [7]
+ 6 | class Base<T> implements I<T> { }
+   |                          ^ [4]
+   |                            ^ [6]
+ 7 | // Should this be allowed?
+ 8 | // We were thinking that implements should override inherited stuff
+ 9 | // But perhaps only when there is a direct instantiation in the declaration
+10 | class Derived extends Base<string> implements J { }
+11 | 
+12 | class Another extends Base<string> { }
+   |                            ^^^^^^ [5]
+13 | // On the other hand, what about this?
+14 | class Derived2 extends Another implements J { }
+   |                        ^^^^^^^ [1]
+   |                                           ^ [2]
+15 | 
+16 | // Workaround is to re-implement e.g.
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+insts5.php:22:10
+ 3 | 
+ 4 | interface I<+T> { }
+ 5 | interface J extends I<arraykey> { }
+   |                       ^^^^^^^^ [3]
+ 6 | class Base<T> implements I<T> { }
+ 7 | // Should this be allowed?
+   :
+17 | class Derived3 extends Base<string> implements I<string>, J { }
+18 | 
+19 | function expect(I<string> $_):void { }
+   |                   ^^^^^^ [2]
+20 | 
+21 | function test1(Derived $d):void {
+22 |   expect($d);
+   |          ^^ [1]
+23 |   }
+
+3 errors found

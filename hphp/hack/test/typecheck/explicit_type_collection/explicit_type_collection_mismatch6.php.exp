@@ -1,12 +1,27 @@
-ERROR: File "explicit_type_collection_mismatch6.php", line 4, characters 8-37:
-The keys of this `dict` are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch6.php", line 4, characters 13-18:
-  Expected `string`
-  File "explicit_type_collection_mismatch6.php", line 4, characters 26-26:
-  But got `int`
-ERROR: File "explicit_type_collection_mismatch6.php", line 4, characters 8-37:
-The values of this `dict` are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch6.php", line 4, characters 21-23:
-  Expected `int`
-  File "explicit_type_collection_mismatch6.php", line 4, characters 31-36:
-  But got `string`
+error: Typing[4110] The keys of this `dict` are incompatible [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+explicit_type_collection_mismatch6.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $e = dict<string, int>[9 => "nine"];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |             ^^^^^^ [2]
+  |                          ^ [3]
+5 | }
+
+error: Typing[4110] The values of this `dict` are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+explicit_type_collection_mismatch6.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $e = dict<string, int>[9 => "nine"];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                     ^^^ [2]
+  |                               ^^^^^^ [3]
+5 | }
+
+2 errors found

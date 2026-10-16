@@ -1,6 +1,21 @@
-ERROR: File "indexing_increment.php", line 5, characters 17-18:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "indexing_increment.php", line 5, characters 17-18:
-Unsequenced modification and access to local variable. Modified here (Typing[4143])
-  File "indexing_increment.php", line 5, characters 13-14:
-  And accessed here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+indexing_increment.php:5:17
+3 | function foo(varray<varray<int>> $x): int {
+4 |   $y = 0;
+5 |   return $x[$y][$y++];
+  |                 ^^ [1]
+6 | }
+
+error: Typing[4143] Unsequenced modification and access to local variable. Modified here [1]
+-> And accessed here [2]
+
+indexing_increment.php:5:17
+3 | function foo(varray<varray<int>> $x): int {
+4 |   $y = 0;
+5 |   return $x[$y][$y++];
+  |             ^^ [2]
+  |                 ^^ [1]
+6 | }
+
+2 errors found

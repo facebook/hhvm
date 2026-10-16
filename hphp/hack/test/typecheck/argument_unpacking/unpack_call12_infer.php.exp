@@ -1,16 +1,62 @@
-ERROR: File "unpack_call12_infer.php", line 18, characters 21-22:
-Invalid argument (Typing[4110])
-  File "unpack_call12_infer.php", line 22, characters 32-34:
-  Expected `int`
-  File "unpack_call12_infer.php", line 15, characters 16-20:
-  But got `string`
-  File "hackarray.hhi", line 52, characters 72-72:
-    via this generic `T`
-  File "hackarray.hhi", line 22, characters 35-36:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 23-24:
-    via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 66-67:
-    via this generic `Tv`
-  File "unpack_call12_infer.php", line 4, characters 53-54:
-    via this generic `Tv`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+->   via this generic `T` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+->   via this generic `Tv` [7]
+->   via this generic `Tv` [8]
+
+unpack_call12_infer.php:18:21
+  2 | // Copyright 2004-present Facebook. All Rights Reserved.
+  3 | 
+  4 | function myconcat<Tv>(Traversable<Tv> ...$vec): vec<Tv> {
+    |                                                     ^^ [8]
+  5 |   $v = vec[];
+  6 |   foreach ($vec as $x) {
+    :
+ 13 | 
+ 14 | function test_concat_type(): void {
+ 15 |   $a = vec[vec['foo'], vec['bar']];
+    |                ^^^^^ [3]
+ 16 |   $b = myconcat(...$a);
+ 17 |   expect_vec_of_string($b); // ok
+ 18 |   expect_vec_of_int($b); // error
+    |                     ^^ [1]
+ 19 | }
+ 20 | 
+ 21 | function expect_vec_of_string(vec<string> $v): void {}
+ 22 | function expect_vec_of_int(vec<int> $v): void {}
+    |                                ^^^ [2]
+
+hackarray.hhi:52:72
+ 20 |     <<__NoAutoBound>> +Tk as arraykey,
+ 21 |     <<__NoAutoBound>> +Tv,
+ 22 |   > implements KeyedContainer<Tk, Tv>, \XHPChild {
+    |                                   ^^ [5]
+ 23 | 
+ 24 |   }
+    :
+ 50 |    */
+ 51 |   <<__SupportDynamicType>>
+ 52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+    |                                                                        ^ [4]
+ 53 | 
+ 54 | } // namespace HH
+
+interfaces.hhi:115:23
+ 90 |    */
+ 91 |   <<__Sealed(KeyedContainer::class)>>
+ 92 |   interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
+    |                                                                  ^^ [7]
+ 93 | 
+ 94 |   }
+    :
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                       ^^ [6]
+116 | 
+117 |   /**
+
+1 error found

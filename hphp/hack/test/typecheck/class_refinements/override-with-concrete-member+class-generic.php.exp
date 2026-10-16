@@ -1,2 +1,11 @@
-ERROR: File "override-with-concrete-member+class-generic.php", line 7, characters 59-62:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+override-with-concrete-member+class-generic.php:7:59
+5 | }
+6 | abstract class Base<TBox as Box> {
+7 |   abstract protected function mShady<T>(T $_): void where TBox::T = T;
+  |                                                           ^^^^ [1]
+8 | 
+9 |   abstract protected function m<T>(T $_): void
+
+1 error found

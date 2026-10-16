@@ -1,6 +1,15 @@
-ERROR: File "array_as_tuple_bad.php", line 13, characters 10-11:
-Invalid return type (Typing[4110])
-  File "array_as_tuple_bad.php", line 12, characters 38-66:
-  Expected `vec_or_dict<int, string>`
-  File "array_as_tuple_bad.php", line 12, characters 19-31:
-  But got `(int, string)`
+error: Typing[4110] Invalid return type [1]
+-> Expected `vec_or_dict<int, string>` [2]
+-> But got `(int, string)` [3]
+
+array_as_tuple_bad.php:13:10
+10 |  */
+11 | 
+12 | function as_array((int, string) $x): varray_or_darray<int, string> {
+   |                   ^^^^^^^^^^^^^ [3]
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 |   return $x;
+   |          ^^ [1]
+14 | }
+
+1 error found

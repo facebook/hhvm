@@ -10,11 +10,37 @@ File "inout.php", line 12, characters 3-13:
   dynamic
 File "inout.php", line 13, characters 3-13:
   string
-WARN: File "inout.php", line 6, characters 8-9:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "inout.php", line 3, characters 21-27:
-  This expression has type `dynamic`
-WARN: File "inout.php", line 11, characters 12-17:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "inout.php", line 3, characters 21-27:
-  This expression has type `dynamic`
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+inout.php:6:8
+1 | <?hh
+2 | 
+3 | function testObjGet(dynamic $x): void {
+  |                     ^^^^^^^ [2]
+4 |   $z = 5;
+5 |   hh_show($z);
+6 |   $y = $x(inout $z);
+  |        ^^ [1]
+7 |   hh_show($y);
+8 |   hh_show($z);
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+inout.php:11:12
+ 1 | <?hh
+ 2 | 
+ 3 | function testObjGet(dynamic $x): void {
+   |                     ^^^^^^^ [2]
+ 4 |   $z = 5;
+ 5 |   hh_show($z);
+   :
+ 9 |   $w = "5";
+10 |   hh_show($w);
+11 |   $y = $x->method(inout $w);
+   |            ^^^^^^ [1]
+12 |   hh_show($y);
+13 |   hh_show($w);
+
+2 errors found

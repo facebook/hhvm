@@ -1,6 +1,19 @@
-ERROR: File "list_error.php", line 9, characters 15-18:
-Invalid argument (Typing[4110])
-  File "list_error.php", line 12, characters 22-27:
-  Expected `string`
-  File "list_error.php", line 6, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+list_error.php:9:15
+ 4 |  * report errors. */
+ 5 | function test(): void {
+ 6 |   $a = vec[4, 'aaa'];
+   |            ^ [3]
+ 7 | 
+ 8 |   list($int, $string) = $a;
+ 9 |   take_string($int);
+   |               ^^^^ [1]
+10 | }
+11 | 
+12 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+1 error found

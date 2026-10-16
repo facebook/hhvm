@@ -1,8 +1,23 @@
-ERROR: File "is-expr.php", line 11, characters 17-44:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expr.php", line 11, characters 17-44:
-  The `is` operator cannot be used with type refinement
-ERROR: File "is-expr.php", line 13, characters 12-52:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expr.php", line 13, characters 27-51:
-  The `is` operator cannot be used with type refinement
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with type refinement [1]
+
+is-expr.php:11:17
+ 9 | 
+10 | function is_contains_box_refinement(mixed $b): bool {
+11 |   return ($b is Box with { type T = string }) // ERROR (non-nested)
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |     ||
+13 |     ($b is shape('bad' => Box with { type T = int })); // ERROR (nested)
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with type refinement [2]
+
+is-expr.php:13:12
+11 |   return ($b is Box with { type T = string }) // ERROR (non-nested)
+12 |     ||
+13 |     ($b is shape('bad' => Box with { type T = int })); // ERROR (nested)
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | }
+
+2 errors found

@@ -1,40 +1,141 @@
-ERROR: File "invariant-dep-1.php", line 39, characters 5-8:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "invariant-dep-1.php", line 45, characters 5-8:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "invariant-dep-1.php", line 51, characters 5-8:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "invariant-dep-1.php", line 49, characters 45-46:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "invariant-dep-1.php", line 52, characters 12-36:
-Invalid return type (Typing[4110])
-  File "invariant-dep-1.php", line 49, characters 76-77:
-  Expected `T0`
-  File "invariant-dep-1.php", line 9, characters 26-32:
-  But got `<expr#23>::T as TBox::T`
-  File "invariant-dep-1.php", line 52, characters 12-29:
-    where `<expr#23>` is a reference to this expression
-ERROR: File "invariant-dep-1.php", line 52, characters 12-36:
-Invalid return type (Typing[4110])
-  File "invariant-dep-1.php", line 49, characters 76-77:
-  Expected `T0`
-  File "invariant-dep-1.php", line 9, characters 26-32:
-  But got `Box::T super TBox::T`
-  File "invariant-dep-1.php", line 52, characters 12-29:
-    where `<expr#23>` is a reference to this expression
-ERROR: File "invariant-dep-1.php", line 52, characters 12-36:
-Invalid return type (Typing[4110])
-  File "invariant-dep-1.php", line 49, characters 76-77:
-  Expected `T0`
-  File "invariant-dep-1.php", line 9, characters 26-32:
-  But got `TBox::T where TBox::T super <expr#23>::T, TBox::T super T0, TBox::T as Box::T`
-  File "invariant-dep-1.php", line 52, characters 12-29:
-    where `<expr#23>` is a reference to this expression
-ERROR: File "invariant-dep-1.php", line 52, characters 12-36:
-Invalid return type (Typing[4110])
-  File "invariant-dep-1.php", line 49, characters 76-77:
-  Expected `T0`
-  File "invariant-dep-1.php", line 9, characters 26-32:
-  But got `mixed`
-  File "invariant-dep-1.php", line 52, characters 12-29:
-    where `<expr#23>` is a reference to this expression
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+invariant-dep-1.php:39:5
+37 |   public static function eqOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+38 |   where
+39 |     TBox::T = T0 {
+   |     ^^^^ [1]
+40 |     return $cov_box->unwrap()->get(); // OK?
+41 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+invariant-dep-1.php:45:5
+43 |   public static function superOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+44 |   where
+45 |     TBox::T as T0 {
+   |     ^^^^ [1]
+46 |     return $cov_box->unwrap()->get(); // OK
+47 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+invariant-dep-1.php:51:5
+49 |   public static function subOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+50 |   where
+51 |     TBox::T super T0 {
+   |     ^^^^ [1]
+52 |     return $cov_box->unwrap()->get(); // ERROR
+53 |   }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+invariant-dep-1.php:49:45
+47 |   }
+48 | 
+49 |   public static function subOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+   |                                             ^^ [1]
+50 |   where
+51 |     TBox::T super T0 {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T0` [2]
+-> But got `<expr#23>::T as TBox::T` [3]
+->   where `<expr#23>` is a reference to this expression [4]
+
+invariant-dep-1.php:52:12
+ 7 | interface Box {
+ 8 |   abstract const type T;
+ 9 |   public function get(): this::T;
+   |                          ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+47 |   }
+48 | 
+49 |   public static function subOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+   |                                                                            ^^ [2]
+50 |   where
+51 |     TBox::T super T0 {
+52 |     return $cov_box->unwrap()->get(); // ERROR
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^^^^^^^^^^^^^ [4]
+53 |   }
+54 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T0` [2]
+-> But got `Box::T super TBox::T` [3]
+->   where `<expr#23>` is a reference to this expression [4]
+
+invariant-dep-1.php:52:12
+ 7 | interface Box {
+ 8 |   abstract const type T;
+ 9 |   public function get(): this::T;
+   |                          ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+47 |   }
+48 | 
+49 |   public static function subOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+   |                                                                            ^^ [2]
+50 |   where
+51 |     TBox::T super T0 {
+52 |     return $cov_box->unwrap()->get(); // ERROR
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^^^^^^^^^^^^^ [4]
+53 |   }
+54 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T0` [2]
+-> But got `TBox::T where TBox::T super <expr#23>::T, TBox::T super T0, TBox::T as Box::T` [3]
+->   where `<expr#23>` is a reference to this expression [4]
+
+invariant-dep-1.php:52:12
+ 7 | interface Box {
+ 8 |   abstract const type T;
+ 9 |   public function get(): this::T;
+   |                          ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+47 |   }
+48 | 
+49 |   public static function subOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+   |                                                                            ^^ [2]
+50 |   where
+51 |     TBox::T super T0 {
+52 |     return $cov_box->unwrap()->get(); // ERROR
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^^^^^^^^^^^^^ [4]
+53 |   }
+54 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T0` [2]
+-> But got `mixed` [3]
+->   where `<expr#23>` is a reference to this expression [4]
+
+invariant-dep-1.php:52:12
+ 7 | interface Box {
+ 8 |   abstract const type T;
+ 9 |   public function get(): this::T;
+   |                          ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+47 |   }
+48 | 
+49 |   public static function subOuterProjection<T0>(Invariant<TBox> $cov_box): T0
+   |                                                                            ^^ [2]
+50 |   where
+51 |     TBox::T super T0 {
+52 |     return $cov_box->unwrap()->get(); // ERROR
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^^^^^^^^^^^^^ [4]
+53 |   }
+54 | }
+
+8 errors found

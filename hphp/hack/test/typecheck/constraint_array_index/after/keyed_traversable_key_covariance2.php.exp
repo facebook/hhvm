@@ -1,6 +1,16 @@
-ERROR: File "keyed_traversable_key_covariance2.php", line 7, characters 20-22:
-Invalid index type for this vec (Typing[4449])
-  File "keyed_traversable_key_covariance2.php", line 5, characters 13-20:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "keyed_traversable_key_covariance2.php", line 7, characters 20-22:
-  It is incompatible with a string
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+keyed_traversable_key_covariance2.php:7:20
+3 | function main(): void {
+4 |   filter(
+5 |     produce(vec['a']),
+  |             ^^^^^^^^ [2]
+6 |     $item ==> {
+7 |       return $item['a'] === 'a'; // this should also trigger typechecker error
+  |                    ^^^ [1]
+8 |     },
+9 |   );
+
+1 error found

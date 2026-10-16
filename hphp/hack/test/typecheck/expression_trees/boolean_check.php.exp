@@ -1,22 +1,111 @@
-ERROR: File "boolean_check.php", line 27, characters 11-25:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 28, characters 11-25:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 34, characters 16-30:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 37, characters 16-30:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 45, characters 13-27:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 48, characters 13-27:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 49, characters 20-34:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 50, characters 14-28:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 51, characters 20-34:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 59, characters 7-21:
-`ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
-ERROR: File "boolean_check.php", line 62, characters 7-18:
-`ExampleStringOpType` cannot be used as a boolean (it has no instance method named `__bool`) (Typing[4053])
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:27:11
+25 |     () ==> {
+26 |       // if/else
+27 |       if (nullable_bool()) {}
+   |           ^^^^^^^^^^^^^^^ [1]
+28 |       if (nullable_bool()) {} else {}
+29 | 
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:28:11
+26 |       // if/else
+27 |       if (nullable_bool()) {}
+28 |       if (nullable_bool()) {} else {}
+   |           ^^^^^^^^^^^^^^^ [1]
+29 | 
+30 |       if (a_bool()) {}
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:34:16
+32 | 
+33 |       if (a_bool()) {}
+34 |       else if (nullable_bool()) {}
+   |                ^^^^^^^^^^^^^^^ [1]
+35 | 
+36 |       if (a_bool()) {}
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:37:16
+35 | 
+36 |       if (a_bool()) {}
+37 |       else if (nullable_bool()) {}
+   |                ^^^^^^^^^^^^^^^ [1]
+38 |       else {}
+39 | 
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:45:13
+43 | 
+44 |       // while() {}
+45 |       while(nullable_bool()) {}
+   |             ^^^^^^^^^^^^^^^ [1]
+46 |       while(a_bool()) {}
+47 | 
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:48:13
+46 |       while(a_bool()) {}
+47 | 
+48 |       for (;nullable_bool();) {}
+   |             ^^^^^^^^^^^^^^^ [1]
+49 |       for ($i = 0; nullable_bool();) {}
+50 |       for (; nullable_bool(); $i = $i + 1) {}
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:49:20
+47 | 
+48 |       for (;nullable_bool();) {}
+49 |       for ($i = 0; nullable_bool();) {}
+   |                    ^^^^^^^^^^^^^^^ [1]
+50 |       for (; nullable_bool(); $i = $i + 1) {}
+51 |       for ($i = 0; nullable_bool(); $i = $i + 1) {}
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:50:14
+48 |       for (;nullable_bool();) {}
+49 |       for ($i = 0; nullable_bool();) {}
+50 |       for (; nullable_bool(); $i = $i + 1) {}
+   |              ^^^^^^^^^^^^^^^ [1]
+51 |       for ($i = 0; nullable_bool(); $i = $i + 1) {}
+52 | 
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:51:20
+49 |       for ($i = 0; nullable_bool();) {}
+50 |       for (; nullable_bool(); $i = $i + 1) {}
+51 |       for ($i = 0; nullable_bool(); $i = $i + 1) {}
+   |                    ^^^^^^^^^^^^^^^ [1]
+52 | 
+53 |       for (;a_bool();) {}
+
+error: Typing[4053] `ExampleMixedOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:59:7
+57 | 
+58 |       // ternary _ ? _ : _ operator
+59 |       nullable_bool() ? 1 : 2;
+   |       ^^^^^^^^^^^^^^^ [1]
+60 |       a_bool() ? 1 : 2;
+61 | 
+
+error: Typing[4053] `ExampleStringOpType` cannot be used as a boolean (it has no instance method named `__bool`) [1]
+
+boolean_check.php:62:7
+60 |       a_bool() ? 1 : 2;
+61 | 
+62 |       "not a bool" ? 1 : 2;
+   |       ^^^^^^^^^^^^ [1]
+63 | 
+64 |       // Represents an infinite loop and should be the last item
+
+11 errors found

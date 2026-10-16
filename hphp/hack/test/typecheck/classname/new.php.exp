@@ -6,7 +6,17 @@ File "new.php", line 30, characters 3-16:
   Td as D<I>
 File "new.php", line 47, characters 5-18:
   T as C
-ERROR: File "new.php", line 17, characters 15-20:
-Can't use `new` on `classname<I>`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-  File "new.php", line 16, characters 25-25:
-  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+error: Typing[4060] Can't use `new` on `classname<I>`; `__construct` arguments are not guaranteed to be consistent in child classes [1]
+-> This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute [2]
+
+new.php:17:15
+14 | trait MyTr {}
+15 | 
+16 | function factory_i<T as I>(class<T> $klass): I {
+   |                         ^ [2]
+17 |   $inst = new $klass();
+   |               ^^^^^^ [1]
+18 |   hh_show($inst);
+19 |   return $inst;
+
+1 error found

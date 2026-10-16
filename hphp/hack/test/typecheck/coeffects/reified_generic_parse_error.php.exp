@@ -1,6 +1,31 @@
-ERROR: File "reified_generic_parse_error.php", line 8, characters 22-22:
-Type parameter T used for dependent context T::Tself::C must be reified (Parsing[1002])
-ERROR: File "reified_generic_parse_error.php", line 12, characters 5-5:
-Type parameter T used for dependent context T::C must be reified (Parsing[1002])
-ERROR: File "reified_generic_parse_error.php", line 13, characters 5-6:
-Type parameter Tm used for dependent context Tm::C must be reified (Parsing[1002])
+error: Parsing[1002] Type parameter T used for dependent context T::Tself::C must be reified [1]
+
+reified_generic_parse_error.php:8:22
+ 6 | }
+ 7 | 
+ 8 | function f<T as A>()[T::Tself::C]: void {}
+   |                      ^ [1]
+ 9 | 
+10 | class C<T as A> {
+
+error: Parsing[1002] Type parameter T used for dependent context T::C must be reified [1]
+
+reified_generic_parse_error.php:12:5
+10 | class C<T as A> {
+11 |   public function m<Tm as A>()[
+12 |     T::C,
+   |     ^ [1]
+13 |     Tm::C
+14 |   ]: void {}
+
+error: Parsing[1002] Type parameter Tm used for dependent context Tm::C must be reified [1]
+
+reified_generic_parse_error.php:13:5
+11 |   public function m<Tm as A>()[
+12 |     T::C,
+13 |     Tm::C
+   |     ^^ [1]
+14 |   ]: void {}
+15 | }
+
+3 errors found

@@ -1,6 +1,18 @@
-ERROR: File "unpack_call2.php", line 8, characters 5-12:
-Invalid argument (Typing[4110])
-  File "unpack_call2.php", line 3, characters 12-14:
-  Expected `int`
-  File "unpack_call2.php", line 8, characters 5-12:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+unpack_call2.php:8:5
+1 | <?hh
+2 | 
+3 | function f(int $foo, mixed ...$args): void {}
+  |            ^^^ [2]
+4 | 
+5 | function test(): void {
+6 |   $args = vec[1, 2, 3];
+7 |   // positional args should be typechecked
+8 |   f('string', ...$args);
+  |     ^^^^^^^^ [1]
+9 | }
+
+1 error found

@@ -1,12 +1,25 @@
-ERROR: File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
-  Expected `int`
-  File "explicit_type_collection_mismatch4.php", line 4, characters 20-24:
-  But got `string`
-ERROR: File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
-  Expected `int`
-  File "explicit_type_collection_mismatch4.php", line 4, characters 27-31:
-  But got `string`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `string` [2]
+
+explicit_type_collection_mismatch4.php:4:15
+2 | 
+3 | function f(): void {
+4 |   $c = keyset<int>["bar", "baz"];
+  |               ^^^ [1]
+  |                    ^^^^^ [2]
+5 | }
+
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `string` [2]
+
+explicit_type_collection_mismatch4.php:4:15
+2 | 
+3 | function f(): void {
+4 |   $c = keyset<int>["bar", "baz"];
+  |               ^^^ [1]
+  |                           ^^^^^ [2]
+5 | }
+
+2 errors found

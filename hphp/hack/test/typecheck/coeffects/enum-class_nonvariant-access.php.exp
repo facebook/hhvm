@@ -1,2 +1,10 @@
-ERROR: File "enum-class_nonvariant-access.php", line 9, characters 22-30:
-Using `EC::class` in this position will trigger an implicit runtime conversion to string, please use `nameof EC` (Typing[4482])
+error: Typing[4482] Using `EC::class` in this position will trigger an implicit runtime conversion to string, please use `nameof EC` [1]
+
+enum-class_nonvariant-access.php:9:22
+ 7 | final abstract class Foo {
+ 8 |   // OK (this is not access to variant that requires impure context)
+ 9 |   const string FOO = EC::class;
+   |                      ^^^^^^^^^ [1]
+10 | }
+
+1 error found

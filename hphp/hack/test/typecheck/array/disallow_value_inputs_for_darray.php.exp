@@ -1,6 +1,28 @@
-ERROR: File "disallow_value_inputs_for_darray.php", line 4, characters 9-9:
-An arrow `=>` is expected here. (Parsing[1002])
-ERROR: File "disallow_value_inputs_for_darray.php", line 4, characters 9-9:
-Unbound name: `]` (a global constant) (Naming[2049])
-ERROR: File "disallow_value_inputs_for_darray.php", line 4, characters 9-9:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] An arrow `=>` is expected here. [1]
+
+disallow_value_inputs_for_darray.php:4:9
+2 | 
+3 | function test(): void {
+4 |   dict[0];
+  |         ^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `]` (a global constant) [1]
+
+disallow_value_inputs_for_darray.php:4:9
+2 | 
+3 | function test(): void {
+4 |   dict[0];
+  |         ^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+disallow_value_inputs_for_darray.php:4:9
+2 | 
+3 | function test(): void {
+4 |   dict[0];
+  |         ^ [1]
+5 | }
+
+3 errors found

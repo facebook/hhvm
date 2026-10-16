@@ -1,8 +1,22 @@
-ERROR: File "meth_caller11.php", line 31, characters 17-23:
-Invalid argument (Typing[4110])
-  File "meth_caller11.php", line 24, characters 49-49:
-  Expected `C`
-  File "meth_caller11.php", line 24, characters 42-44:
-  But got `int`
-  File "meth_caller11.php", line 24, characters 42-44:
-  This type argument to `Wrapper` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+-> But got `int` [3]
+-> This type argument to `Wrapper` must match exactly (it is invariant) [3]
+
+meth_caller11.php:31:17
+22 | }
+23 | 
+24 | function use_with_ints((function(Wrapper<int>): C) $caller): void {
+   |                                          ^^^ [3]
+   |                                                 ^ [2]
+25 |   $b = $caller(new Wrapper(3));
+26 |   $b->bar();
+   :
+29 | function breakIt(): void {
+30 |   $caller = meth_caller(Wrapper::class, 'foo');
+31 |   use_with_ints($caller);
+   |                 ^^^^^^^ [1]
+32 | }
+33 | 
+
+1 error found

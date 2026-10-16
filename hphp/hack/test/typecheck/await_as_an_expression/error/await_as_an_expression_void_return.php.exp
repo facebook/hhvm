@@ -1,4 +1,15 @@
-ERROR: File "await_as_an_expression_void_return.php", line 6, characters 8-19:
-You are using the return value of a `void` function (Typing[4119])
-  File "await_as_an_expression_void_return.php", line 3, characters 34-37:
-  A `void` function doesn't return a value.
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+await_as_an_expression_void_return.php:6:8
+1 | <?hh
+2 | 
+3 | async function genx(): Awaitable<void> {}
+  |                                  ^^^^ [2]
+4 | 
+5 | async function foo(): Awaitable<void> {
+6 |   $x = await genx();
+  |        ^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

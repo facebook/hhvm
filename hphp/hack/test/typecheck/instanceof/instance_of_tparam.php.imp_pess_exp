@@ -1,62 +1,144 @@
-ERROR: File "instance_of_tparam.php", line 14, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 12, characters 40-45:
-  Expected `string`
-  File "interfaces.hhi", line 77, characters 13-28:
-  But got `mixed`
-ERROR: File "instance_of_tparam.php", line 14, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 12, characters 48-53:
-  Expected `string`
-  File "instance_of_tparam.php", line 13, characters 13-34:
-  But got `nonnull` from this `is` expression test
-ERROR: File "instance_of_tparam.php", line 14, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 12, characters 48-53:
-  Expected `~string`
-  File "instance_of_tparam.php", line 13, characters 13-34:
-  But got `mixed` from this `is` expression test
-ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  Expected `Ty`
-  File "instance_of_tparam.php", line 24, characters 13-16:
-  But got `Tx` from this `is` expression test
-  File "instance_of_tparam.php", line 21, characters 22-22:
-    via this generic `T`
-  File "instance_of_tparam.php", line 24, characters 13-16:
-  This type argument to `D` must match exactly (it is invariant)
-ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  Expected `Ty`
-  File "instance_of_tparam.php", line 24, characters 13-16:
-  But got `mixed` from this `is` expression test
-  File "instance_of_tparam.php", line 21, characters 22-22:
-    via this generic `T`
-  File "instance_of_tparam.php", line 24, characters 13-16:
-  This type argument to `D` must match exactly (it is invariant)
-  File "instance_of_tparam.php", line 23, characters 12-13:
-    by the definition of `Tx`
-ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 24, characters 13-16:
-  Expected `Tx` from this `is` expression test
-  File "instance_of_tparam.php", line 21, characters 22-22:
-    via this generic `T`
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  But got `Ty`
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  This type argument to `D` must match exactly (it is invariant)
-ERROR: File "instance_of_tparam.php", line 25, characters 12-13:
-Invalid return type (Typing[4110])
-  File "instance_of_tparam.php", line 24, characters 13-16:
-  Expected `Tx` from this `is` expression test
-  File "instance_of_tparam.php", line 21, characters 22-22:
-    via this generic `T`
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  But got `mixed`
-  File "instance_of_tparam.php", line 23, characters 33-34:
-  This type argument to `D` must match exactly (it is invariant)
-  File "instance_of_tparam.php", line 23, characters 16-17:
-    by the definition of `Ty`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+
+instance_of_tparam.php:14:12
+10 |  */
+11 | 
+12 | function f(mixed $x): KeyedTraversable<string, string> {
+   |                                        ^^^^^^ [2]
+13 |   if ($x is KeyedTraversable<_, _>) {
+14 |     return $x;
+   |            ^^ [1]
+15 |   }
+16 | 
+
+interfaces.hhi:77:13
+75 |     \MysqlRow::class,
+76 |   )>>
+77 |   interface KeyedTraversable<+Tk, <<__NoAutoBound>> +Tv> extends Traversable<Tv> {}
+   |             ^^^^^^^^^^^^^^^^ [3]
+78 | 
+79 |   /**
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `nonnull` from this `is` expression test [3]
+
+instance_of_tparam.php:14:12
+10 |  */
+11 | 
+12 | function f(mixed $x): KeyedTraversable<string, string> {
+   |                                                ^^^^^^ [2]
+13 |   if ($x is KeyedTraversable<_, _>) {
+   |             ^^^^^^^^^^^^^^^^^^^^^^ [3]
+14 |     return $x;
+   |            ^^ [1]
+15 |   }
+16 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~string` [2]
+-> But got `mixed` from this `is` expression test [3]
+
+instance_of_tparam.php:14:12
+10 |  */
+11 | 
+12 | function f(mixed $x): KeyedTraversable<string, string> {
+   |                                                ^^^^^^ [2]
+13 |   if ($x is KeyedTraversable<_, _>) {
+   |             ^^^^^^^^^^^^^^^^^^^^^^ [3]
+14 |     return $x;
+   |            ^^ [1]
+15 |   }
+16 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Ty` [2]
+-> But got `Tx` from this `is` expression test [3]
+->   via this generic `T` [4]
+-> This type argument to `D` must match exactly (it is invariant) [3]
+
+instance_of_tparam.php:25:12
+19 | 
+20 | class C<T> {}
+21 | class D<T> extends C<T> {}
+   |                      ^ [4]
+22 | 
+23 | function g<Tx, Ty>(C<Tx> $x): D<Ty> {
+   |                                 ^^ [2]
+24 |   if ($x is D<_>) {
+   |             ^^^^ [3]
+25 |     return $x;
+   |            ^^ [1]
+26 |   }
+27 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Ty` [2]
+-> But got `mixed` from this `is` expression test [3]
+->   via this generic `T` [4]
+-> This type argument to `D` must match exactly (it is invariant) [3]
+->   by the definition of `Tx` [5]
+
+instance_of_tparam.php:25:12
+19 | 
+20 | class C<T> {}
+21 | class D<T> extends C<T> {}
+   |                      ^ [4]
+22 | 
+23 | function g<Tx, Ty>(C<Tx> $x): D<Ty> {
+   |            ^^ [5]
+   |                                 ^^ [2]
+24 |   if ($x is D<_>) {
+   |             ^^^^ [3]
+25 |     return $x;
+   |            ^^ [1]
+26 |   }
+27 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tx` from this `is` expression test [2]
+->   via this generic `T` [3]
+-> But got `Ty` [4]
+-> This type argument to `D` must match exactly (it is invariant) [4]
+
+instance_of_tparam.php:25:12
+19 | 
+20 | class C<T> {}
+21 | class D<T> extends C<T> {}
+   |                      ^ [3]
+22 | 
+23 | function g<Tx, Ty>(C<Tx> $x): D<Ty> {
+   |                                 ^^ [4]
+24 |   if ($x is D<_>) {
+   |             ^^^^ [2]
+25 |     return $x;
+   |            ^^ [1]
+26 |   }
+27 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tx` from this `is` expression test [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+-> This type argument to `D` must match exactly (it is invariant) [4]
+->   by the definition of `Ty` [5]
+
+instance_of_tparam.php:25:12
+19 | 
+20 | class C<T> {}
+21 | class D<T> extends C<T> {}
+   |                      ^ [3]
+22 | 
+23 | function g<Tx, Ty>(C<Tx> $x): D<Ty> {
+   |                ^^ [5]
+   |                                 ^^ [4]
+24 |   if ($x is D<_>) {
+   |             ^^^^ [2]
+25 |     return $x;
+   |            ^^ [1]
+26 |   }
+27 | 
+
+7 errors found

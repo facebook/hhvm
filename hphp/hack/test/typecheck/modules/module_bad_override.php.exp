@@ -1,24 +1,112 @@
-ERROR: File "module_bad_override.php--B.php", line 14, characters 22-27:
-This member visibility is: `private` (Typing[4113])
-  File "module_bad_override.php--A.php", line 6, characters 20-25:
-  `internal` was expected
-ERROR: File "module_bad_override.php--B.php", line 16, characters 24-37:
-This member visibility is: `protected` (Typing[4113])
-  File "module_bad_override.php--A.php", line 7, characters 29-42:
-  `internal` was expected
-ERROR: File "module_bad_override.php--D.php", line 7, characters 23-28:
-Cannot override this member in module `D` (Typing[4444])
-  File "module_bad_override.php--A.php", line 6, characters 20-25:
-  This member is internal to module `A`
-ERROR: File "module_bad_override.php--D.php", line 9, characters 23-36:
-Cannot override this member in module `D` (Typing[4444])
-  File "module_bad_override.php--A.php", line 7, characters 29-42:
-  This member is internal to module `A`
-ERROR: File "module_bad_override.php--D.php", line 11, characters 14-16:
-Cannot override this member in module `D` (Typing[4444])
-  File "module_bad_override.php--A.php", line 8, characters 11-13:
-  This member is internal to module `A`
-ERROR: File "module_bad_override.php--E.php", line 7, characters 24-29:
-This member visibility is: `protected` (Typing[4113])
-  File "module_bad_override.php--A.php", line 6, characters 20-25:
-  `internal` was expected
+error: Typing[4113] This member visibility is: `private` [1]
+-> `internal` was expected [2]
+
+module_bad_override.php--B.php:14:22
+12 | class C extends A {
+13 |     // Not OK since since we are narrowing visibility and not in the same module
+14 |     private function foobar(): void {}
+   |                      ^^^^^^ [1]
+15 |     // Not OK since since we are narrowing visibility and not in the same module
+16 |     protected function abstractFoobar(): void {}
+
+module_bad_override.php--A.php:6:20
+ 4 | 
+ 5 | abstract class A {
+ 6 |  internal function foobar(): void {}
+   |                    ^^^^^^ [2]
+ 7 |  abstract internal function abstractFoobar(): void;
+ 8 |  internal int $foobar = 42;
+
+error: Typing[4113] This member visibility is: `protected` [1]
+-> `internal` was expected [2]
+
+module_bad_override.php--B.php:16:24
+14 |     private function foobar(): void {}
+15 |     // Not OK since since we are narrowing visibility and not in the same module
+16 |     protected function abstractFoobar(): void {}
+   |                        ^^^^^^^^^^^^^^ [1]
+17 | }
+
+module_bad_override.php--A.php:7:29
+ 5 | abstract class A {
+ 6 |  internal function foobar(): void {}
+ 7 |  abstract internal function abstractFoobar(): void;
+   |                             ^^^^^^^^^^^^^^ [2]
+ 8 |  internal int $foobar = 42;
+ 9 | }
+
+error: Typing[4444] Cannot override this member in module `D` [1]
+-> This member is internal to module `A` [2]
+
+module_bad_override.php--D.php:7:23
+5 | class D extends A {
+6 |     // Not OK since we are in a different module
+7 |     internal function foobar(): void {}
+  |                       ^^^^^^ [1]
+8 |     // Not OK since we are in a different module
+9 |     internal function abstractFoobar(): void {}
+
+module_bad_override.php--A.php:6:20
+4 | 
+5 | abstract class A {
+6 |  internal function foobar(): void {}
+  |                    ^^^^^^ [2]
+7 |  abstract internal function abstractFoobar(): void;
+8 |  internal int $foobar = 42;
+
+error: Typing[4444] Cannot override this member in module `D` [1]
+-> This member is internal to module `A` [2]
+
+module_bad_override.php--D.php:9:23
+ 7 |     internal function foobar(): void {}
+ 8 |     // Not OK since we are in a different module
+ 9 |     internal function abstractFoobar(): void {}
+   |                       ^^^^^^^^^^^^^^ [1]
+10 |     //Not OK since we are in a different module
+11 |     internal int $foobar = 13;
+
+module_bad_override.php--A.php:7:29
+ 5 | abstract class A {
+ 6 |  internal function foobar(): void {}
+ 7 |  abstract internal function abstractFoobar(): void;
+   |                             ^^^^^^^^^^^^^^ [2]
+ 8 |  internal int $foobar = 42;
+ 9 | }
+
+error: Typing[4444] Cannot override this member in module `D` [1]
+-> This member is internal to module `A` [2]
+
+module_bad_override.php--D.php:11:14
+ 9 |     internal function abstractFoobar(): void {}
+10 |     //Not OK since we are in a different module
+11 |     internal int $foobar = 13;
+   |              ^^^ [1]
+12 | }
+
+module_bad_override.php--A.php:8:11
+ 6 |  internal function foobar(): void {}
+ 7 |  abstract internal function abstractFoobar(): void;
+ 8 |  internal int $foobar = 42;
+   |           ^^^ [2]
+ 9 | }
+
+error: Typing[4113] This member visibility is: `protected` [1]
+-> `internal` was expected [2]
+
+module_bad_override.php--E.php:7:24
+5 | class E extends A {
+6 |     // Not OK since we are narrowing visibility even though we are in the same module
+7 |     protected function foobar(): void {}
+  |                        ^^^^^^ [1]
+8 |     // OK since we are in the same module
+9 |     internal function abstractFoobar(): void {}
+
+module_bad_override.php--A.php:6:20
+4 | 
+5 | abstract class A {
+6 |  internal function foobar(): void {}
+  |                    ^^^^^^ [2]
+7 |  abstract internal function abstractFoobar(): void;
+8 |  internal int $foobar = 42;
+
+6 errors found

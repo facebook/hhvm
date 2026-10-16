@@ -1,10 +1,31 @@
-ERROR: File "lambda_bad_as_dict_argument.php", line 32, characters 17-30:
-No instance method `missing_method` in `MyClass` (Typing[4053])
-  File "lambda_bad_as_dict_argument.php", line 5, characters 19-23:
-  Did you mean `hello` instead?
-  File "lambda_bad_as_dict_argument.php", line 22, characters 32-38:
-  This is why I think it is an object of type MyClass
-  File "lambda_bad_as_dict_argument.php", line 22, characters 32-38:
-  This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
-  File "lambda_bad_as_dict_argument.php", line 4, characters 7-13:
-  Declaration of `MyClass` is here
+error: Typing[4053] No instance method `missing_method` in `MyClass` [1]
+-> Did you mean `hello` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> This type argument to `MyClosureRunner` only allows supertypes (it is contravariant) [3]
+-> Declaration of `MyClass` is here [4]
+
+lambda_bad_as_dict_argument.php:32:17
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class MyClass {
+   |       ^^^^^^^ [4]
+ 5 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 6 |     return 'world';
+ 7 |   }
+   :
+20 | 
+21 | function expectsMyClosureRunnerMyClass(
+22 |   dict<string, MyClosureRunner<MyClass>> $p,
+   |                                ^^^^^^^ [3]
+23 | ): MyClosureRunner<MyClass> {
+24 |   $r = $p['a'];
+   :
+30 |       'a' => new MyClosureRunner(
+31 |         function($arg) {
+32 |           $arg->missing_method();
+   |                 ^^^^^^^^^^^^^^ [1]
+33 |           return "ok";
+34 |         },
+
+1 error found

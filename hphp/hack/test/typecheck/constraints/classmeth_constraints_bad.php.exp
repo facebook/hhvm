@@ -1,6 +1,18 @@
-ERROR: File "classmeth_constraints_bad.php", line 11, characters 6-6:
-Invalid argument (Typing[4110])
-  File "classmeth_constraints_bad.php", line 6, characters 39-42:
-  Expected `Base`
-  File "classmeth_constraints_bad.php", line 11, characters 6-6:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base` [2]
+-> But got `int` [1]
+
+classmeth_constraints_bad.php:11:6
+ 4 | class Base {}
+ 5 | class MyClass {
+ 6 |   public static function element<T as Base>(?T $element): void {}
+   |                                       ^^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | function render(): void {
+10 |   $f = MyClass::element<>;
+11 |   $f(3);
+   |      ^ [1]
+12 | }
+
+1 error found

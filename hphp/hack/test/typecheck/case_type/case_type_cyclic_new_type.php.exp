@@ -1,26 +1,66 @@
-ERROR: File "case_type_cyclic_new_type.php--file1.php", line 3, characters 9-17:
-Cyclic type definition (Typing[4014])
-  File "case_type_cyclic_new_type.php--file1.php", line 3, characters 22-30:
-  Cyclic use is here
-ERROR: File "case_type_cyclic_new_type.php--file2.php", line 4, characters 11-12:
-Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_cyclic_new_type.php--file2.php", line 4, characters 16-24:
-  This is the type `Recursive`, which includes **strings** because it is a cyclic type
-  File "case_type_cyclic_new_type.php--file1.php", line 3, characters 22-30:
-    via the constraint on the newtype `Recursive`
-  File "case_type_cyclic_new_type.php--file2.php", line 4, characters 28-33:
-  It overlaps with `string`, which also includes **strings**
-ERROR: File "case_type_cyclic_new_type.php--file2.php", line 10, characters 5-20:
-hh_expect type mismatch (Typing[4453])
-  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 15-16:
-  Expected `CT`
-  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 19-19:
-  But got `int`
-ERROR: File "case_type_cyclic_new_type.php--file2.php", line 10, characters 19-19:
-Invalid argument (Typing[4110])
-  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 15-16:
-  Expected `CT`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "case_type_cyclic_new_type.php--file2.php", line 10, characters 19-19:
-  But got `int`
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+case_type_cyclic_new_type.php--file1.php:3:9
+1 | <?hh
+2 | 
+3 | newtype Recursive as Recursive = int;
+  |         ^^^^^^^^^ [1]
+  |                      ^^^^^^^^^ [2]
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag [1]
+-> This is the type `Recursive`, which includes **strings** because it is a cyclic type [2]
+->   via the constraint on the newtype `Recursive` [3]
+-> It overlaps with `string`, which also includes **strings** [4]
+
+case_type_cyclic_new_type.php--file2.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type CT = Recursive | string;
+  |           ^^ [1]
+  |                ^^^^^^^^^ [2]
+  |                            ^^^^^^ [4]
+5 | 
+6 | function f(CT $ct, Recursive $rec): void {
+
+case_type_cyclic_new_type.php--file1.php:3:22
+1 | <?hh
+2 | 
+3 | newtype Recursive as Recursive = int;
+  |                      ^^^^^^^^^ [3]
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `CT` [2]
+-> But got `int` [3]
+
+case_type_cyclic_new_type.php--file2.php:10:5
+ 8 |     hh_expect<CT>($ct); // OK
+ 9 |     hh_expect<CT>($rec); // OK
+10 |     hh_expect<CT>(1); // Error
+   |     ^^^^^^^^^^^^^^^^ [1]
+   |               ^^ [2]
+   |                   ^ [3]
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT` [2]
+->   via this generic `T` [3]
+-> But got `int` [1]
+
+case_type_cyclic_new_type.php--file2.php:10:19
+ 8 |     hh_expect<CT>($ct); // OK
+ 9 |     hh_expect<CT>($rec); // OK
+10 |     hh_expect<CT>(1); // Error
+   |               ^^ [2]
+   |                   ^ [1]
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+4 errors found

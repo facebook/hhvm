@@ -1,10 +1,31 @@
-ERROR: File "function_protected_bad.php", line 4, characters 7-15:
-Top-level functions cannot be declared `protected` (Parsing[1002])
-ERROR: File "function_protected_bad.php", line 4, characters 33-36:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "function_protected_bad.php", line 4, characters 26-28:
-Invalid return type (Typing[4336])
-  File "function_protected_bad.php", line 4, characters 33-36:
-  Expected `void`
-  File "function_protected_bad.php", line 4, characters 26-28:
-  But got `Awaitable<void>` because this function does not always return a value
+error: Parsing[1002] Top-level functions cannot be declared `protected` [1]
+
+function_protected_bad.php:4:7
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | async protected function foo(): void {
+  |       ^^^^^^^^^ [1]
+5 | }
+
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+function_protected_bad.php:4:33
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | async protected function foo(): void {
+  |                                 ^^^^ [1]
+5 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `Awaitable<void>` because this function does not always return a value [1]
+
+function_protected_bad.php:4:26
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | async protected function foo(): void {
+  |                          ^^^ [1]
+  |                                 ^^^^ [2]
+5 | }
+
+3 errors found

@@ -1,6 +1,15 @@
-ERROR: File "lambda16.php", line 14, characters 12-23:
-Invalid return type (Typing[4110])
-  File "lambda16.php", line 13, characters 30-33:
-  Expected `this`
-  File "lambda16.php", line 14, characters 12-23:
-  But got `(function(): this) where this as Foo<T>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `this` [2]
+-> But got `(function(): this) where this as Foo<T>` [1]
+
+lambda16.php:14:12
+11 | 
+12 | class Foo<T> {
+13 |   public function thisser(): this {
+   |                              ^^^^ [2]
+14 |     return () ==> $this;
+   |            ^^^^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

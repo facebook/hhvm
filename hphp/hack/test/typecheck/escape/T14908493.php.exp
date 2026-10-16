@@ -1,6 +1,20 @@
-ERROR: File "T14908493.php", line 49, characters 5-62:
-Rigid type variable escapes its lambda (Typing[4442])
-  File "T14908493.php", line 50, characters 24-24:
-  Rigid type variable `T#1` is escaping
-  File "T14908493.php", line 49, characters 5-62:
-  in the return type of this lambda
+error: Typing[4442] Rigid type variable escapes its lambda [1]
+-> Rigid type variable `T#1` is escaping [2]
+-> in the return type of this lambda [1]
+
+T14908493.php:49:5
+47 |   $values = map(
+48 |     $values,
+49 |     $v ==> {
+   |     ^^^^^^^^ [1]
+50 |       $v as BoxedValue<_>;
+   |       ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                        ^ [2]
+51 |       return $v;
+   |       ^^^^^^^^^^ [1]
+52 |     },
+   |     ^ [1]
+53 |   );
+54 | 
+
+1 error found

@@ -1,4 +1,20 @@
-ERROR: File "abstract_typeconst_bound.php", line 12, characters 14-29:
-It is no longer allowed to use a `classname<this::TB>` in this position. Please use a `class<this::TB>` instead. (Typing[4482])
-  File "typestructure.hhi", line 64, characters 21-32:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<this::TB>` in this position. Please use a `class<this::TB>` instead. [1]
+-> Definition is here [2]
+
+abstract_typeconst_bound.php:12:14
+10 |   public function getUserData(): this::TUserData {
+11 |     $userb_classname = type_structure(static::class, 'TB')['classname'];
+12 |     $userb = $userb_classname::make();
+   |              ^^^^^^^^^^^^^^^^ [1]
+13 |     return $userb->getUserData();
+14 |   }
+
+typestructure.hhi:64:21
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |                     ^^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+1 error found

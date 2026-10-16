@@ -1,2 +1,11 @@
-ERROR: File "refinement_pattern_wildcard_invalid_name.php", line 7, characters 5-15:
-Wildcard patterns must begin with the `_` character. To bind a variable, use a `$` character (`$unused`). (Parsing[1002])
+error: Parsing[1002] Wildcard patterns must begin with the `_` character. To bind a variable, use a `$` character (`$unused`). [1]
+
+refinement_pattern_wildcard_invalid_name.php:7:5
+5 | function f(arraykey $v): void {
+6 |   match ($v) {
+7 |     unused: int => echo "int $v\n";
+  |     ^^^^^^^^^^^ [1]
+8 |     _ => echo "string $v\n";
+9 |   }
+
+1 error found

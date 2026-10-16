@@ -1,22 +1,39 @@
-ERROR: File "extend_generic2.php", line 18, characters 25-28:
-Some type arguments violate their constraints (Typing[4323])
-  File "extend_generic2.php", line 15, characters 9-9:
-  `T` is a constrained type parameter
-  File "extend_generic2.php", line 15, characters 14-14:
-  This type constraint is violated
-  File "extend_generic2.php", line 15, characters 14-14:
-  Expected `B`
-  File "extend_generic2.php", line 18, characters 27-27:
-  But got `A`
-  File "extend_generic2.php", line 18, characters 14-14:
-    by the definition of `T`
-ERROR: File "extend_generic2.php", line 18, characters 25-28:
-Some type arguments violate their constraints (Typing[4323])
-  File "extend_generic2.php", line 15, characters 9-9:
-  `T` is a constrained type parameter
-  File "extend_generic2.php", line 15, characters 14-14:
-  This type constraint is violated
-  File "extend_generic2.php", line 15, characters 14-14:
-  Expected `B`
-  File "extend_generic2.php", line 18, characters 27-27:
-  But got `T as A`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `B` [3]
+-> But got `A` [4]
+->   by the definition of `T` [5]
+
+extend_generic2.php:18:25
+13 | class B extends A {}
+14 | 
+15 | class C<T as B> {
+   |         ^ [2]
+   |              ^ [3]
+16 | }
+17 | 
+18 | class D<T as A> extends C<T> {}
+   |              ^ [5]
+   |                         ^^^^ [1]
+   |                           ^ [4]
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `B` [3]
+-> But got `T as A` [4]
+
+extend_generic2.php:18:25
+13 | class B extends A {}
+14 | 
+15 | class C<T as B> {
+   |         ^ [2]
+   |              ^ [3]
+16 | }
+17 | 
+18 | class D<T as A> extends C<T> {}
+   |                         ^^^^ [1]
+   |                           ^ [4]
+
+2 errors found

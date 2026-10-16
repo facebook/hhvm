@@ -1,22 +1,62 @@
-ERROR: File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
-Invalid return type (Typing[4110])
-  File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
-  Expected `NAC\AAA`
-  File "contravariance_constraint_bad_2.php", line 14, characters 40-40:
-    via this generic `T`
-  File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-  But got `NAC\BBB`
-  File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-  This type argument to `NAC\CONTRA` only allows supertypes (it is contravariant)
-  File "contravariance_constraint_bad_2.php", line 36, characters 16-18:
-    by the definition of `T`
-ERROR: File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
-Invalid return type (Typing[4110])
-  File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
-  Expected `NAC\AAA`
-  File "contravariance_constraint_bad_2.php", line 14, characters 40-40:
-    via this generic `T`
-  File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-  But got `T as NAC\BBB`
-  File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-  This type argument to `NAC\CONTRA` only allows supertypes (it is contravariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `NAC\AAA` [2]
+->   via this generic `T` [3]
+-> But got `NAC\BBB` [4]
+-> This type argument to `NAC\CONTRA` only allows supertypes (it is contravariant) [4]
+->   by the definition of `T` [5]
+
+contravariance_constraint_bad_2.php:43:12
+12 | 
+13 | // It's this constraint that fails to be satisfied
+14 | class CCC<-T as AAA> implements CONTRA<T> {
+   |                 ^^^ [2]
+   |                                        ^ [3]
+15 | 
+16 |   public function __construct(private (function(T): void) $myfun) {}
+   :
+34 | }
+35 | 
+36 | class DDD<T as BBB> {
+   |                ^^^ [5]
+37 |   public function ddd(): CONTRA<T> {
+   |                                 ^ [4]
+38 |     $c = new CCC(
+39 |       function(AAA $arg) {
+40 |         $arg->foo();
+41 |       },
+42 |     );
+43 |     return $c;
+   |            ^^ [1]
+44 |   }
+45 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `NAC\AAA` [2]
+->   via this generic `T` [3]
+-> But got `T as NAC\BBB` [4]
+-> This type argument to `NAC\CONTRA` only allows supertypes (it is contravariant) [4]
+
+contravariance_constraint_bad_2.php:43:12
+12 | 
+13 | // It's this constraint that fails to be satisfied
+14 | class CCC<-T as AAA> implements CONTRA<T> {
+   |                 ^^^ [2]
+   |                                        ^ [3]
+15 | 
+16 |   public function __construct(private (function(T): void) $myfun) {}
+   :
+35 | 
+36 | class DDD<T as BBB> {
+37 |   public function ddd(): CONTRA<T> {
+   |                                 ^ [4]
+38 |     $c = new CCC(
+39 |       function(AAA $arg) {
+40 |         $arg->foo();
+41 |       },
+42 |     );
+43 |     return $c;
+   |            ^^ [1]
+44 |   }
+45 | }
+
+2 errors found

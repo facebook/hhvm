@@ -1,12 +1,29 @@
-ERROR: File "meth_caller_bad_exact.php", line 15, characters 23-33:
-Invalid argument (Typing[4110])
-  File "meth_caller_bad_exact.php", line 6, characters 23-26:
-  Expected `<expr#2> as Base`
-  File "meth_caller_bad_exact.php", line 14, characters 23-27:
-    where `<expr#2>` is a reference to this expression
-  File "meth_caller_bad_exact.php", line 12, characters 21-24:
-  But got `Base`
-  File "meth_caller_bad_exact.php", line 10, characters 26-29:
-  Since `Base` is not final
-  File "meth_caller_bad_exact.php", line 12, characters 21-24:
-  this might not be a `Base`
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2> as Base` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+-> But got `Base` [4]
+-> Since `Base` is not final [5]
+-> this might not be a `Base` [4]
+
+meth_caller_bad_exact.php:15:23
+ 4 | class Base {
+ 5 |   public function get(): this { return $this; }
+ 6 |   public function set(this $_x): void {}
+   |                       ^^^^ [2]
+ 7 | }
+ 8 | class Child extends Base {}
+ 9 | 
+10 | function use_meth_caller(Base $base): void {
+   |                          ^^^^ [5]
+11 |   $f = meth_caller(Base::class, 'get');
+12 |   $exact_base = new Base();
+   |                     ^^^^ [4]
+13 |   //$base->set($exact_base); // Correctly reports error
+14 |   $nonexact_base = $f($base);
+   |                       ^^^^^ [3]
+15 |   $nonexact_base->set($exact_base); // No error, fatals at runtime
+   |                       ^^^^^^^^^^^ [1]
+16 | }
+17 | 
+
+1 error found

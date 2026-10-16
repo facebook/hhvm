@@ -1,12 +1,39 @@
-ERROR: File "lambda_bad_as_shape_argument.php", line 34, characters 17-30:
-No instance method `missing_method` in `MyClass` (Typing[4053])
-  File "lambda_bad_as_shape_argument.php", line 5, characters 19-23:
-  Did you mean `hello` instead?
-  File "lambda_bad_as_shape_argument.php", line 23, characters 28-34:
-  This is why I think it is an object of type MyClass
-  File "lambda_bad_as_shape_argument.php", line 23, characters 28-34:
-  This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
-  File "lambda_bad_as_shape_argument.php", line 11, characters 49-49:
-    via this generic `T`
-  File "lambda_bad_as_shape_argument.php", line 4, characters 7-13:
-  Declaration of `MyClass` is here
+error: Typing[4053] No instance method `missing_method` in `MyClass` [1]
+-> Did you mean `hello` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> This type argument to `MyClosureRunner` only allows supertypes (it is contravariant) [3]
+->   via this generic `T` [4]
+-> Declaration of `MyClass` is here [5]
+
+lambda_bad_as_shape_argument.php:34:17
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class MyClass {
+   |       ^^^^^^^ [5]
+ 5 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 6 |     return 'world';
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | class MyClosureRunner<-T> {
+11 |   public function __construct(private (function(T): string) $closure) {}
+   |                                                 ^ [4]
+12 |   public function get(): (function(T): string) {
+13 |     return $this->closure;
+   :
+21 | function expectsMyClosureRunnerMyClass(
+22 |   shape(
+23 |     'a' => MyClosureRunner<MyClass>,
+   |                            ^^^^^^^ [3]
+24 |     'b' => int,
+25 |   ) $p,
+   :
+32 |       'a' => new MyClosureRunner(
+33 |         function($arg) {
+34 |           $arg->missing_method();
+   |                 ^^^^^^^^^^^^^^ [1]
+35 |           return "ok";
+36 |         },
+
+1 error found

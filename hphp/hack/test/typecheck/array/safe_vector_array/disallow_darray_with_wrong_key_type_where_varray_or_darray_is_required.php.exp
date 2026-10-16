@@ -1,12 +1,29 @@
-ERROR: File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-24:
-Invalid index type for this dict (Typing[4110])
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 15-18:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 15-18:
-  But got `bool`
-ERROR: File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 12-27:
-Invalid return type (Typing[4110])
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 7, characters 43-45:
-  Expected `int`
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 12-27:
-  But got `string`
+error: Typing[4110] Invalid index type for this dict [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `bool` [2]
+
+disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php:4:10
+2 | 
+3 | function test1(): varray_or_darray<int> {
+4 |   return dict[true => 0]; // error
+  |          ^^^^^^^^^^^^^^^ [1]
+  |               ^^^^ [2]
+5 | }
+6 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php:9:12
+ 5 | }
+ 6 | 
+ 7 | function test2(bool $x): varray_or_darray<int, int> {
+   |                                           ^^^ [2]
+ 8 |   if ($x) {
+ 9 |     return dict['foo' => 0]; // error
+   |            ^^^^^^^^^^^^^^^^ [1]
+10 |   } else {
+11 |     return dict[0 => 0]; // ok
+
+2 errors found

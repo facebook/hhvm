@@ -1,6 +1,15 @@
-ERROR: File "shape_creation_missing_field.php", line 8, characters 8-22:
-Invalid argument (Typing[4057])
-  File "shape_creation_missing_field.php", line 8, characters 8-22:
-  The field `y` is missing
-  File "shape_creation_missing_field.php", line 7, characters 49-51:
-  The field `y` is required here
+error: Typing[4057] Invalid argument [1]
+-> The field `y` is missing [1]
+-> The field `y` is required here [2]
+
+shape_creation_missing_field.php:8:8
+ 5 | function g(): void {
+ 6 |   ExampleDsl`{
+ 7 |     $f = (ExampleShape<shape('x' => ExampleInt, 'y' => ExampleString)> $shape) ==> 3;
+   |                                                 ^^^ [2]
+ 8 |     $f(shape('x' => 2));
+   |        ^^^^^^^^^^^^^^^ [1]
+ 9 |   }`;
+10 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "explicit_type_collection_arity_mismatch3.php", line 4, characters 14-26:
-`keyset` takes exactly one type argument (Parsing[1002])
+error: Parsing[1002] `keyset` takes exactly one type argument [1]
+
+explicit_type_collection_arity_mismatch3.php:4:14
+2 | 
+3 | function f(): void {
+4 |   $a = keyset<int, string>[];
+  |              ^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

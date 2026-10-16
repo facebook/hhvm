@@ -1,8 +1,26 @@
-ERROR: File "inout.php", line 8, characters 11-12:
-Invalid assignment to an `inout` parameter (Typing[4337])
-  File "inout.php", line 7, characters 20-21:
-  Expected exactly the type `V` (`inout` parameter)
-  File "inout.php", line 5, characters 18-18:
-  But got the nonexact type `V`
-ERROR: File "inout.php", line 8, characters 11-12:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
+error: Typing[4337] Invalid assignment to an `inout` parameter [1]
+-> Expected exactly the type `V` (`inout` parameter) [2]
+-> But got the nonexact type `V` [3]
+
+inout.php:8:11
+3 | abstract class V { abstract const ctx C; }
+4 | 
+5 | function i(inout V $v)[]: void {}
+  |                  ^ [3]
+6 | 
+7 | function f(inout V $v)[$v::C]: void {
+  |                    ^^ [2]
+8 |   i(inout $v);
+  |           ^^ [1]
+9 | }
+
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+inout.php:8:11
+6 | 
+7 | function f(inout V $v)[$v::C]: void {
+8 |   i(inout $v);
+  |           ^^ [1]
+9 | }
+
+2 errors found

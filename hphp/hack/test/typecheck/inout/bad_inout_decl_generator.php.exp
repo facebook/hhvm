@@ -1,2 +1,10 @@
-ERROR: File "bad_inout_decl_generator.php", line 4, characters 3-10:
-Parameters may not be marked `inout` on generators (Parsing[1002])
+error: Parsing[1002] Parameters may not be marked `inout` on generators [1]
+
+bad_inout_decl_generator.php:4:3
+2 | 
+3 | function test(inout string $s): Iterator<int> {
+4 |   yield 42;
+  |   ^^^^^^^^ [1]
+5 | }
+
+1 error found

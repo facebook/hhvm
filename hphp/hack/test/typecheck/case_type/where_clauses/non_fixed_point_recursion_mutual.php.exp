@@ -1,8 +1,28 @@
-ERROR: File "non_fixed_point_recursion_mutual.php", line 3, characters 11-24:
-Recursion is not supported via case type where clauses. (Typing[4485])
-  File "non_fixed_point_recursion_mutual.php", line 7, characters 22-44:
-  `NonFixedPointA` appears here
-ERROR: File "non_fixed_point_recursion_mutual.php", line 6, characters 11-24:
-Recursion is not supported via case type where clauses. (Typing[4485])
-  File "non_fixed_point_recursion_mutual.php", line 4, characters 22-44:
-  `NonFixedPointB` appears here
+error: Typing[4485] Recursion is not supported via case type where clauses. [1]
+-> `NonFixedPointA` appears here [2]
+
+non_fixed_point_recursion_mutual.php:3:11
+1 | <?hh
+2 | 
+3 | case type NonFixedPointA<T1> =
+  |           ^^^^^^^^^^^^^^ [1]
+4 |   | int where int as NonFixedPointB<vec<T1>>;
+5 | 
+6 | case type NonFixedPointB<T1> =
+7 |   | int where int as NonFixedPointA<vec<T1>>;
+  |                      ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+error: Typing[4485] Recursion is not supported via case type where clauses. [1]
+-> `NonFixedPointB` appears here [2]
+
+non_fixed_point_recursion_mutual.php:6:11
+2 | 
+3 | case type NonFixedPointA<T1> =
+4 |   | int where int as NonFixedPointB<vec<T1>>;
+  |                      ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 | 
+6 | case type NonFixedPointB<T1> =
+  |           ^^^^^^^^^^^^^^ [1]
+7 |   | int where int as NonFixedPointA<vec<T1>>;
+
+2 errors found

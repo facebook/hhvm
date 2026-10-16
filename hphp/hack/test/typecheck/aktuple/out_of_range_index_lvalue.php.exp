@@ -1,8 +1,21 @@
 File "out_of_range_index_lvalue.php", line 11, characters 3-13:
   vec<(int | string)>
-ERROR: File "out_of_range_index_lvalue.php", line 12, characters 15-19:
-Invalid argument (Typing[4110])
-  File "out_of_range_index_lvalue.php", line 15, characters 22-27:
-  Expected `string`
-  File "out_of_range_index_lvalue.php", line 9, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+out_of_range_index_lvalue.php:12:15
+ 7 | 
+ 8 | function test(): void {
+ 9 |   $a = vec[4, 'aaa'];
+   |            ^ [3]
+10 |   $a[99] = 4;
+11 |   hh_show($a);
+12 |   take_string($a[1]);
+   |               ^^^^^ [1]
+13 | }
+14 | 
+15 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+1 error found

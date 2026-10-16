@@ -1,12 +1,54 @@
-ERROR: File "array_write_key_union.php", line 18, characters 5-8:
-It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "array_write_key_union.php", line 13, characters 22-29:
-  Definition is here
-ERROR: File "array_write_key_union.php", line 31, characters 5-10:
-It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "array_write_key_union.php", line 23, characters 3-10:
-  Definition is here
-ERROR: File "array_write_key_union.php", line 44, characters 5-10:
-It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "array_write_key_union.php", line 36, characters 3-10:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. [1]
+-> Definition is here [2]
+
+array_write_key_union.php:18:5
+11 | }
+12 | 
+13 | function union_write(class<A> $a, class<B> $b, bool $cond): void {
+   |                      ^^^^^^^^ [2]
+14 |   $key = $cond ? $a : $b;
+15 |   $d = dict[];
+16 |   $d[$key] = 1;
+17 |   foreach ($d as $key => $_) {
+18 |     $key::meth();
+   |     ^^^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. [1]
+-> Definition is here [2]
+
+array_write_key_union.php:31:5
+21 | 
+22 | function union_keyset_append(
+23 |   class<A> $a,
+   |   ^^^^^^^^ [2]
+24 |   class<B> $b,
+25 |   bool $cond,
+   :
+29 |   $keyset[] = $value;
+30 |   foreach ($keyset as $value) {
+31 |     $value::meth();
+   |     ^^^^^^ [1]
+32 |   }
+33 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. [1]
+-> Definition is here [2]
+
+array_write_key_union.php:44:5
+34 | 
+35 | function union_set_append(
+36 |   class<A> $a,
+   |   ^^^^^^^^ [2]
+37 |   class<B> $b,
+38 |   bool $cond,
+   :
+42 |   $set[] = $value;
+43 |   foreach ($set as $value) {
+44 |     $value::meth();
+   |     ^^^^^^ [1]
+45 |   }
+46 | }
+
+3 errors found

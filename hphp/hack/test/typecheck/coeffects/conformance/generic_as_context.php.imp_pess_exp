@@ -1,5 +1,22 @@
-ERROR: File "generic_as_context.php", line 6, characters 2-5:
-Illegal context: `Te`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "generic_as_context.php", line 12, characters 28-29:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: NastCheck[3090] Illegal context: `Te`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+generic_as_context.php:6:2
+4 |   vec<int> $v,
+5 |   (function (int)[Te]: int) $f,
+6 | )[Te]: void {
+  |  ^^^^ [1]
+7 |   foreach ($v as $x) {
+8 |     $f($x);
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+generic_as_context.php:12:28
+10 | }
+11 | 
+12 | function empty_vec_factory<Te>()[
+   |                            ^^ [1]
+13 | ]: (function ()[Te]: vec<int>) {
+14 |   return ()[] ==> vec[];
+
+2 errors found

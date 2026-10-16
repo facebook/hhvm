@@ -1,24 +1,85 @@
-ERROR: File "expected_lambda_param.php", line 14, characters 30-32:
-No instance method `foo` in `B` (Typing[4053])
-  File "expected_lambda_param.php", line 9, characters 36-36:
-  This is why I think it is an object of type B
-  File "expected_lambda_param.php", line 3, characters 7-7:
-  Declaration of `B` is here
-ERROR: File "expected_lambda_param.php", line 18, characters 19-38:
-Invalid argument (Typing[4110])
-  File "expected_lambda_param.php", line 18, characters 20-20:
-  Expected `C`
-  File "expected_lambda_param.php", line 9, characters 36-36:
-  But got `B`
-ERROR: File "expected_lambda_param.php", line 22, characters 34-36:
-No instance method `foo` in `B` (Typing[4053])
-  File "expected_lambda_param.php", line 22, characters 20-20:
-  This is why I think it is an object of type B
-  File "expected_lambda_param.php", line 3, characters 7-7:
-  Declaration of `B` is here
-ERROR: File "expected_lambda_param.php", line 24, characters 34-36:
-No instance method `foo` in `B` (Typing[4053])
-  File "expected_lambda_param.php", line 24, characters 20-20:
-  This is why I think it is an object of type B
-  File "expected_lambda_param.php", line 3, characters 7-7:
-  Declaration of `B` is here
+error: Typing[4053] No instance method `foo` in `B` [1]
+-> This is why I think it is an object of type B [2]
+-> Declaration of `B` is here [3]
+
+expected_lambda_param.php:14:30
+ 1 | <?hh
+ 2 | 
+ 3 | class B {
+   |       ^ [3]
+ 4 | }
+ 5 | class C extends B {
+ 6 |   public function foo():void { }
+ 7 | }
+ 8 | 
+ 9 | function expectFunctionB((function(B):void) $f):void { }
+   |                                    ^ [2]
+10 | function expectFunctionC((function(C):void) $f):void { }
+11 | 
+12 | function test1():void {
+13 |   // Reject
+14 |   expectFunctionB($x ==> $x->foo());
+   |                              ^^^ [1]
+15 |   // Accept
+16 |   expectFunctionC($x ==> $x->foo());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+-> But got `B` [3]
+
+expected_lambda_param.php:18:19
+ 7 | }
+ 8 | 
+ 9 | function expectFunctionB((function(B):void) $f):void { }
+   |                                    ^ [3]
+10 | function expectFunctionC((function(C):void) $f):void { }
+11 | 
+   :
+16 |   expectFunctionC($x ==> $x->foo());
+17 |   // Reject (not a subtype)
+18 |   expectFunctionB((C $x) ==> $x->foo());
+   |                   ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^ [2]
+19 |   // Accept
+20 |   expectFunctionC((C $x) ==> $x->foo());
+
+error: Typing[4053] No instance method `foo` in `B` [1]
+-> This is why I think it is an object of type B [2]
+-> Declaration of `B` is here [3]
+
+expected_lambda_param.php:22:34
+ 1 | <?hh
+ 2 | 
+ 3 | class B {
+   |       ^ [3]
+ 4 | }
+ 5 | class C extends B {
+   :
+20 |   expectFunctionC((C $x) ==> $x->foo());
+21 |   // Reject (no method foo)
+22 |   expectFunctionB((B $x) ==> $x->foo());
+   |                    ^ [2]
+   |                                  ^^^ [1]
+23 |   // Arguable, but should reject, because we're only expecting a B
+24 |   expectFunctionC((B $x) ==> $x->foo());
+
+error: Typing[4053] No instance method `foo` in `B` [1]
+-> This is why I think it is an object of type B [2]
+-> Declaration of `B` is here [3]
+
+expected_lambda_param.php:24:34
+ 1 | <?hh
+ 2 | 
+ 3 | class B {
+   |       ^ [3]
+ 4 | }
+ 5 | class C extends B {
+   :
+22 |   expectFunctionB((B $x) ==> $x->foo());
+23 |   // Arguable, but should reject, because we're only expecting a B
+24 |   expectFunctionC((B $x) ==> $x->foo());
+   |                    ^ [2]
+   |                                  ^^^ [1]
+25 | }
+
+4 errors found

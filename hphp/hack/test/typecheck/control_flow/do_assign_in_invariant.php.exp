@@ -1,104 +1,436 @@
-ERROR: File "do_assign_in_invariant.php", line 86, characters 6-7:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "do_assign_in_invariant.php", line 45, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 25, characters 20-21:
-  Expected `AB`
-  File "do_assign_in_invariant.php", line 56, characters 14-14:
-  But got `D`
-ERROR: File "do_assign_in_invariant.php", line 46, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 26, characters 20-21:
-  Expected `AD`
-  File "do_assign_in_invariant.php", line 48, characters 14-14:
-  But got `B`
-ERROR: File "do_assign_in_invariant.php", line 47, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 29, characters 20-21:
-  Expected `BD`
-  File "do_assign_in_invariant.php", line 41, characters 12-12:
-  But got `A`
-ERROR: File "do_assign_in_invariant.php", line 59, characters 29-30:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 37-37:
-  Expected `B`
-  File "do_assign_in_invariant.php", line 56, characters 14-14:
-  But got `D`
-ERROR: File "do_assign_in_invariant.php", line 59, characters 33-34:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 43-43:
-  Expected `D`
-  File "do_assign_in_invariant.php", line 48, characters 14-14:
-  But got `B`
-ERROR: File "do_assign_in_invariant.php", line 63, characters 13-14:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 28, characters 20-21:
-  Expected `BC`
-  File "do_assign_in_invariant.php", line 56, characters 14-14:
-  But got `D`
-ERROR: File "do_assign_in_invariant.php", line 64, characters 13-14:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 29, characters 20-21:
-  Expected `BD`
-  File "do_assign_in_invariant.php", line 52, characters 14-14:
-  But got `C`
-ERROR: File "do_assign_in_invariant.php", line 65, characters 13-14:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 30, characters 20-21:
-  Expected `CD`
-  File "do_assign_in_invariant.php", line 48, characters 14-14:
-  But got `B`
-ERROR: File "do_assign_in_invariant.php", line 72, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 27, characters 20-21:
-  Expected `AE`
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  But got `?(<expr#11> as E | A)`
-ERROR: File "do_assign_in_invariant.php", line 73, characters 14-15:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 19, characters 19-19:
-  Expected `A`
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  But got `?(<expr#11> as E | A)`
-ERROR: File "do_assign_in_invariant.php", line 74, characters 14-15:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 22, characters 19-19:
-  Expected `E`
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  But got `?(<expr#11> as E | A)`
-ERROR: File "do_assign_in_invariant.php", line 74, characters 14-15:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 22, characters 19-19:
-  Expected `E`
-  File "do_assign_in_invariant.php", line 69, characters 12-12:
-  But got `A`
-ERROR: File "do_assign_in_invariant.php", line 86, characters 39-40:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 41-41:
-  Expected `B`
-  File "do_assign_in_invariant.php", line 83, characters 14-14:
-  But got `D`
-ERROR: File "do_assign_in_invariant.php", line 86, characters 43-44:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 47-47:
-  Expected `D`
-  File "do_assign_in_invariant.php", line 75, characters 14-14:
-  But got `B`
-ERROR: File "do_assign_in_invariant.php", line 90, characters 13-14:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 32, characters 20-21:
-  Expected `CE`
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  But got `?(<expr#21> as E | C)`
-ERROR: File "do_assign_in_invariant.php", line 91, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 20, characters 23-23:
-  Expected `C`
-  File "do_assign_in_invariant.php", line 33, characters 55-55:
-  But got `E`
-ERROR: File "do_assign_in_invariant.php", line 92, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 21, characters 23-23:
-  Expected `E`
-  File "do_assign_in_invariant.php", line 79, characters 14-14:
-  But got `C`
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+do_assign_in_invariant.php:86:6
+84 |   } while (
+85 |     // $x is B | D (errors on 2nd and 3rd args)
+86 |     ($x = expect_BD_B_D_make_Eopt($x, $x, $x)) !== null
+   |      ^^ [1]
+87 |   );
+88 |   // $x is C | ?E
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `AB` [2]
+-> But got `D` [3]
+
+do_assign_in_invariant.php:45:15
+23 | function expect_ABD(ABD $x): void {}
+24 | function expect_BCD(BCD $x): void {}
+25 | function expect_AB(AB $x): void {}
+   |                    ^^ [2]
+26 | function expect_AD(AD $x): void {}
+27 | function expect_AE(AE $x): void {}
+   :
+43 |     // $x is A | B | D
+44 |     expect_ABD($x);
+45 |     expect_AB($x); // error
+   |               ^^ [1]
+46 |     expect_AD($x); // error
+47 |     expect_BD($x); // error
+   :
+54 |       break;
+55 |     }
+56 |     $x = new D();
+   |              ^ [3]
+57 |   } while (
+58 |     // $x is B | D
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `AD` [2]
+-> But got `B` [3]
+
+do_assign_in_invariant.php:46:15
+24 | function expect_BCD(BCD $x): void {}
+25 | function expect_AB(AB $x): void {}
+26 | function expect_AD(AD $x): void {}
+   |                    ^^ [2]
+27 | function expect_AE(AE $x): void {}
+28 | function expect_BC(BC $x): void {}
+   :
+44 |     expect_ABD($x);
+45 |     expect_AB($x); // error
+46 |     expect_AD($x); // error
+   |               ^^ [1]
+47 |     expect_BD($x); // error
+48 |     $x = new B();
+   |              ^ [3]
+49 |     if ($b) {
+50 |       continue;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `BD` [2]
+-> But got `A` [3]
+
+do_assign_in_invariant.php:47:15
+27 | function expect_AE(AE $x): void {}
+28 | function expect_BC(BC $x): void {}
+29 | function expect_BD(BD $x): void {}
+   |                    ^^ [2]
+30 | function expect_CD(CD $x): void {}
+31 | function expect_CEopt(?CE $x): void {}
+   :
+39 | 
+40 | function test1(bool $b): void {
+41 |   $x = new A();
+   |            ^ [3]
+42 |   do {
+43 |     // $x is A | B | D
+44 |     expect_ABD($x);
+45 |     expect_AB($x); // error
+46 |     expect_AD($x); // error
+47 |     expect_BD($x); // error
+   |               ^^ [1]
+48 |     $x = new B();
+49 |     if ($b) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `D` [3]
+
+do_assign_in_invariant.php:59:29
+34 |   return new E();
+35 | }
+36 | function some_cond_of_BD_B_D(BD $x, B $y, D $z): bool {
+   |                                     ^ [2]
+37 |   return true;
+38 | }
+   :
+54 |       break;
+55 |     }
+56 |     $x = new D();
+   |              ^ [3]
+57 |   } while (
+58 |     // $x is B | D
+59 |     some_cond_of_BD_B_D($x, $x, $x) // errors on 2nd and 3rd args
+   |                             ^^ [1]
+60 |   );
+61 |   // $x is B | C | D
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `D` [2]
+-> But got `B` [3]
+
+do_assign_in_invariant.php:59:33
+34 |   return new E();
+35 | }
+36 | function some_cond_of_BD_B_D(BD $x, B $y, D $z): bool {
+   |                                           ^ [2]
+37 |   return true;
+38 | }
+   :
+46 |     expect_AD($x); // error
+47 |     expect_BD($x); // error
+48 |     $x = new B();
+   |              ^ [3]
+49 |     if ($b) {
+50 |       continue;
+   :
+57 |   } while (
+58 |     // $x is B | D
+59 |     some_cond_of_BD_B_D($x, $x, $x) // errors on 2nd and 3rd args
+   |                                 ^^ [1]
+60 |   );
+61 |   // $x is B | C | D
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `BC` [2]
+-> But got `D` [3]
+
+do_assign_in_invariant.php:63:13
+26 | function expect_AD(AD $x): void {}
+27 | function expect_AE(AE $x): void {}
+28 | function expect_BC(BC $x): void {}
+   |                    ^^ [2]
+29 | function expect_BD(BD $x): void {}
+30 | function expect_CD(CD $x): void {}
+   :
+54 |       break;
+55 |     }
+56 |     $x = new D();
+   |              ^ [3]
+57 |   } while (
+58 |     // $x is B | D
+   :
+61 |   // $x is B | C | D
+62 |   expect_BCD($x);
+63 |   expect_BC($x); // error
+   |             ^^ [1]
+64 |   expect_BD($x); // error
+65 |   expect_CD($x); // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `BD` [2]
+-> But got `C` [3]
+
+do_assign_in_invariant.php:64:13
+27 | function expect_AE(AE $x): void {}
+28 | function expect_BC(BC $x): void {}
+29 | function expect_BD(BD $x): void {}
+   |                    ^^ [2]
+30 | function expect_CD(CD $x): void {}
+31 | function expect_CEopt(?CE $x): void {}
+   :
+50 |       continue;
+51 |     }
+52 |     $x = new C();
+   |              ^ [3]
+53 |     if ($b) {
+54 |       break;
+   :
+62 |   expect_BCD($x);
+63 |   expect_BC($x); // error
+64 |   expect_BD($x); // error
+   |             ^^ [1]
+65 |   expect_CD($x); // error
+66 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CD` [2]
+-> But got `B` [3]
+
+do_assign_in_invariant.php:65:13
+28 | function expect_BC(BC $x): void {}
+29 | function expect_BD(BD $x): void {}
+30 | function expect_CD(CD $x): void {}
+   |                    ^^ [2]
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+   :
+46 |     expect_AD($x); // error
+47 |     expect_BD($x); // error
+48 |     $x = new B();
+   |              ^ [3]
+49 |     if ($b) {
+50 |       continue;
+   :
+63 |   expect_BC($x); // error
+64 |   expect_BD($x); // error
+65 |   expect_CD($x); // error
+   |             ^^ [1]
+66 | }
+67 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `AE` [2]
+-> But got `?(<expr#11> as E | A)` [3]
+
+do_assign_in_invariant.php:72:15
+25 | function expect_AB(AB $x): void {}
+26 | function expect_AD(AD $x): void {}
+27 | function expect_AE(AE $x): void {}
+   |                    ^^ [2]
+28 | function expect_BC(BC $x): void {}
+29 | function expect_BD(BD $x): void {}
+30 | function expect_CD(CD $x): void {}
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                                      ^^ [3]
+34 |   return new E();
+35 | }
+   :
+70 |   do {
+71 |     // $x is A | E
+72 |     expect_AE($x);
+   |               ^^ [1]
+73 |     expect_A($x); // error
+74 |     expect_E($x); // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `?(<expr#11> as E | A)` [3]
+
+do_assign_in_invariant.php:73:14
+17 | class E implements AE, CE {}
+18 | 
+19 | function expect_A(A $x): void {}
+   |                   ^ [2]
+20 | function expect_Copt(?C $x): void {}
+21 | function expect_Eopt(?E $x): void {}
+   :
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                                      ^^ [3]
+34 |   return new E();
+35 | }
+   :
+71 |     // $x is A | E
+72 |     expect_AE($x);
+73 |     expect_A($x); // error
+   |              ^^ [1]
+74 |     expect_E($x); // error
+75 |     $x = new B();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `?(<expr#11> as E | A)` [3]
+
+do_assign_in_invariant.php:74:14
+20 | function expect_Copt(?C $x): void {}
+21 | function expect_Eopt(?E $x): void {}
+22 | function expect_E(E $x): void {}
+   |                   ^ [2]
+23 | function expect_ABD(ABD $x): void {}
+24 | function expect_BCD(BCD $x): void {}
+   :
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                                      ^^ [3]
+34 |   return new E();
+35 | }
+   :
+72 |     expect_AE($x);
+73 |     expect_A($x); // error
+74 |     expect_E($x); // error
+   |              ^^ [1]
+75 |     $x = new B();
+76 |     if ($b) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `A` [3]
+
+do_assign_in_invariant.php:74:14
+20 | function expect_Copt(?C $x): void {}
+21 | function expect_Eopt(?E $x): void {}
+22 | function expect_E(E $x): void {}
+   |                   ^ [2]
+23 | function expect_ABD(ABD $x): void {}
+24 | function expect_BCD(BCD $x): void {}
+   :
+67 | 
+68 | function test2(bool $b): void {
+69 |   $x = new A();
+   |            ^ [3]
+70 |   do {
+71 |     // $x is A | E
+72 |     expect_AE($x);
+73 |     expect_A($x); // error
+74 |     expect_E($x); // error
+   |              ^^ [1]
+75 |     $x = new B();
+76 |     if ($b) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `D` [3]
+
+do_assign_in_invariant.php:86:39
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                         ^ [2]
+34 |   return new E();
+35 | }
+   :
+81 |       break;
+82 |     }
+83 |     $x = new D();
+   |              ^ [3]
+84 |   } while (
+85 |     // $x is B | D (errors on 2nd and 3rd args)
+86 |     ($x = expect_BD_B_D_make_Eopt($x, $x, $x)) !== null
+   |                                       ^^ [1]
+87 |   );
+88 |   // $x is C | ?E
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `D` [2]
+-> But got `B` [3]
+
+do_assign_in_invariant.php:86:43
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                               ^ [2]
+34 |   return new E();
+35 | }
+   :
+73 |     expect_A($x); // error
+74 |     expect_E($x); // error
+75 |     $x = new B();
+   |              ^ [3]
+76 |     if ($b) {
+77 |       continue;
+   :
+84 |   } while (
+85 |     // $x is B | D (errors on 2nd and 3rd args)
+86 |     ($x = expect_BD_B_D_make_Eopt($x, $x, $x)) !== null
+   |                                           ^^ [1]
+87 |   );
+88 |   // $x is C | ?E
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CE` [2]
+-> But got `?(<expr#21> as E | C)` [3]
+
+do_assign_in_invariant.php:90:13
+30 | function expect_CD(CD $x): void {}
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+   |                    ^^ [2]
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                                      ^^ [3]
+34 |   return new E();
+35 | }
+   :
+88 |   // $x is C | ?E
+89 |   expect_CEopt($x);
+90 |   expect_CE($x); // error
+   |             ^^ [1]
+91 |   expect_Copt($x);
+92 |   expect_Eopt($x); // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+-> But got `E` [3]
+
+do_assign_in_invariant.php:91:15
+18 | 
+19 | function expect_A(A $x): void {}
+20 | function expect_Copt(?C $x): void {}
+   |                       ^ [2]
+21 | function expect_Eopt(?E $x): void {}
+22 | function expect_E(E $x): void {}
+   :
+31 | function expect_CEopt(?CE $x): void {}
+32 | function expect_CE(CE $x): void {}
+33 | function expect_BD_B_D_make_Eopt(BD $x, B $y, D $z): ?E {
+   |                                                       ^ [3]
+34 |   return new E();
+35 | }
+   :
+89 |   expect_CEopt($x);
+90 |   expect_CE($x); // error
+91 |   expect_Copt($x);
+   |               ^^ [1]
+92 |   expect_Eopt($x); // error
+93 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `C` [3]
+
+do_assign_in_invariant.php:92:15
+19 | function expect_A(A $x): void {}
+20 | function expect_Copt(?C $x): void {}
+21 | function expect_Eopt(?E $x): void {}
+   |                       ^ [2]
+22 | function expect_E(E $x): void {}
+23 | function expect_ABD(ABD $x): void {}
+   :
+77 |       continue;
+78 |     }
+79 |     $x = new C();
+   |              ^ [3]
+80 |     if ($b) {
+81 |       break;
+   :
+90 |   expect_CE($x); // error
+91 |   expect_Copt($x);
+92 |   expect_Eopt($x); // error
+   |               ^^ [1]
+93 | }
+
+18 errors found

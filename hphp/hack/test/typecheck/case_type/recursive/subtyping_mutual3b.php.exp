@@ -1,82 +1,313 @@
-ERROR: File "subtyping_mutual3b.php", line 4, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "subtyping_mutual3b.php", line 6, characters 16-16:
-  Cyclic use is here
-ERROR: File "subtyping_mutual3b.php", line 6, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "subtyping_mutual3b.php", line 4, characters 16-16:
-  Cyclic use is here
-ERROR: File "subtyping_mutual3b.php", line 29, characters 5-6:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual3b.php", line 16, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3b.php", line 4, characters 16-16:
-    by the definition of `A`
-  File "subtyping_mutual3b.php", line 6, characters 16-16:
-    by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-ERROR: File "subtyping_mutual3b.php", line 31, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual3b.php", line 16, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3b.php", line 4, characters 16-16:
-    by the definition of `A`
-  File "subtyping_mutual3b.php", line 6, characters 16-16:
-    by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-ERROR: File "subtyping_mutual3b.php", line 33, characters 5-6:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 12, characters 25-35:
-  Expected `vec<vec<A>>`
-  File "subtyping_mutual3b.php", line 16, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3b.php", line 4, characters 16-16:
-    by the definition of `A`
-  File "subtyping_mutual3b.php", line 6, characters 16-16:
-    by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-ERROR: File "subtyping_mutual3b.php", line 37, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual3b.php", line 17, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3b.php", line 6, characters 16-16:
-    by the definition of `B`
-  File "subtyping_mutual3b.php", line 4, characters 16-16:
-    by the definition of `A`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B
-ERROR: File "subtyping_mutual3b.php", line 38, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual3b.php", line 17, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3b.php", line 6, characters 16-16:
-    by the definition of `B`
-  File "subtyping_mutual3b.php", line 4, characters 16-16:
-    by the definition of `A`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B
-ERROR: File "subtyping_mutual3b.php", line 65, characters 12-15:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 8, characters 19-19:
-  Expected `A`
-  File "subtyping_mutual3b.php", line 24, characters 3-15:
-  But got `vec<vec<int>>`
-ERROR: File "subtyping_mutual3b.php", line 66, characters 12-15:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual3b.php", line 24, characters 3-15:
-  But got `vec<vec<int>>`
-ERROR: File "subtyping_mutual3b.php", line 67, characters 15-18:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 10, characters 26-26:
-  Expected `A`
-  File "subtyping_mutual3b.php", line 24, characters 7-14:
-  But got `vec<int>`
-ERROR: File "subtyping_mutual3b.php", line 68, characters 15-18:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3b.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual3b.php", line 24, characters 7-14:
-  But got `vec<int>`
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+subtyping_mutual3b.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A as B = B;
+  |           ^ [1]
+5 | 
+6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+  |                ^ [2]
+7 | 
+8 | function expect_A(A $x): void {}
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+subtyping_mutual3b.php:6:11
+2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A as B = B;
+  |                ^ [2]
+5 | 
+6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+  |           ^ [1]
+7 | 
+8 | function expect_A(A $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+->   by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [5]
+
+subtyping_mutual3b.php:29:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [4]
+ 5 | 
+ 6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+   |                ^ [5]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+13 | function expect_vecvecB(vec<vec<B>> $x): void {}
+14 | 
+15 | function foo(
+16 |   A $a,
+   |   ^ [3]
+17 |   B $b,
+18 |   vec<nothing> $v,
+   :
+27 |   expect_B($a);
+28 |   expect_vecA(
+29 |     $a,
+   |     ^^ [1]
+30 |   ); // nok: A <: vec<A> -> B <: vec<A> -> A <: vec<A> -> recursing -> nok
+31 |   expect_vecB($a);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+->   by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [5]
+
+subtyping_mutual3b.php:31:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [4]
+ 5 | 
+ 6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+   |                ^ [5]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+13 | function expect_vecvecB(vec<vec<B>> $x): void {}
+14 | 
+15 | function foo(
+16 |   A $a,
+   |   ^ [3]
+17 |   B $b,
+18 |   vec<nothing> $v,
+   :
+29 |     $a,
+30 |   ); // nok: A <: vec<A> -> B <: vec<A> -> A <: vec<A> -> recursing -> nok
+31 |   expect_vecB($a);
+   |               ^^ [1]
+32 |   expect_vecvecA(
+33 |     $a,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<vec<A>>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+->   by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [5]
+
+subtyping_mutual3b.php:33:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [4]
+ 5 | 
+ 6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+   |                ^ [5]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+   |                         ^^^^^^^^^^^ [2]
+13 | function expect_vecvecB(vec<vec<B>> $x): void {}
+14 | 
+15 | function foo(
+16 |   A $a,
+   |   ^ [3]
+17 |   B $b,
+18 |   vec<nothing> $v,
+   :
+31 |   expect_vecB($a);
+32 |   expect_vecvecA(
+33 |     $a,
+   |     ^^ [1]
+34 |   ); // nok: A <: vec<vec<A>> -> B <: vec<vec<A>> -> A <: vec<vec<A>> -> recursing -> nok
+35 |   expect_A($b);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` [4]
+->   by the definition of `A`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B [5]
+
+subtyping_mutual3b.php:37:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [5]
+ 5 | 
+ 6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+   |                ^ [4]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+   :
+15 | function foo(
+16 |   A $a,
+17 |   B $b,
+   |   ^ [3]
+18 |   vec<nothing> $v,
+19 |   vec<A> $va,
+   :
+35 |   expect_A($b);
+36 |   expect_B($b);
+37 |   expect_vecA($b);
+   |               ^^ [1]
+38 |   expect_vecB($b);
+39 |   expect_A($v);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` [4]
+->   by the definition of `A`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B [5]
+
+subtyping_mutual3b.php:38:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [5]
+ 5 | 
+ 6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+   |                ^ [4]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+13 | function expect_vecvecB(vec<vec<B>> $x): void {}
+14 | 
+15 | function foo(
+16 |   A $a,
+17 |   B $b,
+   |   ^ [3]
+18 |   vec<nothing> $v,
+19 |   vec<A> $va,
+   :
+36 |   expect_B($b);
+37 |   expect_vecA($b);
+38 |   expect_vecB($b);
+   |               ^^ [1]
+39 |   expect_A($v);
+40 |   expect_B($v);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<vec<int>>` [3]
+
+subtyping_mutual3b.php:65:12
+ 6 | case type B as A = vec<A>; // constraint ok: vec<A> <: A -> vec<A> <: B -> vec<A> <: vec<A> -> A <: A -> ok
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+   |                   ^ [2]
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   :
+22 |   vec<vec<A>> $vva,
+23 |   vec<vec<B>> $vvb,
+24 |   vec<vec<int>> $vvi,
+   |   ^^^^^^^^^^^^^ [3]
+25 | ): void {
+26 |   expect_A($a);
+   :
+63 | 
+64 |   // these are wrong
+65 |   expect_A($vvi);
+   |            ^^^^ [1]
+66 |   expect_B($vvi);
+67 |   expect_vecA($vvi);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<vec<int>>` [3]
+
+subtyping_mutual3b.php:66:12
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+22 |   vec<vec<A>> $vva,
+23 |   vec<vec<B>> $vvb,
+24 |   vec<vec<int>> $vvi,
+   |   ^^^^^^^^^^^^^ [3]
+25 | ): void {
+26 |   expect_A($a);
+   :
+64 |   // these are wrong
+65 |   expect_A($vvi);
+66 |   expect_B($vvi);
+   |            ^^^^ [1]
+67 |   expect_vecA($vvi);
+68 |   expect_vecB($vvi);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<int>` [3]
+
+subtyping_mutual3b.php:67:15
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                          ^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+   :
+22 |   vec<vec<A>> $vva,
+23 |   vec<vec<B>> $vvb,
+24 |   vec<vec<int>> $vvi,
+   |       ^^^^^^^^ [3]
+25 | ): void {
+26 |   expect_A($a);
+   :
+65 |   expect_A($vvi);
+66 |   expect_B($vvi);
+67 |   expect_vecA($vvi);
+   |               ^^^^ [1]
+68 |   expect_vecB($vvi);
+69 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<int>` [3]
+
+subtyping_mutual3b.php:68:15
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | function expect_vecvecA(vec<vec<A>> $x): void {}
+13 | function expect_vecvecB(vec<vec<B>> $x): void {}
+   :
+22 |   vec<vec<A>> $vva,
+23 |   vec<vec<B>> $vvb,
+24 |   vec<vec<int>> $vvi,
+   |       ^^^^^^^^ [3]
+25 | ): void {
+26 |   expect_A($a);
+   :
+66 |   expect_B($vvi);
+67 |   expect_vecA($vvi);
+68 |   expect_vecB($vvi);
+   |               ^^^^ [1]
+69 | }
+
+11 errors found

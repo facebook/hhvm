@@ -1,2 +1,10 @@
-ERROR: File "unset_const_on_instance.php", line 10, characters 9-13:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+unset_const_on_instance.php:10:9
+ 8 | function foo(): void{
+ 9 |   $a = new A();
+10 |   unset($a::C);
+   |         ^^^^^ [1]
+11 | }
+
+1 error found

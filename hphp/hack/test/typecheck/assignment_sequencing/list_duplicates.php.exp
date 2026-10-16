@@ -1,4 +1,13 @@
-ERROR: File "list_duplicates.php", line 5, characters 8-9:
-Unsequenced modifications to local variable. Modified here (Typing[4144])
-  File "list_duplicates.php", line 5, characters 12-13:
-  And also modified here
+error: Typing[4144] Unsequenced modifications to local variable. Modified here [1]
+-> And also modified here [2]
+
+list_duplicates.php:5:8
+3 | // Bad because duplicate variables on LHS
+4 | function test(varray<int> $a): int {
+5 |   list($x, $x, $z) = $a;
+  |        ^^ [1]
+  |            ^^ [2]
+6 |   return $x;
+7 | }
+
+1 error found

@@ -1,24 +1,121 @@
-ERROR: File "unsupported_scrutinee_types.php", line 23, characters 3-28:
-This expression has type `mixed`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 24, characters 3-30:
-This expression has type `nonnull`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 25, characters 3-29:
-This expression has type `Terased`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 26, characters 3-30:
-This expression has type `Treified`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 27, characters 3-30:
-This expression has type `Tbounded`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 28, characters 3-26:
-This expression has type `vec<int>`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 29, characters 3-27:
-This expression has type `dict<arraykey, int>`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 30, characters 3-32:
-This expression has type `Container<int>`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 31, characters 3-31:
-This expression has type `(function(int): ~int)`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 32, characters 3-28:
-This expression has type `(int, int)`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 33, characters 3-28:
-This expression has type `shape('x' => int)`, which is not supported in match statements (Typing[4479])
-ERROR: File "unsupported_scrutinee_types.php", line 34, characters 3-43:
-This expression has type `(int | vec<int>)`, which is not supported in match statements because it contains the type `vec<int>` (Typing[4479])
+error: Typing[4479] This expression has type `mixed`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:23:3
+21 |   shape('x' => int) $shape,
+22 | ): void {
+23 |   match ($mixed) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+24 |   match ($nonnull) { _ => {} }
+25 |   match ($erased) { _ => {} }
+
+error: Typing[4479] This expression has type `nonnull`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:24:3
+22 | ): void {
+23 |   match ($mixed) { _ => {} }
+24 |   match ($nonnull) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 |   match ($erased) { _ => {} }
+26 |   match ($reified) { _ => {} }
+
+error: Typing[4479] This expression has type `Terased`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:25:3
+23 |   match ($mixed) { _ => {} }
+24 |   match ($nonnull) { _ => {} }
+25 |   match ($erased) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |   match ($reified) { _ => {} }
+27 |   match ($bounded) { _ => {} }
+
+error: Typing[4479] This expression has type `Treified`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:26:3
+24 |   match ($nonnull) { _ => {} }
+25 |   match ($erased) { _ => {} }
+26 |   match ($reified) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |   match ($bounded) { _ => {} }
+28 |   match ($vec) { _ => {} }
+
+error: Typing[4479] This expression has type `Tbounded`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:27:3
+25 |   match ($erased) { _ => {} }
+26 |   match ($reified) { _ => {} }
+27 |   match ($bounded) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 |   match ($vec) { _ => {} }
+29 |   match ($dict) { _ => {} }
+
+error: Typing[4479] This expression has type `vec<int>`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:28:3
+26 |   match ($reified) { _ => {} }
+27 |   match ($bounded) { _ => {} }
+28 |   match ($vec) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |   match ($dict) { _ => {} }
+30 |   match ($container) { _ => {} }
+
+error: Typing[4479] This expression has type `dict<arraykey, int>`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:29:3
+27 |   match ($bounded) { _ => {} }
+28 |   match ($vec) { _ => {} }
+29 |   match ($dict) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |   match ($container) { _ => {} }
+31 |   match ($function) { _ => {} }
+
+error: Typing[4479] This expression has type `Container<int>`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:30:3
+28 |   match ($vec) { _ => {} }
+29 |   match ($dict) { _ => {} }
+30 |   match ($container) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |   match ($function) { _ => {} }
+32 |   match ($tuple) { _ => {} }
+
+error: Typing[4479] This expression has type `(function(int): ~int)`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:31:3
+29 |   match ($dict) { _ => {} }
+30 |   match ($container) { _ => {} }
+31 |   match ($function) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+32 |   match ($tuple) { _ => {} }
+33 |   match ($shape) { _ => {} }
+
+error: Typing[4479] This expression has type `(int, int)`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:32:3
+30 |   match ($container) { _ => {} }
+31 |   match ($function) { _ => {} }
+32 |   match ($tuple) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+33 |   match ($shape) { _ => {} }
+34 |   match (coinflip() ? 0 : $vec) { _ => {} }
+
+error: Typing[4479] This expression has type `shape('x' => int)`, which is not supported in match statements [1]
+
+unsupported_scrutinee_types.php:33:3
+31 |   match ($function) { _ => {} }
+32 |   match ($tuple) { _ => {} }
+33 |   match ($shape) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+34 |   match (coinflip() ? 0 : $vec) { _ => {} }
+35 | }
+
+error: Typing[4479] This expression has type `(int | vec<int>)`, which is not supported in match statements because it contains the type `vec<int>` [1]
+
+unsupported_scrutinee_types.php:34:3
+32 |   match ($tuple) { _ => {} }
+33 |   match ($shape) { _ => {} }
+34 |   match (coinflip() ? 0 : $vec) { _ => {} }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+35 | }
+36 | 
+
+12 errors found

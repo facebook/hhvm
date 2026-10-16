@@ -1,52 +1,185 @@
 File "sound_abstract.php", line 121, characters 5-15:
   T
-ERROR: File "sound_abstract.php", line 39, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 37, characters 56-61:
-  But got `string`
-ERROR: File "sound_abstract.php", line 39, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 37, characters 67-67:
-  But got `?class<C1>`
-  File "sound_abstract.php", line 37, characters 44-53:
-    by the definition of `T`
-ERROR: File "sound_abstract.php", line 39, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 37, characters 67-67:
-  But got `T as ?class<C1>`
-ERROR: File "sound_abstract.php", line 39, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 38, characters 7-15:
-  But got `(string & <expr#2> as T) where T as ?class<C1>` from this equality test
-ERROR: File "sound_abstract.php", line 48, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 43, characters 54-56:
-  But got `int`
-ERROR: File "sound_abstract.php", line 48, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 44, characters 3-8:
-  But got `string`
-ERROR: File "sound_abstract.php", line 48, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 45, characters 3-3:
-  But got `T as (int | class<C1>)`
-ERROR: File "sound_abstract.php", line 48, characters 15-16:
-Invalid argument (Typing[4110])
-  File "sound_abstract.php", line 11, characters 20-28:
-  Expected `class<C1>`
-  File "sound_abstract.php", line 47, characters 7-15:
-  But got `(string & <expr#2> as T) where T as (int | class<C1>)` from this equality test
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `string` [3]
+
+sound_abstract.php:39:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+35 | }
+36 | 
+37 | function sound_generic_nullable_bound<T as ?class<C1>>(string $s, T $t): void {
+   |                                                        ^^^^^^ [3]
+38 |   if ($s === $t) {
+39 |     expect_c1($s);
+   |               ^^ [1]
+40 |   }
+41 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `?class<C1>` [3]
+->   by the definition of `T` [4]
+
+sound_abstract.php:39:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+35 | }
+36 | 
+37 | function sound_generic_nullable_bound<T as ?class<C1>>(string $s, T $t): void {
+   |                                            ^^^^^^^^^^ [4]
+   |                                                                   ^ [3]
+38 |   if ($s === $t) {
+39 |     expect_c1($s);
+   |               ^^ [1]
+40 |   }
+41 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `T as ?class<C1>` [3]
+
+sound_abstract.php:39:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+35 | }
+36 | 
+37 | function sound_generic_nullable_bound<T as ?class<C1>>(string $s, T $t): void {
+   |                                                                   ^ [3]
+38 |   if ($s === $t) {
+39 |     expect_c1($s);
+   |               ^^ [1]
+40 |   }
+41 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `(string & <expr#2> as T) where T as ?class<C1>` from this equality test [3]
+
+sound_abstract.php:39:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+36 | 
+37 | function sound_generic_nullable_bound<T as ?class<C1>>(string $s, T $t): void {
+38 |   if ($s === $t) {
+   |       ^^^^^^^^^ [3]
+39 |     expect_c1($s);
+   |               ^^ [1]
+40 |   }
+41 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `int` [3]
+
+sound_abstract.php:48:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+41 | }
+42 | 
+43 | function sound_generic_union_bound<T as (class<C1> | int)>(
+   |                                                      ^^^ [3]
+44 |   string $s,
+45 |   T $t,
+46 | ): void {
+47 |   if ($s === $t) {
+48 |     expect_c1($s);
+   |               ^^ [1]
+49 |   }
+50 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `string` [3]
+
+sound_abstract.php:48:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+42 | 
+43 | function sound_generic_union_bound<T as (class<C1> | int)>(
+44 |   string $s,
+   |   ^^^^^^ [3]
+45 |   T $t,
+46 | ): void {
+47 |   if ($s === $t) {
+48 |     expect_c1($s);
+   |               ^^ [1]
+49 |   }
+50 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `T as (int | class<C1>)` [3]
+
+sound_abstract.php:48:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+43 | function sound_generic_union_bound<T as (class<C1> | int)>(
+44 |   string $s,
+45 |   T $t,
+   |   ^ [3]
+46 | ): void {
+47 |   if ($s === $t) {
+48 |     expect_c1($s);
+   |               ^^ [1]
+49 |   }
+50 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `class<C1>` [2]
+-> But got `(string & <expr#2> as T) where T as (int | class<C1>)` from this equality test [3]
+
+sound_abstract.php:48:15
+ 9 | }
+10 | 
+11 | function expect_c1(class<C1> $_): void {}
+   |                    ^^^^^^^^^ [2]
+12 | 
+13 | case type CT = class<C1> | int;
+   :
+45 |   T $t,
+46 | ): void {
+47 |   if ($s === $t) {
+   |       ^^^^^^^^^ [3]
+48 |     expect_c1($s);
+   |               ^^ [1]
+49 |   }
+50 | }
+
+8 errors found

@@ -1,6 +1,14 @@
-ERROR: File "explicit_type_collection_mismatch1.php", line 4, characters 8-22:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch1.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch1.php", line 4, characters 17-21:
-  But got `string`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+explicit_type_collection_mismatch1.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $a = vec<int>["foo"];
+  |        ^^^^^^^^^^^^^^^ [1]
+  |            ^^^ [2]
+  |                 ^^^^^ [3]
+5 | }
+
+1 error found

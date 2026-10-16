@@ -1,6 +1,18 @@
-ERROR: File "using.php", line 8, characters 10-16:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "using.php", line 7, characters 16-17:
-  From this declaration, the context of this function body provides the capability set {}
-  File "using.php", line 4, characters 31-38:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+using.php:8:10
+2 | 
+3 | class X implements IDisposable {
+4 |   public function __dispose()[defaults]: void {}
+  |                               ^^^^^^^^ [3]
+5 | }
+6 | 
+7 | function pure()[]: void {
+  |                ^^ [2]
+8 |   using (new X()) {}
+  |          ^^^^^^^ [1]
+9 | }
+
+1 error found

@@ -1,4 +1,12 @@
-ERROR: File "untyped_lambda_strict_mode.php", line 5, characters 27-29:
-You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "untyped_lambda_strict_mode.php", line 5, characters 16-31:
-  Definition is here
+error: Typing[4064] You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+untyped_lambda_strict_mode.php:5:27
+3 | function expect_mixed(mixed $f): void {}
+4 | function test(): void {
+5 |   expect_mixed($x ==> $x->foo());
+  |                ^^^^^^^^^^^^^^^^ [2]
+  |                           ^^^ [1]
+6 | }
+
+1 error found

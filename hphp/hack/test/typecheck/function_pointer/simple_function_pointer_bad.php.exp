@@ -1,6 +1,19 @@
-ERROR: File "simple_function_pointer_bad.php", line 9, characters 6-6:
-Invalid argument (Typing[4110])
-  File "simple_function_pointer_bad.php", line 3, characters 14-19:
-  Expected `string`
-  File "simple_function_pointer_bad.php", line 9, characters 6-6:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+simple_function_pointer_bad.php:9:6
+ 1 | <?hh
+ 2 | 
+ 3 | function foo(string $arg): void {
+   |              ^^^^^^ [2]
+ 4 | }
+ 5 | 
+ 6 | function test(): void {
+ 7 |   $x = foo<>;
+ 8 |   // Whoops, expects a string
+ 9 |   $x(4);
+   |      ^ [1]
+10 | }
+
+1 error found

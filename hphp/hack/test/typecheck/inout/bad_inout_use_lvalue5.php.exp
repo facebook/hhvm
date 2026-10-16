@@ -1,10 +1,35 @@
-ERROR: File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
-You cannot decorate this argument as `inout` (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
-`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
-ERROR: File "bad_inout_use_lvalue5.php", line 6, characters 5-22:
-Invalid argument (Typing[4110])
-  File "bad_inout_use_lvalue5.php", line 3, characters 18-28:
-  Expected `vec<int>`
-  File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
-  But got `(int, int)`
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_lvalue5.php:6:11
+4 | 
+5 | function test(int $x, int $y): void {
+6 |   f(inout list($x, $y));
+  |           ^^^^^^^^^^^^ [1]
+7 | }
+
+error: NastCheck[3092] `list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? [1]
+
+bad_inout_use_lvalue5.php:6:11
+4 | 
+5 | function test(int $x, int $y): void {
+6 |   f(inout list($x, $y));
+  |           ^^^^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<int>` [2]
+-> But got `(int, int)` [3]
+
+bad_inout_use_lvalue5.php:6:5
+1 | <?hh
+2 | 
+3 | function f(inout varray<int> $a): void {}
+  |                  ^^^^^^^^^^^ [2]
+4 | 
+5 | function test(int $x, int $y): void {
+6 |   f(inout list($x, $y));
+  |     ^^^^^^^^^^^^^^^^^^ [1]
+  |           ^^^^^^^^^^^^ [3]
+7 | }
+
+3 errors found

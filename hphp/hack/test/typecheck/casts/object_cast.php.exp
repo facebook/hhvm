@@ -1,6 +1,28 @@
-ERROR: File "object_cast.php", line 4, characters 16-17:
-Encountered unexpected token `$i`. (Parsing[1002])
-ERROR: File "object_cast.php", line 4, characters 9-14:
-Unbound name: `object` (a global constant) (Naming[2049])
-ERROR: File "object_cast.php", line 4, characters 9-14:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Encountered unexpected token `$i`. [1]
+
+object_cast.php:4:16
+2 | 
+3 | function my_example(int $i): void {
+4 |   $x = (object)$i;
+  |                ^^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `object` (a global constant) [1]
+
+object_cast.php:4:9
+2 | 
+3 | function my_example(int $i): void {
+4 |   $x = (object)$i;
+  |         ^^^^^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+object_cast.php:4:9
+2 | 
+3 | function my_example(int $i): void {
+4 |   $x = (object)$i;
+  |         ^^^^^^ [1]
+5 | }
+
+3 errors found

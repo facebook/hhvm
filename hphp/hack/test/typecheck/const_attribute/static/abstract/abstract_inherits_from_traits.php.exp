@@ -1,10 +1,33 @@
-WARN: File "abstract_inherits_from_traits.php", line 12, characters 16-16:
-Duplicated property `p` in `C` (defined in `A` and `B`): all instances will be aliased at runtime (Warn[12008])
-ERROR: File "abstract_inherits_from_traits.php", line 13, characters 7-7:
-Some members in class `C` are incompatible with those declared in type `A` (Typing[4341])
-  File "abstract_inherits_from_traits.php", line 9, characters 38-40:
-  The property `$p` has the wrong type
-  File "abstract_inherits_from_traits.php", line 5, characters 38-40:
-  Expected `int`
-  File "abstract_inherits_from_traits.php", line 9, characters 38-40:
-  But got `num`
+warning: Warn[12008] Duplicated property `p` in `C` (defined in `A` and `B`): all instances will be aliased at runtime [1]
+
+abstract_inherits_from_traits.php:12:16
+10 | }
+11 | 
+12 | abstract class C {
+   |                ^ [1]
+13 |   use A, B;
+14 | }
+
+error: Typing[4341] Some members in class `C` are incompatible with those declared in type `A` [1]
+-> The property `$p` has the wrong type [2]
+-> Expected `int` [3]
+-> But got `num` [2]
+
+abstract_inherits_from_traits.php:13:7
+ 3 | 
+ 4 | trait A {
+ 5 |   <<__Const>> abstract static public int $p;
+   |                                      ^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | trait B {
+ 9 |   <<__Const>> abstract static public num $p;
+   |                                      ^^^ [2]
+10 | }
+11 | 
+12 | abstract class C {
+13 |   use A, B;
+   |       ^ [1]
+14 | }
+
+2 errors found

@@ -1,140 +1,403 @@
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 108, characters 44-55:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 30, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 30, characters 13-20:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 30, characters 13-20:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
-  But got `mixed`
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 109, characters 49-60:
-Invalid argument (Typing[4110])
-  File "tparam_in_tparam_bound_variance_bad.php", line 34, characters 10-17:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
-  But got `mixed`
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 112, characters 40-51:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 40, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 40, characters 13-20:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 40, characters 13-20:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
-  But got `mixed`
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 113, characters 45-56:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 45, characters 52-52:
-  `T` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 45, characters 57-70:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 45, characters 62-69:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
-  But got `mixed`
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 116, characters 48-61:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 16-23:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 12, characters 35-37:
-  Expected `int`
-  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 16-23:
-  But got `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 54, characters 16-23:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 117, characters 53-66:
-Invalid argument (Typing[4110])
-  File "tparam_in_tparam_bound_variance_bad.php", line 12, characters 35-37:
-  Expected `int`
-  File "tparam_in_tparam_bound_variance_bad.php", line 58, characters 14-21:
-  But got `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 58, characters 14-21:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 120, characters 44-53:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 16-23:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 15, characters 27-29:
-  Expected `int`
-  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 16-23:
-  But got `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 64, characters 16-23:
-  This type argument to `Inv3` must match exactly (it is invariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 121, characters 49-58:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 56-59:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 67-74:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 15, characters 27-29:
-  Expected `int`
-  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 67-74:
-  But got `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 67, characters 67-74:
-  This type argument to `Inv3` must match exactly (it is invariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 124, characters 44-55:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 74, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 74, characters 13-20:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 74, characters 13-20:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
-  But got `mixed`
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 125, characters 49-60:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 79, characters 56-59:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 79, characters 64-71:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 79, characters 64-71:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 9, characters 29-33:
-  But got `mixed`
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 129, characters 38-55:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 16-23:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 18, characters 44-46:
-  Expected `int`
-  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 16-23:
-  But got `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 88, characters 16-23:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 130, characters 43-60:
-Invalid argument (Typing[4110])
-  File "tparam_in_tparam_bound_variance_bad.php", line 18, characters 44-46:
-  Expected `int`
-  File "tparam_in_tparam_bound_variance_bad.php", line 92, characters 19-26:
-  But got `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 92, characters 19-26:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 134, characters 42-65:
-Invalid argument (Typing[4323])
-  File "tparam_in_tparam_bound_variance_bad.php", line 98, characters 5-8:
-  `TKey` is a constrained type parameter
-  File "tparam_in_tparam_bound_variance_bad.php", line 98, characters 13-20:
-  This type constraint is violated
-  File "tparam_in_tparam_bound_variance_bad.php", line 98, characters 13-20:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
-  But got `mixed`
-  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
-ERROR: File "tparam_in_tparam_bound_variance_bad.php", line 135, characters 47-70:
-Invalid argument (Typing[4110])
-  File "tparam_in_tparam_bound_variance_bad.php", line 102, characters 23-30:
-  Expected `arraykey`
-  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
-  But got `mixed`
-  File "tparam_in_tparam_bound_variance_bad.php", line 21, characters 54-58:
-  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tparam_in_tparam_bound_variance_bad.php:108:44
+  7 | 
+  8 | // Factory functions to produce values that should be REJECTED
+  9 | function cov3_mixed(): Cov3<mixed> {
+    |                             ^^^^^ [4]
+ 10 |   throw new Exception();
+ 11 | }
+    :
+ 28 |   public static function cov_class_in_contrav_pos<
+ 29 |     T as Cov3<TKey>,
+ 30 |     TKey as arraykey,
+    |     ^^^^ [2]
+    |             ^^^^^^^^ [3]
+ 31 |   >(T $_): void {}
+ 32 | 
+    :
+106 | function test_reject(): void {
+107 |   // Cov3<mixed> rejected: mixed is not <: arraykey
+108 |   VarianceReject::cov_class_in_contrav_pos(cov3_mixed());
+    |                                            ^^^^^^^^^^^^ [1]
+109 |   VarianceReject::cov_class_in_contrav_pos_simp(cov3_mixed());
+110 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+tparam_in_tparam_bound_variance_bad.php:109:49
+  7 | 
+  8 | // Factory functions to produce values that should be REJECTED
+  9 | function cov3_mixed(): Cov3<mixed> {
+    |                             ^^^^^ [3]
+ 10 |   throw new Exception();
+ 11 | }
+    :
+ 32 | 
+ 33 |   public static function cov_class_in_contrav_pos_simp(
+ 34 |     Cov3<arraykey> $_,
+    |          ^^^^^^^^ [2]
+ 35 |   ): void {}
+ 36 | 
+    :
+107 |   // Cov3<mixed> rejected: mixed is not <: arraykey
+108 |   VarianceReject::cov_class_in_contrav_pos(cov3_mixed());
+109 |   VarianceReject::cov_class_in_contrav_pos_simp(cov3_mixed());
+    |                                                 ^^^^^^^^^^^^ [1]
+110 | 
+111 |   // Cov3<mixed> rejected: Cov3<mixed> is not <: Cov3<arraykey>
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tparam_in_tparam_bound_variance_bad.php:112:40
+  7 | 
+  8 | // Factory functions to produce values that should be REJECTED
+  9 | function cov3_mixed(): Cov3<mixed> {
+    |                             ^^^^^ [4]
+ 10 |   throw new Exception();
+ 11 | }
+    :
+ 38 |   public static function cov_class_in_inv_pos<
+ 39 |     T as Cov3<TKey>,
+ 40 |     TKey as arraykey,
+    |     ^^^^ [2]
+    |             ^^^^^^^^ [3]
+ 41 |   >(T $_): ?T {
+ 42 |     return null;
+    :
+110 | 
+111 |   // Cov3<mixed> rejected: Cov3<mixed> is not <: Cov3<arraykey>
+112 |   VarianceReject::cov_class_in_inv_pos(cov3_mixed());
+    |                                        ^^^^^^^^^^^^ [1]
+113 |   VarianceReject::cov_class_in_inv_pos_simp(cov3_mixed());
+114 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [4]
+-> But got `mixed` [5]
+
+tparam_in_tparam_bound_variance_bad.php:113:45
+  7 | 
+  8 | // Factory functions to produce values that should be REJECTED
+  9 | function cov3_mixed(): Cov3<mixed> {
+    |                             ^^^^^ [5]
+ 10 |   throw new Exception();
+ 11 | }
+    :
+ 43 |   }
+ 44 | 
+ 45 |   public static function cov_class_in_inv_pos_simp<T as Cov3<arraykey>>(
+    |                                                    ^ [2]
+    |                                                         ^^^^^^^^^^^^^^ [3]
+    |                                                              ^^^^^^^^ [4]
+ 46 |     T $_,
+ 47 |   ): ?T {
+    :
+111 |   // Cov3<mixed> rejected: Cov3<mixed> is not <: Cov3<arraykey>
+112 |   VarianceReject::cov_class_in_inv_pos(cov3_mixed());
+113 |   VarianceReject::cov_class_in_inv_pos_simp(cov3_mixed());
+    |                                             ^^^^^^^^^^^^ [1]
+114 | 
+115 |   // Contrav3<int> rejected: int is not super arraykey (arraykey = int|string)
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [4]
+-> But got `arraykey` [3]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:116:48
+ 10 |   throw new Exception();
+ 11 | }
+ 12 | function contrav3_int(): Contrav3<int> {
+    |                                   ^^^ [4]
+ 13 |   throw new Exception();
+ 14 | }
+    :
+ 52 |   public static function contrav_class_in_contrav_pos<
+ 53 |     T as Contrav3<TKey>,
+ 54 |     TKey super arraykey,
+    |     ^^^^ [2]
+    |                ^^^^^^^^ [3]
+ 55 |   >(T $_): void {}
+ 56 | 
+    :
+114 | 
+115 |   // Contrav3<int> rejected: int is not super arraykey (arraykey = int|string)
+116 |   VarianceReject::contrav_class_in_contrav_pos(contrav3_int());
+    |                                                ^^^^^^^^^^^^^^ [1]
+117 |   VarianceReject::contrav_class_in_contrav_pos_simp(contrav3_int());
+118 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:117:53
+ 10 |   throw new Exception();
+ 11 | }
+ 12 | function contrav3_int(): Contrav3<int> {
+    |                                   ^^^ [2]
+ 13 |   throw new Exception();
+ 14 | }
+    :
+ 56 | 
+ 57 |   public static function contrav_class_in_contrav_pos_simp(
+ 58 |     Contrav3<arraykey> $_,
+    |              ^^^^^^^^ [3]
+ 59 |   ): void {}
+ 60 | 
+    :
+115 |   // Contrav3<int> rejected: int is not super arraykey (arraykey = int|string)
+116 |   VarianceReject::contrav_class_in_contrav_pos(contrav3_int());
+117 |   VarianceReject::contrav_class_in_contrav_pos_simp(contrav3_int());
+    |                                                     ^^^^^^^^^^^^^^ [1]
+118 | 
+119 |   // Inv3<int> rejected: int is not super arraykey
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [4]
+-> But got `arraykey` [3]
+-> This type argument to `Inv3` must match exactly (it is invariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:120:44
+ 13 |   throw new Exception();
+ 14 | }
+ 15 | function inv3_int(): Inv3<int> {
+    |                           ^^^ [4]
+ 16 |   throw new Exception();
+ 17 | }
+    :
+ 62 |   public static function inv_class_in_contrav_pos<
+ 63 |     T as Inv3<TKey>,
+ 64 |     TKey super arraykey,
+    |     ^^^^ [2]
+    |                ^^^^^^^^ [3]
+ 65 |   >(T $_): void {}
+ 66 | 
+    :
+118 | 
+119 |   // Inv3<int> rejected: int is not super arraykey
+120 |   VarianceReject::inv_class_in_contrav_pos(inv3_int());
+    |                                            ^^^^^^^^^^ [1]
+121 |   VarianceReject::inv_class_in_contrav_pos_simp(inv3_int());
+122 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [4]
+-> But got `arraykey` [3]
+-> This type argument to `Inv3` must match exactly (it is invariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:121:49
+ 13 |   throw new Exception();
+ 14 | }
+ 15 | function inv3_int(): Inv3<int> {
+    |                           ^^^ [4]
+ 16 |   throw new Exception();
+ 17 | }
+    :
+ 65 |   >(T $_): void {}
+ 66 | 
+ 67 |   public static function inv_class_in_contrav_pos_simp<TKey super arraykey>(
+    |                                                        ^^^^ [2]
+    |                                                                   ^^^^^^^^ [3]
+ 68 |     Inv3<TKey> $_,
+ 69 |   ): void {}
+    :
+119 |   // Inv3<int> rejected: int is not super arraykey
+120 |   VarianceReject::inv_class_in_contrav_pos(inv3_int());
+121 |   VarianceReject::inv_class_in_contrav_pos_simp(inv3_int());
+    |                                                 ^^^^^^^^^^ [1]
+122 | 
+123 |   // Cov3<mixed> rejected: mixed is not <: arraykey
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tparam_in_tparam_bound_variance_bad.php:124:44
+  7 | 
+  8 | // Factory functions to produce values that should be REJECTED
+  9 | function cov3_mixed(): Cov3<mixed> {
+    |                             ^^^^^ [4]
+ 10 |   throw new Exception();
+ 11 | }
+    :
+ 72 |   public static function tkey_in_bound_and_return<
+ 73 |     T as Cov3<TKey>,
+ 74 |     TKey as arraykey,
+    |     ^^^^ [2]
+    |             ^^^^^^^^ [3]
+ 75 |   >(T $_): ?TKey {
+ 76 |     return null;
+    :
+122 | 
+123 |   // Cov3<mixed> rejected: mixed is not <: arraykey
+124 |   VarianceReject::tkey_in_bound_and_return(cov3_mixed());
+    |                                            ^^^^^^^^^^^^ [1]
+125 |   VarianceReject::tkey_in_bound_and_return_simp(cov3_mixed());
+126 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+tparam_in_tparam_bound_variance_bad.php:125:49
+  7 | 
+  8 | // Factory functions to produce values that should be REJECTED
+  9 | function cov3_mixed(): Cov3<mixed> {
+    |                             ^^^^^ [4]
+ 10 |   throw new Exception();
+ 11 | }
+    :
+ 77 |   }
+ 78 | 
+ 79 |   public static function tkey_in_bound_and_return_simp<TKey as arraykey>(
+    |                                                        ^^^^ [2]
+    |                                                                ^^^^^^^^ [3]
+ 80 |     Cov3<TKey> $_,
+ 81 |   ): ?TKey {
+    :
+123 |   // Cov3<mixed> rejected: mixed is not <: arraykey
+124 |   VarianceReject::tkey_in_bound_and_return(cov3_mixed());
+125 |   VarianceReject::tkey_in_bound_and_return_simp(cov3_mixed());
+    |                                                 ^^^^^^^^^^^^ [1]
+126 | 
+127 |   // Cov3<Contrav3<int>> rejected: Contrav3<int> is not <: Contrav3<arraykey>
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [4]
+-> But got `arraykey` [3]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:129:38
+ 16 |   throw new Exception();
+ 17 | }
+ 18 | function cov3_contrav_int(): Cov3<Contrav3<int>> {
+    |                                            ^^^ [4]
+ 19 |   throw new Exception();
+ 20 | }
+    :
+ 86 |   public static function nested_cov_contrav<
+ 87 |     T as Cov3<Contrav3<TKey>>,
+ 88 |     TKey super arraykey,
+    |     ^^^^ [2]
+    |                ^^^^^^^^ [3]
+ 89 |   >(T $_): void {}
+ 90 | 
+    :
+127 |   // Cov3<Contrav3<int>> rejected: Contrav3<int> is not <: Contrav3<arraykey>
+128 |   // (would need arraykey <: int, which is false)
+129 |   VarianceReject::nested_cov_contrav(cov3_contrav_int());
+    |                                      ^^^^^^^^^^^^^^^^^^ [1]
+130 |   VarianceReject::nested_cov_contrav_simp(cov3_contrav_int());
+131 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:130:43
+ 16 |   throw new Exception();
+ 17 | }
+ 18 | function cov3_contrav_int(): Cov3<Contrav3<int>> {
+    |                                            ^^^ [2]
+ 19 |   throw new Exception();
+ 20 | }
+    :
+ 90 | 
+ 91 |   public static function nested_cov_contrav_simp(
+ 92 |     Cov3<Contrav3<arraykey>> $_,
+    |                   ^^^^^^^^ [3]
+ 93 |   ): void {}
+ 94 | 
+    :
+128 |   // (would need arraykey <: int, which is false)
+129 |   VarianceReject::nested_cov_contrav(cov3_contrav_int());
+130 |   VarianceReject::nested_cov_contrav_simp(cov3_contrav_int());
+    |                                           ^^^^^^^^^^^^^^^^^^ [1]
+131 | 
+132 |   // Contrav3<Contrav3<mixed>> rejected: Contrav3<arraykey> is not <: Contrav3<mixed>
+
+error: Typing[4323] Invalid argument [1]
+-> `TKey` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [4]
+
+tparam_in_tparam_bound_variance_bad.php:134:42
+ 19 |   throw new Exception();
+ 20 | }
+ 21 | function contrav3_contrav_mixed(): Contrav3<Contrav3<mixed>> {
+    |                                                      ^^^^^ [4]
+ 22 |   throw new Exception();
+ 23 | }
+    :
+ 96 |   public static function nested_contrav_contrav<
+ 97 |     T as Contrav3<Contrav3<TKey>>,
+ 98 |     TKey as arraykey,
+    |     ^^^^ [2]
+    |             ^^^^^^^^ [3]
+ 99 |   >(T $_): void {}
+100 | 
+    :
+132 |   // Contrav3<Contrav3<mixed>> rejected: Contrav3<arraykey> is not <: Contrav3<mixed>
+133 |   // (would need mixed <: arraykey, which is false)
+134 |   VarianceReject::nested_contrav_contrav(contrav3_contrav_mixed());
+    |                                          ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+135 |   VarianceReject::nested_contrav_contrav_simp(contrav3_contrav_mixed());
+136 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+-> This type argument to `Contrav3` only allows supertypes (it is contravariant) [3]
+
+tparam_in_tparam_bound_variance_bad.php:135:47
+ 19 |   throw new Exception();
+ 20 | }
+ 21 | function contrav3_contrav_mixed(): Contrav3<Contrav3<mixed>> {
+    |                                                      ^^^^^ [3]
+ 22 |   throw new Exception();
+ 23 | }
+    :
+100 | 
+101 |   public static function nested_contrav_contrav_simp(
+102 |     Contrav3<Contrav3<arraykey>> $_,
+    |                       ^^^^^^^^ [2]
+103 |   ): void {}
+104 | }
+    :
+133 |   // (would need mixed <: arraykey, which is false)
+134 |   VarianceReject::nested_contrav_contrav(contrav3_contrav_mixed());
+135 |   VarianceReject::nested_contrav_contrav_simp(contrav3_contrav_mixed());
+    |                                               ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+136 | }
+
+14 errors found

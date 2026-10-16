@@ -1,24 +1,78 @@
-ERROR: File "lambda_arithmetic_bad.php", line 20, characters 11-32:
-Invalid argument (Typing[4110])
-  File "lambda_arithmetic_bad.php", line 11, characters 18-18:
-  Expected `E`
-  File "lambda_arithmetic_bad.php", line 19, characters 37-43:
-  But got `int` because this is the result of an integer arithmetic operation
-ERROR: File "lambda_arithmetic_bad.php", line 22, characters 23-25:
-Invalid argument (Typing[4110])
-  File "lambda_arithmetic_bad.php", line 16, characters 30-31:
-  Expected `int` because this is used in an arithmetic operation
-  File "lambda_arithmetic_bad.php", line 22, characters 23-25:
-  But got `num`
-ERROR: File "lambda_arithmetic_bad.php", line 24, characters 23-25:
-Invalid argument (Typing[4110])
-  File "lambda_arithmetic_bad.php", line 17, characters 30-31:
-  Expected `int` because this is used in an arithmetic operation
-  File "lambda_arithmetic_bad.php", line 24, characters 23-25:
-  But got `num`
-ERROR: File "lambda_arithmetic_bad.php", line 26, characters 23-25:
-Invalid argument (Typing[4110])
-  File "lambda_arithmetic_bad.php", line 18, characters 30-31:
-  Expected `int` because this is used in an arithmetic operation
-  File "lambda_arithmetic_bad.php", line 26, characters 23-25:
-  But got `num`
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `int` because this is the result of an integer arithmetic operation [3]
+
+lambda_arithmetic_bad.php:20:11
+ 9 |   A = 1;
+10 | }
+11 | function expectE(E $e):void { }
+   |                  ^ [2]
+12 | 
+13 | function expectInt(int $i):void { }
+   :
+17 |   $sub_func = makeFun($x ==> $x - 1);
+18 |   $mul_func = makeFun($x ==> $x * 2);
+19 |   $add_func2 = makeFun2(($x,$y) ==> $x + $y);
+   |                                     ^^^^^^^ [3]
+20 |   expectE($add_func2(E::A, E::A));
+   |           ^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   expectInt($add_func(3));
+22 |   expectInt($add_func(3.4));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `num` [1]
+
+lambda_arithmetic_bad.php:22:23
+14 | <<__EntryPoint>>
+15 | function foo(): void {
+16 |   $add_func = makeFun($x ==> $x + 1);
+   |                              ^^ [2]
+17 |   $sub_func = makeFun($x ==> $x - 1);
+18 |   $mul_func = makeFun($x ==> $x * 2);
+19 |   $add_func2 = makeFun2(($x,$y) ==> $x + $y);
+20 |   expectE($add_func2(E::A, E::A));
+21 |   expectInt($add_func(3));
+22 |   expectInt($add_func(3.4));
+   |                       ^^^ [1]
+23 |   expectInt($sub_func(3));
+24 |   expectInt($sub_func(3.4));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `num` [1]
+
+lambda_arithmetic_bad.php:24:23
+15 | function foo(): void {
+16 |   $add_func = makeFun($x ==> $x + 1);
+17 |   $sub_func = makeFun($x ==> $x - 1);
+   |                              ^^ [2]
+18 |   $mul_func = makeFun($x ==> $x * 2);
+19 |   $add_func2 = makeFun2(($x,$y) ==> $x + $y);
+   :
+22 |   expectInt($add_func(3.4));
+23 |   expectInt($sub_func(3));
+24 |   expectInt($sub_func(3.4));
+   |                       ^^^ [1]
+25 |   expectInt($mul_func(3));
+26 |   expectInt($mul_func(3.4));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `num` [1]
+
+lambda_arithmetic_bad.php:26:23
+16 |   $add_func = makeFun($x ==> $x + 1);
+17 |   $sub_func = makeFun($x ==> $x - 1);
+18 |   $mul_func = makeFun($x ==> $x * 2);
+   |                              ^^ [2]
+19 |   $add_func2 = makeFun2(($x,$y) ==> $x + $y);
+20 |   expectE($add_func2(E::A, E::A));
+   :
+24 |   expectInt($sub_func(3.4));
+25 |   expectInt($mul_func(3));
+26 |   expectInt($mul_func(3.4));
+   |                       ^^^ [1]
+27 | }
+
+4 errors found

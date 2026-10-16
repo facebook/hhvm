@@ -1,26 +1,76 @@
-ERROR: File "lambda_unpacked_parameters.php", line 11, characters 14-24:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 11, characters 14-24:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "lambda_unpacked_parameters.php", line 9, characters 17-17:
-  But got `int`
-ERROR: File "lambda_unpacked_parameters.php", line 15, characters 14-14:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 14, characters 28-29:
-  Expected `string` (variadic argument)
-  File "lambda_unpacked_parameters.php", line 15, characters 14-14:
-  But got `int`
-ERROR: File "lambda_unpacked_parameters.php", line 39, characters 11-12:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `string` or `int`
-  File "lambda_unpacked_parameters.php", line 3, characters 69-70:
-  But got `vec<string>` (variadic argument)
-ERROR: File "lambda_unpacked_parameters.php", line 42, characters 25-29:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_unpacked_parameters.php", line 42, characters 17-18:
-  It is unknown because a type could not be determined here
-ERROR: File "lambda_unpacked_parameters.php", line 47, characters 12-13:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_unpacked_parameters.php", line 46, characters 18-19:
-  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+error: Typing[4110] Invalid argument [1]
+-> Expected `Traversable<_>` (it is unpacked with `...`) [1]
+-> But got `int` [2]
+
+lambda_unpacked_parameters.php:11:14
+ 7 | 
+ 8 |   // Error, $single_int is not unpackable
+ 9 |   $single_int = 1;
+   |                 ^ [2]
+10 |   $lambda = (...$x) ==> $x[0] + $x[1];
+11 |   $lambda(...$single_int);
+   |              ^^^^^^^^^^^ [1]
+12 | 
+13 |   // Error, expecting string but got int
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` (variadic argument) [2]
+-> But got `int` [1]
+
+lambda_unpacked_parameters.php:15:14
+12 | 
+13 |   // Error, expecting string but got int
+14 |   $lambda = ($a, string ...$x) ==> $x[0]."hello";
+   |                            ^^ [2]
+15 |   $lambda(1, 1, ...$y);
+   |              ^ [1]
+16 | 
+17 |   // OK, as second argument is a string
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` or `int` [2]
+-> But got `vec<string>` (variadic argument) [3]
+
+lambda_unpacked_parameters.php:39:11
+ 1 | <?hh
+ 2 | 
+ 3 | function test((string, int) $tup, Traversable<int> $ints, string ...$y): void {
+   |                                                                     ^^ [3]
+ 4 |   // OK
+ 5 |   $lambda = (...$x) ==> $x[0] + $x[1];
+   :
+36 | 
+37 |   // Error, expecting variadic string, we pass it a varray
+38 |   $lambda = (...$x) ==> $x[0].$x[1];
+   |                         ^^^^^ [2]
+39 |   $lambda($y);
+   |           ^^ [1]
+40 | 
+41 |   // Error, $x will be variadic string
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+lambda_unpacked_parameters.php:42:25
+40 | 
+41 |   // Error, $x will be variadic string
+42 |   $lambda = (...$x) ==> $x[0]->foo();
+   |                 ^^ [2]
+   |                         ^^^^^ [1]
+43 |   $lambda(...$y);
+44 | 
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+lambda_unpacked_parameters.php:47:12
+44 | 
+45 |   // Error, $b will be an int when $tup is unpacked into $lambda.
+46 |   $lambda = ($a, $b) ==> {
+   |                  ^^ [2]
+47 |     return $b->foo();
+   |            ^^ [1]
+48 |   };
+49 |   $lambda(...$tup);
+
+5 errors found

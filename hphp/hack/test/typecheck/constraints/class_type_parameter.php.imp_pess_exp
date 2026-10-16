@@ -1,22 +1,39 @@
-ERROR: File "class_type_parameter.php", line 6, characters 34-46:
-Some type arguments violate their constraints (Typing[4323])
-  File "class_type_parameter.php", line 3, characters 22-22:
-  `T` is a constrained type parameter
-  File "class_type_parameter.php", line 3, characters 27-29:
-  This type constraint is violated
-  File "class_type_parameter.php", line 3, characters 27-29:
-  Expected `num`
-  File "class_type_parameter.php", line 6, characters 45-45:
-  But got `T`
-ERROR: File "class_type_parameter.php", line 6, characters 34-46:
-Some type arguments violate their constraints (Typing[4323])
-  File "class_type_parameter.php", line 3, characters 22-22:
-  `T` is a constrained type parameter
-  File "class_type_parameter.php", line 3, characters 27-29:
-  This type constraint is violated
-  File "class_type_parameter.php", line 3, characters 27-29:
-  Expected `num`
-  File "class_type_parameter.php", line 6, characters 45-45:
-  But got `mixed`
-  File "class_type_parameter.php", line 6, characters 25-25:
-    by the definition of `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `T` [4]
+
+class_type_parameter.php:6:34
+1 | <?hh
+2 | 
+3 | interface Constraint<T as num> {}
+  |                      ^ [2]
+  |                           ^^^ [3]
+4 | 
+5 | // Not a valid constraint since T is unbounded type parameter
+6 | class InvalidConstraint<T, Tc as Constraint<T>> {}
+  |                                  ^^^^^^^^^^^^^ [1]
+  |                                             ^ [4]
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+class_type_parameter.php:6:34
+1 | <?hh
+2 | 
+3 | interface Constraint<T as num> {}
+  |                      ^ [2]
+  |                           ^^^ [3]
+4 | 
+5 | // Not a valid constraint since T is unbounded type parameter
+6 | class InvalidConstraint<T, Tc as Constraint<T>> {}
+  |                         ^ [5]
+  |                                  ^^^^^^^^^^^^^ [1]
+  |                                             ^ [4]
+
+2 errors found

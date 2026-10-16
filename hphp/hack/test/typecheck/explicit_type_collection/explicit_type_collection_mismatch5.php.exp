@@ -1,18 +1,40 @@
-ERROR: File "explicit_type_collection_mismatch5.php", line 4, characters 8-35:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch5.php", line 4, characters 17-21:
-  But got `bool`
-ERROR: File "explicit_type_collection_mismatch5.php", line 4, characters 8-35:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch5.php", line 4, characters 24-28:
-  But got `bool`
-ERROR: File "explicit_type_collection_mismatch5.php", line 4, characters 8-35:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch5.php", line 4, characters 31-34:
-  But got `bool`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+explicit_type_collection_mismatch5.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $d = vec<int>[false, false, true];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |            ^^^ [2]
+  |                 ^^^^^ [3]
+5 | }
+
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+explicit_type_collection_mismatch5.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $d = vec<int>[false, false, true];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |            ^^^ [2]
+  |                        ^^^^^ [3]
+5 | }
+
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+explicit_type_collection_mismatch5.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $d = vec<int>[false, false, true];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |            ^^^ [2]
+  |                               ^^^^ [3]
+5 | }
+
+3 errors found

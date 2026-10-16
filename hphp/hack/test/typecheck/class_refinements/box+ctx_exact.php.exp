@@ -1,20 +1,80 @@
-ERROR: File "box+ctx_exact.php", line 13, characters 16-45:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "box+ctx_exact.php", line 24, characters 7-9:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "box+ctx_exact.php", line 23, characters 37-38:
-  From this declaration, the context of this function body provides the capability set {}
-  File "box+ctx_exact.php", line 10, characters 31-31:
-  But the function being called requires the capability <expr#2>::C
-ERROR: File "box+ctx_exact.php", line 55, characters 15-17:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "box+ctx_exact.php", line 51, characters 2-3:
-  From this declaration, the context of this function body provides the capability set {}
-  File "box+ctx_exact.php", line 10, characters 31-31:
-  But the function being called requires the capability <expr#5>::C
-ERROR: File "box+ctx_exact.php", line 56, characters 20-22:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "box+ctx_exact.php", line 51, characters 2-3:
-  From this declaration, the context of this function body provides the capability set {}
-  File "box+ctx_exact.php", line 10, characters 31-31:
-  But the function being called requires the capability <expr#2>::C
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+box+ctx_exact.php:13:16
+11 | }
+12 | 
+13 | type PureBox = BoxWithCtx with { ctx C = [] }; // ERROR
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | 
+15 | function get_pure_good(BoxWithCtx with { ctx C = [] } $b)[]: void {
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability <expr#2>::C [3]
+
+box+ctx_exact.php:24:7
+ 8 | interface BoxWithCtx extends Box {
+ 9 |   abstract const ctx C super [defaults];
+10 |   public function get()[this::C]: this::T;
+   |                               ^ [3]
+11 | }
+12 | 
+   :
+21 | }
+22 | 
+23 | function get_pure_bad(BoxWithCtx $b)[]: void {
+   |                                     ^^ [2]
+24 |   $b->get(); // ERROR
+   |       ^^^ [1]
+25 | }
+26 | 
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability <expr#5>::C [3]
+
+box+ctx_exact.php:55:15
+ 8 | interface BoxWithCtx extends Box {
+ 9 |   abstract const ctx C super [defaults];
+10 |   public function get()[this::C]: this::T;
+   |                               ^ [3]
+11 | }
+12 | 
+   :
+49 |   BoxWithCtx $maybe_pure_box,
+50 |   BoxWithCtx with { ctx C = [] } $pure_box,
+51 | )[]: void {
+   |  ^^ [2]
+52 |   $pure_box->get(); // OK
+53 |   make_pure_box()->get(); // OK
+54 | 
+55 |   make_box()->get(); // ERROR
+   |               ^^^ [1]
+56 |   $maybe_pure_box->get(); // ERROR
+57 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability <expr#2>::C [3]
+
+box+ctx_exact.php:56:20
+ 8 | interface BoxWithCtx extends Box {
+ 9 |   abstract const ctx C super [defaults];
+10 |   public function get()[this::C]: this::T;
+   |                               ^ [3]
+11 | }
+12 | 
+   :
+49 |   BoxWithCtx $maybe_pure_box,
+50 |   BoxWithCtx with { ctx C = [] } $pure_box,
+51 | )[]: void {
+   |  ^^ [2]
+52 |   $pure_box->get(); // OK
+53 |   make_pure_box()->get(); // OK
+54 | 
+55 |   make_box()->get(); // ERROR
+56 |   $maybe_pure_box->get(); // ERROR
+   |                    ^^^ [1]
+57 | }
+
+4 errors found

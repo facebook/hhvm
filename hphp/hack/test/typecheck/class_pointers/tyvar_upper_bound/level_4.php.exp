@@ -1,20 +1,90 @@
-ERROR: File "level_4.php", line 43, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 9, characters 45-52:
-  Definition is here
-ERROR: File "level_4.php", line 45, characters 3-20:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 13, characters 47-54:
-  Definition is here
-ERROR: File "level_4.php", line 47, characters 3-21:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 19, characters 48-55:
-  Definition is here
-ERROR: File "level_4.php", line 49, characters 3-21:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 25, characters 48-55:
-  Definition is here
-ERROR: File "level_4.php", line 51, characters 3-8:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 31, characters 35-42:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:43:3
+ 7 | }
+ 8 | 
+ 9 | function lower_then_nullable_string<T super class<C> as ?string>(T $value): T {
+   |                                             ^^^^^^^^ [2]
+10 |   return $value;
+11 | }
+   :
+41 | function test(): void {
+42 |   $nullable_string = lower_then_nullable_string(get_class_pointer());
+43 |   $nullable_string::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+44 |   $nullable_arraykey = lower_then_nullable_arraykey(get_class_pointer());
+45 |   $nullable_arraykey::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:45:3
+11 | }
+12 | 
+13 | function lower_then_nullable_arraykey<T super class<C> as ?arraykey>(
+   |                                               ^^^^^^^^ [2]
+14 |   T $value,
+15 | ): T {
+   :
+43 |   $nullable_string::method();
+44 |   $nullable_arraykey = lower_then_nullable_arraykey(get_class_pointer());
+45 |   $nullable_arraykey::method();
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+46 |   $nullable_stringish = lower_then_nullable_stringish(get_class_pointer());
+47 |   $nullable_stringish::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:47:3
+17 | }
+18 | 
+19 | function lower_then_nullable_stringish<T super class<C> as ?Stringish>(
+   |                                                ^^^^^^^^ [2]
+20 |   T $value,
+21 | ): T {
+   :
+45 |   $nullable_arraykey::method();
+46 |   $nullable_stringish = lower_then_nullable_stringish(get_class_pointer());
+47 |   $nullable_stringish::method();
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+48 |   $nullable_xhp_child = lower_then_nullable_xhp_child(get_class_pointer());
+49 |   $nullable_xhp_child::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:49:3
+23 | }
+24 | 
+25 | function lower_then_nullable_xhp_child<T super class<C> as ?XHPChild>(
+   |                                                ^^^^^^^^ [2]
+26 |   T $value,
+27 | ): T {
+   :
+47 |   $nullable_stringish::method();
+48 |   $nullable_xhp_child = lower_then_nullable_xhp_child(get_class_pointer());
+49 |   $nullable_xhp_child::method();
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+50 |   $union = lower_then_union(get_class_pointer());
+51 |   $union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:51:3
+29 | }
+30 | 
+31 | function lower_then_union<T super class<C> as (string | float)>(
+   |                                   ^^^^^^^^ [2]
+32 |   T $value,
+33 | ): T {
+   :
+49 |   $nullable_xhp_child::method();
+50 |   $union = lower_then_union(get_class_pointer());
+51 |   $union::method();
+   |   ^^^^^^ [1]
+52 | }
+
+5 errors found

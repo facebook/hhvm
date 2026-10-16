@@ -1,2 +1,11 @@
-WARN: File "talias5.php", line 11, characters 14-23:
-This `is` check is always `false`. The expression on the left has type `(B & not C<_>)` which shares no values with `C<T#1>`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(B & not C<_>)` which shares no values with `C<T#1>`. [1]
+
+talias5.php:11:14
+ 9 | function do_it(B $x): void {
+10 |   if ($x is A<_>) {
+11 |   } else if ($x is C<_>) {
+   |              ^^^^^^^^^^ [1]
+12 |   }
+13 | }
+
+1 error found

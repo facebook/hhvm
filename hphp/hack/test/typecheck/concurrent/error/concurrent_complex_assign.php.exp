@@ -1,8 +1,34 @@
-ERROR: File "concurrent_complex_assign.php", line 7, characters 21-23:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "concurrent_complex_assign.php", line 9, characters 21-23:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "concurrent_complex_assign.php", line 8, characters 27-29:
-Variable `$a2` is undefined, or not always defined. (Naming[2050])
-  File "concurrent_complex_assign.php", line 7, characters 21-28:
-  Did you mean `$a1` instead?
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+concurrent_complex_assign.php:7:21
+5 | async function foo(): Awaitable<int> {
+6 |   concurrent {
+7 |     $x = await genx($a1 = 42);
+  |                     ^^^ [1]
+8 |     $y = await genx($a1 + $a2);
+9 |     $z = await genx($a2 = 43);
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+concurrent_complex_assign.php:9:21
+ 7 |     $x = await genx($a1 = 42);
+ 8 |     $y = await genx($a1 + $a2);
+ 9 |     $z = await genx($a2 = 43);
+   |                     ^^^ [1]
+10 |   }
+11 |   return $x + $y + $z;
+
+error: Naming[2050] Variable `$a2` is undefined, or not always defined. [1]
+-> Did you mean `$a1` instead? [2]
+
+concurrent_complex_assign.php:8:27
+ 5 | async function foo(): Awaitable<int> {
+ 6 |   concurrent {
+ 7 |     $x = await genx($a1 = 42);
+   |                     ^^^^^^^^ [2]
+ 8 |     $y = await genx($a1 + $a2);
+   |                           ^^^ [1]
+ 9 |     $z = await genx($a2 = 43);
+10 |   }
+
+3 errors found

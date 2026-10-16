@@ -1,10 +1,51 @@
-ERROR: File "public_toplevel2.php", line 3, characters 1-6:
-`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "public_toplevel2.php", line 4, characters 1-6:
-`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "public_toplevel2.php", line 5, characters 1-6:
-`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "public_toplevel2.php", line 7, characters 1-6:
-`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
-ERROR: File "public_toplevel2.php", line 10, characters 1-6:
-`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+error: Parsing[1002] `public` on toplevel entities cannot be used outside of a module. Please define a module for this file. [1]
+
+public_toplevel2.php:3:1
+1 | <?hh
+2 | 
+3 | public class Foo {}
+  | ^^^^^^ [1]
+4 | public type FooAlias = Foo;
+5 | public enum FooEnum : int {}
+
+error: Parsing[1002] `public` on toplevel entities cannot be used outside of a module. Please define a module for this file. [1]
+
+public_toplevel2.php:4:1
+2 | 
+3 | public class Foo {}
+4 | public type FooAlias = Foo;
+  | ^^^^^^ [1]
+5 | public enum FooEnum : int {}
+6 | 
+
+error: Parsing[1002] `public` on toplevel entities cannot be used outside of a module. Please define a module for this file. [1]
+
+public_toplevel2.php:5:1
+3 | public class Foo {}
+4 | public type FooAlias = Foo;
+5 | public enum FooEnum : int {}
+  | ^^^^^^ [1]
+6 | 
+7 | public enum class FooEnumClass : int {}
+
+error: Parsing[1002] `public` on toplevel entities cannot be used outside of a module. Please define a module for this file. [1]
+
+public_toplevel2.php:7:1
+5 | public enum FooEnum : int {}
+6 | 
+7 | public enum class FooEnumClass : int {}
+  | ^^^^^^ [1]
+8 | 
+9 | <<__EntryPoint>>
+
+error: Parsing[1002] `public` on toplevel entities cannot be used outside of a module. Please define a module for this file. [1]
+
+public_toplevel2.php:10:1
+ 8 | 
+ 9 | <<__EntryPoint>>
+10 | public function foo(): void {
+   | ^^^^^^ [1]
+11 |   echo "Good\n";
+12 | }
+
+5 errors found

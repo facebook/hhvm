@@ -1,146 +1,293 @@
-ERROR: File "subtype.php", line 21, characters 25-60:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "subtype.php", line 23, characters 21-22:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "subtype.php", line 34, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 34, characters 41-68:
-  Expected a class with `{type T = string}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 34, characters 14-38:
-  But got `Box with { type T = int }`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 34, characters 61-66:
-  This `as` or `=` refinement constraint is violated
-  File "subtype.php", line 34, characters 61-66:
-  Expected `string`
-  File "subtype.php", line 34, characters 34-36:
-  But got `int`
-ERROR: File "subtype.php", line 34, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 34, characters 41-68:
-  Expected a class with `{type T = string}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 34, characters 14-38:
-  But got `Box with { type T = int }`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 34, characters 61-66:
-  This `super` refinement constraint is violated
-  File "subtype.php", line 34, characters 34-36:
-  Expected `int`
-  File "subtype.php", line 34, characters 61-66:
-  But got `string`
-ERROR: File "subtype.php", line 35, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 35, characters 19-46:
-  Expected a class with `{type T = string}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 35, characters 14-16:
-  But got `Box`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-ERROR: File "subtype.php", line 35, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 35, characters 19-46:
-  Expected a class with `{type T = string}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 35, characters 14-16:
-  But got `Box`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 35, characters 39-44:
-  This `as` or `=` refinement constraint is violated
-  File "subtype.php", line 35, characters 39-44:
-  Expected `string`
-  File "subtype.php", line 9, characters 28-32:
-  But got `mixed`
-ERROR: File "subtype.php", line 35, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 35, characters 19-46:
-  Expected a class with `{type T = string}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 35, characters 14-16:
-  But got `Box`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 35, characters 39-44:
-  This `super` refinement constraint is violated
-  File "subtype.php", line 9, characters 23-23:
-  Expected `nothing` because the type constant T lacks a constraint
-  File "subtype.php", line 35, characters 39-44:
-  But got `string`
-ERROR: File "subtype.php", line 36, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 36, characters 22-46:
-  Expected a class with `{type T = int}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 36, characters 14-19:
-  But got `StrBox`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 36, characters 42-44:
-  This `as` or `=` refinement constraint is violated
-  File "subtype.php", line 36, characters 42-44:
-  Expected `int`
-  File "subtype.php", line 17, characters 18-23:
-  But got `string`
-ERROR: File "subtype.php", line 36, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 36, characters 22-46:
-  Expected a class with `{type T = int}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 36, characters 14-19:
-  But got `StrBox`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 36, characters 42-44:
-  This `super` refinement constraint is violated
-  File "subtype.php", line 17, characters 18-23:
-  Expected `string`
-  File "subtype.php", line 36, characters 42-44:
-  But got `int`
-ERROR: File "subtype.php", line 37, characters 3-12:
-A `where` type constraint is violated here (Typing[4323])
-  File "subtype.php", line 23, characters 10-19:
-  This is the method with `where` type constraints
-  File "subtype.php", line 37, characters 30-43:
-  Expected a class with `{type T super C3 as C2}`
-  File "subtype.php", line 23, characters 49-50:
-    via this generic `Tb`
-  File "subtype.php", line 37, characters 14-27:
-  But got `Box with { type T as C2 super C4 }`
-  File "subtype.php", line 23, characters 43-44:
-    via this generic `Ta`
-  File "subtype.php", line 37, characters 37-38:
-  This `super` refinement constraint is violated
-  File "subtype.php", line 37, characters 21-22:
-  Expected `C4`
-  File "subtype.php", line 21, characters 49-51:
-    via this generic `Tlo`
-  File "subtype.php", line 37, characters 37-38:
-  But got `C3`
-  File "subtype.php", line 21, characters 49-51:
-    via this generic `Tlo`
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+subtype.php:21:25
+19 | 
+20 | // We ignore the NastCheck
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+subtype.php:23:21
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |                     ^^ [1]
+24 | 
+25 | function subtype_tests(): void {
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = string}` [3]
+->   via this generic `Tb` [4]
+-> But got `Box with { type T = int }` [5]
+->   via this generic `Ta` [6]
+-> This `as` or `=` refinement constraint is violated [7]
+-> Expected `string` [7]
+-> But got `int` [8]
+
+subtype.php:34:3
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+32 | 
+33 |   // Errors expected below:
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+   |                                  ^^^ [8]
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                             ^^^^^^ [7]
+35 |   is_subtype<Box, Box with { type T = string }>();
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = string}` [3]
+->   via this generic `Tb` [4]
+-> But got `Box with { type T = int }` [5]
+->   via this generic `Ta` [6]
+-> This `super` refinement constraint is violated [7]
+-> Expected `int` [8]
+-> But got `string` [7]
+
+subtype.php:34:3
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+32 | 
+33 |   // Errors expected below:
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+   |                                  ^^^ [8]
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                             ^^^^^^ [7]
+35 |   is_subtype<Box, Box with { type T = string }>();
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = string}` [3]
+->   via this generic `Tb` [4]
+-> But got `Box` [5]
+->   via this generic `Ta` [6]
+
+subtype.php:35:3
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+33 |   // Errors expected below:
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+35 |   is_subtype<Box, Box with { type T = string }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^ [5]
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+37 |   is_subtype<RngBox<C4, C2>, RngBox<C3, C2>>();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = string}` [3]
+->   via this generic `Tb` [4]
+-> But got `Box` [5]
+->   via this generic `Ta` [6]
+-> This `as` or `=` refinement constraint is violated [7]
+-> Expected `string` [7]
+-> But got `mixed` [8]
+
+subtype.php:35:3
+ 7 | 
+ 8 | abstract class Box {
+ 9 |   abstract const type T as mixed;
+   |                            ^^^^^ [8]
+10 | }
+11 | 
+   :
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+33 |   // Errors expected below:
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+35 |   is_subtype<Box, Box with { type T = string }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^ [5]
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                       ^^^^^^ [7]
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+37 |   is_subtype<RngBox<C4, C2>, RngBox<C3, C2>>();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = string}` [3]
+->   via this generic `Tb` [4]
+-> But got `Box` [5]
+->   via this generic `Ta` [6]
+-> This `super` refinement constraint is violated [7]
+-> Expected `nothing` because the type constant T lacks a constraint [8]
+-> But got `string` [7]
+
+subtype.php:35:3
+ 7 | 
+ 8 | abstract class Box {
+ 9 |   abstract const type T as mixed;
+   |                       ^ [8]
+10 | }
+11 | 
+   :
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+33 |   // Errors expected below:
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+35 |   is_subtype<Box, Box with { type T = string }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^ [5]
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                       ^^^^^^ [7]
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+37 |   is_subtype<RngBox<C4, C2>, RngBox<C3, C2>>();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = int}` [3]
+->   via this generic `Tb` [4]
+-> But got `StrBox` [5]
+->   via this generic `Ta` [6]
+-> This `as` or `=` refinement constraint is violated [7]
+-> Expected `int` [7]
+-> But got `string` [8]
+
+subtype.php:36:3
+15 | 
+16 | class StrBox extends Box {
+17 |   const type T = string;
+   |                  ^^^^^^ [8]
+18 | }
+19 | 
+20 | // We ignore the NastCheck
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+35 |   is_subtype<Box, Box with { type T = string }>();
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^^^^ [5]
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                          ^^^ [7]
+37 |   is_subtype<RngBox<C4, C2>, RngBox<C3, C2>>();
+38 | 
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T = int}` [3]
+->   via this generic `Tb` [4]
+-> But got `StrBox` [5]
+->   via this generic `Ta` [6]
+-> This `super` refinement constraint is violated [7]
+-> Expected `string` [8]
+-> But got `int` [7]
+
+subtype.php:36:3
+15 | 
+16 | class StrBox extends Box {
+17 |   const type T = string;
+   |                  ^^^^^^ [8]
+18 | }
+19 | 
+20 | // We ignore the NastCheck
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+34 |   is_subtype<Box with { type T = int }, Box with { type T = string }>();
+35 |   is_subtype<Box, Box with { type T = string }>();
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^^^^ [5]
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                          ^^^ [7]
+37 |   is_subtype<RngBox<C4, C2>, RngBox<C3, C2>>();
+38 | 
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected a class with `{type T super C3 as C2}` [3]
+->   via this generic `Tb` [4]
+-> But got `Box with { type T as C2 super C4 }` [5]
+->   via this generic `Ta` [6]
+-> This `super` refinement constraint is violated [7]
+-> Expected `C4` [8]
+->   via this generic `Tlo` [9]
+-> But got `C3` [7]
+->   via this generic `Tlo` [9]
+
+subtype.php:37:3
+19 | 
+20 | // We ignore the NastCheck
+21 | type RngBox<Tlo, Thi> = Box with { type T super Tlo as Thi };
+   |                                                 ^^^ [9]
+22 | 
+23 | function is_subtype<Ta, Tb>(): void where Ta as Tb {}
+   |          ^^^^^^^^^^ [2]
+   |                                           ^^ [6]
+   |                                                 ^^ [4]
+24 | 
+25 | function subtype_tests(): void {
+   :
+35 |   is_subtype<Box, Box with { type T = string }>();
+36 |   is_subtype<StrBox, Box with { type T = int }>();
+37 |   is_subtype<RngBox<C4, C2>, RngBox<C3, C2>>();
+   |   ^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^ [5]
+   |                     ^^ [8]
+   |                              ^^^^^^^^^^^^^^ [3]
+   |                                     ^^ [7]
+38 | 
+39 | }
+
+10 errors found

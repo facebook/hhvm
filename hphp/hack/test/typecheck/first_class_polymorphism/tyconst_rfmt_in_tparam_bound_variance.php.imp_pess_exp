@@ -1,2 +1,11 @@
-ERROR: File "tyconst_rfmt_in_tparam_bound_variance.php", line 20, characters 5-6:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tyconst_rfmt_in_tparam_bound_variance.php:20:5
+18 |   // Both eliminated (as rfmt in return type, cov pos)
+19 |   public static function as_rfmt_in_cov_pos<
+20 |     T2 super arraykey,
+   |     ^^ [1]
+21 |   >(): ?(WithTC1 with { type TC as T2 }) {
+22 |     return null;
+
+1 error found

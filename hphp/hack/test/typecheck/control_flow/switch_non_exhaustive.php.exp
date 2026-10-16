@@ -1,6 +1,23 @@
 File "switch_non_exhaustive.php", line 16, characters 3-13:
   B
-ERROR: File "switch_non_exhaustive.php", line 9, characters 3-66:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_non_exhaustive.php", line 9, characters 11-12:
-  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_non_exhaustive.php:9:3
+ 7 | function test(string $x): void {
+ 8 |   $y = new A();
+ 9 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+10 |     case 'a':
+   |     ^^^^^^^^^ [1]
+11 |       $y = new B();
+   |       ^^^^^^^^^^^^^ [1]
+12 |       break;
+   |       ^^^^^^ [1]
+13 |   }
+   |   ^ [1]
+14 |   // we expect (exact B) since the switch will
+15 |   // throw when $x !== 'a'
+
+1 error found

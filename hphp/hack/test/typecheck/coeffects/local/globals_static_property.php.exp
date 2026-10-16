@@ -1,12 +1,60 @@
-ERROR: File "globals_static_property.php", line 6, characters 32-61:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "globals_static_property.php", line 10, characters 12-21:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "globals_static_property.php", line 14, characters 22-51:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "globals_static_property.php", line 15, characters 28-32:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "globals_static_property.php", line 20, characters 19-48:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "globals_static_property.php", line 21, characters 10-14:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+globals_static_property.php:6:32
+4 |   public static int $x = 42;
+5 | 
+6 |   private function m_allowed()[\HH\Capabilities\AccessGlobals, globals]: int {
+  |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |     return static::$x; // ok (context defaults has the AccessGlobals capability)
+8 |   }
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+globals_static_property.php:10:12
+ 8 |   }
+ 9 |   private function m_banned()[]: int {
+10 |     return static::$x; // error
+   |            ^^^^^^^^^^ [1]
+11 |   }
+12 | }
+
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+globals_static_property.php:14:22
+12 | }
+13 | 
+14 | function f_allowed()[\HH\Capabilities\AccessGlobals, globals]: int {
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   $l_disallowed = ()[] ==> C::$x; // error
+16 |   return C::$x; // ok
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+globals_static_property.php:15:28
+13 | 
+14 | function f_allowed()[\HH\Capabilities\AccessGlobals, globals]: int {
+15 |   $l_disallowed = ()[] ==> C::$x; // error
+   |                            ^^^^^ [1]
+16 |   return C::$x; // ok
+17 | }
+
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+globals_static_property.php:20:19
+18 | 
+19 | function f_banned()[write_props]: int {
+20 |   $l_allowed = ()[\HH\Capabilities\AccessGlobals, globals] ==> C::$x; // ok
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   return C::$x; // error
+22 | }
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+globals_static_property.php:21:10
+19 | function f_banned()[write_props]: int {
+20 |   $l_allowed = ()[\HH\Capabilities\AccessGlobals, globals] ==> C::$x; // ok
+21 |   return C::$x; // error
+   |          ^^^^^ [1]
+22 | }
+
+6 errors found

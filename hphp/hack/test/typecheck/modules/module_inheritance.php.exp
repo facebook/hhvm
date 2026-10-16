@@ -1,12 +1,55 @@
-ERROR: File "module_inheritance.php--A.php", line 22, characters 21-23:
-This member visibility is: `internal` (Typing[4113])
-  File "module_inheritance.php--A.php", line 7, characters 19-21:
-  `public` was expected
-ERROR: File "module_inheritance.php--B.php", line 8, characters 21-23:
-This member visibility is: `internal` (Typing[4113])
-  File "module_inheritance.php--A.php", line 7, characters 19-21:
-  `public` was expected
-ERROR: File "module_inheritance.php--B.php", line 16, characters 21-28:
-Cannot override this member in module `B` (Typing[4444])
-  File "module_inheritance.php--A.php", line 9, characters 21-28:
-  This member is internal to module `A`
+error: Typing[4113] This member visibility is: `internal` [1]
+-> `public` was expected [2]
+
+module_inheritance.php--A.php:22:21
+ 5 | 
+ 6 | class A {
+ 7 |   public function pub(): void {}
+   |                   ^^^ [2]
+ 8 | 
+ 9 |   internal function internal(): void {}
+   :
+20 | class A3 extends A {
+21 |   <<__Override>>
+22 |   internal function pub(): void {}
+   |                     ^^^ [1]
+23 | }
+
+error: Typing[4113] This member visibility is: `internal` [1]
+-> `public` was expected [2]
+
+module_inheritance.php--B.php:8:21
+ 6 | class B extends A {
+ 7 |   <<__Override>>
+ 8 |   internal function pub(): void {}
+   |                     ^^^ [1]
+ 9 | }
+10 | 
+
+module_inheritance.php--A.php:7:19
+ 5 | 
+ 6 | class A {
+ 7 |   public function pub(): void {}
+   |                   ^^^ [2]
+ 8 | 
+ 9 |   internal function internal(): void {}
+
+error: Typing[4444] Cannot override this member in module `B` [1]
+-> This member is internal to module `A` [2]
+
+module_inheritance.php--B.php:16:21
+14 | class B2 extends A {
+15 |   <<__Override>>
+16 |   internal function internal(): void {}
+   |                     ^^^^^^^^ [1]
+17 | }
+
+module_inheritance.php--A.php:9:21
+ 7 |   public function pub(): void {}
+ 8 | 
+ 9 |   internal function internal(): void {}
+   |                     ^^^^^^^^ [2]
+10 | }
+11 | 
+
+3 errors found

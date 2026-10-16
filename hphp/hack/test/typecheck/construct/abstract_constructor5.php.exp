@@ -1,6 +1,19 @@
-ERROR: File "abstract_constructor5.php", line 7, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract method `__construct` (Typing[4047])
-  File "abstract_constructor5.php", line 8, characters 7-13:
-  `C` uses `Awesome`
-  File "abstract_constructor5.php", line 4, characters 28-38:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `__construct` [1]
+-> `C` uses `Awesome` [2]
+-> The method is defined here [3]
+
+abstract_constructor5.php:7:7
+ 2 | 
+ 3 | trait Awesome {
+ 4 |   abstract public function __construct();
+   |                            ^^^^^^^^^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | class C {
+   |       ^ [1]
+ 8 |   use Awesome;
+   |       ^^^^^^^ [2]
+ 9 | }
+10 | 
+
+1 error found

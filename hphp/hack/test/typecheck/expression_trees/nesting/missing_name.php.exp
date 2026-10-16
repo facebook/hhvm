@@ -1,10 +1,50 @@
-ERROR: File "missing_name.php", line 6, characters 8-10:
-Expression trees must provide the DSL name. (Parsing[1002])
-ERROR: File "missing_name.php", line 7, characters 29-31:
-Expression trees must provide the DSL name. (Parsing[1002])
-ERROR: File "missing_name.php", line 6, characters 8-8:
-Unbound name: `MISSING_DSL` (Naming[2049])
-ERROR: File "missing_name.php", line 6, characters 8-8:
-Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
-ERROR: File "missing_name.php", line 6, characters 9-9:
-Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
+error: Parsing[1002] Expression trees must provide the DSL name. [1]
+
+missing_name.php:6:8
+4 | 
+5 | function f(): void {
+6 |   $x = `1`; // Error: missing DSL
+  |        ^^^ [1]
+7 |   $y = ExampleDsl`${(() ==> `1`)()}`; // Error: missing DSL
+8 | }
+
+error: Parsing[1002] Expression trees must provide the DSL name. [1]
+
+missing_name.php:7:29
+5 | function f(): void {
+6 |   $x = `1`; // Error: missing DSL
+7 |   $y = ExampleDsl`${(() ==> `1`)()}`; // Error: missing DSL
+  |                             ^^^ [1]
+8 | }
+
+error: Naming[2049] Unbound name: `MISSING_DSL` [1]
+
+missing_name.php:6:8
+4 | 
+5 | function f(): void {
+6 |   $x = `1`; // Error: missing DSL
+  |        ^ [1]
+7 |   $y = ExampleDsl`${(() ==> `1`)()}`; // Error: missing DSL
+8 | }
+
+error: Naming[2049] Unbound name: `MISSING_DSL` (an object type) [1]
+
+missing_name.php:6:8
+4 | 
+5 | function f(): void {
+6 |   $x = `1`; // Error: missing DSL
+  |        ^ [1]
+7 |   $y = ExampleDsl`${(() ==> `1`)()}`; // Error: missing DSL
+8 | }
+
+error: Naming[2049] Unbound name: `MISSING_DSL` (an object type) [1]
+
+missing_name.php:6:9
+4 | 
+5 | function f(): void {
+6 |   $x = `1`; // Error: missing DSL
+  |         ^ [1]
+7 |   $y = ExampleDsl`${(() ==> `1`)()}`; // Error: missing DSL
+8 | }
+
+5 errors found

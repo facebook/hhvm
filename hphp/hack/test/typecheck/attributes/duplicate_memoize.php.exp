@@ -1,4 +1,13 @@
-ERROR: File "duplicate_memoize.php", line 4, characters 5-13:
-Methods cannot be both `__Memoize` and `__MemoizeLSB`. (NastCheck[3100])
-  File "duplicate_memoize.php", line 4, characters 16-27:
-  Conflicting memoize attribute is here
+error: NastCheck[3100] Methods cannot be both `__Memoize` and `__MemoizeLSB`. [1]
+-> Conflicting memoize attribute is here [2]
+
+duplicate_memoize.php:4:5
+2 | 
+3 | class MyClass {
+4 |   <<__Memoize, __MemoizeLSB>>
+  |     ^^^^^^^^^ [1]
+  |                ^^^^^^^^^^^^ [2]
+5 |   public static function foo(): int {
+6 |     return 1;
+
+1 error found

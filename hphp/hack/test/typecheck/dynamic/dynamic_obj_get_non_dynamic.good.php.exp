@@ -1,40 +1,136 @@
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 15, characters 13-27:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 14, characters 27-33:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 29, characters 14-28:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 28, characters 36-42:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 47, characters 11-25:
-Property accessed on a value of type `(dynamic & dict<string, int>)` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 45, characters 4-10:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 51, characters 12-26:
-Property accessed on a value of type `(dynamic & int)` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 50, characters 32-38:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 55, characters 13-27:
-Property accessed on a value of type `(dynamic & nonnull)` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 54, characters 36-42:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 59, characters 13-27:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 58, characters 39-45:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 66, characters 11-19:
-Property accessed on a value of type `(dynamic & nonnull)` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 63, characters 4-10:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 73, characters 23-29:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic_obj_get_non_dynamic.good.php", line 70, characters 3-9:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 74, characters 13-27:
-Property accessed on a value of type `(dynamic & ~C)` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 73, characters 23-39:
-  This expression has type `dynamic`
-WARN: File "dynamic_obj_get_non_dynamic.good.php", line 75, characters 12-20:
-Property accessed on a value of type `(dynamic & ~C)` (Warn[12042])
-  File "dynamic_obj_get_non_dynamic.good.php", line 73, characters 23-39:
-  This expression has type `dynamic`
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:15:13
+12 | }
+13 | 
+14 | function dynamic_receiver(dynamic $object): void {
+   |                           ^^^^^^^ [2]
+15 |   $object->{property_name()};
+   |             ^^^^^^^^^^^^^^^ [1]
+16 | }
+17 | 
+
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:29:14
+26 | }
+27 | 
+28 | function nullsafe_dynamic_receiver(dynamic $object): void {
+   |                                    ^^^^^^^ [2]
+29 |   $object?->{property_name()};
+   |              ^^^^^^^^^^^^^^^ [1]
+30 | }
+31 | 
+
+warning: Warn[12042] Property accessed on a value of type `(dynamic & dict<string, int>)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:47:11
+43 | 
+44 | function dynamic_dict_receiver(
+45 |   (dynamic & dict<string, int>) $dict,
+   |    ^^^^^^^ [2]
+46 | ): void {
+47 |   $dict->{property_name()};
+   |           ^^^^^^^^^^^^^^^ [1]
+48 | }
+49 | 
+
+warning: Warn[12042] Property accessed on a value of type `(dynamic & int)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:51:12
+48 | }
+49 | 
+50 | function dynamic_int_receiver((dynamic & int) $value): void {
+   |                                ^^^^^^^ [2]
+51 |   $value->{property_name()};
+   |            ^^^^^^^^^^^^^^^ [1]
+52 | }
+53 | 
+
+warning: Warn[12042] Property accessed on a value of type `(dynamic & nonnull)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:55:13
+52 | }
+53 | 
+54 | function dynamic_nonnull_receiver((dynamic & nonnull) $object): void {
+   |                                    ^^^^^^^ [2]
+55 |   $object->{property_name()};
+   |             ^^^^^^^^^^^^^^^ [1]
+56 | }
+57 | 
+
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:59:13
+56 | }
+57 | 
+58 | function normalized_dynamic_receiver((dynamic & ~nonnull) $object): void {
+   |                                       ^^^^^^^ [2]
+59 |   $object->{property_name()};
+   |             ^^^^^^^^^^^^^^^ [1]
+60 | }
+61 | 
+
+warning: Warn[12042] Property accessed on a value of type `(dynamic & nonnull)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:66:11
+61 | 
+62 | function dynamic_nonnull_variable_receiver(
+63 |   (dynamic & nonnull) $value,
+   |    ^^^^^^^ [2]
+64 |   string $property,
+65 | ): void {
+66 |   $value->$property;
+   |           ^^^^^^^^^ [1]
+67 | }
+68 | 
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:73:23
+68 | 
+69 | function captured_like_dynamic_intersection_receiver(
+70 |   dynamic $result,
+   |   ^^^^^^^ [2]
+71 |   string $property,
+72 | ): void {
+73 |   $object = make_like($result['object'] as C);
+   |                       ^^^^^^^ [1]
+74 |   $object->{property_name()};
+75 |   $object->$property;
+
+warning: Warn[12042] Property accessed on a value of type `(dynamic & ~C)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:74:13
+71 |   string $property,
+72 | ): void {
+73 |   $object = make_like($result['object'] as C);
+   |                       ^^^^^^^^^^^^^^^^^ [2]
+74 |   $object->{property_name()};
+   |             ^^^^^^^^^^^^^^^ [1]
+75 |   $object->$property;
+76 | }
+
+warning: Warn[12042] Property accessed on a value of type `(dynamic & ~C)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_obj_get_non_dynamic.good.php:75:12
+71 |   string $property,
+72 | ): void {
+73 |   $object = make_like($result['object'] as C);
+   |                       ^^^^^^^^^^^^^^^^^ [2]
+74 |   $object->{property_name()};
+75 |   $object->$property;
+   |            ^^^^^^^^^ [1]
+76 | }
+
+10 errors found

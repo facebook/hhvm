@@ -1,8 +1,23 @@
-ERROR: File "inc_dynamic.php", line 4, characters 12-13:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "inc_dynamic.php", line 4, characters 10-13:
-Invalid return type (Typing[4110])
-  File "inc_dynamic.php", line 3, characters 27-32:
-  Expected `string`
-  File "inc_dynamic.php", line 4, characters 10-13:
-  But got `dynamic` because a type could not be determined here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+inc_dynamic.php:4:12
+2 | 
+3 | function foo(dynamic $d): string {
+4 |   return ++$d;
+  |            ^^ [1]
+5 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `dynamic` because a type could not be determined here [1]
+
+inc_dynamic.php:4:10
+1 | <?hh
+2 | 
+3 | function foo(dynamic $d): string {
+  |                           ^^^^^^ [2]
+4 |   return ++$d;
+  |          ^^^^ [1]
+5 | }
+
+2 errors found

@@ -1,8 +1,38 @@
-WARN: File "bad_inout_use_lvalue4.php", line 10, characters 11-32:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "bad_inout_use_lvalue4.php", line 10, characters 11-35:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "bad_inout_use_lvalue4.php", line 10, characters 11-32:
-You cannot decorate this argument as `inout` (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue4.php", line 4, characters 9-25:
-Please add a type hint (Naming[2035])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+bad_inout_use_lvalue4.php:10:11
+ 8 | 
+ 9 | function test(): void {
+10 |   f(inout Cls::Array_CLASS_CONST[0]);
+   |           ^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+bad_inout_use_lvalue4.php:10:11
+ 8 | 
+ 9 | function test(): void {
+10 |   f(inout Cls::Array_CLASS_CONST[0]);
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_lvalue4.php:10:11
+ 8 | 
+ 9 | function test(): void {
+10 |   f(inout Cls::Array_CLASS_CONST[0]);
+   |           ^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+error: Naming[2035] Please add a type hint [1]
+
+bad_inout_use_lvalue4.php:4:9
+2 | 
+3 | class Cls {
+4 |   const Array_CLASS_CONST = vec[42, 'foo'];
+  |         ^^^^^^^^^^^^^^^^^ [1]
+5 | }
+6 | 
+
+4 errors found

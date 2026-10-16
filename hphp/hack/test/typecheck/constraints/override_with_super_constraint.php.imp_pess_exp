@@ -1,2 +1,11 @@
-ERROR: File "override_with_super_constraint.php", line 6, characters 26-27:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Tv` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Tv` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+override_with_super_constraint.php:6:26
+4 | class F {}
+5 | interface MyIterable<+Tv> {
+6 |   public function concat<Tu super Tv>(): MyIterable<Tu>;
+  |                          ^^ [1]
+7 | }
+8 | 
+
+1 error found

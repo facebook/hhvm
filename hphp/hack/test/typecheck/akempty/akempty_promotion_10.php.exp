@@ -1,6 +1,18 @@
-ERROR: File "akempty_promotion_10.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-  File "akempty_promotion_10.php", line 6, characters 45-50:
-  Expected `string`
-  File "akempty_promotion_10.php", line 8, characters 18-18:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+akempty_promotion_10.php:10:10
+ 4 |  * Test AKempty promotion affecting an array inside a collection
+ 5 |  */
+ 6 | function test(): ConstVector<darray<string, string>> {
+   |                                             ^^^^^^ [2]
+ 7 |   $v = Vector { dict[] };
+ 8 |   $v[0]['aaa'] = 4;
+   |                  ^ [3]
+ 9 |   // should be an error - $v can contain strings integers now
+10 |   return $v;
+   |          ^^ [1]
+11 | }
+
+1 error found

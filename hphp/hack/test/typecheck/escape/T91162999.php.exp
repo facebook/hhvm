@@ -1,6 +1,25 @@
-ERROR: File "T91162999.php", line 12, characters 8-103:
-Rigid type variable escapes its lambda (Typing[4442])
-  File "T91162999.php", line 13, characters 21-26:
-  Could not remove rigid type variable `T#4`
-  File "T91162999.php", line 10, characters 3-15:
-  in the type of local `$v`
+error: Typing[4442] Rigid type variable escapes its lambda [1]
+-> Could not remove rigid type variable `T#4` [2]
+-> in the type of local `$v` [3]
+
+T91162999.php:12:8
+ 8 | function f(): string {
+ 9 |   $a = 42;
+10 |   $v = Vector{};
+   |   ^^^^^^^^^^^^^ [3]
+11 |   $w = "";
+12 |   $f = (mixed $x) ==> {
+   |        ^^^^^^^^^^^^^^^^ [1]
+13 |     invariant($x is Box<_>, "");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                     ^^^^^^ [2]
+14 |     $v[] = $x->data;
+   |     ^^^^^^^^^^^^^^^^ [1]
+15 |     $x->data = $v[0];
+   |     ^^^^^^^^^^^^^^^^^ [1]
+16 |   };
+   |   ^ [1]
+17 |   $f(new Box(42));
+18 |   $sbox = new Box("oops");
+
+1 error found

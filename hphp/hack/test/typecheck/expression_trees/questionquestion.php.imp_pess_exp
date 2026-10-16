@@ -1,32 +1,111 @@
-WARN: File "questionquestion.php", line 12, characters 5-16:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "questionquestion.php", line 12, characters 5-8:
-  The expression on the left has type `null` which is always `null`.
-WARN: File "questionquestion.php", line 13, characters 5-13:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "questionquestion.php", line 13, characters 5-8:
-  The expression on the left has type `null` which is always `null`.
-WARN: File "questionquestion.php", line 14, characters 5-14:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "questionquestion.php", line 14, characters 5-8:
-  The expression on the left has type `null` which is always `null`.
-WARN: File "questionquestion.php", line 16, characters 5-12:
-This null coalesce will always evaluate to its left-hand side. (Warn[12023])
-  File "questionquestion.php", line 11, characters 31-40:
-  The expression on the left has type `int` which can never be `null`.
-WARN: File "questionquestion.php", line 18, characters 11-20:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "questionquestion.php", line 18, characters 11-14:
-  The expression on the left has type `null` which is always `null`.
-WARN: File "questionquestion.php", line 20, characters 12-21:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "questionquestion.php", line 20, characters 12-15:
-  The expression on the left has type `null` which is always `null`.
-WARN: File "questionquestion.php", line 31, characters 5-6:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "questionquestion.php", line 30, characters 20-26:
-  This expression has type `dynamic`
-ERROR: File "questionquestion.php", line 31, characters 5-14:
-Expression trees do not support array access (e.g. `arr[0]`) as the left side of the null coalesce operator (`??`). (Parsing[1002])
-ERROR: File "questionquestion.php", line 24, characters 5-19:
-`ExampleMixedOpType` does not support this operator (it has no instance method named `__plus`) (Typing[4053])
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+questionquestion.php:12:5
+10 | function test(): void {
+11 |   ExampleDsl`(?ExampleInt $x, ExampleInt $y) ==> {
+12 |     null ?? null;
+   |     ^^^^^^^^^^^^ [1]
+   |     ^^^^ [2]
+13 |     null ?? 1;
+14 |     null ?? $y;
+
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+questionquestion.php:13:5
+11 |   ExampleDsl`(?ExampleInt $x, ExampleInt $y) ==> {
+12 |     null ?? null;
+13 |     null ?? 1;
+   |     ^^^^^^^^^ [1]
+   |     ^^^^ [2]
+14 |     null ?? $y;
+15 |     $x ?? $y;
+
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+questionquestion.php:14:5
+12 |     null ?? null;
+13 |     null ?? 1;
+14 |     null ?? $y;
+   |     ^^^^^^^^^^ [1]
+   |     ^^^^ [2]
+15 |     $x ?? $y;
+16 |     $y ?? $x;
+
+warning: Warn[12023] This null coalesce will always evaluate to its left-hand side. [1]
+-> The expression on the left has type `int` which can never be `null`. [2]
+
+questionquestion.php:16:5
+ 9 | 
+10 | function test(): void {
+11 |   ExampleDsl`(?ExampleInt $x, ExampleInt $y) ==> {
+   |                               ^^^^^^^^^^ [2]
+12 |     null ?? null;
+13 |     null ?? 1;
+14 |     null ?? $y;
+15 |     $x ?? $y;
+16 |     $y ?? $x;
+   |     ^^^^^^^^ [1]
+17 |     // The coalesce operator is right-associative
+18 |     $x ?? null ?? $y;
+
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+questionquestion.php:18:11
+16 |     $y ?? $x;
+17 |     // The coalesce operator is right-associative
+18 |     $x ?? null ?? $y;
+   |           ^^^^^^^^^^ [1]
+   |           ^^^^ [2]
+19 |     ($x ?? null) ?? $y;
+20 |     $x ?? (null ?? $y);
+
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+questionquestion.php:20:12
+18 |     $x ?? null ?? $y;
+19 |     ($x ?? null) ?? $y;
+20 |     $x ?? (null ?? $y);
+   |            ^^^^^^^^^^ [1]
+   |            ^^^^ [2]
+21 |     // The addition operator has a higher precedence than the coalesce operator
+22 |     ($x ?? $y) + $y;
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+questionquestion.php:31:5
+28 | function test_invalid(): void {
+29 |   // Array access expression is not allowed as the left operand of the coalesce operator
+30 |   $f = ExampleDsl`(dynamic $x) ==> {
+   |                    ^^^^^^^ [2]
+31 |     $x[0] ?? 1;
+   |     ^^ [1]
+32 |   }`;
+33 | }
+
+error: Parsing[1002] Expression trees do not support array access (e.g. `arr[0]`) as the left side of the null coalesce operator (`??`). [1]
+
+questionquestion.php:31:5
+29 |   // Array access expression is not allowed as the left operand of the coalesce operator
+30 |   $f = ExampleDsl`(dynamic $x) ==> {
+31 |     $x[0] ?? 1;
+   |     ^^^^^^^^^^ [1]
+32 |   }`;
+33 | }
+
+error: Typing[4053] `ExampleMixedOpType` does not support this operator (it has no instance method named `__plus`) [1]
+
+questionquestion.php:24:5
+22 |     ($x ?? $y) + $y;
+23 |     // Fails because the result of the first expression is ?ExampleInt
+24 |     ($x ?? $x) + $y;
+   |     ^^^^^^^^^^^^^^^ [1]
+25 |   }`;
+26 | }
+
+9 errors found

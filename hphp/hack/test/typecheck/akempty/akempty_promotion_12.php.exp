@@ -1,6 +1,20 @@
-ERROR: File "akempty_promotion_12.php", line 12, characters 10-12:
-Invalid return type (Typing[4110])
-  File "akempty_promotion_12.php", line 6, characters 57-62:
-  Expected `string`
-  File "akempty_promotion_12.php", line 9, characters 19-19:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+akempty_promotion_12.php:12:10
+ 4 |  * Test AKempty promotion in double-nested collection
+ 5 |  */
+ 6 | function test(): ConstVector<ConstVector<darray<string, string>>> {
+   |                                                         ^^^^^^ [2]
+ 7 |   $v1 = Vector { Vector { dict[] } };
+ 8 |   $v2 = $v1[0];
+ 9 |   $v2[0]['aaa'] = 4;
+   |                   ^ [3]
+10 |   // Vectors have reference semantics, so should be an error - $v1 will
+11 |   // contain integers now
+12 |   return $v1;
+   |          ^^^ [1]
+13 | }
+
+1 error found

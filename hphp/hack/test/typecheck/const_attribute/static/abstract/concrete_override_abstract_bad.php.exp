@@ -1,6 +1,17 @@
-ERROR: File "concrete_override_abstract_bad.php", line 9, characters 29-36:
-The property `$p` has the wrong type (Typing[4341])
-  File "concrete_override_abstract_bad.php", line 5, characters 38-40:
-  Expected `int`
-  File "concrete_override_abstract_bad.php", line 9, characters 29-36:
-  But got `arraykey`
+error: Typing[4341] The property `$p` has the wrong type [1]
+-> Expected `int` [2]
+-> But got `arraykey` [1]
+
+concrete_override_abstract_bad.php:9:29
+ 3 | 
+ 4 | abstract class A {
+ 5 |   <<__Const>> abstract public static int $p;
+   |                                      ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | class B extends A {
+ 9 |   <<__Const>> public static arraykey $p = 1;
+   |                             ^^^^^^^^ [1]
+10 | }
+
+1 error found

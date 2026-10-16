@@ -1,20 +1,47 @@
-ERROR: File "discard_bad.php", line 7, characters 3-4:
-Typing error (Typing[4429])
-  File "discard_bad.php", line 7, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "discard_bad.php", line 7, characters 3-4:
-  But got `void` (`$_` is a placeholder variable not meant to be used)
-ERROR: File "discard_bad.php", line 7, characters 3-4:
-You are using the return value of a `void` function (Typing[4119])
-  File "discard_bad.php", line 7, characters 3-4:
-  A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
-ERROR: File "discard_bad.php", line 12, characters 3-4:
-Typing error (Typing[4429])
-  File "discard_bad.php", line 12, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "discard_bad.php", line 12, characters 3-4:
-  But got `void` (`$_` is a placeholder variable not meant to be used)
-ERROR: File "discard_bad.php", line 12, characters 3-4:
-You are using the return value of a `void` function (Typing[4119])
-  File "discard_bad.php", line 12, characters 3-4:
-  A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `void` (`$_` is a placeholder variable not meant to be used) [1]
+
+discard_bad.php:7:3
+5 | function test_punning_discard(shape('_' => int) $s): void {
+6 |   shape($_) = $s;
+7 |   $_ + 1; // $_ is a placeholder variable not meant to be used
+  |   ^^ [1]
+  |   ^^^^^^ [2]
+8 | }
+9 | 
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used) [1]
+
+discard_bad.php:7:3
+5 | function test_punning_discard(shape('_' => int) $s): void {
+6 |   shape($_) = $s;
+7 |   $_ + 1; // $_ is a placeholder variable not meant to be used
+  |   ^^ [1]
+8 | }
+9 | 
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `void` (`$_` is a placeholder variable not meant to be used) [1]
+
+discard_bad.php:12:3
+10 | function test_explicit_discard(shape('x' => int) $s): void {
+11 |   shape('x' => $_) = $s;
+12 |   $_ + 1; // $_ is a placeholder variable not meant to be used
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+13 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used) [1]
+
+discard_bad.php:12:3
+10 | function test_explicit_discard(shape('x' => int) $s): void {
+11 |   shape('x' => $_) = $s;
+12 |   $_ + 1; // $_ is a placeholder variable not meant to be used
+   |   ^^ [1]
+13 | }
+
+4 errors found

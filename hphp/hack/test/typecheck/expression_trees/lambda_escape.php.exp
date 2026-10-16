@@ -1,6 +1,26 @@
-ERROR: File "lambda_escape.php", line 15, characters 10-11:
-Invalid return type (Typing[4110])
-  File "lambda_escape.php", line 11, characters 37-43:
-  Expected `nothing`
-  File "expr_tree.php", line 109, characters 8-32:
-  But got `ExampleExpression<int>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `ExampleExpression<int>` [3]
+
+lambda_escape.php:15:10
+  9 | 
+ 10 | // This should throw an error, but it was not
+ 11 | function test_error(): (function(): nothing) {
+    |                                     ^^^^^^^ [2]
+ 12 |   $x = () ==> {
+ 13 |     return ExampleDsl`1`;
+ 14 |   };
+ 15 |   return $x;
+    |          ^^ [1]
+ 16 | }
+ 17 | 
+
+expr_tree.php:109:8
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "polymorphic_lambda_not_enabled.php", line 4, characters 9-27:
-Cannot use unstable feature: `polymorphic_lambda` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `polymorphic_lambda` [1]
+
+polymorphic_lambda_not_enabled.php:4:9
+2 | 
+3 | function foo(): void {
+4 |   $_ =  function<T>(T $x):T ==> $x;
+  |         ^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

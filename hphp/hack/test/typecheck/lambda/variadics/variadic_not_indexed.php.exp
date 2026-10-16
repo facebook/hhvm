@@ -1,24 +1,84 @@
-ERROR: File "variadic_not_indexed.php", line 16, characters 35-37:
-No instance method `foo` in `vec` (Typing[4053])
-  File "variadic_not_indexed.php", line 16, characters 23-24:
-  This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 52, characters 24-26:
-  Declaration of `vec` is here
-ERROR: File "variadic_not_indexed.php", line 17, characters 37-39:
-No instance method `foo` in `vec` (Typing[4053])
-  File "variadic_not_indexed.php", line 17, characters 25-26:
-  This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 52, characters 24-26:
-  Declaration of `vec` is here
-ERROR: File "variadic_not_indexed.php", line 19, characters 29-31:
-No instance method `foo` in `vec` (Typing[4053])
-  File "variadic_not_indexed.php", line 19, characters 17-18:
-  This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 52, characters 24-26:
-  Declaration of `vec` is here
-ERROR: File "variadic_not_indexed.php", line 20, characters 31-33:
-No instance method `foo` in `vec` (Typing[4053])
-  File "variadic_not_indexed.php", line 20, characters 19-20:
-  This is why I think it is an object of type HH\vec (variadic argument)
-  File "hackarray.hhi", line 52, characters 24-26:
-  Declaration of `vec` is here
+error: Typing[4053] No instance method `foo` in `vec` [1]
+-> This is why I think it is an object of type HH\vec (variadic argument) [2]
+-> Declaration of `vec` is here [3]
+
+variadic_not_indexed.php:16:35
+14 | // accessing an element and calling a method on that, e.g. $y[0]->foo()
+15 | function test(): void {
+16 |   expect_variadic((...$y) ==> $y->foo());
+   |                       ^^ [2]
+   |                                   ^^^ [1]
+17 |   expect_variadic((C ...$y) ==> $y->foo());
+18 | 
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [3]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4053] No instance method `foo` in `vec` [1]
+-> This is why I think it is an object of type HH\vec (variadic argument) [2]
+-> Declaration of `vec` is here [3]
+
+variadic_not_indexed.php:17:37
+15 | function test(): void {
+16 |   expect_variadic((...$y) ==> $y->foo());
+17 |   expect_variadic((C ...$y) ==> $y->foo());
+   |                         ^^ [2]
+   |                                     ^^^ [1]
+18 | 
+19 |   $lambda = (...$y) ==> $y->foo();
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [3]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4053] No instance method `foo` in `vec` [1]
+-> This is why I think it is an object of type HH\vec (variadic argument) [2]
+-> Declaration of `vec` is here [3]
+
+variadic_not_indexed.php:19:29
+17 |   expect_variadic((C ...$y) ==> $y->foo());
+18 | 
+19 |   $lambda = (...$y) ==> $y->foo();
+   |                 ^^ [2]
+   |                             ^^^ [1]
+20 |   $lambda = (C ...$y) ==> $y->foo();
+21 | }
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [3]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4053] No instance method `foo` in `vec` [1]
+-> This is why I think it is an object of type HH\vec (variadic argument) [2]
+-> Declaration of `vec` is here [3]
+
+variadic_not_indexed.php:20:31
+18 | 
+19 |   $lambda = (...$y) ==> $y->foo();
+20 |   $lambda = (C ...$y) ==> $y->foo();
+   |                   ^^ [2]
+   |                               ^^^ [1]
+21 | }
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [3]
+53 | 
+54 | } // namespace HH
+
+4 errors found

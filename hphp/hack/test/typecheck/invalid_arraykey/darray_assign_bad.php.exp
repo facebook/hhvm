@@ -1,6 +1,19 @@
-ERROR: File "darray_assign_bad.php", line 9, characters 5-22:
-This value is not a valid key type for this container (Typing[4371])
-  File "darray_assign_bad.php", line 5, characters 11-28:
-  This container is an object of type dict<string, int>
-  File "darray_assign_bad.php", line 6, characters 26-32:
-  A nullable type cannot be used as a key for an object of type dict<string, int>
+error: Typing[4371] This value is not a valid key type for this container [1]
+-> This container is an object of type dict<string, int> [2]
+-> A nullable type cannot be used as a key for an object of type dict<string, int> [3]
+
+darray_assign_bad.php:9:5
+ 3 | 
+ 4 | class C {
+ 5 |   public ?darray<string,int> $da;
+   |           ^^^^^^^^^^^^^^^^^^ [2]
+ 6 |   public function testit(?string $so):void {
+   |                          ^^^^^^^ [3]
+ 7 |     $this->da ??= dict[];
+ 8 |     /* HH_FIXME[4110] */
+ 9 |     $this->da[$so] = 3;
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+1 error found

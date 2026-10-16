@@ -1,6 +1,22 @@
-ERROR: File "polymorphic_lambda_sub_id_no_auto_bound.php", line 16, characters 15-16:
-Invalid argument (Typing[4110])
-  File "polymorphic_lambda_sub_id_no_auto_bound.php", line 15, characters 17-17:
-  Expected `dynamic`
-  File "polymorphic_lambda_sub_id_no_auto_bound.php", line 5, characters 31-31:
-  Type `T#1` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `T#1` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+polymorphic_lambda_sub_id_no_auto_bound.php:16:15
+ 3 | 
+ 4 | function fork(
+ 5 |   (function<<<__NoAutoBound>> T>(T): T) $id,
+   |                               ^ [3]
+ 6 |   string $x,
+ 7 |   int $y
+   :
+13 | 
+14 | function sub1(): (string,int) {
+15 |   $f = function<T>(T $x): T ==> $x;
+   |                 ^ [2]
+16 |   return fork($f,"hello",42);
+   |               ^^ [1]
+17 | }
+18 | 
+
+1 error found

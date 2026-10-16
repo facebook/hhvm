@@ -1,16 +1,42 @@
-ERROR: File "lambda_bad_contra.php", line 25, characters 29-46:
-Invalid argument (Typing[4323])
-  File "lambda_bad_contra.php", line 16, characters 15-19:
-  `Tblah` is a constrained type parameter
-  File "lambda_bad_contra.php", line 16, characters 10-13:
-  This type constraint is violated
-  File "lambda_bad_contra.php", line 25, characters 30-32:
-  Expected `int`
-  File "lambda_bad_contra.php", line 16, characters 15-19:
-  But got `mixed` where `Tblah#2` corresponds to the rank-2 type parameter `Tblah` in the polymorphic function
-ERROR: File "lambda_bad_contra.php", line 25, characters 29-46:
-Invalid argument (Typing[4110])
-  File "lambda_bad_contra.php", line 25, characters 30-32:
-  Expected `int`
-  File "lambda_bad_contra.php", line 16, characters 28-29:
-  But got `~Tblah#2` because method must be callable in a dynamic context
+error: Typing[4323] Invalid argument [1]
+-> `Tblah` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [4]
+-> But got `mixed` where `Tblah#2` corresponds to the rank-2 type parameter `Tblah` in the polymorphic function [2]
+
+lambda_bad_contra.php:25:29
+14 | }
+15 | 
+16 | function blah<Tblah>(Tblah $_): bool {
+   |          ^^^^ [3]
+   |               ^^^^^ [2]
+17 |   throw new Exception();
+18 | }
+   :
+23 |   $mock = new TypedMockFunction($fptr);
+24 | 
+25 |   $mock->mockImplementation((int $_) ==> false);
+   |                             ^^^^^^^^^^^^^^^^^^ [1]
+   |                              ^^^ [4]
+26 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `~Tblah#2` because method must be callable in a dynamic context [3]
+
+lambda_bad_contra.php:25:29
+14 | }
+15 | 
+16 | function blah<Tblah>(Tblah $_): bool {
+   |                            ^^ [3]
+17 |   throw new Exception();
+18 | }
+   :
+23 |   $mock = new TypedMockFunction($fptr);
+24 | 
+25 |   $mock->mockImplementation((int $_) ==> false);
+   |                             ^^^^^^^^^^^^^^^^^^ [1]
+   |                              ^^^ [2]
+26 | }
+
+2 errors found

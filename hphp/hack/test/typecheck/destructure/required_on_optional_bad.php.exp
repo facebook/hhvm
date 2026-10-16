@@ -1,16 +1,37 @@
-ERROR: File "required_on_optional_bad.php", line 11, characters 3-34:
-Typing error (Typing[4163])
-  File "required_on_optional_bad.php", line 8, characters 3-32:
-  The field `y` is **optional**
-  File "required_on_optional_bad.php", line 11, characters 3-34:
-  The field `y` is defined as **required**
-  File "required_on_optional_bad.php", line 11, characters 20-22:
-  `y` is defined here
-ERROR: File "required_on_optional_bad.php", line 18, characters 3-37:
-Typing error (Typing[4163])
-  File "required_on_optional_bad.php", line 15, characters 16-36:
-  The field `b` is **optional**
-  File "required_on_optional_bad.php", line 18, characters 16-20:
-  The field `b` is defined as **required**
-  File "required_on_optional_bad.php", line 18, characters 22-24:
-  `b` is defined here
+error: Typing[4163] Typing error [1]
+-> The field `y` is **optional** [2]
+-> The field `y` is defined as **required** [1]
+-> `y` is defined here [3]
+
+required_on_optional_bad.php:11:3
+ 6 | 
+ 7 | function test_required_pattern_optional_rhs_field(
+ 8 |   shape('x' => int, ?'y' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 | ): void {
+10 |   // Error: 'y' is optional in the type but required in the pattern
+11 |   shape('x' => $x, 'y' => $y, ...) = $s;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^ [3]
+12 | }
+13 | 
+
+error: Typing[4163] Typing error [1]
+-> The field `b` is **optional** [2]
+-> The field `b` is defined as **required** [3]
+-> `b` is defined here [4]
+
+required_on_optional_bad.php:18:3
+13 | 
+14 | function test_required_pattern_optional_rhs_nested(
+15 |   shape('a' => shape(?'b' => string)) $s,
+   |                ^^^^^^^^^^^^^^^^^^^^^ [2]
+16 | ): void {
+17 |   // Error: 'b' is optional in the inner shape but required in the pattern
+18 |   shape('a' => shape('b' => $b, ...)) = $s;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                ^^^^^ [3]
+   |                      ^^^ [4]
+19 | }
+
+2 errors found

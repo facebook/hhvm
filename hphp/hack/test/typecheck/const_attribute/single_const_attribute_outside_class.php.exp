@@ -1,2 +1,11 @@
-ERROR: File "single_const_attribute_outside_class.php", line 20, characters 15-16:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+single_const_attribute_outside_class.php:20:15
+18 | 
+19 |   public function fail(): void {
+20 |     $this->a->CA = 42;
+   |               ^^ [1]
+21 |   }
+22 | }
+
+1 error found

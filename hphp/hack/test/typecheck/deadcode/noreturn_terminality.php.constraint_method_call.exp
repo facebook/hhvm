@@ -1,6 +1,14 @@
-ERROR: File "noreturn_terminality.php", line 17, characters 10-14:
-Invalid return type (Typing[4336])
-  File "noreturn_terminality.php", line 17, characters 23-30:
-  Expected `noreturn`
-  File "noreturn_terminality.php", line 17, characters 10-14:
-  But got `void` because this function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `noreturn` [2]
+-> But got `void` because this function does not always return a value [1]
+
+noreturn_terminality.php:17:10
+15 | }
+16 | 
+17 | function test2(A $x): noreturn {
+   |          ^^^^^ [1]
+   |                       ^^^^^^^^ [2]
+18 |   $x->foo();
+19 | }
+
+1 error found

@@ -1,28 +1,141 @@
-ERROR: File "test_basics.php", line 15, characters 8-16:
-[test_fun_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_basics.php", line 16, characters 3-14:
-[test_fun_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_basics.php", line 17, characters 10-11:
-[test_fun_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_basics.php", line 24, characters 5-26:
-[Test::test_method_call]{Test::$static_prop}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_basics.php", line 28, characters 5-25:
-[Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_basics.php", line 29, characters 5-23:
-[Test::test_method_call]{Foo::$static_prop}(int)<CounterIncrement> A global variable is definitely written. (Other[11001])
-ERROR: File "test_basics.php", line 31, characters 5-25:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_basics.php", line 32, characters 5-25:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_basics.php", line 34, characters 10-26:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
-ERROR: File "test_basics.php", line 38, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_basics.php", line 39, characters 5-16:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_basics.php", line 42, characters 5-14:
-[Test::test_method_call]{Foo::$bar}(int)<CounterIncrement> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_basics.php", line 45, characters 16-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_basics.php", line 48, characters 16-32:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
+error: Other[11004] [test_fun_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_basics.php:15:8
+13 | 
+14 | function test_fun_call(): Bar {
+15 |   $a = Foo::$bar;
+   |        ^^^^^^^^^ [1]
+16 |   $a->prop = 2; // A global variable is written.
+17 |   return $a; // A global variable is passed to (or returned from) a function call.
+
+error: Other[11002] [test_fun_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_basics.php:16:3
+14 | function test_fun_call(): Bar {
+15 |   $a = Foo::$bar;
+16 |   $a->prop = 2; // A global variable is written.
+   |   ^^^^^^^^^^^^ [1]
+17 |   return $a; // A global variable is passed to (or returned from) a function call.
+18 | }
+
+error: Other[11003] [test_fun_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. [1]
+
+test_basics.php:17:10
+15 |   $a = Foo::$bar;
+16 |   $a->prop = 2; // A global variable is written.
+17 |   return $a; // A global variable is passed to (or returned from) a function call.
+   |          ^^ [1]
+18 | }
+19 | 
+
+error: Other[11001] [Test::test_method_call]{Test::$static_prop}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_basics.php:24:5
+22 | 
+23 |   public function test_method_call(): void {
+24 |     self::$static_prop = 1; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 |     /* HH_FIXME[11001] Test HH_FIXME to ignore the error of static variable direct write */
+26 |     self::$static_prop = 1;
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_basics.php:28:5
+26 |     self::$static_prop = 1;
+27 | 
+28 |     Foo::$static_prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |     Foo::$static_prop++; // A global variable is written.
+30 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<CounterIncrement> A global variable is definitely written. [1]
+
+test_basics.php:29:5
+27 | 
+28 |     Foo::$static_prop = 2; // A global variable is written.
+29 |     Foo::$static_prop++; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+30 | 
+31 |     (Foo::$bar)->prop = 2; // A global variable is written.
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_basics.php:31:5
+29 |     Foo::$static_prop++; // A global variable is written.
+30 | 
+31 |     (Foo::$bar)->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+32 |     Foo::$bar = new Bar(); // A global variable is written.
+33 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. [1]
+
+test_basics.php:32:5
+30 | 
+31 |     (Foo::$bar)->prop = 2; // A global variable is written.
+32 |     Foo::$bar = new Bar(); // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+33 | 
+34 |     $a = Foo::$static_prop;
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. [1]
+
+test_basics.php:34:10
+32 |     Foo::$bar = new Bar(); // A global variable is written.
+33 | 
+34 |     $a = Foo::$static_prop;
+   |          ^^^^^^^^^^^^^^^^^ [1]
+35 |     $a = 2;
+36 |     $a++;
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_basics.php:38:10
+36 |     $a++;
+37 | 
+38 |     $b = Foo::$bar;
+   |          ^^^^^^^^^ [1]
+39 |     $b->prop = 2; // A global variable is written.
+40 |     /* HH_FIXME[11002] Test HH_FIXME to ignore the error of global variable write */
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_basics.php:39:5
+37 | 
+38 |     $b = Foo::$bar;
+39 |     $b->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^ [1]
+40 |     /* HH_FIXME[11002] Test HH_FIXME to ignore the error of global variable write */
+41 |     $b->prop = 2; // A global variable is written.
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<CounterIncrement> A global variable is possibly written via reference. [1]
+
+test_basics.php:42:5
+40 |     /* HH_FIXME[11002] Test HH_FIXME to ignore the error of global variable write */
+41 |     $b->prop = 2; // A global variable is written.
+42 |     $b->prop++; // A global variable is written.
+   |     ^^^^^^^^^^ [1]
+43 | 
+44 |     $c = $b;
+
+error: Other[11003] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. [1]
+
+test_basics.php:45:16
+43 | 
+44 |     $c = $b;
+45 |     call_mixed($c); // A global variable is passed to (or returned from) a function call.
+   |                ^^ [1]
+46 |     /* HH_FIXME[11003] Test HH_FIXME to ignore the error of passing global variables to function calls */
+47 |     call_mixed($c);
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. [1]
+
+test_basics.php:48:16
+46 |     /* HH_FIXME[11003] Test HH_FIXME to ignore the error of passing global variables to function calls */
+47 |     call_mixed($c);
+48 |     call_mixed(Foo::$static_prop);
+   |                ^^^^^^^^^^^^^^^^^ [1]
+49 | 
+50 |     $d = $c->prop;
+
+14 errors found

@@ -1,16 +1,57 @@
-ERROR: File "box_get_set.php", line 9, characters 55-56:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "box_get_set.php", line 44, characters 34-36:
-Invalid argument (Typing[4110])
-  File "box_get_set.php", line 44, characters 10-15:
-  Expected `string`
-  File "box_get_set.php", line 33, characters 20-20:
-    via this generic `T`
-  File "box_get_set.php", line 26, characters 18-20:
-  But got `int`
-ERROR: File "box_get_set.php", line 46, characters 18-21:
-Invalid argument (Typing[4110])
-  File "box_get_set.php", line 26, characters 18-20:
-  Expected `int`
-  File "box_get_set.php", line 46, characters 18-21:
-  But got `string`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+box_get_set.php:9:55
+ 7 | }
+ 8 | 
+ 9 | function legacy_get<Tb as Box, T>(Tb $b): T where T = Tb::T {
+   |                                                       ^^ [1]
+10 |   return $b->get();
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+box_get_set.php:44:34
+24 | 
+25 | class IntBox extends Box {
+26 |   const type T = int;
+   |                  ^^^ [4]
+27 |   public function get(): int {
+28 |     return 42;
+   :
+31 | }
+32 | 
+33 | function expect<T>(T $x): void {}
+   |                    ^ [3]
+34 | 
+35 | function test_ok(): void {
+   :
+42 |   $ib = new IntBox();
+43 |   // Error below:
+44 |   expect<string>(tyref_get(true, $ib));
+   |          ^^^^^^ [2]
+   |                                  ^^^ [1]
+45 |   // Error below:
+46 |   tyref_set($ib, "hi");
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+box_get_set.php:46:18
+24 | 
+25 | class IntBox extends Box {
+26 |   const type T = int;
+   |                  ^^^ [2]
+27 |   public function get(): int {
+28 |     return 42;
+   :
+44 |   expect<string>(tyref_get(true, $ib));
+45 |   // Error below:
+46 |   tyref_set($ib, "hi");
+   |                  ^^^^ [1]
+47 | }
+
+3 errors found

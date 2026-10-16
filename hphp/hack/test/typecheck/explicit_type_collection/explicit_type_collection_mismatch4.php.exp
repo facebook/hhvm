@@ -1,12 +1,27 @@
-ERROR: File "explicit_type_collection_mismatch4.php", line 4, characters 8-32:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
-  Expected `int`
-  File "explicit_type_collection_mismatch4.php", line 4, characters 20-24:
-  But got `string`
-ERROR: File "explicit_type_collection_mismatch4.php", line 4, characters 8-32:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch4.php", line 4, characters 15-17:
-  Expected `int`
-  File "explicit_type_collection_mismatch4.php", line 4, characters 27-31:
-  But got `string`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+explicit_type_collection_mismatch4.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $c = keyset<int>["bar", "baz"];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |               ^^^ [2]
+  |                    ^^^^^ [3]
+5 | }
+
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+explicit_type_collection_mismatch4.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $c = keyset<int>["bar", "baz"];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |               ^^^ [2]
+  |                           ^^^^^ [3]
+5 | }
+
+2 errors found

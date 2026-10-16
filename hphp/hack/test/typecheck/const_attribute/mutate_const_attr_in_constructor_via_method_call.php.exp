@@ -1,14 +1,71 @@
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 13, characters 12-12:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 17, characters 12-12:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 21, characters 12-12:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 35, characters 7-7:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 36, characters 7-7:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 37, characters 7-7:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "mutate_const_attr_in_constructor_via_method_call.php", line 38, characters 7-7:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:13:12
+11 | 
+12 |   public function incrB(): void {
+13 |     $this->b++;
+   |            ^ [1]
+14 |   }
+15 | 
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:17:12
+15 | 
+16 |   public function incrA(): void {
+17 |     $this->a++;
+   |            ^ [1]
+18 |   }
+19 | 
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:21:12
+19 | 
+20 |   public function resetA(): void {
+21 |     $this->a = 0;
+   |            ^ [1]
+22 |   }
+23 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:35:7
+33 | 
+34 |   // Correctly a type error
+35 |   $c->b++;
+   |       ^ [1]
+36 |   $c->a++;
+37 |   $c->b = 5;
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:36:7
+34 |   // Correctly a type error
+35 |   $c->b++;
+36 |   $c->a++;
+   |       ^ [1]
+37 |   $c->b = 5;
+38 |   $c->a = 10;
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:37:7
+35 |   $c->b++;
+36 |   $c->a++;
+37 |   $c->b = 5;
+   |       ^ [1]
+38 |   $c->a = 10;
+39 |   $c->resetA();
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+mutate_const_attr_in_constructor_via_method_call.php:38:7
+36 |   $c->a++;
+37 |   $c->b = 5;
+38 |   $c->a = 10;
+   |       ^ [1]
+39 |   $c->resetA();
+40 | }
+
+7 errors found

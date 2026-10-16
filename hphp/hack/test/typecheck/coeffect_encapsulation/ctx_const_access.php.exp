@@ -1,6 +1,25 @@
-ERROR: File "ctx_const_access.php", line 8, characters 3-6:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "ctx_const_access.php", line 4, characters 20-30:
-  From this declaration, the context of this function body provides the capability WriteProperty
-  File "pseudofunctions.hhi", line 44, characters 12-15:
-  But the function being called requires the capability IO
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability WriteProperty [2]
+-> But the function being called requires the capability IO [3]
+
+ctx_const_access.php:8:3
+ 2 | 
+ 3 | class Foo {
+ 4 |   const ctx Bar = [write_props];
+   |                    ^^^^^^^^^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | function main()[Foo::Bar]: void {
+ 8 |   echo "fail"; // error
+   |   ^^^^ [1]
+ 9 | }
+
+pseudofunctions.hhi:44:12
+42 |    */
+43 |   <<__SupportDynamicType>>
+44 |   function echo(arraykey ...$args): void;
+   |            ^^^^ [3]
+45 | }
+46 | 
+
+1 error found

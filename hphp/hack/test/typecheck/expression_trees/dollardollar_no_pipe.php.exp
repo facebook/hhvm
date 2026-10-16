@@ -1,4 +1,19 @@
-ERROR: File "dollardollar_no_pipe.php", line 6, characters 17-18:
-Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])
-ERROR: File "dollardollar_no_pipe.php", line 6, characters 17-18:
-Variable `$$` is undefined, or not always defined. (Naming[2050])
+error: Parsing[1002] Pipe variables must occur only in the RHS of pipe expressions [1]
+
+dollardollar_no_pipe.php:6:17
+4 | 
+5 | function test(): void {
+6 |   ExampleDsl`${ $$ }`;
+  |                 ^^ [1]
+7 | }
+
+error: Naming[2050] Variable `$$` is undefined, or not always defined. [1]
+
+dollardollar_no_pipe.php:6:17
+4 | 
+5 | function test(): void {
+6 |   ExampleDsl`${ $$ }`;
+  |                 ^^ [1]
+7 | }
+
+2 errors found

@@ -1,16 +1,73 @@
-ERROR: File "level_5.php", line 51, characters 3-15:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 9, characters 42-49:
-  Definition is here
-ERROR: File "level_5.php", line 53, characters 3-17:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 15, characters 44-51:
-  Definition is here
-ERROR: File "level_5.php", line 55, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 22, characters 11-18:
-  Definition is here
-ERROR: File "level_5.php", line 57, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 27, characters 45-52:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:51:3
+ 7 | }
+ 8 | 
+ 9 | function lower_then_string_union<T super class<C> as (string | float)>(
+   |                                          ^^^^^^^^ [2]
+10 |   T $value,
+11 | ): T {
+   :
+49 | function test(): void {
+50 |   $string_union = lower_then_string_union(get_class_pointer());
+51 |   $string_union::method();
+   |   ^^^^^^^^^^^^^ [1]
+52 |   $arraykey_union = lower_then_arraykey_union(get_class_pointer());
+53 |   $arraykey_union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:53:3
+13 | }
+14 | 
+15 | function lower_then_arraykey_union<T super class<C> as (arraykey | float)>(
+   |                                            ^^^^^^^^ [2]
+16 |   T $value,
+17 | ): T {
+   :
+51 |   $string_union::method();
+52 |   $arraykey_union = lower_then_arraykey_union(get_class_pointer());
+53 |   $arraykey_union::method();
+   |   ^^^^^^^^^^^^^^^ [1]
+54 |   $stringish_union = lower_then_stringish_union(get_class_pointer());
+55 |   $stringish_union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:55:3
+20 | 
+21 | function lower_then_stringish_union<
+22 |   T super class<C> as (Stringish | vec<int>),
+   |           ^^^^^^^^ [2]
+23 | >(T $value): T {
+24 |   return $value;
+   :
+53 |   $arraykey_union::method();
+54 |   $stringish_union = lower_then_stringish_union(get_class_pointer());
+55 |   $stringish_union::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+56 |   $xhp_child_union = lower_then_xhp_child_union(get_class_pointer());
+57 |   $xhp_child_union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:57:3
+25 | }
+26 | 
+27 | function lower_then_xhp_child_union<T super class<C> as (XHPChild | bool)>(
+   |                                             ^^^^^^^^ [2]
+28 |   T $value,
+29 | ): T {
+   :
+55 |   $stringish_union::method();
+56 |   $xhp_child_union = lower_then_xhp_child_union(get_class_pointer());
+57 |   $xhp_child_union::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+58 |   $classname = lower_then_classname(get_class_pointer());
+59 |   $classname::method();
+
+4 errors found

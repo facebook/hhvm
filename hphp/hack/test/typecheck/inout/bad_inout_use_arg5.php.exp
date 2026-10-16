@@ -1,2 +1,10 @@
-ERROR: File "bad_inout_use_arg5.php", line 11, characters 11-18:
-You cannot decorate this argument as `inout` (Parsing[1002])
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_arg5.php:11:11
+ 9 | function test(): void {
+10 |   $v = vec[new C()];
+11 |   f(inout $v[0]->x);
+   |           ^^^^^^^^ [1]
+12 | }
+
+1 error found

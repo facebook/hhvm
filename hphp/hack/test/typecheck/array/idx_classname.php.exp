@@ -1,24 +1,88 @@
-WARN: File "idx_classname.php", line 11, characters 5-26:
-Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "hackarray.hhi", line 52, characters 67-69:
-  `int` is one of the disjoint types
-  File "idx_classname.php", line 9, characters 31-45:
-  `classname<this>` is one of the disjoint types
-  File "idx.hhi", line 30, characters 38-39:
-  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
-ERROR: File "idx_classname.php", line 12, characters 5-21:
-Typing error (Typing[4110])
-  File "idx_classname.php", line 12, characters 5-13:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "idx_classname.php", line 9, characters 31-45:
-  But got `string`
-  File "classname.hhi", line 21, characters 28-38:
-    by the definition of `classname`
-  File "classname.hhi", line 14, characters 27-32:
-    by the definition of `typename`
-ERROR: File "idx_classname.php", line 12, characters 15-20:
-Invalid index type for this vec (Typing[4449])
-  File "idx_classname.php", line 5, characters 42-44:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "idx_classname.php", line 9, characters 31-45:
-  It is incompatible with a classname string for this
+warning: Warn[12017] Invalid type argument due to disjoint types in a union [1]
+-> `int` is one of the disjoint types [2]
+-> `classname<this>` is one of the disjoint types [3]
+-> This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors [4]
+
+idx_classname.php:11:5
+ 7 |   }
+ 8 | 
+ 9 |   private static function uhh(classname<this> $class): void {
+   |                               ^^^^^^^^^^^^^^^ [3]
+10 |     $classvec = self::getClassVec();
+11 |     idx($classvec, $class); // Produce warning for this
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |     $classvec[$class]; // Invalid index type for this vec (4449)
+13 |   }
+
+hackarray.hhi:52:67
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                                                                   ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+idx.hhi:30:38
+28 |    * `null` is a valid key in the container.
+29 |    */
+30 |   function idx<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
+   |                                      ^^ [4]
+31 |     ?KeyedContainer<Tk, Tv> $collection,
+32 |     ?Tk $index,
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+->   by the definition of `classname` [4]
+->   by the definition of `typename` [5]
+
+idx_classname.php:12:5
+ 7 |   }
+ 8 | 
+ 9 |   private static function uhh(classname<this> $class): void {
+   |                               ^^^^^^^^^^^^^^^ [3]
+10 |     $classvec = self::getClassVec();
+11 |     idx($classvec, $class); // Produce warning for this
+12 |     $classvec[$class]; // Invalid index type for this vec (4449)
+   |     ^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^ [2]
+13 |   }
+14 | }
+
+classname.hhi:21:28
+12 |    */
+13 |   <<__NoAutoDynamic>>
+14 |   newtype typename<+T> as string = string;
+   |                           ^^^^^^ [5]
+15 | 
+16 |   /**
+   :
+19 |    * package boundaries. */
+20 |   <<__NoAutoDynamic>>
+21 |   newtype classname<+T> as typename<T> = typename<T>;
+   |                            ^^^^^^^^^^^ [4]
+22 | 
+23 |   /**
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a classname string for this [3]
+
+idx_classname.php:12:15
+ 3 | 
+ 4 | class C {
+ 5 |   private static function getClassVec(): vec<classname<this>> {
+   |                                          ^^^ [2]
+ 6 |     return vec[];
+ 7 |   }
+ 8 | 
+ 9 |   private static function uhh(classname<this> $class): void {
+   |                               ^^^^^^^^^^^^^^^ [3]
+10 |     $classvec = self::getClassVec();
+11 |     idx($classvec, $class); // Produce warning for this
+12 |     $classvec[$class]; // Invalid index type for this vec (4449)
+   |               ^^^^^^ [1]
+13 |   }
+14 | }
+
+3 errors found

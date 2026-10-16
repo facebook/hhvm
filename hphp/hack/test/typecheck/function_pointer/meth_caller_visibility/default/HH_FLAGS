@@ -1,1 +1,2 @@
 --meth-caller-only-public-visibility=true
+--error-format plain_highlighted

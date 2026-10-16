@@ -1,4 +1,16 @@
-ERROR: File "lambda11.php", line 16, characters 15-16:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
-  File "lambda11.php", line 12, characters 19-20:
-  Did you mean `$x` instead?
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+-> Did you mean `$x` instead? [2]
+
+lambda11.php:16:15
+10 |  */
+11 | 
+12 | function foo(bool $x): void {
+   |                   ^^ [2]
+13 |   if ($x) {
+14 |     $y = "asd";
+15 |   }
+16 |   $z = $l ==> $y; // $y bad_style, even in a capture
+   |               ^^ [1]
+17 | }
+
+1 error found

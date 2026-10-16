@@ -1,12 +1,55 @@
-ERROR: File "meth_caller_visibility_errors.php", line 16, characters 34-39:
-Cannot access this protected member, you don't extend MyChild (Typing[4112])
-  File "meth_caller_visibility_errors.php", line 4, characters 22-25:
-  This member is protected
-ERROR: File "meth_caller_visibility_errors.php", line 17, characters 34-38:
-Cannot access this protected member, you don't extend Foo (Typing[4112])
-  File "meth_caller_visibility_errors.php", line 8, characters 22-24:
-  This member is protected
-ERROR: File "meth_caller_visibility_errors.php", line 18, characters 34-38:
-You cannot access this member (Typing[4112])
-  File "meth_caller_visibility_errors.php", line 10, characters 20-22:
-  This member is private
+error: Typing[4112] Cannot access this protected member, you don't extend MyChild [1]
+-> This member is protected [2]
+
+meth_caller_visibility_errors.php:16:34
+ 2 | 
+ 3 | class MyChild {
+ 4 |   protected function quux(): void {}
+   |                      ^^^^ [2]
+ 5 | }
+ 6 | 
+   :
+14 | class DifferentClass {
+15 |   public function test(): void {
+16 |     $x = meth_caller(Foo::class, 'quux');
+   |                                  ^^^^^^ [1]
+17 |     $y = meth_caller(Foo::class, 'bar');
+18 |     $z = meth_caller(Foo::class, 'baz');
+
+error: Typing[4112] Cannot access this protected member, you don't extend Foo [1]
+-> This member is protected [2]
+
+meth_caller_visibility_errors.php:17:34
+ 6 | 
+ 7 | class Foo extends MyChild {
+ 8 |   protected function bar(): void {}
+   |                      ^^^ [2]
+ 9 | 
+10 |   private function baz(): void {}
+   :
+15 |   public function test(): void {
+16 |     $x = meth_caller(Foo::class, 'quux');
+17 |     $y = meth_caller(Foo::class, 'bar');
+   |                                  ^^^^^ [1]
+18 |     $z = meth_caller(Foo::class, 'baz');
+19 |   }
+
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+meth_caller_visibility_errors.php:18:34
+ 8 |   protected function bar(): void {}
+ 9 | 
+10 |   private function baz(): void {}
+   |                    ^^^ [2]
+11 | }
+12 | 
+   :
+16 |     $x = meth_caller(Foo::class, 'quux');
+17 |     $y = meth_caller(Foo::class, 'bar');
+18 |     $z = meth_caller(Foo::class, 'baz');
+   |                                  ^^^^^ [1]
+19 |   }
+20 | }
+
+3 errors found

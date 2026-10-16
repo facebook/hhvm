@@ -1,28 +1,132 @@
-ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
-Invalid return type (Typing[4110])
-  File "shape_at_wrong.php", line 8, characters 33-42:
-  Expected `int`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
-  File "Shapes.hhi", line 86, characters 10-11:
-    via this generic `Tv`
-ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
-Too many positional arguments (expected 2 but got 3) (Typing[4105])
-  File "Shapes.hhi", line 83, characters 28-29:
-  Definition is here
-ERROR: File "shape_at_wrong.php", line 21, characters 33-38:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shape_at_wrong.php", line 24, characters 5-31:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "Shapes.hhi", line 83, characters 28-29:
-  Definition is here
-ERROR: File "shape_at_wrong.php", line 27, characters 33-35:
-You are calling `Shapes::at()` on a field known to not exist (Typing[4251])
-  File "shape_at_wrong.php", line 16, characters 15-28:
-  The field `x` is not defined in this shape
-ERROR: File "shape_at_wrong.php", line 30, characters 25-27:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 84, characters 18-23:
-  Expected `shape(?'y' => _, ...)`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+->   via this generic `Tv` [4]
+
+shape_at_wrong.php:9:10
+  6 | 
+  7 | // wrong return type
+  8 | function f(): ExampleExpression<ExampleInt> {
+    |                                 ^^^^^^^^^^ [2]
+  9 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 10 |     $x = shape('y' => 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 11 |     return ExampleDsl::shapeAt($x, 'y');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 12 |   }`;
+    |   ^^ [1]
+ 13 | }
+ 14 | 
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+Shapes.hhi:86:10
+ 84 |       shape(...) $shape,
+ 85 |       arraykey $index,
+ 86 |     )[]: Tv;
+    |          ^^ [4]
+ 87 | 
+ 88 |     /**
+
+error: Typing[4105] Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+
+shape_at_wrong.php:18:5
+16 |   ExampleDsl`(MyExampleShape $shape) ==> {
+17 |     // Too many arguments
+18 |     ExampleDsl::shapeAt($shape, 'y', 'y');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | 
+20 |     // Not a literal key
+
+Shapes.hhi:83:28
+81 |      */
+82 |     <<__NoAutoDynamic, __SupportDynamicType>>
+83 |     public static function at<Tv>(
+   |                            ^^ [2]
+84 |       shape(...) $shape,
+85 |       arraykey $index,
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shape_at_wrong.php:21:33
+19 | 
+20 |     // Not a literal key
+21 |     ExampleDsl::shapeAt($shape, ''.'y');
+   |                                 ^^^^^^ [1]
+22 | 
+23 |     // Too few args
+
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+shape_at_wrong.php:24:5
+22 | 
+23 |     // Too few args
+24 |     ExampleDsl::shapeAt($shape);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 | 
+26 |     // Non existing field
+
+Shapes.hhi:83:28
+81 |      */
+82 |     <<__NoAutoDynamic, __SupportDynamicType>>
+83 |     public static function at<Tv>(
+   |                            ^^ [2]
+84 |       shape(...) $shape,
+85 |       arraykey $index,
+
+error: Typing[4251] You are calling `Shapes::at()` on a field known to not exist [1]
+-> The field `x` is not defined in this shape [2]
+
+shape_at_wrong.php:27:33
+14 | 
+15 | function g(): void {
+16 |   ExampleDsl`(MyExampleShape $shape) ==> {
+   |               ^^^^^^^^^^^^^^ [2]
+17 |     // Too many arguments
+18 |     ExampleDsl::shapeAt($shape, 'y', 'y');
+   :
+25 | 
+26 |     // Non existing field
+27 |     ExampleDsl::shapeAt($shape, 'x');
+   |                                 ^^^ [1]
+28 | 
+29 |     // Not a shape
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape(?'y' => _, ...)` [2]
+-> But got `string` [3]
+
+shape_at_wrong.php:30:25
+ 28 | 
+ 29 |     // Not a shape
+ 30 |     ExampleDsl::shapeAt('y', 'y');
+    |                         ^^^ [1]
+ 31 |   }`;
+ 32 | }
+
+Shapes.hhi:84:18
+ 82 |     <<__NoAutoDynamic, __SupportDynamicType>>
+ 83 |     public static function at<Tv>(
+ 84 |       shape(...) $shape,
+    |                  ^^^^^^ [2]
+ 85 |       arraykey $index,
+ 86 |     )[]: Tv;
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+6 errors found

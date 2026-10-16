@@ -1,12 +1,54 @@
-ERROR: File "class_meth_interface_inherited.php", line 10, characters 10-12:
-Cannot create a function pointer to `Child::bar`; it is abstract (Typing[4391])
-  File "class_meth_interface_inherited.php", line 4, characters 26-28:
-  Declaration is here
-ERROR: File "class_meth_interface_inherited.php", line 12, characters 10-12:
-Cannot create a function pointer to `Child::bar`; it is abstract (Typing[4391])
-  File "class_meth_interface_inherited.php", line 4, characters 26-28:
-  Declaration is here
-ERROR: File "class_meth_interface_inherited.php", line 14, characters 10-12:
-Cannot create a function pointer to `Child::bar`; it is abstract (Typing[4391])
-  File "class_meth_interface_inherited.php", line 4, characters 26-28:
-  Declaration is here
+error: Typing[4391] Cannot create a function pointer to `Child::bar`; it is abstract [1]
+-> Declaration is here [2]
+
+class_meth_interface_inherited.php:10:10
+ 2 | 
+ 3 | interface Foo {
+ 4 |   public static function bar(): void;
+   |                          ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | abstract class Child implements Foo {}
+ 8 | 
+ 9 | function test(): void {
+10 |   Child::bar<>;
+   |          ^^^ [1]
+11 | 
+12 |   Child::bar<>;
+
+error: Typing[4391] Cannot create a function pointer to `Child::bar`; it is abstract [1]
+-> Declaration is here [2]
+
+class_meth_interface_inherited.php:12:10
+ 2 | 
+ 3 | interface Foo {
+ 4 |   public static function bar(): void;
+   |                          ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+10 |   Child::bar<>;
+11 | 
+12 |   Child::bar<>;
+   |          ^^^ [1]
+13 | 
+14 |   Child::bar<>;
+
+error: Typing[4391] Cannot create a function pointer to `Child::bar`; it is abstract [1]
+-> Declaration is here [2]
+
+class_meth_interface_inherited.php:14:10
+ 2 | 
+ 3 | interface Foo {
+ 4 |   public static function bar(): void;
+   |                          ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+12 |   Child::bar<>;
+13 | 
+14 |   Child::bar<>;
+   |          ^^^ [1]
+15 | }
+
+3 errors found

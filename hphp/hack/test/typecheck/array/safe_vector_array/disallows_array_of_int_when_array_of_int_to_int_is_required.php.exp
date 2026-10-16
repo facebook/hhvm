@@ -1,6 +1,17 @@
-ERROR: File "disallows_array_of_int_when_array_of_int_to_int_is_required.php", line 6, characters 26-36:
-Invalid argument (Typing[4110])
-  File "disallows_array_of_int_when_array_of_int_to_int_is_required.php", line 3, characters 33-48:
-  Expected `dict<int, int>`
-  File "disallows_array_of_int_when_array_of_int_to_int_is_required.php", line 5, characters 15-25:
-  But got `vec<int>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<int, int>` [2]
+-> But got `vec<int>` [3]
+
+disallows_array_of_int_when_array_of_int_to_int_is_required.php:6:26
+1 | <?hh
+2 | 
+3 | function consumeArrayOfIntToInt(darray<int, int> $_): void {}
+  |                                 ^^^^^^^^^^^^^^^^ [2]
+4 | 
+5 | function test(varray<int> $arrayOfInt): void {
+  |               ^^^^^^^^^^^ [3]
+6 |   consumeArrayOfIntToInt($arrayOfInt);
+  |                          ^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

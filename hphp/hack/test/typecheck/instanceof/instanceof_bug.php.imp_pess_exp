@@ -1,2 +1,11 @@
-ERROR: File "instanceof_bug.php", line 18, characters 49-49:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+instanceof_bug.php:18:49
+16 | abstract final class C {
+17 | 
+18 |   public static async function genEntityExample<T>(
+   |                                                 ^ [1]
+19 |     I<mixed, mixed, T> $f,
+20 |   ): Awaitable<mixed> {
+
+1 error found

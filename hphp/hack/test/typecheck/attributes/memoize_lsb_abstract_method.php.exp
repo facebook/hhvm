@@ -1,2 +1,11 @@
-ERROR: File "memoize_lsb_abstract_method.php", line 5, characters 35-35:
-Abstract methods cannot be memoized. (NastCheck[3087])
+error: NastCheck[3087] Abstract methods cannot be memoized. [1]
+
+memoize_lsb_abstract_method.php:5:35
+3 | abstract class X {
+4 |   <<__MemoizeLSB>>
+5 |   public static abstract function f(): void;
+  |                                   ^ [1]
+6 | }
+7 | 
+
+1 error found

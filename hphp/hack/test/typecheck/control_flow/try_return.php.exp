@@ -1,6 +1,25 @@
-ERROR: File "try_return.php", line 16, characters 18-19:
-Invalid argument (Typing[4110])
-  File "try_return.php", line 4, characters 23-28:
-  Expected `string`
-  File "try_return.php", line 12, characters 12-15:
-  But got `bool`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+try_return.php:16:18
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function expectString(string $x): void {
+   |                       ^^^^^^ [2]
+ 5 |   echo 'expectString';
+ 6 | }
+   :
+10 |   try {
+11 |     if ($b) {
+12 |       $x = true;
+   |            ^^^^ [3]
+13 |       return 0;
+14 |     }
+15 |   } finally {
+16 |     expectString($x);
+   |                  ^^ [1]
+17 |   }
+18 |   return 2;
+
+1 error found

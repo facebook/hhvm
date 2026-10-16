@@ -1,8 +1,27 @@
-ERROR: File "no_warning.php", line 29, characters 3-12:
-Elements in a keyset cannot be assigned, use append instead. (Typing[4156])
-  File "no_warning.php", line 28, characters 22-32:
-  Definition is here
-ERROR: File "no_warning.php", line 30, characters 3-11:
-This is not an object of type `KeyedContainer`, this is an object of type Set<int> (Typing[4370])
-  File "no_warning.php", line 28, characters 39-46:
-  Definition is here
+error: Typing[4156] Elements in a keyset cannot be assigned, use append instead. [1]
+-> Definition is here [2]
+
+no_warning.php:29:3
+26 | }
+27 | 
+28 | function test_assign(keyset<int> $ks, Set<int> $s): void {
+   |                      ^^^^^^^^^^^ [2]
+29 |   $ks[1] = 1; // No warning - this is an error insted
+   |   ^^^^^^^^^^ [1]
+30 |   $s[1] = 1; // No warning - this is an error insted
+31 | }
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is an object of type Set<int> [1]
+-> Definition is here [2]
+
+no_warning.php:30:3
+26 | }
+27 | 
+28 | function test_assign(keyset<int> $ks, Set<int> $s): void {
+   |                                       ^^^^^^^^ [2]
+29 |   $ks[1] = 1; // No warning - this is an error insted
+30 |   $s[1] = 1; // No warning - this is an error insted
+   |   ^^^^^^^^^ [1]
+31 | }
+
+2 errors found

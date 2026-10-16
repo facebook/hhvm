@@ -1,2 +1,11 @@
-ERROR: File "class_const_this.php", line 7, characters 10-21:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+class_const_this.php:7:10
+5 | 
+6 |   public function baz(): void {
+7 |     $x = $this::bar<>;
+  |          ^^^^^^^^^^^^ [1]
+8 |     $x(4);
+9 |   }
+
+1 error found

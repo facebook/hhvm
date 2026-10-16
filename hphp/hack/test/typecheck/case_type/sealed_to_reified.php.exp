@@ -1,10 +1,20 @@
-ERROR: File "sealed_to_reified.php", line 8, characters 11-12:
-Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag (Typing[4475])
-  File "sealed_to_reified.php", line 8, characters 16-19:
-  This is the type `IFoo`, which includes **instances of the class ReifiedFoo**
-  File "sealed_to_reified.php", line 4, characters 11-14:
-    via the sealed interface `IFoo`
-  File "sealed_to_reified.php", line 8, characters 23-37:
-  It may overlap with `ReifiedFoo<int>`, which includes **instances of the class ReifiedFoo<int>**
-  File "sealed_to_reified.php", line 8, characters 11-12:
-  Because it is possible for values to be both **instances of the class ReifiedFoo** and **instances of the class ReifiedFoo<int>**, `IFoo` and `ReifiedFoo<int>` cannot be in the same case type
+error: Typing[4475] Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag [1]
+-> This is the type `IFoo`, which includes **instances of the class ReifiedFoo** [2]
+->   via the sealed interface `IFoo` [3]
+-> It may overlap with `ReifiedFoo<int>`, which includes **instances of the class ReifiedFoo<int>** [4]
+-> Because it is possible for values to be both **instances of the class ReifiedFoo** and **instances of the class ReifiedFoo<int>**, `IFoo` and `ReifiedFoo<int>` cannot be in the same case type [1]
+
+sealed_to_reified.php:8:11
+2 | 
+3 | <<__Sealed(ReifiedFoo::class)>>
+4 | interface IFoo {}
+  |           ^^^^ [3]
+5 | 
+6 | abstract class ReifiedFoo<reify T> implements IFoo {}
+7 | 
+8 | case type CT = IFoo | ReifiedFoo<int>;
+  |           ^^ [1]
+  |                ^^^^ [2]
+  |                       ^^^^^^^^^^^^^^^ [4]
+
+1 error found

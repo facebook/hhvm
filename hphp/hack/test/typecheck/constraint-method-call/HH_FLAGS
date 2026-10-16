@@ -1,2 +1,3 @@
 --config constraint_method_call=true
 --extra-builtin ../../expr_tree.php
+--error-format plain_highlighted

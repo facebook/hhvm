@@ -1,12 +1,47 @@
-ERROR: File "await_in_tree.php", line 12, characters 14-39:
-`await` is not supported in expression trees. (Parsing[1002])
-ERROR: File "await_in_tree.php", line 12, characters 14-39:
-`await` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "await_in_tree.php", line 12, characters 20-39:
-This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typing[4110])
-  File "expr_tree.php", line 499, characters 5-25:
-  Expected `~ExampleExpression<T>` because you are splicing into a `ExampleDsl` expression or block
-  File "await_in_tree.php", line 6, characters 4-43:
-  But got `Awaitable<ExampleExpression<int>>`
-  File "await_in_tree.php", line 12, characters 22-38:
-  Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing
+error: Parsing[1002] `await` is not supported in expression trees. [1]
+
+await_in_tree.php:12:14
+10 | <<__EntryPoint>>
+11 | async function myTestFunction(): Awaitable<void> {
+12 |   ExampleDsl`await ${myTestFunction2()}`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+await_in_tree.php:12:14
+10 | <<__EntryPoint>>
+11 | async function myTestFunction(): Awaitable<void> {
+12 |   ExampleDsl`await ${myTestFunction2()}`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4110] This value cannot be inserted (spliced) into a `ExampleDsl` expression tree [1]
+-> Expected `~ExampleExpression<T>` because you are splicing into a `ExampleDsl` expression or block [2]
+-> But got `Awaitable<ExampleExpression<int>>` [3]
+-> Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing [4]
+
+await_in_tree.php:12:20
+  4 | 
+  5 | async function myTestFunction2(
+  6 | ): Awaitable<ExampleExpression<ExampleInt>> {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+  7 |   return ExampleDsl`1`;
+  8 | }
+  9 | 
+ 10 | <<__EntryPoint>>
+ 11 | async function myTestFunction(): Awaitable<void> {
+ 12 |   ExampleDsl`await ${myTestFunction2()}`;
+    |                    ^^^^^^^^^^^^^^^^^^^^ [1]
+    |                      ^^^^^^^^^^^^^^^^^ [4]
+ 13 | }
+
+expr_tree.php:499:5
+497 |     ?ExprPos $_,
+498 |     string $_key,
+499 |     ~ExampleExpression<T> $splice_val,
+    |     ^^^^^^^^^^^^^^^^^^^^^ [2]
+500 |     ?vec<string> $_macro_vars = null,
+501 |   ): ExampleDsl::TAst {
+
+3 errors found

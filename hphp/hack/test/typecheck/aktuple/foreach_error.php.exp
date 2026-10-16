@@ -1,14 +1,54 @@
-ERROR: File "foreach_error.php", line 12, characters 14-15:
-Invalid argument (Typing[4110])
-  File "foreach_error.php", line 16, characters 19-21:
-  Expected `int`
-  File "foreach_error.php", line 9, characters 15-18:
-  But got `num`
-  File "hackarray.hhi", line 52, characters 72-72:
-    via this generic `T`
-  File "hackarray.hhi", line 22, characters 35-36:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 23-24:
-    via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 66-67:
-    via this generic `Tv`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+->   via this generic `T` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+->   via this generic `Tv` [7]
+
+foreach_error.php:12:14
+  7 | 
+  8 | function test(): void {
+  9 |   $a = vec[4, 3.14];
+    |               ^^^^ [3]
+ 10 | 
+ 11 |   foreach ($a as $v) {
+ 12 |     take_int($v);
+    |              ^^ [1]
+ 13 |   }
+ 14 | }
+ 15 | 
+ 16 | function take_int(int $_): void {}
+    |                   ^^^ [2]
+
+hackarray.hhi:52:72
+ 20 |     <<__NoAutoBound>> +Tk as arraykey,
+ 21 |     <<__NoAutoBound>> +Tv,
+ 22 |   > implements KeyedContainer<Tk, Tv>, \XHPChild {
+    |                                   ^^ [5]
+ 23 | 
+ 24 |   }
+    :
+ 50 |    */
+ 51 |   <<__SupportDynamicType>>
+ 52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+    |                                                                        ^ [4]
+ 53 | 
+ 54 | } // namespace HH
+
+interfaces.hhi:115:23
+ 90 |    */
+ 91 |   <<__Sealed(KeyedContainer::class)>>
+ 92 |   interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
+    |                                                                  ^^ [7]
+ 93 | 
+ 94 |   }
+    :
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                       ^^ [6]
+116 | 
+117 |   /**
+
+1 error found

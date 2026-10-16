@@ -1,28 +1,67 @@
-ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
-  But got `Tk`
-ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
-  But got `mixed`
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 31-32:
-    by the definition of `Tk`
-ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 6, characters 24-34:
-Invalid argument (Typing[4110])
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
-  Expected `dict<_, _>`
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 5, characters 15-25:
-  But got `vec<int>`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `Tk` [4]
+
+disallows_array_of_int_when_array_of_tk_to_tv_is_required.php:3:39
+ 1 | <?hh
+ 2 | 
+ 3 | function consumeArrayOfTkToTv<Tk, Tv>(darray<Tk, Tv> $_): void {}
+   |                                       ^^^^^^^^^^^^^^ [1]
+   |                                              ^^ [4]
+ 4 | 
+ 5 | function test(varray<int> $arrayOfInt): void {
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   by the definition of `Tk` [5]
+
+disallows_array_of_int_when_array_of_tk_to_tv_is_required.php:3:39
+ 1 | <?hh
+ 2 | 
+ 3 | function consumeArrayOfTkToTv<Tk, Tv>(darray<Tk, Tv> $_): void {}
+   |                               ^^ [5]
+   |                                       ^^^^^^^^^^^^^^ [1]
+   |                                              ^^ [4]
+ 4 | 
+ 5 | function test(varray<int> $arrayOfInt): void {
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<_, _>` [2]
+-> But got `vec<int>` [3]
+
+disallows_array_of_int_when_array_of_tk_to_tv_is_required.php:6:24
+1 | <?hh
+2 | 
+3 | function consumeArrayOfTkToTv<Tk, Tv>(darray<Tk, Tv> $_): void {}
+  |                                       ^^^^^^^^^^^^^^ [2]
+4 | 
+5 | function test(varray<int> $arrayOfInt): void {
+  |               ^^^^^^^^^^^ [3]
+6 |   consumeArrayOfTkToTv($arrayOfInt);
+  |                        ^^^^^^^^^^^ [1]
+7 | }
+
+3 errors found

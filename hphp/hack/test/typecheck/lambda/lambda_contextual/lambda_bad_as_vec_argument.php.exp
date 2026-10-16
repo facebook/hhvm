@@ -1,12 +1,39 @@
-ERROR: File "lambda_bad_as_vec_argument.php", line 32, characters 17-30:
-No instance method `missing_method` in `MyClass` (Typing[4053])
-  File "lambda_bad_as_vec_argument.php", line 5, characters 19-23:
-  Did you mean `hello` instead?
-  File "lambda_bad_as_vec_argument.php", line 22, characters 23-29:
-  This is why I think it is an object of type MyClass
-  File "lambda_bad_as_vec_argument.php", line 22, characters 23-29:
-  This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
-  File "lambda_bad_as_vec_argument.php", line 11, characters 49-49:
-    via this generic `T`
-  File "lambda_bad_as_vec_argument.php", line 4, characters 7-13:
-  Declaration of `MyClass` is here
+error: Typing[4053] No instance method `missing_method` in `MyClass` [1]
+-> Did you mean `hello` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> This type argument to `MyClosureRunner` only allows supertypes (it is contravariant) [3]
+->   via this generic `T` [4]
+-> Declaration of `MyClass` is here [5]
+
+lambda_bad_as_vec_argument.php:32:17
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class MyClass {
+   |       ^^^^^^^ [5]
+ 5 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 6 |     return 'world';
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | class MyClosureRunner<-T> {
+11 |   public function __construct(private (function(T): string) $closure) {}
+   |                                                 ^ [4]
+12 |   public function get(): (function(T): string) {
+13 |     return $this->closure;
+   :
+20 | 
+21 | function expectsMyClosureRunnerMyClass(
+22 |   vec<MyClosureRunner<MyClass>> $p,
+   |                       ^^^^^^^ [3]
+23 | ): MyClosureRunner<MyClass> {
+24 |   $r = $p[0];
+   :
+30 |       new MyClosureRunner(
+31 |         function($arg) {
+32 |           $arg->missing_method();
+   |                 ^^^^^^^^^^^^^^ [1]
+33 |           return "ok";
+34 |         },
+
+1 error found

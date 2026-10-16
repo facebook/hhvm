@@ -1,10 +1,23 @@
 File "array_literal_bad.php", line 10, characters 3-15:
   dict<string, class<(C1 | C2 | D)>>
-ERROR: File "array_literal_bad.php", line 11, characters 10-13:
-Invalid return type (Typing[4110])
-  File "array_literal_bad.php", line 8, characters 53-53:
-  Expected `I`
-  File "array_literal_bad.php", line 6, characters 7-7:
-  But got `D`; implicitly defined constant `::class` is a reference to class `D`
-  File "array_literal_bad.php", line 9, characters 45-45:
-    where the class `D` was referenced here
+error: Typing[4110] Invalid return type [1]
+-> Expected `I` [2]
+-> But got `D`; implicitly defined constant `::class` is a reference to class `D` [3]
+->   where the class `D` was referenced here [4]
+
+array_literal_bad.php:11:10
+ 4 | class C1 implements I {}
+ 5 | class C2 implements I {}
+ 6 | class D {}
+   |       ^ [3]
+ 7 | 
+ 8 | function f(string $good1): darray<string, classname<I>> {
+   |                                                     ^ [2]
+ 9 |   $arr = dict[$good1 => C1::class, 'bad' => D::class, 'good2' => C2::class];
+   |                                             ^ [4]
+10 |   hh_show($arr);
+11 |   return $arr;
+   |          ^^^^ [1]
+12 | }
+
+1 error found

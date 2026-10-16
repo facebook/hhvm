@@ -1,8 +1,40 @@
-ERROR: File "dynamically_referenced.php", line 9, characters 27-33:
-This attribute parameter should be an integer literal (Typing[4127])
-ERROR: File "dynamically_referenced.php", line 11, characters 27-30:
-This attribute parameter should be an integer literal (Typing[4127])
-ERROR: File "dynamically_referenced.php", line 13, characters 27-31:
-This attribute parameter should be an integer literal (Typing[4127])
-ERROR: File "dynamically_referenced.php", line 15, characters 3-25:
-The attribute `__DynamicallyReferenced` expects at most 1 argument (Typing[4126])
+error: Typing[4127] This attribute parameter should be an integer literal [1]
+
+dynamically_referenced.php:9:27
+ 7 | <<__DynamicallyReferenced(1)>>
+ 8 | class C {}
+ 9 | <<__DynamicallyReferenced("hello")>>
+   |                           ^^^^^^^ [1]
+10 | class D {}
+11 | <<__DynamicallyReferenced(3.14)>>
+
+error: Typing[4127] This attribute parameter should be an integer literal [1]
+
+dynamically_referenced.php:11:27
+ 9 | <<__DynamicallyReferenced("hello")>>
+10 | class D {}
+11 | <<__DynamicallyReferenced(3.14)>>
+   |                           ^^^^ [1]
+12 | class E {}
+13 | <<__DynamicallyReferenced(false)>>
+
+error: Typing[4127] This attribute parameter should be an integer literal [1]
+
+dynamically_referenced.php:13:27
+11 | <<__DynamicallyReferenced(3.14)>>
+12 | class E {}
+13 | <<__DynamicallyReferenced(false)>>
+   |                           ^^^^^ [1]
+14 | class F {}
+15 | <<__DynamicallyReferenced(1, 2)>>
+
+error: Typing[4126] The attribute `__DynamicallyReferenced` expects at most 1 argument [1]
+
+dynamically_referenced.php:15:3
+13 | <<__DynamicallyReferenced(false)>>
+14 | class F {}
+15 | <<__DynamicallyReferenced(1, 2)>>
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | class G {}
+
+4 errors found

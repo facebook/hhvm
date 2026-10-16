@@ -1,2 +1,11 @@
-ERROR: File "lambda_tany.php", line 11, characters 31-32:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+lambda_tany.php:11:31
+ 9 | }
+10 | 
+11 | function test_tany(/* TAny */ $y): void {
+   |                               ^^ [1]
+12 |   $f = $x ==> $x->foo();
+13 |   $f($y);
+
+1 error found

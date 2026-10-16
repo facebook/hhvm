@@ -1,2 +1,14 @@
-ERROR: File "nonexhaustive.php", line 11, characters 3-43:
-This match statement is not exhaustive: there is no arm matching values of type `B` (Typing[4478])
+error: Typing[4478] This match statement is not exhaustive: there is no arm matching values of type `B` [1]
+
+nonexhaustive.php:11:3
+ 9 | 
+10 | function test(AB $ab): void {
+11 |   match ($ab) {
+   |   ^^^^^^^^^^^^^ [1]
+12 |     _: A => print('A');
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+13 |   }
+   |   ^ [1]
+14 | }
+
+1 error found

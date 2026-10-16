@@ -1,126 +1,402 @@
-ERROR: File "bad_math.php", line 9, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 9, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 9, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 9, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 10, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 10, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 10, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 10, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 11, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 11, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 11, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 11, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 12, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 12, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 12, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 12, characters 3-8:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 13, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 13, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 13, characters 3-4:
-Typing error (Typing[4429])
-  File "bad_math.php", line 13, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 14, characters 3-5:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 14, characters 3-5:
-  Expected `int` because this is used in a bitwise operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 15, characters 3-4:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 15, characters 3-4:
-  Expected `int` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 16, characters 3-4:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 16, characters 3-4:
-  Expected `int` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 17, characters 3-4:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 17, characters 3-4:
-  Expected `int` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 18, characters 3-4:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 18, characters 3-4:
-  Expected `int` because this is used in a bitwise operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 19, characters 3-4:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 19, characters 3-4:
-  Expected `int` because this is used in a bitwise operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 20, characters 3-4:
-Invalid argument (Typing[4110])
-  File "bad_math.php", line 20, characters 3-4:
-  Expected `int` because this is used in a bitwise operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 21, characters 3-5:
-Typing error (Typing[4429])
-  File "bad_math.php", line 21, characters 3-5:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 21, characters 3-5:
-Typing error (Typing[4429])
-  File "bad_math.php", line 21, characters 3-5:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
-ERROR: File "bad_math.php", line 22, characters 3-5:
-Typing error (Typing[4429])
-  File "bad_math.php", line 22, characters 3-5:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-ERROR: File "bad_math.php", line 22, characters 3-5:
-Typing error (Typing[4429])
-  File "bad_math.php", line 22, characters 3-5:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic` [3]
+
+bad_math.php:9:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+ 8 |   }
+ 9 |   $c + 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+10 |   $c - 5; // error
+11 |   $c * 5; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `C` [3]
+
+bad_math.php:9:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+ 8 |   }
+ 9 |   $c + 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+10 |   $c - 5; // error
+11 |   $c * 5; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic` [3]
+
+bad_math.php:10:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+ 8 |   }
+ 9 |   $c + 5; // error
+10 |   $c - 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+11 |   $c * 5; // error
+12 |   $c / 5; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `C` [3]
+
+bad_math.php:10:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+ 8 |   }
+ 9 |   $c + 5; // error
+10 |   $c - 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+11 |   $c * 5; // error
+12 |   $c / 5; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic` [3]
+
+bad_math.php:11:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+ 8 |   }
+ 9 |   $c + 5; // error
+10 |   $c - 5; // error
+11 |   $c * 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+12 |   $c / 5; // error
+13 |   $c ** 5; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `C` [3]
+
+bad_math.php:11:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+ 8 |   }
+ 9 |   $c + 5; // error
+10 |   $c - 5; // error
+11 |   $c * 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+12 |   $c / 5; // error
+13 |   $c ** 5; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic` [3]
+
+bad_math.php:12:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+10 |   $c - 5; // error
+11 |   $c * 5; // error
+12 |   $c / 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+13 |   $c ** 5; // error
+14 |   ~$c; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `C` [3]
+
+bad_math.php:12:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+10 |   $c - 5; // error
+11 |   $c * 5; // error
+12 |   $c / 5; // error
+   |   ^^ [1]
+   |   ^^^^^^ [2]
+13 |   $c ** 5; // error
+14 |   ~$c; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic` [3]
+
+bad_math.php:13:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+11 |   $c * 5; // error
+12 |   $c / 5; // error
+13 |   $c ** 5; // error
+   |   ^^ [1]
+   |   ^^^^^^^ [2]
+14 |   ~$c; // error
+15 |   $c % 0; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `C` [3]
+
+bad_math.php:13:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [3]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+11 |   $c * 5; // error
+12 |   $c / 5; // error
+13 |   $c ** 5; // error
+   |   ^^ [1]
+   |   ^^^^^^^ [2]
+14 |   ~$c; // error
+15 |   $c % 0; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `C` [2]
+
+bad_math.php:14:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+12 |   $c / 5; // error
+13 |   $c ** 5; // error
+14 |   ~$c; // error
+   |   ^^^ [1]
+15 |   $c % 0; // error
+16 |   $c << 0; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [1]
+-> But got `C` [2]
+
+bad_math.php:15:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+13 |   $c ** 5; // error
+14 |   ~$c; // error
+15 |   $c % 0; // error
+   |   ^^ [1]
+16 |   $c << 0; // error
+17 |   $c >> 0; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [1]
+-> But got `C` [2]
+
+bad_math.php:16:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+14 |   ~$c; // error
+15 |   $c % 0; // error
+16 |   $c << 0; // error
+   |   ^^ [1]
+17 |   $c >> 0; // error
+18 |   $c ^ 0; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [1]
+-> But got `C` [2]
+
+bad_math.php:17:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+15 |   $c % 0; // error
+16 |   $c << 0; // error
+17 |   $c >> 0; // error
+   |   ^^ [1]
+18 |   $c ^ 0; // error
+19 |   $c & 0; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `C` [2]
+
+bad_math.php:18:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+16 |   $c << 0; // error
+17 |   $c >> 0; // error
+18 |   $c ^ 0; // error
+   |   ^^ [1]
+19 |   $c & 0; // error
+20 |   $c | 0; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `C` [2]
+
+bad_math.php:19:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+17 |   $c >> 0; // error
+18 |   $c ^ 0; // error
+19 |   $c & 0; // error
+   |   ^^ [1]
+20 |   $c | 0; // error
+21 |   +$c; // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `C` [2]
+
+bad_math.php:20:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+18 |   $c ^ 0; // error
+19 |   $c & 0; // error
+20 |   $c | 0; // error
+   |   ^^ [1]
+21 |   +$c; // error
+22 |   -$c; // error
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `dynamic` [2]
+
+bad_math.php:21:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+19 |   $c & 0; // error
+20 |   $c | 0; // error
+21 |   +$c; // error
+   |   ^^^ [1]
+22 |   -$c; // error
+23 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `C` [2]
+
+bad_math.php:21:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+19 |   $c & 0; // error
+20 |   $c | 0; // error
+21 |   +$c; // error
+   |   ^^^ [1]
+22 |   -$c; // error
+23 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `dynamic` [2]
+
+bad_math.php:22:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                   ^^^^^^^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+20 |   $c | 0; // error
+21 |   +$c; // error
+22 |   -$c; // error
+   |   ^^^ [1]
+23 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `C` [2]
+
+bad_math.php:22:3
+ 3 | class C {}
+ 4 | 
+ 5 | function bad_math(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+ 6 |   if($dyn) {
+ 7 |     $c = $dyn;
+   :
+20 |   $c | 0; // error
+21 |   +$c; // error
+22 |   -$c; // error
+   |   ^^^ [1]
+23 | }
+
+21 errors found

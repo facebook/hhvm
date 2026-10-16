@@ -1,12 +1,61 @@
-ERROR: File "module_bad_visibility.php--test.php", line 6, characters 11-18:
-Methods cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
-ERROR: File "module_bad_visibility.php--test.php", line 7, characters 10-17:
-Methods cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
-ERROR: File "module_bad_visibility.php--test.php", line 8, characters 21-28:
-Methods cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
-ERROR: File "module_bad_visibility.php--test.php", line 13, characters 11-18:
-Properties cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
-ERROR: File "module_bad_visibility.php--test.php", line 14, characters 10-17:
-Properties cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
-ERROR: File "module_bad_visibility.php--test.php", line 15, characters 21-28:
-Properties cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
+error: Parsing[1002] Methods cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+module_bad_visibility.php--test.php:6:11
+4 | 
+5 | class A {
+6 |   private internal function bad1(): void {}
+  |           ^^^^^^^^ [1]
+7 |   public internal function bad2(): void {}
+8 |   private protected internal function bad3(): void {}
+
+error: Parsing[1002] Methods cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+module_bad_visibility.php--test.php:7:10
+5 | class A {
+6 |   private internal function bad1(): void {}
+7 |   public internal function bad2(): void {}
+  |          ^^^^^^^^ [1]
+8 |   private protected internal function bad3(): void {}
+9 |   internal function good1(): void {}
+
+error: Parsing[1002] Methods cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+module_bad_visibility.php--test.php:8:21
+ 6 |   private internal function bad1(): void {}
+ 7 |   public internal function bad2(): void {}
+ 8 |   private protected internal function bad3(): void {}
+   |                     ^^^^^^^^ [1]
+ 9 |   internal function good1(): void {}
+10 |   protected internal function good2(): void {}
+
+error: Parsing[1002] Properties cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+module_bad_visibility.php--test.php:13:11
+11 |   internal protected function good3(): void {}
+12 | 
+13 |   private internal int $bad1 = 42;
+   |           ^^^^^^^^ [1]
+14 |   public internal int $bad2 = 42;
+15 |   private protected internal int $bad3 = 42;
+
+error: Parsing[1002] Properties cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+module_bad_visibility.php--test.php:14:10
+12 | 
+13 |   private internal int $bad1 = 42;
+14 |   public internal int $bad2 = 42;
+   |          ^^^^^^^^ [1]
+15 |   private protected internal int $bad3 = 42;
+16 |   internal int $good1 = 42;
+
+error: Parsing[1002] Properties cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+module_bad_visibility.php--test.php:15:21
+13 |   private internal int $bad1 = 42;
+14 |   public internal int $bad2 = 42;
+15 |   private protected internal int $bad3 = 42;
+   |                     ^^^^^^^^ [1]
+16 |   internal int $good1 = 42;
+17 |   protected internal int $good2 = 42;
+
+6 errors found

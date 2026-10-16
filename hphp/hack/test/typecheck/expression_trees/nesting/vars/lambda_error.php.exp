@@ -1,28 +1,133 @@
-ERROR: File "lambda_error.php", line 29, characters 25-26:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 30, characters 25-26:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 31, characters 41-42:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 32, characters 36-37:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "lambda_error.php", line 32, characters 14-15:
-  Did you mean `$y` instead?
-ERROR: File "lambda_error.php", line 32, characters 41-42:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 33, characters 45-46:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 34, characters 41-42:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 35, characters 44-45:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 36, characters 45-46:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 37, characters 45-46:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 43, characters 22-23:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 50, characters 35-36:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "lambda_error.php", line 55, characters 27-28:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:29:25
+27 | function f(): void {
+28 |   // Each of these should have an error because the binding is in an ET and the use in a splice
+29 |   ExampleDsl`$x ==> ${i($x)}`;
+   |                         ^^ [1]
+30 |   ExampleDsl`$x ==> ${h($x, ExampleDsl`$x`)}`;
+31 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $y)}`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:30:25
+28 |   // Each of these should have an error because the binding is in an ET and the use in a splice
+29 |   ExampleDsl`$x ==> ${i($x)}`;
+30 |   ExampleDsl`$x ==> ${h($x, ExampleDsl`$x`)}`;
+   |                         ^^ [1]
+31 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $y)}`;
+32 |   ExampleDsl`$y ==> ${g(ExampleDsl`$x`, $y)}`;
+
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+
+lambda_error.php:31:41
+29 |   ExampleDsl`$x ==> ${i($x)}`;
+30 |   ExampleDsl`$x ==> ${h($x, ExampleDsl`$x`)}`;
+31 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $y)}`;
+   |                                         ^^ [1]
+32 |   ExampleDsl`$y ==> ${g(ExampleDsl`$x`, $y)}`;
+33 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x + 1)}`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$y` instead? [2]
+
+lambda_error.php:32:36
+30 |   ExampleDsl`$x ==> ${h($x, ExampleDsl`$x`)}`;
+31 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $y)}`;
+32 |   ExampleDsl`$y ==> ${g(ExampleDsl`$x`, $y)}`;
+   |              ^^ [2]
+   |                                    ^^ [1]
+33 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x + 1)}`;
+34 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $x)}`;
+
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+
+lambda_error.php:32:41
+30 |   ExampleDsl`$x ==> ${h($x, ExampleDsl`$x`)}`;
+31 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $y)}`;
+32 |   ExampleDsl`$y ==> ${g(ExampleDsl`$x`, $y)}`;
+   |                                         ^^ [1]
+33 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x + 1)}`;
+34 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $x)}`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:33:45
+31 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $y)}`;
+32 |   ExampleDsl`$y ==> ${g(ExampleDsl`$x`, $y)}`;
+33 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x + 1)}`;
+   |                                             ^^ [1]
+34 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $x)}`;
+35 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, id($x))}`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:34:41
+32 |   ExampleDsl`$y ==> ${g(ExampleDsl`$x`, $y)}`;
+33 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x + 1)}`;
+34 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $x)}`;
+   |                                         ^^ [1]
+35 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, id($x))}`;
+36 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x)}`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:35:44
+33 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x + 1)}`;
+34 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $x)}`;
+35 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, id($x))}`;
+   |                                            ^^ [1]
+36 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x)}`;
+37 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x.'')}`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:36:45
+34 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, $x)}`;
+35 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, id($x))}`;
+36 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x)}`;
+   |                                             ^^ [1]
+37 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x.'')}`;
+38 |   ExampleDsl`{
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:37:45
+35 |   ExampleDsl`$x ==> ${g(ExampleDsl`$x`, id($x))}`;
+36 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x)}`;
+37 |   ExampleDsl`$x ==> ${g(ExampleDsl`1 + $x`, $x.'')}`;
+   |                                             ^^ [1]
+38 |   ExampleDsl`{
+39 |     $x = 1;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:43:22
+41 |       ${
+42 |         ExampleDsl`{
+43 |           $y = 0 + ${$x};
+   |                      ^^ [1]
+44 |           return $y + $x;
+45 |         }`
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+lambda_error.php:50:35
+48 | 
+49 |   // These should have an error because the binding is in a splice and the use in an ET
+50 |   ExampleDsl`${($x ==> ExampleDsl`$x`)(1)}`;
+   |                                   ^^ [1]
+51 |   ExampleDsl`${
+52 |     (
+
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+
+lambda_error.php:55:27
+53 |       $x ==> {
+54 |         $y = 1;
+55 |         return ExampleDsl`$y`;
+   |                           ^^ [1]
+56 |       }
+57 |     )(1)
+
+13 errors found

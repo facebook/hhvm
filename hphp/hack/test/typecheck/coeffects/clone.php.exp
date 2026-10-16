@@ -1,6 +1,21 @@
-ERROR: File "clone.php", line 10, characters 3-10:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "clone.php", line 9, characters 27-32:
-  From this declaration, the context of this function body provides the capability string
-  File "clone.php", line 4, characters 29-31:
-  But the function being called requires the capability int
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability string [2]
+-> But the function being called requires the capability int [3]
+
+clone.php:10:3
+ 2 | 
+ 3 | class C {
+ 4 |   public function __clone()[int]: void {}
+   |                             ^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | class D {}
+ 8 | 
+ 9 | function test(C $c, D $d)[string]: void {
+   |                           ^^^^^^ [2]
+10 |   clone $c;
+   |   ^^^^^^^^ [1]
+11 |   clone $d; // undefined __clone methods are typed as pure
+12 | }
+
+1 error found

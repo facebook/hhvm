@@ -1,8 +1,33 @@
-ERROR: File "type_arity_checked.php", line 6, characters 15-15:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "type_arity_checked.php", line 3, characters 7-7:
-  Definition is here
-ERROR: File "type_arity_checked.php", line 10, characters 24-24:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "type_arity_checked.php", line 3, characters 7-7:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+type_arity_checked.php:6:15
+1 | <?hh
+2 | 
+3 | class A<T> {}
+  |       ^ [2]
+4 | 
+5 | // must detect that A is missing a type argument
+6 | function test(A ... $y): void {}
+  |               ^ [1]
+7 | 
+8 | class B {
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+type_arity_checked.php:10:24
+ 1 | <?hh
+ 2 | 
+ 3 | class A<T> {}
+   |       ^ [2]
+ 4 | 
+ 5 | // must detect that A is missing a type argument
+   :
+ 8 | class B {
+ 9 |   // must detect that A is missing a type argument
+10 |   public function test(A ...$y): void {}
+   |                        ^ [1]
+11 | }
+
+2 errors found

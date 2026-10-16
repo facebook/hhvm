@@ -1,12 +1,61 @@
-WARN: File "any.php", line 12, characters 17-25:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. (Warn[12012])
-WARN: File "any.php", line 16, characters 19-27:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `resource` which shares no values with `int`. (Warn[12012])
-ERROR: File "any.php", line 7, characters 13-14:
-Was expecting a type hint (Typing[4032])
-ERROR: File "any.php", line 11, characters 13-14:
-Was expecting a type hint (Typing[4032])
-ERROR: File "any.php", line 15, characters 13-14:
-Was expecting a type hint (Typing[4032])
-ERROR: File "any.php", line 19, characters 12-13:
-Was expecting a type hint (Typing[4032])
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. [1]
+
+any.php:12:17
+10 | 
+11 | function f2($x): void {
+12 |   expect_string($x as int);
+   |                 ^^^^^^^^^ [1]
+13 | }
+14 | 
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `resource` which shares no values with `int`. [1]
+
+any.php:16:19
+14 | 
+15 | function f3($x): void {
+16 |   expect_resource($x as int);
+   |                   ^^^^^^^^^ [1]
+17 | }
+18 | 
+
+error: Typing[4032] Was expecting a type hint [1]
+
+any.php:7:13
+5 |  */
+6 | 
+7 | function f1($x): void {
+  |             ^^ [1]
+8 |   expect_int($x as int);
+9 | }
+
+error: Typing[4032] Was expecting a type hint [1]
+
+any.php:11:13
+ 9 | }
+10 | 
+11 | function f2($x): void {
+   |             ^^ [1]
+12 |   expect_string($x as int);
+13 | }
+
+error: Typing[4032] Was expecting a type hint [1]
+
+any.php:15:13
+13 | }
+14 | 
+15 | function f3($x): void {
+   |             ^^ [1]
+16 |   expect_resource($x as int);
+17 | }
+
+error: Typing[4032] Was expecting a type hint [1]
+
+any.php:19:12
+17 | }
+18 | 
+19 | function g($x): void {
+   |            ^^ [1]
+20 |   $x as int;
+21 |   expect_int($x);
+
+6 errors found

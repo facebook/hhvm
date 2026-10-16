@@ -1,12 +1,25 @@
-ERROR: File "bad_inout_hint_parent7.php", line 11, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "bad_inout_hint_parent7.php", line 11, characters 19-21:
-  Method `foo` has type `(function(): (function(inout arraykey): void))` in `C2`
-  File "bad_inout_hint_parent7.php", line 4, characters 19-21:
-  But it has type `(function(): (function(inout int): void))` in parent `C1`
-  File "bad_inout_hint_parent7.php", line 11, characters 19-21:
-  Type `(function(): (function(inout arraykey): void))` is not a subtype of `(function(): (function(inout int): void))`
-  File "bad_inout_hint_parent7.php", line 4, characters 42-44:
-  Expected `int`
-  File "bad_inout_hint_parent7.php", line 11, characters 42-49:
-  But got `arraykey`
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(): (function(inout arraykey): void))` in `C2` [1]
+-> But it has type `(function(): (function(inout int): void))` in parent `C1` [2]
+-> Type `(function(): (function(inout arraykey): void))` is not a subtype of `(function(): (function(inout int): void))` [1]
+-> Expected `int` [3]
+-> But got `arraykey` [4]
+
+bad_inout_hint_parent7.php:11:19
+ 2 | 
+ 3 | class C1 {
+ 4 |   public function foo(): (function(inout int): void) {
+   |                   ^^^ [2]
+   |                                          ^^^ [3]
+ 5 |     return (inout $x) ==> {
+ 6 |     };
+   :
+ 9 | 
+10 | class C2 extends C1 {
+11 |   public function foo(): (function(inout arraykey): void) {
+   |                   ^^^ [1]
+   |                                          ^^^^^^^^ [4]
+12 |     return (inout $x) ==> {
+13 |     };
+
+1 error found

@@ -1,4 +1,16 @@
-ERROR: File "abstract_override_concrete.php", line 9, characters 38-43:
-Cannot re-declare this property as abstract (Typing[4142])
-  File "abstract_override_concrete.php", line 5, characters 29-34:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this property as abstract [1]
+-> Previously defined here [2]
+
+abstract_override_concrete.php:9:38
+ 3 | 
+ 4 | class C {
+ 5 |   <<__Const>> public static string $x = "concrete";
+   |                             ^^^^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | abstract class D extends C {
+ 9 |   <<__Const>> abstract public static string $x; // illegal
+   |                                      ^^^^^^ [1]
+10 | }
+
+1 error found

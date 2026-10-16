@@ -1,6 +1,16 @@
-ERROR: File "4337-inout_return_type_mismatch.php", line 6, characters 5-15:
-Invalid assignment to an `inout` parameter (Typing[4337])
-  File "4337-inout_return_type_mismatch.php", line 5, characters 29-31:
-  Expected `int` (`inout` parameter)
-  File "4337-inout_return_type_mismatch.php", line 6, characters 10-15:
-  But got `string`
+error: Typing[4337] Invalid assignment to an `inout` parameter [1]
+-> Expected `int` (`inout` parameter) [2]
+-> But got `string` [3]
+
+4337-inout_return_type_mismatch.php:6:5
+3 | 
+4 | class Foo {
+5 |   public function bar(inout int $x): void {
+  |                             ^^^ [2]
+6 |     $x = "nope";
+  |     ^^^^^^^^^^^ [1]
+  |          ^^^^^^ [3]
+7 |   }
+8 | }
+
+1 error found

@@ -1,12 +1,32 @@
-ERROR: File "reflection.php", line 18, characters 26-37:
-Invalid argument (Typing[4323])
-  File "reflection.hhi", line 63, characters 43-43:
-  `T` is a constrained type parameter
-  File "reflection.hhi", line 63, characters 48-68:
-  This type constraint is violated
-  File "reflection.hhi", line 63, characters 48-68:
-  Expected `HH\ClassLikeAttribute`
-  File "reflection.php", line 8, characters 7-11:
-  But got `FAttr`; implicitly defined constant `::class` is a reference to class `FAttr`
-  File "reflection.php", line 18, characters 26-30:
-    where the class `FAttr` was referenced here
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `HH\ClassLikeAttribute` [3]
+-> But got `FAttr`; implicitly defined constant `::class` is a reference to class `FAttr` [4]
+->   where the class `FAttr` was referenced here [5]
+
+reflection.php:18:26
+ 6 | }
+ 7 | 
+ 8 | class FAttr implements HH\FunctionAttribute {
+   |       ^^^^^ [4]
+ 9 |   public function __construct(public int $j) {}
+10 | }
+   :
+16 |   $rc = new ReflectionClass("C");
+17 |   $rc->getAttributeClass(CAttr::class);
+18 |   $rc->getAttributeClass(FAttr::class);
+   |                          ^^^^^^^^^^^^ [1]
+   |                          ^^^^^ [5]
+19 | }
+
+reflection.hhi:63:43
+61 |   final public function hasAttribute(string $name)[]: bool;
+62 |   final public function getAttribute(string $name)[]: ?varray<mixed>;
+63 |   final public function getAttributeClass<T as HH\ClassLikeAttribute>(
+   |                                           ^ [2]
+   |                                                ^^^^^^^^^^^^^^^^^^^^^ [3]
+64 |     class<T> $c,
+65 |   )[]: ?T;
+
+1 error found

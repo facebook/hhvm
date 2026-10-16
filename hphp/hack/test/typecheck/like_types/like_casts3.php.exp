@@ -1,18 +1,65 @@
-WARN: File "like_casts3.php", line 4, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Tf`. (Warn[12011])
-WARN: File "like_casts3.php", line 8, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Tg`. (Warn[12011])
-WARN: File "like_casts3.php", line 12, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Th`. (Warn[12011])
-ERROR: File "like_casts3.php", line 4, characters 9-11:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts3.php", line 4, characters 10-11:
-  The `as` operator cannot be used with an erased generic type parameter
-ERROR: File "like_casts3.php", line 8, characters 9-11:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts3.php", line 8, characters 10-11:
-  The `as` operator cannot be used with an erased generic type parameter
-ERROR: File "like_casts3.php", line 12, characters 9-11:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts3.php", line 12, characters 10-11:
-  The `as` operator cannot be used with an erased generic type parameter
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Tf`. [1]
+
+like_casts3.php:4:3
+2 | 
+3 | function f<Tf as (function (int): num)>(dynamic $d): void {
+4 |   $d as ~Tf;
+  |   ^^^^^^^^^ [1]
+5 | }
+6 | 
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Tg`. [1]
+
+like_casts3.php:8:3
+ 6 | 
+ 7 | function g<Tg super (function (num): int)>(dynamic $d): void {
+ 8 |   $d as ~Tg;
+   |   ^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Th`. [1]
+
+like_casts3.php:12:3
+10 | 
+11 | function h<Th>(dynamic $d): void {
+12 |   $d as ~Th;
+   |   ^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with an erased generic type parameter [2]
+
+like_casts3.php:4:9
+2 | 
+3 | function f<Tf as (function (int): num)>(dynamic $d): void {
+4 |   $d as ~Tf;
+  |         ^^^ [1]
+  |          ^^ [2]
+5 | }
+6 | 
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with an erased generic type parameter [2]
+
+like_casts3.php:8:9
+ 6 | 
+ 7 | function g<Tg super (function (num): int)>(dynamic $d): void {
+ 8 |   $d as ~Tg;
+   |         ^^^ [1]
+   |          ^^ [2]
+ 9 | }
+10 | 
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with an erased generic type parameter [2]
+
+like_casts3.php:12:9
+10 | 
+11 | function h<Th>(dynamic $d): void {
+12 |   $d as ~Th;
+   |         ^^^ [1]
+   |          ^^ [2]
+13 | }
+
+6 errors found

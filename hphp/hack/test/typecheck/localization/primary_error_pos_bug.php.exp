@@ -1,100 +1,279 @@
-WARN: File "primary_error_pos_bug.php", line 33, characters 3-6:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "primary_error_pos_bug.php", line 34, characters 3-10:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "primary_error_pos_bug.php", line 9, characters 16-19:
-Invalid type hint (Typing[4090])
-  File "primary_error_pos_bug.php", line 9, characters 19-19:
-  No type constant `T` in `A`
-  File "primary_error_pos_bug.php", line 3, characters 7-7:
-  Declaration of `A` is here
-ERROR: File "primary_error_pos_bug.php", line 11, characters 16-21:
-Wrong number of type arguments (expected 0, got 1) (Typing[4101])
-  File "primary_error_pos_bug.php", line 3, characters 7-7:
-  Definition is here
-ERROR: File "primary_error_pos_bug.php", line 16, characters 28-28:
-No type constant `T` in `A` (Typing[4090])
-  File "primary_error_pos_bug.php", line 3, characters 7-7:
-  Declaration of `A` is here
-ERROR: File "primary_error_pos_bug.php", line 18, characters 25-30:
-Wrong number of type arguments (expected 0, got 1) (Typing[4101])
-  File "primary_error_pos_bug.php", line 3, characters 7-7:
-  Definition is here
-ERROR: File "primary_error_pos_bug.php", line 22, characters 22-22:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "primary_error_pos_bug.php", line 24, characters 28-31:
-Some type arguments violate their constraints (Typing[4323])
-  File "primary_error_pos_bug.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  This type constraint is violated
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 24, characters 30-30:
-  But got `T`
-ERROR: File "primary_error_pos_bug.php", line 24, characters 28-31:
-Some type arguments violate their constraints (Typing[4323])
-  File "primary_error_pos_bug.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  This type constraint is violated
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 24, characters 30-30:
-  But got `mixed`
-  File "primary_error_pos_bug.php", line 24, characters 30-30:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
-ERROR: File "primary_error_pos_bug.php", line 32, characters 18-31:
-Some type arguments violate their constraints (Typing[4323])
-  File "primary_error_pos_bug.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  This type constraint is violated
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 32, characters 25-30:
-  But got `string`
-  File "primary_error_pos_bug.php", line 27, characters 20-20:
-    via this generic `T`
-ERROR: File "primary_error_pos_bug.php", line 32, characters 37-50:
-Some type arguments violate their constraints (Typing[4323])
-  File "primary_error_pos_bug.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  This type constraint is violated
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 32, characters 44-49:
-  But got `string`
-  File "primary_error_pos_bug.php", line 29, characters 20-20:
-    via this generic `T`
-ERROR: File "primary_error_pos_bug.php", line 38, characters 7-8:
-Some type arguments violate their constraints (Typing[4323])
-  File "primary_error_pos_bug.php", line 20, characters 22-22:
-  `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 20, characters 27-29:
-  This type constraint is violated
-  File "primary_error_pos_bug.php", line 20, characters 27-29:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 38, characters 10-15:
-  But got `string`
-ERROR: File "primary_error_pos_bug.php", line 39, characters 7-8:
-A `where` type constraint is violated here (Typing[4323])
-  File "primary_error_pos_bug.php", line 22, characters 19-20:
-  This is the method with `where` type constraints
-  File "primary_error_pos_bug.php", line 22, characters 44-46:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 39, characters 10-15:
-  But got `string`
-  File "primary_error_pos_bug.php", line 22, characters 39-39:
-    via this generic `T`
-ERROR: File "primary_error_pos_bug.php", line 40, characters 7-7:
-Some type arguments violate their constraints (Typing[4323])
-  File "primary_error_pos_bug.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  This type constraint is violated
-  File "primary_error_pos_bug.php", line 5, characters 14-16:
-  Expected `num`
-  File "primary_error_pos_bug.php", line 40, characters 9-14:
-  But got `string`
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+primary_error_pos_bug.php:33:3
+31 | // no errors in uses
+32 | function g(I $x, Alias1<string> $_, Alias2<string> $_): void {
+33 |   f1();
+   |   ^^^^ [1]
+34 |   $x->f1();
+35 |   $x->f2();
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+primary_error_pos_bug.php:34:3
+32 | function g(I $x, Alias1<string> $_, Alias2<string> $_): void {
+33 |   f1();
+34 |   $x->f1();
+   |   ^^^^^^^^ [1]
+35 |   $x->f2();
+36 |   $x->f5<string>();
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T` in `A` [2]
+-> Declaration of `A` is here [3]
+
+primary_error_pos_bug.php:9:16
+ 1 | <?hh
+ 2 | 
+ 3 | class A {}
+   |       ^ [3]
+ 4 | 
+ 5 | class B<T as num> {}
+ 6 | 
+ 7 | // errors in declarations
+ 8 | 
+ 9 | function f1(): A::T {}
+   |                ^^^^ [1]
+   |                   ^ [2]
+10 | 
+11 | function f2(): A<int> {
+
+error: Typing[4101] Wrong number of type arguments (expected 0, got 1) [1]
+-> Definition is here [2]
+
+primary_error_pos_bug.php:11:16
+ 1 | <?hh
+ 2 | 
+ 3 | class A {}
+   |       ^ [2]
+ 4 | 
+ 5 | class B<T as num> {}
+   :
+ 9 | function f1(): A::T {}
+10 | 
+11 | function f2(): A<int> {
+   |                ^^^^^^ [1]
+12 |   return new A();
+13 | }
+
+error: Typing[4090] No type constant `T` in `A` [1]
+-> Declaration of `A` is here [2]
+
+primary_error_pos_bug.php:16:28
+ 1 | <?hh
+ 2 | 
+ 3 | class A {}
+   |       ^ [2]
+ 4 | 
+ 5 | class B<T as num> {}
+   :
+14 | 
+15 | interface I {
+16 |   public function f1(): A::T;
+   |                            ^ [1]
+17 | 
+18 |   public function f2(): A<int>;
+
+error: Typing[4101] Wrong number of type arguments (expected 0, got 1) [1]
+-> Definition is here [2]
+
+primary_error_pos_bug.php:18:25
+ 1 | <?hh
+ 2 | 
+ 3 | class A {}
+   |       ^ [2]
+ 4 | 
+ 5 | class B<T as num> {}
+   :
+16 |   public function f1(): A::T;
+17 | 
+18 |   public function f2(): A<int>;
+   |                         ^^^^^^ [1]
+19 | 
+20 |   public function f3<T as num>(): void;
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+primary_error_pos_bug.php:22:22
+20 |   public function f3<T as num>(): void;
+21 | 
+22 |   public function f4<T>(): void where T as num;
+   |                      ^ [1]
+23 | 
+24 |   public function f5<T>(): B<T>;
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `T` [4]
+
+primary_error_pos_bug.php:24:28
+ 3 | class A {}
+ 4 | 
+ 5 | class B<T as num> {}
+   |         ^ [2]
+   |              ^^^ [3]
+ 6 | 
+ 7 | // errors in declarations
+   :
+22 |   public function f4<T>(): void where T as num;
+23 | 
+24 |   public function f5<T>(): B<T>;
+   |                            ^^^^ [1]
+   |                              ^ [4]
+25 | }
+26 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [4]
+
+primary_error_pos_bug.php:24:28
+ 3 | class A {}
+ 4 | 
+ 5 | class B<T as num> {}
+   |         ^ [2]
+   |              ^^^ [3]
+ 6 | 
+ 7 | // errors in declarations
+   :
+22 |   public function f4<T>(): void where T as num;
+23 | 
+24 |   public function f5<T>(): B<T>;
+   |                            ^^^^ [1]
+   |                              ^ [4]
+25 | }
+26 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+->   via this generic `T` [5]
+
+primary_error_pos_bug.php:32:18
+ 3 | class A {}
+ 4 | 
+ 5 | class B<T as num> {}
+   |         ^ [2]
+   |              ^^^ [3]
+ 6 | 
+ 7 | // errors in declarations
+   :
+25 | }
+26 | 
+27 | type Alias1<T> = B<T>;
+   |                    ^ [5]
+28 | 
+29 | type Alias2<T> = B<T>;
+30 | 
+31 | // no errors in uses
+32 | function g(I $x, Alias1<string> $_, Alias2<string> $_): void {
+   |                  ^^^^^^^^^^^^^^ [1]
+   |                         ^^^^^^ [4]
+33 |   f1();
+34 |   $x->f1();
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+->   via this generic `T` [5]
+
+primary_error_pos_bug.php:32:37
+ 3 | class A {}
+ 4 | 
+ 5 | class B<T as num> {}
+   |         ^ [2]
+   |              ^^^ [3]
+ 6 | 
+ 7 | // errors in declarations
+   :
+27 | type Alias1<T> = B<T>;
+28 | 
+29 | type Alias2<T> = B<T>;
+   |                    ^ [5]
+30 | 
+31 | // no errors in uses
+32 | function g(I $x, Alias1<string> $_, Alias2<string> $_): void {
+   |                                     ^^^^^^^^^^^^^^ [1]
+   |                                            ^^^^^^ [4]
+33 |   f1();
+34 |   $x->f1();
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+
+primary_error_pos_bug.php:38:7
+18 |   public function f2(): A<int>;
+19 | 
+20 |   public function f3<T as num>(): void;
+   |                      ^ [2]
+   |                           ^^^ [3]
+21 | 
+22 |   public function f4<T>(): void where T as num;
+   :
+36 |   $x->f5<string>();
+37 |   // except when error is needed
+38 |   $x->f3<string>();
+   |       ^^ [1]
+   |          ^^^^^^ [4]
+39 |   $x->f4<string>();
+40 |   new B<string>();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected `num` [3]
+-> But got `string` [4]
+->   via this generic `T` [5]
+
+primary_error_pos_bug.php:39:7
+20 |   public function f3<T as num>(): void;
+21 | 
+22 |   public function f4<T>(): void where T as num;
+   |                   ^^ [2]
+   |                                       ^ [5]
+   |                                            ^^^ [3]
+23 | 
+24 |   public function f5<T>(): B<T>;
+   :
+37 |   // except when error is needed
+38 |   $x->f3<string>();
+39 |   $x->f4<string>();
+   |       ^^ [1]
+   |          ^^^^^^ [4]
+40 |   new B<string>();
+41 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+
+primary_error_pos_bug.php:40:7
+ 3 | class A {}
+ 4 | 
+ 5 | class B<T as num> {}
+   |         ^ [2]
+   |              ^^^ [3]
+ 6 | 
+ 7 | // errors in declarations
+   :
+38 |   $x->f3<string>();
+39 |   $x->f4<string>();
+40 |   new B<string>();
+   |       ^ [1]
+   |         ^^^^^^ [4]
+41 | }
+
+14 errors found

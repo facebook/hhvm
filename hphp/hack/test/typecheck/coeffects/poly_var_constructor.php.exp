@@ -1,12 +1,30 @@
-ERROR: File "poly_var_constructor.php", line 14, characters 7-7:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "poly_var_constructor.php", line 12, characters 24-26:
-  From this declaration, the context of this function body provides the capability int
-  File "poly_var_constructor.php", line 14, characters 7-7:
-  But the function being called requires the capability string
-ERROR: File "poly_var_constructor.php", line 18, characters 7-7:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "poly_var_constructor.php", line 17, characters 24-29:
-  From this declaration, the context of this function body provides the capability string
-  File "poly_var_constructor.php", line 18, characters 7-7:
-  But the function being called requires the capability int
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability int [2]
+-> But the function being called requires the capability string [1]
+
+poly_var_constructor.php:14:7
+10 | }
+11 | 
+12 | function x(X $x, Y $y)[int]: void {
+   |                        ^^^ [2]
+13 |   new C($x);
+14 |   new C($y);
+   |       ^ [1]
+15 | }
+16 | 
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability string [2]
+-> But the function being called requires the capability int [1]
+
+poly_var_constructor.php:18:7
+15 | }
+16 | 
+17 | function y(X $x, Y $y)[string]: void {
+   |                        ^^^^^^ [2]
+18 |   new C($x);
+   |       ^ [1]
+19 |   new C($y);
+20 | }
+
+2 errors found

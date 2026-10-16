@@ -1,108 +1,312 @@
-ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
-  This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
-    via the constraint on the enum `StrOpaque`
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
-  It overlaps with `IntOpaque`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
-    via the constraint on the enum `IntOpaque`
-ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
-  This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
-    via the constraint on the enum `StrOpaque`
-  File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
-  It overlaps with `StrEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 7, characters 6-12:
-    via the constraint on the enum `StrEnum`
-ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
-  This is the type `StrOpaque`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
-    via the constraint on the enum `StrOpaque`
-  File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
-  It overlaps with `string`, which also includes **strings**
-ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
-  This is the type `IntOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
-    via the constraint on the enum `IntOpaque`
-  File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
-  It overlaps with `StrEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 7, characters 6-12:
-    via the constraint on the enum `StrEnum`
-ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
-  This is the type `IntOpaque`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
-    via the constraint on the enum `IntOpaque`
-  File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
-  It overlaps with `string`, which also includes **strings**
-ERROR: File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
-Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
-  This is the type `StrEnum`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 7, characters 6-12:
-    via the constraint on the enum `StrEnum`
-  File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
-  It overlaps with `string`, which also includes **strings**
-ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
-  This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
-    via the constraint on the enum `StrOpaque`
-  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
-  It overlaps with `IntOpaque`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
-    via the constraint on the enum `IntOpaque`
-ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
-  This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
-    via the constraint on the enum `StrOpaque`
-  File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
-  It overlaps with `IntEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 8, characters 6-12:
-    via the constraint on the enum `IntEnum`
-ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
-  This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 4, characters 6-14:
-    via the constraint on the enum `StrOpaque`
-  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
-  It overlaps with `int`, which also includes **ints**
-ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
-  This is the type `IntOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
-    via the constraint on the enum `IntOpaque`
-  File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
-  It overlaps with `IntEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 8, characters 6-12:
-    via the constraint on the enum `IntEnum`
-ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
-  This is the type `IntOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 5, characters 6-14:
-    via the constraint on the enum `IntOpaque`
-  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
-  It overlaps with `int`, which also includes **ints**
-ERROR: File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
-Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
-  This is the type `IntEnum`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "case_type_overlapping_variants_enums.php", line 8, characters 6-12:
-    via the constraint on the enum `IntEnum`
-  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
-  It overlaps with `int`, which also includes **ints**
+error: Typing[4475] Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag [1]
+-> This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrOpaque` [3]
+-> It overlaps with `IntOpaque`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [4]
+->   via the constraint on the enum `IntOpaque` [5]
+
+case_type_overlapping_variants_enums.php:10:11
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | enum StrOpaque : string {}
+   |      ^^^^^^^^^ [3]
+ 5 | enum IntOpaque : int {}
+   |      ^^^^^^^^^ [5]
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+ 8 | enum IntEnum : int as int {}
+ 9 | 
+10 | case type StrData =
+   |           ^^^^^^^ [1]
+11 |   | StrOpaque
+   |     ^^^^^^^^^ [2]
+12 |   | IntOpaque
+   |     ^^^^^^^^^ [4]
+13 |   | StrEnum
+14 |   | string;
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag [1]
+-> This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrOpaque` [3]
+-> It overlaps with `StrEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [4]
+->   via the constraint on the enum `StrEnum` [5]
+
+case_type_overlapping_variants_enums.php:10:11
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | enum StrOpaque : string {}
+   |      ^^^^^^^^^ [3]
+ 5 | enum IntOpaque : int {}
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+   |      ^^^^^^^ [5]
+ 8 | enum IntEnum : int as int {}
+ 9 | 
+10 | case type StrData =
+   |           ^^^^^^^ [1]
+11 |   | StrOpaque
+   |     ^^^^^^^^^ [2]
+12 |   | IntOpaque
+13 |   | StrEnum
+   |     ^^^^^^^ [4]
+14 |   | string;
+15 | 
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag [1]
+-> This is the type `StrOpaque`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrOpaque` [3]
+-> It overlaps with `string`, which also includes **strings** [4]
+
+case_type_overlapping_variants_enums.php:10:11
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | enum StrOpaque : string {}
+   |      ^^^^^^^^^ [3]
+ 5 | enum IntOpaque : int {}
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+ 8 | enum IntEnum : int as int {}
+ 9 | 
+10 | case type StrData =
+   |           ^^^^^^^ [1]
+11 |   | StrOpaque
+   |     ^^^^^^^^^ [2]
+12 |   | IntOpaque
+13 |   | StrEnum
+14 |   | string;
+   |     ^^^^^^ [4]
+15 | 
+16 | case type IntData =
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag [1]
+-> This is the type `IntOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `IntOpaque` [3]
+-> It overlaps with `StrEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [4]
+->   via the constraint on the enum `StrEnum` [5]
+
+case_type_overlapping_variants_enums.php:10:11
+ 3 | 
+ 4 | enum StrOpaque : string {}
+ 5 | enum IntOpaque : int {}
+   |      ^^^^^^^^^ [3]
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+   |      ^^^^^^^ [5]
+ 8 | enum IntEnum : int as int {}
+ 9 | 
+10 | case type StrData =
+   |           ^^^^^^^ [1]
+11 |   | StrOpaque
+12 |   | IntOpaque
+   |     ^^^^^^^^^ [2]
+13 |   | StrEnum
+   |     ^^^^^^^ [4]
+14 |   | string;
+15 | 
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag [1]
+-> This is the type `IntOpaque`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `IntOpaque` [3]
+-> It overlaps with `string`, which also includes **strings** [4]
+
+case_type_overlapping_variants_enums.php:10:11
+ 3 | 
+ 4 | enum StrOpaque : string {}
+ 5 | enum IntOpaque : int {}
+   |      ^^^^^^^^^ [3]
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+ 8 | enum IntEnum : int as int {}
+ 9 | 
+10 | case type StrData =
+   |           ^^^^^^^ [1]
+11 |   | StrOpaque
+12 |   | IntOpaque
+   |     ^^^^^^^^^ [2]
+13 |   | StrEnum
+14 |   | string;
+   |     ^^^^^^ [4]
+15 | 
+16 | case type IntData =
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `StrData` could contain values with the same runtime tag [1]
+-> This is the type `StrEnum`, which includes **strings** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrEnum` [3]
+-> It overlaps with `string`, which also includes **strings** [4]
+
+case_type_overlapping_variants_enums.php:10:11
+ 5 | enum IntOpaque : int {}
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+   |      ^^^^^^^ [3]
+ 8 | enum IntEnum : int as int {}
+ 9 | 
+10 | case type StrData =
+   |           ^^^^^^^ [1]
+11 |   | StrOpaque
+12 |   | IntOpaque
+13 |   | StrEnum
+   |     ^^^^^^^ [2]
+14 |   | string;
+   |     ^^^^^^ [4]
+15 | 
+16 | case type IntData =
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag [1]
+-> This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrOpaque` [3]
+-> It overlaps with `IntOpaque`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [4]
+->   via the constraint on the enum `IntOpaque` [5]
+
+case_type_overlapping_variants_enums.php:16:11
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | enum StrOpaque : string {}
+   |      ^^^^^^^^^ [3]
+ 5 | enum IntOpaque : int {}
+   |      ^^^^^^^^^ [5]
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+   :
+14 |   | string;
+15 | 
+16 | case type IntData =
+   |           ^^^^^^^ [1]
+17 |   | StrOpaque
+   |     ^^^^^^^^^ [2]
+18 |   | IntOpaque
+   |     ^^^^^^^^^ [4]
+19 |   | IntEnum
+20 |   | int;
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag [1]
+-> This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrOpaque` [3]
+-> It overlaps with `IntEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [4]
+->   via the constraint on the enum `IntEnum` [5]
+
+case_type_overlapping_variants_enums.php:16:11
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | enum StrOpaque : string {}
+   |      ^^^^^^^^^ [3]
+ 5 | enum IntOpaque : int {}
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+ 8 | enum IntEnum : int as int {}
+   |      ^^^^^^^ [5]
+ 9 | 
+10 | case type StrData =
+   :
+14 |   | string;
+15 | 
+16 | case type IntData =
+   |           ^^^^^^^ [1]
+17 |   | StrOpaque
+   |     ^^^^^^^^^ [2]
+18 |   | IntOpaque
+19 |   | IntEnum
+   |     ^^^^^^^ [4]
+20 |   | int;
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag [1]
+-> This is the type `StrOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `StrOpaque` [3]
+-> It overlaps with `int`, which also includes **ints** [4]
+
+case_type_overlapping_variants_enums.php:16:11
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | enum StrOpaque : string {}
+   |      ^^^^^^^^^ [3]
+ 5 | enum IntOpaque : int {}
+ 6 | 
+   :
+14 |   | string;
+15 | 
+16 | case type IntData =
+   |           ^^^^^^^ [1]
+17 |   | StrOpaque
+   |     ^^^^^^^^^ [2]
+18 |   | IntOpaque
+19 |   | IntEnum
+20 |   | int;
+   |     ^^^ [4]
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag [1]
+-> This is the type `IntOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `IntOpaque` [3]
+-> It overlaps with `IntEnum`, which also includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [4]
+->   via the constraint on the enum `IntEnum` [5]
+
+case_type_overlapping_variants_enums.php:16:11
+ 3 | 
+ 4 | enum StrOpaque : string {}
+ 5 | enum IntOpaque : int {}
+   |      ^^^^^^^^^ [3]
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+ 8 | enum IntEnum : int as int {}
+   |      ^^^^^^^ [5]
+ 9 | 
+10 | case type StrData =
+   :
+14 |   | string;
+15 | 
+16 | case type IntData =
+   |           ^^^^^^^ [1]
+17 |   | StrOpaque
+18 |   | IntOpaque
+   |     ^^^^^^^^^ [2]
+19 |   | IntEnum
+   |     ^^^^^^^ [4]
+20 |   | int;
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag [1]
+-> This is the type `IntOpaque`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `IntOpaque` [3]
+-> It overlaps with `int`, which also includes **ints** [4]
+
+case_type_overlapping_variants_enums.php:16:11
+ 3 | 
+ 4 | enum StrOpaque : string {}
+ 5 | enum IntOpaque : int {}
+   |      ^^^^^^^^^ [3]
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+   :
+14 |   | string;
+15 | 
+16 | case type IntData =
+   |           ^^^^^^^ [1]
+17 |   | StrOpaque
+18 |   | IntOpaque
+   |     ^^^^^^^^^ [2]
+19 |   | IntEnum
+20 |   | int;
+   |     ^^^ [4]
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `IntData` could contain values with the same runtime tag [1]
+-> This is the type `IntEnum`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `IntEnum` [3]
+-> It overlaps with `int`, which also includes **ints** [4]
+
+case_type_overlapping_variants_enums.php:16:11
+ 6 | 
+ 7 | enum StrEnum : string as string {}
+ 8 | enum IntEnum : int as int {}
+   |      ^^^^^^^ [3]
+ 9 | 
+10 | case type StrData =
+   :
+14 |   | string;
+15 | 
+16 | case type IntData =
+   |           ^^^^^^^ [1]
+17 |   | StrOpaque
+18 |   | IntOpaque
+19 |   | IntEnum
+   |     ^^^^^^^ [2]
+20 |   | int;
+   |     ^^^ [4]
+
+12 errors found

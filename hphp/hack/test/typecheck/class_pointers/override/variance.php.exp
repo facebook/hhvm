@@ -1,24 +1,49 @@
-ERROR: File "variance.php", line 15, characters 19-30:
-The method `getClassname` is not compatible with the overridden method (Typing[4341])
-  File "variance.php", line 15, characters 19-30:
-  Method `getClassname` has type `(function(): ~class<mixed>)` in `Child`
-  File "variance.php", line 7, characters 28-39:
-  But it has type `(function(): ~classname<mixed>)` in parent `Base`
-  File "variance.php", line 15, characters 19-30:
-  Type `(function(): ~class<mixed>)` is not a subtype of `(function(): ~classname<mixed>)`
-  File "variance.php", line 7, characters 44-59:
-  Expected `classname<mixed>`
-  File "variance.php", line 15, characters 35-46:
-  But got `class<mixed>`
-ERROR: File "variance.php", line 20, characters 19-27:
-The method `takeClass` is not compatible with the overridden method (Typing[4341])
-  File "variance.php", line 20, characters 19-27:
-  Method `takeClass` has type `(function(classname<mixed> $value): void)` in `Child`
-  File "variance.php", line 8, characters 28-36:
-  But it has type `(function(class<mixed> $value): void)` in parent `Base`
-  File "variance.php", line 20, characters 19-27:
-  Type `(function(classname<mixed> $value): void)` is not a subtype of `(function(class<mixed> $value): void)`
-  File "variance.php", line 20, characters 29-44:
-  Expected `classname<mixed>`
-  File "variance.php", line 8, characters 38-49:
-  But got `class<mixed>`
+error: Typing[4341] The method `getClassname` is not compatible with the overridden method [1]
+-> Method `getClassname` has type `(function(): ~class<mixed>)` in `Child` [1]
+-> But it has type `(function(): ~classname<mixed>)` in parent `Base` [2]
+-> Type `(function(): ~class<mixed>)` is not a subtype of `(function(): ~classname<mixed>)` [1]
+-> Expected `classname<mixed>` [3]
+-> But got `class<mixed>` [4]
+
+variance.php:15:19
+ 5 | 
+ 6 | abstract class Base {
+ 7 |   abstract public function getClassname(): classname<mixed>;
+   |                            ^^^^^^^^^^^^ [2]
+   |                                            ^^^^^^^^^^^^^^^^ [3]
+ 8 |   abstract public function takeClass(class<mixed> $value): void;
+ 9 |   abstract public function getClass(): class<ParentClass>;
+   :
+13 | final class Child extends Base {
+14 |   <<__Override>>
+15 |   public function getClassname(): class<mixed> {
+   |                   ^^^^^^^^^^^^ [1]
+   |                                   ^^^^^^^^^^^^ [4]
+16 |     throw new Exception();
+17 |   }
+
+error: Typing[4341] The method `takeClass` is not compatible with the overridden method [1]
+-> Method `takeClass` has type `(function(classname<mixed> $value): void)` in `Child` [1]
+-> But it has type `(function(class<mixed> $value): void)` in parent `Base` [2]
+-> Type `(function(classname<mixed> $value): void)` is not a subtype of `(function(class<mixed> $value): void)` [1]
+-> Expected `classname<mixed>` [3]
+-> But got `class<mixed>` [4]
+
+variance.php:20:19
+ 6 | abstract class Base {
+ 7 |   abstract public function getClassname(): classname<mixed>;
+ 8 |   abstract public function takeClass(class<mixed> $value): void;
+   |                            ^^^^^^^^^ [2]
+   |                                      ^^^^^^^^^^^^ [4]
+ 9 |   abstract public function getClass(): class<ParentClass>;
+10 |   abstract public function takeChildClass(class<ChildClass> $value): void;
+   :
+18 | 
+19 |   <<__Override>>
+20 |   public function takeClass(classname<mixed> $value): void {}
+   |                   ^^^^^^^^^ [1]
+   |                             ^^^^^^^^^^^^^^^^ [3]
+21 | 
+22 |   <<__Override>>
+
+2 errors found

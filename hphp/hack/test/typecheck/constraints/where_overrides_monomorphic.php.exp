@@ -1,2 +1,10 @@
-ERROR: File "where_overrides_monomorphic.php", line 15, characters 54-55:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+where_overrides_monomorphic.php:15:54
+13 | class B<Tb as I> extends A {
+14 |   // TODO: upddate this example to remove Contra when super syntax is available
+15 |   public function f<T>(Contra<T> $c): void where T = Tb::Ti {}
+   |                                                      ^^ [1]
+16 | }
+
+1 error found

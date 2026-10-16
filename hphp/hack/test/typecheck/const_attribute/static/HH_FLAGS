@@ -1,2 +1,3 @@
 --config const_static_props=true
 --config const_attribute=true
+--error-format plain_highlighted

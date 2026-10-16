@@ -1,2 +1,10 @@
-ERROR: File "list_destructure.php", line 6, characters 3-25:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+list_destructure.php:6:3
+4 | 
+5 | function destruct(V $v)[$v::C]: void {
+6 |   list($v, $_) = vec[1,2];
+  |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

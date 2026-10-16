@@ -1,2 +1,11 @@
-WARN: File "concrete_override_trait.php", line 8, characters 7-7:
-Duplicated property `p` in `B` (defined in `A` and `B`): all instances will be aliased at runtime (Warn[12008])
+warning: Warn[12008] Duplicated property `p` in `B` (defined in `A` and `B`): all instances will be aliased at runtime [1]
+
+concrete_override_trait.php:8:7
+ 6 | }
+ 7 | 
+ 8 | class B {
+   |       ^ [1]
+ 9 |   use A;
+10 |   <<__Const>> public static int $p = 1;
+
+1 error found

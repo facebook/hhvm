@@ -1,28 +1,45 @@
-ERROR: File "multi_inherit.php", line 6, characters 20-28:
-Interface `I` is used more than once in this declaration. (Typing[4377])
-  File "multi_inherit.php", line 6, characters 31-31:
-  Here is another occurrence
-ERROR: File "multi_inherit.php", line 6, characters 31-36:
-C implements I<int> but it already implements I at another instantiation (Typing[4480])
-  File "multi_inherit.php", line 6, characters 20-28:
-  It already implements I<string>
-  File "multi_inherit.php", line 6, characters 20-20:
-  I<string> should be a subtype of I<int>, but it's not because
-  File "multi_inherit.php", line 6, characters 22-27:
-  Expected `string`
-  File "multi_inherit.php", line 6, characters 33-35:
-  But got `int`
-  File "multi_inherit.php", line 6, characters 33-35:
-  This type argument to `I` must match exactly (it is invariant)
-ERROR: File "multi_inherit.php", line 6, characters 31-36:
-C implements I<int> but it already implements I at another instantiation (Typing[4480])
-  File "multi_inherit.php", line 6, characters 20-28:
-  It already implements I<string>
-  File "multi_inherit.php", line 6, characters 20-20:
-  I<string> should be a subtype of I<int>, but it's not because
-  File "multi_inherit.php", line 6, characters 33-35:
-  Expected `int`
-  File "multi_inherit.php", line 6, characters 22-27:
-  But got `string`
-  File "multi_inherit.php", line 6, characters 22-27:
-  This type argument to `I` must match exactly (it is invariant)
+error: Typing[4377] Interface `I` is used more than once in this declaration. [1]
+-> Here is another occurrence [2]
+
+multi_inherit.php:6:20
+4 | interface I<T> { }
+5 | 
+6 | class C implements I<string>, I<int> { }
+  |                    ^^^^^^^^^ [1]
+  |                               ^ [2]
+
+error: Typing[4480] C implements I<int> but it already implements I at another instantiation [1]
+-> It already implements I<string> [2]
+-> I<string> should be a subtype of I<int>, but it's not because [3]
+-> Expected `string` [4]
+-> But got `int` [5]
+-> This type argument to `I` must match exactly (it is invariant) [5]
+
+multi_inherit.php:6:31
+4 | interface I<T> { }
+5 | 
+6 | class C implements I<string>, I<int> { }
+  |                    ^^^^^^^^^ [2]
+  |                    ^ [3]
+  |                      ^^^^^^ [4]
+  |                               ^^^^^^ [1]
+  |                                 ^^^ [5]
+
+error: Typing[4480] C implements I<int> but it already implements I at another instantiation [1]
+-> It already implements I<string> [2]
+-> I<string> should be a subtype of I<int>, but it's not because [3]
+-> Expected `int` [4]
+-> But got `string` [5]
+-> This type argument to `I` must match exactly (it is invariant) [5]
+
+multi_inherit.php:6:31
+4 | interface I<T> { }
+5 | 
+6 | class C implements I<string>, I<int> { }
+  |                    ^^^^^^^^^ [2]
+  |                    ^ [3]
+  |                      ^^^^^^ [5]
+  |                               ^^^^^^ [1]
+  |                                 ^^^ [4]
+
+3 errors found

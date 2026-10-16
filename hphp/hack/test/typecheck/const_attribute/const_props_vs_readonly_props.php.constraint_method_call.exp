@@ -1,16 +1,59 @@
-ERROR: File "const_props_vs_readonly_props.php", line 28, characters 3-16:
-This value is readonly, its properties cannot be modified (Typing[4409])
-ERROR: File "const_props_vs_readonly_props.php", line 29, characters 7-7:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "const_props_vs_readonly_props.php", line 16, characters 47-47:
-  The property is defined here.
-ERROR: File "const_props_vs_readonly_props.php", line 31, characters 3-12:
-Typing error (Typing[4411])
-  File "const_props_vs_readonly_props.php", line 5, characters 19-22:
-  Function readonly mismatch
-  File "const_props_vs_readonly_props.php", line 5, characters 19-22:
-  This function is not marked readonly
-  File "const_props_vs_readonly_props.php", line 31, characters 3-12:
-  This function is marked readonly
-ERROR: File "const_props_vs_readonly_props.php", line 43, characters 7-7:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+const_props_vs_readonly_props.php:28:3
+26 |   $r = new R($a, 2);
+27 |   R::$static_foo = new Foo("hello");
+28 |   R::$static_foo->s = "goodbye"; // fails: cannot modify props on readonly value
+   |   ^^^^^^^^^^^^^^ [1]
+29 |   $r->a->incr(); // fails: property returns readonly value, need to wrap in a readonly expression
+30 |   $a = readonly $r->a;
+
+error: Typing[4412] This property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The property is defined here. [2]
+
+const_props_vs_readonly_props.php:29:7
+14 | class R {
+15 |   public static readonly ?Foo $static_foo = null;
+16 |   public function __construct(public readonly A $a, public readonly int $i) {}
+   |                                               ^ [2]
+17 | }
+18 | 
+   :
+27 |   R::$static_foo = new Foo("hello");
+28 |   R::$static_foo->s = "goodbye"; // fails: cannot modify props on readonly value
+29 |   $r->a->incr(); // fails: property returns readonly value, need to wrap in a readonly expression
+   |       ^ [1]
+30 |   $a = readonly $r->a;
+31 |   $a->incr(); // readonly expression can only call readonly methods
+
+error: Typing[4411] Typing error [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [1]
+
+const_props_vs_readonly_props.php:31:3
+ 3 | class A {
+ 4 |   public function __construct(public int $a) {}
+ 5 |   public function incr(): void {
+   |                   ^^^^ [2]
+ 6 |     $this->a++;
+ 7 |   }
+   :
+29 |   $r->a->incr(); // fails: property returns readonly value, need to wrap in a readonly expression
+30 |   $a = readonly $r->a;
+31 |   $a->incr(); // readonly expression can only call readonly methods
+   |   ^^^^^^^^^^ [1]
+32 |   $r->i = 5;
+33 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_props_vs_readonly_props.php:43:7
+41 |   $a = $c->a;
+42 |   $a->incr(); //valid
+43 |   $c->i = 5;  // invalid, const property cannot be mutated
+   |       ^ [1]
+44 | }
+45 | 
+
+4 errors found

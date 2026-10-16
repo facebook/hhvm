@@ -1,4 +1,19 @@
-ERROR: File "single_const_late_init.php", line 4, characters 3-51:
-`__Const` properties may not also be `__LateInit` (Parsing[1002])
-ERROR: File "single_const_late_init.php", line 4, characters 45-46:
-A late-initialized property cannot have a default value (Typing[4277])
+error: Parsing[1002] `__Const` properties may not also be `__LateInit` [1]
+
+single_const_late_init.php:4:3
+2 | 
+3 | class A {
+4 |   <<__Const, __LateInit>> public static int $a = 5;
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4277] A late-initialized property cannot have a default value [1]
+
+single_const_late_init.php:4:45
+2 | 
+3 | class A {
+4 |   <<__Const, __LateInit>> public static int $a = 5;
+  |                                             ^^ [1]
+5 | }
+
+2 errors found

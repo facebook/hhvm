@@ -1,12 +1,40 @@
-ERROR: File "disallow_unset_on_varray.php", line 4, characters 3-15:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-  File "disallow_unset_on_varray.php", line 3, characters 22-32:
-  This is an object of type vec<int>
-ERROR: File "disallow_unset_on_varray.php", line 8, characters 3-15:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-  File "disallow_unset_on_varray.php", line 7, characters 32-52:
-  This is a vec_or_dict
-ERROR: File "disallow_unset_on_varray.php", line 12, characters 3-15:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-  File "disallow_unset_on_varray.php", line 11, characters 25-35:
-  This is an object of type vec<int>
+error: Typing[4135] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing [1]
+-> This is an object of type vec<int> [2]
+
+disallow_unset_on_varray.php:4:3
+1 | <?hh
+2 | 
+3 | function test_varray(varray<int> $x): void {
+  |                      ^^^^^^^^^^^ [2]
+4 |   unset($x[0]);
+  |   ^^^^^^^^^^^^^ [1]
+5 | }
+6 | 
+
+error: Typing[4135] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing [1]
+-> This is a vec_or_dict [2]
+
+disallow_unset_on_varray.php:8:3
+ 5 | }
+ 6 | 
+ 7 | function test_varray_or_darray(varray_or_darray<int> $x): void {
+   |                                ^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 |   unset($x[0]);
+   |   ^^^^^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+error: Typing[4135] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing [1]
+-> This is an object of type vec<int> [2]
+
+disallow_unset_on_varray.php:12:3
+ 9 | }
+10 | 
+11 | function test_vec_array(varray<int> $x): void {
+   |                         ^^^^^^^^^^^ [2]
+12 |   unset($x[0]);
+   |   ^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+3 errors found

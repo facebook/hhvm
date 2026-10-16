@@ -1,16 +1,44 @@
-ERROR: File "type_const_label.php", line 10, characters 7-8:
-Invalid argument (Typing[4110])
-  File "type_const_label.php", line 10, characters 7-8:
-  Expected a class with a constant `T`
-  File "type_const_label.php", line 7, characters 33-33:
-  But got `E`
-  File "type_const_label.php", line 3, characters 12-12:
-  `E` is defined here
-ERROR: File "type_const_label.php", line 11, characters 3-5:
-This label is not a valid reference to a member of the given enum class (Typing[4110])
-  File "type_const_label.php", line 11, characters 4-5:
-  Expected a class with a constant `T`
-  File "type_const_label.php", line 11, characters 3-3:
-  But got `E`
-  File "type_const_label.php", line 3, characters 12-12:
-  `E` is defined here
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `T` [1]
+-> But got `E` [2]
+-> `E` is defined here [3]
+
+type_const_label.php:10:7
+ 1 | <?hh
+ 2 | 
+ 3 | enum class E: mixed {
+   |            ^ [3]
+ 4 |   const type T = int;
+ 5 | }
+ 6 | 
+ 7 | function get(HH\EnumClass\Label<E, int> $label): void {}
+   |                                 ^ [2]
+ 8 | 
+ 9 | function test(): void {
+10 |   get(#T);
+   |       ^^ [1]
+11 |   E#T;
+12 | }
+
+error: Typing[4110] This label is not a valid reference to a member of the given enum class [1]
+-> Expected a class with a constant `T` [2]
+-> But got `E` [3]
+-> `E` is defined here [4]
+
+type_const_label.php:11:3
+ 1 | <?hh
+ 2 | 
+ 3 | enum class E: mixed {
+   |            ^ [4]
+ 4 |   const type T = int;
+ 5 | }
+   :
+ 9 | function test(): void {
+10 |   get(#T);
+11 |   E#T;
+   |   ^^^ [1]
+   |   ^ [3]
+   |    ^^ [2]
+12 | }
+
+2 errors found

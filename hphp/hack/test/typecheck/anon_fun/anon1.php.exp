@@ -1,4 +1,16 @@
-ERROR: File "anon1.php", line 9, characters 5-6:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "anon1.php", line 6, characters 27-28:
-  Did you mean `$y` instead?
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$y` instead? [2]
+
+anon1.php:9:5
+ 4 | function expect<T>(T $_): void {}
+ 5 | 
+ 6 | function test(int $x, int $y): void {
+   |                           ^^ [2]
+ 7 |   function () use ($y) {
+ 8 |     expect<int>($y);
+ 9 |     $x; // should be undefined
+   |     ^^ [1]
+10 |   };
+11 | }
+
+1 error found

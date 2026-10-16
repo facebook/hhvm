@@ -1,18 +1,64 @@
-ERROR: File "pipe3.php", line 16, characters 48-49:
-Invalid argument (Typing[4110])
-  File "pipe3.php", line 9, characters 32-41:
-  Expected `int`
-  File "pipe3.php", line 9, characters 67-79:
-  But got `string`
-ERROR: File "pipe3.php", line 18, characters 10-12:
-Invalid return type (Typing[4110])
-  File "pipe3.php", line 13, characters 36-47:
-  Expected `float`
-  File "pipe3.php", line 16, characters 22-50:
-  But got `string`
-  File "expr_tree.php", line 141, characters 24-29:
-    via this generic `TInfer`
-  File "expr_tree.php", line 666, characters 52-52:
-    via this generic `T`
-  File "expr_tree.php", line 109, characters 26-31:
-    via this generic `TInfer`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+pipe3.php:16:48
+ 7 | }
+ 8 | 
+ 9 | function bar(ExampleExpression<ExampleInt> $x): ExampleExpression<ExampleString> {
+   |                                ^^^^^^^^^^ [2]
+   |                                                                   ^^^^^^^^^^^^^ [3]
+10 |   throw new Exception();
+11 | }
+   :
+14 |   // Ensure that we still get some errors
+15 |   $et = 1
+16 |     |> ExampleDsl`${ foo($$) |> bar($$) |> bar($$) }`;
+   |                                                ^^ [1]
+17 | 
+18 |   return $et;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `float` [2]
+-> But got `string` [3]
+->   via this generic `TInfer` [4]
+->   via this generic `T` [5]
+->   via this generic `TInfer` [6]
+
+pipe3.php:18:10
+ 11 | }
+ 12 | 
+ 13 | function test(): ExampleExpression<ExampleFloat> {
+    |                                    ^^^^^^^^^^^^ [2]
+ 14 |   // Ensure that we still get some errors
+ 15 |   $et = 1
+ 16 |     |> ExampleDsl`${ foo($$) |> bar($$) |> bar($$) }`;
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+ 17 | 
+ 18 |   return $et;
+    |          ^^^ [1]
+ 19 | }
+
+expr_tree.php:141:24
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |                          ^^^^^^ [6]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+    :
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+140 |     ExampleUnion<THack, TInfer> $e,
+141 |   ): ExampleExpression<TInfer> {
+    |                        ^^^^^^ [4]
+142 |     if ($e is ExampleExpression<_>) {
+143 |       return $e;
+    :
+664 | 
+665 | interface ExampleExpression<+T>
+666 |   extends Spliceable<ExampleDsl, ExampleDsl::TAst, T> {}
+    |                                                    ^ [5]
+667 | 
+668 | function concat_arg_list(vec<string> $args)[]: string {
+
+2 errors found

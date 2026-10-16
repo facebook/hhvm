@@ -1,6 +1,14 @@
-ERROR: File "varray.php", line 24, characters 10-15:
-Invalid return type (Typing[4110])
-  File "varray.php", line 23, characters 38-41:
-  Expected `bool`
-  File "varray.php", line 24, characters 10-15:
-  But got `vec<int>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `vec<int>` [1]
+
+varray.php:24:10
+21 | }
+22 | 
+23 | function err_string(varray<int> $v): bool {
+   |                                      ^^^^ [2]
+24 |   return vec[0];
+   |          ^^^^^^ [1]
+25 | }
+
+1 error found

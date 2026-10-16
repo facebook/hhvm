@@ -1,6 +1,31 @@
-WARN: File "invalid_lsb_type_const.php", line 9, characters 9-21:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. (Warn[12009])
-WARN: File "invalid_lsb_type_const.php", line 10, characters 7-19:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-WARN: File "invalid_lsb_type_const.php", line 14, characters 9-35:
-This `is` check is always `true`. The expression on the left has type `shape('a' => int)` which is a subtype of `shape('a' => int)`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. [1]
+
+invalid_lsb_type_const.php:9:9
+ 7 |   public static function f(): void {
+ 8 |     $a = 4;
+ 9 |     if ($a is this::T) {
+   |         ^^^^^^^^^^^^^ [1]
+10 |       $a as this::T;
+11 |     }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+invalid_lsb_type_const.php:10:7
+ 8 |     $a = 4;
+ 9 |     if ($a is this::T) {
+10 |       $a as this::T;
+   |       ^^^^^^^^^^^^^ [1]
+11 |     }
+12 | 
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `shape('a' => int)` which is a subtype of `shape('a' => int)`. [1]
+
+invalid_lsb_type_const.php:14:9
+12 | 
+13 |     $b = shape('a' => 3);
+14 |     if ($b is shape('a' => this::T)) {}
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+3 errors found

@@ -1,2 +1,11 @@
-ERROR: File "private_props_abs_without_construct1.php", line 5, characters 16-16:
-Lacking `__construct`, class `A` does not initialize its private member(s): `c` (NastCheck[3030])
+error: NastCheck[3030] Lacking `__construct`, class `A` does not initialize its private member(s): `c` [1]
+
+private_props_abs_without_construct1.php:5:16
+3 | class C {}
+4 | 
+5 | abstract class A {
+  |                ^ [1]
+6 |   private C $c;
+7 | }
+
+1 error found

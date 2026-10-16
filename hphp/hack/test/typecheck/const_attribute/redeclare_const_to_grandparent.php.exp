@@ -1,4 +1,13 @@
-ERROR: File "redeclare_const_to_grandparent.php", line 5, characters 40-42:
-This property is `__Const` (Typing[4204])
-  File "redeclare_const_to_grandparent.php", line 3, characters 21-23:
-  This property is not `__Const`
+error: Typing[4204] This property is `__Const` [1]
+-> This property is not `__Const` [2]
+
+redeclare_const_to_grandparent.php:5:40
+1 | <?hh
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | class C { protected int $p = 1; }
+  |                     ^^^ [2]
+4 | class D extends C {}
+5 | class E extends D { <<__Const>> public int $p = 2; }
+  |                                        ^^^ [1]
+
+1 error found

@@ -1,12 +1,41 @@
-ERROR: File "bad_inout_hint_call5.php", line 7, characters 5-33:
-Invalid argument (Typing[4110])
-  File "bad_inout_hint_call5.php", line 3, characters 30-32:
-  Expected `int`
-  File "bad_inout_hint_call5.php", line 7, characters 12-17:
-  But got `string`
-ERROR: File "bad_inout_hint_call5.php", line 7, characters 5-33:
-Invalid argument (Typing[4110])
-  File "bad_inout_hint_call5.php", line 7, characters 12-17:
-  Expected `string`
-  File "bad_inout_hint_call5.php", line 3, characters 30-32:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+bad_inout_hint_call5.php:7:5
+ 1 | <?hh
+ 2 | 
+ 3 | function foo((function(inout int): void) $f): void {}
+   |                              ^^^ [2]
+ 4 | 
+ 5 | function test(): void {
+ 6 |   foo(
+ 7 |     (inout string $v) ==> {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^ [3]
+ 8 |     },
+   |     ^ [1]
+ 9 |   );
+10 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+bad_inout_hint_call5.php:7:5
+ 1 | <?hh
+ 2 | 
+ 3 | function foo((function(inout int): void) $f): void {}
+   |                              ^^^ [3]
+ 4 | 
+ 5 | function test(): void {
+ 6 |   foo(
+ 7 |     (inout string $v) ==> {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^ [2]
+ 8 |     },
+   |     ^ [1]
+ 9 |   );
+10 | }
+
+2 errors found

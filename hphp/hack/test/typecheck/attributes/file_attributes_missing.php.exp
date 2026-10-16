@@ -1,2 +1,11 @@
-ERROR: File "file_attributes_missing.php", line 3, characters 9-17:
-Unrecognized user attribute: `__Missing` starts with __ but is not a standard attribute (Naming[2049])
+error: Naming[2049] Unrecognized user attribute: `__Missing` starts with __ but is not a standard attribute [1]
+
+file_attributes_missing.php:3:9
+1 | <?hh
+2 | 
+3 | <<file: __Missing>>
+  |         ^^^^^^^^^ [1]
+4 | 
+5 | class ExampleClass { }
+
+1 error found

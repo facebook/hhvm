@@ -1,10 +1,36 @@
-ERROR: File "trivial.php", line 6, characters 3-8:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
-ERROR: File "trivial.php", line 12, characters 3-4:
-Typing error (Typing[4429])
-  File "trivial.php", line 12, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "trivial.php", line 9, characters 19-20:
-  But got `V`
-ERROR: File "trivial.php", line 12, characters 3-9:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+trivial.php:6:3
+4 | 
+5 | function trivial(V $v)[$v::C]: void {
+6 |   $v = 4;
+  |   ^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `V` [3]
+
+trivial.php:12:3
+ 7 | }
+ 8 | 
+ 9 | function pluseq(V $v)[$v::C]: void {
+   |                   ^^ [3]
+10 |   // kind of a non-sensical case, but demonstrates that += and friends
+11 |   // change expression ids
+12 |   $v += 3;
+   |   ^^ [1]
+   |   ^^^^^^^ [2]
+13 | }
+
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+trivial.php:12:3
+10 |   // kind of a non-sensical case, but demonstrates that += and friends
+11 |   // change expression ids
+12 |   $v += 3;
+   |   ^^^^^^^ [1]
+13 | }
+
+3 errors found

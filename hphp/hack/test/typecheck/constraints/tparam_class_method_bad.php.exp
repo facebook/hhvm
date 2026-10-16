@@ -1,8 +1,25 @@
-ERROR: File "tparam_class_method_bad.php", line 4, characters 3-4:
-It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. (Typing[4482])
-  File "tparam_class_method_bad.php", line 3, characters 18-29:
-  Definition is here
-ERROR: File "tparam_class_method_bad.php", line 4, characters 7-18:
-You are trying to access the static method `doesNotExist` but this is a value of generic type T (Typing[4252])
-  File "tparam_class_method_bad.php", line 3, characters 28-28:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. [1]
+-> Definition is here [2]
+
+tparam_class_method_bad.php:4:3
+1 | <?hh
+2 | 
+3 | function test<T>(classname<T> $c): void {
+  |                  ^^^^^^^^^^^^ [2]
+4 |   $c::doesNotExist();
+  |   ^^ [1]
+5 | }
+
+error: Typing[4252] You are trying to access the static method `doesNotExist` but this is a value of generic type T [1]
+-> Definition is here [2]
+
+tparam_class_method_bad.php:4:7
+1 | <?hh
+2 | 
+3 | function test<T>(classname<T> $c): void {
+  |                            ^ [2]
+4 |   $c::doesNotExist();
+  |       ^^^^^^^^^^^^ [1]
+5 | }
+
+2 errors found

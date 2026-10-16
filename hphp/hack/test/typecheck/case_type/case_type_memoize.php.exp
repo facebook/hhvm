@@ -1,4 +1,17 @@
-ERROR: File "case_type_memoize.php", line 14, characters 16-17:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "case_type_memoize.php", line 8, characters 30-30:
-  This is an object of type C
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type C [2]
+
+case_type_memoize.php:14:16
+ 6 | case type Good = int | bool | IMemoizeParam;
+ 7 | 
+ 8 | case type Bad = int | bool | C;
+   |                              ^ [2]
+ 9 | 
+10 | <<__Memoize>>
+11 | function f(Good $x): void {}
+12 | 
+13 | <<__Memoize>>
+14 | function g(Bad $x): void {}
+   |                ^^ [1]
+
+1 error found

@@ -1,20 +1,74 @@
-ERROR: File "enum_dup_downward_closure.php", line 18, characters 6-11:
-`DcUser` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_dup_downward_closure.php", line 11, characters 6-11:
-  it uses `DcBase`, which cannot be checked for duplicate values
-ERROR: File "enum_dup_downward_closure.php", line 31, characters 6-19:
-`DcComputedBase` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_dup_downward_closure.php", line 32, characters 3-3:
-  `E` cannot be checked
-ERROR: File "enum_dup_downward_closure.php", line 49, characters 6-17:
-This enum has members `X` and `Y` with the same value `10`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_downward_closure.php", line 46, characters 3-3:
-  `X` is declared here
-  File "enum_dup_downward_closure.php", line 51, characters 3-3:
-  `Y` is declared here
-ERROR: File "enum_dup_downward_closure.php", line 74, characters 6-22:
-`DcUsesTwoOptedOut` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_dup_downward_closure.php", line 65, characters 6-14:
-  it uses `DcOptOutA`, which cannot be checked for duplicate values
-  File "enum_dup_downward_closure.php", line 70, characters 6-14:
-  it uses `DcOptOutB`, which cannot be checked for duplicate values
+error: Typing[4520] `DcUser` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> it uses `DcBase`, which cannot be checked for duplicate values [2]
+
+enum_dup_downward_closure.php:18:6
+ 9 | // Opted-out base with an intentional duplicate.
+10 | <<__AllowUncheckedEnumValues>>
+11 | enum DcBase: int as int {
+   |      ^^^^^^ [2]
+12 |   A = 1;
+13 |   B = 1; // intentional duplicate, allowed by the attribute
+   :
+16 | // Uses an opted-out enum -> uncheckable as a whole. Its own C/D/Dup are not
+17 | // separately checked; the enum is asked to opt out too.
+18 | enum DcUser: int as int {
+   |      ^^^^^^ [1]
+19 |   use DcBase;
+20 |   C = 1;
+
+error: Typing[4520] `DcComputedBase` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> `E` cannot be checked [2]
+
+enum_dup_downward_closure.php:31:6
+29 | // A base with a value that can't be statically evaluated -> flagged on its own
+30 | // definition (the root cause the user must fix or opt out).
+31 | enum DcComputedBase: int as int {
+   |      ^^^^^^^^^^^^^^ [1]
+32 |   E = DcConst::K; // constant reference, can't be checked
+   |   ^ [2]
+33 | }
+34 | 
+
+error: Typing[4519] This enum has members `X` and `Y` with the same value `10`. Duplicate enum values are not allowed. [1]
+-> `X` is declared here [2]
+-> `Y` is declared here [3]
+
+enum_dup_downward_closure.php:49:6
+44 | // A base that can be checked: an includer is checked normally.
+45 | enum DcStrictBase: int as int {
+46 |   X = 10;
+   |   ^ [2]
+47 | }
+48 | 
+49 | enum DcStrictUser: int as int {
+   |      ^^^^^^^^^^^^ [1]
+50 |   use DcStrictBase; // brings in X = 10
+51 |   Y = 10; // collides with DcStrictBase::X, both checkable -> flagged
+   |   ^ [3]
+52 | }
+53 | 
+
+error: Typing[4520] `DcUsesTwoOptedOut` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> it uses `DcOptOutA`, which cannot be checked for duplicate values [2]
+-> it uses `DcOptOutB`, which cannot be checked for duplicate values [3]
+
+enum_dup_downward_closure.php:74:6
+63 | // lists both used enums as reasons (deduped and sorted by name).
+64 | <<__AllowUncheckedEnumValues>>
+65 | enum DcOptOutA: int as int {
+   |      ^^^^^^^^^ [2]
+66 |   Oa = 1;
+67 | }
+68 | 
+69 | <<__AllowUncheckedEnumValues>>
+70 | enum DcOptOutB: int as int {
+   |      ^^^^^^^^^ [3]
+71 |   Ob = 2;
+72 | }
+73 | 
+74 | enum DcUsesTwoOptedOut: int as int {
+   |      ^^^^^^^^^^^^^^^^^ [1]
+75 |   use DcOptOutA; // opted out -> uncheckable
+76 |   use DcOptOutB; // opted out -> uncheckable
+
+4 errors found

@@ -1,12 +1,35 @@
-ERROR: File "simple_gadt_example.php", line 31, characters 12-22:
-Invalid return type (Typing[4110])
-  File "simple_gadt_example.php", line 29, characters 65-65:
-  Expected `T`
-  File "simple_gadt_example.php", line 31, characters 16-20:
-  But got `MyInt`
-ERROR: File "simple_gadt_example.php", line 42, characters 12-22:
-Invalid return type (Typing[4110])
-  File "simple_gadt_example.php", line 38, characters 41-41:
-  Expected `T`
-  File "simple_gadt_example.php", line 42, characters 16-20:
-  But got `MyInt`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `MyInt` [3]
+
+simple_gadt_example.php:31:12
+27 | }
+28 | 
+29 | function lift_test_ambiguous_match<T>(LiftableTo<T> $liftable): T {
+   |                                                                 ^ [2]
+30 |   if ($liftable is arraykey) {
+31 |     return new MyInt(); // this should error
+   |            ^^^^^^^^^^^ [1]
+   |                ^^^^^ [3]
+32 |   }
+33 |   throw new Exception();
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `MyInt` [3]
+
+simple_gadt_example.php:42:12
+36 | case type NonnullCT<T> = nonnull where T super MyInt | null;
+37 | 
+38 | function test_span<T>(NonnullCT<T> $x): T {
+   |                                         ^ [2]
+39 |   if ($x is int) {
+40 |     return new MyInt();
+41 |   } else {
+42 |     return new MyInt(); // this should error
+   |            ^^^^^^^^^^^ [1]
+   |                ^^^^^ [3]
+43 |   }
+44 | }
+
+2 errors found

@@ -1,8 +1,31 @@
-ERROR: File "meth_caller_internal.php--C.php", line 9, characters 32-36:
-You cannot access this method with `meth_caller` (even from the same module) (Typing[4481])
-  File "meth_caller_internal.php--C.php", line 6, characters 21-23:
-  It is declared as `internal` here
-ERROR: File "meth_caller_internal.php--C.php", line 17, characters 32-36:
-You cannot access this method with `meth_caller` (even from the same module and the same class hierarchy) (Typing[4496])
-  File "meth_caller_internal.php--C.php", line 14, characters 31-33:
-  It is declared as `protected internal` here
+error: Typing[4481] You cannot access this method with `meth_caller` (even from the same module) [1]
+-> It is declared as `internal` here [2]
+
+meth_caller_internal.php--C.php:9:32
+ 4 | 
+ 5 | class C {
+ 6 |   internal function foo(): void { echo "I am foo\n"; }
+   |                     ^^^ [2]
+ 7 | 
+ 8 |   public function bar(): void {
+ 9 |     $f = meth_caller(C::class, 'foo');
+   |                                ^^^^^ [1]
+10 |     $c = new C();
+11 |     $f($c);
+
+error: Typing[4496] You cannot access this method with `meth_caller` (even from the same module and the same class hierarchy) [1]
+-> It is declared as `protected internal` here [2]
+
+meth_caller_internal.php--C.php:17:32
+12 |   }
+13 | 
+14 |   protected internal function baz(): void { echo "I am baz\n"; }
+   |                               ^^^ [2]
+15 | 
+16 |   public function qux(): void {
+17 |     $f = meth_caller(C::class, 'baz');
+   |                                ^^^^^ [1]
+18 |     $c = new C();
+19 |     $f($c);
+
+2 errors found

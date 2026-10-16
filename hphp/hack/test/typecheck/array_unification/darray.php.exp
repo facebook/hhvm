@@ -1,6 +1,14 @@
-ERROR: File "darray.php", line 24, characters 10-24:
-Invalid return type (Typing[4110])
-  File "darray.php", line 23, characters 44-47:
-  Expected `bool`
-  File "darray.php", line 24, characters 10-24:
-  But got `dict<int, bool>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `dict<int, bool>` [1]
+
+darray.php:24:10
+21 | }
+22 | 
+23 | function err_string(darray<int, bool> $v): bool {
+   |                                            ^^^^ [2]
+24 |   return dict[0 => true];
+   |          ^^^^^^^^^^^^^^^ [1]
+25 | }
+
+1 error found

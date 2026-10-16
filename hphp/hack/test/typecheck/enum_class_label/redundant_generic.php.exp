@@ -1,6 +1,31 @@
-ERROR: File "redundant_generic.php", line 7, characters 22-22:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "redundant_generic.php", line 9, characters 25-25:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "redundant_generic.php", line 14, characters 34-34:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+redundant_generic.php:7:22
+5 | interface I2 {}
+6 | 
+7 | function f_no_bounds<T>(HH\EnumClass\Label<mixed, T> $label, T $value): void {}
+  |                      ^ [1]
+8 | 
+9 | function f_single_bound<T as arraykey>(
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+redundant_generic.php:9:25
+ 7 | function f_no_bounds<T>(HH\EnumClass\Label<mixed, T> $label, T $value): void {}
+ 8 | 
+ 9 | function f_single_bound<T as arraykey>(
+   |                         ^ [1]
+10 |   HH\EnumClass\Label<mixed, T> $label,
+11 |   T $value,
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+redundant_generic.php:14:34
+12 | ): void {}
+13 | 
+14 | function f_multi_bounds_simplify<T as ?arraykey as nonnull>(
+   |                                  ^ [1]
+15 |   HH\EnumClass\Label<mixed, T> $label,
+16 |   T $value,
+
+3 errors found

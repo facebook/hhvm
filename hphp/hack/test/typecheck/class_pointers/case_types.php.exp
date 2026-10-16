@@ -1,36 +1,85 @@
-ERROR: File "case_types.php", line 7, characters 11-11:
-Invalid case type declaration. More than one variant of `X` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 7, characters 15-20:
-  This is the type `string`, which includes **strings**
-  File "case_types.php", line 7, characters 24-35:
-  It overlaps with `classname<C>`, which also includes **strings**
-ERROR: File "case_types.php", line 10, characters 11-11:
-Invalid case type declaration. More than one variant of `Y` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 10, characters 15-20:
-  This is the type `string`, which includes **strings**
-  File "case_types.php", line 10, characters 24-31:
-  It overlaps with `class<C>`, which also includes **strings**
-ERROR: File "case_types.php", line 11, characters 11-11:
-Invalid case type declaration. More than one variant of `Z` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 11, characters 15-22:
-  This is the type `class<C>`, which includes **class pointers**
-  File "case_types.php", line 11, characters 26-37:
-  It overlaps with `classname<C>`, which also includes **class pointers**
-ERROR: File "case_types.php", line 21, characters 11-20:
-Invalid case type declaration. More than one variant of `TwoClasses` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 21, characters 24-31:
-  This is the type `class<C>`, which includes **class pointers**
-  File "case_types.php", line 21, characters 35-42:
-  It overlaps with `class<D>`, which also includes **class pointers**
-ERROR: File "case_types.php", line 24, characters 11-22:
-Invalid case type declaration. More than one variant of `WithArraykey` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 24, characters 26-33:
-  This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings
-  File "case_types.php", line 24, characters 37-44:
-  It overlaps with `class<C>`, which also includes **strings**
-ERROR: File "case_types.php", line 29, characters 11-18:
-Invalid case type declaration. More than one variant of `CoCClass` could contain values with the same runtime tag (Typing[4475])
-  File "case_types.php", line 29, characters 22-29:
-  This is the type `class<C>`, which includes **class pointers**
-  File "case_types.php", line 29, characters 33-53:
-  It overlaps with `HH\class_or_classname<C>`, which also includes **class pointers**
+error: Typing[4475] Invalid case type declaration. More than one variant of `X` could contain values with the same runtime tag [1]
+-> This is the type `string`, which includes **strings** [2]
+-> It overlaps with `classname<C>`, which also includes **strings** [3]
+
+case_types.php:7:11
+5 | interface I {}
+6 | 
+7 | case type X = string | classname<C>;
+  |           ^ [1]
+  |               ^^^^^^ [2]
+  |                        ^^^^^^^^^^^^ [3]
+8 | 
+9 | // Separable once -vEval.ClassPassesClassname=false and similar
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `Y` could contain values with the same runtime tag [1]
+-> This is the type `string`, which includes **strings** [2]
+-> It overlaps with `class<C>`, which also includes **strings** [3]
+
+case_types.php:10:11
+ 8 | 
+ 9 | // Separable once -vEval.ClassPassesClassname=false and similar
+10 | case type Y = string | class<C>;
+   |           ^ [1]
+   |               ^^^^^^ [2]
+   |                        ^^^^^^^^ [3]
+11 | case type Z = class<C> | classname<C>;
+12 | 
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `Z` could contain values with the same runtime tag [1]
+-> This is the type `class<C>`, which includes **class pointers** [2]
+-> It overlaps with `classname<C>`, which also includes **class pointers** [3]
+
+case_types.php:11:11
+ 9 | // Separable once -vEval.ClassPassesClassname=false and similar
+10 | case type Y = string | class<C>;
+11 | case type Z = class<C> | classname<C>;
+   |           ^ [1]
+   |               ^^^^^^^^ [2]
+   |                          ^^^^^^^^^^^^ [3]
+12 | 
+13 | // class<T> is a class pointer, never an object, so it is disjoint from
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `TwoClasses` could contain values with the same runtime tag [1]
+-> This is the type `class<C>`, which includes **class pointers** [2]
+-> It overlaps with `class<D>`, which also includes **class pointers** [3]
+
+case_types.php:21:11
+19 | // Two class pointers with distinct inner types are still indistinguishable at
+20 | // runtime (the inner type is not enforced), so they overlap.
+21 | case type TwoClasses = class<C> | class<D>;
+   |           ^^^^^^^^^^ [1]
+   |                        ^^^^^^^^ [2]
+   |                                   ^^^^^^^^ [3]
+22 | 
+23 | // A class pointer still shares the string runtime tag during the migration.
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `WithArraykey` could contain values with the same runtime tag [1]
+-> This is the type `arraykey`, which includes **strings** because arraykeys are ints or strings [2]
+-> It overlaps with `class<C>`, which also includes **strings** [3]
+
+case_types.php:24:11
+22 | 
+23 | // A class pointer still shares the string runtime tag during the migration.
+24 | case type WithArraykey = arraykey | class<C>;
+   |           ^^^^^^^^^^^^ [1]
+   |                          ^^^^^^^^ [2]
+   |                                     ^^^^^^^^ [3]
+25 | 
+26 | // class_or_classname<T> is an opaque newtype but behaves like classname here:
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `CoCClass` could contain values with the same runtime tag [1]
+-> This is the type `class<C>`, which includes **class pointers** [2]
+-> It overlaps with `HH\class_or_classname<C>`, which also includes **class pointers** [3]
+
+case_types.php:29:11
+27 | // disjoint from pure objects, but overlapping strings/class.
+28 | case type CoCObj = C | class_or_classname<C>;
+29 | case type CoCClass = class<C> | class_or_classname<C>;
+   |           ^^^^^^^^ [1]
+   |                      ^^^^^^^^ [2]
+   |                                 ^^^^^^^^^^^^^^^^^^^^^ [3]
+30 | 
+31 | case type S = class<C>;
+
+6 errors found

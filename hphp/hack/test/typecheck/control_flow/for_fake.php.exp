@@ -1,9 +1,25 @@
-ERROR: File "for_fake.php", line 12, characters 14-22:
-Invalid argument (Typing[4110])
-  File "for_fake.php", line 6, characters 21-23:
-  Expected `int`
-  File "for_fake.php", line 4, characters 17-20:
-  But got `null`
-  File "for_fake.php", line 10, characters 10-18:
-  All the local information about `C::$thing` has been invalidated because of scope change.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+-> All the local information about `C::$thing` has been invalidated because of scope change.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+for_fake.php:12:14
+ 2 | 
+ 3 | class C {
+ 4 |   public static ?int $thing = null;
+   |                 ^^^^ [3]
+ 5 | }
+ 6 | function expect_int(int $x):void { }
+   |                     ^^^ [2]
+ 7 | 
+ 8 | <<__EntryPoint>>
+ 9 | function test_flow():void {
+10 |   for (; C::$thing !== null; ) {
+   |          ^^^^^^^^^ [4]
+11 |   }
+12 |   expect_int(C::$thing);
+   |              ^^^^^^^^^ [1]
+13 | }
+
+1 error found

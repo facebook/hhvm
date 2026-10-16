@@ -1,6 +1,21 @@
-ERROR: File "internal_on_constructor_param.php--file2.php", line 4, characters 8-9:
-Typing error (Typing[4444])
-  File "internal_on_constructor_param.php--file2.php", line 4, characters 12-12:
-  Cannot access an internal element from module `foo` in the default module
-  File "internal_on_constructor_param.php--file1.php", line 7, characters 14-16:
-  This is from module `foo`
+error: Typing[4444] Typing error [1]
+-> Cannot access an internal element from module `foo` in the default module [2]
+-> This is from module `foo` [3]
+
+internal_on_constructor_param.php--file2.php:4:8
+2 | 
+3 | function test(Foo $x): void {
+4 |   $z = $x->x; // error
+  |        ^^ [1]
+  |            ^ [2]
+5 | }
+
+internal_on_constructor_param.php--file1.php:7:14
+5 | class Foo {
+6 |   public function __construct(
+7 |     internal int $x = 5
+  |              ^^^ [3]
+8 |   ) {}
+9 | }
+
+1 error found

@@ -1,6 +1,23 @@
-ERROR: File "conditional.php", line 4, characters 14-15:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "conditional.php", line 5, characters 10-11:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "conditional.php", line 4, characters 3-26:
-  Did you mean `$y` instead?
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+conditional.php:4:14
+2 | 
+3 | function foo(bool $b): int {
+4 |   $y = $b ? ($x = 42) : -1;
+  |              ^^ [1]
+5 |   return $x;
+6 | }
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$y` instead? [2]
+
+conditional.php:5:10
+2 | 
+3 | function foo(bool $b): int {
+4 |   $y = $b ? ($x = 42) : -1;
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 |   return $x;
+  |          ^^ [1]
+6 | }
+
+2 errors found

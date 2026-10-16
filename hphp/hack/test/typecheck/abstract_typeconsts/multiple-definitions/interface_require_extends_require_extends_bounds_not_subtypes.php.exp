@@ -1,12 +1,41 @@
-ERROR: File "interface_require_extends_require_extends_bounds_not_subtypes.php", line 25, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "interface_require_extends_require_extends_bounds_not_subtypes.php", line 25, characters 38-39:
-  No type constant `T2` in `UpperBound2`
-  File "interface_require_extends_require_extends_bounds_not_subtypes.php", line 7, characters 11-21:
-  Declaration of `UpperBound2` is here
-ERROR: File "interface_require_extends_require_extends_bounds_not_subtypes.php", line 34, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "interface_require_extends_require_extends_bounds_not_subtypes.php", line 34, characters 38-39:
-  No type constant `T3` in `UpperBound1`
-  File "interface_require_extends_require_extends_bounds_not_subtypes.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound2` [2]
+-> Declaration of `UpperBound2` is here [3]
+
+interface_require_extends_require_extends_bounds_not_subtypes.php:25:28
+ 5 | }
+ 6 | 
+ 7 | interface UpperBound2 {
+   |           ^^^^^^^^^^^ [3]
+ 8 |   abstract const type T3;
+ 9 | }
+   :
+23 |   require extends C1;
+24 |   require extends C2;
+25 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+26 |   abstract const type T3 = this::T1::T3;
+27 | }
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T3` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+interface_require_extends_require_extends_bounds_not_subtypes.php:34:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {
+   |           ^^^^^^^^^^^ [3]
+ 4 |   abstract const type T2;
+ 5 | }
+   :
+32 |   require extends C1;
+33 |   abstract const type T2 = this::T1::T2;
+34 |   abstract const type T3 = this::T1::T3;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+35 | }
+36 | 
+
+2 errors found

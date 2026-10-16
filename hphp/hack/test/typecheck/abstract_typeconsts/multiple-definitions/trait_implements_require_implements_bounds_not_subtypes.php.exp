@@ -1,12 +1,41 @@
-ERROR: File "trait_implements_require_implements_bounds_not_subtypes.php", line 25, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "trait_implements_require_implements_bounds_not_subtypes.php", line 25, characters 38-39:
-  No type constant `T3` in `UpperBound1`
-  File "trait_implements_require_implements_bounds_not_subtypes.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
-ERROR: File "trait_implements_require_implements_bounds_not_subtypes.php", line 31, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "trait_implements_require_implements_bounds_not_subtypes.php", line 31, characters 38-39:
-  No type constant `T2` in `UpperBound2`
-  File "trait_implements_require_implements_bounds_not_subtypes.php", line 7, characters 11-21:
-  Declaration of `UpperBound2` is here
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T3` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+trait_implements_require_implements_bounds_not_subtypes.php:25:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {
+   |           ^^^^^^^^^^^ [3]
+ 4 |   abstract const type T2;
+ 5 | }
+   :
+23 |   require implements I2;
+24 |   abstract const type T2 = this::T1::T2;
+25 |   abstract const type T3 = this::T1::T3;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+26 | }
+27 | 
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound2` [2]
+-> Declaration of `UpperBound2` is here [3]
+
+trait_implements_require_implements_bounds_not_subtypes.php:31:28
+ 5 | }
+ 6 | 
+ 7 | interface UpperBound2 {
+   |           ^^^^^^^^^^^ [3]
+ 8 |   abstract const type T3;
+ 9 | }
+   :
+29 | trait Tr2 implements I2 {
+30 |   require implements I1;
+31 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+32 |   abstract const type T3 = this::T1::T3;
+33 | }
+
+2 errors found

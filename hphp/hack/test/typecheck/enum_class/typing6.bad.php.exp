@@ -1,6 +1,13 @@
-ERROR: File "typing6.bad.php", line 12, characters 28-29:
-Invalid argument (Typing[4110])
-  File "typing6.bad.php", line 12, characters 8-13:
-  Expected `string`
-  File "typing6.bad.php", line 12, characters 28-29:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+typing6.bad.php:12:28
+10 | enum class E : ExBox {
+11 |   // wrong initializer
+12 |    Box<string> A = new Box(42);
+   |        ^^^^^^ [2]
+   |                            ^^ [1]
+13 | }
+
+1 error found

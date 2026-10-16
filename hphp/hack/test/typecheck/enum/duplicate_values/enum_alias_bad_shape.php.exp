@@ -1,20 +1,59 @@
-ERROR: File "enum_alias_bad_shape.php", line 15, characters 6-15:
-`AliasMixed` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_alias_bad_shape.php", line 16, characters 3-3:
-  `P` cannot be checked
-ERROR: File "enum_alias_bad_shape.php", line 26, characters 6-18:
-`AliasTwoEnums` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_alias_bad_shape.php", line 27, characters 3-3:
-  `H` cannot be checked
-  File "enum_alias_bad_shape.php", line 28, characters 3-3:
-  `I` cannot be checked
-ERROR: File "enum_alias_bad_shape.php", line 33, characters 6-19:
-`AliasSameTwice` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_alias_bad_shape.php", line 34, characters 3-3:
-  `J` cannot be checked
-  File "enum_alias_bad_shape.php", line 35, characters 3-3:
-  `K` cannot be checked
-ERROR: File "enum_alias_bad_shape.php", line 42, characters 6-17:
-`AliasWithUse` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. (Typing[4520])
-  File "enum_alias_bad_shape.php", line 44, characters 3-3:
-  `L` cannot be checked
+error: Typing[4520] `AliasMixed` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> `P` cannot be checked [2]
+
+enum_alias_bad_shape.php:15:6
+13 | // Mixing an access with a literal: not all members are accesses, so not a pure
+14 | // alias -> the access is uncheckable.
+15 | enum AliasMixed: int as int {
+   |      ^^^^^^^^^^ [1]
+16 |   P = AliasBase::A; // uncheckable
+   |   ^ [2]
+17 |   Q = 5;
+18 | }
+
+error: Typing[4520] `AliasTwoEnums` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> `H` cannot be checked [2]
+-> `I` cannot be checked [3]
+
+enum_alias_bad_shape.php:26:6
+24 | }
+25 | 
+26 | enum AliasTwoEnums: int as int {
+   |      ^^^^^^^^^^^^^ [1]
+27 |   H = AliasBase::A; // uncheckable
+   |   ^ [2]
+28 |   I = OtherBase::F; // uncheckable
+   |   ^ [3]
+29 | }
+30 | 
+
+error: Typing[4520] `AliasSameTwice` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> `J` cannot be checked [2]
+-> `K` cannot be checked [3]
+
+enum_alias_bad_shape.php:33:6
+31 | // The same constant accessed twice: the accessed members are not distinct, so
+32 | // the alias could hide a duplicate and is not exempt.
+33 | enum AliasSameTwice: int as int {
+   |      ^^^^^^^^^^^^^^ [1]
+34 |   J = AliasBase::A; // uncheckable
+   |   ^ [2]
+35 |   K = AliasBase::A; // uncheckable
+   |   ^ [3]
+36 | }
+37 | 
+
+error: Typing[4520] `AliasWithUse` cannot be statically checked for duplicate values. Member values must be int or string literals, `nameof`, or `::class` to be checked; references to global constants (or other computed expressions) cannot be. Fix the flagged values and only include enums that can be checked, or add `<<__AllowUncheckedEnumValues>>` to the enum. [1]
+-> `L` cannot be checked [2]
+
+enum_alias_bad_shape.php:42:6
+40 | // actually collide. The no-inclusions gate keeps this from being wrongly
+41 | // exempted.
+42 | enum AliasWithUse: int as int {
+   |      ^^^^^^^^^^^^ [1]
+43 |   use AliasBase;
+44 |   L = AliasBase::A; // uncheckable
+   |   ^ [2]
+45 | }
+
+4 errors found

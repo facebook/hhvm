@@ -1,10 +1,41 @@
-WARN: File "typename_no_call.php", line 14, characters 3-9:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "classname.hhi", line 14, characters 27-32:
-  This expression has type `dynamic`
-ERROR: File "typename_no_call.php", line 10, characters 3-4:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "typename_no_call.php", line 9, characters 16-32:
-  Definition is here
-ERROR: File "typename_no_call.php", line 14, characters 3-4:
-Was expecting a class, but got a string (Typing[4026])
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+typename_no_call.php:14:3
+12 | 
+13 | function bad_new_c(typename<CAlias> $c): void {
+14 |   $c::foo();
+   |   ^^^^^^^ [1]
+15 | }
+
+classname.hhi:14:27
+12 |    */
+13 |   <<__NoAutoDynamic>>
+14 |   newtype typename<+T> as string = string;
+   |                           ^^^^^^ [2]
+15 | 
+16 |   /**
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+typename_no_call.php:10:3
+ 7 | type CAlias = C;
+ 8 | 
+ 9 | function new_c(classname<CAlias> $c): void {
+   |                ^^^^^^^^^^^^^^^^^ [2]
+10 |   $c::foo();
+   |   ^^ [1]
+11 | }
+12 | 
+
+error: Typing[4026] Was expecting a class, but got a string [1]
+
+typename_no_call.php:14:3
+12 | 
+13 | function bad_new_c(typename<CAlias> $c): void {
+14 |   $c::foo();
+   |   ^^ [1]
+15 | }
+
+3 errors found

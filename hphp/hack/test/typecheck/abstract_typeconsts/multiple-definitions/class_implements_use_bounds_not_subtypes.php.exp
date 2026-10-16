@@ -1,28 +1,93 @@
-ERROR: File "class_implements_use_bounds_not_subtypes.php", line 31, characters 7-9:
-Some members in class `C3` are incompatible with those declared in type `Tr1` (Typing[4340])
-  File "class_implements_use_bounds_not_subtypes.php", line 14, characters 23-24:
-  The constraint on this type constant is inconsistent with its parent
-  File "class_implements_use_bounds_not_subtypes.php", line 18, characters 29-39:
-  Expected `UpperBound2`
-  File "class_implements_use_bounds_not_subtypes.php", line 14, characters 29-39:
-  But got `UpperBound1`
-ERROR: File "class_implements_use_bounds_not_subtypes.php", line 33, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "class_implements_use_bounds_not_subtypes.php", line 33, characters 38-39:
-  No type constant `T3` in `UpperBound1`
-  File "class_implements_use_bounds_not_subtypes.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
-ERROR: File "class_implements_use_bounds_not_subtypes.php", line 38, characters 7-9:
-Some members in class `C4` are incompatible with those declared in type `Tr2` (Typing[4340])
-  File "class_implements_use_bounds_not_subtypes.php", line 22, characters 23-24:
-  The constraint on this type constant is inconsistent with its parent
-  File "class_implements_use_bounds_not_subtypes.php", line 26, characters 29-39:
-  Expected `UpperBound1`
-  File "class_implements_use_bounds_not_subtypes.php", line 22, characters 29-39:
-  But got `UpperBound2`
-ERROR: File "class_implements_use_bounds_not_subtypes.php", line 39, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "class_implements_use_bounds_not_subtypes.php", line 39, characters 38-39:
-  No type constant `T2` in `UpperBound2`
-  File "class_implements_use_bounds_not_subtypes.php", line 7, characters 11-21:
-  Declaration of `UpperBound2` is here
+error: Typing[4340] Some members in class `C3` are incompatible with those declared in type `Tr1` [1]
+-> The constraint on this type constant is inconsistent with its parent [2]
+-> Expected `UpperBound2` [3]
+-> But got `UpperBound1` [4]
+
+class_implements_use_bounds_not_subtypes.php:31:7
+12 | 
+13 | interface I1 {
+14 |   abstract const type T1 as UpperBound1;
+   |                       ^^ [2]
+   |                             ^^^^^^^^^^^ [4]
+15 | }
+16 | 
+17 | trait Tr1 {
+18 |   abstract const type T1 as UpperBound2;
+   |                             ^^^^^^^^^^^ [3]
+19 | }
+20 | 
+   :
+29 | // Error
+30 | abstract class C3 implements I1 {
+31 |   use Tr1;
+   |       ^^^ [1]
+32 |   abstract const type T2 = this::T1::T2;
+33 |   abstract const type T3 = this::T1::T3;
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T3` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+class_implements_use_bounds_not_subtypes.php:33:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {
+   |           ^^^^^^^^^^^ [3]
+ 4 |   abstract const type T2;
+ 5 | }
+   :
+31 |   use Tr1;
+32 |   abstract const type T2 = this::T1::T2;
+33 |   abstract const type T3 = this::T1::T3;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+34 | }
+35 | 
+
+error: Typing[4340] Some members in class `C4` are incompatible with those declared in type `Tr2` [1]
+-> The constraint on this type constant is inconsistent with its parent [2]
+-> Expected `UpperBound1` [3]
+-> But got `UpperBound2` [4]
+
+class_implements_use_bounds_not_subtypes.php:38:7
+20 | 
+21 | interface I2 {
+22 |   abstract const type T1 as UpperBound2;
+   |                       ^^ [2]
+   |                             ^^^^^^^^^^^ [4]
+23 | }
+24 | 
+25 | trait Tr2 {
+26 |   abstract const type T1 as UpperBound1;
+   |                             ^^^^^^^^^^^ [3]
+27 | }
+28 | 
+   :
+36 | // Error
+37 | abstract class C4 implements I2 {
+38 |   use Tr2;
+   |       ^^^ [1]
+39 |   abstract const type T2 = this::T1::T2;
+40 |   abstract const type T3 = this::T1::T3;
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound2` [2]
+-> Declaration of `UpperBound2` is here [3]
+
+class_implements_use_bounds_not_subtypes.php:39:28
+ 5 | }
+ 6 | 
+ 7 | interface UpperBound2 {
+   |           ^^^^^^^^^^^ [3]
+ 8 |   abstract const type T3;
+ 9 | }
+   :
+37 | abstract class C4 implements I2 {
+38 |   use Tr2;
+39 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+40 |   abstract const type T3 = this::T1::T3;
+41 | }
+
+4 errors found

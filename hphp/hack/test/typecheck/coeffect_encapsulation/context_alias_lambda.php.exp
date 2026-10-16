@@ -1,6 +1,28 @@
-ERROR: File "context_alias_lambda.php--g.php", line 8, characters 5-57:
-Invalid argument (Typing[4403])
-  File "context_alias_lambda.php--f.php", line 8, characters 16-22:
-  Expected a function that requires the capability Codegen
-  File "context_alias_lambda.php--g.php", line 6, characters 10-13:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability Codegen [2]
+-> But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+context_alias_lambda.php--g.php:8:5
+ 4 | // client code
+ 5 | <<__EntryPoint>>
+ 6 | function main(): void {
+   |          ^^^^ [3]
+ 7 |   enter_codegen(
+ 8 |     () ==> {
+   |     ^^^^^^^^ [1]
+ 9 |       echo "break purity"; // illegal!
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     }
+   |     ^ [1]
+11 |   );
+12 | }
+
+context_alias_lambda.php--f.php:8:16
+ 6 | 
+ 7 | function enter_codegen(
+ 8 |   (function ()[Codegen]: void) $f
+   |                ^^^^^^^ [2]
+ 9 | ): void {
+10 |   echo "Hello I can secretly do IO";
+
+1 error found

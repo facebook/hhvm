@@ -1,2 +1,11 @@
-ERROR: File "assign_in_conditional.php", line 9, characters 8-9:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+assign_in_conditional.php:9:8
+ 7 | 
+ 8 | function test(int $x): void {
+ 9 |   if (($x = takes_int_makes_string($x)) === "") {
+   |        ^^ [1]
+10 |     expect_string($x);
+11 |   }
+
+1 error found

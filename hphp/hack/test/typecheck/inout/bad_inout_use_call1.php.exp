@@ -1,6 +1,20 @@
-ERROR: File "bad_inout_use_call1.php", line 9, characters 8-15:
-Invalid argument (Typing[4110])
-  File "bad_inout_use_call1.php", line 3, characters 21-23:
-  Expected `int`
-  File "bad_inout_use_call1.php", line 8, characters 8-13:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+bad_inout_use_call1.php:9:8
+ 1 | <?hh
+ 2 | 
+ 3 | function herp(inout int $x): void {
+   |                     ^^^ [2]
+ 4 |   $x += 42;
+ 5 | }
+ 6 | 
+ 7 | function derp(): void {
+ 8 |   $z = 'derp';
+   |        ^^^^^^ [3]
+ 9 |   herp(inout $z);
+   |        ^^^^^^^^ [1]
+10 | }
+
+1 error found

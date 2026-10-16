@@ -1,4 +1,20 @@
-ERROR: File "__clone.php", line 4, characters 30-35:
-The return type of `__clone` should be void. `__clone` is called to mutate the new object side-effect-fully (NastCheck[3104])
-ERROR: File "__clone.php", line 12, characters 10-16:
-`__clone` is a magic method and cannot be called directly (NastCheck[3011])
+error: NastCheck[3104] The return type of `__clone` should be void. `__clone` is called to mutate the new object side-effect-fully [1]
+
+__clone.php:4:30
+2 | 
+3 | class Example {
+4 |   public function __clone(): string {
+  |                              ^^^^^^ [1]
+5 |     echo("Clone was called");
+6 |     return "A";
+
+error: NastCheck[3011] `__clone` is a magic method and cannot be called directly [1]
+
+__clone.php:12:10
+10 | function test(): void {
+11 |   $test = new Example();
+12 |   $test->__clone();
+   |          ^^^^^^^ [1]
+13 | }
+
+2 errors found

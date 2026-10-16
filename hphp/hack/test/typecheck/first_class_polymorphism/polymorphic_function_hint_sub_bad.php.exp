@@ -1,44 +1,110 @@
-ERROR: File "polymorphic_function_hint_sub_bad.php", line 27, characters 15-16:
-Invalid argument (Typing[4323])
-  File "polymorphic_function_hint_sub_bad.php", line 23, characters 27-27:
-  `T` is a constrained type parameter
-  File "polymorphic_function_hint_sub_bad.php", line 23, characters 32-36:
-  This type constraint is violated
-  File "polymorphic_function_hint_sub_bad.php", line 23, characters 32-36:
-  Expected `Three`
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
-  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "polymorphic_function_hint_sub_bad.php", line 27, characters 15-16:
-Invalid argument (Typing[4323])
-  File "polymorphic_function_hint_sub_bad.php", line 23, characters 27-27:
-  `T` is a constrained type parameter
-  File "polymorphic_function_hint_sub_bad.php", line 23, characters 32-36:
-  This type constraint is violated
-  File "polymorphic_function_hint_sub_bad.php", line 23, characters 32-36:
-  Expected `Three`
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
-  But got `Two` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "polymorphic_function_hint_sub_bad.php", line 34, characters 15-16:
-Invalid argument (Typing[4323])
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
-  `T` is a constrained type parameter
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 28-31:
-  This type constraint is violated
-  File "polymorphic_function_hint_sub_bad.php", line 30, characters 26-26:
-  `T` is a constrained type parameter
-  File "polymorphic_function_hint_sub_bad.php", line 30, characters 41-45:
-  This type constraint is violated
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 28-31:
-  Expected `Four`
-  File "polymorphic_function_hint_sub_bad.php", line 30, characters 41-45:
-  But got `Three`
-ERROR: File "polymorphic_function_hint_sub_bad.php", line 34, characters 15-16:
-Invalid argument (Typing[4323])
-  File "polymorphic_function_hint_sub_bad.php", line 30, characters 26-26:
-  `T` is a constrained type parameter
-  File "polymorphic_function_hint_sub_bad.php", line 30, characters 41-45:
-  This type constraint is violated
-  File "polymorphic_function_hint_sub_bad.php", line 14, characters 13-13:
-  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "polymorphic_function_hint_sub_bad.php", line 30, characters 41-45:
-  But got `Three`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Three` [3]
+-> But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [4]
+
+polymorphic_function_hint_sub_bad.php:27:15
+12 |   T2 as Three super Four
+13 |  >(
+14 |   (function<T as Two super Four>(T): T) $id,
+   |             ^ [4]
+15 |   T1 $x,
+16 |   T2 $y
+   :
+21 | }
+22 | 
+23 | function id_five_to_three<T as Three super Five>(T $x): T { return $x; }
+   |                           ^ [2]
+   |                                ^^^^^ [3]
+24 | 
+25 | function sub1(): (Three,Four) {
+26 |   $f = id_five_to_three<>;
+27 |   return fork($f,new Three(),new Four());
+   |               ^^ [1]
+28 | }
+29 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Three` [3]
+-> But got `Two` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [4]
+
+polymorphic_function_hint_sub_bad.php:27:15
+12 |   T2 as Three super Four
+13 |  >(
+14 |   (function<T as Two super Four>(T): T) $id,
+   |             ^ [4]
+15 |   T1 $x,
+16 |   T2 $y
+   :
+21 | }
+22 | 
+23 | function id_five_to_three<T as Three super Five>(T $x): T { return $x; }
+   |                           ^ [2]
+   |                                ^^^^^ [3]
+24 | 
+25 | function sub1(): (Three,Four) {
+26 |   $f = id_five_to_three<>;
+27 |   return fork($f,new Three(),new Four());
+   |               ^^ [1]
+28 | }
+29 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> `T` is a constrained type parameter [4]
+-> This type constraint is violated [5]
+-> Expected `Four` [3]
+-> But got `Three` [5]
+
+polymorphic_function_hint_sub_bad.php:34:15
+12 |   T2 as Three super Four
+13 |  >(
+14 |   (function<T as Two super Four>(T): T) $id,
+   |             ^ [2]
+   |                            ^^^^ [3]
+15 |   T1 $x,
+16 |   T2 $y
+   :
+28 | }
+29 | 
+30 | function id_three_to_one<T as One super Three>(T $x): T { return $x; }
+   |                          ^ [4]
+   |                                         ^^^^^ [5]
+31 | 
+32 | function sub2(): (Two,Three) {
+33 |   $f = id_three_to_one<>;
+34 |   return fork($f,new Two(),new Three());
+   |               ^^ [1]
+35 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [4]
+-> But got `Three` [3]
+
+polymorphic_function_hint_sub_bad.php:34:15
+12 |   T2 as Three super Four
+13 |  >(
+14 |   (function<T as Two super Four>(T): T) $id,
+   |             ^ [4]
+15 |   T1 $x,
+16 |   T2 $y
+   :
+28 | }
+29 | 
+30 | function id_three_to_one<T as One super Three>(T $x): T { return $x; }
+   |                          ^ [2]
+   |                                         ^^^^^ [3]
+31 | 
+32 | function sub2(): (Two,Three) {
+33 |   $f = id_three_to_one<>;
+34 |   return fork($f,new Two(),new Three());
+   |               ^^ [1]
+35 | }
+
+4 errors found

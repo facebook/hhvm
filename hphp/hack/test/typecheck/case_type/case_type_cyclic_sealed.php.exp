@@ -1,2 +1,11 @@
-WARN: File "case_type_cyclic_sealed.php", line 7, characters 12-20:
-Interface `I1` in sealed allowlist for `I2`, but does not extend `I2` (Warn[12035])
+warning: Warn[12035] Interface `I1` in sealed allowlist for `I2`, but does not extend `I2` [1]
+
+case_type_cyclic_sealed.php:7:12
+5 | interface I1 {}
+6 | 
+7 | <<__Sealed(I1::class)>>
+  |            ^^^^^^^^^ [1]
+8 | interface I2 extends I1 {}
+9 | 
+
+1 error found

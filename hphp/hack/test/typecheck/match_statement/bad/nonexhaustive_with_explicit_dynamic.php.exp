@@ -1,2 +1,15 @@
-ERROR: File "nonexhaustive_with_explicit_dynamic.php", line 7, characters 3-52:
-This match statement is not exhaustive: there is no arm matching values of type `~float` (Typing[4478])
+error: Typing[4478] This match statement is not exhaustive: there is no arm matching values of type `~float` [1]
+
+nonexhaustive_with_explicit_dynamic.php:7:3
+ 5 | function test(num $x): void {
+ 6 |   if (coinflip()) $x = get_dynamic(); // $x: (num | dynamic)
+ 7 |   match ($x) {
+   |   ^^^^^^^^^^^^ [1]
+ 8 |     _: int => hh_expect<int>($x);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |   }
+   |   ^ [1]
+10 | }
+11 | 
+
+1 error found

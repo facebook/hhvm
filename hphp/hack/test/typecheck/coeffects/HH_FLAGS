@@ -1,2 +1,3 @@
 --no-strict-contexts
 --extra-builtin ../../hhi/coeffects.hhi
+--error-format plain_highlighted

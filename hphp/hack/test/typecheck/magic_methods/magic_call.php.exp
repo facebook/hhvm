@@ -1,2 +1,10 @@
-ERROR: File "magic_call.php", line 4, characters 3-31:
-Magic `__call` methods are no longer supported (Parsing[1002])
+error: Parsing[1002] Magic `__call` methods are no longer supported [1]
+
+magic_call.php:4:3
+2 | 
+3 | class C {
+4 |   public function __call():void {}
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

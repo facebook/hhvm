@@ -1,2 +1,11 @@
-ERROR: File "array_append_bad.php", line 5, characters 3-4:
-Cannot use `[]` for reading (NastCheck[3047])
+error: NastCheck[3047] Cannot use `[]` for reading [1]
+
+array_append_bad.php:5:3
+3 | function my_example(): vec<mixed> {
+4 |   $x = vec[];
+5 |   $x[] += 1;
+  |   ^^ [1]
+6 |   return $x;
+7 | }
+
+1 error found

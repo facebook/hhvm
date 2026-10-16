@@ -1,8 +1,21 @@
 File "explicit_type_collection_passing_darray2.php", line 6, characters 3-13:
   dict<arraykey, bool>
-ERROR: File "explicit_type_collection_passing_darray2.php", line 8, characters 10-11:
-Invalid argument (Typing[4110])
-  File "explicit_type_collection_passing_darray2.php", line 3, characters 24-29:
-  Expected `string`
-  File "explicit_type_collection_passing_darray2.php", line 5, characters 8-28:
-  But got `arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+explicit_type_collection_passing_darray2.php:8:10
+1 | <?hh
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | function expect(darray<string,bool> $m):void { }
+  |                        ^^^^^^ [2]
+4 | function testit():void {
+5 |   $n = dict<arraykey,bool>[];
+  |        ^^^^^^^^^^^^^^^^^^^^^ [3]
+6 |   hh_show($n);
+7 |   // Likewise this
+8 |   expect($n);
+  |          ^^ [1]
+9 | }
+
+1 error found

@@ -1,8 +1,29 @@
-ERROR: File "private_property_access.php", line 5, characters 16-22:
-Lacking `__construct`, class `MyClass` does not initialize its private member(s): `prop` (NastCheck[3030])
-ERROR: File "private_property_access.php", line 10, characters 7-8:
-Typing error (Typing[4448])
-  File "private_property_access.php", line 10, characters 11-14:
-  Cannot access non-public members within expression trees.
-  File "private_property_access.php", line 6, characters 11-20:
-  Member defined here
+error: NastCheck[3030] Lacking `__construct`, class `MyClass` does not initialize its private member(s): `prop` [1]
+
+private_property_access.php:5:16
+3 | <<file:__EnableUnstableFeatures('expression_trees')>>
+4 | 
+5 | abstract class MyClass {
+  |                ^^^^^^^ [1]
+6 |   private ExampleInt $prop;
+7 | 
+
+error: Typing[4448] Typing error [1]
+-> Cannot access non-public members within expression trees. [2]
+-> Member defined here [3]
+
+private_property_access.php:10:7
+ 4 | 
+ 5 | abstract class MyClass {
+ 6 |   private ExampleInt $prop;
+   |           ^^^^^^^^^^ [3]
+ 7 | 
+ 8 |   public function test(): void {
+ 9 |     ExampleDsl`(MyClass $x) ==> {
+10 |       $x->prop;
+   |       ^^ [1]
+   |           ^^^^ [2]
+11 |     }`;
+12 |   }
+
+2 errors found

@@ -1,4 +1,16 @@
-ERROR: File "bad_inout_use_variadic1.php", line 7, characters 16-23:
-Unexpected `inout` annotation for argument (Typing[4183])
-  File "bad_inout_use_variadic1.php", line 3, characters 30-32:
-  A variadic parameter can never be `inout`
+error: Typing[4183] Unexpected `inout` annotation for argument [1]
+-> A variadic parameter can never be `inout` [2]
+
+bad_inout_use_variadic1.php:7:16
+1 | <?hh
+2 | 
+3 | function f(string $x, int ...$ys): void {}
+  |                              ^^^ [2]
+4 | 
+5 | function test(): void {
+6 |   $v = 123;
+7 |   f('bar', $v, inout $v);
+  |                ^^^^^^^^ [1]
+8 | }
+
+1 error found

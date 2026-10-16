@@ -6,17 +6,46 @@ File "enum_variant_gadt.php", line 33, characters 5-19:
   Color
 File "enum_variant_gadt.php", line 36, characters 5-19:
   bool
-ERROR: File "enum_variant_gadt.php", line 12, characters 11-20:
-Invalid case type declaration. More than one variant of `ColorOrInt` could contain values with the same runtime tag (Typing[4475])
-  File "enum_variant_gadt.php", line 13, characters 5-9:
-  This is the type `Color`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings
-  File "enum_variant_gadt.php", line 3, characters 6-10:
-    via the constraint on the enum `Color`
-  File "enum_variant_gadt.php", line 14, characters 5-7:
-  It overlaps with `int`, which also includes **ints**
-ERROR: File "enum_variant_gadt.php", line 24, characters 7-23:
-Invalid return type (Typing[4110])
-  File "enum_variant_gadt.php", line 20, characters 59-59:
-  Expected `T`
-  File "enum_variant_gadt.php", line 24, characters 11-21:
-  But got `ColorResult`
+error: Typing[4475] Invalid case type declaration. More than one variant of `ColorOrInt` could contain values with the same runtime tag [1]
+-> This is the type `Color`, which includes **ints** because enums are approximated as `arraykey` for case type variant disjointness — an `is` test on an enum cannot rule out other ints or strings [2]
+->   via the constraint on the enum `Color` [3]
+-> It overlaps with `int`, which also includes **ints** [4]
+
+enum_variant_gadt.php:12:11
+ 1 | <?hh
+ 2 | 
+ 3 | enum Color: string as string {
+   |      ^^^^^ [3]
+ 4 |   RED = 'red';
+ 5 |   GREEN = 'green';
+   :
+10 | final class OtherResult {}
+11 | 
+12 | case type ColorOrInt<+T> =
+   |           ^^^^^^^^^^ [1]
+13 |   | Color where T super ColorResult
+   |     ^^^^^ [2]
+14 |   | int where T super OtherResult;
+   |     ^^^ [4]
+15 | 
+16 | case type ColorOrBool<+T> =
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `ColorResult` [3]
+
+enum_variant_gadt.php:24:7
+18 |   | bool where T super OtherResult;
+19 | 
+20 | function process_union_with_int<T>(ColorOrInt<T> $input): T {
+   |                                                           ^ [2]
+21 |   if ($input is Color) {
+22 |     hh_show($input);
+23 |     return
+24 |       new ColorResult(); // expect error because `is Enum` cannot exclude int
+   |       ^^^^^^^^^^^^^^^^^ [1]
+   |           ^^^^^^^^^^^ [3]
+25 |   } else {
+26 |     hh_show($input);
+
+2 errors found

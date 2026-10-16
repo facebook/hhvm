@@ -1,4 +1,19 @@
-ERROR: File "enum_attribute.php", line 4, characters 3-14:
-Unbound name: `DoesNotExist` (an object type) (Naming[2049])
-ERROR: File "enum_attribute.php", line 4, characters 3-14:
-Unrecognized user attribute: `DoesNotExist` does not have a class. Please declare a class for the attribute. (Naming[2049])
+error: Naming[2049] Unbound name: `DoesNotExist` (an object type) [1]
+
+enum_attribute.php:4:3
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | <<DoesNotExist>>
+  |   ^^^^^^^^^^^^ [1]
+5 | enum E: int {}
+
+error: Naming[2049] Unrecognized user attribute: `DoesNotExist` does not have a class. Please declare a class for the attribute. [1]
+
+enum_attribute.php:4:3
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | <<DoesNotExist>>
+  |   ^^^^^^^^^^^^ [1]
+5 | enum E: int {}
+
+2 errors found

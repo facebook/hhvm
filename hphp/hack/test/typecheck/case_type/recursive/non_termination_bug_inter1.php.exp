@@ -1,4 +1,12 @@
-ERROR: File "non_termination_bug_inter1.php", line 9, characters 13-29:
-Invalid `is` expression hint (Typing[4195])
-  File "non_termination_bug_inter1.php", line 9, characters 20-28:
-  The `is` operator cannot be used with a `newtype`
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a `newtype` [2]
+
+non_termination_bug_inter1.php:9:13
+ 7 |   Lst<int> $l,
+ 8 | ): void {
+ 9 |   if ($l is (null, Lst<null>)) {}
+   |             ^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^^^^^^^ [2]
+10 | }
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "dynamically_callable_attr_private.php", line 15, characters 5-25:
-`__DynamicallyCallable` can only be used on public methods (Naming[2106])
-  File "dynamically_callable_attr_private.php", line 16, characters 20-23:
-  But this method is `private`
+error: Naming[2106] `__DynamicallyCallable` can only be used on public methods [1]
+-> But this method is `private` [2]
+
+dynamically_callable_attr_private.php:15:5
+13 |   <<__DynamicallyCallable>>
+14 |   public function pub(): void {}
+15 |   <<__DynamicallyCallable>>
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   private function priv(): void {}
+   |                    ^^^^ [2]
+17 | }
+
+1 error found

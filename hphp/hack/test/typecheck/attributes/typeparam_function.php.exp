@@ -1,6 +1,15 @@
-ERROR: File "typeparam_function.php", line 8, characters 16-18:
-Invalid argument (Typing[4110])
-  File "typeparam_function.php", line 5, characters 31-33:
-  Expected `int`
-  File "typeparam_function.php", line 8, characters 16-18:
-  But got `float`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `float` [1]
+
+typeparam_function.php:8:16
+3 | 
+4 | class A implements HH\TypeParameterAttribute {
+5 |   public function __construct(int $foo) {}
+  |                               ^^^ [2]
+6 | }
+7 | 
+8 | function f<<<A(3.4)>> T>(): void {}
+  |                ^^^ [1]
+
+1 error found

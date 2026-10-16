@@ -1,18 +1,49 @@
-ERROR: File "class_extends_implements.php", line 31, characters 27-28:
-Some members in class `C4` are incompatible with those declared in type `C2` (Typing[4340])
-  File "class_extends_implements.php", line 31, characters 27-28:
-  Some members in class `C4` are incompatible with those declared in type `C2`
-  File "class_extends_implements.php", line 22, characters 23-24:
-  The constraint on this type constant is inconsistent with its parent
-  File "class_extends_implements.php", line 18, characters 29-39:
-  Expected `UpperBound2`
-  File "class_extends_implements.php", line 22, characters 29-39:
-  But got `UpperBound1`
-  File "class_extends_implements.php", line 22, characters 23-24:
-  This declaration was inherited from an object of type `I2`. Redeclare this member in `C4` with a compatible signature.
-ERROR: File "class_extends_implements.php", line 32, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "class_extends_implements.php", line 32, characters 38-39:
-  No type constant `T2` in `UpperBound1`
-  File "class_extends_implements.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
+error: Typing[4340] Some members in class `C4` are incompatible with those declared in type `C2` [1]
+-> Some members in class `C4` are incompatible with those declared in type `C2` [1]
+-> The constraint on this type constant is inconsistent with its parent [2]
+-> Expected `UpperBound2` [3]
+-> But got `UpperBound1` [4]
+-> This declaration was inherited from an object of type `I2`. Redeclare this member in `C4` with a compatible signature. [2]
+
+class_extends_implements.php:31:27
+16 | 
+17 | abstract class C2 {
+18 |   abstract const type T1 as UpperBound2;
+   |                             ^^^^^^^^^^^ [3]
+19 | }
+20 | 
+21 | interface I2 {
+22 |   abstract const type T1 as UpperBound1;
+   |                       ^^ [2]
+   |                             ^^^^^^^^^^^ [4]
+23 | }
+24 | 
+   :
+29 | 
+30 | // Error
+31 | abstract class C4 extends C2 implements I2 {
+   |                           ^^ [1]
+32 |   abstract const type T2 = this::T1::T2;
+33 | }
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+class_extends_implements.php:32:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {}
+   |           ^^^^^^^^^^^ [3]
+ 4 | 
+ 5 | interface UpperBound2 extends UpperBound1 {
+   :
+30 | // Error
+31 | abstract class C4 extends C2 implements I2 {
+32 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+33 | }
+34 | 
+
+2 errors found

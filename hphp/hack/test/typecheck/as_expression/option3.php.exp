@@ -1,6 +1,31 @@
-WARN: File "option3.php", line 4, characters 16-37:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. (Warn[12011])
-WARN: File "option3.php", line 5, characters 16-46:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. (Warn[12011])
-WARN: File "option3.php", line 9, characters 3-24:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. [1]
+
+option3.php:4:16
+2 | 
+3 | function f((int, int) $x): void {
+4 |   expect_tuple($x as ?(int, arraykey));
+  |                ^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   expect_tuple(tuple(0, 1) as ?(int, arraykey));
+6 | }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. [1]
+
+option3.php:5:16
+3 | function f((int, int) $x): void {
+4 |   expect_tuple($x as ?(int, arraykey));
+5 |   expect_tuple(tuple(0, 1) as ?(int, arraykey));
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+7 | 
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. [1]
+
+option3.php:9:3
+ 7 | 
+ 8 | function g((int, int) $x): void {
+ 9 |   $x as ?(int, arraykey);
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |   expect_tuple($x);
+11 | }
+
+3 errors found

@@ -1,18 +1,67 @@
-ERROR: File "reified-generics-alias.php", line 18, characters 5-11:
-Invalid reified hint (Typing[4305])
-  File "reified-generics-alias.php", line 13, characters 16-40:
-  This is type refinement, it cannot be used as a reified type argument
-  File "reified-generics-alias.php", line 11, characters 18-18:
-  `T` is reified
-ERROR: File "reified-generics-alias.php", line 21, characters 5-18:
-Invalid reified hint (Typing[4305])
-  File "reified-generics-alias.php", line 13, characters 16-40:
-  This is type refinement, it cannot be used as a reified type argument
-  File "reified-generics-alias.php", line 11, characters 18-18:
-  `T` is reified
-ERROR: File "reified-generics-alias.php", line 27, characters 19-32:
-Invalid reified hint (Typing[4305])
-  File "reified-generics-alias.php", line 13, characters 16-40:
-  This is type refinement, it cannot be used as a reified type argument
-  File "reified-generics-alias.php", line 24, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified-generics-alias.php:18:5
+ 9 | }
+10 | 
+11 | function f<reify T>(T $a): void {}
+   |                  ^ [3]
+12 | function f_nonreified<T>(T $a): void {} // OK
+13 | type BoxWith = Box with { type T = int };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | function g(int $x, BoxWith $b): void {
+15 |   f<int>($x); // OK
+16 |   f_nonreified<BoxWith>($b); // OK
+17 | 
+18 |   f<BoxWith>($b); // ERROR
+   |     ^^^^^^^ [1]
+19 | 
+20 |   $covar_b = new Covar($b);
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified-generics-alias.php:21:5
+ 9 | }
+10 | 
+11 | function f<reify T>(T $a): void {}
+   |                  ^ [3]
+12 | function f_nonreified<T>(T $a): void {} // OK
+13 | type BoxWith = Box with { type T = int };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | function g(int $x, BoxWith $b): void {
+15 |   f<int>($x); // OK
+   :
+19 | 
+20 |   $covar_b = new Covar($b);
+21 |   f<Covar<BoxWith>>($covar_b); // ERROR
+   |     ^^^^^^^^^^^^^^ [1]
+22 | }
+23 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified-generics-alias.php:27:19
+11 | function f<reify T>(T $a): void {}
+12 | function f_nonreified<T>(T $a): void {} // OK
+13 | type BoxWith = Box with { type T = int };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | function g(int $x, BoxWith $b): void {
+15 |   f<int>($x); // OK
+   :
+22 | }
+23 | 
+24 | class C<reify T> {}
+   |               ^ [3]
+25 | class C2<reify T> extends C<T> {}
+26 | 
+27 | class D extends C<Covar<BoxWith>> {} // ERROR (nested)
+   |                   ^^^^^^^^^^^^^^ [1]
+28 | 
+29 | function in_bound_only<
+
+3 errors found

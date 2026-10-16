@@ -1,2 +1,21 @@
-ERROR: File "switch.php", line 7, characters 5-74:
-Expression trees do not support `switch` statements. Consider using `if`/`else if`/`else` instead. (Parsing[1002])
+error: Parsing[1002] Expression trees do not support `switch` statements. Consider using `if`/`else if`/`else` instead. [1]
+
+switch.php:7:5
+ 5 | function test(): void {
+ 6 |   ExampleDsl`(int $x) ==> {
+ 7 |     switch ($x) {
+   |     ^^^^^^^^^^^^^ [1]
+ 8 |     case 1:
+   |     ^^^^^^^ [1]
+ 9 |       break;
+   |       ^^^^^^ [1]
+10 |     default:
+   |     ^^^^^^^^ [1]
+11 |       break;
+   |       ^^^^^^ [1]
+12 |     }
+   |     ^ [1]
+13 |   }`;
+14 | }
+
+1 error found

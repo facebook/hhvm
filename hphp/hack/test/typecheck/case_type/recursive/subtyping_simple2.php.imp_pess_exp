@@ -1,16 +1,39 @@
-ERROR: File "subtyping_simple2.php", line 4, characters 11-11:
-Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])
-  File "subtyping_simple2.php", line 4, characters 15-15:
-  This is the type `A`, which includes **ints** because it is a cyclic type
-  File "subtyping_simple2.php", line 4, characters 15-15:
-    via this variant of the case type `A`
-  File "subtyping_simple2.php", line 4, characters 19-21:
-  It overlaps with `int`, which also includes **ints**
-ERROR: File "subtyping_simple2.php", line 11, characters 14-15:
-Invalid argument (Typing[4110])
-  File "subtyping_simple2.php", line 7, characters 21-23:
-  Expected `int`
-  File "subtyping_simple2.php", line 9, characters 14-14:
-  But got `mixed`
-  File "subtyping_simple2.php", line 4, characters 11-11:
-    by the definition of `A`
+error: Typing[4475] Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag [1]
+-> This is the type `A`, which includes **ints** because it is a cyclic type [2]
+->   via this variant of the case type `A` [2]
+-> It overlaps with `int`, which also includes **ints** [3]
+
+subtyping_simple2.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A = A | int;
+  |           ^ [1]
+  |               ^ [2]
+  |                   ^^^ [3]
+5 | 
+6 | function expect_A(A $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+
+subtyping_simple2.php:11:14
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = A | int;
+   |           ^ [4]
+ 5 | 
+ 6 | function expect_A(A $_): void {}
+ 7 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+ 8 | 
+ 9 | function foo(A $a, int $i): void {
+   |              ^ [3]
+10 |   expect_A($a);
+11 |   expect_int($a); // nok: A <: int -> nok, need bound on A
+   |              ^^ [1]
+12 |   expect_A($i); // ok: int <: A -> int <: A | int -> ok
+13 | }
+
+2 errors found

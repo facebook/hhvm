@@ -1,4 +1,20 @@
-ERROR: File "shapes_remove_key2.php", line 5, characters 21-22:
-This argument should be annotated with `inout` (Typing[4182])
-  File "Shapes.hhi", line 63, characters 15-20:
-  Because this is an `inout` parameter
+error: Typing[4182] This argument should be annotated with `inout` [1]
+-> Because this is an `inout` parameter [2]
+
+shapes_remove_key2.php:5:21
+ 3 | function test(): void {
+ 4 |   $s = shape('x' => 4, 'y' => 'aaa');
+ 5 |   Shapes::removeKey($s, 'x'); // error for safe-pass-by-ref
+   |                     ^^ [1]
+ 6 |   $s['y']; // no error
+ 7 | }
+
+Shapes.hhi:63:15
+61 |     <<__NoAutoDynamic, __SupportDynamicType>>
+62 |     public static function removeKey<T as shape(...)>(
+63 |       inout T $shape,
+   |               ^^^^^^ [2]
+64 |       arraykey $index,
+65 |     )[]: void;
+
+1 error found

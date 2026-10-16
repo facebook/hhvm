@@ -1,6 +1,26 @@
-ERROR: File "coeffect_subtyping.php--h.php", line 6, characters 10-50:
-Invalid argument (Typing[4403])
-  File "coeffect_subtyping.php--g.php", line 6, characters 33-37:
-  Expected a function that requires the capability First
-  File "coeffect_subtyping.php--h.php", line 5, characters 17-22:
-  But got a function that requires the capability Second
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability First [2]
+-> But got a function that requires the capability Second [3]
+
+coeffect_subtyping.php--h.php:6:10
+3 | // client code
+4 | <<__EntryPoint>>
+5 | function main()[Second]: void {
+  |                 ^^^^^^ [3]
+6 |   int_op((int $inp) ==> {
+  |          ^^^^^^^^^^^^^^^^ [1]
+7 |     return $inp + 4;
+  |     ^^^^^^^^^^^^^^^^ [1]
+8 |   }, 5);
+  |   ^ [1]
+9 | }
+
+coeffect_subtyping.php--g.php:6:33
+4 | newctx Second as [First] = [defaults, First];
+5 | 
+6 | function int_op((function (int)[First]: int) $f, int $i)[First]: void {
+  |                                 ^^^^^ [2]
+7 |   $result = $f($i);
+8 | }
+
+1 error found

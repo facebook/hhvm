@@ -1,8 +1,35 @@
-ERROR: File "parent_construct22.php", line 15, characters 55-61:
-Cannot redeclare the promoted property `config` here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter. (Typing[4524])
-  File "parent_construct22.php", line 8, characters 41-47:
-  `config` was previously declared in `EntFooBase`
-ERROR: File "parent_construct22.php", line 34, characters 45-46:
-Cannot redeclare the promoted property `x` here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter. (Typing[4524])
-  File "parent_construct22.php", line 30, characters 41-43:
-  `x` was previously declared in `Base`
+error: Typing[4524] Cannot redeclare the promoted property `config` here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter. [1]
+-> `config` was previously declared in `EntFooBase` [2]
+
+parent_construct22.php:15:55
+ 6 | <<__ConsistentConstruct>>
+ 7 | abstract class EntFooBase<TConfig as IEntFoo> {
+ 8 |   public function __construct(protected TConfig $config) {}
+   |                                         ^^^^^^^ [2]
+ 9 | }
+10 | 
+   :
+13 | final class EntFoo extends EntFooBase<this::TConfig> {
+14 |   const type TConfig = EntFooConfig;
+15 |   public function __construct(protected this::TConfig $config) {
+   |                                                       ^^^^^^^ [1]
+16 |     parent::__construct($config);
+17 |   }
+
+error: Typing[4524] Cannot redeclare the promoted property `x` here because it is already declared by an ancestor. Remove the visibility modifier from this constructor parameter. [1]
+-> `x` was previously declared in `Base` [2]
+
+parent_construct22.php:34:45
+28 | // Simple (non-generic) re-promotion of an inherited property is also rejected.
+29 | class Base {
+30 |   public function __construct(protected int $x) {}
+   |                                         ^^^ [2]
+31 | }
+32 | 
+33 | class SubRepromote extends Base {
+34 |   public function __construct(protected int $x) {
+   |                                             ^^ [1]
+35 |     parent::__construct($x);
+36 |   }
+
+2 errors found

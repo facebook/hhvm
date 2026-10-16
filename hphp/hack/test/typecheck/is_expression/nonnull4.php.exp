@@ -1,2 +1,11 @@
-WARN: File "nonnull4.php", line 4, characters 7-19:
-This `is` check is always `false`. The expression on the left has type `null` which shares no values with `nonnull`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `null` which shares no values with `nonnull`. [1]
+
+nonnull4.php:4:7
+2 | 
+3 | function f(null $x): void {
+4 |   if ($x is nonnull) {
+  |       ^^^^^^^^^^^^^ [1]
+5 |     expect_int($x);
+6 |     expect_null($x);
+
+1 error found

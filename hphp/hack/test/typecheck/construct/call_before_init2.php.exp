@@ -1,7 +1,31 @@
-ERROR: File "call_before_init2.php", line 16, characters 34-44:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because `$this->x` can still potentially be null (NastCheck[3004])
-ERROR: File "call_before_init2.php", line 16, characters 17-47:
-Too many positional arguments (expected 1 but got 2) (Typing[4105])
-  File "stdlib/builtins_class.hhi", line 35, characters 12-20:
-  Definition is here
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->x` can still potentially be null [1]
+
+call_before_init2.php:16:34
+14 | 
+15 |   public function __construct() {
+16 |     $my_class = get_class($this, $this->foo2());
+   |                                  ^^^^^^^^^^^ [1]
+17 |     $this->x = 0;
+18 |   }
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+call_before_init2.php:16:17
+14 | 
+15 |   public function __construct() {
+16 |     $my_class = get_class($this, $this->foo2());
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |     $this->x = 0;
+18 |   }
+
+stdlib/builtins_class.hhi:35:12
+33 |   <<__PHPStdLib>>
+34 |   function get_class_vars(string $class_name): \HH\FIXME\MISSING_RETURN_TYPE;
+35 |   function get_class<T /* as HH\object */>(
+   |            ^^^^^^^^^ [2]
+36 |     readonly T $object,
+37 |   )[]: classname<T>;
+
+2 errors found

@@ -1,75 +1,232 @@
-WARN: File "non_bool_condition.php", line 19, characters 9-10:
-`$s` is a sketchy condition: testing the truthiness of a string may not behave as expected.
-The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty($s)`. (Warn[12006])
-ERROR: File "non_bool_condition.php", line 4, characters 7-8:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 4, characters 7-8:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 7, characters 10-11:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 7, characters 10-11:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 12, characters 12-13:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 12, characters 12-13:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 13, characters 16-17:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 13, characters 16-17:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 15, characters 3-4:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 15, characters 3-4:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 16, characters 12-13:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 16, characters 12-13:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 17, characters 3-4:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 17, characters 3-4:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 18, characters 12-13:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 18, characters 12-13:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 19, characters 3-4:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 19, characters 3-4:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 19, characters 9-10:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 19, characters 9-10:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 37-42:
-  But got `string`
-ERROR: File "non_bool_condition.php", line 20, characters 4-5:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 20, characters 4-5:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
-ERROR: File "non_bool_condition.php", line 21, characters 3-4:
-Only bool values can be used as a condition. Use a type-specific test instead. (Typing[4504])
-  File "non_bool_condition.php", line 21, characters 3-4:
-  Expected `bool`
-  File "non_bool_condition.php", line 3, characters 29-31:
-  But got `int`
+warning: Warn[12006] `$s` is a sketchy condition: testing the truthiness of a string may not behave as expected.
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty($s)`. [1]
+
+non_bool_condition.php:19:9
+17 |   $x || $bool;
+18 |   $bool || $x;
+19 |   $x && $s;
+   |         ^^ [1]
+20 |   !$x;
+21 |   $x ? 'consq' : 'alt';
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:4:7
+1 | <?hh
+2 | 
+3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+  |                             ^^^ [2]
+4 |   if ($x) {
+  |       ^^ [1]
+5 |     ;
+6 |   }
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:7:10
+1 | <?hh
+2 | 
+3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+  |                             ^^^ [2]
+4 |   if ($x) {
+5 |     ;
+6 |   }
+7 |   while ($x) {
+  |          ^^ [1]
+8 |     ;
+9 |   }
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:12:12
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+10 |   do {
+11 |     ;
+12 |   } while ($x);
+   |            ^^ [1]
+13 |   for ($i = 0; $x; $i++) {
+14 |   }
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:13:16
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+11 |     ;
+12 |   } while ($x);
+13 |   for ($i = 0; $x; $i++) {
+   |                ^^ [1]
+14 |   }
+15 |   $x && $bool;
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:15:3
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+13 |   for ($i = 0; $x; $i++) {
+14 |   }
+15 |   $x && $bool;
+   |   ^^ [1]
+16 |   $bool && $x;
+17 |   $x || $bool;
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:16:12
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+14 |   }
+15 |   $x && $bool;
+16 |   $bool && $x;
+   |            ^^ [1]
+17 |   $x || $bool;
+18 |   $bool || $x;
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:17:3
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+15 |   $x && $bool;
+16 |   $bool && $x;
+17 |   $x || $bool;
+   |   ^^ [1]
+18 |   $bool || $x;
+19 |   $x && $s;
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:18:12
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+16 |   $bool && $x;
+17 |   $x || $bool;
+18 |   $bool || $x;
+   |            ^^ [1]
+19 |   $x && $s;
+20 |   !$x;
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:19:3
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+17 |   $x || $bool;
+18 |   $bool || $x;
+19 |   $x && $s;
+   |   ^^ [1]
+20 |   !$x;
+21 |   $x ? 'consq' : 'alt';
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `string` [2]
+
+non_bool_condition.php:19:9
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                                     ^^^^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+17 |   $x || $bool;
+18 |   $bool || $x;
+19 |   $x && $s;
+   |         ^^ [1]
+20 |   !$x;
+21 |   $x ? 'consq' : 'alt';
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:20:4
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+18 |   $bool || $x;
+19 |   $x && $s;
+20 |   !$x;
+   |    ^^ [1]
+21 |   $x ? 'consq' : 'alt';
+22 | }
+
+error: Typing[4504] Only bool values can be used as a condition. Use a type-specific test instead. [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+non_bool_condition.php:21:3
+ 1 | <?hh
+ 2 | 
+ 3 | function non_bool_condition(int $x, string $s, bool $bool): void {
+   |                             ^^^ [2]
+ 4 |   if ($x) {
+ 5 |     ;
+   :
+19 |   $x && $s;
+20 |   !$x;
+21 |   $x ? 'consq' : 'alt';
+   |   ^^ [1]
+22 | }
+
+13 errors found

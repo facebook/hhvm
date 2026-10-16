@@ -1,12 +1,39 @@
-ERROR: File "eif.php", line 5, characters 14-15:
-Invalid argument (Typing[4110])
-  File "eif.php", line 10, characters 21-23:
-  Expected `int`
-  File "eif.php", line 4, characters 17-18:
-  But got `string`
-ERROR: File "eif.php", line 6, characters 17-18:
-Invalid argument (Typing[4110])
-  File "eif.php", line 11, characters 24-29:
-  Expected `string`
-  File "eif.php", line 4, characters 13-13:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+eif.php:5:14
+ 2 | 
+ 3 | function f(bool $b): arraykey {
+ 4 |   $x = $b ? 1 : "";
+   |                 ^^ [3]
+ 5 |   expect_int($x); // error
+   |              ^^ [1]
+ 6 |   expect_string($x); // error
+ 7 |   return $x;
+ 8 | }
+ 9 | 
+10 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+11 | function expect_string(string $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+eif.php:6:17
+ 2 | 
+ 3 | function f(bool $b): arraykey {
+ 4 |   $x = $b ? 1 : "";
+   |             ^ [3]
+ 5 |   expect_int($x); // error
+ 6 |   expect_string($x); // error
+   |                 ^^ [1]
+ 7 |   return $x;
+ 8 | }
+ 9 | 
+10 | function expect_int(int $x): void {}
+11 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+
+2 errors found

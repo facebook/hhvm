@@ -1,2 +1,10 @@
-ERROR: File "memoized_wrong_enum_class.php", line 7, characters 13-19:
-`__Memoize` can only be used with items from MemoizeOption. (Naming[2124])
+error: Naming[2124] `__Memoize` can only be used with items from MemoizeOption. [1]
+
+memoized_wrong_enum_class.php:7:13
+5 | }
+6 | 
+7 | <<__Memoize(MyClass#KeyedByIC)>>
+  |             ^^^^^^^ [1]
+8 | function foo(): void {}
+
+1 error found

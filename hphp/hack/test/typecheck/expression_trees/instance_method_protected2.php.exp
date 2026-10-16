@@ -1,8 +1,35 @@
-ERROR: File "instance_method_protected2.php", line 8, characters 11-13:
-Cannot access non-public members within expression trees. (Typing[4448])
-  File "instance_method_protected2.php", line 14, characters 22-24:
-  Member defined here
-ERROR: File "instance_method_protected2.php", line 8, characters 11-15:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "instance_method_protected2.php", line 14, characters 22-24:
-  Definition is here
+error: Typing[4448] Cannot access non-public members within expression trees. [1]
+-> Member defined here [2]
+
+instance_method_protected2.php:8:11
+ 6 |   public function test(): void {
+ 7 |     ExampleDsl`(MyClass $x) ==> {
+ 8 |       $x->foo();
+   |           ^^^ [1]
+ 9 |     }`;
+10 |   }
+11 | }
+12 | 
+13 | abstract class MyClass extends MyParent {
+14 |   protected function foo(ExampleInt $x): void {}
+   |                      ^^^ [2]
+15 | }
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+instance_method_protected2.php:8:11
+ 6 |   public function test(): void {
+ 7 |     ExampleDsl`(MyClass $x) ==> {
+ 8 |       $x->foo();
+   |           ^^^^^ [1]
+ 9 |     }`;
+10 |   }
+11 | }
+12 | 
+13 | abstract class MyClass extends MyParent {
+14 |   protected function foo(ExampleInt $x): void {}
+   |                      ^^^ [2]
+15 | }
+
+2 errors found

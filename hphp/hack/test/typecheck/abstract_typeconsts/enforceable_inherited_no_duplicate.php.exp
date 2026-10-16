@@ -1,6 +1,20 @@
-ERROR: File "enforceable_inherited_no_duplicate.php", line 10, characters 14-18:
-Invalid type (Typing[4302])
-  File "enforceable_inherited_no_duplicate.php", line 5, characters 5-17:
-  Type constant `TType` was declared `__Enforceable` here
-  File "enforceable_inherited_no_duplicate.php", line 10, characters 37-47:
-  This type is not enforceable because it has a type with an erased generic type argument
+error: Typing[4302] Invalid type [1]
+-> Type constant `TType` was declared `__Enforceable` here [2]
+-> This type is not enforceable because it has a type with an erased generic type argument [3]
+
+enforceable_inherited_no_duplicate.php:10:14
+ 3 | 
+ 4 | interface MyInterface {
+ 5 |   <<__Enforceable>>
+   |     ^^^^^^^^^^^^^ [2]
+ 6 |   abstract const type TType as shape(...);
+ 7 | }
+ 8 | 
+ 9 | abstract class MyClassBase implements MyInterface {
+10 |   const type TType = shape('foo' => vec<string>);
+   |              ^^^^^ [1]
+   |                                     ^^^^^^^^^^^ [3]
+11 | }
+12 | 
+
+1 error found

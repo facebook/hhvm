@@ -1,4 +1,20 @@
-WARN: File "refinement.php", line 7, characters 7-15:
-This `is` check is always `false`. The expression on the left has type `V` which shares no values with `int`. (Warn[12010])
-WARN: File "refinement.php", line 8, characters 3-14:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `V` which shares no values with `string`. (Warn[12012])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `V` which shares no values with `int`. [1]
+
+refinement.php:7:7
+5 | // Expression ID is not updated in either case, only the type
+6 | function refine(V $v)[$v::C]: void {
+7 |   if ($v is int) {}
+  |       ^^^^^^^^^ [1]
+8 |   $v as string;
+9 | }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `V` which shares no values with `string`. [1]
+
+refinement.php:8:3
+6 | function refine(V $v)[$v::C]: void {
+7 |   if ($v is int) {}
+8 |   $v as string;
+  |   ^^^^^^^^^^^^ [1]
+9 | }
+
+2 errors found

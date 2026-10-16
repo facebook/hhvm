@@ -1,34 +1,171 @@
-ERROR: File "shape_put.php", line 9, characters 23-34:
-Unbound name: `ExampleShape` (Naming[2049])
-ERROR: File "shape_put.php", line 9, characters 49-61:
-Unbound name: `ExampleString` (Naming[2049])
-ERROR: File "shape_put.php", line 11, characters 15-34:
-Unbound name: `ExampleDslExpression` (Naming[2049])
-ERROR: File "shape_put.php", line 11, characters 36-48:
-Unbound name: `ExampleString` (Naming[2049])
-ERROR: File "shape_put.php", line 12, characters 10-19:
-Unbound name: `ExampleDsl` (Naming[2049])
-ERROR: File "shape_put.php", line 12, characters 10-19:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 12, characters 21-182:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 13, characters 10-69:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 13, characters 38-47:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 14, characters 10-16:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 15, characters 10-19:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 15, characters 10-47:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 15, characters 40-46:
-Unbound name: `ExampleDsl` (an object type) (Naming[2049])
-ERROR: File "shape_put.php", line 12, characters 21-182:
-Was expecting a function value but type is unknown (Typing[4297])
-  File "shape_put.php", line 12, characters 21-182:
-  It is unknown because a type could not be determined here
-ERROR: File "shape_put.php", line 16, characters 12-17:
-Was expecting a function value but type is unknown (Typing[4297])
-  File "shape_put.php", line 16, characters 12-17:
-  It is unknown because a type could not be determined here
+error: Naming[2049] Unbound name: `ExampleShape` [1]
+
+shape_put.php:9:23
+ 7 |   )>>
+ 8 | 
+ 9 | type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
+   |                       ^^^^^^^^^^^^ [1]
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+
+error: Naming[2049] Unbound name: `ExampleString` [1]
+
+shape_put.php:9:49
+ 7 |   )>>
+ 8 | 
+ 9 | type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
+   |                                                 ^^^^^^^^^^^^^ [1]
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+
+error: Naming[2049] Unbound name: `ExampleDslExpression` [1]
+
+shape_put.php:11:15
+ 9 | type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+   |               ^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   return ExampleDsl`{
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+
+error: Naming[2049] Unbound name: `ExampleString` [1]
+
+shape_put.php:11:36
+ 9 | type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+   |                                    ^^^^^^^^^^^^^ [1]
+12 |   return ExampleDsl`{
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+
+error: Naming[2049] Unbound name: `ExampleDsl` [1]
+
+shape_put.php:12:10
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+12 |   return ExampleDsl`{
+   |          ^^^^^^^^^^ [1]
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+14 |     $x = shape();
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:12:10
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+12 |   return ExampleDsl`{
+   |          ^^^^^^^^^^ [1]
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+14 |     $x = shape();
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:12:21
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+12 |   return ExampleDsl`{
+   |                     ^ [1]
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     $x = shape();
+   |     ^^^^^^^^^^^^^ [1]
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |     return $f($x);
+   |     ^^^^^^^^^^^^^^ [1]
+17 |   }`;
+   |   ^ [1]
+18 | }
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:13:10
+11 | function h(): ExampleDslExpression<ExampleString> {
+12 |   return ExampleDsl`{
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     $x = shape();
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:13:38
+11 | function h(): ExampleDslExpression<ExampleString> {
+12 |   return ExampleDsl`{
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+   |                                      ^^^^^^^^^^ [1]
+14 |     $x = shape();
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:14:10
+12 |   return ExampleDsl`{
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+14 |     $x = shape();
+   |          ^^^^^^^ [1]
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+16 |     return $f($x);
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:15:10
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+14 |     $x = shape();
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+   |          ^^^^^^^^^^ [1]
+16 |     return $f($x);
+17 |   }`;
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:15:10
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+14 |     $x = shape();
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |     return $f($x);
+17 |   }`;
+
+error: Naming[2049] Unbound name: `ExampleDsl` (an object type) [1]
+
+shape_put.php:15:40
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+14 |     $x = shape();
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+   |                                        ^^^^^^^ [1]
+16 |     return $f($x);
+17 |   }`;
+
+error: Typing[4297] Was expecting a function value but type is unknown [1]
+-> It is unknown because a type could not be determined here [1]
+
+shape_put.php:12:21
+10 | 
+11 | function h(): ExampleDslExpression<ExampleString> {
+12 |   return ExampleDsl`{
+   |                     ^ [1]
+13 |     $f = (MyExampleShape $shape) ==> ExampleDsl::shapeAt($shape, 'y');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     $x = shape();
+   |     ^^^^^^^^^^^^^ [1]
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |     return $f($x);
+   |     ^^^^^^^^^^^^^^ [1]
+17 |   }`;
+   |   ^ [1]
+18 | }
+
+error: Typing[4297] Was expecting a function value but type is unknown [1]
+-> It is unknown because a type could not be determined here [1]
+
+shape_put.php:16:12
+14 |     $x = shape();
+15 |     $x = ExampleDsl::shapePut($x, 'y', 'test3');
+16 |     return $f($x);
+   |            ^^^^^^ [1]
+17 |   }`;
+18 | }
+
+15 errors found

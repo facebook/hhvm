@@ -1,8 +1,20 @@
-ERROR: File "simple_function_pointer_targs_bad.php", line 8, characters 6-19:
-Invalid argument (Typing[4110])
-  File "simple_function_pointer_targs_bad.php", line 7, characters 12-14:
-  Expected `int`
-  File "simple_function_pointer_targs_bad.php", line 3, characters 17-17:
-    via this generic `T`
-  File "simple_function_pointer_targs_bad.php", line 8, characters 6-19:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `string` [1]
+
+simple_function_pointer_targs_bad.php:8:6
+1 | <?hh
+2 | 
+3 | function foo<T>(T $arg): void {
+  |                 ^ [3]
+4 | }
+5 | 
+6 | function test(): void {
+7 |   $x = foo<int>;
+  |            ^^^ [2]
+8 |   $x('Hello world!');
+  |      ^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

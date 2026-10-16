@@ -1,36 +1,81 @@
-ERROR: File "immediately-called-lambda-error1.php", line 18, characters 19-23:
-Typing error (Typing[4429])
-  File "immediately-called-lambda-error1.php", line 18, characters 19-27:
-  Expected `num` because this is used in an arithmetic operation
-  File "immediately-called-lambda-error1.php", line 4, characters 38-41:
-  But got `?int`
-  File "immediately-called-lambda-error1.php", line 18, characters 12-27:
-  All the local information about `$c->x` has been invalidated by this lambda function.
-This is a limitation of the type-checker; use a local if that's the problem.
-ERROR: File "immediately-called-lambda-error1.php", line 18, characters 19-23:
-Typing error (Typing[4429])
-  File "immediately-called-lambda-error1.php", line 18, characters 19-27:
-  Expected `num` because this is used in an arithmetic operation
-  File "immediately-called-lambda-error1.php", line 18, characters 23-23:
-  But got `dynamic`, the result of accessing a property of a `dynamic` type
-  File "immediately-called-lambda-error1.php", line 18, characters 12-27:
-  All the local information about `$c->x` has been invalidated by this lambda function.
-This is a limitation of the type-checker; use a local if that's the problem.
-ERROR: File "immediately-called-lambda-error1.php", line 22, characters 25-29:
-Typing error (Typing[4429])
-  File "immediately-called-lambda-error1.php", line 22, characters 25-33:
-  Expected `num` because this is used in an arithmetic operation
-  File "immediately-called-lambda-error1.php", line 4, characters 38-41:
-  But got `?int`
-  File "immediately-called-lambda-error1.php", line 22, characters 12-33:
-  All the local information about `$c->x` has been invalidated by this lambda function.
-This is a limitation of the type-checker; use a local if that's the problem.
-ERROR: File "immediately-called-lambda-error1.php", line 22, characters 25-29:
-Typing error (Typing[4429])
-  File "immediately-called-lambda-error1.php", line 22, characters 25-33:
-  Expected `num` because this is used in an arithmetic operation
-  File "immediately-called-lambda-error1.php", line 22, characters 29-29:
-  But got `dynamic`, the result of accessing a property of a `dynamic` type
-  File "immediately-called-lambda-error1.php", line 22, characters 12-33:
-  All the local information about `$c->x` has been invalidated by this lambda function.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `?int` [3]
+-> All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+immediately-called-lambda-error1.php:18:19
+ 2 | 
+ 3 | class C {
+ 4 |   public function __construct(public ?int $x) {}
+   |                                      ^^^^ [3]
+ 5 | }
+ 6 | 
+   :
+16 |   if ($c->x is null) {
+17 |   } else {
+18 |     $z2 = ($x ==> $c->x + 1)(h());
+   |            ^^^^^^^^^^^^^^^^ [4]
+   |                   ^^^^^ [1]
+   |                   ^^^^^^^^^ [2]
+19 |   }
+20 |   if ($c->x is null) {
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic`, the result of accessing a property of a `dynamic` type [3]
+-> All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+immediately-called-lambda-error1.php:18:19
+16 |   if ($c->x is null) {
+17 |   } else {
+18 |     $z2 = ($x ==> $c->x + 1)(h());
+   |            ^^^^^^^^^^^^^^^^ [4]
+   |                   ^^^^^ [1]
+   |                   ^^^^^^^^^ [2]
+   |                       ^ [3]
+19 |   }
+20 |   if ($c->x is null) {
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `?int` [3]
+-> All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+immediately-called-lambda-error1.php:22:25
+ 2 | 
+ 3 | class C {
+ 4 |   public function __construct(public ?int $x) {}
+   |                                      ^^^^ [3]
+ 5 | }
+ 6 | 
+   :
+20 |   if ($c->x is null) {
+21 |   } else {
+22 |     $z1 = (($x, $y) ==> $c->x + 1)(1, g($c));
+   |            ^^^^^^^^^^^^^^^^^^^^^^ [4]
+   |                         ^^^^^ [1]
+   |                         ^^^^^^^^^ [2]
+23 |   }
+24 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `dynamic`, the result of accessing a property of a `dynamic` type [3]
+-> All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+immediately-called-lambda-error1.php:22:25
+20 |   if ($c->x is null) {
+21 |   } else {
+22 |     $z1 = (($x, $y) ==> $c->x + 1)(1, g($c));
+   |            ^^^^^^^^^^^^^^^^^^^^^^ [4]
+   |                         ^^^^^ [1]
+   |                         ^^^^^^^^^ [2]
+   |                             ^ [3]
+23 |   }
+24 | }
+
+4 errors found

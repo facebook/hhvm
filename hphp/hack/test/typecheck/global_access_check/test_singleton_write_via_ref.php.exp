@@ -1,28 +1,141 @@
-WARN: File "test_singleton_write_via_ref.php", line 39, characters 9-26:
-This `is` check is always `true`. The expression on the left has type `Baz` which is a subtype of `nonnull`. (Warn[12009])
-WARN: File "test_singleton_write_via_ref.php", line 52, characters 9-26:
-This `is` check is always `true`. The expression on the left has type `Baz` which is a subtype of `nonnull`. (Warn[12009])
-ERROR: File "test_singleton_write_via_ref.php", line 28, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_via_ref.php", line 29, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_write_via_ref.php", line 32, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_via_ref.php", line 34, characters 7-25:
-[Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 36, characters 7-25:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 40, characters 7-25:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 42, characters 7-25:
-[Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 45, characters 10-23:
-[Test::test_method_call]{\fun_memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_via_ref.php", line 47, characters 7-25:
-[Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 49, characters 7-25:
-[Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 53, characters 7-25:
-[Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_write_via_ref.php", line 55, characters 7-25:
-[Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `Baz` which is a subtype of `nonnull`. [1]
+
+test_singleton_write_via_ref.php:39:9
+37 |     }
+38 | 
+39 |     if ($a->baz is nonnull) {
+   |         ^^^^^^^^^^^^^^^^^^ [1]
+40 |       ($a->baz)->prop = 1;
+41 |     } else {
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `Baz` which is a subtype of `nonnull`. [1]
+
+test_singleton_write_via_ref.php:52:9
+50 |     }
+51 | 
+52 |     if ($b->baz is nonnull) {
+   |         ^^^^^^^^^^^^^^^^^^ [1]
+53 |       ($b->baz)->prop = 1;
+54 |     } else {
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. [1]
+
+test_singleton_write_via_ref.php:28:9
+26 | class Test {
+27 |   public function test_method_call(): void {
+28 |     if (Foo::$bar is null) {
+   |         ^^^^^^^^^ [1]
+29 |       Foo::$bar = new Bar(); // Singleton
+30 |     }
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_write_via_ref.php:29:7
+27 |   public function test_method_call(): void {
+28 |     if (Foo::$bar is null) {
+29 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |     }
+31 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_singleton_write_via_ref.php:32:10
+30 |     }
+31 | 
+32 |     $a = Foo::$bar;
+   |          ^^^^^^^^^ [1]
+33 |     if ($a->baz is null) {
+34 |       $a->baz = new Baz(); // Singleton
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:34:7
+32 |     $a = Foo::$bar;
+33 |     if ($a->baz is null) {
+34 |       $a->baz = new Baz(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+35 |     } else {
+36 |       ($a->baz)->prop = 1;
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:36:7
+34 |       $a->baz = new Baz(); // Singleton
+35 |     } else {
+36 |       ($a->baz)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+37 |     }
+38 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:40:7
+38 | 
+39 |     if ($a->baz is nonnull) {
+40 |       ($a->baz)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+41 |     } else {
+42 |       $a->baz = new Baz(); // Singleton
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:42:7
+40 |       ($a->baz)->prop = 1;
+41 |     } else {
+42 |       $a->baz = new Baz(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+43 |     }
+44 | 
+
+error: Other[11004] [Test::test_method_call]{\fun_memoized}((function(): Bar)) A global variable is definitely read. [1]
+
+test_singleton_write_via_ref.php:45:10
+43 |     }
+44 | 
+45 |     $b = fun_memoized();
+   |          ^^^^^^^^^^^^^^ [1]
+46 |     if ($b->baz is null) {
+47 |       $b->baz = new Baz(); // Singleton
+
+error: Other[11002] [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:47:7
+45 |     $b = fun_memoized();
+46 |     if ($b->baz is null) {
+47 |       $b->baz = new Baz(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+48 |     } else {
+49 |       ($b->baz)->prop = 1;
+
+error: Other[11002] [Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:49:7
+47 |       $b->baz = new Baz(); // Singleton
+48 |     } else {
+49 |       ($b->baz)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+50 |     }
+51 | 
+
+error: Other[11002] [Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:53:7
+51 | 
+52 |     if ($b->baz is nonnull) {
+53 |       ($b->baz)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+54 |     } else {
+55 |       $b->baz = new Baz(); // Singleton
+
+error: Other[11002] [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. [1]
+
+test_singleton_write_via_ref.php:55:7
+53 |       ($b->baz)->prop = 1;
+54 |     } else {
+55 |       $b->baz = new Baz(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+56 |     }
+57 |   }
+
+14 errors found

@@ -1,22 +1,48 @@
-ERROR: File "use_trait_bad_constraint_2.php", line 10, characters 7-16:
-Some type arguments violate their constraints (Typing[4323])
-  File "use_trait_bad_constraint_2.php", line 4, characters 14-15:
-  `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint_2.php", line 10, characters 10-11:
-  This type constraint is violated
-  File "use_trait_bad_constraint_2.php", line 10, characters 10-11:
-  Expected `Ta`
-  File "use_trait_bad_constraint_2.php", line 10, characters 14-15:
-  But got `Tb`
-ERROR: File "use_trait_bad_constraint_2.php", line 10, characters 7-16:
-Some type arguments violate their constraints (Typing[4323])
-  File "use_trait_bad_constraint_2.php", line 4, characters 14-15:
-  `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint_2.php", line 10, characters 10-11:
-  This type constraint is violated
-  File "use_trait_bad_constraint_2.php", line 10, characters 10-11:
-  Expected `Ta`
-  File "use_trait_bad_constraint_2.php", line 10, characters 14-15:
-  But got `mixed`
-  File "use_trait_bad_constraint_2.php", line 10, characters 14-15:
-    by the definition of `Tb` arising from an implicit `as mixed` constraint on this type
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tb` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Ta` [3]
+-> But got `Tb` [4]
+
+use_trait_bad_constraint_2.php:10:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | trait T1<Ta, Tb as Ta> {
+   |              ^^ [2]
+ 5 |   final public function do(Tb $in): Ta {
+ 6 |     return $in;
+ 7 |   }
+ 8 | }
+ 9 | trait T2<Ta, Tb> {
+10 |   use T1<Ta, Tb>;
+   |       ^^^^^^^^^^ [1]
+   |          ^^ [3]
+   |              ^^ [4]
+11 | }
+12 | abstract class A1 {
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tb` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Ta` [3]
+-> But got `mixed` [4]
+->   by the definition of `Tb` arising from an implicit `as mixed` constraint on this type [4]
+
+use_trait_bad_constraint_2.php:10:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | trait T1<Ta, Tb as Ta> {
+   |              ^^ [2]
+ 5 |   final public function do(Tb $in): Ta {
+ 6 |     return $in;
+ 7 |   }
+ 8 | }
+ 9 | trait T2<Ta, Tb> {
+10 |   use T1<Ta, Tb>;
+   |       ^^^^^^^^^^ [1]
+   |          ^^ [3]
+   |              ^^ [4]
+11 | }
+12 | abstract class A1 {
+
+2 errors found

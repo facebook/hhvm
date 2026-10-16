@@ -1,6 +1,21 @@
-ERROR: File "do_while_finally2.php", line 9, characters 20-21:
-Invalid argument (Typing[4110])
-  File "do_while_finally2.php", line 14, characters 23-28:
-  Expected `string`
-  File "do_while_finally2.php", line 6, characters 10-10:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+do_while_finally2.php:9:20
+ 4 |   $a = "apple";
+ 5 |   do {
+ 6 |     $a = 1;
+   |          ^ [3]
+ 7 |     try {
+ 8 |     } finally {
+ 9 |       takes_string($a);
+   |                    ^^ [1]
+10 |     }
+11 |   } while (1 == 2);
+12 | }
+13 | 
+14 | function takes_string(string $_): void {}
+   |                       ^^^^^^ [2]
+
+1 error found

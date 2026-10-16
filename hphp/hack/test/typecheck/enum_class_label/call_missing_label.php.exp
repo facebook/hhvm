@@ -1,10 +1,24 @@
-ERROR: File "call_missing_label.php", line 10, characters 15-16:
-Invalid argument (Typing[4110])
-  File "call_missing_label.php", line 10, characters 15-16:
-  Expected a class with a constant `B`
-  File "call_missing_label.php", line 7, characters 41-41:
-  But got `E`
-  File "call_missing_label.php", line 3, characters 12-12:
-  `E` is defined here
-  File "call_missing_label.php", line 4, characters 7-7:
-  Did you mean `A`?
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `B` [1]
+-> But got `E` [2]
+-> `E` is defined here [3]
+-> Did you mean `A`? [4]
+
+call_missing_label.php:10:15
+ 1 | <?hh
+ 2 | 
+ 3 | enum class E: mixed {
+   |            ^ [3]
+ 4 |   int A = 42;
+   |       ^ [4]
+ 5 | }
+ 6 | 
+ 7 | function takes_label(HH\EnumClass\Label<E, int> $_): void {}
+   |                                         ^ [2]
+ 8 | 
+ 9 | function call_it(): void {
+10 |   takes_label(#B);
+   |               ^^ [1]
+11 | }
+
+1 error found

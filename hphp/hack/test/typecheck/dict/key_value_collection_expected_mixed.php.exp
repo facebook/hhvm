@@ -1,36 +1,135 @@
-ERROR: File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-Invalid index type for this dict (Typing[4110])
-  File "key_value_collection_expected_mixed.php", line 11, characters 7-8:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "key_value_collection_expected_mixed.php", line 8, characters 15-19:
-  But got `float`
-ERROR: File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-Invalid index type for this dict (Typing[4110])
-  File "key_value_collection_expected_mixed.php", line 13, characters 7-8:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "key_value_collection_expected_mixed.php", line 8, characters 34-34:
-  But got `C`
-ERROR: File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-The keys of this `dict` are incompatible (Typing[4110])
-  File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-  This is a key-value collection, which requires `arraykey`-typed keys
-  File "key_value_collection_expected_mixed.php", line 8, characters 15-19:
-  But got `float`
-ERROR: File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-The keys of this `dict` are incompatible (Typing[4110])
-  File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-  This is a key-value collection, which requires `arraykey`-typed keys
-  File "key_value_collection_expected_mixed.php", line 8, characters 25-28:
-  But got `?int`
-ERROR: File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-The keys of this `dict` are incompatible (Typing[4110])
-  File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
-  This is a key-value collection, which requires `arraykey`-typed keys
-  File "key_value_collection_expected_mixed.php", line 8, characters 34-34:
-  But got `C`
-ERROR: File "key_value_collection_expected_mixed.php", line 12, characters 7-8:
-Invalid index type for this dict (Typing[4110])
-  File "key_value_collection_expected_mixed.php", line 12, characters 7-8:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "key_value_collection_expected_mixed.php", line 8, characters 25-28:
-  But got `?int`
+error: Typing[4110] Invalid index type for this dict [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `float` [3]
+
+key_value_collection_expected_mixed.php:10:5
+ 6 | class C {}
+ 7 | 
+ 8 | function test(float $x, ?int $y, C $z): void {
+   |               ^^^^^ [3]
+ 9 |   expect_mixed(
+10 |     dict[
+   |     ^^^^^ [1]
+11 |       $x => 1,
+   |       ^^^^^^^^ [1]
+   |       ^^ [2]
+12 |       $y => 2,
+   |       ^^^^^^^^ [1]
+13 |       $z => 3,
+   |       ^^^^^^^^ [1]
+14 |     ],
+   |     ^ [1]
+15 |   );
+16 | }
+
+error: Typing[4110] Invalid index type for this dict [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `C` [3]
+
+key_value_collection_expected_mixed.php:10:5
+ 6 | class C {}
+ 7 | 
+ 8 | function test(float $x, ?int $y, C $z): void {
+   |                                  ^ [3]
+ 9 |   expect_mixed(
+10 |     dict[
+   |     ^^^^^ [1]
+11 |       $x => 1,
+   |       ^^^^^^^^ [1]
+12 |       $y => 2,
+   |       ^^^^^^^^ [1]
+13 |       $z => 3,
+   |       ^^^^^^^^ [1]
+   |       ^^ [2]
+14 |     ],
+   |     ^ [1]
+15 |   );
+16 | }
+
+error: Typing[4110] The keys of this `dict` are incompatible [1]
+-> This is a key-value collection, which requires `arraykey`-typed keys [1]
+-> But got `float` [2]
+
+key_value_collection_expected_mixed.php:10:5
+ 6 | class C {}
+ 7 | 
+ 8 | function test(float $x, ?int $y, C $z): void {
+   |               ^^^^^ [2]
+ 9 |   expect_mixed(
+10 |     dict[
+   |     ^^^^^ [1]
+11 |       $x => 1,
+   |       ^^^^^^^^ [1]
+12 |       $y => 2,
+   |       ^^^^^^^^ [1]
+13 |       $z => 3,
+   |       ^^^^^^^^ [1]
+14 |     ],
+   |     ^ [1]
+15 |   );
+16 | }
+
+error: Typing[4110] The keys of this `dict` are incompatible [1]
+-> This is a key-value collection, which requires `arraykey`-typed keys [1]
+-> But got `?int` [2]
+
+key_value_collection_expected_mixed.php:10:5
+ 6 | class C {}
+ 7 | 
+ 8 | function test(float $x, ?int $y, C $z): void {
+   |                         ^^^^ [2]
+ 9 |   expect_mixed(
+10 |     dict[
+   |     ^^^^^ [1]
+11 |       $x => 1,
+   |       ^^^^^^^^ [1]
+12 |       $y => 2,
+   |       ^^^^^^^^ [1]
+13 |       $z => 3,
+   |       ^^^^^^^^ [1]
+14 |     ],
+   |     ^ [1]
+15 |   );
+16 | }
+
+error: Typing[4110] The keys of this `dict` are incompatible [1]
+-> This is a key-value collection, which requires `arraykey`-typed keys [1]
+-> But got `C` [2]
+
+key_value_collection_expected_mixed.php:10:5
+ 6 | class C {}
+ 7 | 
+ 8 | function test(float $x, ?int $y, C $z): void {
+   |                                  ^ [2]
+ 9 |   expect_mixed(
+10 |     dict[
+   |     ^^^^^ [1]
+11 |       $x => 1,
+   |       ^^^^^^^^ [1]
+12 |       $y => 2,
+   |       ^^^^^^^^ [1]
+13 |       $z => 3,
+   |       ^^^^^^^^ [1]
+14 |     ],
+   |     ^ [1]
+15 |   );
+16 | }
+
+error: Typing[4110] Invalid index type for this dict [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [1]
+-> But got `?int` [2]
+
+key_value_collection_expected_mixed.php:12:7
+ 6 | class C {}
+ 7 | 
+ 8 | function test(float $x, ?int $y, C $z): void {
+   |                         ^^^^ [2]
+ 9 |   expect_mixed(
+10 |     dict[
+11 |       $x => 1,
+12 |       $y => 2,
+   |       ^^ [1]
+13 |       $z => 3,
+14 |     ],
+
+6 errors found

@@ -1,14 +1,64 @@
-ERROR: File "arity_explicit.php", line 5, characters 12-12:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "arity_explicit.php", line 11, characters 3-3:
-Expected exactly one type parameter (Typing[4029])
-  File "arity_explicit.php", line 5, characters 10-10:
-  Definition is here
-ERROR: File "arity_explicit.php", line 13, characters 3-3:
-Expected exactly one type parameter (Typing[4029])
-  File "arity_explicit.php", line 5, characters 10-10:
-  Definition is here
-ERROR: File "arity_explicit.php", line 20, characters 3-3:
-Expected exactly one type parameter (Typing[4029])
-  File "arity_explicit.php", line 5, characters 10-10:
-  Definition is here
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+arity_explicit.php:5:12
+3 | class A { const ctx C = []; }
+4 | 
+5 | function f<T>(
+  |            ^ [1]
+6 |   A $a,
+7 |   (function (T)[_]: void) $f,
+
+error: Typing[4029] Expected exactly one type parameter [1]
+-> Definition is here [2]
+
+arity_explicit.php:11:3
+ 3 | class A { const ctx C = []; }
+ 4 | 
+ 5 | function f<T>(
+   |          ^ [2]
+ 6 |   A $a,
+ 7 |   (function (T)[_]: void) $f,
+ 8 | )[$a::C, ctx $f]: void {
+ 9 |   f<T>($a, $f);
+10 | 
+11 |   f<T, _, _>($a, $f);
+   |   ^ [1]
+12 | 
+13 |   f<
+
+error: Typing[4029] Expected exactly one type parameter [1]
+-> Definition is here [2]
+
+arity_explicit.php:13:3
+ 3 | class A { const ctx C = []; }
+ 4 | 
+ 5 | function f<T>(
+   |          ^ [2]
+ 6 |   A $a,
+ 7 |   (function (T)[_]: void) $f,
+   :
+11 |   f<T, _, _>($a, $f);
+12 | 
+13 |   f<
+   |   ^ [1]
+14 |     T,
+15 |     _, // T/$a
+
+error: Typing[4029] Expected exactly one type parameter [1]
+-> Definition is here [2]
+
+arity_explicit.php:20:3
+ 3 | class A { const ctx C = []; }
+ 4 | 
+ 5 | function f<T>(
+   |          ^ [2]
+ 6 |   A $a,
+ 7 |   (function (T)[_]: void) $f,
+   :
+18 |   >($a, $f);
+19 | 
+20 |   f<T, _, _, _, _>($a, $f);
+   |   ^ [1]
+21 | }
+
+4 errors found

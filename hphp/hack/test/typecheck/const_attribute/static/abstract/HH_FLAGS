@@ -1,3 +1,4 @@
 --config const_static_props=true
 --config const_attribute=true
 --config abstract_static_props=true
+--error-format plain_highlighted

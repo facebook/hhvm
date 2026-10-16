@@ -1,2 +1,39 @@
-ERROR: File "class_const_attribute.php", line 3, characters 1-360:
-Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
+error: Parsing[1002] Classes, interfaces, traits and enums may not be declared `__Const` [1]
+
+class_const_attribute.php:3:1
+ 1 | <?hh
+ 2 | 
+ 3 | <<__Const>>
+   | ^^^^^^^^^^^ [1]
+ 4 | class A {
+   | ^^^^^^^^^ [1]
+ 5 |   public int $denyMutateField;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 6 |   <<__Const>>
+   |   ^^^^^^^^^^^ [1]
+ 7 |   public int $permitRedundantConst;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 8 |   public static int $allowMutateStatic = 7;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | 
+10 |   public function __construct() {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |     $this->denyMutateField = 4;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |     $this->permitRedundantConst = 27;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   }
+   |   ^ [1]
+14 | 
+15 |   public function fail(): void {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |     A::$allowMutateStatic = 23;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |     $this->denyMutateField = 42;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   }
+   |   ^ [1]
+19 | }
+   | ^ [1]
+
+1 error found

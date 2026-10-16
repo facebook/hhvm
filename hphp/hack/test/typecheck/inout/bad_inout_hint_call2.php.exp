@@ -1,6 +1,19 @@
-ERROR: File "bad_inout_hint_call2.php", line 8, characters 7-8:
-Invalid argument (Typing[4184])
-  File "bad_inout_hint_call2.php", line 6, characters 15-16:
-  This is an `inout` parameter
-  File "bad_inout_hint_call2.php", line 3, characters 24-26:
-  It is incompatible with a normal parameter
+error: Typing[4184] Invalid argument [1]
+-> This is an `inout` parameter [2]
+-> It is incompatible with a normal parameter [3]
+
+bad_inout_hint_call2.php:8:7
+1 | <?hh
+2 | 
+3 | function foo((function(int): void) $f): void {}
+  |                        ^^^ [3]
+4 | 
+5 | function test(): void {
+6 |   $x = (inout $v) ==> {
+  |               ^^ [2]
+7 |   };
+8 |   foo($x);
+  |       ^^ [1]
+9 | }
+
+1 error found

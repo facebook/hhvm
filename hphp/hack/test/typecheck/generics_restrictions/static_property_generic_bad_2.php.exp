@@ -1,12 +1,41 @@
-ERROR: File "static_property_generic_bad_2.php", line 20, characters 12-12:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_property_generic_bad_2.php", line 6, characters 17-18:
-  This is where the type of the static property was declared
-  File "static_property_generic_bad_2.php", line 19, characters 7-13:
-  This is the class containing the static property
-ERROR: File "static_property_generic_bad_2.php", line 20, characters 12-12:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_property_generic_bad_2.php", line 7, characters 17-22:
-  This is where the type of the static property was declared
-  File "static_property_generic_bad_2.php", line 19, characters 7-13:
-  This is the class containing the static property
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_property_generic_bad_2.php:20:12
+ 4 | // trait itself is ok
+ 5 | trait Tr<T> {
+ 6 |   public static ?T $fld = null;
+   |                 ^^ [2]
+ 7 |   public static vec<T> $vec_fld = vec[];
+ 8 | }
+   :
+17 | 
+18 | // This is not ok
+19 | class WithAny<T> {
+   |       ^^^^^^^ [3]
+20 |   use Tr<C<T>>;
+   |            ^ [1]
+21 | }
+
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_property_generic_bad_2.php:20:12
+ 5 | trait Tr<T> {
+ 6 |   public static ?T $fld = null;
+ 7 |   public static vec<T> $vec_fld = vec[];
+   |                 ^^^^^^ [2]
+ 8 | }
+ 9 | 
+   :
+17 | 
+18 | // This is not ok
+19 | class WithAny<T> {
+   |       ^^^^^^^ [3]
+20 |   use Tr<C<T>>;
+   |            ^ [1]
+21 | }
+
+2 errors found

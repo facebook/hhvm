@@ -1,6 +1,19 @@
-ERROR: File "tuple2.php", line 7, characters 7-8:
-Invalid argument (Typing[4110])
-  File "tuple2.php", line 3, characters 18-20:
-  Expected `int`
-  File "tuple2.php", line 6, characters 19-24:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+tuple2.php:7:7
+1 | <?hh
+2 | 
+3 | function g((int, int, string) $x): void {}
+  |                  ^^^ [2]
+4 | 
+5 | function f(mixed $x): void {
+6 |   if ($x is (int, string, string)) {
+  |                   ^^^^^^ [3]
+7 |     g($x);
+  |       ^^ [1]
+8 |   }
+9 | }
+
+1 error found

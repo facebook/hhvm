@@ -1,4 +1,17 @@
-ERROR: File "internal_attribute_class.php--test2.php", line 2, characters 3-8:
-Cannot access an internal element from module `foo` in the default module (Typing[4444])
-  File "internal_attribute_class.php--test.php", line 3, characters 16-21:
-  This is from module `foo`
+error: Typing[4444] Cannot access an internal element from module `foo` in the default module [1]
+-> This is from module `foo` [2]
+
+internal_attribute_class.php--test2.php:2:3
+1 | <?hh
+2 | <<Sealed>>
+  |   ^^^^^^ [1]
+3 | trait TBar {}
+
+internal_attribute_class.php--test.php:3:16
+1 | <?hh
+2 | module foo;
+3 | internal class Sealed implements HH\ClassAttribute {}
+  |                ^^^^^^ [2]
+4 | 
+
+1 error found

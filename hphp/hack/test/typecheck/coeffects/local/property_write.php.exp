@@ -1,28 +1,101 @@
-ERROR: File "property_write.php", line 20, characters 3-17:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "property_write.php", line 21, characters 3-14:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "property_write.php", line 22, characters 3-18:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "property_write.php", line 23, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "property_write.php", line 20, characters 3-13:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "property_write.php", line 19, characters 20-21:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "property_write.php", line 21, characters 3-9:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "property_write.php", line 19, characters 20-21:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "property_write.php", line 22, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "property_write.php", line 19, characters 20-21:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "property_write.php", line 23, characters 3-12:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "property_write.php", line 19, characters 20-21:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+property_write.php:20:3
+18 | 
+19 | function fail(X $x)[]: void {
+20 |   $x->integer = 5; // ERROR
+   |   ^^^^^^^^^^^^^^^ [1]
+21 |   $x->str .= 0; // ERROR
+22 |   $x->vector[] = 1; // ERROR
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+property_write.php:21:3
+19 | function fail(X $x)[]: void {
+20 |   $x->integer = 5; // ERROR
+21 |   $x->str .= 0; // ERROR
+   |   ^^^^^^^^^^^^ [1]
+22 |   $x->vector[] = 1; // ERROR
+23 |   $x->varr[] = 2;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+property_write.php:22:3
+20 |   $x->integer = 5; // ERROR
+21 |   $x->str .= 0; // ERROR
+22 |   $x->vector[] = 1; // ERROR
+   |   ^^^^^^^^^^^^^^^^ [1]
+23 |   $x->varr[] = 2;
+24 | }
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+property_write.php:23:3
+21 |   $x->str .= 0; // ERROR
+22 |   $x->vector[] = 1; // ERROR
+23 |   $x->varr[] = 2;
+   |   ^^^^^^^^^^^^^^ [1]
+24 | }
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+property_write.php:20:3
+17 | }
+18 | 
+19 | function fail(X $x)[]: void {
+   |                    ^^ [2]
+20 |   $x->integer = 5; // ERROR
+   |   ^^^^^^^^^^^ [1]
+21 |   $x->str .= 0; // ERROR
+22 |   $x->vector[] = 1; // ERROR
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+property_write.php:21:3
+17 | }
+18 | 
+19 | function fail(X $x)[]: void {
+   |                    ^^ [2]
+20 |   $x->integer = 5; // ERROR
+21 |   $x->str .= 0; // ERROR
+   |   ^^^^^^^ [1]
+22 |   $x->vector[] = 1; // ERROR
+23 |   $x->varr[] = 2;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+property_write.php:22:3
+17 | }
+18 | 
+19 | function fail(X $x)[]: void {
+   |                    ^^ [2]
+20 |   $x->integer = 5; // ERROR
+21 |   $x->str .= 0; // ERROR
+22 |   $x->vector[] = 1; // ERROR
+   |   ^^^^^^^^^^^^ [1]
+23 |   $x->varr[] = 2;
+24 | }
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+property_write.php:23:3
+17 | }
+18 | 
+19 | function fail(X $x)[]: void {
+   |                    ^^ [2]
+20 |   $x->integer = 5; // ERROR
+21 |   $x->str .= 0; // ERROR
+22 |   $x->vector[] = 1; // ERROR
+23 |   $x->varr[] = 2;
+   |   ^^^^^^^^^^ [1]
+24 | }
+
+8 errors found

@@ -1,2 +1,10 @@
-ERROR: File "bad_inout_decl_default.php", line 3, characters 28-31:
-An `inout` parameter must not have a default value. (Parsing[1002])
+error: Parsing[1002] An `inout` parameter must not have a default value. [1]
+
+bad_inout_decl_default.php:3:28
+1 | <?hh
+2 | 
+3 | function test(inout int $i = 42): void {
+  |                            ^^^^ [1]
+4 | }
+
+1 error found

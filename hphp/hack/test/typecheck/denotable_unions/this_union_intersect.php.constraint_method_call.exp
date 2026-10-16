@@ -1,48 +1,141 @@
-ERROR: File "this_union_intersect.php", line 92, characters 7-11:
-No instance method `imeth` in `M` (Typing[4053])
-  File "this_union_intersect.php", line 20, characters 19-23:
-  Did you mean `mmeth` instead?
-  File "this_union_intersect.php", line 17, characters 25-25:
-  This is why I think it is an object of type M
-  File "this_union_intersect.php", line 19, characters 11-11:
-  Declaration of `M` is here
-ERROR: File "this_union_intersect.php", line 128, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_union_intersect.php", line 126, characters 45-46:
-  Expected `JB`
-  File "this_union_intersect.php", line 119, characters 25-32:
-  But got `<expr#2>::TP where <expr#2>::TP as IA::TP, <expr#2>::TP as IC::TP`
-  File "this_union_intersect.php", line 127, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "this_union_intersect.php", line 128, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_union_intersect.php", line 126, characters 45-46:
-  Expected `JB`
-  File "this_union_intersect.php", line 119, characters 25-32:
-  But got `IA::TP where \IA::TP super <expr#2>::TP, \IA::TP as JA`
-  File "this_union_intersect.php", line 127, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "this_union_intersect.php", line 128, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_union_intersect.php", line 126, characters 45-46:
-  Expected `JB`
-  File "this_union_intersect.php", line 119, characters 25-32:
-  But got `IC::TP where \IC::TP super <expr#2>::TP, \IC::TP as JC`
-  File "this_union_intersect.php", line 127, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "this_union_intersect.php", line 128, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_union_intersect.php", line 126, characters 45-46:
-  Expected `JB`
-  File "this_union_intersect.php", line 119, characters 25-32:
-  But got `JA`
-  File "this_union_intersect.php", line 127, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "this_union_intersect.php", line 128, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_union_intersect.php", line 126, characters 45-46:
-  Expected `JB`
-  File "this_union_intersect.php", line 119, characters 25-32:
-  But got `JC`
-  File "this_union_intersect.php", line 127, characters 8-9:
-    where `<expr#2>` is a reference to this expression
+error: Typing[4053] No instance method `imeth` in `M` [1]
+-> Did you mean `mmeth` instead? [2]
+-> This is why I think it is an object of type M [3]
+-> Declaration of `M` is here [4]
+
+this_union_intersect.php:92:7
+15 | }
+16 | interface K {
+17 |   public function get():M;
+   |                         ^ [3]
+18 | }
+19 | interface M {
+   |           ^ [4]
+20 |   public function mmeth():void;
+   |                   ^^^^^ [2]
+21 | }
+22 | interface N {
+   :
+90 |   $y = $x->get();
+91 |   //hh_show($y);
+92 |   $y->imeth();
+   |       ^^^^^ [1]
+93 |   $y->mmeth();
+94 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `JB` [2]
+-> But got `<expr#2>::TP where <expr#2>::TP as IA::TP, <expr#2>::TP as IC::TP` [3]
+->   where `<expr#2>` is a reference to this expression [4]
+
+this_union_intersect.php:128:10
+117 |   abstract const type TP as JC;
+118 |   public function methc():void;
+119 |   public function get():this::TP;
+    |                         ^^^^^^^^ [3]
+120 | }
+121 | 
+    :
+124 | }
+125 | 
+126 | function testcomplex2((IB & (IA | IC)) $x):(JB & (JA | JC)) {
+    |                                             ^^ [2]
+127 |   $y = $x->get();
+    |        ^^ [4]
+128 |   return $y;
+    |          ^^ [1]
+129 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `JB` [2]
+-> But got `IA::TP where \IA::TP super <expr#2>::TP, \IA::TP as JA` [3]
+->   where `<expr#2>` is a reference to this expression [4]
+
+this_union_intersect.php:128:10
+117 |   abstract const type TP as JC;
+118 |   public function methc():void;
+119 |   public function get():this::TP;
+    |                         ^^^^^^^^ [3]
+120 | }
+121 | 
+    :
+124 | }
+125 | 
+126 | function testcomplex2((IB & (IA | IC)) $x):(JB & (JA | JC)) {
+    |                                             ^^ [2]
+127 |   $y = $x->get();
+    |        ^^ [4]
+128 |   return $y;
+    |          ^^ [1]
+129 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `JB` [2]
+-> But got `IC::TP where \IC::TP super <expr#2>::TP, \IC::TP as JC` [3]
+->   where `<expr#2>` is a reference to this expression [4]
+
+this_union_intersect.php:128:10
+117 |   abstract const type TP as JC;
+118 |   public function methc():void;
+119 |   public function get():this::TP;
+    |                         ^^^^^^^^ [3]
+120 | }
+121 | 
+    :
+124 | }
+125 | 
+126 | function testcomplex2((IB & (IA | IC)) $x):(JB & (JA | JC)) {
+    |                                             ^^ [2]
+127 |   $y = $x->get();
+    |        ^^ [4]
+128 |   return $y;
+    |          ^^ [1]
+129 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `JB` [2]
+-> But got `JA` [3]
+->   where `<expr#2>` is a reference to this expression [4]
+
+this_union_intersect.php:128:10
+117 |   abstract const type TP as JC;
+118 |   public function methc():void;
+119 |   public function get():this::TP;
+    |                         ^^^^^^^^ [3]
+120 | }
+121 | 
+    :
+124 | }
+125 | 
+126 | function testcomplex2((IB & (IA | IC)) $x):(JB & (JA | JC)) {
+    |                                             ^^ [2]
+127 |   $y = $x->get();
+    |        ^^ [4]
+128 |   return $y;
+    |          ^^ [1]
+129 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `JB` [2]
+-> But got `JC` [3]
+->   where `<expr#2>` is a reference to this expression [4]
+
+this_union_intersect.php:128:10
+117 |   abstract const type TP as JC;
+118 |   public function methc():void;
+119 |   public function get():this::TP;
+    |                         ^^^^^^^^ [3]
+120 | }
+121 | 
+    :
+124 | }
+125 | 
+126 | function testcomplex2((IB & (IA | IC)) $x):(JB & (JA | JC)) {
+    |                                             ^^ [2]
+127 |   $y = $x->get();
+    |        ^^ [4]
+128 |   return $y;
+    |          ^^ [1]
+129 | }
+
+6 errors found

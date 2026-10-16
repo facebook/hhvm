@@ -1,6 +1,26 @@
-ERROR: File "property_access_error.php", line 7, characters 19-25:
-Invalid assignment (Typing[4110])
-  File "property_access_error.php", line 12, characters 10-19:
-  Expected `int`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+property_access_error.php:7:19
+  5 | function test(): void {
+  6 |   ExampleDsl`(MyState $x) ==> {
+  7 |     $x->my_prop = "Hello";
+    |                   ^^^^^^^ [1]
+  8 |   }`;
+  9 | }
+ 10 | 
+ 11 | abstract class MyState {
+ 12 |   public ExampleInt $my_prop;
+    |          ^^^^^^^^^^ [2]
+ 13 | }
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+1 error found

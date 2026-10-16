@@ -1,8 +1,19 @@
-ERROR: File "meth_caller10.php", line 13, characters 10-11:
-Invalid return type (Typing[4110])
-  File "meth_caller10.php", line 9, characters 20-22:
-  Expected `int`
-  File "meth_caller10.php", line 12, characters 15-24:
-  But got `string`
-  File "meth_caller10.php", line 12, characters 15-24:
-  This type argument to `X` must match exactly (it is invariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+-> This type argument to `X` must match exactly (it is invariant) [3]
+
+meth_caller10.php:13:10
+ 7 | }
+ 8 | 
+ 9 | function test(): X<int> {
+   |                    ^^^ [2]
+10 |   $caller = meth_caller(X::class, 'foo');
+11 |   $x = new X();
+12 |   $caller($x, 'a string');
+   |               ^^^^^^^^^^ [3]
+13 |   return $x;
+   |          ^^ [1]
+14 | }
+
+1 error found

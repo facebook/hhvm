@@ -1,4 +1,13 @@
-ERROR: File "bad_inout_use_arg15.php", line 9, characters 11-20:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-  File "bad_inout_use_arg15.php", line 8, characters 8-38:
-  This is an object of type Map<string, Vector<int>>
+error: Typing[4208] Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. [1]
+-> This is an object of type Map<string, Vector<int>> [2]
+
+bad_inout_use_arg15.php:9:11
+ 6 | 
+ 7 | function test(): void {
+ 8 |   $x = Map { 'wow' => Vector { 256 } };
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   f(inout $x['nope']);
+   |           ^^^^^^^^^^ [1]
+10 | }
+
+1 error found

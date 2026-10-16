@@ -1,24 +1,59 @@
-ERROR: File "simple_variance.php", line 13, characters 15-15:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "simple_variance.php", line 12, characters 41-41:
-  This is where the parameter was declared as covariant `+`
-  File "simple_variance.php", line 13, characters 15-15:
-  `case type where _ as _` constraints are covariant on the left, contravariant on the right
-ERROR: File "simple_variance.php", line 15, characters 20-22:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "simple_variance.php", line 12, characters 41-41:
-  This is where the parameter was declared as covariant `+`
-  File "simple_variance.php", line 15, characters 20-22:
-  `case type where _ = _` constraints are invariant on the left and right
-ERROR: File "simple_variance.php", line 19, characters 18-18:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "simple_variance.php", line 17, characters 45-45:
-  This is where the parameter was declared as contravariant `-`
-  File "simple_variance.php", line 19, characters 18-18:
-  `case type where _ super _` constraints are contravariant on the left, covariant on the right
-ERROR: File "simple_variance.php", line 20, characters 16-16:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "simple_variance.php", line 17, characters 45-45:
-  This is where the parameter was declared as contravariant `-`
-  File "simple_variance.php", line 20, characters 16-16:
-  `case type where _ = _` constraints are invariant on the left and right
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> `case type where _ as _` constraints are covariant on the left, contravariant on the right [1]
+
+simple_variance.php:13:15
+10 |   | bool where T = Baz;
+11 | 
+12 | case type CaseTypeWithCovariantGeneric<+T> =
+   |                                         ^ [2]
+13 |   | int where T as Foo // error
+   |               ^ [1]
+14 |   | string where T super Bar
+15 |   | bool where T = Baz; // error
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> `case type where _ = _` constraints are invariant on the left and right [1]
+
+simple_variance.php:15:20
+10 |   | bool where T = Baz;
+11 | 
+12 | case type CaseTypeWithCovariantGeneric<+T> =
+   |                                         ^ [2]
+13 |   | int where T as Foo // error
+14 |   | string where T super Bar
+15 |   | bool where T = Baz; // error
+   |                    ^^^ [1]
+16 | 
+17 | case type CaseTypeWithContravariantGeneric<-T> =
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `case type where _ super _` constraints are contravariant on the left, covariant on the right [1]
+
+simple_variance.php:19:18
+15 |   | bool where T = Baz; // error
+16 | 
+17 | case type CaseTypeWithContravariantGeneric<-T> =
+   |                                             ^ [2]
+18 |   | int where T as Foo
+19 |   | string where T super Bar // error
+   |                  ^ [1]
+20 |   | bool where T = Baz; // error
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `case type where _ = _` constraints are invariant on the left and right [1]
+
+simple_variance.php:20:16
+15 |   | bool where T = Baz; // error
+16 | 
+17 | case type CaseTypeWithContravariantGeneric<-T> =
+   |                                             ^ [2]
+18 |   | int where T as Foo
+19 |   | string where T super Bar // error
+20 |   | bool where T = Baz; // error
+   |                ^ [1]
+
+4 errors found

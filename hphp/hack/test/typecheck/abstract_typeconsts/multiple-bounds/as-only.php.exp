@@ -1,24 +1,80 @@
-ERROR: File "as-only.php", line 25, characters 23-24:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "as-only.php", line 7, characters 29-31:
-  Expected `int`
-  File "as-only.php", line 25, characters 29-34:
-  But got `string`
-ERROR: File "as-only.php", line 26, characters 23-24:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "as-only.php", line 8, characters 29-36:
-  Expected `arraykey`
-  File "as-only.php", line 26, characters 29-33:
-  But got `mixed`
-ERROR: File "as-only.php", line 27, characters 23-25:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "as-only.php", line 9, characters 42-44:
-  Expected `int`
-  File "as-only.php", line 27, characters 30-35:
-  But got `string`
-ERROR: File "as-only.php", line 28, characters 23-25:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "as-only.php", line 10, characters 30-43:
-  Expected `nothing`
-  File "as-only.php", line 28, characters 30-37:
-  But got `arraykey`
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+as-only.php:25:23
+ 5 | 
+ 6 | abstract class A {
+ 7 |   abstract const type Ti as int;
+   |                             ^^^ [2]
+ 8 |   abstract const type Ta as arraykey;
+ 9 |   abstract const type Tia as arraykey as int;
+   :
+23 | 
+24 | abstract class ABadOverride extends A {
+25 |   abstract const type Ti as string; // ERROR: string </: int
+   |                       ^^ [1]
+   |                             ^^^^^^ [3]
+26 |   abstract const type Ta as mixed; // ERROR: mixed </: arraykey
+27 |   abstract const type Tia as string as arraykey; // ERROR: (string & arraykey) </: (string & int)
+
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+as-only.php:26:23
+ 6 | abstract class A {
+ 7 |   abstract const type Ti as int;
+ 8 |   abstract const type Ta as arraykey;
+   |                             ^^^^^^^^ [2]
+ 9 |   abstract const type Tia as arraykey as int;
+10 |   abstract const type Tsi as (string & int);
+   :
+24 | abstract class ABadOverride extends A {
+25 |   abstract const type Ti as string; // ERROR: string </: int
+26 |   abstract const type Ta as mixed; // ERROR: mixed </: arraykey
+   |                       ^^ [1]
+   |                             ^^^^^ [3]
+27 |   abstract const type Tia as string as arraykey; // ERROR: (string & arraykey) </: (string & int)
+28 |   abstract const type Tsi as arraykey; // ERROR: arraykey </: (string & int)
+
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+as-only.php:27:23
+ 7 |   abstract const type Ti as int;
+ 8 |   abstract const type Ta as arraykey;
+ 9 |   abstract const type Tia as arraykey as int;
+   |                                          ^^^ [2]
+10 |   abstract const type Tsi as (string & int);
+11 | }
+   :
+25 |   abstract const type Ti as string; // ERROR: string </: int
+26 |   abstract const type Ta as mixed; // ERROR: mixed </: arraykey
+27 |   abstract const type Tia as string as arraykey; // ERROR: (string & arraykey) </: (string & int)
+   |                       ^^^ [1]
+   |                              ^^^^^^ [3]
+28 |   abstract const type Tsi as arraykey; // ERROR: arraykey </: (string & int)
+29 | }
+
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `nothing` [2]
+-> But got `arraykey` [3]
+
+as-only.php:28:23
+ 8 |   abstract const type Ta as arraykey;
+ 9 |   abstract const type Tia as arraykey as int;
+10 |   abstract const type Tsi as (string & int);
+   |                              ^^^^^^^^^^^^^^ [2]
+11 | }
+12 | 
+   :
+26 |   abstract const type Ta as mixed; // ERROR: mixed </: arraykey
+27 |   abstract const type Tia as string as arraykey; // ERROR: (string & arraykey) </: (string & int)
+28 |   abstract const type Tsi as arraykey; // ERROR: arraykey </: (string & int)
+   |                       ^^^ [1]
+   |                              ^^^^^^^^ [3]
+29 | }
+
+4 errors found

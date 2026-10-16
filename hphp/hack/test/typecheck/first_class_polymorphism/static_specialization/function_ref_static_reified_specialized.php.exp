@@ -1,12 +1,50 @@
-ERROR: File "function_ref_static_reified_specialized.php", line 26, characters 12-26:
-Invalid argument (Typing[4110])
-  File "function_ref_static_reified_specialized.php", line 11, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_reified_specialized.php", line 6, characters 26-27:
-  But got `(readonly function<T>(int $value): int)`
-ERROR: File "function_ref_static_reified_specialized.php", line 27, characters 12-24:
-Invalid argument (Typing[4110])
-  File "function_ref_static_reified_specialized.php", line 11, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_reified_specialized.php", line 6, characters 26-27:
-  But got `(readonly function<T>($value): _)`
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>(int $value): int)` [3]
+
+function_ref_static_reified_specialized.php:26:12
+ 4 | 
+ 5 | class Base {
+ 6 |   public static function id<T>(T $value): T {
+   |                          ^^ [3]
+ 7 |     return $value;
+ 8 |   }
+ 9 | }
+10 | 
+11 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+12 | 
+13 | function good<reify TClass as Base as Marker>(): void {
+   :
+24 | 
+25 | function bad<reify TClass as Base as Marker>(): void {
+26 |   take_ref(TClass::id<int>);
+   |            ^^^^^^^^^^^^^^^ [1]
+27 |   take_ref(TClass::id<_>);
+28 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>($value): _)` [3]
+
+function_ref_static_reified_specialized.php:27:12
+ 4 | 
+ 5 | class Base {
+ 6 |   public static function id<T>(T $value): T {
+   |                          ^^ [3]
+ 7 |     return $value;
+ 8 |   }
+ 9 | }
+10 | 
+11 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+12 | 
+13 | function good<reify TClass as Base as Marker>(): void {
+   :
+25 | function bad<reify TClass as Base as Marker>(): void {
+26 |   take_ref(TClass::id<int>);
+27 |   take_ref(TClass::id<_>);
+   |            ^^^^^^^^^^^^^ [1]
+28 | }
+
+2 errors found

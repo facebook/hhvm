@@ -1,6 +1,14 @@
-ERROR: File "disallow_darray_with_int_keys_where_varray_is_required.php", line 16, characters 10-29:
-Invalid return type (Typing[4110])
-  File "disallow_darray_with_int_keys_where_varray_is_required.php", line 15, characters 18-31:
-  Expected `vec<string>`
-  File "disallow_darray_with_int_keys_where_varray_is_required.php", line 16, characters 10-29:
-  But got `dict<int, string>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `vec<string>` [2]
+-> But got `dict<int, string>` [1]
+
+disallow_darray_with_int_keys_where_varray_is_required.php:16:10
+13 |  */
+14 | 
+15 | function test(): varray<string> {
+   |                  ^^^^^^^^^^^^^^ [2]
+16 |   return dict[0 => "tingley"];
+   |          ^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+
+1 error found

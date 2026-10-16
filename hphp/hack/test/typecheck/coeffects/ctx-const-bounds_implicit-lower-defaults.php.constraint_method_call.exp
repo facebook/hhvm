@@ -1,6 +1,19 @@
-ERROR: File "ctx-const-bounds_implicit-lower-defaults.php", line 9, characters 3-9:
-Typing error (Typing[4403])
-  File "ctx-const-bounds_implicit-lower-defaults.php", line 8, characters 10-33:
-  Expected a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-  File "ctx-const-bounds_implicit-lower-defaults.php", line 5, characters 38-38:
-  But got a function that requires the capability <expr#2>::C
+error: Typing[4403] Typing error [1]
+-> Expected a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [2]
+-> But got a function that requires the capability <expr#2>::C [3]
+
+ctx-const-bounds_implicit-lower-defaults.php:9:3
+ 3 | abstract class Base {
+ 4 |   abstract const ctx C;
+ 5 |   public abstract function m()[this::C]: void;
+   |                                      ^ [3]
+ 6 | }
+ 7 | 
+ 8 | function bad_mono_caller_implicit(Base $b): void {
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   $b->m(); // ERROR (must not implicitly hold: [defaults] <: C)
+   |   ^^^^^^^ [1]
+10 | }
+11 | 
+
+1 error found

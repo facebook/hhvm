@@ -1,10 +1,22 @@
-ERROR: File "classname+static.php", line 7, characters 7-17:
-Invalid argument (Typing[4323])
-  File "classname+static.php", line 11, characters 12-15:
-  `TBox` is a constrained type parameter
-  File "classname+static.php", line 11, characters 20-42:
-  This type constraint is violated
-  File "classname+static.php", line 11, characters 20-42:
-  Expected a class with `{type T = _}`
-  File "classname+static.php", line 7, characters 14-17:
-  But got `Box`
+error: Typing[4323] Invalid argument [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type T = _}` [3]
+-> But got `Box` [4]
+
+classname+static.php:7:7
+ 5 |   public function m(): void {
+ 6 |     f(nameof static); // OK
+ 7 |     f(nameof self); // ERROR
+   |       ^^^^^^^^^^^ [1]
+   |              ^^^^ [4]
+ 8 |   }
+ 9 | }
+10 | 
+11 | function f<TBox as Box with { type T = T }, T>(
+   |            ^^^^ [2]
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+12 |   classname<TBox> $cls_box,
+13 | ): void {}
+
+1 error found

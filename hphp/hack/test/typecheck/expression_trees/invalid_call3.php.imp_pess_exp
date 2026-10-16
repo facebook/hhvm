@@ -1,8 +1,29 @@
-WARN: File "invalid_call3.php", line 6, characters 14-23:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "invalid_call3.php", line 6, characters 14-23:
-  This expression has type `dynamic`, the result of calling a `dynamic` type as a function
-ERROR: File "invalid_call3.php", line 6, characters 14-23:
-You are trying to access the method `__unwrap` but this is an int (Typing[4062])
-  File "expr_tree.php", line 574, characters 43-52:
-  Definition is here
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic`, the result of calling a `dynamic` type as a function [1]
+
+invalid_call3.php:6:14
+4 | 
+5 | function foo(): void {
+6 |   ExampleDsl`(2 + 2)(4)`;
+  |              ^^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4062] You are trying to access the method `__unwrap` but this is an int [1]
+-> Definition is here [2]
+
+invalid_call3.php:6:14
+  4 | 
+  5 | function foo(): void {
+  6 |   ExampleDsl`(2 + 2)(4)`;
+    |              ^^^^^^^^^^ [1]
+  7 | }
+
+expr_tree.php:574:43
+572 | 
+573 | interface ExampleIntOpType extends ExampleMixedOpType {
+574 |   public function __plus(~ExampleInt $_): ExampleInt;
+    |                                           ^^^^^^^^^^ [2]
+575 |   public function __minus(~ExampleInt $_): ExampleInt;
+576 |   public function __star(~ExampleInt $_): ExampleInt;
+
+2 errors found

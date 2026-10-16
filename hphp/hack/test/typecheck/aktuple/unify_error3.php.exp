@@ -1,12 +1,46 @@
-ERROR: File "unify_error3.php", line 13, characters 12-16:
-Invalid argument (Typing[4110])
-  File "unify_error3.php", line 3, characters 19-21:
-  Expected `int`
-  File "unify_error3.php", line 8, characters 14-14:
-  But got `num`
-ERROR: File "unify_error3.php", line 13, characters 12-16:
-Invalid argument (Typing[4110])
-  File "unify_error3.php", line 3, characters 19-21:
-  Expected `int`
-  File "unify_error3.php", line 10, characters 20-24:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+
+unify_error3.php:13:12
+ 1 | <?hh
+ 2 | 
+ 3 | function take_int(int $_): void {}
+   |                   ^^^ [2]
+ 4 | 
+ 5 | function test(bool $b): void {
+ 6 | 
+ 7 |   if ($b) {
+ 8 |     $a = vec[4];
+   |              ^ [3]
+ 9 |   } else {
+10 |     $a = vec[3.14, 'aaa'];
+11 |   }
+12 | 
+13 |   take_int($a[1]);
+   |            ^^^^^ [1]
+14 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+unify_error3.php:13:12
+ 1 | <?hh
+ 2 | 
+ 3 | function take_int(int $_): void {}
+   |                   ^^^ [2]
+ 4 | 
+ 5 | function test(bool $b): void {
+   :
+ 8 |     $a = vec[4];
+ 9 |   } else {
+10 |     $a = vec[3.14, 'aaa'];
+   |                    ^^^^^ [3]
+11 |   }
+12 | 
+13 |   take_int($a[1]);
+   |            ^^^^^ [1]
+14 | }
+
+2 errors found

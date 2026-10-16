@@ -1,6 +1,24 @@
-ERROR: File "et_lambda.php", line 7, characters 28-28:
-Expression trees must provide the DSL name. (Parsing[1002])
-ERROR: File "et_lambda.php", line 9, characters 44-45:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "et_lambda.php", line 8, characters 3-61:
-  Did you mean `$y` instead?
+error: Parsing[1002] Expression trees must provide the DSL name. [1]
+
+et_lambda.php:7:28
+5 | function f(): void {
+6 |   $y = ExampleDsl`() ==> ${ExampleDsl`1`}`; // Ok
+7 |   $y = ExampleDsl`() ==> ${`1`}`; // Error: nested ET without DSL
+  |                            ^ [1]
+8 |   $y = ExampleDsl`() ==> {$x = 1; return ${ExampleDsl`$x`};}`; // Ok (nested with binding)
+9 |   $y = ExampleDsl`() ==> {$x = 1; return ${$x};}`; // Error: unbound $x
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$y` instead? [2]
+
+et_lambda.php:9:44
+ 6 |   $y = ExampleDsl`() ==> ${ExampleDsl`1`}`; // Ok
+ 7 |   $y = ExampleDsl`() ==> ${`1`}`; // Error: nested ET without DSL
+ 8 |   $y = ExampleDsl`() ==> {$x = 1; return ${ExampleDsl`$x`};}`; // Ok (nested with binding)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   $y = ExampleDsl`() ==> {$x = 1; return ${$x};}`; // Error: unbound $x
+   |                                            ^^ [1]
+10 |   $y = ExampleDsl`() ==> {$x = 1; return $x;}`; // Ok
+11 | }
+
+2 errors found

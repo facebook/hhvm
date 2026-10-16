@@ -1,12 +1,38 @@
-ERROR: File "subtyping_simple4b.php", line 4, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "subtyping_simple4b.php", line 4, characters 20-20:
-  Cyclic use is here
-ERROR: File "subtyping_simple4b.php", line 28, characters 5-6:
-Invalid argument (Typing[4110])
-  File "subtyping_simple4b.php", line 8, characters 29-34:
-  Expected `vec<A>`
-  File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-  File "subtyping_simple4b.php", line 4, characters 20-20:
-    by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+subtyping_simple4b.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A as vec<A> = vec<A>;
+  |           ^ [1]
+  |                    ^ [2]
+5 | 
+6 | function expect_A(A $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [3]
+->   by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [3]
+
+subtyping_simple4b.php:28:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as vec<A> = vec<A>;
+   |                    ^ [3]
+ 5 | 
+ 6 | function expect_A(A $x): void {}
+ 7 | function expect_vecA(vec<A> $x): void {}
+ 8 | function expect_vecvecA(vec<vec<A>> $x): void {}
+   |                             ^^^^^^ [2]
+ 9 | 
+10 | function foo(
+   :
+26 |   expect_vecA($vva);
+27 |   expect_vecvecA(
+28 |     $a,
+   |     ^^ [1]
+29 |   ); // ok: A <: vec<vec<A>> -> vec<A> <: vec<vec<A>> -> A <: vec<A> -> vec<A> <: vec<A> -> ok
+30 |   expect_vecvecA(
+
+2 errors found

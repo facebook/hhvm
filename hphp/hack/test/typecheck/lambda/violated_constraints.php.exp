@@ -1,20 +1,41 @@
-ERROR: File "violated_constraints.php", line 7, characters 9-17:
-Some type arguments violate their constraints (Typing[4323])
-  File "violated_constraints.php", line 3, characters 9-9:
-  `T` is a constrained type parameter
-  File "violated_constraints.php", line 3, characters 14-16:
-  This type constraint is violated
-  File "violated_constraints.php", line 3, characters 14-16:
-  Expected `num`
-  File "violated_constraints.php", line 7, characters 11-16:
-  But got `string`
-ERROR: File "violated_constraints.php", line 7, characters 25-33:
-Some type arguments violate their constraints (Typing[4323])
-  File "violated_constraints.php", line 3, characters 9-9:
-  `T` is a constrained type parameter
-  File "violated_constraints.php", line 3, characters 14-16:
-  This type constraint is violated
-  File "violated_constraints.php", line 3, characters 14-16:
-  Expected `num`
-  File "violated_constraints.php", line 7, characters 27-32:
-  But got `string`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+
+violated_constraints.php:7:9
+1 | <?hh
+2 | 
+3 | class A<T as num> {}
+  |         ^ [2]
+  |              ^^^ [3]
+4 | 
+5 | function test() : void {
+6 |   // constraints violated here in two places
+7 |   $f = (A<string> $x) : A<string> ==> { return $x;};
+  |         ^^^^^^^^^ [1]
+  |           ^^^^^^ [4]
+8 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+
+violated_constraints.php:7:25
+1 | <?hh
+2 | 
+3 | class A<T as num> {}
+  |         ^ [2]
+  |              ^^^ [3]
+4 | 
+5 | function test() : void {
+6 |   // constraints violated here in two places
+7 |   $f = (A<string> $x) : A<string> ==> { return $x;};
+  |                         ^^^^^^^^^ [1]
+  |                           ^^^^^^ [4]
+8 | }
+
+2 errors found

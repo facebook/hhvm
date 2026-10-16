@@ -1,4 +1,12 @@
-ERROR: File "non_fixed_point_recursion_not_top_level.php", line 5, characters 11-23:
-Recursion is not supported via case type where clauses. (Typing[4485])
-  File "non_fixed_point_recursion_not_top_level.php", line 6, characters 35-56:
-  `NonFixedPoint` appears here
+error: Typing[4485] Recursion is not supported via case type where clauses. [1]
+-> `NonFixedPoint` appears here [2]
+
+non_fixed_point_recursion_not_top_level.php:5:11
+3 | final class Cov<+T> {}
+4 | 
+5 | case type NonFixedPoint<T1> =
+  |           ^^^^^^^^^^^^^ [1]
+6 | | string where Cov<string> as Cov<NonFixedPoint<vec<T1>>>;
+  |                                   ^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+1 error found

@@ -1,12 +1,20 @@
-ERROR: File "default_consistent_construct.php", line 7, characters 19-29:
-The method `__construct` is not compatible with the overridden method (Typing[4341])
-  File "default_consistent_construct.php", line 7, characters 19-29:
-  Method `__construct` has type `(function()[HH\Contexts\write_props]: void)` in `C`
-  File "default_consistent_construct.php", line 4, characters 11-11:
-  But it has type `(function()[]: void)` in parent `I`
-  File "default_consistent_construct.php", line 7, characters 19-29:
-  Type `(function()[HH\Contexts\write_props]: void)` is not a subtype of `(function()[]: void)`
-  File "default_consistent_construct.php", line 4, characters 11-11:
-  Expected a function that requires the capability set {}
-  File "default_consistent_construct.php", line 7, characters 33-43:
-  But got a function that requires the capability WriteProperty
+error: Typing[4341] The method `__construct` is not compatible with the overridden method [1]
+-> Method `__construct` has type `(function()[HH\Contexts\write_props]: void)` in `C` [1]
+-> But it has type `(function()[]: void)` in parent `I` [2]
+-> Type `(function()[HH\Contexts\write_props]: void)` is not a subtype of `(function()[]: void)` [1]
+-> Expected a function that requires the capability set {} [2]
+-> But got a function that requires the capability WriteProperty [3]
+
+default_consistent_construct.php:7:19
+2 | 
+3 | <<__ConsistentConstruct>>
+4 | interface I {}
+  |           ^ [2]
+5 | 
+6 | class C implements I {
+7 |   public function __construct()[write_props] {}
+  |                   ^^^^^^^^^^^ [1]
+  |                                 ^^^^^^^^^^^ [3]
+8 | }
+
+1 error found

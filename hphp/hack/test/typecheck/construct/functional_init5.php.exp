@@ -1,7 +1,26 @@
-ERROR: File "functional_init5.php", line 17, characters 19-29:
-Class `A` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "functional_init5.php", line 15, characters 18-19:
-  `$this->x` is not initialized.
-ERROR: File "functional_init5.php", line 21, characters 5-15:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because `$this->x` can still potentially be null (NastCheck[3004])
+error: NastCheck[3015] Class `A` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->x` is not initialized. [2]
+
+functional_init5.php:17:19
+13 | 
+14 | class A {
+15 |   private string $x;
+   |                  ^^ [2]
+16 | 
+17 |   public function __construct(string $x) {
+   |                   ^^^^^^^^^^^ [1]
+18 |     if ($x === '') {
+19 |       $this->x = 'foo';
+
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->x` can still potentially be null [1]
+
+functional_init5.php:21:5
+19 |       $this->x = 'foo';
+20 |     }
+21 |     $this->setX($x);
+   |     ^^^^^^^^^^^ [1]
+22 |   }
+23 | 
+
+2 errors found

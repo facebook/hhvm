@@ -1,2 +1,9 @@
-ERROR: File "multiple_module_declarations.php", line 3, characters 12-14:
-You cannot declare more than one module within a file (Parsing[1002])
+error: Parsing[1002] You cannot declare more than one module within a file [1]
+
+multiple_module_declarations.php:3:12
+1 | <?hh
+2 | new module foo {}
+3 | new module bar {}
+  |            ^^^ [1]
+
+1 error found

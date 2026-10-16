@@ -1,1 +1,2 @@
 --config constraint_array_index_assign=false
+--error-format plain_highlighted

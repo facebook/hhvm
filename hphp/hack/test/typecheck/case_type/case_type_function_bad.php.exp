@@ -1,24 +1,46 @@
-ERROR: File "case_type_function_bad.php", line 4, characters 11-24:
-Invalid case type declaration. More than one variant of `NoTwoFunctions` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_function_bad.php", line 4, characters 28-47:
-  This is the type `(function(): string)`, which includes **built-in values**
-  File "case_type_function_bad.php", line 4, characters 51-67:
-  It may overlap with `(function(): int)`, which includes **built-in values**
-  File "case_type_function_bad.php", line 4, characters 11-24:
-  Because it is possible for values to be both **built-in values** and **built-in values**, `(function(): string)` and `(function(): int)` cannot be in the same case type
-ERROR: File "case_type_function_bad.php", line 6, characters 11-23:
-Invalid case type declaration. More than one variant of `NoFunctionRef` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_function_bad.php", line 7, characters 5-40:
-  This is the type `HH\FunctionRef<(function(): string)>`, which includes **built-in values**
-  File "case_type_function_bad.php", line 7, characters 5-40:
-    via the constraint on the newtype `HH\FunctionRef`
-  File "case_type_function_bad.php", line 8, characters 5-21:
-  It may overlap with `(function(): int)`, which includes **built-in values**
-  File "case_type_function_bad.php", line 6, characters 11-23:
-  Because it is possible for values to be both **built-in values** and **built-in values**, `HH\FunctionRef<(function(): string)>` and `(function(): int)` cannot be in the same case type
-ERROR: File "case_type_function_bad.php", line 10, characters 11-19:
-Invalid case type declaration. More than one variant of `NoClosure` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_function_bad.php", line 10, characters 23-29:
-  This is the type `Closure`, which includes **instances of the class Closure**
-  File "case_type_function_bad.php", line 10, characters 33-49:
-  It overlaps with `(function(): int)`, which also includes **instances of the class Closure**
+error: Typing[4475] Invalid case type declaration. More than one variant of `NoTwoFunctions` could contain values with the same runtime tag [1]
+-> This is the type `(function(): string)`, which includes **built-in values** [2]
+-> It may overlap with `(function(): int)`, which includes **built-in values** [3]
+-> Because it is possible for values to be both **built-in values** and **built-in values**, `(function(): string)` and `(function(): int)` cannot be in the same case type [1]
+
+case_type_function_bad.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type NoTwoFunctions = (function(): string) | (function(): int);
+  |           ^^^^^^^^^^^^^^ [1]
+  |                            ^^^^^^^^^^^^^^^^^^^^ [2]
+  |                                                   ^^^^^^^^^^^^^^^^^ [3]
+5 | 
+6 | case type NoFunctionRef =
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `NoFunctionRef` could contain values with the same runtime tag [1]
+-> This is the type `HH\FunctionRef<(function(): string)>`, which includes **built-in values** [2]
+->   via the constraint on the newtype `HH\FunctionRef` [2]
+-> It may overlap with `(function(): int)`, which includes **built-in values** [3]
+-> Because it is possible for values to be both **built-in values** and **built-in values**, `HH\FunctionRef<(function(): string)>` and `(function(): int)` cannot be in the same case type [1]
+
+case_type_function_bad.php:6:11
+ 4 | case type NoTwoFunctions = (function(): string) | (function(): int);
+ 5 | 
+ 6 | case type NoFunctionRef =
+   |           ^^^^^^^^^^^^^ [1]
+ 7 |   | HH\FunctionRef<(function(): string)>
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 |   | (function(): int);
+   |     ^^^^^^^^^^^^^^^^^ [3]
+ 9 | 
+10 | case type NoClosure = Closure | (function(): int);
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `NoClosure` could contain values with the same runtime tag [1]
+-> This is the type `Closure`, which includes **instances of the class Closure** [2]
+-> It overlaps with `(function(): int)`, which also includes **instances of the class Closure** [3]
+
+case_type_function_bad.php:10:11
+ 8 |   | (function(): int);
+ 9 | 
+10 | case type NoClosure = Closure | (function(): int);
+   |           ^^^^^^^^^ [1]
+   |                       ^^^^^^^ [2]
+   |                                 ^^^^^^^^^^^^^^^^^ [3]
+
+3 errors found

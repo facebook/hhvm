@@ -1,3 +1,11 @@
-ERROR: File "invalid_aliased_type.php", line 5, characters 23-31:
-Illegal context: `this::T`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+error: NastCheck[3090] Illegal context: `this::T`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+invalid_aliased_type.php:5:23
+3 |   const type T = int;
+4 | 
+5 |   private function f()[this::T]: void {}
+  |                       ^^^^^^^^^ [1]
+6 | }
+
+1 error found

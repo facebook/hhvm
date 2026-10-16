@@ -1,24 +1,76 @@
-ERROR: File "memoize_policy-sharded.php", line 8, characters 15-15:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "memoize_policy-sharded.php", line 8, characters 21-25:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "memoize_policy-sharded.php", line 4, characters 36-43:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "memoize_policy-sharded.php", line 12, characters 34-34:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "memoize_policy-sharded.php", line 12, characters 40-44:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "memoize_policy-sharded.php", line 4, characters 36-43:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "memoize_policy-sharded.php", line 20, characters 15-15:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "memoize_policy-sharded.php", line 20, characters 21-25:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "memoize_policy-sharded.php", line 16, characters 36-48:
-  But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
-ERROR: File "memoize_policy-sharded.php", line 24, characters 34-34:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "memoize_policy-sharded.php", line 24, characters 40-44:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "memoize_policy-sharded.php", line 16, characters 36-48:
-  But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+memoize_policy-sharded.php:8:15
+ 2 | 
+ 3 | class X implements IMemoizeParam {
+ 4 |   public function getInstanceKey()[defaults]: string { return ""; }
+   |                                    ^^^^^^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | <<__Memoize(#KeyedByIC)>>
+ 8 | function bad1(X $x)[zoned]: void {}
+   |               ^ [1]
+   |                     ^^^^^ [2]
+ 9 | 
+10 | class Bad1 {
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+memoize_policy-sharded.php:12:34
+ 2 | 
+ 3 | class X implements IMemoizeParam {
+ 4 |   public function getInstanceKey()[defaults]: string { return ""; }
+   |                                    ^^^^^^^^ [3]
+ 5 | }
+ 6 | 
+   :
+10 | class Bad1 {
+11 |   <<__MemoizeLSB(#KeyedByIC)>>
+12 |   public static function bad1LSB(X $x)[zoned]: int { return 0; }
+   |                                  ^ [1]
+   |                                        ^^^^^ [2]
+13 | }
+14 | 
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty} [3]
+
+memoize_policy-sharded.php:20:15
+14 | 
+15 | class Y implements IMemoizeParam {
+16 |   public function getInstanceKey()[zoned_shallow]: string { return ""; }
+   |                                    ^^^^^^^^^^^^^ [3]
+17 | }
+18 | 
+19 | <<__Memoize(#KeyedByIC)>>
+20 | function bad2(Y $y)[zoned]: void {}
+   |               ^ [1]
+   |                     ^^^^^ [2]
+21 | 
+22 | class Bad2 {
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability set {ImplicitPolicyShallow, ReadGlobals, SystemShallow, WriteProperty} [3]
+
+memoize_policy-sharded.php:24:34
+14 | 
+15 | class Y implements IMemoizeParam {
+16 |   public function getInstanceKey()[zoned_shallow]: string { return ""; }
+   |                                    ^^^^^^^^^^^^^ [3]
+17 | }
+18 | 
+   :
+22 | class Bad2 {
+23 |   <<__MemoizeLSB(#KeyedByIC)>>
+24 |   public static function bad2LSB(Y $y)[zoned]: int { return 0; }
+   |                                  ^ [1]
+   |                                        ^^^^^ [2]
+25 | }
+
+4 errors found

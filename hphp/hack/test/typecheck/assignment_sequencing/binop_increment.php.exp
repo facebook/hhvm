@@ -1,6 +1,21 @@
-ERROR: File "binop_increment.php", line 4, characters 15-16:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "binop_increment.php", line 4, characters 15-16:
-Unsequenced modification and access to local variable. Modified here (Typing[4143])
-  File "binop_increment.php", line 4, characters 10-11:
-  And accessed here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+binop_increment.php:4:15
+2 | 
+3 | function x(int $y): int {
+4 |   return $y + $y++;
+  |               ^^ [1]
+5 | }
+
+error: Typing[4143] Unsequenced modification and access to local variable. Modified here [1]
+-> And accessed here [2]
+
+binop_increment.php:4:15
+2 | 
+3 | function x(int $y): int {
+4 |   return $y + $y++;
+  |          ^^ [2]
+  |               ^^ [1]
+5 | }
+
+2 errors found

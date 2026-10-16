@@ -1,2 +1,10 @@
-ERROR: File "unpack_call8_isset.php", line 6, characters 3-17:
-Arg unpacking is disallowed for `isset` (Typing[4147])
+error: Typing[4147] Arg unpacking is disallowed for `isset` [1]
+
+unpack_call8_isset.php:6:3
+4 |   $args = vec["hello"];
+5 |   // HHVM doesn't support unpacking into isset
+6 |   isset(...$args);
+  |   ^^^^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

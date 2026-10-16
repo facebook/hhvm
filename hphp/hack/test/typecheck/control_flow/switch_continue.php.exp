@@ -1,4 +1,21 @@
-ERROR: File "switch_continue.php", line 14, characters 9-17:
-In PHP, `continue;` inside a switch statement is equivalent to `break;`. Hack does not support this; use `break` if that is what you meant. (NastCheck[3006])
-ERROR: File "switch_continue.php", line 17, characters 9-17:
-In PHP, `continue;` inside a switch statement is equivalent to `break;`. Hack does not support this; use `break` if that is what you meant. (NastCheck[3006])
+error: NastCheck[3006] In PHP, `continue;` inside a switch statement is equivalent to `break;`. Hack does not support this; use `break` if that is what you meant. [1]
+
+switch_continue.php:14:9
+12 |       case 1:
+13 |         $x = new A();
+14 |         continue;
+   |         ^^^^^^^^^ [1]
+15 |       default:
+16 |         $x = new A();
+
+error: NastCheck[3006] In PHP, `continue;` inside a switch statement is equivalent to `break;`. Hack does not support this; use `break` if that is what you meant. [1]
+
+switch_continue.php:17:9
+15 |       default:
+16 |         $x = new A();
+17 |         continue;
+   |         ^^^^^^^^^ [1]
+18 |     }
+19 |     // continue should just break out of the switch, not continue the loop
+
+2 errors found

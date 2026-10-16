@@ -1,22 +1,46 @@
-ERROR: File "constraint_bad_usepos.php", line 12, characters 11-15:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_bad_usepos.php", line 6, characters 9-10:
-  `TC` is a constrained type parameter
-  File "constraint_bad_usepos.php", line 6, characters 15-15:
-  This type constraint is violated
-  File "constraint_bad_usepos.php", line 6, characters 15-15:
-  Expected `I`
-  File "constraint_bad_usepos.php", line 12, characters 13-14:
-  But got `TD`
-ERROR: File "constraint_bad_usepos.php", line 12, characters 11-15:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_bad_usepos.php", line 6, characters 9-10:
-  `TC` is a constrained type parameter
-  File "constraint_bad_usepos.php", line 6, characters 15-15:
-  This type constraint is violated
-  File "constraint_bad_usepos.php", line 6, characters 15-15:
-  Expected `I`
-  File "constraint_bad_usepos.php", line 12, characters 13-14:
-  But got `mixed`
-  File "constraint_bad_usepos.php", line 12, characters 13-14:
-    by the definition of `TD` arising from an implicit `as mixed` constraint on this type
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TC` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `TD` [4]
+
+constraint_bad_usepos.php:12:11
+ 4 | interface I { }
+ 5 | 
+ 6 | class C<TC as I> {
+   |         ^^ [2]
+   |               ^ [3]
+ 7 |   public function __construct(private TC $item) { }
+ 8 | }
+ 9 | 
+10 | class D<TD>
+11 | // Should report error here, not at definition of constraint
+12 |   extends C<TD>
+   |           ^^^^^ [1]
+   |             ^^ [4]
+13 |   { }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `TC` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `mixed` [4]
+->   by the definition of `TD` arising from an implicit `as mixed` constraint on this type [4]
+
+constraint_bad_usepos.php:12:11
+ 4 | interface I { }
+ 5 | 
+ 6 | class C<TC as I> {
+   |         ^^ [2]
+   |               ^ [3]
+ 7 |   public function __construct(private TC $item) { }
+ 8 | }
+ 9 | 
+10 | class D<TD>
+11 | // Should report error here, not at definition of constraint
+12 |   extends C<TD>
+   |           ^^^^^ [1]
+   |             ^^ [4]
+13 |   { }
+
+2 errors found

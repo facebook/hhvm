@@ -1,48 +1,177 @@
-ERROR: File "arities02.php", line 23, characters 11-15:
-Typing error (Typing[4429])
-  File "arities02.php", line 23, characters 11-23:
-  Expected `num` because this is used in an arithmetic operation
-  File "arities02.php", line 3, characters 35-40:
-  But got `string`
-ERROR: File "arities02.php", line 23, characters 19-23:
-Typing error (Typing[4429])
-  File "arities02.php", line 23, characters 11-23:
-  Expected `num` because this is used in an arithmetic operation
-  File "arities02.php", line 3, characters 35-40:
-  But got `string`
-ERROR: File "arities02.php", line 34, characters 17-19:
-No instance method `bar` in `string` (Typing[4053])
-  File "arities02.php", line 3, characters 35-40:
-  This is why I think it is an object of type HH\string
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "arities02.php", line 34, characters 17-19:
-You are trying to access the method `bar` but this is an int (Typing[4062])
-  File "arities02.php", line 3, characters 51-53:
-  Definition is here
-ERROR: File "arities02.php", line 40, characters 17-19:
-No instance method `bar` in `string` (Typing[4053])
-  File "arities02.php", line 40, characters 10-14:
-  This is why I think it is an object of type HH\string
-  File "arities02.php", line 39, characters 29-30:
-    from this definition (variadic argument)
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "arities02.php", line 45, characters 13-48:
-Invalid argument (Typing[4042])
-  File "arities02.php", line 45, characters 13-48:
-  Should have a variadic argument
-  File "arities02.php", line 3, characters 20-63:
-  Because of this definition
-ERROR: File "arities02.php", line 50, characters 13-52:
-Invalid argument (Typing[4042])
-  File "arities02.php", line 50, characters 13-52:
-  Should have a variadic argument
-  File "arities02.php", line 3, characters 20-63:
-  Because of this definition
-ERROR: File "arities02.php", line 50, characters 13-52:
-Invalid argument (Typing[4041])
-  File "arities02.php", line 50, characters 13-52:
-  Too many mandatory arguments (expected 3 but got 4)
-  File "arities02.php", line 3, characters 20-63:
-  Because of this definition
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `string` [3]
+
+arities02.php:23:11
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                                   ^^^^^^ [3]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+21 | 
+22 |   expect_fn(($a, ...$y) ==> {
+23 |     $c = ($y[0] + $y[1]);
+   |           ^^^^^ [1]
+   |           ^^^^^^^^^^^^^ [2]
+24 |     return 1;
+25 |   });
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `string` [3]
+
+arities02.php:23:19
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                                   ^^^^^^ [3]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+21 | 
+22 |   expect_fn(($a, ...$y) ==> {
+23 |     $c = ($y[0] + $y[1]);
+   |           ^^^^^^^^^^^^^ [2]
+   |                   ^^^^^ [1]
+24 |     return 1;
+25 |   });
+
+error: Typing[4053] No instance method `bar` in `string` [1]
+-> This is why I think it is an object of type HH\string [2]
+-> Declaration of `string` is here [3]
+
+arities02.php:34:17
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                                   ^^^^^^ [2]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+32 |   // Error
+33 |   expect_fn(($a, ...$y) ==> {
+34 |     $c = $y[0]->bar();
+   |                 ^^^ [1]
+35 |     return 1;
+36 |   });
+
+string.hhi:6:15
+ 4 | 
+ 5 |   <<__SupportDynamicType>>
+ 6 |   final class string {
+   |               ^^^^^^ [3]
+ 7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+ 8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4062] You are trying to access the method `bar` but this is an int [1]
+-> Definition is here [2]
+
+arities02.php:34:17
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                                                   ^^^ [2]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+32 |   // Error
+33 |   expect_fn(($a, ...$y) ==> {
+34 |     $c = $y[0]->bar();
+   |                 ^^^ [1]
+35 |     return 1;
+36 |   });
+
+error: Typing[4053] No instance method `bar` in `string` [1]
+-> This is why I think it is an object of type HH\string [2]
+->   from this definition (variadic argument) [3]
+-> Declaration of `string` is here [4]
+
+arities02.php:40:17
+37 | 
+38 |   // Error, no bar() on string
+39 |   expect_fn2(($a, string ...$y) ==> {
+   |                             ^^ [3]
+40 |     $c = $y[0]->bar();
+   |          ^^^^^ [2]
+   |                 ^^^ [1]
+41 |     return 1;
+42 |   });
+
+string.hhi:6:15
+ 4 | 
+ 5 |   <<__SupportDynamicType>>
+ 6 |   final class string {
+   |               ^^^^^^ [4]
+ 7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+ 8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4042] Invalid argument [1]
+-> Should have a variadic argument [1]
+-> Because of this definition [2]
+
+arities02.php:45:13
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+43 | 
+44 |   // Error, should have variadic arg
+45 |   expect_fn(($a, $b, $c) ==> {
+   |             ^^^^^^^^^^^^^^^^^^ [1]
+46 |     return 1;
+   |     ^^^^^^^^^ [1]
+47 |   });
+   |   ^ [1]
+48 | 
+49 |   // Error
+
+error: Typing[4042] Invalid argument [1]
+-> Should have a variadic argument [1]
+-> Because of this definition [2]
+
+arities02.php:50:13
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+48 | 
+49 |   // Error
+50 |   expect_fn(($a, $b, $c, $d) ==> {
+   |             ^^^^^^^^^^^^^^^^^^^^^^ [1]
+51 |     return 1;
+   |     ^^^^^^^^^ [1]
+52 |   });
+   |   ^ [1]
+53 | }
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 3 but got 4) [1]
+-> Because of this definition [2]
+
+arities02.php:50:13
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_fn((function(int, string, string, int...): int) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 4 |   $f(1, "hello", "world");
+ 5 | }
+   :
+48 | 
+49 |   // Error
+50 |   expect_fn(($a, $b, $c, $d) ==> {
+   |             ^^^^^^^^^^^^^^^^^^^^^^ [1]
+51 |     return 1;
+   |     ^^^^^^^^^ [1]
+52 |   });
+   |   ^ [1]
+53 | }
+
+8 errors found

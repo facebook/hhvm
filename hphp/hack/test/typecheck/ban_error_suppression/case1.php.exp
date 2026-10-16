@@ -1,2 +1,11 @@
-ERROR: File "case1.php", line 6, characters 8-8:
-The error suppression operator `@` is not allowed (Parsing[1002])
+error: Parsing[1002] The error suppression operator `@` is not allowed [1]
+
+case1.php:6:8
+4 |   <<__Soft>> int $foobar,
+5 | ): mixed {
+6 |   $_ = @hgoldstein(42);
+  |        ^ [1]
+7 |   $_ = hgoldstein(95);
+8 |   return null;
+
+1 error found

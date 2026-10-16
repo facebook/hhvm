@@ -1,4 +1,15 @@
-ERROR: File "module_level_traits_method_1_noattr.php--A.php", line 14, characters 9-11:
-Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_level_traits_method_1_noattr.php--A.php", line 12, characters 14-14:
-  This trait must be made `internal` to access other internal members
+error: Typing[4444] Cannot access `internal` members inside a non-internal trait [1]
+-> This trait must be made `internal` to access other internal members [2]
+
+module_level_traits_method_1_noattr.php--A.php:14:9
+10 | }
+11 | 
+12 | public trait T {
+   |              ^ [2]
+13 |   public function getFoo(D $d): void {
+14 |     $d->foo();
+   |         ^^^ [1]
+15 |   }
+16 | }
+
+1 error found

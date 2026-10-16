@@ -1,2 +1,10 @@
-ERROR: File "typeparam_type_const.php", line 9, characters 3-36:
-Type parameters are not allowed on class type constants (Parsing[1002])
+error: Parsing[1002] Type parameters are not allowed on class type constants [1]
+
+typeparam_type_const.php:9:3
+ 7 | 
+ 8 | class C {
+ 9 |   const type Ty<<<A>> T> = vec<int>;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

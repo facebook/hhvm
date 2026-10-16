@@ -1,4 +1,19 @@
-ERROR: File "postfix_plus_plus_error1.php", line 7, characters 14-14:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "postfix_plus_plus_error1.php", line 7, characters 14-14:
-You cannot use this syntax with an increment or decrement statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+postfix_plus_plus_error1.php:7:14
+5 | function test(): void {
+6 |   // This doesn't work in Hack proper. Just making sure this doesn't work here
+7 |   ExampleDsl`1++`;
+  |              ^ [1]
+8 | }
+
+error: Parsing[1002] You cannot use this syntax with an increment or decrement statement. [1]
+
+postfix_plus_plus_error1.php:7:14
+5 | function test(): void {
+6 |   // This doesn't work in Hack proper. Just making sure this doesn't work here
+7 |   ExampleDsl`1++`;
+  |              ^ [1]
+8 | }
+
+2 errors found

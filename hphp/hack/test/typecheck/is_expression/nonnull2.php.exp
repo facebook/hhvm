@@ -1,6 +1,21 @@
-ERROR: File "nonnull2.php", line 6, characters 16-17:
-Invalid argument (Typing[4110])
-  File "nonnull2.php", line 11, characters 21-23:
-  Expected `int`
-  File "nonnull2.php", line 3, characters 12-16:
-  But got `nonnull`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `nonnull` [3]
+
+nonnull2.php:6:16
+ 1 | <?hh
+ 2 | 
+ 3 | function f(mixed $x): void {
+   |            ^^^^^ [3]
+ 4 |   if ($x is nonnull) {
+ 5 |     expect_nonnull($x);
+ 6 |     expect_int($x);
+   |                ^^ [1]
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | function expect_nonnull(nonnull $x): void {}
+11 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+
+1 error found

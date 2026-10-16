@@ -1,28 +1,132 @@
-ERROR: File "collection_error.php", line 9, characters 14-20:
-Initializers of `vec`, `dict` and `keyset` should use `[...]` instead of `{...}`. (Parsing[1002])
-ERROR: File "collection_error.php", line 12, characters 14-42:
-Collections in expression trees must have `key => value` entries (Parsing[1002])
-ERROR: File "collection_error.php", line 6, characters 14-22:
-Unbound name: `wrongCtor` (an object type) (Naming[2049])
-ERROR: File "collection_error.php", line 7, characters 14-35:
-Could not find `exampleKeyedCollection`. (Naming[2006])
-  File "expr_tree.php", line 643, characters 16-37:
-  Did you mean `~~E~~xampleKeyedCollection` instead (which only differs by case)?
-ERROR: File "collection_error.php", line 11, characters 14-23:
-Unbound name: `symbolType` (an object type) (Naming[2049])
-ERROR: File "collection_error.php", line 8, characters 14-16:
-No static method `__makeType` in `Map` (Typing[4090])
-  File "collections/Map.hhi", line 635, characters 28-36:
-  Did you mean `fromArray` instead?
-  File "collections/Map.hhi", line 57, characters 15-17:
-  Declaration of `Map` is here
-ERROR: File "collection_error.php", line 9, characters 14-17:
-No static method `__makeType` in `dict` (Typing[4090])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Declaration of `dict` is here
-ERROR: File "collection_error.php", line 10, characters 14-19:
-No static method `__makeType` in `Vector` (Typing[4090])
-  File "collections/Vector.hhi", line 714, characters 28-36:
-  Did you mean `fromArray` instead?
-  File "collections/Vector.hhi", line 48, characters 15-20:
-  Declaration of `Vector` is here
+error: Parsing[1002] Initializers of `vec`, `dict` and `keyset` should use `[...]` instead of `{...}`. [1]
+
+collection_error.php:9:14
+ 7 |   ExampleDsl`exampleKeyedCollection {}`;
+ 8 |   ExampleDsl`Map {}`;
+ 9 |   ExampleDsl`dict {}`;
+   |              ^^^^^^^ [1]
+10 |   ExampleDsl`Vector {}`;
+11 |   ExampleDsl`symbolType {1 => 2}`;
+
+error: Parsing[1002] Collections in expression trees must have `key => value` entries [1]
+
+collection_error.php:12:14
+10 |   ExampleDsl`Vector {}`;
+11 |   ExampleDsl`symbolType {1 => 2}`;
+12 |   ExampleDsl`ExampleKeyedCollection {1, 2}`;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Naming[2049] Unbound name: `wrongCtor` (an object type) [1]
+
+collection_error.php:6:14
+4 | 
+5 | function test_function(): void {
+6 |   ExampleDsl`wrongCtor {}`;
+  |              ^^^^^^^^^ [1]
+7 |   ExampleDsl`exampleKeyedCollection {}`;
+8 |   ExampleDsl`Map {}`;
+
+error: Naming[2006] Could not find `exampleKeyedCollection`. [1]
+-> Did you mean `~~E~~xampleKeyedCollection` instead (which only differs by case)? [2]
+
+collection_error.php:7:14
+  5 | function test_function(): void {
+  6 |   ExampleDsl`wrongCtor {}`;
+  7 |   ExampleDsl`exampleKeyedCollection {}`;
+    |              ^^^^^^^^^^^^^^^^^^^^^^ [1]
+  8 |   ExampleDsl`Map {}`;
+  9 |   ExampleDsl`dict {}`;
+
+expr_tree.php:643:16
+641 | type ExampleShape<+T> = T;
+642 | 
+643 | abstract class ExampleKeyedCollection<+Tkey as arraykey, +Tvalue> {
+    |                ^^^^^^^^^^^^^^^^^^^^^^ [2]
+644 |   public static function __makeType<Tk as arraykey, Tv>(
+645 |     (Tk, Tv) ...$_
+
+error: Naming[2049] Unbound name: `symbolType` (an object type) [1]
+
+collection_error.php:11:14
+ 9 |   ExampleDsl`dict {}`;
+10 |   ExampleDsl`Vector {}`;
+11 |   ExampleDsl`symbolType {1 => 2}`;
+   |              ^^^^^^^^^^ [1]
+12 |   ExampleDsl`ExampleKeyedCollection {1, 2}`;
+13 | }
+
+error: Typing[4090] No static method `__makeType` in `Map` [1]
+-> Did you mean `fromArray` instead? [2]
+-> Declaration of `Map` is here [3]
+
+collection_error.php:8:14
+  6 |   ExampleDsl`wrongCtor {}`;
+  7 |   ExampleDsl`exampleKeyedCollection {}`;
+  8 |   ExampleDsl`Map {}`;
+    |              ^^^ [1]
+  9 |   ExampleDsl`dict {}`;
+ 10 |   ExampleDsl`Vector {}`;
+
+collections/Map.hhi:635:28
+ 55 |    * @guide /hack/collections/classes
+ 56 |    */
+ 57 |   final class Map<Tk as arraykey, Tv>
+    |               ^^^ [3]
+ 58 |     implements \MutableMap<Tk, Tv> {
+ 59 |     /**
+    :
+633 |      */
+634 |     <<__Deprecated('Use `new Map($arr)` instead.')>>
+635 |     public static function fromArray(darray<Tk, Tv> $arr): Map<Tk, Tv>;
+    |                            ^^^^^^^^^ [2]
+636 | 
+637 |     /**
+
+error: Typing[4090] No static method `__makeType` in `dict` [1]
+-> Declaration of `dict` is here [2]
+
+collection_error.php:9:14
+ 7 |   ExampleDsl`exampleKeyedCollection {}`;
+ 8 |   ExampleDsl`Map {}`;
+ 9 |   ExampleDsl`dict {}`;
+   |              ^^^^ [1]
+10 |   ExampleDsl`Vector {}`;
+11 |   ExampleDsl`symbolType {1 => 2}`;
+
+hackarray.hhi:32:24
+30 |    */
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+   |                        ^^^^ [2]
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+34 |     <<__NoAutoBound>> +Tv,
+
+error: Typing[4090] No static method `__makeType` in `Vector` [1]
+-> Did you mean `fromArray` instead? [2]
+-> Declaration of `Vector` is here [3]
+
+collection_error.php:10:14
+  8 |   ExampleDsl`Map {}`;
+  9 |   ExampleDsl`dict {}`;
+ 10 |   ExampleDsl`Vector {}`;
+    |              ^^^^^^ [1]
+ 11 |   ExampleDsl`symbolType {1 => 2}`;
+ 12 |   ExampleDsl`ExampleKeyedCollection {1, 2}`;
+
+collections/Vector.hhi:714:28
+ 46 |    * @guide /hack/collections/classes
+ 47 |    */
+ 48 |   final class Vector<Tv> implements \MutableVector<Tv> {
+    |               ^^^^^^ [3]
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+    :
+712 |      */
+713 |     <<__Deprecated('Use `new Vector($arr)` instead.'), __NoAutoLikes>>
+714 |     public static function fromArray(darray<arraykey, Tv> $arr): Vector<Tv>;
+    |                            ^^^^^^^^^ [2]
+715 | 
+716 |     /**
+
+8 errors found

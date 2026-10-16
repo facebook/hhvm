@@ -1,10 +1,39 @@
-WARN: File "as-expr-alias.php", line 13, characters 8-30:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `Box` which shares no values with `(Box with { type T = int }, int)`. (Warn[12012])
-ERROR: File "as-expr-alias.php", line 12, characters 14-26:
-Invalid `as` expression hint (Typing[4195])
-  File "as-expr-alias.php", line 9, characters 22-50:
-  The `as` operator cannot be used with type refinement
-ERROR: File "as-expr-alias.php", line 13, characters 14-30:
-Invalid `as` expression hint (Typing[4195])
-  File "as-expr-alias.php", line 10, characters 19-44:
-  The `as` operator cannot be used with type refinement
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `Box` which shares no values with `(Box with { type T = int }, int)`. [1]
+
+as-expr-alias.php:13:8
+11 | function callee(mixed $b): void {
+12 |   $_ = $b as BoxWithString; // ERROR (non-nested)
+13 |   $_ = $b as (BoxWithInt, int); // ERROR (nested)
+   |        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with type refinement [2]
+
+as-expr-alias.php:12:14
+ 7 |   abstract const type T;
+ 8 | }
+ 9 | type BoxWithString = Box with { type T = string; };
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | type BoxWithInt = Box with { type T = int; };
+11 | function callee(mixed $b): void {
+12 |   $_ = $b as BoxWithString; // ERROR (non-nested)
+   |              ^^^^^^^^^^^^^ [1]
+13 |   $_ = $b as (BoxWithInt, int); // ERROR (nested)
+14 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with type refinement [2]
+
+as-expr-alias.php:13:14
+ 8 | }
+ 9 | type BoxWithString = Box with { type T = string; };
+10 | type BoxWithInt = Box with { type T = int; };
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+11 | function callee(mixed $b): void {
+12 |   $_ = $b as BoxWithString; // ERROR (non-nested)
+13 |   $_ = $b as (BoxWithInt, int); // ERROR (nested)
+   |              ^^^^^^^^^^^^^^^^^ [1]
+14 | }
+
+3 errors found

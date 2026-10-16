@@ -1,16 +1,76 @@
-ERROR: File "pseudofunction_with_signature.php", line 8, characters 15-22:
-Unexpected `inout` annotation for argument (Typing[4183])
-  File "Shapes.hhi", line 42, characters 19-24:
-  This is a normal parameter (does not have `inout`)
-ERROR: File "pseudofunction_with_signature.php", line 9, characters 28-30:
-No class constant `T` in `dict` (Typing[4090])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Declaration of `dict` is here
-ERROR: File "pseudofunction_with_signature.php", line 11, characters 11-18:
-Unexpected `inout` annotation for argument (Typing[4183])
-  File "stdlib/builtins_variable.hhi", line 35, characters 35-38:
-  This is a normal parameter (does not have `inout`)
-ERROR: File "pseudofunction_with_signature.php", line 12, characters 19-26:
-Unexpected `inout` annotation for argument (Typing[4183])
-  File "functions.hhi", line 57, characters 40-43:
-  This is a normal parameter (does not have `inout`)
+error: Typing[4183] Unexpected `inout` annotation for argument [1]
+-> This is a normal parameter (does not have `inout`) [2]
+
+pseudofunction_with_signature.php:8:15
+ 6 |   string $z,
+ 7 | ): void {
+ 8 |   Shapes::idx(inout $s, 'lol');
+   |               ^^^^^^^^ [1]
+ 9 |   type_structure(inout $d, 'T');
+10 |   printf('%s', inout $z);
+
+Shapes.hhi:42:19
+40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+41 |     public static function idx<Tv>(
+42 |       ?shape(...) $shape,
+   |                   ^^^^^^ [2]
+43 |       arraykey $index,
+44 |       ?Tv $default = null,
+
+error: Typing[4090] No class constant `T` in `dict` [1]
+-> Declaration of `dict` is here [2]
+
+pseudofunction_with_signature.php:9:28
+ 7 | ): void {
+ 8 |   Shapes::idx(inout $s, 'lol');
+ 9 |   type_structure(inout $d, 'T');
+   |                            ^^^ [1]
+10 |   printf('%s', inout $z);
+11 |   is_null(inout $z);
+
+hackarray.hhi:32:24
+30 |    */
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+   |                        ^^^^ [2]
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+34 |     <<__NoAutoBound>> +Tv,
+
+error: Typing[4183] Unexpected `inout` annotation for argument [1]
+-> This is a normal parameter (does not have `inout`) [2]
+
+pseudofunction_with_signature.php:11:11
+ 9 |   type_structure(inout $d, 'T');
+10 |   printf('%s', inout $z);
+11 |   is_null(inout $z);
+   |           ^^^^^^^^ [1]
+12 |   HH\is_any_array(inout $d);
+13 | }
+
+stdlib/builtins_variable.hhi:35:35
+33 |   <<__PHPStdLib>>
+34 |   function is_resource(readonly mixed $var)[]: bool;
+35 |   function is_null(readonly mixed $var)[]: bool;
+   |                                   ^^^^ [2]
+36 |   <<__PHPStdLib>>
+37 |   function gettype(readonly mixed $v)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+
+error: Typing[4183] Unexpected `inout` annotation for argument [1]
+-> This is a normal parameter (does not have `inout`) [2]
+
+pseudofunction_with_signature.php:12:19
+10 |   printf('%s', inout $z);
+11 |   is_null(inout $z);
+12 |   HH\is_any_array(inout $d);
+   |                   ^^^^^^^^ [1]
+13 | }
+
+functions.hhi:57:40
+55 |    * Otherwise returns false.
+56 |    */
+57 |   function is_any_array(readonly mixed $arg)[]: bool;
+   |                                        ^^^^ [2]
+58 | }
+59 | 
+
+4 errors found

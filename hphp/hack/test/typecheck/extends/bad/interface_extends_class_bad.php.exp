@@ -1,4 +1,11 @@
-ERROR: File "interface_extends_class_bad.php", line 13, characters 11-11:
-Interfaces can only extend other interfaces. (Typing[4115])
-  File "interface_extends_class_bad.php", line 13, characters 21-21:
-  This is a class.
+error: Typing[4115] Interfaces can only extend other interfaces. [1]
+-> This is a class. [2]
+
+interface_extends_class_bad.php:13:11
+11 | 
+12 | class A {}
+13 | interface B extends A {}
+   |           ^ [1]
+   |                     ^ [2]
+
+1 error found

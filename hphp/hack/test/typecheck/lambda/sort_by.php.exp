@@ -1,10 +1,23 @@
-ERROR: File "sort_by.php", line 20, characters 70-76:
-Invalid return type (Typing[4110])
-  File "sort_by.php", line 13, characters 23-25:
-  Expected `int`
-  File "sort_by.php", line 20, characters 70-76:
-  But got `float` because this is the result of an arithmetic operation with a `float` as the first argument.
-  File "sort_by.php", line 20, characters 5-11:
-  Here is why I think the argument is a `float`: this is a `float` because type parameter `Ts` of `sort_by` could not be determined. Please add explicit type parameters to the invocation of `sort_by`
-  File "sort_by.php", line 13, characters 18-19:
-    via this generic `Ts`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `float` because this is the result of an arithmetic operation with a `float` as the first argument. [1]
+-> Here is why I think the argument is a `float`: this is a `float` because type parameter `Ts` of `sort_by` could not be determined. Please add explicit type parameters to the invocation of `sort_by` [3]
+->   via this generic `Ts` [4]
+
+sort_by.php:20:70
+11 |   Traversable<Tv> $t,
+12 |   (function(Tv): Ts) $s,
+13 |   ?(function(Ts, Ts): int) $c = null,
+   |                  ^^ [4]
+   |                       ^^^ [2]
+14 | ): vec<Tv> {
+15 |   throw new Exception("A");
+   :
+18 | async function genUnits(vec<TimePeriod> $units): Awaitable<vec<TimePeriod>> {
+19 |   return
+20 |     sort_by($units, (TimePeriod $u) ==> $u->getScore(), ($a, $b) ==> $b - $a);
+   |     ^^^^^^^ [3]
+   |                                                                      ^^^^^^^ [1]
+21 | }
+
+1 error found

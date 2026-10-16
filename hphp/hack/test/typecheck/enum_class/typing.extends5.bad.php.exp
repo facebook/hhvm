@@ -1,26 +1,75 @@
-ERROR: File "typing.extends5.bad.php", line 25, characters 12-12:
-Enum classes can only extend other enum classes. (Typing[4115])
-  File "typing.extends5.bad.php", line 25, characters 29-38:
-  This is an enum.
-ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
-Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])
-ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
-Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4341])
-  File "BuiltinEnum.hhi", line 140, characters 34-42:
-  The method `getValues` is not compatible with the overridden method
-  File "BuiltinEnum.hhi", line 140, characters 34-42:
-  Method `getValues` has type `(function()[HH\Contexts\write_props]: dict<string, HH\MemberOf<F, ExBox>>)` in `F` and comes from ancestor or trait `HH\BuiltinEnumClass<HH\MemberOf<F, ExBox>>`
-  File "BuiltinEnum.hhi", line 35, characters 34-42:
-  But it has type `(function()[]: dict<string, NormalEnum>)` in parent `NormalEnum` and comes from ancestor or trait `HH\BuiltinEnum<NormalEnum>`
-  File "BuiltinEnum.hhi", line 140, characters 34-42:
-  Type `(function()[HH\Contexts\write_props]: dict<string, HH\MemberOf<F, ExBox>>)` is not a subtype of `(function()[]: dict<string, NormalEnum>)`
-  File "BuiltinEnum.hhi", line 35, characters 45-46:
-  Expected a function that requires the capability set {}
-  File "BuiltinEnum.hhi", line 140, characters 46-56:
-  But got a function that requires the capability WriteProperty
-ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
-Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4070])
-  File "BuiltinEnum.hhi", line 140, characters 34-42:
-  You cannot override this method
-  File "BuiltinEnum.hhi", line 35, characters 34-42:
-  It was declared as final
+error: Typing[4115] Enum classes can only extend other enum classes. [1]
+-> This is an enum. [2]
+
+typing.extends5.bad.php:25:12
+23 | }
+24 | 
+25 | enum class F: ExBox extends NormalEnum {}
+   |            ^ [1]
+   |                             ^^^^^^^^^^ [2]
+
+error: Typing[4388] Enum F includes enum NormalEnum but their base types are incompatible [1]
+
+typing.extends5.bad.php:25:29
+23 | }
+24 | 
+25 | enum class F: ExBox extends NormalEnum {}
+   |                             ^^^^^^^^^^ [1]
+
+error: Typing[4341] Some members in class `F` are incompatible with those declared in type `NormalEnum` [1]
+-> The method `getValues` is not compatible with the overridden method [2]
+-> Method `getValues` has type `(function()[HH\Contexts\write_props]: dict<string, HH\MemberOf<F, ExBox>>)` in `F` and comes from ancestor or trait `HH\BuiltinEnumClass<HH\MemberOf<F, ExBox>>` [2]
+-> But it has type `(function()[]: dict<string, NormalEnum>)` in parent `NormalEnum` and comes from ancestor or trait `HH\BuiltinEnum<NormalEnum>` [3]
+-> Type `(function()[HH\Contexts\write_props]: dict<string, HH\MemberOf<F, ExBox>>)` is not a subtype of `(function()[]: dict<string, NormalEnum>)` [2]
+-> Expected a function that requires the capability set {} [4]
+-> But got a function that requires the capability WriteProperty [5]
+
+typing.extends5.bad.php:25:29
+ 23 | }
+ 24 | 
+ 25 | enum class F: ExBox extends NormalEnum {}
+    |                             ^^^^^^^^^^ [1]
+
+BuiltinEnum.hhi:140:34
+ 33 |      */
+ 34 |     <<__NoAutoDynamic>>
+ 35 |     final public static function getValues()[]: darray<string, T>;
+    |                                  ^^^^^^^^^ [3]
+    |                                             ^^ [4]
+ 36 | 
+ 37 |     /**
+    :
+138 |      * @return array ('CONST_NAME' => $value, ....)
+139 |      */
+140 |     final public static function getValues()[write_props]: darray<string, T>;
+    |                                  ^^^^^^^^^ [2]
+    |                                              ^^^^^^^^^^^ [5]
+141 | 
+142 |     final public static function valueOf<TEnum super this, TType>(
+
+error: Typing[4070] Some members in class `F` are incompatible with those declared in type `NormalEnum` [1]
+-> You cannot override this method [2]
+-> It was declared as final [3]
+
+typing.extends5.bad.php:25:29
+ 23 | }
+ 24 | 
+ 25 | enum class F: ExBox extends NormalEnum {}
+    |                             ^^^^^^^^^^ [1]
+
+BuiltinEnum.hhi:140:34
+ 33 |      */
+ 34 |     <<__NoAutoDynamic>>
+ 35 |     final public static function getValues()[]: darray<string, T>;
+    |                                  ^^^^^^^^^ [3]
+ 36 | 
+ 37 |     /**
+    :
+138 |      * @return array ('CONST_NAME' => $value, ....)
+139 |      */
+140 |     final public static function getValues()[write_props]: darray<string, T>;
+    |                                  ^^^^^^^^^ [2]
+141 | 
+142 |     final public static function valueOf<TEnum super this, TType>(
+
+4 errors found

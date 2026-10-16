@@ -1,2 +1,11 @@
-ERROR: File "multiple_module_use_decls.php--A1.php", line 4, characters 8-8:
-`module B;` must be unique, and precede any other declarations in a file. (Parsing[1002])
+error: Parsing[1002] `module B;` must be unique, and precede any other declarations in a file. [1]
+
+multiple_module_use_decls.php--A1.php:4:8
+2 | 
+3 | module A;
+4 | module B; // TODO, error here
+  |        ^ [1]
+5 | 
+6 | internal function f(): void {}
+
+1 error found

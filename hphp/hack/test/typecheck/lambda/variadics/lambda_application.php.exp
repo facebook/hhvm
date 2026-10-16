@@ -1,16 +1,51 @@
-ERROR: File "lambda_application.php", line 13, characters 26-30:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_application.php", line 13, characters 18-19:
-  It is unknown because a type could not be determined here
-ERROR: File "lambda_application.php", line 16, characters 44-52:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_application.php", line 16, characters 32-37:
-  It is unknown because a type could not be determined here
-ERROR: File "lambda_application.php", line 25, characters 12-16:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_application.php", line 24, characters 27-28:
-  It is unknown because a type could not be determined here
-ERROR: File "lambda_application.php", line 30, characters 12-20:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_application.php", line 29, characters 41-46:
-  It is unknown because a type could not be determined here
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+lambda_application.php:13:26
+11 | 
+12 | function test(): void {
+13 |   $lambda1 = (...$y) ==> $y[0]->bar();
+   |                  ^^ [2]
+   |                          ^^^^^ [1]
+14 |   $lambda1(new D("first"));
+15 | 
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+lambda_application.php:16:44
+14 |   $lambda1(new D("first"));
+15 | 
+16 |   $lambda2 = ($i, $str, $d, ...$d_var) ==> $d_var[0]->bar();
+   |                                ^^^^^^ [2]
+   |                                            ^^^^^^^^^ [1]
+17 |   $lambda2(1, "hello", new D("first"), new D("second"));
+18 |   $lambda2(1, "hello", new D("first"));
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+lambda_application.php:25:12
+22 |   $lambda3(1, "hello", new D("first"));
+23 | 
+24 |   $closure1 = function(...$y): int {
+   |                           ^^ [2]
+25 |     return $y[0]->bar();
+   |            ^^^^^ [1]
+26 |   };
+27 |   $closure1(new D("first"));
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because a type could not be determined here [2]
+
+lambda_application.php:30:12
+27 |   $closure1(new D("first"));
+28 | 
+29 |   $closure2 = function($i, $str, $d, ...$d_var): int {
+   |                                         ^^^^^^ [2]
+30 |     return $d_var[0]->bar();
+   |            ^^^^^^^^^ [1]
+31 |   };
+32 |   $closure2(1, "hello", new D("first"), new D("second"));
+
+4 errors found

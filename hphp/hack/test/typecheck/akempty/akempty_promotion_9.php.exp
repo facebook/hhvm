@@ -1,6 +1,22 @@
-ERROR: File "akempty_promotion_9.php", line 15, characters 5-6:
-Invalid argument (Typing[4110])
-  File "akempty_promotion_9.php", line 18, characters 12-30:
-  Expected `dict<int, string>`
-  File "akempty_promotion_9.php", line 8, characters 8-12:
-  But got `vec<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<int, string>` [2]
+-> But got `vec<string>` [3]
+
+akempty_promotion_9.php:15:5
+ 6 |  */
+ 7 | function test(bool $b): void {
+ 8 |   $a = vec[];
+   |        ^^^^^ [3]
+ 9 |   if ($b) {
+10 |     $a[] = 'aaa';
+   :
+13 |   }
+14 |   // no error - both vector and map like arrays match the darray<int, string>
+15 |   f($a);
+   |     ^^ [1]
+16 | }
+17 | 
+18 | function f(darray<int, string> $_): void {}
+   |            ^^^^^^^^^^^^^^^^^^^ [2]
+
+1 error found

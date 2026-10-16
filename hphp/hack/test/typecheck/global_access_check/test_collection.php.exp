@@ -1,46 +1,231 @@
-ERROR: File "test_collection.php", line 14, characters 12-28:
-[Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 14, characters 12-28:
-[Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_collection.php", line 18, characters 5-26:
-[Foo::set_bar]{Foo::$static_bar}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 22, characters 12-32:
-[Foo::get_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 26, characters 5-31:
-[Foo::set_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 30, characters 12-32:
-[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 30, characters 12-32:
-[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_collection.php", line 34, characters 5-31:
-[Foo::set_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 40, characters 5-32:
-[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 42, characters 10-25:
-[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 43, characters 5-16:
-[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_collection.php", line 45, characters 5-39:
-[Test::test_method_call]{Foo::$static_vec_int}(vec<int>)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 47, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 50, characters 5-31:
-[Test::test_method_call]{Foo::$static_vec_int}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 52, characters 5-41:
-[Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 54, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 55, characters 5-19:
-[Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_collection.php", line 58, characters 5-37:
-[Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_collection.php", line 60, characters 39-54:
-[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 61, characters 20-35:
-[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 62, characters 5-26:
-[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_collection.php", line 67, characters 12-27:
-[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_collection.php", line 68, characters 5-19:
-[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+error: Other[11004] [Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is definitely read. [1]
+
+test_collection.php:14:12
+12 | 
+13 |   public static function get_bar(): Bar {
+14 |     return self::$static_bar; // A global variable is passed to (or returned from) a function call.
+   |            ^^^^^^^^^^^^^^^^^ [1]
+15 |   }
+16 | 
+
+error: Other[11003] [Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is possibly written via function call. [1]
+
+test_collection.php:14:12
+12 | 
+13 |   public static function get_bar(): Bar {
+14 |     return self::$static_bar; // A global variable is passed to (or returned from) a function call.
+   |            ^^^^^^^^^^^^^^^^^ [1]
+15 |   }
+16 | 
+
+error: Other[11001] [Foo::set_bar]{Foo::$static_bar}(Bar) A global variable is definitely written. [1]
+
+test_collection.php:18:5
+16 | 
+17 |   public static function set_bar(Bar $b): void {
+18 |     self::$static_bar = $b; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 |   }
+20 | 
+
+error: Other[11004] [Foo::get_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. [1]
+
+test_collection.php:22:12
+20 | 
+21 |   public static function get_vec_int(): vec<int> {
+22 |     return self::$static_vec_int;
+   |            ^^^^^^^^^^^^^^^^^^^^^ [1]
+23 |   }
+24 | 
+
+error: Other[11001] [Foo::set_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely written. [1]
+
+test_collection.php:26:5
+24 | 
+25 |   public static function set_vec_int(vec<int> $vi): void {
+26 |     self::$static_vec_int = $vi; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |   }
+28 | 
+
+error: Other[11004] [Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. [1]
+
+test_collection.php:30:12
+28 | 
+29 |   public static function get_vec_bar(): vec<Bar> {
+30 |     return self::$static_vec_bar; // A global variable is passed to (or returned from) a function call.
+   |            ^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |   }
+32 | 
+
+error: Other[11003] [Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is possibly written via function call. [1]
+
+test_collection.php:30:12
+28 | 
+29 |   public static function get_vec_bar(): vec<Bar> {
+30 |     return self::$static_vec_bar; // A global variable is passed to (or returned from) a function call.
+   |            ^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |   }
+32 | 
+
+error: Other[11001] [Foo::set_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely written. [1]
+
+test_collection.php:34:5
+32 | 
+33 |   public static function set_vec_bar(vec<Bar> $vb): void {
+34 |     self::$static_vec_bar = $vb; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+35 |   }
+36 | }
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely written. [1]
+
+test_collection.php:40:5
+38 | class Test {
+39 |   public function test_method_call(): void {
+40 |     Foo::$static_bar = new Bar(); // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+41 |     Foo::set_bar(new Bar());
+42 |     $b = Foo::$static_bar;
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. [1]
+
+test_collection.php:42:10
+40 |     Foo::$static_bar = new Bar(); // A global variable is written.
+41 |     Foo::set_bar(new Bar());
+42 |     $b = Foo::$static_bar;
+   |          ^^^^^^^^^^^^^^^^ [1]
+43 |     $b->prop = 2; // A global variable is written.
+44 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_collection.php:43:5
+41 |     Foo::set_bar(new Bar());
+42 |     $b = Foo::$static_bar;
+43 |     $b->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^ [1]
+44 | 
+45 |     Foo::$static_vec_int = vec[3, 4, 5]; // A global variable is written.
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_vec_int}(vec<int>)<WriteLiteral> A global variable is definitely written. [1]
+
+test_collection.php:45:5
+43 |     $b->prop = 2; // A global variable is written.
+44 | 
+45 |     Foo::$static_vec_int = vec[3, 4, 5]; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+46 |     Foo::set_vec_int(vec[3, 4, 5]);
+47 |     $c = Foo::$static_vec_int;
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. [1]
+
+test_collection.php:47:10
+45 |     Foo::$static_vec_int = vec[3, 4, 5]; // A global variable is written.
+46 |     Foo::set_vec_int(vec[3, 4, 5]);
+47 |     $c = Foo::$static_vec_int;
+   |          ^^^^^^^^^^^^^^^^^^^^ [1]
+48 |     $c[0] = 0;
+49 |     $c = vec[3, 4, 5];
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_vec_int}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_collection.php:50:5
+48 |     $c[0] = 0;
+49 |     $c = vec[3, 4, 5];
+50 |     Foo::$static_vec_int[0] = 0;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+51 | 
+52 |     Foo::$static_vec_bar = vec[new Bar()]; // A global variable is written.
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely written. [1]
+
+test_collection.php:52:5
+50 |     Foo::$static_vec_int[0] = 0;
+51 | 
+52 |     Foo::$static_vec_bar = vec[new Bar()]; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+53 |     Foo::set_vec_bar(vec[new Bar()]);
+54 |     $d = Foo::$static_vec_bar;
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. [1]
+
+test_collection.php:54:10
+52 |     Foo::$static_vec_bar = vec[new Bar()]; // A global variable is written.
+53 |     Foo::set_vec_bar(vec[new Bar()]);
+54 |     $d = Foo::$static_vec_bar;
+   |          ^^^^^^^^^^^^^^^^^^^^ [1]
+55 |     $d[0]->prop = 2; // A global variable is written.
+56 |     $d = vec[new Bar()];
+
+error: Other[11002] [Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_collection.php:55:5
+53 |     Foo::set_vec_bar(vec[new Bar()]);
+54 |     $d = Foo::$static_vec_bar;
+55 |     $d[0]->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^ [1]
+56 |     $d = vec[new Bar()];
+57 |     $d[0]->prop = 2;
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_collection.php:58:5
+56 |     $d = vec[new Bar()];
+57 |     $d[0]->prop = 2;
+58 |     Foo::$static_vec_bar[0]->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+59 | 
+60 |     $e = shape('id' => 1, 'object' => Foo::$static_bar);
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. [1]
+
+test_collection.php:60:39
+58 |     Foo::$static_vec_bar[0]->prop = 2; // A global variable is written.
+59 | 
+60 |     $e = shape('id' => 1, 'object' => Foo::$static_bar);
+   |                                       ^^^^^^^^^^^^^^^^ [1]
+61 |     $e['object'] = Foo::$static_bar;
+62 |     $e['object']->prop = 2; // A global variable is written.
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. [1]
+
+test_collection.php:61:20
+59 | 
+60 |     $e = shape('id' => 1, 'object' => Foo::$static_bar);
+61 |     $e['object'] = Foo::$static_bar;
+   |                    ^^^^^^^^^^^^^^^^ [1]
+62 |     $e['object']->prop = 2; // A global variable is written.
+63 |     $e['id'] = 2;
+
+error: Other[11002] [Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_collection.php:62:5
+60 |     $e = shape('id' => 1, 'object' => Foo::$static_bar);
+61 |     $e['object'] = Foo::$static_bar;
+62 |     $e['object']->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+63 |     $e['id'] = 2;
+64 |     $e['object']->prop = 2; // To do: raise an error "A global variable is written."
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. [1]
+
+test_collection.php:67:12
+65 | 
+66 |     $f = vec[new Bar()];
+67 |     $f[] = Foo::$static_bar;
+   |            ^^^^^^^^^^^^^^^^ [1]
+68 |     $f[1]->prop = 2; // A global variable is written.
+69 |     $f[0] = new Bar();
+
+error: Other[11002] [Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_collection.php:68:5
+66 |     $f = vec[new Bar()];
+67 |     $f[] = Foo::$static_bar;
+68 |     $f[1]->prop = 2; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^ [1]
+69 |     $f[0] = new Bar();
+70 |     $f[1]->prop = 2; // To do: raise an error "A global variable is written."
+
+23 errors found

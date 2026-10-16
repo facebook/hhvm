@@ -1,26 +1,58 @@
-ERROR: File "staticgeneric_bad.php", line 14, characters 14-17:
-Invalid argument (Typing[4323])
-  File "staticgeneric_bad.php", line 4, characters 9-9:
-  `T` is a constrained type parameter
-  File "staticgeneric_bad.php", line 4, characters 14-21:
-  This type constraint is violated
-  File "staticgeneric_bad.php", line 4, characters 14-21:
-  Expected `arraykey`
-  File "staticgeneric_bad.php", line 14, characters 14-17:
-  But got `bool`
-ERROR: File "staticgeneric_bad.php", line 15, characters 25-29:
-Invalid argument (Typing[4323])
-  File "staticgeneric_bad.php", line 4, characters 9-9:
-  `T` is a constrained type parameter
-  File "staticgeneric_bad.php", line 4, characters 14-21:
-  This type constraint is violated
-  File "staticgeneric_bad.php", line 4, characters 14-21:
-  Expected `arraykey`
-  File "staticgeneric_bad.php", line 15, characters 25-29:
-  But got `bool`
-ERROR: File "staticgeneric_bad.php", line 15, characters 25-29:
-Invalid argument (Typing[4110])
-  File "staticgeneric_bad.php", line 13, characters 24-29:
-  Expected `string`
-  File "staticgeneric_bad.php", line 15, characters 25-29:
-  But got `bool`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [1]
+
+staticgeneric_bad.php:14:14
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<T as arraykey> {
+   |         ^ [2]
+   |              ^^^^^^^^ [3]
+ 5 |   public function __construct(private T $item) {}
+ 6 |   public static function id(T $x): T {
+   :
+12 | }
+13 | function test(int $x): string {
+14 |   $z = C::id(true);
+   |              ^^^^ [1]
+15 |   return C::selfy(new C(false));
+16 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [1]
+
+staticgeneric_bad.php:15:25
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<T as arraykey> {
+   |         ^ [2]
+   |              ^^^^^^^^ [3]
+ 5 |   public function __construct(private T $item) {}
+ 6 |   public static function id(T $x): T {
+   :
+13 | function test(int $x): string {
+14 |   $z = C::id(true);
+15 |   return C::selfy(new C(false));
+   |                         ^^^^^ [1]
+16 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [1]
+
+staticgeneric_bad.php:15:25
+11 |   }
+12 | }
+13 | function test(int $x): string {
+   |                        ^^^^^^ [2]
+14 |   $z = C::id(true);
+15 |   return C::selfy(new C(false));
+   |                         ^^^^^ [1]
+16 | }
+
+3 errors found

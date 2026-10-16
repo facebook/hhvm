@@ -1,10 +1,29 @@
-WARN: File "dynamic_error_message1.php", line 4, characters 12-12:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "dynamic_error_message1.php", line 3, characters 21-27:
-  This expression has type `dynamic`
-ERROR: File "dynamic_error_message1.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-  File "dynamic_error_message1.php", line 3, characters 34-36:
-  Expected `int`
-  File "dynamic_error_message1.php", line 4, characters 12-12:
-  But got `dynamic`, the result of accessing a property of a `dynamic` type
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_error_message1.php:4:12
+1 | <?hh
+2 | 
+3 | function testObjGet(dynamic $x): int {
+  |                     ^^^^^^^ [2]
+4 |   $y = $x->y;
+  |            ^ [1]
+5 |   return $y;
+6 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `dynamic`, the result of accessing a property of a `dynamic` type [3]
+
+dynamic_error_message1.php:5:10
+1 | <?hh
+2 | 
+3 | function testObjGet(dynamic $x): int {
+  |                                  ^^^ [2]
+4 |   $y = $x->y;
+  |            ^ [3]
+5 |   return $y;
+  |          ^^ [1]
+6 | }
+
+2 errors found

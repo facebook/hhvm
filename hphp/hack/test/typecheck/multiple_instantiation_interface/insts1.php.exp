@@ -1,14 +1,27 @@
-ERROR: File "insts1.php", line 12, characters 21-26:
-Interface `J` is used more than once in this declaration. (Typing[4377])
-  File "insts1.php", line 12, characters 29-29:
-  Here is another occurrence
-ERROR: File "insts1.php", line 12, characters 29-34:
-L extends J<int> but it already extends J at another instantiation (Typing[4480])
-  File "insts1.php", line 12, characters 21-26:
-  It already extends J<num>
-  File "insts1.php", line 12, characters 21-21:
-  J<num> should be a subtype of J<int>, but it's not because
-  File "insts1.php", line 12, characters 31-33:
-  Expected `int`
-  File "insts1.php", line 12, characters 23-25:
-  But got `num`
+error: Typing[4377] Interface `J` is used more than once in this declaration. [1]
+-> Here is another occurrence [2]
+
+insts1.php:12:21
+10 | 
+11 | // Illegal
+12 | interface L extends J<num>, J<int> { }
+   |                     ^^^^^^ [1]
+   |                             ^ [2]
+
+error: Typing[4480] L extends J<int> but it already extends J at another instantiation [1]
+-> It already extends J<num> [2]
+-> J<num> should be a subtype of J<int>, but it's not because [3]
+-> Expected `int` [4]
+-> But got `num` [5]
+
+insts1.php:12:29
+10 | 
+11 | // Illegal
+12 | interface L extends J<num>, J<int> { }
+   |                     ^^^^^^ [2]
+   |                     ^ [3]
+   |                       ^^^ [5]
+   |                             ^^^^^^ [1]
+   |                               ^^^ [4]
+
+2 errors found

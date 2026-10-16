@@ -1,4 +1,15 @@
-ERROR: File "newtype_internal_bad.php--test.php", line 6, characters 26-36:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "newtype_internal_bad.php--test.php", line 4, characters 16-26:
-  It is declared as `internal` here
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+newtype_internal_bad.php--test.php:6:26
+2 | 
+3 | module foo;
+4 | internal class FooInternal {}
+  |                ^^^^^^^^^^^ [2]
+5 | newtype FooAlias = FooInternal;
+6 | newtype FooAliasWrong as FooInternal = FooInternal;
+  |                          ^^^^^^^^^^^ [1]
+7 | class EntFoo {
+8 |   const type TValue = FooAlias;
+
+1 error found

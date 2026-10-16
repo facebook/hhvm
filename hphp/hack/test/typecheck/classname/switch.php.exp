@@ -1,7 +1,47 @@
-WARN: File "switch.php", line 19, characters 10-10:
-Invalid case: This case will never match.
-A value of type `classname<C>` can never be equal to a value of type `int` (Warn[12007])
-ERROR: File "switch.php", line 9, characters 3-339:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch.php", line 9, characters 11-14:
-  The scrutinee has type `classname<C>` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `classname<C>` can never be equal to a value of type `int` [1]
+
+switch.php:19:10
+17 |       // of this comparison succeeding.
+18 |       break;
+19 |     case 1:
+   |          ^ [1]
+20 |       break;
+21 |   }
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `classname<C>` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch.php:9:3
+ 7 | 
+ 8 | function test(classname<C> $cls): void {
+ 9 |   switch ($cls) {
+   |   ^^^^^^^^^^^^^^^ [1]
+   |           ^^^^ [2]
+10 |     case D::class:
+   |     ^^^^^^^^^^^^^^ [1]
+11 |       break;
+   |       ^^^^^^ [1]
+12 |     case E::class:
+   |     ^^^^^^^^^^^^^^ [1]
+13 |       break;
+   |       ^^^^^^ [1]
+14 |     case UnrelatedC::class:
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |       // This is a limitation of the current approach to checking switch
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |       // case labels. Ideally we would be able to detect the impossibility
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |       // of this comparison succeeding.
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |       break;
+   |       ^^^^^^ [1]
+19 |     case 1:
+   |     ^^^^^^^ [1]
+20 |       break;
+   |       ^^^^^^ [1]
+21 |   }
+   |   ^ [1]
+22 | }
+
+2 errors found

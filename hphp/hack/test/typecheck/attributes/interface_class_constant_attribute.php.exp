@@ -1,6 +1,20 @@
-ERROR: File "interface_class_constant_attribute.php", line 11, characters 23-31:
-Invalid argument (Typing[4110])
-  File "interface_class_constant_attribute.php", line 4, characters 31-33:
-  Expected `int`
-  File "interface_class_constant_attribute.php", line 11, characters 23-31:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+interface_class_constant_attribute.php:11:23
+ 2 | 
+ 3 | final class ConstantAttribute implements HH\ClassConstantAttribute {
+ 4 |   public function __construct(int $_value)[] {}
+   |                               ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+ 9 |   const string VALID = 'valid';
+10 | 
+11 |   <<ConstantAttribute('invalid')>>
+   |                       ^^^^^^^^^ [1]
+12 |   const string INVALID = 'invalid';
+13 | }
+
+1 error found

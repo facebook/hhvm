@@ -1,6 +1,24 @@
-ERROR: File "refinement_pattern_variable.php", line 7, characters 5-11:
-Binding a variable in a pattern is not yet supported. (Parsing[1002])
-ERROR: File "refinement_pattern_variable.php", line 7, characters 26-27:
-Variable `$i` is undefined, or not always defined. (Naming[2050])
-  File "refinement_pattern_variable.php", line 6, characters 10-11:
-  Did you mean `$v` instead?
+error: Parsing[1002] Binding a variable in a pattern is not yet supported. [1]
+
+refinement_pattern_variable.php:7:5
+5 | function f(arraykey $v): void {
+6 |   match ($v) {
+7 |     $i: int => echo "int $i\n";
+  |     ^^^^^^^ [1]
+8 |     _ => echo "string $v\n";
+9 |   }
+
+error: Naming[2050] Variable `$i` is undefined, or not always defined. [1]
+-> Did you mean `$v` instead? [2]
+
+refinement_pattern_variable.php:7:26
+4 | 
+5 | function f(arraykey $v): void {
+6 |   match ($v) {
+  |          ^^ [2]
+7 |     $i: int => echo "int $i\n";
+  |                          ^^ [1]
+8 |     _ => echo "string $v\n";
+9 |   }
+
+2 errors found

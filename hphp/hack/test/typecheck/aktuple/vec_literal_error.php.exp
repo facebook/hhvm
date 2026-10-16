@@ -1,6 +1,18 @@
-ERROR: File "vec_literal_error.php", line 6, characters 15-19:
-Invalid argument (Typing[4110])
-  File "vec_literal_error.php", line 9, characters 22-27:
-  Expected `string`
-  File "vec_literal_error.php", line 4, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+vec_literal_error.php:6:15
+2 | 
+3 | function test(): void {
+4 |   $a = vec[4, 'aaa'];
+  |            ^ [3]
+5 | 
+6 |   take_string($a[0]);
+  |               ^^^^^ [1]
+7 | }
+8 | 
+9 | function take_string(string $_): void {}
+  |                      ^^^^^^ [2]
+
+1 error found

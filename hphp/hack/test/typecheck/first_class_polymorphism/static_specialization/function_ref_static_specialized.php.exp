@@ -1,54 +1,234 @@
-ERROR: File "function_ref_static_specialized.php", line 52, characters 12-28:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 29, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_specialized.php", line 16, characters 26-27:
-  But got `(readonly function<T>(int $value): int)`
-ERROR: File "function_ref_static_specialized.php", line 53, characters 12-26:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 29, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_specialized.php", line 16, characters 26-27:
-  But got `(readonly function<T>($value): _)`
-ERROR: File "function_ref_static_specialized.php", line 54, characters 17-33:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 31, characters 27-43:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_specialized.php", line 16, characters 26-27:
-  But got `(readonly function<T>(int $value): int)`
-ERROR: File "function_ref_static_specialized.php", line 55, characters 17-31:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 31, characters 27-43:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_specialized.php", line 16, characters 26-27:
-  But got `(readonly function<T>($value): _)`
-ERROR: File "function_ref_static_specialized.php", line 56, characters 33-40:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 7, characters 17-19:
-  Expected `int`
-  File "function_ref_static_specialized.php", line 16, characters 29-29:
-  But got `T#2` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref_static_specialized.php", line 56, characters 33-40:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 7, characters 17-19:
-  Expected `int`
-  File "function_ref_static_specialized.php", line 16, characters 29-29:
-  But got `mixed` where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref_static_specialized.php", line 56, characters 33-40:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 16, characters 29-29:
-  Expected `T#2` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "function_ref_static_specialized.php", line 7, characters 30-32:
-  But got `int`
-ERROR: File "function_ref_static_specialized.php", line 57, characters 12-18:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 29, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_specialized.php", line 3, characters 10-11:
-  But got `(readonly function<T>(int $value): int)`
-ERROR: File "function_ref_static_specialized.php", line 58, characters 12-16:
-Invalid argument (Typing[4110])
-  File "function_ref_static_specialized.php", line 29, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_specialized.php", line 3, characters 10-11:
-  But got `(readonly function<T>($value): _)`
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>(int $value): int)` [3]
+
+function_ref_static_specialized.php:52:12
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                          ^^ [3]
+17 |     return $value;
+18 |   }
+   :
+27 | }
+28 | 
+29 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+30 | 
+31 | function mock_function<T>(HH\FunctionRef<T> $_original, T $_replacement): void {}
+   :
+50 | 
+51 | function bad(): void {
+52 |   take_ref(Identity::id<int>);
+   |            ^^^^^^^^^^^^^^^^^ [1]
+53 |   take_ref(Identity::id<_>);
+54 |   mock_function(Identity::id<int>, int_id<>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>($value): _)` [3]
+
+function_ref_static_specialized.php:53:12
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                          ^^ [3]
+17 |     return $value;
+18 |   }
+   :
+27 | }
+28 | 
+29 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+30 | 
+31 | function mock_function<T>(HH\FunctionRef<T> $_original, T $_replacement): void {}
+   :
+51 | function bad(): void {
+52 |   take_ref(Identity::id<int>);
+53 |   take_ref(Identity::id<_>);
+   |            ^^^^^^^^^^^^^^^ [1]
+54 |   mock_function(Identity::id<int>, int_id<>);
+55 |   mock_function(Identity::id<_>, int_id<>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>(int $value): int)` [3]
+
+function_ref_static_specialized.php:54:17
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                          ^^ [3]
+17 |     return $value;
+18 |   }
+   :
+29 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+30 | 
+31 | function mock_function<T>(HH\FunctionRef<T> $_original, T $_replacement): void {}
+   |                           ^^^^^^^^^^^^^^^^^ [2]
+32 | 
+33 | function good(): void {
+   :
+52 |   take_ref(Identity::id<int>);
+53 |   take_ref(Identity::id<_>);
+54 |   mock_function(Identity::id<int>, int_id<>);
+   |                 ^^^^^^^^^^^^^^^^^ [1]
+55 |   mock_function(Identity::id<_>, int_id<>);
+56 |   mock_function(Identity::id<>, int_id<>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>($value): _)` [3]
+
+function_ref_static_specialized.php:55:17
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                          ^^ [3]
+17 |     return $value;
+18 |   }
+   :
+29 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+30 | 
+31 | function mock_function<T>(HH\FunctionRef<T> $_original, T $_replacement): void {}
+   |                           ^^^^^^^^^^^^^^^^^ [2]
+32 | 
+33 | function good(): void {
+   :
+53 |   take_ref(Identity::id<_>);
+54 |   mock_function(Identity::id<int>, int_id<>);
+55 |   mock_function(Identity::id<_>, int_id<>);
+   |                 ^^^^^^^^^^^^^^^ [1]
+56 |   mock_function(Identity::id<>, int_id<>);
+57 |   take_ref(id<int>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `T#2` which corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref_static_specialized.php:56:33
+ 5 | }
+ 6 | 
+ 7 | function int_id(int $value): int {
+   |                 ^^^ [2]
+ 8 |   return $value;
+ 9 | }
+   :
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                             ^ [3]
+17 |     return $value;
+18 |   }
+   :
+54 |   mock_function(Identity::id<int>, int_id<>);
+55 |   mock_function(Identity::id<_>, int_id<>);
+56 |   mock_function(Identity::id<>, int_id<>);
+   |                                 ^^^^^^^^ [1]
+57 |   take_ref(id<int>);
+58 |   take_ref(id<_>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref_static_specialized.php:56:33
+ 5 | }
+ 6 | 
+ 7 | function int_id(int $value): int {
+   |                 ^^^ [2]
+ 8 |   return $value;
+ 9 | }
+   :
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                             ^ [3]
+17 |     return $value;
+18 |   }
+   :
+54 |   mock_function(Identity::id<int>, int_id<>);
+55 |   mock_function(Identity::id<_>, int_id<>);
+56 |   mock_function(Identity::id<>, int_id<>);
+   |                                 ^^^^^^^^ [1]
+57 |   take_ref(id<int>);
+58 |   take_ref(id<_>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T#2` which corresponds to the rank-2 type parameter `T` in the polymorphic function [2]
+-> But got `int` [3]
+
+function_ref_static_specialized.php:56:33
+ 5 | }
+ 6 | 
+ 7 | function int_id(int $value): int {
+   |                              ^^^ [3]
+ 8 |   return $value;
+ 9 | }
+   :
+14 | 
+15 | class Identity {
+16 |   public static function id<T>(T $value): T {
+   |                             ^ [2]
+17 |     return $value;
+18 |   }
+   :
+54 |   mock_function(Identity::id<int>, int_id<>);
+55 |   mock_function(Identity::id<_>, int_id<>);
+56 |   mock_function(Identity::id<>, int_id<>);
+   |                                 ^^^^^^^^ [1]
+57 |   take_ref(id<int>);
+58 |   take_ref(id<_>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>(int $value): int)` [3]
+
+function_ref_static_specialized.php:57:12
+ 1 | <?hh
+ 2 | 
+ 3 | function id<T>(T $value): T {
+   |          ^^ [3]
+ 4 |   return $value;
+ 5 | }
+   :
+27 | }
+28 | 
+29 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+30 | 
+31 | function mock_function<T>(HH\FunctionRef<T> $_original, T $_replacement): void {}
+   :
+55 |   mock_function(Identity::id<_>, int_id<>);
+56 |   mock_function(Identity::id<>, int_id<>);
+57 |   take_ref(id<int>);
+   |            ^^^^^^^ [1]
+58 |   take_ref(id<_>);
+59 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<T>($value): _)` [3]
+
+function_ref_static_specialized.php:58:12
+ 1 | <?hh
+ 2 | 
+ 3 | function id<T>(T $value): T {
+   |          ^^ [3]
+ 4 |   return $value;
+ 5 | }
+   :
+27 | }
+28 | 
+29 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+30 | 
+31 | function mock_function<T>(HH\FunctionRef<T> $_original, T $_replacement): void {}
+   :
+56 |   mock_function(Identity::id<>, int_id<>);
+57 |   take_ref(id<int>);
+58 |   take_ref(id<_>);
+   |            ^^^^^ [1]
+59 | }
+
+9 errors found

@@ -1,2 +1,10 @@
-ERROR: File "const_static_prop.php", line 4, characters 33-34:
-Cannot use experimental feature: Const properties cannot be static. (Other[0000])
+error: Other[0000] Cannot use experimental feature: Const properties cannot be static. [1]
+
+const_static_prop.php:4:33
+2 | 
+3 | class A {
+4 |   <<__Const>> static public int $p = 5;
+  |                                 ^^ [1]
+5 | }
+
+1 error found

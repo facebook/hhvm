@@ -1,14 +1,33 @@
-ERROR: File "throw_yield.php", line 5, characters 9-15:
-`yield` can only appear as a statement or on the right of an assignment (Parsing[1002])
-ERROR: File "throw_yield.php", line 4, characters 17-20:
-Invalid return type (Typing[4110])
-  File "throw_yield.php", line 4, characters 17-20:
-  Expected `void`
-  File "throw_yield.php", line 4, characters 17-20:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
-ERROR: File "throw_yield.php", line 5, characters 9-15:
-Invalid exception (Typing[4110])
-  File "throw_yield.php", line 5, characters 9-15:
-  Expected `~Throwable` because it is used as an exception
-  File "throw_yield.php", line 5, characters 9-15:
-  But got `?_` (`$generator->send()` can always send a `null` back to a `yield`)
+error: Parsing[1002] `yield` can only appear as a statement or on the right of an assignment [1]
+
+throw_yield.php:5:9
+3 | 
+4 | function foo(): void {
+5 |   throw yield 3;
+  |         ^^^^^^^ [1]
+6 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+throw_yield.php:4:17
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function foo(): void {
+  |                 ^^^^ [1]
+5 |   throw yield 3;
+6 | }
+
+error: Typing[4110] Invalid exception [1]
+-> Expected `~Throwable` because it is used as an exception [1]
+-> But got `?_` (`$generator->send()` can always send a `null` back to a `yield`) [1]
+
+throw_yield.php:5:9
+3 | 
+4 | function foo(): void {
+5 |   throw yield 3;
+  |         ^^^^^^^ [1]
+6 | }
+
+3 errors found

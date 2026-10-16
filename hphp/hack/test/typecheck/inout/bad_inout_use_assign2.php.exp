@@ -1,6 +1,17 @@
-ERROR: File "bad_inout_use_assign2.php", line 4, characters 11-12:
-Invalid assignment to an `inout` parameter (Typing[4337])
-  File "bad_inout_use_assign2.php", line 3, characters 18-23:
-  Expected `string` (`inout` parameter)
-  File "bad_inout_use_assign2.php", line 7, characters 18-25:
-  But got `arraykey`
+error: Typing[4337] Invalid assignment to an `inout` parameter [1]
+-> Expected `string` (`inout` parameter) [2]
+-> But got `arraykey` [3]
+
+bad_inout_use_assign2.php:4:11
+1 | <?hh
+2 | 
+3 | function f(inout string $s): void {
+  |                  ^^^^^^ [2]
+4 |   g(inout $s);
+  |           ^^ [1]
+5 | }
+6 | 
+7 | function g(inout arraykey $a): void {}
+  |                  ^^^^^^^^ [3]
+
+1 error found

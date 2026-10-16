@@ -1,12 +1,43 @@
-ERROR: File "T14908493.php", line 49, characters 5-62:
-Rigid type variable escapes its lambda (Typing[4442])
-  File "T14908493.php", line 50, characters 24-24:
-  Rigid type variable `T#1` is escaping
-  File "T14908493.php", line 49, characters 5-62:
-  in the return type of this lambda
-ERROR: File "T14908493.php", line 55, characters 10-43:
-Invalid return type (Typing[4110])
-  File "T14908493.php", line 46, characters 51-55:
-  Expected `dynamic`
-  File "T14908493.php", line 50, characters 7-8:
-  Type `T#1` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4442] Rigid type variable escapes its lambda [1]
+-> Rigid type variable `T#1` is escaping [2]
+-> in the return type of this lambda [1]
+
+T14908493.php:49:5
+47 |   $values = map(
+48 |     $values,
+49 |     $v ==> {
+   |     ^^^^^^^^ [1]
+50 |       $v as BoxedValue<_>;
+   |       ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                        ^ [2]
+51 |       return $v;
+   |       ^^^^^^^^^^ [1]
+52 |     },
+   |     ^ [1]
+53 |   );
+54 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> Type `T#1` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+T14908493.php:55:10
+44 | }
+45 | 
+46 | function add_first_two(vec<IBoxedValue> $values): mixed {
+   |                                                   ^^^^^ [2]
+47 |   $values = map(
+48 |     $values,
+49 |     $v ==> {
+50 |       $v as BoxedValue<_>;
+   |       ^^ [3]
+51 |       return $v;
+52 |     },
+53 |   );
+54 | 
+55 |   return $values[0]->add($values[1]->get());
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+56 | }
+57 | 
+
+2 errors found

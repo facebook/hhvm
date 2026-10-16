@@ -1,18 +1,63 @@
-ERROR: File "leak_safe_subtyping.php", line 24, characters 19-27:
-Invalid argument (Typing[4403])
-  File "leak_safe_subtyping.php", line 4, characters 15-23:
-  Expected a function that requires the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_subtyping.php", line 23, characters 10-26:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "leak_safe_subtyping.php", line 25, characters 19-37:
-Invalid argument (Typing[4403])
-  File "leak_safe_subtyping.php", line 4, characters 15-23:
-  Expected a function that requires the capability set {ReadGlobals, System, WriteProperty}
-  File "leak_safe_subtyping.php", line 25, characters 22-29:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "leak_safe_subtyping.php", line 28, characters 32-62:
-Invalid argument (Typing[4403])
-  File "leak_safe_subtyping.php", line 18, characters 14-35:
-  Expected a function that requires the capability set {AccessGlobals, WriteProperty}
-  File "leak_safe_subtyping.php", line 27, characters 39-58:
-  But got a function that requires the capability set {AccessGlobals, System, WriteProperty}
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+leak_safe_subtyping.php:24:19
+ 2 | 
+ 3 | function call_controlled(
+ 4 |   (function()[leak_safe]: void) $f
+   |               ^^^^^^^^^ [2]
+ 5 | )[leak_safe]: void {
+ 6 |   $f();
+   :
+21 | }
+22 | 
+23 | function bad_fun_subtyping(): void {
+   |          ^^^^^^^^^^^^^^^^^ [3]
+24 |   call_controlled(() ==> {}); // ERROR: `leak_safe` is purer
+   |                   ^^^^^^^^^ [1]
+25 |   call_controlled(()[defaults] ==> {}); // ERROR: `leak_safe` is purer
+26 | 
+
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability set {ReadGlobals, System, WriteProperty} [2]
+-> But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+leak_safe_subtyping.php:25:19
+ 2 | 
+ 3 | function call_controlled(
+ 4 |   (function()[leak_safe]: void) $f
+   |               ^^^^^^^^^ [2]
+ 5 | )[leak_safe]: void {
+ 6 |   $f();
+   :
+23 | function bad_fun_subtyping(): void {
+24 |   call_controlled(() ==> {}); // ERROR: `leak_safe` is purer
+25 |   call_controlled(()[defaults] ==> {}); // ERROR: `leak_safe` is purer
+   |                   ^^^^^^^^^^^^^^^^^^^ [1]
+   |                      ^^^^^^^^ [3]
+26 | 
+27 |   $l_controlled_and_write_globals = ()[leak_safe, globals] ==> {};
+
+error: Typing[4403] Invalid argument [1]
+-> Expected a function that requires the capability set {AccessGlobals, WriteProperty} [2]
+-> But got a function that requires the capability set {AccessGlobals, System, WriteProperty} [3]
+
+leak_safe_subtyping.php:28:32
+16 | 
+17 | function call_write_props_and_globals(
+18 |   (function()[write_props, globals]: void) $f
+   |              ^^^^^^^^^^^^^^^^^^^^^^ [2]
+19 | )[write_props, globals]: void {
+20 |   $f();
+   :
+25 |   call_controlled(()[defaults] ==> {}); // ERROR: `leak_safe` is purer
+26 | 
+27 |   $l_controlled_and_write_globals = ()[leak_safe, globals] ==> {};
+   |                                       ^^^^^^^^^^^^^^^^^^^^ [3]
+28 |   call_write_props_and_globals($l_controlled_and_write_globals); // ERROR
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |   // (`leak_safe` should allow reads but not writes to globals )
+30 | }
+
+3 errors found

@@ -1,14 +1,38 @@
-ERROR: File "typing4.bad.php", line 11, characters 20-20:
-Unbound name: `T` (Naming[2049])
-ERROR: File "typing4.bad.php", line 11, characters 20-20:
-Unbound name: `T` (an object type) (Naming[2049])
-ERROR: File "typing4.bad.php", line 12, characters 16-16:
-Constant does not match the type of the enum it is in (Typing[4328])
-  File "typing4.bad.php", line 11, characters 20-20:
-  Expected `T`
-  File "typing4.bad.php", line 12, characters 8-13:
-  But got `string`
-  File "typing4.bad.php", line 12, characters 8-13:
-  This type argument to `Box` must match exactly (it is invariant)
-  File "typing4.bad.php", line 12, characters 24-26:
-  This type argument to `Box` must match exactly (it is invariant)
+error: Naming[2049] Unbound name: `T` [1]
+
+typing4.bad.php:11:20
+ 9 | 
+10 | // only types without free parameters are allowed
+11 | enum class E : Box<T> {
+   |                    ^ [1]
+12 |    Box<string> A = new Box('zuck');
+13 | }
+
+error: Naming[2049] Unbound name: `T` (an object type) [1]
+
+typing4.bad.php:11:20
+ 9 | 
+10 | // only types without free parameters are allowed
+11 | enum class E : Box<T> {
+   |                    ^ [1]
+12 |    Box<string> A = new Box('zuck');
+13 | }
+
+error: Typing[4328] Constant does not match the type of the enum it is in [1]
+-> Expected `T` [2]
+-> But got `string` [3]
+-> This type argument to `Box` must match exactly (it is invariant) [3]
+-> This type argument to `Box` must match exactly (it is invariant) [4]
+
+typing4.bad.php:12:16
+ 9 | 
+10 | // only types without free parameters are allowed
+11 | enum class E : Box<T> {
+   |                    ^ [2]
+12 |    Box<string> A = new Box('zuck');
+   |        ^^^^^^ [3]
+   |                ^ [1]
+   |                        ^^^ [4]
+13 | }
+
+3 errors found

@@ -1,1 +1,2 @@
 --keep-user-attributes
+--error-format plain_highlighted

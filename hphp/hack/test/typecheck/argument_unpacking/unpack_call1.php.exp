@@ -1,78 +1,244 @@
-ERROR: File "unpack_call1.php", line 38, characters 8-12:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 38, characters 8-12:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 39, characters 21-25:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 39, characters 21-25:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 8, characters 19-29:
-  Definition is here
-ERROR: File "unpack_call1.php", line 40, characters 15-19:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 40, characters 15-19:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 12, characters 19-19:
-  Definition is here
-ERROR: File "unpack_call1.php", line 41, characters 21-25:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 41, characters 21-25:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 16, characters 19-29:
-  Definition is here
-ERROR: File "unpack_call1.php", line 42, characters 15-19:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 42, characters 15-19:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 12, characters 19-19:
-  Definition is here
-ERROR: File "unpack_call1.php", line 51, characters 8-22:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 51, characters 8-22:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 53, characters 8-14:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 53, characters 8-14:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 69, characters 8-12:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 69, characters 8-12:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 75, characters 8-12:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 75, characters 8-12:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 85, characters 8-19:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 85, characters 8-19:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 85, characters 8-19:
-Invalid argument (Typing[4110])
-  File "unpack_call1.php", line 85, characters 8-19:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call1.php", line 90, characters 24-28:
-  But got `mixed`
-ERROR: File "unpack_call1.php", line 87, characters 8-14:
-Invalid argument (Typing[4359])
-  File "unpack_call1.php", line 87, characters 8-14:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call1.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "unpack_call1.php", line 87, characters 8-14:
-Invalid argument (Typing[4110])
-  File "unpack_call1.php", line 87, characters 8-14:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call1.php", line 90, characters 24-28:
-  But got `mixed`
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:38:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+36 | function test_basic(): void {
+37 |   $args = vec[1, 2, 3];
+38 |   f(...$args);
+   |        ^^^^^ [1]
+39 |   $inst = new C1(...$args);
+40 |   $inst->f(...$args);
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:39:21
+ 6 | 
+ 7 | class C1 {
+ 8 |   public function __construct(
+   |                   ^^^^^^^^^^^ [2]
+ 9 |     private int $foo,
+10 |     private mixed ...$args
+   :
+37 |   $args = vec[1, 2, 3];
+38 |   f(...$args);
+39 |   $inst = new C1(...$args);
+   |                     ^^^^^ [1]
+40 |   $inst->f(...$args);
+41 |   $inst = new C2(...$args);
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:40:15
+10 |     private mixed ...$args
+11 |   ) {}
+12 |   public function f(int $foo, mixed ...$args): void {}
+   |                   ^ [2]
+13 | }
+14 | 
+   :
+38 |   f(...$args);
+39 |   $inst = new C1(...$args);
+40 |   $inst->f(...$args);
+   |               ^^^^^ [1]
+41 |   $inst = new C2(...$args);
+42 |   $inst->f(...$args);
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:41:21
+14 | 
+15 | class C2 extends C1 {
+16 |   public function __construct(
+   |                   ^^^^^^^^^^^ [2]
+17 |     private int $foo,
+18 |     private mixed ...$args
+   :
+39 |   $inst = new C1(...$args);
+40 |   $inst->f(...$args);
+41 |   $inst = new C2(...$args);
+   |                     ^^^^^ [1]
+42 |   $inst->f(...$args);
+43 | 
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:42:15
+10 |     private mixed ...$args
+11 |   ) {}
+12 |   public function f(int $foo, mixed ...$args): void {}
+   |                   ^ [2]
+13 | }
+14 | 
+   :
+40 |   $inst->f(...$args);
+41 |   $inst = new C2(...$args);
+42 |   $inst->f(...$args);
+   |               ^^^^^ [1]
+43 | 
+44 |   switch ( mt_rand() % 5 ) {
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:51:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+49 |   }
+50 | 
+51 |   f(...make_int_args());
+   |        ^^^^^^^^^^^^^^^ [1]
+52 |   $make = make_int_args<>;
+53 |   f(...$make());
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:53:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+51 |   f(...make_int_args());
+52 |   $make = make_int_args<>;
+53 |   f(...$make());
+   |        ^^^^^^^ [1]
+54 | 
+55 |   f(1, ...make_mixed_args());
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:69:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+67 |   // fails at runtime, but we don't track array arity!
+68 |   $args = dict[];
+69 |   f(...$args);
+   |        ^^^^^ [1]
+70 | 
+71 |   // fails at runtime, but we don't ensure that container doesn't have
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:75:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+73 |   // Container-but-not-KeyedContainer<string, >
+74 |   $args['a'] = 1;
+75 |   f(...$args);
+   |        ^^^^^ [1]
+76 | 
+77 |   $args = Map { 'a' => 1, 'b' => 2, };
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:85:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+83 |   // fails at runtime, but we don't unpack the container's content type
+84 |   // because issuing errors for mixed pretty much destroys the feature
+85 |   f(...make_mixed());
+   |        ^^^^^^^^^^^^ [1]
+86 |   $make = make_mixed<>;
+87 |   f(...$make());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Traversable<_>` (it is unpacked with `...`) [1]
+-> But got `mixed` [2]
+
+unpack_call1.php:85:8
+83 |   // fails at runtime, but we don't unpack the container's content type
+84 |   // because issuing errors for mixed pretty much destroys the feature
+85 |   f(...make_mixed());
+   |        ^^^^^^^^^^^^ [1]
+86 |   $make = make_mixed<>;
+87 |   f(...$make());
+88 | }
+89 | 
+90 | function make_mixed(): mixed {
+   |                        ^^^^^ [2]
+91 |   throw new Exception('');
+92 | }
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call1.php:87:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $foo, mixed ...$args): void {}
+   |          ^ [2]
+ 4 | 
+ 5 | function g(string $foo, mixed ...$args): void {}
+   :
+85 |   f(...make_mixed());
+86 |   $make = make_mixed<>;
+87 |   f(...$make());
+   |        ^^^^^^^ [1]
+88 | }
+89 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Traversable<_>` (it is unpacked with `...`) [1]
+-> But got `mixed` [2]
+
+unpack_call1.php:87:8
+85 |   f(...make_mixed());
+86 |   $make = make_mixed<>;
+87 |   f(...$make());
+   |        ^^^^^^^ [1]
+88 | }
+89 | 
+90 | function make_mixed(): mixed {
+   |                        ^^^^^ [2]
+91 |   throw new Exception('');
+92 | }
+
+13 errors found

@@ -1,10 +1,51 @@
-ERROR: File "soft_internal.php--file2.php", line 8, characters 3-16:
-<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
-ERROR: File "soft_internal.php--file2.php", line 11, characters 3-16:
-<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
-ERROR: File "soft_internal.php--file2.php", line 13, characters 5-18:
-<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
-ERROR: File "soft_internal.php--file2.php", line 16, characters 5-18:
-<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
-ERROR: File "soft_internal.php--file2.php", line 18, characters 5-18:
-<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. (NastCheck[3102])
+error: NastCheck[3102] <<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. [1]
+
+soft_internal.php--file2.php:8:3
+ 6 | internal function foo(): void {}
+ 7 | 
+ 8 | <<__SoftInternal>>
+   |   ^^^^^^^^^^^^^^ [1]
+ 9 | function bar(): void {}
+10 | 
+
+error: NastCheck[3102] <<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. [1]
+
+soft_internal.php--file2.php:11:3
+ 9 | function bar(): void {}
+10 | 
+11 | <<__SoftInternal>>
+   |   ^^^^^^^^^^^^^^ [1]
+12 | class Bar {
+13 |   <<__SoftInternal>>
+
+error: NastCheck[3102] <<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. [1]
+
+soft_internal.php--file2.php:13:5
+11 | <<__SoftInternal>>
+12 | class Bar {
+13 |   <<__SoftInternal>>
+   |     ^^^^^^^^^^^^^^ [1]
+14 |   public function bar(): void {}
+15 | 
+
+error: NastCheck[3102] <<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. [1]
+
+soft_internal.php--file2.php:16:5
+14 |   public function bar(): void {}
+15 | 
+16 |   <<__SoftInternal>>
+   |     ^^^^^^^^^^^^^^ [1]
+17 |   public static function bar2(): void {}
+18 |   <<__SoftInternal>>
+
+error: NastCheck[3102] <<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol. [1]
+
+soft_internal.php--file2.php:18:5
+16 |   <<__SoftInternal>>
+17 |   public static function bar2(): void {}
+18 |   <<__SoftInternal>>
+   |     ^^^^^^^^^^^^^^ [1]
+19 |   public int $x = 5;
+20 | }
+
+5 errors found

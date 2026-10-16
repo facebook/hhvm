@@ -1,2 +1,11 @@
-ERROR: File "magic_trait_bad.php", line 14, characters 23-31:
-Using `__TRAIT__` outside a trait (Naming[2058])
+error: Naming[2058] Using `__TRAIT__` outside a trait [1]
+
+magic_trait_bad.php:14:23
+12 | class Foo {
+13 |   public function f(): void {
+14 |     echo "Inside >" . __TRAIT__ . "<\n";
+   |                       ^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

@@ -1,6 +1,31 @@
-ERROR: File "type-const-bad.php", line 8, characters 21-45:
-Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
-ERROR: File "type-const-bad.php", line 10, characters 33-57:
-Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
-ERROR: File "type-const-bad.php", line 13, characters 17-41:
-Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type constant. [1]
+
+type-const-bad.php:8:21
+ 6 | 
+ 7 | interface Bad {
+ 8 |   const type TBad = Box with { type T = int }; // ERROR (refinements only allowed under flag)
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | 
+10 |   const type TBadNested = (int, Box with { type T = int }); // ERROR
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type constant. [1]
+
+type-const-bad.php:10:33
+ 8 |   const type TBad = Box with { type T = int }; // ERROR (refinements only allowed under flag)
+ 9 | 
+10 |   const type TBadNested = (int, Box with { type T = int }); // ERROR
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | 
+12 |   abstract const type TBadInPartiallyAbstractRHS = shape(
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type constant. [1]
+
+type-const-bad.php:13:17
+11 | 
+12 |   abstract const type TBadInPartiallyAbstractRHS = shape(
+13 |     'nested' => Box with { type T = int }, // ERROR
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |   );
+15 | }
+
+3 errors found

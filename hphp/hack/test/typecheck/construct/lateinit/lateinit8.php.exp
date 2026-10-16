@@ -1,6 +1,27 @@
-ERROR: File "lateinit8.php--file3.php", line 3, characters 23-23:
-Some members in class `D` are incompatible with those declared in type `C` (Typing[4282])
-  File "lateinit8.php--file1.php", line 4, characters 10-12:
-  Redeclared properties must be consistently declared `__LateInit`
-  File "lateinit8.php--file2.php", line 5, characters 10-12:
-  The property is declared `__LateInit` here
+error: Typing[4282] Some members in class `D` are incompatible with those declared in type `C` [1]
+-> Redeclared properties must be consistently declared `__LateInit` [2]
+-> The property is declared `__LateInit` here [3]
+
+lateinit8.php--file3.php:3:23
+1 | <?hh
+2 | 
+3 | final class D extends C {
+  |                       ^ [1]
+4 |   use S;
+5 | }
+
+lateinit8.php--file1.php:4:10
+2 | 
+3 | trait S {
+4 |   public int $foo = 1;
+  |          ^^^ [2]
+5 | }
+
+lateinit8.php--file2.php:5:10
+3 | abstract class C {
+4 |   <<__LateInit>>
+5 |   public int $foo;
+  |          ^^^ [3]
+6 | }
+
+1 error found

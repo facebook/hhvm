@@ -1,20 +1,80 @@
-ERROR: File "helper_function_void2.php", line 22, characters 22-31:
-Invalid argument (Typing[4110])
-  File "helper_function_void2.php", line 20, characters 47-47:
-  Expected `T`
-  File "helper_function_void2.php", line 7, characters 62-65:
-  But got `void`
-ERROR: File "helper_function_void2.php", line 22, characters 22-31:
-You are using the return value of a `void` function (Typing[4119])
-  File "helper_function_void2.php", line 7, characters 62-65:
-  A `void` function doesn't return a value.
-ERROR: File "helper_function_void2.php", line 23, characters 22-26:
-Invalid argument (Typing[4110])
-  File "helper_function_void2.php", line 20, characters 47-47:
-  Expected `T`
-  File "helper_function_void2.php", line 14, characters 60-63:
-  But got `void`
-ERROR: File "helper_function_void2.php", line 23, characters 22-26:
-You are using the return value of a `void` function (Typing[4119])
-  File "helper_function_void2.php", line 14, characters 60-63:
-  A `void` function doesn't return a value.
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+-> But got `void` [3]
+
+helper_function_void2.php:22:22
+ 5 | class Foo {
+ 6 |   public static async function bar(ExampleContext $_):
+ 7 |     Awaitable<ExampleExpression<ExampleFunction<(function(): void)>>>
+   |                                                              ^^^^ [3]
+ 8 |   {
+ 9 |     throw new Exception();
+   :
+18 | 
+19 | function test<T>(
+20 |   ExampleExpression<ExampleFunction<(function(T): T)>> $x,
+   |                                               ^ [2]
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+   |                      ^^^^^^^^^^ [1]
+23 |   ExampleDsl`${ $x }(baz())`;
+24 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+helper_function_void2.php:22:22
+ 5 | class Foo {
+ 6 |   public static async function bar(ExampleContext $_):
+ 7 |     Awaitable<ExampleExpression<ExampleFunction<(function(): void)>>>
+   |                                                              ^^^^ [2]
+ 8 |   {
+ 9 |     throw new Exception();
+   :
+20 |   ExampleExpression<ExampleFunction<(function(T): T)>> $x,
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+   |                      ^^^^^^^^^^ [1]
+23 |   ExampleDsl`${ $x }(baz())`;
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+-> But got `void` [3]
+
+helper_function_void2.php:23:22
+12 | 
+13 | function baz(ExampleContext $_):
+14 |   Awaitable<ExampleExpression<ExampleFunction<(function(): void)>>>
+   |                                                            ^^^^ [3]
+15 | {
+16 |   throw new Exception();
+17 | }
+18 | 
+19 | function test<T>(
+20 |   ExampleExpression<ExampleFunction<(function(T): T)>> $x,
+   |                                               ^ [2]
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+23 |   ExampleDsl`${ $x }(baz())`;
+   |                      ^^^^^ [1]
+24 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+helper_function_void2.php:23:22
+12 | 
+13 | function baz(ExampleContext $_):
+14 |   Awaitable<ExampleExpression<ExampleFunction<(function(): void)>>>
+   |                                                            ^^^^ [2]
+15 | {
+16 |   throw new Exception();
+   :
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+23 |   ExampleDsl`${ $x }(baz())`;
+   |                      ^^^^^ [1]
+24 | }
+
+4 errors found

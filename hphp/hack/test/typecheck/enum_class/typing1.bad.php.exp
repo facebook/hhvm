@@ -1,8 +1,27 @@
-ERROR: File "typing1.bad.php", line 39, characters 16-19:
-Invalid argument (Typing[4110])
-  File "typing1.bad.php", line 5, characters 21-23:
-  Expected `int`
-  File "typing1.bad.php", line 29, characters 8-13:
-  But got `string`
-  File "typing1.bad.php", line 29, characters 8-13:
-  This type argument to `Box` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+-> This type argument to `Box` must match exactly (it is invariant) [3]
+
+typing1.bad.php:39:16
+ 3 | 
+ 4 | // User code
+ 5 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+ 6 | function expect_string(string $_): void {}
+ 7 | function expect_num(num $_): void {}
+   :
+27 | // Enum Class user code
+28 | enum class E: ExBox {
+29 |    Box<string> A = new Box('bli');
+   |        ^^^^^^ [3]
+30 |    IBox B = Helper::ibox();
+31 |    Box<int> B2 = new Box(42);
+   :
+37 | 
+38 | function testit(): void {
+39 |   expect_int(e(E::A)); // correctly errors, int vs string
+   |                ^^^^ [1]
+40 | }
+
+1 error found

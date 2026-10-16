@@ -1,20 +1,90 @@
-ERROR: File "switch_exhaustive.bad.php", line 14, characters 3-42:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A` (Typing[4019])
-  File "switch_exhaustive.bad.php", line 14, characters 11-12:
-  The scrutinee has type `HH\MemberOf<E, int>`.
-ERROR: File "switch_exhaustive.bad.php", line 20, characters 3-65:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::A` (Typing[4019])
-  File "switch_exhaustive.bad.php", line 20, characters 11-12:
-  The scrutinee has type `HH\MemberOf<F, int>`.
-ERROR: File "switch_exhaustive.bad.php", line 27, characters 3-65:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C` (Typing[4019])
-  File "switch_exhaustive.bad.php", line 27, characters 11-12:
-  The scrutinee has type `HH\MemberOf<F, int>`.
-ERROR: File "switch_exhaustive.bad.php", line 34, characters 3-65:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "switch_exhaustive.bad.php", line 34, characters 11-12:
-  The scrutinee has type `HH\MemberOf<E, int>`.
-ERROR: File "switch_exhaustive.bad.php", line 41, characters 3-88:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::B` (Typing[4019])
-  File "switch_exhaustive.bad.php", line 41, characters 11-12:
-  The scrutinee has type `HH\MemberOf<F, int>`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A` [1]
+-> The scrutinee has type `HH\MemberOf<E, int>`. [2]
+
+switch_exhaustive.bad.php:14:3
+12 | 
+13 | function test_e(HH\MemberOf<E, int> $x) : int {
+14 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+15 |   case E::B: return 1;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   }
+   |   ^ [1]
+17 | }
+18 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::A` [1]
+-> The scrutinee has type `HH\MemberOf<F, int>`. [2]
+
+switch_exhaustive.bad.php:20:3
+18 | 
+19 | function test_f(HH\MemberOf<F, int> $x) : int {
+20 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+21 |   case F::B: return 1;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+22 |   case F::C: return 2;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+23 |   }
+   |   ^ [1]
+24 | }
+25 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C` [1]
+-> The scrutinee has type `HH\MemberOf<F, int>`. [2]
+
+switch_exhaustive.bad.php:27:3
+25 | 
+26 | function test_f2(HH\MemberOf<F, int> $x) : int {
+27 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+28 |   case F::A: return 0;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+29 |   case F::B: return 1;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+30 |   }
+   |   ^ [1]
+31 | }
+32 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `HH\MemberOf<E, int>`. [2]
+
+switch_exhaustive.bad.php:34:3
+32 | 
+33 | function test_e_mixed(HH\MemberOf<E, int> $x) : int {
+34 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+35 |   case E::A: return 0;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+36 |   case F::B: return 1;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+37 |   }
+   |   ^ [1]
+38 | }
+39 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::B` [1]
+-> The scrutinee has type `HH\MemberOf<F, int>`. [2]
+
+switch_exhaustive.bad.php:41:3
+39 | 
+40 | function test_f_mixed(HH\MemberOf<F, int> $x) : int {
+41 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+42 |   case F::A: return 0;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+43 |   case E::B: return 1;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+44 |   case F::C: return 2;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+45 |   }
+   |   ^ [1]
+46 | }
+
+5 errors found

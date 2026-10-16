@@ -1,10 +1,37 @@
-ERROR: File "typing2.bad.php", line 34, characters 18-22:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "typing2.bad.php", line 39, characters 25-28:
-Invalid argument (Typing[4110])
-  File "typing2.bad.php", line 6, characters 24-29:
-  Expected `string`
-  File "typing2.bad.php", line 15, characters 24-26:
-  But got `int`
-  File "typing2.bad.php", line 15, characters 24-26:
-  This type argument to `Box` must match exactly (it is invariant)
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+typing2.bad.php:34:18
+32 | }
+33 | 
+34 | function generic<TEnum as E, T>(HH\MemberOf<TEnum, Box<T>> $param): T {
+   |                  ^^^^^ [1]
+35 |   return $param->data;
+36 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+-> This type argument to `Box` must match exactly (it is invariant) [3]
+
+typing2.bad.php:39:25
+ 4 | // User code
+ 5 | function expect_int(int $_): void {}
+ 6 | function expect_string(string $_): void {}
+   |                        ^^^^^^ [2]
+ 7 | function expect_num(num $_): void {}
+ 8 | 
+   :
+13 | }
+14 | 
+15 | class IBox extends Box<int> {
+   |                        ^^^ [3]
+16 |   public function add(int $x)[write_props]: void {
+17 |     $this->data = $this->data + $x;
+   :
+37 | 
+38 | function testit2(): void {
+39 |   expect_string(generic(E::B)); // correctly errors, int vs string
+   |                         ^^^^ [1]
+40 | }
+
+2 errors found

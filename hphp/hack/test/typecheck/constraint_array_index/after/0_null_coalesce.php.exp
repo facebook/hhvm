@@ -1,6 +1,13 @@
-ERROR: File "0_null_coalesce.php", line 3, characters 3-8:
-Typing error (Typing[4110])
-  File "0_null_coalesce.php", line 3, characters 3-8:
-  Expected an array that can be indexed
-  File "0_null_coalesce.php", line 3, characters 3-3:
-  But got `int`
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `int` [2]
+
+0_null_coalesce.php:3:3
+1 | <?hh
+2 | function f(): void {
+3 |   0["a"] ?? null;
+  |   ^^^^^^ [1]
+  |   ^ [2]
+4 | }
+
+1 error found

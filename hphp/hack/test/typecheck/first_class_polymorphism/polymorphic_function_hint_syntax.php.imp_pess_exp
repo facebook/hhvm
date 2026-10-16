@@ -1,6 +1,31 @@
-ERROR: File "polymorphic_function_hint_syntax.php", line 19, characters 43-48:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "polymorphic_function_hint_syntax.php", line 29, characters 34-37:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "polymorphic_function_hint_syntax.php", line 33, characters 36-39:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+polymorphic_function_hint_syntax.php:19:43
+17 | function param_pos_fn_param_as_ret<TOut>((function<T>(T):TOut) $_): void {}
+18 | 
+19 | function param_pos_fn_param_as_bound<TSub,TSuper>((function<T as TSub super TSuper>(T):T) $_): void {}
+   |                                           ^^^^^^ [1]
+20 | 
+21 | function param_pos_with_user_attr((function<<<__NoAutoBound>> T>(T):T) $_): void {}
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+polymorphic_function_hint_syntax.php:29:34
+27 | }
+28 | 
+29 | function ret_pos_fn_param_as_ret<TOut>(): (function<T>(T):TOut) {
+   |                                  ^^^^ [1]
+30 |   throw new Exception();
+31 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+polymorphic_function_hint_syntax.php:33:36
+31 | }
+32 | 
+33 | function ret_pos_fn_param_as_bound<TSub,TSuper>(): (function<T as TSub super TSuper>(T):T) {
+   |                                    ^^^^ [1]
+34 |   throw new Exception();
+35 | }
+
+3 errors found

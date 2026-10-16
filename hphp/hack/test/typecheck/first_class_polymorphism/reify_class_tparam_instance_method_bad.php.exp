@@ -1,2 +1,10 @@
-ERROR: File "reify_class_tparam_instance_method_bad.php", line 8, characters 8-35:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
+error: Typing[4381] Invalid function reference. This function requires reified generics. Prefer using a lambda instead. [1]
+
+reify_class_tparam_instance_method_bad.php:8:8
+6 | 
+7 | function refIt(): void {
+8 |   $f = meth_caller(C::class, 'foo');
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

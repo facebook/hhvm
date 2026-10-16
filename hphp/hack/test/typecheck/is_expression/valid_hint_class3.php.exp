@@ -1,6 +1,14 @@
 File "valid_hint_class3.php", line 12, characters 5-15:
   nothing
-ERROR: File "valid_hint_class3.php", line 9, characters 13-21:
-Invalid `is` expression hint (Typing[4195])
-  File "valid_hint_class3.php", line 9, characters 13-21:
-  The `is` operator cannot be used with a type with an erased generic type argument
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+valid_hint_class3.php:9:13
+ 7 | function test(): void {
+ 8 |   $c = new C(42);
+ 9 |   if ($c is C<string>) {
+   |             ^^^^^^^^^ [1]
+10 |     expect_Cstring($c);
+11 |   } else {
+
+1 error found

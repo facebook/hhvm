@@ -1,2 +1,10 @@
-ERROR: File "using.php", line 10, characters 10-11:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+using.php:10:10
+ 8 | 
+ 9 | function using_expr(V $v)[$v::C]: void {
+10 |   using ($v = new X()) {}
+   |          ^^ [1]
+11 | }
+
+1 error found

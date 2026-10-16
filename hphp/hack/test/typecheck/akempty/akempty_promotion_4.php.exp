@@ -1,6 +1,18 @@
-ERROR: File "akempty_promotion_4.php", line 9, characters 5-6:
-Invalid argument (Typing[4110])
-  File "akempty_promotion_4.php", line 12, characters 24-26:
-  Expected `int`
-  File "akempty_promotion_4.php", line 7, characters 17-21:
-  But got `vec<(_ | string)>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `vec<(_ | string)>` [3]
+
+akempty_promotion_4.php:9:5
+ 5 |  */
+ 6 | function test(): void {
+ 7 |   $a = Vector { vec[] };
+   |                 ^^^^^ [3]
+ 8 |   $a[0][] = 'aaa';
+ 9 |   f($a);
+   |     ^^ [1]
+10 | }
+11 | 
+12 | function f(ConstVector<int> $_): void {}
+   |                        ^^^ [2]
+
+1 error found

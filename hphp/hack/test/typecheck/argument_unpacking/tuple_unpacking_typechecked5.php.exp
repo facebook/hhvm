@@ -1,6 +1,19 @@
-ERROR: File "tuple_unpacking_typechecked5.php", line 12, characters 12-16:
-Invalid argument (Typing[4104])
-  File "tuple_unpacking_typechecked5.php", line 12, characters 12-16:
-  Too few positional arguments (required 4 but got 3)
-  File "tuple_unpacking_typechecked5.php", line 3, characters 10-10:
-  Definition is here
+error: Typing[4104] Invalid argument [1]
+-> Too few positional arguments (required 4 but got 3) [1]
+-> Definition is here [2]
+
+tuple_unpacking_typechecked5.php:12:12
+ 1 | <?hh
+ 2 | 
+ 3 | function f(
+   |          ^ [2]
+ 4 |   int $integral,
+ 5 |   string $str,
+   :
+10 | function test(): void {
+11 |   $args = tuple("hello", 2.0);
+12 |   f(11, ...$args);
+   |            ^^^^^ [1]
+13 | }
+
+1 error found

@@ -1,6 +1,23 @@
-ERROR: File "do_continue.php", line 13, characters 20-21:
-Invalid argument (Typing[4110])
-  File "do_continue.php", line 4, characters 23-28:
-  Expected `string`
-  File "do_continue.php", line 15, characters 12-14:
-  But got `float`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `float` [3]
+
+do_continue.php:13:20
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function expectString(string $s): void {}
+   |                       ^^^^^^ [2]
+ 5 | 
+ 6 | function test_flow(): void {
+   :
+11 |     if ($i < 5) {
+12 |       // Here it might be a float!
+13 |       expectString($s);
+   |                    ^^ [1]
+14 |       $i++;
+15 |       $s = 5.4;
+   |            ^^^ [3]
+16 |       continue;
+17 |     }
+
+1 error found

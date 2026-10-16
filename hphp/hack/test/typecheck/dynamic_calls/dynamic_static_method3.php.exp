@@ -1,2 +1,11 @@
-ERROR: File "dynamic_static_method3.php", line 8, characters 9-14:
-Dynamic calls to static methods are banned. (Parsing[1002])
+error: Parsing[1002] Dynamic calls to static methods are banned. [1]
+
+dynamic_static_method3.php:8:9
+ 6 |   $w = null;
+ 7 | 
+ 8 |   $r1 = $x::$x();
+   |         ^^^^^^ [1]
+ 9 |   $r2 = $x::$y();
+10 |   $r3 = $x::$z(); // $z undefined
+
+1 error found

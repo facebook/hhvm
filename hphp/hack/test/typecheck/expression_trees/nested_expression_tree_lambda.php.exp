@@ -1,10 +1,44 @@
-ERROR: File "nested_expression_tree_lambda.php", line 6, characters 28-40:
-Expression trees may not be used directly inside of other expression trees. (Parsing[1002])
-ERROR: File "nested_expression_tree_lambda.php", line 6, characters 28-40:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 322, characters 5-20:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "expr_tree.php", line 109, characters 8-32:
-  But got `ExampleExpression<int>`
+error: Parsing[1002] Expression trees may not be used directly inside of other expression trees. [1]
+
+nested_expression_tree_lambda.php:6:28
+4 | 
+5 | function test(): void {
+6 |   ExampleDsl`() ==> { $x = ExampleDsl`1`; }`;
+  |                            ^^^^^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `ExampleExpression<int>` [4]
+
+nested_expression_tree_lambda.php:6:28
+  4 | 
+  5 | function test(): void {
+  6 |   ExampleDsl`() ==> { $x = ExampleDsl`1`; }`;
+    |                            ^^^^^^^^^^^^^ [1]
+  7 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+    :
+320 |     ?ExprPos $_,
+321 |     ExampleDsl::TAst $local,
+322 |     ExampleDsl::TAst $value,
+    |     ^^^^^^^^^^^^^^^^ [3]
+323 |   )[]: ExampleDsl::TAst {
+324 |     return $local." = ".$value.";";
+
+2 errors found

@@ -1,2 +1,11 @@
-ERROR: File "entry_point_locations.php", line 5, characters 5-16:
-The `__EntryPoint` attribute cannot be used on a method. (Typing[4231])
+error: Typing[4231] The `__EntryPoint` attribute cannot be used on a method. [1]
+
+entry_point_locations.php:5:5
+3 | 
+4 | class MyClass {
+5 |   <<__EntryPoint>>
+  |     ^^^^^^^^^^^^ [1]
+6 |   public function method(): void {}
+7 | }
+
+1 error found

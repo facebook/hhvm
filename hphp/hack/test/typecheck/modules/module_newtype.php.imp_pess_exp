@@ -1,8 +1,32 @@
-ERROR: File "module_newtype.php--decl.php", line 5, characters 26-36:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_newtype.php--decl.php", line 6, characters 16-26:
-  It is declared as `internal` here
-ERROR: File "module_newtype.php--use_bad.php", line 3, characters 7-9:
-You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "module_newtype.php--decl.php", line 4, characters 16-18:
-  Definition is here
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_newtype.php--decl.php:5:26
+3 | module foo;
+4 | module newtype Foo = FooInternal; // ok
+5 | module newtype FooBad as FooInternal = FooInternal; // error
+  |                          ^^^^^^^^^^^ [1]
+6 | internal class FooInternal {
+  |                ^^^^^^^^^^^ [2]
+7 |   public function foo(): void {}
+8 | 
+
+error: Typing[4064] You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+module_newtype.php--use_bad.php:3:7
+1 | <?hh
+2 | function bad(Foo $x): void {
+3 |   $x->foo();
+  |       ^^^ [1]
+4 | }
+
+module_newtype.php--decl.php:4:16
+2 | 
+3 | module foo;
+4 | module newtype Foo = FooInternal; // ok
+  |                ^^^ [2]
+5 | module newtype FooBad as FooInternal = FooInternal; // error
+6 | internal class FooInternal {
+
+2 errors found

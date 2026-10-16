@@ -1,2 +1,11 @@
-ERROR: File "prim_by_reference.php", line 5, characters 34-34:
-Encountered unexpected token `&`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `&`. [1]
+
+prim_by_reference.php:5:34
+3 | class Foo {
+4 |   <<__Memoize>>
+5 |   public function someMethod(int &$i): void {}
+  |                                  ^ [1]
+6 | }
+7 | 
+
+1 error found

@@ -1,4 +1,19 @@
-ERROR: File "skip_one_change_type.php", line 11, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "skip_one_change_type.php", line 5, characters 23-23:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+skip_one_change_type.php:11:23
+ 3 | 
+ 4 | abstract class A {
+ 5 |   abstract const type T as num = int;
+   |                       ^ [2]
+ 6 | }
+ 7 | 
+ 8 | class B extends A {}
+ 9 | 
+10 | abstract class C extends B {
+11 |   abstract const type T as num = float;
+   |                       ^ [1]
+12 | }
+13 | 
+
+1 error found

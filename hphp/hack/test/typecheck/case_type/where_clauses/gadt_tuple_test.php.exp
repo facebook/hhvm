@@ -1,24 +1,78 @@
-ERROR: File "gadt_tuple_test.php", line 19, characters 7-18:
-Invalid return type (Typing[4110])
-  File "gadt_tuple_test.php", line 12, characters 59-59:
-  Expected `T`
-  File "gadt_tuple_test.php", line 19, characters 11-16:
-  But got `MyBool`
-ERROR: File "gadt_tuple_test.php", line 35, characters 7-17:
-Invalid return type (Typing[4110])
-  File "gadt_tuple_test.php", line 32, characters 59-59:
-  Expected `T`
-  File "gadt_tuple_test.php", line 35, characters 11-15:
-  But got `MyInt`
-ERROR: File "gadt_tuple_test.php", line 39, characters 12-23:
-Invalid return type (Typing[4110])
-  File "gadt_tuple_test.php", line 32, characters 59-59:
-  Expected `T`
-  File "gadt_tuple_test.php", line 39, characters 16-21:
-  But got `MyBool`
-ERROR: File "gadt_tuple_test.php", line 52, characters 7-18:
-Invalid return type (Typing[4110])
-  File "gadt_tuple_test.php", line 43, characters 59-59:
-  Expected `T`
-  File "gadt_tuple_test.php", line 52, characters 11-16:
-  But got `MyBool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `MyBool` [3]
+
+gadt_tuple_test.php:19:7
+10 |   | bool where T super MyBool;
+11 | 
+12 | function test1<T>((LiftableTo<T>, LiftableTo<T>) $tuple): T {
+   |                                                           ^ [2]
+13 |   if ($tuple is (int, int)) {
+14 |     return new MyInt();
+   :
+17 |   } else {
+18 |     return
+19 |       new MyBool(); // this should error, e.g. for T = (MyInt | MyString), $tuple: (int, string)
+   |       ^^^^^^^^^^^^ [1]
+   |           ^^^^^^ [3]
+20 |   }
+21 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `MyInt` [3]
+
+gadt_tuple_test.php:35:7
+30 | }
+31 | 
+32 | function test2<T>((LiftableTo<T>, LiftableTo<T>) $tuple): T {
+   |                                                           ^ [2]
+33 |   if ($tuple is (arraykey, arraykey)) {
+34 |     return
+35 |       new MyInt(); // this should error, e.g. for T = MyString, $tuple: (string, string)
+   |       ^^^^^^^^^^^ [1]
+   |           ^^^^^ [3]
+36 |   } else {
+37 |     // We assume: (MyBool <: T || ((MyBool <: T) && ((MyString <: T || MyInt <: T))) || (((MyString <: T || MyInt <: T)) && (MyBool <: T)))
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `MyBool` [3]
+
+gadt_tuple_test.php:39:12
+30 | }
+31 | 
+32 | function test2<T>((LiftableTo<T>, LiftableTo<T>) $tuple): T {
+   |                                                           ^ [2]
+33 |   if ($tuple is (arraykey, arraykey)) {
+34 |     return
+   :
+37 |     // We assume: (MyBool <: T || ((MyBool <: T) && ((MyString <: T || MyInt <: T))) || (((MyString <: T || MyInt <: T)) && (MyBool <: T)))
+38 |     // but that doesn't get simplified to MyBool <: T && (...)
+39 |     return new MyBool(); // errors due to lack of prop simplification
+   |            ^^^^^^^^^^^^ [1]
+   |                ^^^^^^ [3]
+40 |   }
+41 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `MyBool` [3]
+
+gadt_tuple_test.php:52:7
+41 | }
+42 | 
+43 | function test3<T>((LiftableTo<T>, LiftableTo<T>) $tuple): T {
+   |                                                           ^ [2]
+44 |   if (
+45 |     $tuple is (arraykey, arraykey) ||
+   :
+50 |   } else {
+51 |     return
+52 |       new MyBool(); // errors due to (A, B) | (C, D) -> (A|C, B|D) approximation
+   |       ^^^^^^^^^^^^ [1]
+   |           ^^^^^^ [3]
+53 |   }
+54 | }
+
+4 errors found

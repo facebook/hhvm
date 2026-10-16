@@ -1,58 +1,164 @@
-ERROR: File "internal_leak_typeconstant_bad.php--A.php", line 16, characters 29-32:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  It is declared as `internal` here
-ERROR: File "internal_leak_typeconstant_bad.php--B.php", line 4, characters 18-18:
-Invalid argument (Typing[4110])
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  Expected `Base::TC` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_leak_typeconstant_bad.php--A.php", line 6, characters 32-39:
-  The type originated from here
-  File "internal_leak_typeconstant_bad.php--A.php", line 6, characters 32-39:
-    resulting from expanding the type constant `Base::TC`
-  File "internal_leak_typeconstant_bad.php--B.php", line 4, characters 18-18:
-  But got `int`
-ERROR: File "internal_leak_typeconstant_bad.php--B.php", line 5, characters 18-18:
-Invalid argument (Typing[4110])
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  Expected `Base::TC` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_leak_typeconstant_bad.php--A.php", line 7, characters 32-39:
-  The type originated from here
-  File "internal_leak_typeconstant_bad.php--A.php", line 7, characters 32-39:
-    resulting from expanding the type constant `Base::TC`
-  File "internal_leak_typeconstant_bad.php--B.php", line 5, characters 18-18:
-  But got `int`
-ERROR: File "internal_leak_typeconstant_bad.php--B.php", line 6, characters 18-18:
-Invalid argument (Typing[4110])
-  File "internal_leak_typeconstant_bad.php--A.php", line 4, characters 19-24:
-  Expected `string`
-  File "internal_leak_typeconstant_bad.php--A.php", line 8, characters 32-39:
-    resulting from expanding the type constant `Derived::TC`
-  File "internal_leak_typeconstant_bad.php--B.php", line 6, characters 18-18:
-  But got `int`
-ERROR: File "internal_leak_typeconstant_bad.php--B.php", line 9, characters 18-19:
-Invalid argument (Typing[4110])
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  Expected `Base::TC2` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
-  The type originated from here
-  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
-    resulting from expanding the type constant `Base::TC2`
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  But got `mixed` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_leak_typeconstant_bad.php--A.php", line 9, characters 34-41:
-  The type originated from here
-  File "internal_leak_typeconstant_bad.php--A.php", line 9, characters 34-41:
-    resulting from expanding the type constant `Base::TC`
-ERROR: File "internal_leak_typeconstant_bad.php--B.php", line 9, characters 18-19:
-Invalid argument (Typing[4110])
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  Expected `Base::TC2` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
-  The type originated from here
-  File "internal_leak_typeconstant_bad.php--A.php", line 12, characters 32-40:
-    resulting from expanding the type constant `Base::TC2`
-  File "internal_leak_typeconstant_bad.php--A.php", line 3, characters 16-19:
-  But got `nonnull` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_leak_typeconstant_bad.php--A.php", line 9, characters 34-41:
-  The type originated from here
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+internal_leak_typeconstant_bad.php--A.php:16:29
+ 1 | <?hh
+ 2 | module A;
+ 3 | internal class Base {
+   |                ^^^^ [2]
+ 4 |   const type TC = string;
+ 5 |   const type TC2 = bool;
+   :
+14 | 
+15 | // We now reject public classes extending internal ones
+16 | final class Derived extends Base {
+   |                             ^^^^ [1]
+17 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base::TC` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+->   resulting from expanding the type constant `Base::TC` [3]
+-> But got `int` [1]
+
+internal_leak_typeconstant_bad.php--B.php:4:18
+2 | module B;
+3 | function main(): void {
+4 |   Derived::meth1(1);
+  |                  ^ [1]
+5 |   Derived::meth2(2);
+6 |   Derived::meth3(3);
+
+internal_leak_typeconstant_bad.php--A.php:3:16
+1 | <?hh
+2 | module A;
+3 | internal class Base {
+  |                ^^^^ [2]
+4 |   const type TC = string;
+5 |   const type TC2 = bool;
+6 |   public static function meth1(Base::TC $_):void { }
+  |                                ^^^^^^^^ [3]
+7 |   public static function meth2(self::TC $_):void { }
+8 |   public static function meth3(this::TC $_):void { }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base::TC` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+->   resulting from expanding the type constant `Base::TC` [3]
+-> But got `int` [1]
+
+internal_leak_typeconstant_bad.php--B.php:5:18
+3 | function main(): void {
+4 |   Derived::meth1(1);
+5 |   Derived::meth2(2);
+  |                  ^ [1]
+6 |   Derived::meth3(3);
+7 |   $x = Derived::getTC();
+
+internal_leak_typeconstant_bad.php--A.php:3:16
+1 | <?hh
+2 | module A;
+3 | internal class Base {
+  |                ^^^^ [2]
+4 |   const type TC = string;
+5 |   const type TC2 = bool;
+6 |   public static function meth1(Base::TC $_):void { }
+7 |   public static function meth2(self::TC $_):void { }
+  |                                ^^^^^^^^ [3]
+8 |   public static function meth3(this::TC $_):void { }
+9 |   public static function getTC():self::TC {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `Derived::TC` [3]
+-> But got `int` [1]
+
+internal_leak_typeconstant_bad.php--B.php:6:18
+ 4 |   Derived::meth1(1);
+ 5 |   Derived::meth2(2);
+ 6 |   Derived::meth3(3);
+   |                  ^ [1]
+ 7 |   $x = Derived::getTC();
+ 8 |   // Make sure that distinct type constants aren't compatible
+
+internal_leak_typeconstant_bad.php--A.php:4:19
+ 2 | module A;
+ 3 | internal class Base {
+ 4 |   const type TC = string;
+   |                   ^^^^^^ [2]
+ 5 |   const type TC2 = bool;
+ 6 |   public static function meth1(Base::TC $_):void { }
+ 7 |   public static function meth2(self::TC $_):void { }
+ 8 |   public static function meth3(this::TC $_):void { }
+   |                                ^^^^^^^^ [3]
+ 9 |   public static function getTC():self::TC {
+10 |     return "A";
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base::TC2` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+->   resulting from expanding the type constant `Base::TC2` [3]
+-> But got `mixed` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [4]
+->   resulting from expanding the type constant `Base::TC` [4]
+
+internal_leak_typeconstant_bad.php--B.php:9:18
+ 7 |   $x = Derived::getTC();
+ 8 |   // Make sure that distinct type constants aren't compatible
+ 9 |   Derived::meth4($x);
+   |                  ^^ [1]
+10 | }
+
+internal_leak_typeconstant_bad.php--A.php:3:16
+ 1 | <?hh
+ 2 | module A;
+ 3 | internal class Base {
+   |                ^^^^ [2]
+ 4 |   const type TC = string;
+ 5 |   const type TC2 = bool;
+ 6 |   public static function meth1(Base::TC $_):void { }
+ 7 |   public static function meth2(self::TC $_):void { }
+ 8 |   public static function meth3(this::TC $_):void { }
+ 9 |   public static function getTC():self::TC {
+   |                                  ^^^^^^^^ [4]
+10 |     return "A";
+11 |   }
+12 |   public static function meth4(self::TC2 $_):void { }
+   |                                ^^^^^^^^^ [3]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base::TC2` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+->   resulting from expanding the type constant `Base::TC2` [3]
+-> But got `nonnull` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [4]
+
+internal_leak_typeconstant_bad.php--B.php:9:18
+ 7 |   $x = Derived::getTC();
+ 8 |   // Make sure that distinct type constants aren't compatible
+ 9 |   Derived::meth4($x);
+   |                  ^^ [1]
+10 | }
+
+internal_leak_typeconstant_bad.php--A.php:3:16
+ 1 | <?hh
+ 2 | module A;
+ 3 | internal class Base {
+   |                ^^^^ [2]
+ 4 |   const type TC = string;
+ 5 |   const type TC2 = bool;
+ 6 |   public static function meth1(Base::TC $_):void { }
+ 7 |   public static function meth2(self::TC $_):void { }
+ 8 |   public static function meth3(this::TC $_):void { }
+ 9 |   public static function getTC():self::TC {
+   |                                  ^^^^^^^^ [4]
+10 |     return "A";
+11 |   }
+12 |   public static function meth4(self::TC2 $_):void { }
+   |                                ^^^^^^^^^ [3]
+13 | }
+14 | 
+
+6 errors found

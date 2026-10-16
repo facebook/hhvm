@@ -1,2 +1,10 @@
-ERROR: File "internal_keyword_bad.php", line 3, characters 3-10:
-`internal` cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+error: Parsing[1002] `internal` cannot be used outside of a module. Please define a module for this file. [1]
+
+internal_keyword_bad.php:3:3
+1 | <?hh
+2 | class Foo {
+3 |   internal function bar(): void {}
+  |   ^^^^^^^^ [1]
+4 | }
+
+1 error found

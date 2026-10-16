@@ -1,2 +1,11 @@
-ERROR: File "memoized_lsb_invalid_syntax.php", line 4, characters 18-22:
-The first argument to `__MemoizeLSB` must be a label, e.g. `#KeyedByIC`. (Parsing[1002])
+error: Parsing[1002] The first argument to `__MemoizeLSB` must be a label, e.g. `#KeyedByIC`. [1]
+
+memoized_lsb_invalid_syntax.php:4:18
+2 | 
+3 | class Bar {
+4 |   <<__MemoizeLSB("Bar")>>
+  |                  ^^^^^ [1]
+5 |   public static function foo(): void {}
+6 | }
+
+1 error found

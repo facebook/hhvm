@@ -1,4 +1,11 @@
-ERROR: File "class_extends_enum_bad.php", line 13, characters 7-7:
-Classes can only extend other classes. (Typing[4115])
-  File "class_extends_enum_bad.php", line 13, characters 17-17:
-  This is an enum.
+error: Typing[4115] Classes can only extend other classes. [1]
+-> This is an enum. [2]
+
+class_extends_enum_bad.php:13:7
+11 | 
+12 | enum A: int {}
+13 | class B extends A {}
+   |       ^ [1]
+   |                 ^ [2]
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "functional_init3.php", line 22, characters 23-23:
-Read access to `$this->x` before initialization (Typing[4083])
+error: Typing[4083] Read access to `$this->x` before initialization [1]
+
+functional_init3.php:22:23
+20 | 
+21 |   private function init(): void {
+22 |     $this->x = $this->x;
+   |                       ^ [1]
+23 |   }
+24 | }
+
+1 error found

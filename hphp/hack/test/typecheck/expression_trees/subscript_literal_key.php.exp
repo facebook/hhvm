@@ -1,4 +1,21 @@
-WARN: File "subscript_literal_key.php", line 30, characters 12-18:
-Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
-WARN: File "subscript_literal_key.php", line 51, characters 12-16:
-Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+warning: Warn[12034] Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+subscript_literal_key.php:30:12
+28 |   return ExampleDsl`{
+29 |     $k = keyset['a', 'b'];
+30 |     return $k['a'];
+   |            ^^^^^^^ [1]
+31 |   }`;
+32 | }
+
+warning: Warn[12034] Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+subscript_literal_key.php:51:12
+49 |   return ExampleDsl`{
+50 |     $k = keyset[1, 2];
+51 |     return $k[1];
+   |            ^^^^^ [1]
+52 |   }`;
+53 | }
+
+2 errors found

@@ -1,2 +1,10 @@
-ERROR: File "05-error-codes-05.php", line 3, characters 15-17:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+05-error-codes-05.php:3:15
+1 | <?hh
+2 | function foo(shape(...) $s): void {
+3 |   $value = $s[1.0];
+  |               ^^^ [1]
+4 | }
+
+1 error found

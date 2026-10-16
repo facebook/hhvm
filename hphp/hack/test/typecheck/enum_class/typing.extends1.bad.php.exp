@@ -1,14 +1,54 @@
-ERROR: File "typing.extends1.bad.php", line 49, characters 14-17:
-It is no longer allowed to use a `classname<this::TEnum>` in this position. Please use a `class<this::TEnum>` instead. (Typing[4482])
-  File "typestructure.hhi", line 64, characters 21-32:
-  Definition is here
-ERROR: File "typing.extends1.bad.php", line 62, characters 18-21:
-Invalid argument (Typing[4110])
-  File "typing.extends1.bad.php", line 35, characters 13-13:
-  Expected `F`
-  File "typing.extends1.bad.php", line 57, characters 22-22:
-  But got `E`
-  File "typing.extends1.bad.php", line 41, characters 38-48:
-    resulting from expanding the type constant `Ext::TEnum`
-  File "typing.extends1.bad.php", line 57, characters 22-22:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
+error: Typing[4482] It is no longer allowed to use a `classname<this::TEnum>` in this position. Please use a `class<this::TEnum>` instead. [1]
+-> Definition is here [2]
+
+typing.extends1.bad.php:49:14
+47 |     $ts = type_structure(static::class, 'TEnum');
+48 |     $cls = $ts['classname'];
+49 |     foreach ($cls::getValues() as $key => $elt) {
+   |              ^^^^ [1]
+50 |       $dict[$key] = $elt;
+51 |     }
+
+typestructure.hhi:64:21
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |                     ^^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `E` [3]
+->   resulting from expanding the type constant `Ext::TEnum` [4]
+-> This type argument to `HH\MemberOf` only allows supertypes (it is contravariant) [3]
+
+typing.extends1.bad.php:62:18
+33 | 
+34 | enum class F: ExBox extends E {
+35 |    Box<num> C = new Box(3.14);
+   |             ^ [2]
+36 | }
+37 | 
+38 | abstract class Base {
+39 |   abstract const type TEnum as E;
+40 | 
+41 |   public function get<T>(HH\MemberOf<this::TEnum, Box<T>> $param): T {
+   |                                      ^^^^^^^^^^^ [4]
+42 |     return $param->data;
+43 |   }
+   :
+55 | 
+56 | class Ext extends Base {
+57 |   const type TEnum = E; // [0]
+   |                      ^ [3]
+58 | }
+59 | 
+60 | function test_constraint(): void {
+61 |   $ext = new Ext();
+62 |   echo $ext->get(F::C); // F vs E, because of [0].
+   |                  ^^^^ [1]
+63 |   echo "\n";
+64 | }
+
+2 errors found

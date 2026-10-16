@@ -1,2 +1,17 @@
-ERROR: File "ternary_within_lambda_within_ternary.php", line 10, characters 8-73:
-Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses (Parsing[1002])
+error: Parsing[1002] Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses [1]
+
+ternary_within_lambda_within_ternary.php:10:8
+ 8 | 
+ 9 | function testLambdaExpression(bool $cond, bool $cond2): void {
+10 |   $l = $cond
+   |        ^^^^^ [1]
+11 |     ? () ==> foo()
+   |     ^^^^^^^^^^^^^^ [1]
+12 |     : () ==>
+   |     ^^^^^^^^ [1]
+13 |       $cond2 ? foo() : bar();
+   |       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |   $l();
+15 | }
+
+1 error found

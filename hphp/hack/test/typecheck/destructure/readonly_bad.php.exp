@@ -1,4 +1,20 @@
-ERROR: File "readonly_bad.php", line 8, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "readonly_bad.php", line 13, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_bad.php:8:3
+ 6 | function test_readonly_shape(readonly shape('a' => Foo, 'b' => Foo) $s): void {
+ 7 |   shape('a' => $a, 'b' => $b) = $s;
+ 8 |   $a->prop = 4; // should error: $a is readonly
+   |   ^^^^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_bad.php:13:3
+11 | function test_readonly_tuple(readonly (Foo, Foo) $t): void {
+12 |   tuple($a, $b) = $t;
+13 |   $a->prop = 4; // should error: $a is readonly
+   |   ^^^^^^^^^^^^ [1]
+14 | }
+
+2 errors found

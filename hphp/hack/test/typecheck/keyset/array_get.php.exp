@@ -1,2 +1,10 @@
-WARN: File "array_get.php", line 4, characters 10-18:
-Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+warning: Warn[12034] Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+array_get.php:4:10
+2 | 
+3 | function foo(keyset<string> $k): string {
+4 |   return $k["foo"];
+  |          ^^^^^^^^^ [1]
+5 | }
+
+1 error found

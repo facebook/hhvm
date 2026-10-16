@@ -1,4 +1,13 @@
-ERROR: File "extend_internal_class.php--test.php", line 8, characters 17-17:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "extend_internal_class.php--test.php", line 6, characters 16-16:
-  It is declared as `internal` here
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+extend_internal_class.php--test.php:8:17
+4 | 
+5 | 
+6 | internal class A {}
+  |                ^ [2]
+7 | 
+8 | class B extends A{}
+  |                 ^ [1]
+
+1 error found

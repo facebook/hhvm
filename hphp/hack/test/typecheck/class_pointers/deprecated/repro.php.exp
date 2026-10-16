@@ -1,4 +1,13 @@
-ERROR: File "repro.php", line 23, characters 3-5:
-It is no longer allowed to use a `classname<I<int>>` in this position. Please use a `class<I<int>>` instead. (Typing[4482])
-  File "repro.php", line 22, characters 15-31:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<I<int>>` in this position. Please use a `class<I<int>>` instead. [1]
+-> Definition is here [2]
+
+repro.php:23:3
+20 | }
+21 | 
+22 | function test(classname<I<int>> $cn = C::class): void {
+   |               ^^^^^^^^^^^^^^^^^ [2]
+23 |   $cn::gen();
+   |   ^^^ [1]
+24 | }
+
+1 error found

@@ -1,4 +1,12 @@
-ERROR: File "abstract_constructor2.php", line 12, characters 19-29:
-You are extending a class that needs to be initialized
+error: NastCheck[3012] You are extending a class that needs to be initialized
 Make sure you call `parent::__construct`.
- (NastCheck[3012])
+ [1]
+
+abstract_constructor2.php:12:19
+10 | 
+11 | class E extends D {
+12 |   public function __construct() {}
+   |                   ^^^^^^^^^^^ [1]
+13 | }
+
+1 error found

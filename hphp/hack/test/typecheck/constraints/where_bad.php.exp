@@ -1,20 +1,47 @@
-ERROR: File "where_bad.php", line 12, characters 17-21:
-A `where` type constraint is violated here (Typing[4323])
-  File "where_bad.php", line 7, characters 19-23:
-  This is the method with `where` type constraints
-  File "where_bad.php", line 7, characters 41-43:
-  Expected `int`
-  File "where_bad.php", line 10, characters 35-40:
-  But got `string`
-  File "where_bad.php", line 7, characters 37-37:
-    via this generic `T`
-ERROR: File "where_bad.php", line 12, characters 17-21:
-A `where` type constraint is violated here (Typing[4323])
-  File "where_bad.php", line 7, characters 19-23:
-  This is the method with `where` type constraints
-  File "where_bad.php", line 10, characters 35-40:
-  Expected `string`
-  File "where_bad.php", line 7, characters 37-37:
-    via this generic `T`
-  File "where_bad.php", line 7, characters 41-43:
-  But got `int`
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected `int` [3]
+-> But got `string` [4]
+->   via this generic `T` [5]
+
+where_bad.php:12:17
+ 5 | class Wrap<T> {
+ 6 |   public function __construct(private T $item) { }
+ 7 |   public function Count():int where T = int { return $this->item; }
+   |                   ^^^^^ [2]
+   |                                     ^ [5]
+   |                                         ^^^ [3]
+ 8 | }
+ 9 | 
+10 | function AcceptWrappedString(Wrap<string> $x):int {
+   |                                   ^^^^^^ [4]
+11 |   $y = 32;
+12 |   $z = $y + $x->Count();
+   |                 ^^^^^ [1]
+13 |   return $z;
+14 | }
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected `string` [3]
+->   via this generic `T` [4]
+-> But got `int` [5]
+
+where_bad.php:12:17
+ 5 | class Wrap<T> {
+ 6 |   public function __construct(private T $item) { }
+ 7 |   public function Count():int where T = int { return $this->item; }
+   |                   ^^^^^ [2]
+   |                                     ^ [4]
+   |                                         ^^^ [5]
+ 8 | }
+ 9 | 
+10 | function AcceptWrappedString(Wrap<string> $x):int {
+   |                                   ^^^^^^ [3]
+11 |   $y = 32;
+12 |   $z = $y + $x->Count();
+   |                 ^^^^^ [1]
+13 |   return $z;
+14 | }
+
+2 errors found

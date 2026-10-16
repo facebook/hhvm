@@ -1,19 +1,90 @@
-ERROR: File "syntax_elaboration.php", line 13, characters 5-34:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "syntax_elaboration.php", line 28, characters 3-32:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "syntax_elaboration.php", line 34, characters 3-26:
-Direct references to coeffects namespaces are not allowed (Parsing[1002])
-ERROR: File "syntax_elaboration.php", line 16, characters 43-55:
-Unbound name: `WriteProperty` (Naming[2049])
-ERROR: File "syntax_elaboration.php", line 31, characters 34-46:
-Unbound name: `AccessGlobals` (Naming[2049])
-ERROR: File "syntax_elaboration.php", line 12, characters 45-84:
-Illegal context: `\HH\Capabilities\WriteProperty`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "syntax_elaboration.php", line 27, characters 40-75:
-Illegal context: `\HH\Capabilities\AccessGlobals`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "syntax_elaboration.php", line 37, characters 43-47:
-Illegal context: `int`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+syntax_elaboration.php:13:5
+11 | 
+12 |   public function fully_qualified_cap_good()[
+13 |     \HH\Capabilities\WriteProperty
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |   ]: void {}
+15 | 
+
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+syntax_elaboration.php:28:3
+26 | 
+27 | function fully_qualified_but_wrong_ns()[
+28 |   \HH\Capabilities\AccessGlobals
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 | ]: void {}
+30 | 
+
+error: Parsing[1002] Direct references to coeffects namespaces are not allowed [1]
+
+syntax_elaboration.php:34:3
+32 | 
+33 | function fully_qualified_but_right_ns()[
+34 |   \HH\Contexts\write_props
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+35 | ]: void {}
+36 | 
+
+error: Naming[2049] Unbound name: `WriteProperty` [1]
+
+syntax_elaboration.php:16:43
+14 |   ]: void {}
+15 | 
+16 |   public function namespaceless_cap_bad()[WriteProperty]: void {}
+   |                                           ^^^^^^^^^^^^^ [1]
+17 | }
+18 | 
+
+error: Naming[2049] Unbound name: `AccessGlobals` [1]
+
+syntax_elaboration.php:31:34
+29 | ]: void {}
+30 | 
+31 | function namespaceless_cap_bad()[AccessGlobals]: void {}
+   |                                  ^^^^^^^^^^^^^ [1]
+32 | 
+33 | function fully_qualified_but_right_ns()[
+
+error: NastCheck[3090] Illegal context: `\HH\Capabilities\WriteProperty`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+syntax_elaboration.php:12:45
+10 |   }
+11 | 
+12 |   public function fully_qualified_cap_good()[
+   |                                             ^ [1]
+13 |     \HH\Capabilities\WriteProperty
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |   ]: void {}
+   |   ^ [1]
+15 | 
+16 |   public function namespaceless_cap_bad()[WriteProperty]: void {}
+
+error: NastCheck[3090] Illegal context: `\HH\Capabilities\AccessGlobals`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+syntax_elaboration.php:27:40
+25 | }
+26 | 
+27 | function fully_qualified_but_wrong_ns()[
+   |                                        ^ [1]
+28 |   \HH\Capabilities\AccessGlobals
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 | ]: void {}
+   | ^ [1]
+30 | 
+31 | function namespaceless_cap_bad()[AccessGlobals]: void {}
+
+error: NastCheck[3090] Illegal context: `int`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+syntax_elaboration.php:37:43
+35 | ]: void {}
+36 | 
+37 | function toplevel_lowercase_typename_bad()[int]: void {}
+   |                                           ^^^^^ [1]
+
+8 errors found

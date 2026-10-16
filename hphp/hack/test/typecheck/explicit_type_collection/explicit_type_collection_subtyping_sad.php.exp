@@ -1,12 +1,29 @@
-ERROR: File "explicit_type_collection_subtyping_sad.php", line 8, characters 8-25:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_subtyping_sad.php", line 8, characters 12-12:
-  Expected `D`
-  File "explicit_type_collection_subtyping_sad.php", line 7, characters 12-12:
-  But got `B`
-ERROR: File "explicit_type_collection_subtyping_sad.php", line 8, characters 8-25:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_subtyping_sad.php", line 8, characters 12-12:
-  Expected `D`
-  File "explicit_type_collection_subtyping_sad.php", line 7, characters 18-18:
-  But got `C`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `D` [2]
+-> But got `B` [3]
+
+explicit_type_collection_subtyping_sad.php:8:8
+5 | class D extends B {}
+6 | 
+7 | function f(B $b, C $c, D $d): void {
+  |            ^ [3]
+8 |   $e = vec<D>[$b, $c, $d];
+  |        ^^^^^^^^^^^^^^^^^^ [1]
+  |            ^ [2]
+9 | }
+
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `D` [2]
+-> But got `C` [3]
+
+explicit_type_collection_subtyping_sad.php:8:8
+5 | class D extends B {}
+6 | 
+7 | function f(B $b, C $c, D $d): void {
+  |                  ^ [3]
+8 |   $e = vec<D>[$b, $c, $d];
+  |        ^^^^^^^^^^^^^^^^^^ [1]
+  |            ^ [2]
+9 | }
+
+2 errors found

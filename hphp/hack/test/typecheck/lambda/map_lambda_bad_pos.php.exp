@@ -1,8 +1,25 @@
-ERROR: File "map_lambda_bad_pos.php", line 6, characters 23-46:
-Invalid argument (Typing[4110])
-  File "map_lambda_bad_pos.php", line 6, characters 24-26:
-  Expected `int`
-  File "map_lambda_bad_pos.php", line 4, characters 19-24:
-  But got `string`
-  File "collections/Map.hhi", line 206, characters 17-18:
-    via this generic `Tk`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+->   via this generic `Tk` [4]
+
+map_lambda_bad_pos.php:6:23
+  2 | // Copyright 2004-present Facebook. All Rights Reserved.
+  3 | 
+  4 | function test(Map<string, bool> $m): void {
+    |                   ^^^^^^ [3]
+  5 |   // We expect the error to be here, not in the .hhi file
+  6 |   $x = $m->mapWithKey((int $k, bool $v) ==> $v);
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                        ^^^ [2]
+  7 | }
+
+collections/Map.hhi:206:17
+204 |      */
+205 |     public function mapWithKey<Tu>(
+206 |       (function(Tk, Tv)[_]: Tu) $fn,
+    |                 ^^ [4]
+207 |     )[ctx $fn]: Map<Tk, Tu>;
+208 | 
+
+1 error found

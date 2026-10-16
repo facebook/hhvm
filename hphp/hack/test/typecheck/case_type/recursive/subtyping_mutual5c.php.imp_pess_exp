@@ -1,68 +1,279 @@
-ERROR: File "subtyping_mutual5c.php", line 26, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 4, characters 11-11:
-  But got `nonnull`
-ERROR: File "subtyping_mutual5c.php", line 26, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual5c.php", line 4, characters 11-11:
-    by the definition of `A`
-ERROR: File "subtyping_mutual5c.php", line 27, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual5c.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual5c.php", line 4, characters 11-11:
-    by the definition of `A`
-ERROR: File "subtyping_mutual5c.php", line 28, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual5c.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual5c.php", line 4, characters 11-11:
-    by the definition of `A`
-ERROR: File "subtyping_mutual5c.php", line 33, characters 5-6:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 4, characters 11-11:
-  But got `nonnull`
-ERROR: File "subtyping_mutual5c.php", line 33, characters 5-6:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 6, characters 20-20:
-  But got `mixed`
-  File "subtyping_mutual5c.php", line 4, characters 11-11:
-    by the definition of `A`
-ERROR: File "subtyping_mutual5c.php", line 36, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 16, characters 3-5:
-  But got `int`
-ERROR: File "subtyping_mutual5c.php", line 43, characters 5-7:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 18, characters 7-9:
-  But got `int`
-ERROR: File "subtyping_mutual5c.php", line 54, characters 5-7:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 8, characters 19-19:
-  Expected `A`
-  File "subtyping_mutual5c.php", line 23, characters 3-13:
-  But got `vec<string>`
-ERROR: File "subtyping_mutual5c.php", line 56, characters 12-14:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual5c.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual5c.php", line 23, characters 3-13:
-  But got `vec<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `nonnull` [3]
+
+subtyping_mutual5c.php:26:12
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B | int;
+   |           ^ [3]
+ 5 | 
+ 6 | case type B as vec<A> = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+24 | ): void {
+25 |   expect_A($a);
+26 |   expect_B($a); // nok: A <: B -> nok, need constraint on A
+   |            ^^ [1]
+27 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need constraint on A
+28 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need constraint on A
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+
+subtyping_mutual5c.php:26:12
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B | int;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B as vec<A> = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   int $i,
+   :
+24 | ): void {
+25 |   expect_A($a);
+26 |   expect_B($a); // nok: A <: B -> nok, need constraint on A
+   |            ^^ [1]
+27 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need constraint on A
+28 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need constraint on A
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+
+subtyping_mutual5c.php:27:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B | int;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B as vec<A> = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   int $i,
+   :
+25 |   expect_A($a);
+26 |   expect_B($a); // nok: A <: B -> nok, need constraint on A
+27 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need constraint on A
+   |               ^^ [1]
+28 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need constraint on A
+29 |   expect_A($b); // ok: B <: A -> B <: B -> ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+
+subtyping_mutual5c.php:28:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B | int;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B as vec<A> = vec<A>;
+   :
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   int $i,
+   :
+26 |   expect_B($a); // nok: A <: B -> nok, need constraint on A
+27 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need constraint on A
+28 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need constraint on A
+   |               ^^ [1]
+29 |   expect_A($b); // ok: B <: A -> B <: B -> ok
+30 |   expect_B($b);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `nonnull` [3]
+
+subtyping_mutual5c.php:33:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B | int;
+   |           ^ [3]
+ 5 | 
+ 6 | case type B as vec<A> = vec<A>;
+   :
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+   :
+31 |   expect_vecA($b); // ok: B <: vec<A> -> vec<A> <: vec<A> -> ok
+32 |   expect_vecB(
+33 |     $b,
+   |     ^^ [1]
+34 |   ); // nok: B <: vec<B> -> vec<A> <: vec<B> -> A <: B -> nok, need constraint on A
+35 |   expect_A($i);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+
+subtyping_mutual5c.php:33:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B | int;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B as vec<A> = vec<A>;
+   |                    ^ [3]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+   :
+31 |   expect_vecA($b); // ok: B <: vec<A> -> vec<A> <: vec<A> -> ok
+32 |   expect_vecB(
+33 |     $b,
+   |     ^^ [1]
+34 |   ); // nok: B <: vec<B> -> vec<A> <: vec<B> -> A <: B -> nok, need constraint on A
+35 |   expect_A($i);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `int` [3]
+
+subtyping_mutual5c.php:36:12
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+14 |   A $a,
+15 |   B $b,
+16 |   int $i,
+   |   ^^^ [3]
+17 |   vec<A> $va,
+18 |   vec<int> $vi,
+   :
+34 |   ); // nok: B <: vec<B> -> vec<A> <: vec<B> -> A <: B -> nok, need constraint on A
+35 |   expect_A($i);
+36 |   expect_B($i); // nok: int <: B -> int <: vec<A> -> nok
+   |            ^^ [1]
+37 |   expect_A($va);
+38 |   expect_B($va);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `int` [3]
+
+subtyping_mutual5c.php:43:5
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+   :
+16 |   int $i,
+17 |   vec<A> $va,
+18 |   vec<int> $vi,
+   |       ^^^ [3]
+19 |   vec<B> $vb,
+20 |   vec<vec<int>> $vvi,
+   :
+41 |   expect_vecA($vi); // ok: vec<int> <: vec<A> -> int <: A -> ok
+42 |   expect_vecB(
+43 |     $vi,
+   |     ^^^ [1]
+44 |   ); // nok: vec<int> <: vec<B> -> int <: B -> int <: vec<A> -> nok
+45 |   expect_A($vb);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<string>` [3]
+
+subtyping_mutual5c.php:54:5
+ 6 | case type B as vec<A> = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+   |                   ^ [2]
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   :
+21 |   vec<vec<A>> $vva,
+22 |   vec<vec<B>> $vvb,
+23 |   vec<string> $vs,
+   |   ^^^^^^^^^^^ [3]
+24 | ): void {
+25 |   expect_A($a);
+   :
+52 |   expect_B($vvb);
+53 |   expect_A(
+54 |     $vs,
+   |     ^^^ [1]
+55 |   ); // nok: string <: A -> string <: B | int -> string <: B -> string <: vec<A> -> nok
+56 |   expect_B($vs); // nok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<string>` [3]
+
+subtyping_mutual5c.php:56:12
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+21 |   vec<vec<A>> $vva,
+22 |   vec<vec<B>> $vvb,
+23 |   vec<string> $vs,
+   |   ^^^^^^^^^^^ [3]
+24 | ): void {
+25 |   expect_A($a);
+   :
+54 |     $vs,
+55 |   ); // nok: string <: A -> string <: B | int -> string <: B -> string <: vec<A> -> nok
+56 |   expect_B($vs); // nok
+   |            ^^^ [1]
+57 | }
+
+10 errors found

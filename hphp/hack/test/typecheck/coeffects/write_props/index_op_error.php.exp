@@ -1,7 +1,25 @@
-ERROR: File "index_op_error.php", line 12, characters 3-26:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "index_op_error.php", line 12, characters 3-20:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "index_op_error.php", line 11, characters 31-32:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+index_op_error.php:12:3
+10 | 
+11 | function pure_function(Foo $x)[] : void {
+12 |   $x->prop_dict['a'] = 'b'; // Error
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+index_op_error.php:12:3
+ 9 | }
+10 | 
+11 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+12 |   $x->prop_dict['a'] = 'b'; // Error
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+2 errors found

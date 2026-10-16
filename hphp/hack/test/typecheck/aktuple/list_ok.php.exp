@@ -1,12 +1,41 @@
-ERROR: File "list_ok.php", line 9, characters 15-21:
-Invalid argument (Typing[4110])
-  File "list_ok.php", line 13, characters 22-27:
-  Expected `string`
-  File "list_ok.php", line 6, characters 12-12:
-  But got `int`
-ERROR: File "list_ok.php", line 10, characters 12-15:
-Invalid argument (Typing[4110])
-  File "list_ok.php", line 14, characters 19-21:
-  Expected `int`
-  File "list_ok.php", line 6, characters 15-19:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+list_ok.php:9:15
+ 4 |  * errors. */
+ 5 | function test(): void {
+ 6 |   $a = vec[4, 'aaa'];
+   |            ^ [3]
+ 7 |   list($int, $string) = $a;
+ 8 | 
+ 9 |   take_string($string);
+   |               ^^^^^^^ [1]
+10 |   take_int($int);
+11 | }
+12 | 
+13 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+14 | function take_int(int $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+list_ok.php:10:12
+ 4 |  * errors. */
+ 5 | function test(): void {
+ 6 |   $a = vec[4, 'aaa'];
+   |               ^^^^^ [3]
+ 7 |   list($int, $string) = $a;
+ 8 | 
+ 9 |   take_string($string);
+10 |   take_int($int);
+   |            ^^^^ [1]
+11 | }
+12 | 
+13 | function take_string(string $_): void {}
+14 | function take_int(int $_): void {}
+   |                   ^^^ [2]
+
+2 errors found

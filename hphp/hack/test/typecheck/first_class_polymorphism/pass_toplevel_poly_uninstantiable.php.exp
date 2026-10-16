@@ -1,10 +1,25 @@
-ERROR: File "pass_toplevel_poly_uninstantiable.php", line 11, characters 12-13:
-Invalid argument (Typing[4323])
-  File "pass_toplevel_poly_uninstantiable.php", line 3, characters 27-28:
-  `T2` is a constrained type parameter
-  File "pass_toplevel_poly_uninstantiable.php", line 3, characters 33-38:
-  This type constraint is violated
-  File "pass_toplevel_poly_uninstantiable.php", line 3, characters 33-38:
-  Expected `string`
-  File "pass_toplevel_poly_uninstantiable.php", line 6, characters 13-15:
-  But got `int`
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+pass_toplevel_poly_uninstantiable.php:11:12
+ 1 | <?hh
+ 2 | 
+ 3 | function never<T1 as int, T2 as string super T1>(T1 $_, T2 $_): void {}
+   |                           ^^ [2]
+   |                                 ^^^^^^ [3]
+ 4 | 
+ 5 | function rcvr_bad(
+ 6 |   (function(int,string): void) $_
+   |             ^^^ [4]
+ 7 | ): void {}
+ 8 | 
+ 9 | function pass_generic_bad(): void {
+10 |   $f = never<>;
+11 |   rcvr_bad($f);
+   |            ^^ [1]
+12 | }
+
+1 error found

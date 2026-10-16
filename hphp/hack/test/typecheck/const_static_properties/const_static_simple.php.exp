@@ -1,2 +1,10 @@
-ERROR: File "const_static_simple.php", line 4, characters 3-8:
-Constants cannot be declared `static` (Parsing[1002])
+error: Parsing[1002] Constants cannot be declared `static` [1]
+
+const_static_simple.php:4:3
+2 | 
+3 | class A {
+4 |   static const int MAX_ARGS = 5;
+  |   ^^^^^^ [1]
+5 | }
+
+1 error found

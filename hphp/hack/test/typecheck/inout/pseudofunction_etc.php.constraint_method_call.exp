@@ -1,46 +1,213 @@
-WARN: File "pseudofunction_etc.php", line 9, characters 20-22:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "pseudofunction_etc.php", line 3, characters 36-42:
-  This expression has type `dynamic`
-ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
-ERROR: File "pseudofunction_etc.php", line 6, characters 15-15:
-An expression is expected here. (Parsing[1002])
-ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
-ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
-ERROR: File "pseudofunction_etc.php", line 14, characters 31-35:
-Parameters may not be marked `inout` on constructors (Parsing[1002])
-ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
-Unbound name: `inout` (a global constant) (Naming[2049])
-ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
-Unbound name: `inout` (a global constant) (Naming[2049])
-ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
-Unbound name: `inout` (a global constant) (Naming[2049])
-ERROR: File "pseudofunction_etc.php", line 4, characters 3-17:
-Unexpected `inout` argument for `invariant` (NastCheck[3096])
-ERROR: File "pseudofunction_etc.php", line 14, characters 41-42:
-Methods with special semantics cannot have `inout` parameters. (NastCheck[3043])
-ERROR: File "pseudofunction_etc.php", line 5, characters 42-49:
-Unexpected `inout` annotation for argument (Typing[4183])
-  File "soundness.hhi", line 32, characters 7-8:
-  This is a normal parameter (does not have `inout`)
-ERROR: File "pseudofunction_etc.php", line 5, characters 48-49:
-Invalid assignment to an `inout` parameter (Typing[4337])
-  File "pseudofunction_etc.php", line 3, characters 27-30:
-  Expected `bool` (`inout` parameter)
-  File "pseudofunction_etc.php", line 5, characters 24-30:
-  But got `dynamic`
-  File "soundness.hhi", line 32, characters 3-5:
-    via this generic `Tin`
-ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "pseudofunction_etc.php", line 10, characters 3-17:
-`isset` does not allow arguments to be passed by `inout` (Typing[4450])
-ERROR: File "pseudofunction_etc.php", line 10, characters 3-17:
-`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+pseudofunction_etc.php:9:20
+ 1 | <?hh
+ 2 | 
+ 3 | function hgoldstein(inout bool $x, dynamic $v): void {
+   |                                    ^^^^^^^ [2]
+ 4 |   invariant(inout $x, 'foo');
+ 5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+ 6 |   unset(inout $x);
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+ 9 |   unset(inout $v?->foo);
+   |                    ^^^ [1]
+10 |   isset(inout $x);
+11 | }
+
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+pseudofunction_etc.php:6:9
+4 |   invariant(inout $x, 'foo');
+5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+6 |   unset(inout $x);
+  |         ^^^^^ [1]
+7 |   $d = dict[]
+8 |   unset(inout $d['k']);
+
+error: Parsing[1002] An expression is expected here. [1]
+
+pseudofunction_etc.php:6:15
+4 |   invariant(inout $x, 'foo');
+5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+6 |   unset(inout $x);
+  |               ^ [1]
+7 |   $d = dict[]
+8 |   unset(inout $d['k']);
+
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+pseudofunction_etc.php:8:9
+ 6 |   unset(inout $x);
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+   |         ^^^^^ [1]
+ 9 |   unset(inout $v?->foo);
+10 |   isset(inout $x);
+
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+pseudofunction_etc.php:9:9
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+ 9 |   unset(inout $v?->foo);
+   |         ^^^^^ [1]
+10 |   isset(inout $x);
+11 | }
+
+error: Parsing[1002] Parameters may not be marked `inout` on constructors [1]
+
+pseudofunction_etc.php:14:31
+12 | 
+13 | class HgoldsteinParent {
+14 |   public function __construct(inout int $_): void {}
+   |                               ^^^^^ [1]
+15 | }
+16 | 
+
+error: Naming[2049] Unbound name: `inout` (a global constant) [1]
+
+pseudofunction_etc.php:6:9
+4 |   invariant(inout $x, 'foo');
+5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+6 |   unset(inout $x);
+  |         ^^^^^ [1]
+7 |   $d = dict[]
+8 |   unset(inout $d['k']);
+
+error: Naming[2049] Unbound name: `inout` (a global constant) [1]
+
+pseudofunction_etc.php:8:9
+ 6 |   unset(inout $x);
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+   |         ^^^^^ [1]
+ 9 |   unset(inout $v?->foo);
+10 |   isset(inout $x);
+
+error: Naming[2049] Unbound name: `inout` (a global constant) [1]
+
+pseudofunction_etc.php:9:9
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+ 9 |   unset(inout $v?->foo);
+   |         ^^^^^ [1]
+10 |   isset(inout $x);
+11 | }
+
+error: NastCheck[3096] Unexpected `inout` argument for `invariant` [1]
+
+pseudofunction_etc.php:4:3
+2 | 
+3 | function hgoldstein(inout bool $x, dynamic $v): void {
+4 |   invariant(inout $x, 'foo');
+  |   ^^^^^^^^^^^^^^^ [1]
+5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+6 |   unset(inout $x);
+
+error: NastCheck[3043] Methods with special semantics cannot have `inout` parameters. [1]
+
+pseudofunction_etc.php:14:41
+12 | 
+13 | class HgoldsteinParent {
+14 |   public function __construct(inout int $_): void {}
+   |                                         ^^ [1]
+15 | }
+16 | 
+
+error: Typing[4183] Unexpected `inout` annotation for argument [1]
+-> This is a normal parameter (does not have `inout`) [2]
+
+pseudofunction_etc.php:5:42
+ 3 | function hgoldstein(inout bool $x, dynamic $v): void {
+ 4 |   invariant(inout $x, 'foo');
+ 5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+   |                                          ^^^^^^^^ [1]
+ 6 |   unset(inout $x);
+ 7 |   $d = dict[]
+
+soundness.hhi:32:7
+30 |  */
+31 | function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
+32 |   Tin $t,
+   |       ^^ [2]
+33 |   ?\HH\FormatString<nothing> $msg = null,
+34 | )[]: ~Tout;
+
+error: Typing[4337] Invalid assignment to an `inout` parameter [1]
+-> Expected `bool` (`inout` parameter) [2]
+-> But got `dynamic` [3]
+->   via this generic `Tin` [4]
+
+pseudofunction_etc.php:5:48
+ 1 | <?hh
+ 2 | 
+ 3 | function hgoldstein(inout bool $x, dynamic $v): void {
+   |                           ^^^^ [2]
+ 4 |   invariant(inout $x, 'foo');
+ 5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+   |                        ^^^^^^^ [3]
+   |                                                ^^ [1]
+ 6 |   unset(inout $x);
+ 7 |   $d = dict[]
+
+soundness.hhi:32:3
+30 |  */
+31 | function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
+32 |   Tin $t,
+   |   ^^^ [4]
+33 |   ?\HH\FormatString<nothing> $msg = null,
+34 | )[]: ~Tout;
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+pseudofunction_etc.php:6:9
+4 |   invariant(inout $x, 'foo');
+5 |   HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
+6 |   unset(inout $x);
+  |         ^^^^^ [1]
+7 |   $d = dict[]
+8 |   unset(inout $d['k']);
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+pseudofunction_etc.php:8:9
+ 6 |   unset(inout $x);
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+   |         ^^^^^ [1]
+ 9 |   unset(inout $v?->foo);
+10 |   isset(inout $x);
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+pseudofunction_etc.php:9:9
+ 7 |   $d = dict[]
+ 8 |   unset(inout $d['k']);
+ 9 |   unset(inout $v?->foo);
+   |         ^^^^^ [1]
+10 |   isset(inout $x);
+11 | }
+
+error: Typing[4450] `isset` does not allow arguments to be passed by `inout` [1]
+
+pseudofunction_etc.php:10:3
+ 8 |   unset(inout $d['k']);
+ 9 |   unset(inout $v?->foo);
+10 |   isset(inout $x);
+   |   ^^^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+
+error: Typing[4016] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode [1]
+
+pseudofunction_etc.php:10:3
+ 8 |   unset(inout $d['k']);
+ 9 |   unset(inout $v?->foo);
+10 |   isset(inout $x);
+   |   ^^^^^^^^^^^^^^^ [1]
+11 | }
+12 | 
+
+18 errors found

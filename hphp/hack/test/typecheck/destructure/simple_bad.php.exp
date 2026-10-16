@@ -1,20 +1,68 @@
-ERROR: File "simple_bad.php", line 8, characters 9-13:
-Only variables, wildcards, and nested shape/tuple patterns are allowed in destructuring patterns (Parsing[1002])
-ERROR: File "simple_bad.php", line 5, characters 3-7:
-Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 3 (Typing[4513])
-ERROR: File "simple_bad.php", line 6, characters 3-15:
-Typing error (Typing[4110])
-  File "simple_bad.php", line 6, characters 3-15:
-  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
-  File "simple_bad.php", line 6, characters 19-28:
-  But got `vec<int>`
-ERROR: File "simple_bad.php", line 10, characters 3-29:
-Typing error (Typing[4057])
-  File "simple_bad.php", line 10, characters 33-47:
-  The field `a` is missing
-  File "simple_bad.php", line 10, characters 9-11:
-  The field `a` is required here
-ERROR: File "simple_bad.php", line 10, characters 9-11:
-Field `'a'` does not exist in the shape type (Typing[4512])
-ERROR: File "simple_bad.php", line 11, characters 3-7:
-Missing required fields in destructuring pattern: 'a' (Typing[4511])
+error: Parsing[1002] Only variables, wildcards, and nested shape/tuple patterns are allowed in destructuring patterns [1]
+
+simple_bad.php:8:9
+ 6 |   tuple($a, $b) = vec[1,2,3];
+ 7 |   $v = Vector<int>{1, 2};
+ 8 |   tuple($v[0], $a) = tuple("a", 2);
+   |         ^^^^^ [1]
+ 9 | 
+10 |   shape('a' => $a, 'b' => $b) = shape('b' => 2);
+
+error: Typing[4513] Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 3 [1]
+
+simple_bad.php:5:3
+3 | 
+4 | function f(): void {
+5 |   tuple($a, $b) = tuple(1, 2, 3);
+  |   ^^^^^ [1]
+6 |   tuple($a, $b) = vec[1,2,3];
+7 |   $v = Vector<int>{1, 2};
+
+error: Typing[4110] Typing error [1]
+-> Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern [1]
+-> But got `vec<int>` [2]
+
+simple_bad.php:6:3
+4 | function f(): void {
+5 |   tuple($a, $b) = tuple(1, 2, 3);
+6 |   tuple($a, $b) = vec[1,2,3];
+  |   ^^^^^^^^^^^^^ [1]
+  |                   ^^^^^^^^^^ [2]
+7 |   $v = Vector<int>{1, 2};
+8 |   tuple($v[0], $a) = tuple("a", 2);
+
+error: Typing[4057] Typing error [1]
+-> The field `a` is missing [2]
+-> The field `a` is required here [3]
+
+simple_bad.php:10:3
+ 8 |   tuple($v[0], $a) = tuple("a", 2);
+ 9 | 
+10 |   shape('a' => $a, 'b' => $b) = shape('b' => 2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |         ^^^ [3]
+   |                                 ^^^^^^^^^^^^^^^ [2]
+11 |   shape('b' => $b) = shape('a' => 1, 'b' => 2);
+12 | 
+
+error: Typing[4512] Field `'a'` does not exist in the shape type [1]
+
+simple_bad.php:10:9
+ 8 |   tuple($v[0], $a) = tuple("a", 2);
+ 9 | 
+10 |   shape('a' => $a, 'b' => $b) = shape('b' => 2);
+   |         ^^^ [1]
+11 |   shape('b' => $b) = shape('a' => 1, 'b' => 2);
+12 | 
+
+error: Typing[4511] Missing required fields in destructuring pattern: 'a' [1]
+
+simple_bad.php:11:3
+ 9 | 
+10 |   shape('a' => $a, 'b' => $b) = shape('b' => 2);
+11 |   shape('b' => $b) = shape('a' => 1, 'b' => 2);
+   |   ^^^^^ [1]
+12 | 
+13 | 
+
+6 errors found

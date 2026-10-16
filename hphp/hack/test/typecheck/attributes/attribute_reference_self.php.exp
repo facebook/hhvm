@@ -1,2 +1,10 @@
-ERROR: File "attribute_reference_self.php", line 7, characters 17-20:
-`self` is undefined outside of a class (Typing[4059])
+error: Typing[4059] `self` is undefined outside of a class [1]
+
+attribute_reference_self.php:7:17
+5 | }
+6 | 
+7 | <<UserAttribute(self::class)>>
+  |                 ^^^^ [1]
+8 | class SomeClass {}
+
+1 error found

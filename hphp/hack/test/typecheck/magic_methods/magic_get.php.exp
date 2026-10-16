@@ -1,2 +1,10 @@
-ERROR: File "magic_get.php", line 4, characters 3-30:
-Magic `__get` methods are no longer supported (Parsing[1002])
+error: Parsing[1002] Magic `__get` methods are no longer supported [1]
+
+magic_get.php:4:3
+2 | 
+3 | class C {
+4 |   public function __get():void {}
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

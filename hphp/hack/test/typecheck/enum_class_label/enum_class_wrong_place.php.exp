@@ -1,2 +1,11 @@
-ERROR: File "enum_class_wrong_place.php", line 3, characters 1-17:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+enum_class_wrong_place.php:3:1
+1 | <?hh
+2 | 
+3 | #top_level_label;
+  | ^^^^^^^^^^^^^^^^^ [1]
+4 | 
+5 | 
+
+1 error found

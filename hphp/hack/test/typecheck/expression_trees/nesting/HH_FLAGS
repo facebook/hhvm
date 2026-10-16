@@ -1,2 +1,3 @@
 --extra-builtin ../../../expr_tree.php
 --config expression_tree_shape_no_unwrap=true
+--error-format plain_highlighted

@@ -1,2 +1,11 @@
-ERROR: File "parent_class_const.php", line 11, characters 28-42:
-Expression trees only support constants on `static` and named classes. (Parsing[1002])
+error: Parsing[1002] Expression trees only support constants on `static` and named classes. [1]
+
+parent_class_const.php:11:28
+ 9 | class MyClass extends MyParent {
+10 |   public function test(): void {
+11 |     $fun_call = ExampleDsl`parent::MYCONST`;
+   |                            ^^^^^^^^^^^^^^^ [1]
+12 |   }
+13 | }
+
+1 error found

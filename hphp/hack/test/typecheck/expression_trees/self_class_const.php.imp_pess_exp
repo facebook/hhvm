@@ -1,2 +1,11 @@
-ERROR: File "self_class_const.php", line 9, characters 16-28:
-Expression trees only support constants on `static` and named classes. (Parsing[1002])
+error: Parsing[1002] Expression trees only support constants on `static` and named classes. [1]
+
+self_class_const.php:9:16
+ 7 | 
+ 8 |   public function test(): void {
+ 9 |     ExampleDsl`self::MYCONST`;
+   |                ^^^^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+1 error found

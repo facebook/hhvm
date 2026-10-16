@@ -1,36 +1,96 @@
-ERROR: File "union_bad.php", line 7, characters 3-7:
-Missing `...`: the shape type has unknown fields, so the destructuring pattern must end with `...` (Typing[4510])
-ERROR: File "union_bad.php", line 13, characters 3-29:
-Typing error (Typing[4163])
-  File "union_bad.php", line 11, characters 3-72:
-  The field `b` is **optional**
-  File "union_bad.php", line 13, characters 3-29:
-  The field `b` is defined as **required**
-  File "union_bad.php", line 13, characters 20-22:
-  `b` is defined here
-ERROR: File "union_bad.php", line 19, characters 3-7:
-Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 3 (Typing[4513])
-ERROR: File "union_bad.php", line 25, characters 3-7:
-Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 1 (Typing[4513])
-ERROR: File "union_bad.php", line 25, characters 3-15:
-Typing error (Typing[4110])
-  File "union_bad.php", line 25, characters 3-15:
-  Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern
-  File "union_bad.php", line 23, characters 4-9:
-  But got `(int)`
-ERROR: File "union_bad.php", line 31, characters 3-29:
-Typing error (Typing[4163])
-  File "union_bad.php", line 29, characters 3-56:
-  The field `b` is **optional**
-  File "union_bad.php", line 31, characters 3-29:
-  The field `b` is defined as **required**
-  File "union_bad.php", line 31, characters 20-22:
-  `b` is defined here
-ERROR: File "union_bad.php", line 37, characters 3-34:
-Typing error (Typing[4163])
-  File "union_bad.php", line 35, characters 3-58:
-  The field `y` is **optional**
-  File "union_bad.php", line 37, characters 3-34:
-  The field `y` is defined as **required**
-  File "union_bad.php", line 37, characters 20-22:
-  `y` is defined here
+error: Typing[4510] Missing `...`: the shape type has unknown fields, so the destructuring pattern must end with `...` [1]
+
+union_bad.php:7:3
+5 |   (shape('x' => int) | shape('x' => int, ...)) $s,
+6 | ): void {
+7 |   shape('x' => $x) = $s; // error: member2 is open, missing ...
+  |   ^^^^^ [1]
+8 | }
+9 | 
+
+error: Typing[4163] Typing error [1]
+-> The field `b` is **optional** [2]
+-> The field `b` is defined as **required** [1]
+-> `b` is defined here [3]
+
+union_bad.php:13:3
+ 9 | 
+10 | function test_union_req_on_optional_err(
+11 |   (shape('a' => int, ?'b' => string) | shape('a' => float, 'b' => bool)) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 | ): void {
+13 |   shape('a' => $a, 'b' => $b) = $s; // error: 'b' optional in member1
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^ [3]
+14 | }
+15 | 
+
+error: Typing[4513] Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 3 [1]
+
+union_bad.php:19:3
+17 |   ((int, string) | (int, string, bool)) $t,
+18 | ): void {
+19 |   tuple($a, $b) = $t; // error: arity
+   |   ^^^^^ [1]
+20 | }
+21 | 
+
+error: Typing[4513] Tuple arity mismatch: expected 2 elements in destructuring pattern but the tuple type has 1 [1]
+
+union_bad.php:25:3
+23 |   ((int,) | (int, string)) $t,
+24 | ): void {
+25 |   tuple($a, $b) = $t; // error: arity
+   |   ^^^^^ [1]
+26 | }
+27 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected `(_, _, mixed...)` resulting from a shape or tuple destructuring pattern [1]
+-> But got `(int)` [2]
+
+union_bad.php:25:3
+21 | 
+22 | function test_union_tuples_closed_arity_err(
+23 |   ((int,) | (int, string)) $t,
+   |    ^^^^^^ [2]
+24 | ): void {
+25 |   tuple($a, $b) = $t; // error: arity
+   |   ^^^^^^^^^^^^^ [1]
+26 | }
+27 | 
+
+error: Typing[4163] Typing error [1]
+-> The field `b` is **optional** [2]
+-> The field `b` is defined as **required** [1]
+-> `b` is defined here [3]
+
+union_bad.php:31:3
+27 | 
+28 | function test_union_missing_field(
+29 |   (shape('a' => string) | shape('a' => int, 'b' => int)) $s
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+30 | ): void {
+31 |   shape('a' => $a, 'b' => $b) = $s; // error: 'b' not in first member
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^ [3]
+32 | }
+33 | 
+
+error: Typing[4163] Typing error [1]
+-> The field `y` is **optional** [2]
+-> The field `y` is defined as **required** [1]
+-> `y` is defined here [3]
+
+union_bad.php:37:3
+33 | 
+34 | function test_union_field_absent_in_member(
+35 |   (shape('x' => int, 'y' => string) | shape('x' => float)) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+36 | ): void {
+37 |   shape('x' => $x, 'y' => $y, ...) = $s; // error: 'y' not in second member
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^ [3]
+38 | }
+
+7 errors found

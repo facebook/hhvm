@@ -1,4 +1,21 @@
-ERROR: File "subtyping_mutual1.php", line 4, characters 11-11:
-This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])
-ERROR: File "subtyping_mutual1.php", line 6, characters 11-11:
-This recursive case type is not supported. `B` should not be at the top-level. (Typing[4485])
+error: Typing[4485] This recursive case type is not supported. `A` should not be at the top-level. [1]
+
+subtyping_mutual1.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A = B;
+  |           ^ [1]
+5 | 
+6 | case type B = A;
+
+error: Typing[4485] This recursive case type is not supported. `B` should not be at the top-level. [1]
+
+subtyping_mutual1.php:6:11
+4 | case type A = B;
+5 | 
+6 | case type B = A;
+  |           ^ [1]
+7 | 
+8 | function expect_A(A $x): void {}
+
+2 errors found

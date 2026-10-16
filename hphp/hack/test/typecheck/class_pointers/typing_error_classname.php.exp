@@ -1,16 +1,59 @@
-ERROR: File "typing_error_classname.php", line 12, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "typing_error_classname.php", line 11, characters 24-35:
-  Definition is here
-ERROR: File "typing_error_classname.php", line 13, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "typing_error_classname.php", line 11, characters 24-35:
-  Definition is here
-ERROR: File "typing_error_classname.php", line 14, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "typing_error_classname.php", line 11, characters 24-35:
-  Definition is here
-ERROR: File "typing_error_classname.php", line 15, characters 9-10:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "typing_error_classname.php", line 11, characters 24-35:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+typing_error_classname.php:12:5
+ 9 | 
+10 | class B extends A {
+11 |   public function test(classname<A> $a): void {
+   |                        ^^^^^^^^^^^^ [2]
+12 |     $a::meth();
+   |     ^^ [1]
+13 |     $a::CNS;
+14 |     $a::$prop;
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+typing_error_classname.php:13:5
+ 9 | 
+10 | class B extends A {
+11 |   public function test(classname<A> $a): void {
+   |                        ^^^^^^^^^^^^ [2]
+12 |     $a::meth();
+13 |     $a::CNS;
+   |     ^^ [1]
+14 |     $a::$prop;
+15 |     new $a();
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+typing_error_classname.php:14:5
+ 9 | 
+10 | class B extends A {
+11 |   public function test(classname<A> $a): void {
+   |                        ^^^^^^^^^^^^ [2]
+12 |     $a::meth();
+13 |     $a::CNS;
+14 |     $a::$prop;
+   |     ^^ [1]
+15 |     new $a();
+16 |   }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+typing_error_classname.php:15:9
+ 9 | 
+10 | class B extends A {
+11 |   public function test(classname<A> $a): void {
+   |                        ^^^^^^^^^^^^ [2]
+12 |     $a::meth();
+13 |     $a::CNS;
+14 |     $a::$prop;
+15 |     new $a();
+   |         ^^ [1]
+16 |   }
+17 | }
+
+4 errors found

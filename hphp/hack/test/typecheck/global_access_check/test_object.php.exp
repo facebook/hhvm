@@ -1,20 +1,101 @@
-ERROR: File "test_object.php", line 26, characters 5-25:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_object.php", line 27, characters 5-25:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_object.php", line 29, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_object.php", line 30, characters 5-16:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_object.php", line 43, characters 16-24:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_object.php", line 44, characters 5-22:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_object.php", line 45, characters 5-22:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_object.php", line 47, characters 5-24:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_object.php", line 48, characters 5-22:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_object.php", line 49, characters 5-22:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. [1]
+
+test_object.php:26:5
+24 | class Test {
+25 |   public function test_method_call(): void {
+26 |     Foo::$bar = new Bar(); // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |     (Foo::$bar)->prop = 1; // A global variable is written.
+28 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_object.php:27:5
+25 |   public function test_method_call(): void {
+26 |     Foo::$bar = new Bar(); // A global variable is written.
+27 |     (Foo::$bar)->prop = 1; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+28 | 
+29 |     $a = Foo::$bar;
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_object.php:29:10
+27 |     (Foo::$bar)->prop = 1; // A global variable is written.
+28 | 
+29 |     $a = Foo::$bar;
+   |          ^^^^^^^^^ [1]
+30 |     $a->prop = 1; // A global variable is written.
+31 |     $a->set_prop(1); // To do: raise an error "A global variable is written."
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_object.php:30:5
+28 | 
+29 |     $a = Foo::$bar;
+30 |     $a->prop = 1; // A global variable is written.
+   |     ^^^^^^^^^^^^ [1]
+31 |     $a->set_prop(1); // To do: raise an error "A global variable is written."
+32 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_object.php:43:16
+41 |     $c->bar1->prop = 1;
+42 | 
+43 |     $c->bar2 = Foo::$bar;
+   |                ^^^^^^^^^ [1]
+44 |     $c->bar2->prop = 1; // A global variable is written.
+45 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_object.php:44:5
+42 | 
+43 |     $c->bar2 = Foo::$bar;
+44 |     $c->bar2->prop = 1; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+45 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+46 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_object.php:45:5
+43 |     $c->bar2 = Foo::$bar;
+44 |     $c->bar2->prop = 1; // A global variable is written.
+45 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+46 | 
+47 |     $c->bar1 = new Bar(); // A global variable is written. To do: remove this error.
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via reference. [1]
+
+test_object.php:47:5
+45 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+46 | 
+47 |     $c->bar1 = new Bar(); // A global variable is written. To do: remove this error.
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+48 |     $c->bar2->prop = 1; // A global variable is written.
+49 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_object.php:48:5
+46 | 
+47 |     $c->bar1 = new Bar(); // A global variable is written. To do: remove this error.
+48 |     $c->bar2->prop = 1; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+49 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+50 |   }
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_object.php:49:5
+47 |     $c->bar1 = new Bar(); // A global variable is written. To do: remove this error.
+48 |     $c->bar2->prop = 1; // A global variable is written.
+49 |     $c->bar1->prop = 1; // A global variable is written. To do: remove this error.
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+50 |   }
+51 | }
+
+10 errors found

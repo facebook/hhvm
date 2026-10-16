@@ -1,2 +1,10 @@
-ERROR: File "trait.php", line 8, characters 15-21:
-`MyTrait` is a trait which cannot be used with `meth_caller`. Use a class instead. (Typing[4375])
+error: Typing[4375] `MyTrait` is a trait which cannot be used with `meth_caller`. Use a class instead. [1]
+
+trait.php:8:15
+6 | 
+7 | function test(): void {
+8 |   meth_caller(MyTrait::class, 'foo');
+  |               ^^^^^^^ [1]
+9 | }
+
+1 error found

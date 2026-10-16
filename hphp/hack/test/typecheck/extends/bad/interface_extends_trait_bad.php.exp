@@ -1,4 +1,11 @@
-ERROR: File "interface_extends_trait_bad.php", line 13, characters 11-11:
-Interfaces can only extend other interfaces. Did you mean to add `use A;` within the body of `B`? (Typing[4115])
-  File "interface_extends_trait_bad.php", line 13, characters 21-21:
-  This is a trait.
+error: Typing[4115] Interfaces can only extend other interfaces. Did you mean to add `use A;` within the body of `B`? [1]
+-> This is a trait. [2]
+
+interface_extends_trait_bad.php:13:11
+11 | 
+12 | trait A {}
+13 | interface B extends A {}
+   |           ^ [1]
+   |                     ^ [2]
+
+1 error found

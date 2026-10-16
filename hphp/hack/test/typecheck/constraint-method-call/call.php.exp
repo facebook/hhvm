@@ -1,16 +1,55 @@
-WARN: File "call.php", line 49, characters 14-14:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "call.php", line 48, characters 25-31:
-  This expression has type `dynamic`
-ERROR: File "call.php", line 29, characters 10-70:
-Typing error (Typing[4110])
-  File "call.php", line 30, characters 15-16:
-  Expected `int` because this is used in an arithmetic operation
-  File "call.php", line 31, characters 11-13:
-  But got `float`
-ERROR: File "call.php", line 34, characters 10-57:
-Typing error (Typing[4110])
-  File "call.php", line 33, characters 17-18:
-  Expected `int` because this is used in an arithmetic operation
-  File "call.php", line 36, characters 11-13:
-  But got `float`
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+call.php:49:14
+46 |   }
+47 | 
+48 |   public function test4(dynamic $d): void {
+   |                         ^^^^^^^ [2]
+49 |     $x = $d->m(1, "2");
+   |              ^ [1]
+50 |     $v = Vector<dynamic> {};
+51 |     $v[] = $x;
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `float` [3]
+
+call.php:29:10
+27 | 
+28 |   public function test2(): vec<float> {
+29 |     $x = $this->map(
+   |          ^^^^^^^^^^^ [1]
+30 |       ($x ==> $x + 1),
+   |       ^^^^^^^^^^^^^^^^ [1]
+   |               ^^ [2]
+31 |       vec[1.1, 2.1],
+   |       ^^^^^^^^^^^^^^ [1]
+   |           ^^^ [3]
+32 |     ); // Needs constraint-based + or bidirectional
+   |     ^ [1]
+33 |     $f = $x ==> $x + 1;
+34 |     $y = $this->map(
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `float` [3]
+
+call.php:34:10
+31 |       vec[1.1, 2.1],
+32 |     ); // Needs constraint-based + or bidirectional
+33 |     $f = $x ==> $x + 1;
+   |                 ^^ [2]
+34 |     $y = $this->map(
+   |          ^^^^^^^^^^^ [1]
+35 |       $f,
+   |       ^^^ [1]
+36 |       vec[1.1, 2.1],
+   |       ^^^^^^^^^^^^^^ [1]
+   |           ^^^ [3]
+37 |     ); // Needs constraint-based, bidirectional doesn't help
+   |     ^ [1]
+38 |     return $x;
+39 |   }
+
+3 errors found

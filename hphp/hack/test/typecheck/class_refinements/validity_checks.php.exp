@@ -1,12 +1,37 @@
-ERROR: File "validity_checks.php", line 18, characters 45-45:
-Invalid class refinement (Typing[4470])
-  File "validity_checks.php", line 18, characters 31-31:
-  Class `C` has no constant `T`
-ERROR: File "validity_checks.php", line 19, characters 44-44:
-Invalid class refinement (Typing[4470])
-  File "validity_checks.php", line 19, characters 31-31:
-  Constant `T` in `D` is not a ctx, did you mean type?
-ERROR: File "validity_checks.php", line 21, characters 30-37:
-Invalid class refinement (Typing[4470])
-  File "validity_checks.php", line 21, characters 16-16:
-  Class `D` has no constant `TInvalid`
+error: Typing[4470] Invalid class refinement [1]
+-> Class `C` has no constant `T` [2]
+
+validity_checks.php:18:45
+16 | 
+17 | interface Bad {
+18 |   abstract const type BAD0 as C with { type T = int };
+   |                               ^ [2]
+   |                                             ^ [1]
+19 |   abstract const type BAD1 as D with { ctx T = [] };
+20 |   abstract const type BAD2 as F with {
+
+error: Typing[4470] Invalid class refinement [1]
+-> Constant `T` in `D` is not a ctx, did you mean type? [2]
+
+validity_checks.php:19:44
+17 | interface Bad {
+18 |   abstract const type BAD0 as C with { type T = int };
+19 |   abstract const type BAD1 as D with { ctx T = [] };
+   |                               ^ [2]
+   |                                            ^ [1]
+20 |   abstract const type BAD2 as F with {
+21 |     type TD as D with { type TInvalid = int; } };
+
+error: Typing[4470] Invalid class refinement [1]
+-> Class `D` has no constant `TInvalid` [2]
+
+validity_checks.php:21:30
+19 |   abstract const type BAD1 as D with { ctx T = [] };
+20 |   abstract const type BAD2 as F with {
+21 |     type TD as D with { type TInvalid = int; } };
+   |                ^ [2]
+   |                              ^^^^^^^^ [1]
+22 | }
+23 | 
+
+3 errors found

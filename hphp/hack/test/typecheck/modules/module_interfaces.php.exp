@@ -1,4 +1,20 @@
-ERROR: File "module_interfaces.php--B.php", line 6, characters 20-20:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_interfaces.php--A.php", line 6, characters 20-20:
-  This is from module `A`
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_interfaces.php--B.php:6:20
+4 | module B;
+5 | 
+6 | class B implements A {} // Bad
+  |                    ^ [1]
+7 | 
+8 | class B2 implements A2 {} // Ok
+
+module_interfaces.php--A.php:6:20
+4 | module A;
+5 | 
+6 | internal interface A {}
+  |                    ^ [2]
+7 | 
+8 | interface A2 {}
+
+1 error found

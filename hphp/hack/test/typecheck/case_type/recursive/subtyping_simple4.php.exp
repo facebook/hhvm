@@ -1,24 +1,90 @@
-ERROR: File "subtyping_simple4.php", line 22, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_simple4.php", line 7, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_simple4.php", line 11, characters 3-3:
-  But got `mixed`
-  File "subtyping_simple4.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_simple4.php", line 27, characters 18-19:
-Invalid argument (Typing[4110])
-  File "subtyping_simple4.php", line 8, characters 25-35:
-  Expected `vec<vec<A>>`
-  File "subtyping_simple4.php", line 11, characters 3-3:
-  But got `mixed`
-  File "subtyping_simple4.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_simple4.php", line 32, characters 5-7:
-Invalid argument (Typing[4110])
-  File "subtyping_simple4.php", line 8, characters 29-34:
-  Expected `vec<A>`
-  File "subtyping_simple4.php", line 13, characters 7-7:
-  But got `mixed`
-  File "subtyping_simple4.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_simple4.php:22:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = vec<A>;
+   |           ^ [4]
+ 5 | 
+ 6 | function expect_A(A $x): void {}
+ 7 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+ 8 | function expect_vecvecA(vec<vec<A>> $x): void {}
+ 9 | 
+10 | function foo(
+11 |   A $a,
+   |   ^ [3]
+12 |   vec<nothing> $v,
+13 |   vec<A> $va,
+   :
+20 |   expect_A($vv);
+21 |   expect_A($vva);
+22 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need bound on A
+   |               ^^ [1]
+23 |   expect_vecA($v);
+24 |   expect_vecA($va);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<vec<A>>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_simple4.php:27:18
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = vec<A>;
+   |           ^ [4]
+ 5 | 
+ 6 | function expect_A(A $x): void {}
+ 7 | function expect_vecA(vec<A> $x): void {}
+ 8 | function expect_vecvecA(vec<vec<A>> $x): void {}
+   |                         ^^^^^^^^^^^ [2]
+ 9 | 
+10 | function foo(
+11 |   A $a,
+   |   ^ [3]
+12 |   vec<nothing> $v,
+13 |   vec<A> $va,
+   :
+25 |   expect_vecA($vv);
+26 |   expect_vecA($vva);
+27 |   expect_vecvecA($a); // nok: A <: vec<vec<A>> -> nok, need bound on A
+   |                  ^^ [1]
+28 |   expect_vecvecA(
+29 |     $v,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_simple4.php:32:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = vec<A>;
+   |           ^ [4]
+ 5 | 
+ 6 | function expect_A(A $x): void {}
+ 7 | function expect_vecA(vec<A> $x): void {}
+ 8 | function expect_vecvecA(vec<vec<A>> $x): void {}
+   |                             ^^^^^^ [2]
+ 9 | 
+10 | function foo(
+11 |   A $a,
+12 |   vec<nothing> $v,
+13 |   vec<A> $va,
+   |       ^ [3]
+14 |   vec<vec<nothing>> $vv,
+15 |   vec<vec<A>> $vva,
+   :
+30 |   ); // ok: vec<nothing> <: vec<vec<A>> -> nothing <: vec<A> -> ok
+31 |   expect_vecvecA(
+32 |     $va,
+   |     ^^^ [1]
+33 |   ); // nok: vec<A> <: vec<vec<A>> -> A <: vec<A> -> nok, need bound on A
+34 |   expect_vecvecA(
+
+3 errors found

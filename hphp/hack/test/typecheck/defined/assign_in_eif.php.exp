@@ -1,4 +1,21 @@
-ERROR: File "assign_in_eif.php", line 4, characters 9-10:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "assign_in_eif.php", line 4, characters 18-19:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+assign_in_eif.php:4:9
+2 | 
+3 | function f(bool $b): int {
+4 |   ($b ? $x = 1 : $x = 0);
+  |         ^^ [1]
+5 |   return $x;
+6 | }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+assign_in_eif.php:4:18
+2 | 
+3 | function f(bool $b): int {
+4 |   ($b ? $x = 1 : $x = 0);
+  |                  ^^ [1]
+5 |   return $x;
+6 | }
+
+2 errors found

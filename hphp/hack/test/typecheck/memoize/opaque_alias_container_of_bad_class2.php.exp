@@ -1,10 +1,42 @@
-ERROR: File "opaque_alias_container_of_bad_class2.php--file2.php", line 4, characters 28-29:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "opaque_alias_container_of_bad_class2.php--file1.php", line 6, characters 22-28:
-  This is an object of type BarImpl
-  File "hackarray.hhi", line 52, characters 72-72:
-    via this generic `T`
-  File "hackarray.hhi", line 22, characters 35-36:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 23-24:
-    via this generic `Tv`
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type BarImpl [2]
+->   via this generic `T` [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+
+opaque_alias_container_of_bad_class2.php--file2.php:4:28
+  2 | 
+  3 | <<__Memoize>>
+  4 | function some_function(Bar $i): void {}
+    |                            ^^ [1]
+
+opaque_alias_container_of_bad_class2.php--file1.php:6:22
+  4 | }
+  5 | 
+  6 | newtype Bar = varray<BarImpl>;
+    |                      ^^^^^^^ [2]
+
+hackarray.hhi:52:72
+ 20 |     <<__NoAutoBound>> +Tk as arraykey,
+ 21 |     <<__NoAutoBound>> +Tv,
+ 22 |   > implements KeyedContainer<Tk, Tv>, \XHPChild {
+    |                                   ^^ [4]
+ 23 | 
+ 24 |   }
+    :
+ 50 |    */
+ 51 |   <<__SupportDynamicType>>
+ 52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+    |                                                                        ^ [3]
+ 53 | 
+ 54 | } // namespace HH
+
+interfaces.hhi:115:23
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                       ^^ [5]
+116 | 
+117 |   /**
+
+1 error found

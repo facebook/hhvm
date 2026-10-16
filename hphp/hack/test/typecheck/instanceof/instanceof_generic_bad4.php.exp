@@ -1,24 +1,55 @@
-ERROR: File "instanceof_generic_bad4.php", line 9, characters 20-21:
-Invalid argument (Typing[4110])
-  File "instanceof_generic_bad4.php", line 6, characters 29-32:
-  Expected `Base`
-  File "instanceof_generic_bad4.php", line 8, characters 13-18:
-  But got `Tinv#3` from this `is` expression test
-  File "instanceof_generic_bad4.php", line 8, characters 13-18:
-  This type argument to `Inv` must match exactly (it is invariant)
-ERROR: File "instanceof_generic_bad4.php", line 9, characters 20-21:
-Invalid argument (Typing[4110])
-  File "instanceof_generic_bad4.php", line 6, characters 29-32:
-  Expected `Base`
-  File "instanceof_generic_bad4.php", line 8, characters 13-18:
-  But got `mixed` from this `is` expression test
-  File "instanceof_generic_bad4.php", line 8, characters 13-18:
-  This type argument to `Inv` must match exactly (it is invariant)
-ERROR: File "instanceof_generic_bad4.php", line 9, characters 20-21:
-Invalid argument (Typing[4110])
-  File "instanceof_generic_bad4.php", line 8, characters 13-18:
-  Expected `Tinv#3` from this `is` expression test
-  File "instanceof_generic_bad4.php", line 6, characters 29-32:
-  But got `Base`
-  File "instanceof_generic_bad4.php", line 6, characters 29-32:
-  This type argument to `Inv` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base` [2]
+-> But got `Tinv#3` from this `is` expression test [3]
+-> This type argument to `Inv` must match exactly (it is invariant) [3]
+
+instanceof_generic_bad4.php:9:20
+ 4 | class Base {}
+ 5 | class Inv<Tinv> {}
+ 6 | function ExpectsInvBase(Inv<Base> $ib): void {}
+   |                             ^^^^ [2]
+ 7 | function Test(mixed $m): void {
+ 8 |   if ($m is Inv<_>) {
+   |             ^^^^^^ [3]
+ 9 |     ExpectsInvBase($m);
+   |                    ^^ [1]
+10 |   }
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Base` [2]
+-> But got `mixed` from this `is` expression test [3]
+-> This type argument to `Inv` must match exactly (it is invariant) [3]
+
+instanceof_generic_bad4.php:9:20
+ 4 | class Base {}
+ 5 | class Inv<Tinv> {}
+ 6 | function ExpectsInvBase(Inv<Base> $ib): void {}
+   |                             ^^^^ [2]
+ 7 | function Test(mixed $m): void {
+ 8 |   if ($m is Inv<_>) {
+   |             ^^^^^^ [3]
+ 9 |     ExpectsInvBase($m);
+   |                    ^^ [1]
+10 |   }
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Tinv#3` from this `is` expression test [2]
+-> But got `Base` [3]
+-> This type argument to `Inv` must match exactly (it is invariant) [3]
+
+instanceof_generic_bad4.php:9:20
+ 4 | class Base {}
+ 5 | class Inv<Tinv> {}
+ 6 | function ExpectsInvBase(Inv<Base> $ib): void {}
+   |                             ^^^^ [3]
+ 7 | function Test(mixed $m): void {
+ 8 |   if ($m is Inv<_>) {
+   |             ^^^^^^ [2]
+ 9 |     ExpectsInvBase($m);
+   |                    ^^ [1]
+10 |   }
+11 | }
+
+3 errors found

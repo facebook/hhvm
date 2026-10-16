@@ -1,4 +1,14 @@
-ERROR: File "non_fixed_point_recursion_via_case_type_hint.php", line 3, characters 11-23:
-Recursion is not supported via case type where clauses. (Typing[4485])
-  File "non_fixed_point_recursion_via_case_type_hint.php", line 6, characters 37-53:
-  `NonFixedPoint` appears here
+error: Typing[4485] Recursion is not supported via case type where clauses. [1]
+-> `NonFixedPoint` appears here [2]
+
+non_fixed_point_recursion_via_case_type_hint.php:3:11
+1 | <?hh
+2 | 
+3 | case type NonFixedPoint<T1> =
+  |           ^^^^^^^^^^^^^ [1]
+4 |   | int where int as NonFixedPointOrBool<vec<T1>>;
+5 | 
+6 | case type NonFixedPointOrBool<T1> = NonFixedPoint<T1> | bool;
+  |                                     ^^^^^^^^^^^^^^^^^ [2]
+
+1 error found

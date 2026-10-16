@@ -1,4 +1,21 @@
-ERROR: File "generic_upperbound.php", line 12, characters 27-28:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "generic_upperbound.php", line 20, characters 53-54:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+generic_upperbound.php:12:27
+10 |   public function getTypedParamNew<TParams>(
+11 |     HH\EnumClass\Label<TParams, mixed> $label,
+12 |   ): void where TParams = TX::T {
+   |                           ^^ [1]
+13 |   }
+14 | }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+generic_upperbound.php:20:53
+18 | }
+19 | 
+20 | function get<TI as I>(C<TI> $param_bag): void where TI::T as A {
+   |                                                     ^^ [1]
+21 |   $param_bag->getTypedParamNew(#X);
+22 | }
+
+2 errors found

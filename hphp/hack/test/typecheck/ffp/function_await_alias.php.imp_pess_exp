@@ -1,2 +1,9 @@
-ERROR: File "function_await_alias.php", line 6, characters 23-33:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+function_await_alias.php:6:23
+4 | 
+5 | // Should error, because the Awaitable restriction is syntactic.
+6 | async function foo(): MyAwaitable { return 1; }
+  |                       ^^^^^^^^^^^ [1]
+
+1 error found

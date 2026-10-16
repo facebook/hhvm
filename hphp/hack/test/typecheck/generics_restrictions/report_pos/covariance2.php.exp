@@ -1,16 +1,52 @@
-ERROR: File "covariance2.php", line 4, characters 3-22:
-You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4120 in declarations (Typing[4120])
-ERROR: File "covariance2.php", line 5, characters 24-24:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariance2.php", line 3, characters 14-14:
-  This is where the parameter was declared as covariant `+`
-  File "covariance2.php", line 5, characters 24-24:
-  Function parameters are contravariant
-ERROR: File "covariance2.php", line 6, characters 3-22:
-You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4120 in declarations (Typing[4120])
-ERROR: File "covariance2.php", line 7, characters 25-25:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariance2.php", line 3, characters 14-14:
-  This is where the parameter was declared as covariant `+`
-  File "covariance2.php", line 7, characters 25-25:
-  Function parameters are contravariant
+error: Typing[4120] You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4120 in declarations [1]
+
+covariance2.php:4:3
+2 | 
+3 | interface X<+T> {
+4 |   /* HH_FIXME[4120] */
+  |   ^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   public function test(T $x): void;
+6 |   /* HH_FIXME[4120] */
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> Function parameters are contravariant [1]
+
+covariance2.php:5:24
+1 | <?hh
+2 | 
+3 | interface X<+T> {
+  |              ^ [2]
+4 |   /* HH_FIXME[4120] */
+5 |   public function test(T $x): void;
+  |                        ^ [1]
+6 |   /* HH_FIXME[4120] */
+7 |   public function test2(T... $x): void;
+
+error: Typing[4120] You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4120 in declarations [1]
+
+covariance2.php:6:3
+4 |   /* HH_FIXME[4120] */
+5 |   public function test(T $x): void;
+6 |   /* HH_FIXME[4120] */
+  |   ^^^^^^^^^^^^^^^^^^^^ [1]
+7 |   public function test2(T... $x): void;
+8 | }
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> Function parameters are contravariant [1]
+
+covariance2.php:7:25
+1 | <?hh
+2 | 
+3 | interface X<+T> {
+  |              ^ [2]
+4 |   /* HH_FIXME[4120] */
+5 |   public function test(T $x): void;
+6 |   /* HH_FIXME[4120] */
+7 |   public function test2(T... $x): void;
+  |                         ^ [1]
+8 | }
+
+4 errors found

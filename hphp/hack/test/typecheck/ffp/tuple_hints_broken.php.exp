@@ -1,6 +1,31 @@
-ERROR: File "tuple_hints_broken.php", line 3, characters 26-26:
-An opening angle bracket `<` is expected here. (Parsing[1002])
-ERROR: File "tuple_hints_broken.php", line 3, characters 21-25:
-Unbound name: `tuple` (Naming[2049])
-ERROR: File "tuple_hints_broken.php", line 3, characters 21-25:
-Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` (Typing[4100])
+error: Parsing[1002] An opening angle bracket `<` is expected here. [1]
+
+tuple_hints_broken.php:3:26
+1 | <?hh
+2 | 
+3 | function foo(): vec<tuple(int, string)> {
+  |                          ^ [1]
+4 |   return vec[];
+5 | }
+
+error: Naming[2049] Unbound name: `tuple` [1]
+
+tuple_hints_broken.php:3:21
+1 | <?hh
+2 | 
+3 | function foo(): vec<tuple(int, string)> {
+  |                     ^^^^^ [1]
+4 |   return vec[];
+5 | }
+
+error: Typing[4100] Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` [1]
+
+tuple_hints_broken.php:3:21
+1 | <?hh
+2 | 
+3 | function foo(): vec<tuple(int, string)> {
+  |                     ^^^^^ [1]
+4 |   return vec[];
+5 | }
+
+3 errors found

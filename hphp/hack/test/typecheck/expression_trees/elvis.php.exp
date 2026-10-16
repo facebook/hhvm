@@ -1,10 +1,38 @@
-ERROR: File "elvis.php", line 7, characters 19-33:
-Unsupported expression tree syntax: Elvis operator (Parsing[1002])
-ERROR: File "elvis.php", line 7, characters 19-33:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 331, characters 5-20:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "elvis.php", line 7, characters 19-22:
-  But got `bool`
+error: Parsing[1002] Unsupported expression tree syntax: Elvis operator [1]
+
+elvis.php:7:19
+5 | function test(): void {
+6 |   // Currently no support for Elvis operator
+7 |   $_ = ExampleDsl`true ?: "Hello"`;
+  |                   ^^^^^^^^^^^^^^^ [1]
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `bool` [4]
+
+elvis.php:7:19
+  5 | function test(): void {
+  6 |   // Currently no support for Elvis operator
+  7 |   $_ = ExampleDsl`true ?: "Hello"`;
+    |                   ^^^^^^^^^^^^^^^ [1]
+    |                   ^^^^ [4]
+  8 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+329 |     ?ExprPos $_,
+330 |     ExampleDsl::TAst $condition,
+331 |     ExampleDsl::TAst $truthy,
+    |     ^^^^^^^^^^^^^^^^ [3]
+332 |     ExampleDsl::TAst $falsy,
+333 |   )[]: ExampleDsl::TAst {
+
+2 errors found

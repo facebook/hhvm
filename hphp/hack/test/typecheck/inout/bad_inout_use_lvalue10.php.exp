@@ -1,12 +1,41 @@
-WARN: File "bad_inout_use_lvalue10.php", line 4, characters 16-17:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "bad_inout_use_lvalue10.php", line 3, characters 23-29:
-  This expression has type `dynamic`
-WARN: File "bad_inout_use_lvalue10.php", line 4, characters 16-20:
-Appending to a value of type `dynamic` (Warn[12040])
-  File "bad_inout_use_lvalue10.php", line 4, characters 16-20:
-  This expression has type `dynamic`
-ERROR: File "bad_inout_use_lvalue10.php", line 4, characters 16-22:
-You cannot decorate this argument as `inout` (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue10.php", line 4, characters 16-20:
-Cannot use `[]` for reading (NastCheck[3047])
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+bad_inout_use_lvalue10.php:4:16
+1 | <?hh
+2 | 
+3 | function foobar(inout dynamic $x): void {
+  |                       ^^^^^^^ [2]
+4 |   foobar(inout $x[0][]);
+  |                ^^ [1]
+5 | }
+
+warning: Warn[12040] Appending to a value of type `dynamic` [1]
+-> This expression has type `dynamic` [1]
+
+bad_inout_use_lvalue10.php:4:16
+2 | 
+3 | function foobar(inout dynamic $x): void {
+4 |   foobar(inout $x[0][]);
+  |                ^^^^^ [1]
+5 | }
+
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_lvalue10.php:4:16
+2 | 
+3 | function foobar(inout dynamic $x): void {
+4 |   foobar(inout $x[0][]);
+  |                ^^^^^^^ [1]
+5 | }
+
+error: NastCheck[3047] Cannot use `[]` for reading [1]
+
+bad_inout_use_lvalue10.php:4:16
+2 | 
+3 | function foobar(inout dynamic $x): void {
+4 |   foobar(inout $x[0][]);
+  |                ^^^^^ [1]
+5 | }
+
+4 errors found

@@ -1,8 +1,21 @@
-ERROR: File "num.php", line 9, characters 10-15:
-Invalid return type (Typing[4110])
-  File "num.php", line 3, characters 23-28:
-  Expected `string`
-  File "num.php", line 9, characters 10-15:
-  But got `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-  File "num.php", line 3, characters 14-16:
-  Here is why I think the argument is a `num`: this is a `num`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s. [1]
+-> Here is why I think the argument is a `num`: this is a `num` [3]
+
+num.php:9:10
+ 1 | <?hh
+ 2 | 
+ 3 | function foo(num $n): string {
+   |              ^^^ [3]
+   |                       ^^^^^^ [2]
+ 4 |   $x = 5 + $n;
+ 5 |   $x = 5 + $x;
+ 6 |   $x = $x + 5;
+ 7 |   $x = 5 + $x;
+ 8 |   $x = 5 + $x;
+ 9 |   return 5 + $x;
+   |          ^^^^^^ [1]
+10 | }
+
+1 error found

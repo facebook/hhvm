@@ -1,6 +1,15 @@
-ERROR: File "lambda23.php", line 4, characters 10-26:
-Invalid return type (Typing[4110])
-  File "lambda23.php", line 4, characters 11-16:
-  Expected `string`
-  File "lambda23.php", line 3, characters 27-29:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+lambda23.php:4:10
+1 | <?hh
+2 | 
+3 | function foo(): (function(int): int) {
+  |                           ^^^ [3]
+4 |   return (string $x) ==> 4;
+  |          ^^^^^^^^^^^^^^^^^ [1]
+  |           ^^^^^^ [2]
+5 | }
+
+1 error found

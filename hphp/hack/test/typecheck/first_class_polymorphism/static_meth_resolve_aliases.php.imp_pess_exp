@@ -1,6 +1,23 @@
-ERROR: File "static_meth_resolve_aliases.php", line 84, characters 3-99:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "static_meth_resolve_aliases.php", line 79, characters 44-47:
-  Expected `void`
-  File "static_meth_resolve_aliases.php", line 85, characters 58-61:
-  But got `dynamic`
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `void` [2]
+-> But got `dynamic` [3]
+
+static_meth_resolve_aliases.php:84:3
+77 |   const type T = SameNameSource::T;
+78 | 
+79 |   public static function take(this::T $_): void {}
+   |                                            ^^^^ [2]
+80 | }
+81 | 
+82 | function testSameNameAcrossRoots(): void {
+83 |   $fptr = SameNameTarget::take<>;
+84 |   hh_expect_equivalent<
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+85 |     HH\FunctionRef<(readonly function<T as arraykey>(T): void)>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                                          ^^^^ [3]
+86 |   >($fptr);
+   |   ^^^^^^^^ [1]
+87 | }
+
+1 error found

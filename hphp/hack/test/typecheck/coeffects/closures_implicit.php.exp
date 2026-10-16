@@ -1,18 +1,62 @@
-ERROR: File "closures_implicit.php", line 9, characters 24-38:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "closures_implicit.php", line 6, characters 23-27:
-  From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
-  File "closures_implicit.php", line 4, characters 28-35:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "closures_implicit.php", line 26, characters 10-19:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "closures_implicit.php", line 24, characters 30-38:
-  From this declaration, the context of this function body provides the capability Unrelated
-  File "closures_implicit.php", line 6, characters 23-27:
-  But the function being called requires the capability set {Rx, WriteProperty}
-ERROR: File "closures_implicit.php", line 30, characters 12-28:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "closures_implicit.php", line 28, characters 6-10:
-  From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
-  File "closures_implicit.php", line 24, characters 30-38:
-  But the function being called requires the capability Unrelated
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {Rx, WriteProperty} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+closures_implicit.php:9:24
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | function default_context()[defaults]: void {}
+   |                            ^^^^^^^^ [3]
+ 5 | 
+ 6 | function rx_context()[oldrx]: void {
+   |                       ^^^^^ [2]
+ 7 |   // verify the lambda inherits capability Rx from the outer function
+ 8 |   $rx_lambda = () ==> rx_context(); // ok
+ 9 |   $rx_lambda2 = () ==> default_context(); // error
+   |                        ^^^^^^^^^^^^^^^ [1]
+10 | }
+11 | 
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability Unrelated [2]
+-> But the function being called requires the capability set {Rx, WriteProperty} [3]
+
+closures_implicit.php:26:10
+ 4 | function default_context()[defaults]: void {}
+ 5 | 
+ 6 | function rx_context()[oldrx]: void {
+   |                       ^^^^^ [3]
+ 7 |   // verify the lambda inherits capability Rx from the outer function
+ 8 |   $rx_lambda = () ==> rx_context(); // ok
+   :
+22 | }
+23 | 
+24 | function unrelated_context()[unrelated]: void {
+   |                              ^^^^^^^^^ [2]
+25 |   // the lambda should be typed as having Unrelated capability, not defaults
+26 |   () ==> rx_context(); // error
+   |          ^^^^^^^^^^ [1]
+27 | 
+28 |   ()[oldrx] ==> {
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {Rx, WriteProperty} [2]
+-> But the function being called requires the capability Unrelated [3]
+
+closures_implicit.php:30:12
+22 | }
+23 | 
+24 | function unrelated_context()[unrelated]: void {
+   |                              ^^^^^^^^^ [3]
+25 |   // the lambda should be typed as having Unrelated capability, not defaults
+26 |   () ==> rx_context(); // error
+27 | 
+28 |   ()[oldrx] ==> {
+   |      ^^^^^ [2]
+29 |     // the type-checker shouldn't close over unrelated
+30 |     () ==> unrelated_context(); // error
+   |            ^^^^^^^^^^^^^^^^^ [1]
+31 | 
+32 |     () ==> rx_context(); // ok (since Rx is in the enclosing scope / inherited)
+
+3 errors found

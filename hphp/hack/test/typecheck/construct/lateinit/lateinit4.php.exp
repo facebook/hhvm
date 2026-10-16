@@ -1,4 +1,20 @@
-ERROR: File "lateinit4.php", line 4, characters 30-33:
-A late-initialized property cannot have a default value (Typing[4277])
-ERROR: File "lateinit4.php", line 5, characters 39-42:
-A late-initialized property cannot have a default value (Typing[4277])
+error: Typing[4277] A late-initialized property cannot have a default value [1]
+
+lateinit4.php:4:30
+2 | 
+3 | final class C {
+4 |   <<__LateInit>> private int $foo = 1;
+  |                              ^^^^ [1]
+5 |   <<__LateInit>> protected static int $bar = 2;
+6 | }
+
+error: Typing[4277] A late-initialized property cannot have a default value [1]
+
+lateinit4.php:5:39
+3 | final class C {
+4 |   <<__LateInit>> private int $foo = 1;
+5 |   <<__LateInit>> protected static int $bar = 2;
+  |                                       ^^^^ [1]
+6 | }
+
+2 errors found

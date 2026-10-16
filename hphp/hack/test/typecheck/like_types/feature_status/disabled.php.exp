@@ -1,22 +1,109 @@
-ERROR: File "disabled.php", line 3, characters 13-16:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 3, characters 23-27:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 7, characters 17-20:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 7, characters 32-36:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 16, characters 7-10:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 17, characters 10-13:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 18, characters 9-12:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 19, characters 7-10:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 23, characters 9-12:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 24, characters 9-12:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
-ERROR: File "disabled.php", line 27, characters 15-18:
-Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:3:13
+1 | <?hh
+2 | 
+3 | function f1(~int $x): ~bool {
+  |             ^^^^ [1]
+4 |   return true;
+5 | }
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:3:23
+1 | <?hh
+2 | 
+3 | function f1(~int $x): ~bool {
+  |                       ^^^^^ [1]
+4 |   return true;
+5 | }
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:7:17
+5 | }
+6 | 
+7 | function f2(vec<~int> $x): vec<~bool> {
+  |                 ^^^^ [1]
+8 |   return vec[];
+9 | }
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:7:32
+5 | }
+6 | 
+7 | function f2(vec<~int> $x): vec<~bool> {
+  |                                ^^^^^ [1]
+8 |   return vec[];
+9 | }
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:16:7
+14 | 
+15 | function f3(): void {
+16 |   vec<~int>[];
+   |       ^^^^ [1]
+17 |   Vector<~int>{};
+18 |   new C<~int>();
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:17:10
+15 | function f3(): void {
+16 |   vec<~int>[];
+17 |   Vector<~int>{};
+   |          ^^^^ [1]
+18 |   new C<~int>();
+19 |   gen<~int>();
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:18:9
+16 |   vec<~int>[];
+17 |   Vector<~int>{};
+18 |   new C<~int>();
+   |         ^^^^ [1]
+19 |   gen<~int>();
+20 | }
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:19:7
+17 |   Vector<~int>{};
+18 |   new C<~int>();
+19 |   gen<~int>();
+   |       ^^^^ [1]
+20 | }
+21 | 
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:23:9
+21 | 
+22 | function f4(mixed $x): void {
+23 |   $x is ~int;
+   |         ^^^^ [1]
+24 |   $x as ~int;
+25 | }
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:24:9
+22 | function f4(mixed $x): void {
+23 |   $x is ~int;
+24 |   $x as ~int;
+   |         ^^^^ [1]
+25 | }
+26 | 
+
+error: Parsing[1002] Cannot use unstable feature: `like_type_hints` [1]
+
+disabled.php:27:15
+25 | }
+26 | 
+27 | class C1<T as ~int> {}
+   |               ^^^^ [1]
+
+11 errors found

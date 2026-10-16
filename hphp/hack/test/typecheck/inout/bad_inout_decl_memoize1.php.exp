@@ -1,6 +1,19 @@
-ERROR: File "bad_inout_decl_memoize1.php", line 4, characters 24-28:
-`<<__Memoize>>` cannot be used on functions with `inout` parameters (Parsing[1002])
-ERROR: File "bad_inout_decl_memoize1.php", line 4, characters 10-12:
-Functions with `inout` parameters cannot be memoized (NastCheck[3045])
-  File "bad_inout_decl_memoize1.php", line 4, characters 36-37:
-  This is an `inout` parameter
+error: Parsing[1002] `<<__Memoize>>` cannot be used on functions with `inout` parameters [1]
+
+bad_inout_decl_memoize1.php:4:24
+2 | 
+3 | <<__Memoize>>
+4 | function foo(mixed $x, inout mixed $y, mixed $z): void {}
+  |                        ^^^^^ [1]
+
+error: NastCheck[3045] Functions with `inout` parameters cannot be memoized [1]
+-> This is an `inout` parameter [2]
+
+bad_inout_decl_memoize1.php:4:10
+2 | 
+3 | <<__Memoize>>
+4 | function foo(mixed $x, inout mixed $y, mixed $z): void {}
+  |          ^^^ [1]
+  |                                    ^^ [2]
+
+2 errors found

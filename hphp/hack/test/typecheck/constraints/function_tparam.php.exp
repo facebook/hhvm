@@ -1,10 +1,18 @@
-ERROR: File "function_tparam.php", line 5, characters 19-35:
-Some type arguments violate their constraints (Typing[4323])
-  File "function_tparam.php", line 3, characters 22-22:
-  `T` is a constrained type parameter
-  File "function_tparam.php", line 3, characters 27-29:
-  This type constraint is violated
-  File "function_tparam.php", line 3, characters 27-29:
-  Expected `num`
-  File "function_tparam.php", line 5, characters 30-34:
-  But got `mixed`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `mixed` [4]
+
+function_tparam.php:5:19
+1 | <?hh
+2 | 
+3 | interface Constraint<T as num> {}
+  |                      ^ [2]
+  |                           ^^^ [3]
+4 | 
+5 | function foo<T as Constraint<mixed>>(T $c): void {}
+  |                   ^^^^^^^^^^^^^^^^^ [1]
+  |                              ^^^^^ [4]
+
+1 error found

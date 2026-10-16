@@ -1,4 +1,19 @@
-ERROR: File "tconst7.php", line 11, characters 15-24:
-Invalid `is` expression hint (Typing[4195])
-  File "tconst7.php", line 4, characters 23-26:
-  The `is` operator cannot be used with the abstract type constant TFoo because it is not marked `<<__Enforceable>>`
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with the abstract type constant TFoo because it is not marked `<<__Enforceable>>` [2]
+
+tconst7.php:11:15
+ 2 | 
+ 3 | abstract class C {
+ 4 |   abstract const type TFoo as num;
+   |                       ^^^^ [2]
+ 5 | 
+ 6 |   public function f(this::TFoo $foo): void {
+   :
+ 9 | 
+10 |   private function g(mixed $x): void {
+11 |     if ($x is this::TFoo) {
+   |               ^^^^^^^^^^ [1]
+12 |       $this->f($x);
+13 |     }
+
+1 error found

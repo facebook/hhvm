@@ -1,4 +1,20 @@
-ERROR: File "bad_inout_use_lvalue6.php", line 15, characters 11-13:
-You cannot use this syntax with `inout`. (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue6.php", line 16, characters 11-13:
-You cannot use this syntax with `inout`. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax with `inout`. [1]
+
+bad_inout_use_lvalue6.php:15:11
+13 | 
+14 | function test(): void {
+15 |   f(inout g());
+   |           ^^^ [1]
+16 |   f(inout h()['foo']);
+17 | }
+
+error: Parsing[1002] You cannot use this syntax with `inout`. [1]
+
+bad_inout_use_lvalue6.php:16:11
+14 | function test(): void {
+15 |   f(inout g());
+16 |   f(inout h()['foo']);
+   |           ^^^ [1]
+17 | }
+
+2 errors found

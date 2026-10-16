@@ -1,2 +1,10 @@
-ERROR: File "tuple_order_bad.php", line 9, characters 22-23:
-There must be no required elements following an optional element (Parsing[1002])
+error: Parsing[1002] There must be no required elements following an optional element [1]
+
+tuple_order_bad.php:9:22
+ 7 |   (int, string) $t,
+ 8 | ): void {
+ 9 |   tuple(optional $a, $b) = $t;
+   |                      ^^ [1]
+10 | }
+
+1 error found

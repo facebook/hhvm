@@ -1,10 +1,31 @@
-ERROR: File "tuple4.php", line 6, characters 13-58:
-Invalid `is` expression hint (Typing[4195])
-  File "tuple4.php", line 6, characters 14-34:
-  The `is` operator cannot be used with a function type
-ERROR: File "tuple4.php", line 7, characters 7-8:
-Invalid argument (Typing[4110])
-  File "tuple4.php", line 3, characters 13-15:
-  Expected `int`
-  File "tuple4.php", line 3, characters 12-15:
-  But got `nonnull`
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a function type [2]
+
+tuple4.php:6:13
+4 | 
+5 | function f(mixed $x): void {
+6 |   if ($x is ((function(int): ?int), (function(int): ?int))) {
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |              ^^^^^^^^^^^^^^^^^^^^^ [2]
+7 |     g($x);
+8 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `nonnull` [3]
+
+tuple4.php:7:7
+1 | <?hh
+2 | 
+3 | function g(?int $x): void {}
+  |            ^^^^ [3]
+  |             ^^^ [2]
+4 | 
+5 | function f(mixed $x): void {
+6 |   if ($x is ((function(int): ?int), (function(int): ?int))) {
+7 |     g($x);
+  |       ^^ [1]
+8 |   }
+9 | }
+
+2 errors found

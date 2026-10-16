@@ -1,36 +1,147 @@
-ERROR: File "unpack_call11.php", line 32, characters 16-18:
-Invalid argument (Typing[4110])
-  File "unpack_call11.php", line 48, characters 26-26:
-  Expected `B`
-  File "unpack_call11.php", line 17, characters 28-28:
-  But got `A`
-ERROR: File "unpack_call11.php", line 33, characters 26-27:
-Invalid argument (Typing[4110])
-  File "unpack_call11.php", line 49, characters 32-33:
-  Expected `B` (variadic argument)
-  File "unpack_call11.php", line 15, characters 25-25:
-  But got `E`
-ERROR: File "unpack_call11.php", line 34, characters 35-36:
-Invalid argument (Typing[4110])
-  File "unpack_call11.php", line 49, characters 32-33:
-  Expected `B` (variadic argument)
-  File "unpack_call11.php", line 15, characters 25-25:
-  But got `E`
-ERROR: File "unpack_call11.php", line 35, characters 26-27:
-Invalid argument (Typing[4359])
-  File "unpack_call11.php", line 35, characters 26-27:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call11.php", line 51, characters 10-19:
-  Definition is here
-ERROR: File "unpack_call11.php", line 36, characters 26-28:
-Invalid argument (Typing[4110])
-  File "unpack_call11.php", line 52, characters 27-27:
-  Expected `C`
-  File "unpack_call11.php", line 20, characters 19-19:
-  But got `B`
-ERROR: File "unpack_call11.php", line 44, characters 26-27:
-Invalid argument (Typing[4110])
-  File "unpack_call11.php", line 49, characters 32-33:
-  Expected `B` (variadic argument)
-  File "unpack_call11.php", line 39, characters 24-24:
-  But got `E`
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `A` [3]
+
+unpack_call11.php:32:16
+15 |   $v = vec[new B(), new E()];
+16 | 
+17 |   $aa = tuple(new A(), new A());
+   |                            ^ [3]
+18 |   $ab = tuple(new A(), new B());
+19 |   $bb = tuple(new B(), new B());
+   :
+30 | 
+31 |   // Error
+32 |   expect_AB(...$aa);
+   |                ^^^ [1]
+33 |   expect_ABs(new A(), ...$v);
+34 |   expect_ABs(new A(), new B(), ...$v);
+   :
+46 | 
+47 | function expect_As(A ...$a): void {}
+48 | function expect_AB(A $a, B $b): void {}
+   |                          ^ [2]
+49 | function expect_ABs(A $a, B ...$b): void {}
+50 | function expect_ABBBBs(A $a, B $b1, B $b2, B $b3, B ...$b): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` (variadic argument) [2]
+-> But got `E` [3]
+
+unpack_call11.php:33:26
+13 |   $b = vec[new B(), new B()];
+14 |   $e = vec[new E(), new E()];
+15 |   $v = vec[new B(), new E()];
+   |                         ^ [3]
+16 | 
+17 |   $aa = tuple(new A(), new A());
+   :
+31 |   // Error
+32 |   expect_AB(...$aa);
+33 |   expect_ABs(new A(), ...$v);
+   |                          ^^ [1]
+34 |   expect_ABs(new A(), new B(), ...$v);
+35 |   expect_ABE(new A(), ...$v);
+   :
+47 | function expect_As(A ...$a): void {}
+48 | function expect_AB(A $a, B $b): void {}
+49 | function expect_ABs(A $a, B ...$b): void {}
+   |                                ^^ [2]
+50 | function expect_ABBBBs(A $a, B $b1, B $b2, B $b3, B ...$b): void {}
+51 | function expect_ABE(A $a, B $b, E $e): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` (variadic argument) [2]
+-> But got `E` [3]
+
+unpack_call11.php:34:35
+13 |   $b = vec[new B(), new B()];
+14 |   $e = vec[new E(), new E()];
+15 |   $v = vec[new B(), new E()];
+   |                         ^ [3]
+16 | 
+17 |   $aa = tuple(new A(), new A());
+   :
+32 |   expect_AB(...$aa);
+33 |   expect_ABs(new A(), ...$v);
+34 |   expect_ABs(new A(), new B(), ...$v);
+   |                                   ^^ [1]
+35 |   expect_ABE(new A(), ...$v);
+36 |   expect_ACD(new A(), ...$be);
+   :
+47 | function expect_As(A ...$a): void {}
+48 | function expect_AB(A $a, B $b): void {}
+49 | function expect_ABs(A $a, B ...$b): void {}
+   |                                ^^ [2]
+50 | function expect_ABBBBs(A $a, B $b1, B $b2, B $b3, B ...$b): void {}
+51 | function expect_ABE(A $a, B $b, E $e): void {}
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call11.php:35:26
+33 |   expect_ABs(new A(), ...$v);
+34 |   expect_ABs(new A(), new B(), ...$v);
+35 |   expect_ABE(new A(), ...$v);
+   |                          ^^ [1]
+36 |   expect_ACD(new A(), ...$be);
+37 | }
+   :
+49 | function expect_ABs(A $a, B ...$b): void {}
+50 | function expect_ABBBBs(A $a, B $b1, B $b2, B $b3, B ...$b): void {}
+51 | function expect_ABE(A $a, B $b, E $e): void {}
+   |          ^^^^^^^^^^ [2]
+52 | function expect_ACD(A $a, C $c, D $d): void {}
+53 | function expect_ACDs(A $a, C $c, D ...$d): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+-> But got `B` [3]
+
+unpack_call11.php:36:26
+18 |   $ab = tuple(new A(), new B());
+19 |   $bb = tuple(new B(), new B());
+20 |   $be = tuple(new B(), new E());
+   |                   ^ [3]
+21 |   $ee = tuple(new E(), new E());
+22 | 
+   :
+34 |   expect_ABs(new A(), new B(), ...$v);
+35 |   expect_ABE(new A(), ...$v);
+36 |   expect_ACD(new A(), ...$be);
+   |                          ^^^ [1]
+37 | }
+38 | 
+   :
+50 | function expect_ABBBBs(A $a, B $b1, B $b2, B $b3, B ...$b): void {}
+51 | function expect_ABE(A $a, B $b, E $e): void {}
+52 | function expect_ACD(A $a, C $c, D $d): void {}
+   |                           ^ [2]
+53 | function expect_ACDs(A $a, C $c, D ...$d): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` (variadic argument) [2]
+-> But got `E` [3]
+
+unpack_call11.php:44:26
+37 | }
+38 | 
+39 | function f(Traversable<E> $e): void {
+   |                        ^ [3]
+40 |   // OK
+41 |   expect_ACDs(new A(), new E(), ...$e);
+42 | 
+43 |   // Error
+44 |   expect_ABs(new A(), ...$e);
+   |                          ^^ [1]
+45 | }
+46 | 
+47 | function expect_As(A ...$a): void {}
+48 | function expect_AB(A $a, B $b): void {}
+49 | function expect_ABs(A $a, B ...$b): void {}
+   |                                ^^ [2]
+50 | function expect_ABBBBs(A $a, B $b1, B $b2, B $b3, B ...$b): void {}
+51 | function expect_ABE(A $a, B $b, E $e): void {}
+
+6 errors found

@@ -1,6 +1,20 @@
-ERROR: File "multiple_module_decls.php", line 5, characters 12-12:
-You cannot declare more than one module within a file (Parsing[1002])
-ERROR: File "multiple_module_decls.php", line 5, characters 12-12:
-Name already bound: `A` (Naming[2012])
-  File "multiple_module_decls.php", line 4, characters 12-12:
-  Previous definition is here
+error: Parsing[1002] You cannot declare more than one module within a file [1]
+
+multiple_module_decls.php:5:12
+3 | 
+4 | new module A {}
+5 | new module A {}
+  |            ^ [1]
+
+error: Naming[2012] Name already bound: `A` [1]
+-> Previous definition is here [2]
+
+multiple_module_decls.php:5:12
+2 | 
+3 | 
+4 | new module A {}
+  |            ^ [2]
+5 | new module A {}
+  |            ^ [1]
+
+2 errors found

@@ -1,2 +1,11 @@
-ERROR: File "obj_get_chained.php", line 13, characters 8-37:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+obj_get_chained.php:13:8
+11 | function qux(): void {
+12 |   $x = new Foo();
+13 |   $y = $x->bar()->bar()->bar()->baz<>;
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |   $y(4);
+15 | }
+
+1 error found

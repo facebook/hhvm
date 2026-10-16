@@ -1,1 +1,2 @@
 --require-types-class-consts 2
+--error-format plain_highlighted

@@ -1,16 +1,56 @@
-ERROR: File "multi_as_invoke_bad.php", line 24, characters 9-12:
-No instance method `Bong` in `I` (Typing[4053])
-  File "multi_as_invoke_bad.php", line 5, characters 19-21:
-  Did you mean `Foo` instead?
-  File "multi_as_invoke_bad.php", line 11, characters 19-19:
-  This is why I think it is an object of type I
-  File "multi_as_invoke_bad.php", line 4, characters 11-11:
-  Declaration of `I` is here
-ERROR: File "multi_as_invoke_bad.php", line 24, characters 9-12:
-No instance method `Bong` in `J` (Typing[4053])
-  File "multi_as_invoke_bad.php", line 8, characters 19-21:
-  Did you mean `Bar` instead?
-  File "multi_as_invoke_bad.php", line 11, characters 14-14:
-  This is why I think it is an object of type J
-  File "multi_as_invoke_bad.php", line 7, characters 11-11:
-  Declaration of `J` is here
+error: Typing[4053] No instance method `Bong` in `I` [1]
+-> Did you mean `Foo` instead? [2]
+-> This is why I think it is an object of type I [3]
+-> Declaration of `I` is here [4]
+
+multi_as_invoke_bad.php:24:9
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | interface I {
+   |           ^ [4]
+ 5 |   public function Foo(int $i): void;
+   |                   ^^^ [2]
+ 6 | }
+ 7 | interface J {
+ 8 |   public function Bar(string $s): void;
+ 9 | }
+10 | 
+11 | class C<T as J as I> {
+   |                   ^ [3]
+12 |   public function __construct(private T $item) {}
+13 |   public function CallFoo(I $x): void {
+   :
+22 |     $this->CallBar($x);
+23 |     $x->Foo(3);
+24 |     $x->Bong('a');
+   |         ^^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4053] No instance method `Bong` in `J` [1]
+-> Did you mean `Bar` instead? [2]
+-> This is why I think it is an object of type J [3]
+-> Declaration of `J` is here [4]
+
+multi_as_invoke_bad.php:24:9
+ 5 |   public function Foo(int $i): void;
+ 6 | }
+ 7 | interface J {
+   |           ^ [4]
+ 8 |   public function Bar(string $s): void;
+   |                   ^^^ [2]
+ 9 | }
+10 | 
+11 | class C<T as J as I> {
+   |              ^ [3]
+12 |   public function __construct(private T $item) {}
+13 |   public function CallFoo(I $x): void {
+   :
+22 |     $this->CallBar($x);
+23 |     $x->Foo(3);
+24 |     $x->Bong('a');
+   |         ^^^^ [1]
+25 |   }
+26 | }
+
+2 errors found

@@ -1,2 +1,10 @@
-ERROR: File "magic_unset.php", line 4, characters 3-32:
-Magic `__unset` methods are no longer supported (Parsing[1002])
+error: Parsing[1002] Magic `__unset` methods are no longer supported [1]
+
+magic_unset.php:4:3
+2 | 
+3 | class C {
+4 |   public function __unset():void {}
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

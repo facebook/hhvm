@@ -1,18 +1,61 @@
-ERROR: File "context_constants.php", line 16, characters 18-29:
-Invalid argument (Typing[4110])
-  File "context_constants.php", line 3, characters 21-23:
-  Expected `int`
-  File "context_constants.php", line 8, characters 10-13:
-  But got `?int`
-  File "context_constants.php", line 14, characters 7-18:
-  All the local information about `$this->value` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
-ERROR: File "context_constants.php", line 31, characters 18-29:
-Invalid argument (Typing[4110])
-  File "context_constants.php", line 3, characters 21-23:
-  Expected `int`
-  File "context_constants.php", line 24, characters 10-13:
-  But got `?int`
-  File "context_constants.php", line 30, characters 7-18:
-  All the local information about `$this->value` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$this->value` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+context_constants.php:16:18
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_int(int $_)[]: void {}
+   |                     ^^^ [2]
+ 4 | 
+ 5 | abstract class AbstractSubject {
+ 6 |   abstract const ctx CRun super [defaults];
+ 7 | 
+ 8 |   public ?int $value = 1;
+   |          ^^^^ [3]
+ 9 | 
+10 |   abstract public function run()[this::CRun]: void;
+11 | 
+12 |   public function callAbstract(): void {
+13 |     if ($this->value !== null) {
+14 |       $this->run();
+   |       ^^^^^^^^^^^^ [4]
+15 |       // Currently accepted even though a subclass may write properties.
+16 |       expect_int($this->value);
+   |                  ^^^^^^^^^^^^ [1]
+17 |     }
+18 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$this->value` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+context_constants.php:31:18
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_int(int $_)[]: void {}
+   |                     ^^^ [2]
+ 4 | 
+ 5 | abstract class AbstractSubject {
+   :
+22 |   const ctx CRun = [];
+23 | 
+24 |   public ?int $value = 1;
+   |          ^^^^ [3]
+25 | 
+26 |   public function run()[this::CRun]: void {}
+27 | 
+28 |   public function callPure(): void {
+29 |     if ($this->value !== null) {
+30 |       $this->run();
+   |       ^^^^^^^^^^^^ [4]
+31 |       expect_int($this->value);
+   |                  ^^^^^^^^^^^^ [1]
+32 |     }
+33 |   }
+
+2 errors found

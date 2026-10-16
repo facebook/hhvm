@@ -1,4 +1,17 @@
-WARN: File "dynamic.php", line 8, characters 3-4:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic.php", line 3, characters 18-24:
-  This expression has type `dynamic`
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic.php:8:3
+1 | <?hh
+2 | 
+3 | function f(inout dynamic $d): void {}
+  |                  ^^^^^^^ [2]
+4 | 
+5 | function test(): void {
+6 |   $m = 3;
+7 |   f(inout $m);
+8 |   $m[0];
+  |   ^^ [1]
+9 | }
+
+1 error found

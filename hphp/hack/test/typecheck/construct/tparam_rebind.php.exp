@@ -1,6 +1,22 @@
-ERROR: File "tparam_rebind.php", line 4, characters 26-26:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "tparam_rebind.php", line 3, characters 9-9:
-  `T` is already bound here
-ERROR: File "tparam_rebind.php", line 4, characters 19-24:
-Was expecting a return type hint (Typing[4030])
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+tparam_rebind.php:4:26
+1 | <?hh
+2 | 
+3 | class C<T> {
+  |         ^ [2]
+4 |   public function method<T>() {}
+  |                          ^ [1]
+5 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+tparam_rebind.php:4:19
+2 | 
+3 | class C<T> {
+4 |   public function method<T>() {}
+  |                   ^^^^^^ [1]
+5 | }
+
+2 errors found

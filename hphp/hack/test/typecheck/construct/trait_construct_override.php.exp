@@ -1,7 +1,29 @@
-WARN: File "trait_construct_override.php", line 10, characters 15-36:
-Invalid comparison: This expression will always return `true`.
-A value of type `string` can never be equal to a value of type `null` (Warn[12007])
-ERROR: File "trait_construct_override.php", line 17, characters 19-29:
-Class `MyChild` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "trait_construct_override.php", line 4, characters 20-26:
-  `$this->member` is not initialized.
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `string` can never be equal to a value of type `null` [1]
+
+trait_construct_override.php:10:15
+ 8 | 
+ 9 |   final public function say(): void {
+10 |     invariant($this->member !== null, 'bad');
+   |               ^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   }
+12 | }
+
+error: NastCheck[3015] Class `MyChild` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->member` is not initialized. [2]
+
+trait_construct_override.php:17:19
+ 2 | 
+ 3 | trait MyTrait {
+ 4 |   protected string $member;
+   |                    ^^^^^^^ [2]
+ 5 |   public function __construct(string $member) {
+ 6 |     $this->member = $member;
+   :
+15 |   use MyTrait;
+16 | 
+17 |   public function __construct() {}
+   |                   ^^^^^^^^^^^ [1]
+18 | }
+
+2 errors found

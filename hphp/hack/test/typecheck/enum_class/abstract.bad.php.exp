@@ -1,24 +1,89 @@
-ERROR: File "abstract.bad.php", line 16, characters 26-26:
-Some members in class `F` are incompatible with those declared in type `E` (Typing[4348])
-  File "abstract.bad.php", line 11, characters 12-12:
-  Expected `C`
-  File "abstract.bad.php", line 17, characters 3-3:
-  But got `D`
-ERROR: File "abstract.bad.php", line 23, characters 19-19:
-Constant `Y` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "abstract.bad.php", line 21, characters 12-12:
-  Or make the class abstract.
-ERROR: File "abstract.bad.php", line 30, characters 10-10:
-Cannot reference abstract constant `E::X` directly (Typing[4129])
-  File "abstract.bad.php", line 11, characters 14-14:
-  Declaration is here
-ERROR: File "abstract.bad.php", line 31, characters 10-10:
-Cannot reference abstract constant `G::Y` directly (Typing[4129])
-  File "abstract.bad.php", line 23, characters 19-19:
-  Declaration is here
-ERROR: File "abstract.bad.php", line 35, characters 12-12:
-This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
-  File "abstract.bad.php", line 35, characters 26-26:
-  `H` uses `E`
-  File "abstract.bad.php", line 11, characters 14-14:
-  The constant is defined here
+error: Typing[4348] Some members in class `F` are incompatible with those declared in type `E` [1]
+-> Expected `C` [2]
+-> But got `D` [3]
+
+abstract.bad.php:16:26
+ 9 | 
+10 | abstract enum class E : I {
+11 |   abstract C X;
+   |            ^ [2]
+12 |   D Y = new D();
+13 | }
+14 | 
+15 | // wrong type for abstract constant X
+16 | enum class F : I extends E {
+   |                          ^ [1]
+17 |   D X = new D();
+   |   ^ [3]
+18 | }
+19 | 
+
+error: Typing[4465] Constant `Y` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+abstract.bad.php:23:19
+19 | 
+20 | // abstract constant in concrete enum class
+21 | enum class G: mixed {
+   |            ^ [2]
+22 |   int X = 42;
+23 |   abstract string Y;
+   |                   ^ [1]
+24 | }
+25 | 
+
+error: Typing[4129] Cannot reference abstract constant `E::X` directly [1]
+-> Declaration is here [2]
+
+abstract.bad.php:30:10
+ 9 | 
+10 | abstract enum class E : I {
+11 |   abstract C X;
+   |              ^ [2]
+12 |   D Y = new D();
+13 | }
+   :
+28 | // accessing abstract constants
+29 | function test(): void {
+30 |   foo(E::X);
+   |          ^ [1]
+31 |   foo(G::Y);
+32 | }
+
+error: Typing[4129] Cannot reference abstract constant `G::Y` directly [1]
+-> Declaration is here [2]
+
+abstract.bad.php:31:10
+21 | enum class G: mixed {
+22 |   int X = 42;
+23 |   abstract string Y;
+   |                   ^ [2]
+24 | }
+25 | 
+   :
+29 | function test(): void {
+30 |   foo(E::X);
+31 |   foo(G::Y);
+   |          ^ [1]
+32 | }
+33 | 
+
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract constant `X` [1]
+-> `H` uses `E` [2]
+-> The constant is defined here [3]
+
+abstract.bad.php:35:12
+ 9 | 
+10 | abstract enum class E : I {
+11 |   abstract C X;
+   |              ^ [3]
+12 |   D Y = new D();
+13 | }
+   :
+33 | 
+34 | // missing constant initialization
+35 | enum class H : I extends E {}
+   |            ^ [1]
+   |                          ^ [2]
+
+5 errors found

@@ -1,18 +1,37 @@
-ERROR: File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch5.php", line 4, characters 17-21:
-  But got `bool`
-ERROR: File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch5.php", line 4, characters 24-28:
-  But got `bool`
-ERROR: File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch5.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch5.php", line 4, characters 31-34:
-  But got `bool`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `bool` [2]
+
+explicit_type_collection_mismatch5.php:4:12
+2 | 
+3 | function f(): void {
+4 |   $d = vec<int>[false, false, true];
+  |            ^^^ [1]
+  |                 ^^^^^ [2]
+5 | }
+
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `bool` [2]
+
+explicit_type_collection_mismatch5.php:4:12
+2 | 
+3 | function f(): void {
+4 |   $d = vec<int>[false, false, true];
+  |            ^^^ [1]
+  |                        ^^^^^ [2]
+5 | }
+
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `bool` [2]
+
+explicit_type_collection_mismatch5.php:4:12
+2 | 
+3 | function f(): void {
+4 |   $d = vec<int>[false, false, true];
+  |            ^^^ [1]
+  |                               ^^^^ [2]
+5 | }
+
+3 errors found

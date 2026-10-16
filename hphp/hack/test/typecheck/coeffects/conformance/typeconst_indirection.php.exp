@@ -1,9 +1,33 @@
-ERROR: File "typeconst_indirection.php", line 6, characters 31-72:
-Illegal context: `this::T::T`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "typeconst_indirection.php", line 6, characters 31-72:
-Illegal context: `this::T`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-ERROR: File "typeconst_indirection.php", line 12, characters 22-40:
-Illegal context: `this::Tc`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+error: NastCheck[3090] Illegal context: `this::T::T`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+typeconst_indirection.php:6:31
+4 |   abstract const ctx C;
+5 |   abstract const type T as A;
+6 |   public abstract function f()[this::C, this::T, this::T::C, this::T::T]: void;
+  |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: NastCheck[3090] Illegal context: `this::T`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+typeconst_indirection.php:6:31
+4 |   abstract const ctx C;
+5 |   abstract const type T as A;
+6 |   public abstract function f()[this::C, this::T, this::T::C, this::T::T]: void;
+  |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: NastCheck[3090] Illegal context: `this::Tc`
+Cannot use a context defined outside namespace \HH\Contexts [1]
+
+typeconst_indirection.php:12:22
+10 |   const ctx C = [];
+11 |   const type Tc = mixed;
+12 |   public function f()[this::C, this::Tc]: void {}
+   |                      ^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+
+3 errors found

@@ -1,4 +1,13 @@
-ERROR: File "bad_class.php", line 7, characters 40-43:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "bad_class.php", line 7, characters 36-38:
-  This is an object of type Bar
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type Bar [2]
+
+bad_class.php:7:40
+5 | class Foo {
+6 |   <<__Memoize>>
+7 |   public async function someMethod(Bar $arg): Awaitable<string> {
+  |                                    ^^^ [2]
+  |                                        ^^^^ [1]
+8 |     return "hello";
+9 |   }
+
+1 error found

@@ -1,12 +1,61 @@
-ERROR: File "position_bad.php", line 5, characters 40-41:
-A type specifier is expected here. (Parsing[1002])
-ERROR: File "position_bad.php", line 5, characters 40-41:
-Encountered unexpected text `$x`, was expecting a type hint. (Parsing[1002])
-ERROR: File "position_bad.php", line 16, characters 1-33:
-Declarations are not supported outside global scope (Parsing[1002])
-ERROR: File "position_bad.php", line 13, characters 35-36:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "position_bad.php", line 13, characters 38-38:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "position_bad.php", line 13, characters 38-38:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] A type specifier is expected here. [1]
+
+position_bad.php:5:40
+3 | 
+4 | // Forbidden: destructuring in function parameter position
+5 | function test_param_shape(shape('x' => $x) $s): void {}
+  |                                        ^^ [1]
+6 | 
+7 | function test_param_tuple(tuple($a, $b) $t): void {}
+
+error: Parsing[1002] Encountered unexpected text `$x`, was expecting a type hint. [1]
+
+position_bad.php:5:40
+3 | 
+4 | // Forbidden: destructuring in function parameter position
+5 | function test_param_shape(shape('x' => $x) $s): void {}
+  |                                        ^^ [1]
+6 | 
+7 | function test_param_tuple(tuple($a, $b) $t): void {}
+
+error: Parsing[1002] Declarations are not supported outside global scope [1]
+
+position_bad.php:16:1
+14 | }
+15 | 
+16 | function test_catch_tuple(): void {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   try {
+18 |     throw new Exception("test");
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+position_bad.php:13:35
+11 |   try {
+12 |     throw new Exception("test");
+13 |   } catch (Exception shape('x' => $x)) {}
+   |                                   ^^ [1]
+14 | }
+15 | 
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+position_bad.php:13:38
+11 |   try {
+12 |     throw new Exception("test");
+13 |   } catch (Exception shape('x' => $x)) {}
+   |                                      ^ [1]
+14 | }
+15 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+position_bad.php:13:38
+11 |   try {
+12 |     throw new Exception("test");
+13 |   } catch (Exception shape('x' => $x)) {}
+   |                                      ^ [1]
+14 | }
+15 | 
+
+6 errors found

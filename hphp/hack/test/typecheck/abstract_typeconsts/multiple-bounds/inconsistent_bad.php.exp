@@ -1,24 +1,79 @@
-ERROR: File "inconsistent_bad.php", line 23, characters 12-13:
-Invalid argument (Typing[4110])
-  File "inconsistent_bad.php", line 16, characters 29-36:
-  Expected `UpperOne`
-  File "inconsistent_bad.php", line 16, characters 71-78:
-  But got `LowerTwo`
-ERROR: File "inconsistent_bad.php", line 23, characters 12-13:
-Invalid argument (Typing[4110])
-  File "inconsistent_bad.php", line 16, characters 41-48:
-  Expected `UpperTwo`
-  File "inconsistent_bad.php", line 16, characters 56-63:
-  But got `LowerOne`
-ERROR: File "inconsistent_bad.php", line 23, characters 12-13:
-Invalid argument (Typing[4110])
-  File "inconsistent_bad.php", line 28, characters 13-20:
-  Expected `UpperOne`
-  File "inconsistent_bad.php", line 28, characters 52-59:
-  But got `LowerTwo`
-ERROR: File "inconsistent_bad.php", line 23, characters 12-13:
-Invalid argument (Typing[4110])
-  File "inconsistent_bad.php", line 28, characters 24-31:
-  Expected `UpperTwo`
-  File "inconsistent_bad.php", line 28, characters 41-48:
-  But got `LowerOne`
+error: Typing[4110] Invalid argument [1]
+-> Expected `UpperOne` [2]
+-> But got `LowerTwo` [3]
+
+inconsistent_bad.php:23:12
+14 | 
+15 | abstract class Home {
+16 |   abstract const type TA as UpperOne as UpperTwo super LowerOne super LowerTwo;
+   |                             ^^^^^^^^ [2]
+   |                                                                       ^^^^^^^^ [3]
+17 | 
+18 |   public function check(this::TA $_): void {}
+   :
+21 | function refIt(): void {
+22 |   $f = meth_caller(Home::class, 'check');
+23 |   takes_it($f);
+   |            ^^ [1]
+24 | }
+25 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `UpperTwo` [2]
+-> But got `LowerOne` [3]
+
+inconsistent_bad.php:23:12
+14 | 
+15 | abstract class Home {
+16 |   abstract const type TA as UpperOne as UpperTwo super LowerOne super LowerTwo;
+   |                                         ^^^^^^^^ [2]
+   |                                                        ^^^^^^^^ [3]
+17 | 
+18 |   public function check(this::TA $_): void {}
+   :
+21 | function refIt(): void {
+22 |   $f = meth_caller(Home::class, 'check');
+23 |   takes_it($f);
+   |            ^^ [1]
+24 | }
+25 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `UpperOne` [2]
+-> But got `LowerTwo` [3]
+
+inconsistent_bad.php:23:12
+21 | function refIt(): void {
+22 |   $f = meth_caller(Home::class, 'check');
+23 |   takes_it($f);
+   |            ^^ [1]
+24 | }
+25 | 
+26 | function takes_it(
+27 |   HH\FunctionRef<(readonly function<
+28 |     TA1 as (UpperOne & UpperTwo) super (LowerOne | LowerTwo),
+   |             ^^^^^^^^ [2]
+   |                                                    ^^^^^^^^ [3]
+29 |   >(Home with { type TA = TA1 }, TA1): void)> $_,
+30 | ): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `UpperTwo` [2]
+-> But got `LowerOne` [3]
+
+inconsistent_bad.php:23:12
+21 | function refIt(): void {
+22 |   $f = meth_caller(Home::class, 'check');
+23 |   takes_it($f);
+   |            ^^ [1]
+24 | }
+25 | 
+26 | function takes_it(
+27 |   HH\FunctionRef<(readonly function<
+28 |     TA1 as (UpperOne & UpperTwo) super (LowerOne | LowerTwo),
+   |                        ^^^^^^^^ [2]
+   |                                         ^^^^^^^^ [3]
+29 |   >(Home with { type TA = TA1 }, TA1): void)> $_,
+30 | ): void {}
+
+4 errors found

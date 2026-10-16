@@ -1,40 +1,201 @@
-ERROR: File "test_singleton_write_collection.php", line 25, characters 18-34:
-[Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 25, characters 18-34:
-[Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 28, characters 7-38:
-[Foo::get_dict_value]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_write_collection.php", line 30, characters 12-17:
-[Foo::get_dict_value]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 34, characters 32-48:
-[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 34, characters 32-48:
-[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 35, characters 7-41:
-[Foo::get_dict_value2]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_write_collection.php", line 37, characters 12-28:
-[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 37, characters 12-34:
-[Foo::get_dict_value2]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 41, characters 14-32:
-[Foo::get_shape_value]{Foo::$static_shape}(shape('field1' => ?Bar, 'field2' => ?Bar)) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 44, characters 7-44:
-[Foo::get_shape_value]{Foo::$static_shape}(Bar)<Caching> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_write_collection.php", line 46, characters 12-17:
-[Foo::get_shape_value]{Foo::$static_shape}(Bar) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 50, characters 29-45:
-[Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 50, characters 29-45:
-[Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 53, characters 7-38:
-[Foo::get_dict_value_3]{Foo::$static_dic}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_write_collection.php", line 59, characters 40-56:
-[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 59, characters 40-56:
-[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-ERROR: File "test_singleton_write_collection.php", line 62, characters 7-41:
-[Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_write_collection.php", line 64, characters 12-28:
-[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_write_collection.php", line 64, characters 12-34:
-[Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. (Other[11003])
+error: Other[11004] [Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:25:18
+23 | 
+24 |   public static function get_dict_value(string $key): Bar {
+25 |     $value = idx(self::$static_dic, $key);
+   |                  ^^^^^^^^^^^^^^^^^ [1]
+26 |     if ($value === null) {
+27 |       $value = new Bar();
+
+error: Other[11003] [Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:25:18
+23 | 
+24 |   public static function get_dict_value(string $key): Bar {
+25 |     $value = idx(self::$static_dic, $key);
+   |                  ^^^^^^^^^^^^^^^^^ [1]
+26 |     if ($value === null) {
+27 |       $value = new Bar();
+
+error: Other[11001] [Foo::get_dict_value]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. [1]
+
+test_singleton_write_collection.php:28:7
+26 |     if ($value === null) {
+27 |       $value = new Bar();
+28 |       self::$static_dic[$key] = $value; // Caching
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |     }
+30 |     return $value;
+
+error: Other[11003] [Foo::get_dict_value]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:30:12
+28 |       self::$static_dic[$key] = $value; // Caching
+29 |     }
+30 |     return $value;
+   |            ^^^^^^ [1]
+31 |   }
+32 | 
+
+error: Other[11004] [Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:34:32
+32 | 
+33 |   public static function get_dict_value2(string $key): Bar {
+34 |     if (!HH\Lib\C\contains_key(self::$static_dic, $key)) {
+   |                                ^^^^^^^^^^^^^^^^^ [1]
+35 |       self::$static_dic[$key] = new Bar();  // Caching
+36 |     }
+
+error: Other[11003] [Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:34:32
+32 | 
+33 |   public static function get_dict_value2(string $key): Bar {
+34 |     if (!HH\Lib\C\contains_key(self::$static_dic, $key)) {
+   |                                ^^^^^^^^^^^^^^^^^ [1]
+35 |       self::$static_dic[$key] = new Bar();  // Caching
+36 |     }
+
+error: Other[11001] [Foo::get_dict_value2]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. [1]
+
+test_singleton_write_collection.php:35:7
+33 |   public static function get_dict_value2(string $key): Bar {
+34 |     if (!HH\Lib\C\contains_key(self::$static_dic, $key)) {
+35 |       self::$static_dic[$key] = new Bar();  // Caching
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+36 |     }
+37 |     return self::$static_dic[$key];
+
+error: Other[11004] [Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:37:12
+35 |       self::$static_dic[$key] = new Bar();  // Caching
+36 |     }
+37 |     return self::$static_dic[$key];
+   |            ^^^^^^^^^^^^^^^^^ [1]
+38 |   }
+39 | 
+
+error: Other[11003] [Foo::get_dict_value2]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:37:12
+35 |       self::$static_dic[$key] = new Bar();  // Caching
+36 |     }
+37 |     return self::$static_dic[$key];
+   |            ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+38 |   }
+39 | 
+
+error: Other[11004] [Foo::get_shape_value]{Foo::$static_shape}(shape('field1' => ?Bar, 'field2' => ?Bar)) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:41:14
+39 | 
+40 |   public static function get_shape_value(): Bar {
+41 |     $value = self::$static_shape["field1"];
+   |              ^^^^^^^^^^^^^^^^^^^ [1]
+42 |     if ($value === null) {
+43 |       $value = new Bar();
+
+error: Other[11001] [Foo::get_shape_value]{Foo::$static_shape}(Bar)<Caching> A global variable is definitely written. [1]
+
+test_singleton_write_collection.php:44:7
+42 |     if ($value === null) {
+43 |       $value = new Bar();
+44 |       self::$static_shape["field1"] = $value; // Caching
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+45 |     }
+46 |     return $value;
+
+error: Other[11003] [Foo::get_shape_value]{Foo::$static_shape}(Bar) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:46:12
+44 |       self::$static_shape["field1"] = $value; // Caching
+45 |     }
+46 |     return $value;
+   |            ^^^^^^ [1]
+47 |   }
+48 | 
+
+error: Other[11004] [Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:50:29
+48 | 
+49 |   public static function get_dict_value_3(string $key): Bar {
+50 |     $value = arbitrary_func(self::$static_dic, $key);
+   |                             ^^^^^^^^^^^^^^^^^ [1]
+51 |     if ($value === null) {
+52 |       $value = new Bar();
+
+error: Other[11003] [Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:50:29
+48 | 
+49 |   public static function get_dict_value_3(string $key): Bar {
+50 |     $value = arbitrary_func(self::$static_dic, $key);
+   |                             ^^^^^^^^^^^^^^^^^ [1]
+51 |     if ($value === null) {
+52 |       $value = new Bar();
+
+error: Other[11001] [Foo::get_dict_value_3]{Foo::$static_dic}(Bar) A global variable is definitely written. [1]
+
+test_singleton_write_collection.php:53:7
+51 |     if ($value === null) {
+52 |       $value = new Bar();
+53 |       self::$static_dic[$key] = $value; // Not caching
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+54 |     }
+55 |     return $value;
+
+error: Other[11004] [Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:59:40
+57 | 
+58 |   public static function get_dict_value_4(string $key): Bar {
+59 |     $exist_key = HH\Lib\C\contains_key(self::$static_dic, $key);
+   |                                        ^^^^^^^^^^^^^^^^^ [1]
+60 | 
+61 |     if (!$exist_key) {
+
+error: Other[11003] [Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:59:40
+57 | 
+58 |   public static function get_dict_value_4(string $key): Bar {
+59 |     $exist_key = HH\Lib\C\contains_key(self::$static_dic, $key);
+   |                                        ^^^^^^^^^^^^^^^^^ [1]
+60 | 
+61 |     if (!$exist_key) {
+
+error: Other[11001] [Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is definitely written. [1]
+
+test_singleton_write_collection.php:62:7
+60 | 
+61 |     if (!$exist_key) {
+62 |       self::$static_dic[$key] = new Bar();  // FN: caching not recognized
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+63 |     }
+64 |     return self::$static_dic[$key];
+
+error: Other[11004] [Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. [1]
+
+test_singleton_write_collection.php:64:12
+62 |       self::$static_dic[$key] = new Bar();  // FN: caching not recognized
+63 |     }
+64 |     return self::$static_dic[$key];
+   |            ^^^^^^^^^^^^^^^^^ [1]
+65 |   }
+66 | }
+
+error: Other[11003] [Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. [1]
+
+test_singleton_write_collection.php:64:12
+62 |       self::$static_dic[$key] = new Bar();  // FN: caching not recognized
+63 |     }
+64 |     return self::$static_dic[$key];
+   |            ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+65 |   }
+66 | }
+
+20 errors found

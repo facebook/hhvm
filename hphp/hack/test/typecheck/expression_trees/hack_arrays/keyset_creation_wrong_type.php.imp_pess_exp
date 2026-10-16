@@ -1,30 +1,111 @@
-ERROR: File "keyset_creation_wrong_type.php", line 8, characters 15-17:
-Invalid argument (Typing[4110])
-  File "keyset_creation_wrong_type.php", line 7, characters 18-27:
-  Expected `int`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
-ERROR: File "keyset_creation_wrong_type.php", line 8, characters 20-22:
-Invalid argument (Typing[4110])
-  File "keyset_creation_wrong_type.php", line 7, characters 18-27:
-  Expected `int`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
-ERROR: File "keyset_creation_wrong_type.php", line 15, characters 18-20:
-Invalid argument (Typing[4110])
-  File "keyset_creation_wrong_type.php", line 14, characters 18-27:
-  Expected `int`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
-ERROR: File "keyset_creation_wrong_type.php", line 22, characters 15-15:
-Invalid argument (Typing[4110])
-  File "keyset_creation_wrong_type.php", line 21, characters 18-30:
-  Expected `string`
-  File "expr_tree.php", line 155, characters 39-41:
-  But got `int`
-ERROR: File "keyset_creation_wrong_type.php", line 22, characters 18-18:
-Invalid argument (Typing[4110])
-  File "keyset_creation_wrong_type.php", line 21, characters 18-30:
-  Expected `string`
-  File "expr_tree.php", line 155, characters 39-41:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+keyset_creation_wrong_type.php:8:15
+  5 | function test_keyset_wrong_element_type(): void {
+  6 |   ExampleDsl`{
+  7 |     $f = (keyset<ExampleInt> $v) ==> 3;
+    |                  ^^^^^^^^^^ [2]
+  8 |     $f(keyset["a", "b"]);
+    |               ^^^ [1]
+  9 |   }`;
+ 10 | }
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+keyset_creation_wrong_type.php:8:20
+  5 | function test_keyset_wrong_element_type(): void {
+  6 |   ExampleDsl`{
+  7 |     $f = (keyset<ExampleInt> $v) ==> 3;
+    |                  ^^^^^^^^^^ [2]
+  8 |     $f(keyset["a", "b"]);
+    |                    ^^^ [1]
+  9 |   }`;
+ 10 | }
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+keyset_creation_wrong_type.php:15:18
+ 12 | function test_keyset_mixed_element_types(): void {
+ 13 |   ExampleDsl`{
+ 14 |     $f = (keyset<ExampleInt> $v) ==> 3;
+    |                  ^^^^^^^^^^ [2]
+ 15 |     $f(keyset[1, "a"]);
+    |                  ^^^ [1]
+ 16 |   }`;
+ 17 | }
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+keyset_creation_wrong_type.php:22:15
+ 19 | function test_keyset_string_wrong_element_type(): void {
+ 20 |   ExampleDsl`{
+ 21 |     $f = (keyset<ExampleString> $v) ==> 3;
+    |                  ^^^^^^^^^^^^^ [2]
+ 22 |     $f(keyset[1, 2]);
+    |               ^ [1]
+ 23 |   }`;
+ 24 | }
+
+expr_tree.php:155:39
+153 |   // in the virtualized version of the expression tree, to work out the virtual type
+154 |   // of literals during type checking.
+155 |   public static function intType()[]: int {
+    |                                       ^^^ [3]
+156 |     throw new Exception();
+157 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+keyset_creation_wrong_type.php:22:18
+ 19 | function test_keyset_string_wrong_element_type(): void {
+ 20 |   ExampleDsl`{
+ 21 |     $f = (keyset<ExampleString> $v) ==> 3;
+    |                  ^^^^^^^^^^^^^ [2]
+ 22 |     $f(keyset[1, 2]);
+    |                  ^ [1]
+ 23 |   }`;
+ 24 | }
+
+expr_tree.php:155:39
+153 |   // in the virtualized version of the expression tree, to work out the virtual type
+154 |   // of literals during type checking.
+155 |   public static function intType()[]: int {
+    |                                       ^^^ [3]
+156 |     throw new Exception();
+157 |   }
+
+5 errors found

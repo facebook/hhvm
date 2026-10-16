@@ -1,4 +1,19 @@
-ERROR: File "reified_generic_static_const.php", line 9, characters 3-7:
-Cannot access static properties on reified generics (Typing[4346])
-ERROR: File "reified_generic_static_const.php", line 9, characters 6-7:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4346] Cannot access static properties on reified generics [1]
+
+reified_generic_static_const.php:9:3
+ 7 | 
+ 8 | function f<reify T as MyTest>(): void {
+ 9 |   T::$i = 5; // should error
+   |   ^^^^^ [1]
+10 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+reified_generic_static_const.php:9:6
+ 7 | 
+ 8 | function f<reify T as MyTest>(): void {
+ 9 |   T::$i = 5; // should error
+   |      ^^ [1]
+10 | }
+
+2 errors found

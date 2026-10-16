@@ -1,10 +1,23 @@
-ERROR: File "gen5.php", line 22, characters 17-20:
-Some type arguments violate their constraints (Typing[4323])
-  File "gen5.php", line 12, characters 9-9:
-  `T` is a constrained type parameter
-  File "gen5.php", line 12, characters 14-14:
-  This type constraint is violated
-  File "gen5.php", line 12, characters 14-14:
-  Expected `B`
-  File "gen5.php", line 22, characters 19-19:
-  But got `Z`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `B` [3]
+-> But got `Z` [4]
+
+gen5.php:22:17
+10 |  */
+11 | 
+12 | class A<T as B> {
+   |         ^ [2]
+   |              ^ [3]
+13 |   public function bar(T $x): T { return $x; }
+14 | 
+   :
+20 | }
+21 | 
+22 | class B extends A<Z> {
+   |                 ^^^^ [1]
+   |                   ^ [4]
+23 | }
+
+1 error found

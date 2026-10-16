@@ -1,10 +1,48 @@
-ERROR: File "unset_const.php", line 11, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
-ERROR: File "unset_const.php", line 12, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
-ERROR: File "unset_const.php", line 13, characters 9-13:
-You cannot use this syntax in an `unset()` expression. (Parsing[1002])
-ERROR: File "unset_const.php", line 13, characters 9-13:
-Cannot use `[]` for reading (NastCheck[3047])
-ERROR: File "unset_const.php", line 13, characters 3-17:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
+error: Parsing[1002] You cannot use this syntax in an `unset()` expression. [1]
+
+unset_const.php:11:9
+ 9 | <<__EntryPoint>>
+10 | function mutate_const():void {
+11 |   unset(A::C2[2][4]);
+   |         ^^^^^ [1]
+12 |   unset(A::C1[2]);
+13 |   unset(A::C1[]);
+
+error: Parsing[1002] You cannot use this syntax in an `unset()` expression. [1]
+
+unset_const.php:12:9
+10 | function mutate_const():void {
+11 |   unset(A::C2[2][4]);
+12 |   unset(A::C1[2]);
+   |         ^^^^^ [1]
+13 |   unset(A::C1[]);
+14 | }
+
+error: Parsing[1002] You cannot use this syntax in an `unset()` expression. [1]
+
+unset_const.php:13:9
+11 |   unset(A::C2[2][4]);
+12 |   unset(A::C1[2]);
+13 |   unset(A::C1[]);
+   |         ^^^^^ [1]
+14 | }
+
+error: NastCheck[3047] Cannot use `[]` for reading [1]
+
+unset_const.php:13:9
+11 |   unset(A::C2[2][4]);
+12 |   unset(A::C1[2]);
+13 |   unset(A::C1[]);
+   |         ^^^^^ [1]
+14 | }
+
+error: Typing[4135] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing [1]
+
+unset_const.php:13:3
+11 |   unset(A::C2[2][4]);
+12 |   unset(A::C1[2]);
+13 |   unset(A::C1[]);
+   |   ^^^^^^^^^^^^^^^ [1]
+14 | }
+
+5 errors found

@@ -1,10 +1,46 @@
-ERROR: File "global_constant_attribute.php", line 3, characters 19-30:
-Attribute arguments must be literals (Parsing[1002])
-ERROR: File "global_constant_attribute.php", line 3, characters 3-13:
-Unbound name: `MyAttribute` (an object type) (Naming[2049])
-ERROR: File "global_constant_attribute.php", line 3, characters 3-13:
-Unrecognized user attribute: `MyAttribute` does not have a class. Please declare a class for the attribute. (Naming[2049])
-ERROR: File "global_constant_attribute.php", line 3, characters 19-30:
-Unbound name: `GLOBAL_CONST` (a global constant) (Naming[2049])
-ERROR: File "global_constant_attribute.php", line 3, characters 19-30:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Attribute arguments must be literals [1]
+
+global_constant_attribute.php:3:19
+1 | <?hh
+2 | 
+3 | <<MyAttribute(13, GLOBAL_CONST)>>
+  |                   ^^^^^^^^^^^^ [1]
+4 | class X {}
+
+error: Naming[2049] Unbound name: `MyAttribute` (an object type) [1]
+
+global_constant_attribute.php:3:3
+1 | <?hh
+2 | 
+3 | <<MyAttribute(13, GLOBAL_CONST)>>
+  |   ^^^^^^^^^^^ [1]
+4 | class X {}
+
+error: Naming[2049] Unrecognized user attribute: `MyAttribute` does not have a class. Please declare a class for the attribute. [1]
+
+global_constant_attribute.php:3:3
+1 | <?hh
+2 | 
+3 | <<MyAttribute(13, GLOBAL_CONST)>>
+  |   ^^^^^^^^^^^ [1]
+4 | class X {}
+
+error: Naming[2049] Unbound name: `GLOBAL_CONST` (a global constant) [1]
+
+global_constant_attribute.php:3:19
+1 | <?hh
+2 | 
+3 | <<MyAttribute(13, GLOBAL_CONST)>>
+  |                   ^^^^^^^^^^^^ [1]
+4 | class X {}
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+global_constant_attribute.php:3:19
+1 | <?hh
+2 | 
+3 | <<MyAttribute(13, GLOBAL_CONST)>>
+  |                   ^^^^^^^^^^^^ [1]
+4 | class X {}
+
+5 errors found

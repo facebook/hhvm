@@ -1,4 +1,18 @@
-ERROR: File "require_as.php", line 5, characters 8-8:
-Context X must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-ERROR: File "require_as.php", line 6, characters 8-8:
-Context Y must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
+error: Parsing[1002] Context X must declare a context constraint e.g. `as [write_props]` [1]
+
+require_as.php:5:8
+3 | <<file:__EnableUnstableFeatures('context_alias_declaration','context_alias_declaration_short')>>
+4 | 
+5 | newctx X;
+  |        ^ [1]
+6 | newctx Y = [];
+
+error: Parsing[1002] Context Y must declare a context constraint e.g. `as [write_props]` [1]
+
+require_as.php:6:8
+4 | 
+5 | newctx X;
+6 | newctx Y = [];
+  |        ^ [1]
+
+2 errors found

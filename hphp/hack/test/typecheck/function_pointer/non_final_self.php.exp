@@ -1,2 +1,11 @@
-ERROR: File "non_final_self.php", line 15, characters 5-8:
-Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Foo::foo` instead (Naming[2113])
+error: Naming[2113] Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Foo::foo` instead [1]
+
+non_final_self.php:15:5
+13 | class Foo extends BaseClass {
+14 |   public static function bar(): void {
+15 |     self::foo<>;
+   |     ^^^^ [1]
+16 |   }
+17 | }
+
+1 error found

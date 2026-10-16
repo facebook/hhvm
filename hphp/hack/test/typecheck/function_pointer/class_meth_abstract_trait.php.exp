@@ -1,12 +1,52 @@
-ERROR: File "class_meth_abstract_trait.php", line 8, characters 8-10:
-Cannot create a function pointer to `Foo::bar`; it is abstract (Typing[4391])
-  File "class_meth_abstract_trait.php", line 4, characters 35-37:
-  Declaration is here
-ERROR: File "class_meth_abstract_trait.php", line 10, characters 8-10:
-Cannot create a function pointer to `Foo::bar`; it is abstract (Typing[4391])
-  File "class_meth_abstract_trait.php", line 4, characters 35-37:
-  Declaration is here
-ERROR: File "class_meth_abstract_trait.php", line 12, characters 8-10:
-Cannot create a function pointer to `Foo::bar`; it is abstract (Typing[4391])
-  File "class_meth_abstract_trait.php", line 4, characters 35-37:
-  Declaration is here
+error: Typing[4391] Cannot create a function pointer to `Foo::bar`; it is abstract [1]
+-> Declaration is here [2]
+
+class_meth_abstract_trait.php:8:8
+ 2 | 
+ 3 | trait Foo {
+ 4 |   public abstract static function bar(): void;
+   |                                   ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | function test(): void {
+ 8 |   Foo::bar<>;
+   |        ^^^ [1]
+ 9 | 
+10 |   Foo::bar<>;
+
+error: Typing[4391] Cannot create a function pointer to `Foo::bar`; it is abstract [1]
+-> Declaration is here [2]
+
+class_meth_abstract_trait.php:10:8
+ 2 | 
+ 3 | trait Foo {
+ 4 |   public abstract static function bar(): void;
+   |                                   ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | function test(): void {
+ 8 |   Foo::bar<>;
+ 9 | 
+10 |   Foo::bar<>;
+   |        ^^^ [1]
+11 | 
+12 |   Foo::bar<>;
+
+error: Typing[4391] Cannot create a function pointer to `Foo::bar`; it is abstract [1]
+-> Declaration is here [2]
+
+class_meth_abstract_trait.php:12:8
+ 2 | 
+ 3 | trait Foo {
+ 4 |   public abstract static function bar(): void;
+   |                                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+10 |   Foo::bar<>;
+11 | 
+12 |   Foo::bar<>;
+   |        ^^^ [1]
+13 | }
+
+3 errors found

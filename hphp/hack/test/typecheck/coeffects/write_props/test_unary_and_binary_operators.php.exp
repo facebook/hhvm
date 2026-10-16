@@ -1,113 +1,461 @@
-ERROR: File "test_unary_and_binary_operators.php", line 15, characters 3-18:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 16, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 17, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 18, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 19, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 20, characters 3-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 21, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 22, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 23, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 24, characters 3-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 25, characters 3-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 26, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 27, characters 3-28:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 28, characters 3-30:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 29, characters 3-29:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 30, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 31, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 32, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 33, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "test_unary_and_binary_operators.php", line 15, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 16, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 17, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 18, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 19, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 20, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 21, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 22, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 23, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 24, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 25, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 26, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 27, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 28, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "test_unary_and_binary_operators.php", line 29, characters 3-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "test_unary_and_binary_operators.php", line 14, characters 31-32:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:15:3
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+15 |   $x->prop_int = 4;
+   |   ^^^^^^^^^^^^^^^^ [1]
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:16:3
+14 | function pure_function(Foo $x)[] : void {
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:17:3
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+18 |   $x->prop_int *= 4;
+19 |   $x->prop_num /= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:18:3
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+19 |   $x->prop_num /= 4;
+20 |   $x->prop_num **= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:19:3
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+19 |   $x->prop_num /= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+20 |   $x->prop_num **= 4;
+21 |   $x->prop_int %= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:20:3
+18 |   $x->prop_int *= 4;
+19 |   $x->prop_num /= 4;
+20 |   $x->prop_num **= 4;
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+21 |   $x->prop_int %= 4;
+22 |   $x->prop_int &= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:21:3
+19 |   $x->prop_num /= 4;
+20 |   $x->prop_num **= 4;
+21 |   $x->prop_int %= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+22 |   $x->prop_int &= 4;
+23 |   $x->prop_int |= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:22:3
+20 |   $x->prop_num **= 4;
+21 |   $x->prop_int %= 4;
+22 |   $x->prop_int &= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+23 |   $x->prop_int |= 4;
+24 |   $x->prop_int <<= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:23:3
+21 |   $x->prop_int %= 4;
+22 |   $x->prop_int &= 4;
+23 |   $x->prop_int |= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+24 |   $x->prop_int <<= 4;
+25 |   $x->prop_int >>= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:24:3
+22 |   $x->prop_int &= 4;
+23 |   $x->prop_int |= 4;
+24 |   $x->prop_int <<= 4;
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+25 |   $x->prop_int >>= 4;
+26 |   $x->prop_int ^= 4;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:25:3
+23 |   $x->prop_int |= 4;
+24 |   $x->prop_int <<= 4;
+25 |   $x->prop_int >>= 4;
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+26 |   $x->prop_int ^= 4;
+27 |   $x->prop_str ??= 'default';
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:26:3
+24 |   $x->prop_int <<= 4;
+25 |   $x->prop_int >>= 4;
+26 |   $x->prop_int ^= 4;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+27 |   $x->prop_str ??= 'default';
+28 |   $x->prop_str ??= "some text";
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:27:3
+25 |   $x->prop_int >>= 4;
+26 |   $x->prop_int ^= 4;
+27 |   $x->prop_str ??= 'default';
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 |   $x->prop_str ??= "some text";
+29 |   $x->prop_str .= 'more text';
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:28:3
+26 |   $x->prop_int ^= 4;
+27 |   $x->prop_str ??= 'default';
+28 |   $x->prop_str ??= "some text";
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |   $x->prop_str .= 'more text';
+30 |   $x->prop_int++;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:29:3
+27 |   $x->prop_str ??= 'default';
+28 |   $x->prop_str ??= "some text";
+29 |   $x->prop_str .= 'more text';
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |   $x->prop_int++;
+31 |   $x->prop_int--;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:30:3
+28 |   $x->prop_str ??= "some text";
+29 |   $x->prop_str .= 'more text';
+30 |   $x->prop_int++;
+   |   ^^^^^^^^^^^^^^ [1]
+31 |   $x->prop_int--;
+32 |   ++$x->prop_int;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:31:3
+29 |   $x->prop_str .= 'more text';
+30 |   $x->prop_int++;
+31 |   $x->prop_int--;
+   |   ^^^^^^^^^^^^^^ [1]
+32 |   ++$x->prop_int;
+33 |   --$x->prop_int;
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:32:3
+30 |   $x->prop_int++;
+31 |   $x->prop_int--;
+32 |   ++$x->prop_int;
+   |   ^^^^^^^^^^^^^^ [1]
+33 |   --$x->prop_int;
+34 | }
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+test_unary_and_binary_operators.php:33:3
+31 |   $x->prop_int--;
+32 |   ++$x->prop_int;
+33 |   --$x->prop_int;
+   |   ^^^^^^^^^^^^^^ [1]
+34 | }
+35 | 
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:15:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+   |   ^^^^^^^^^^^^ [1]
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:16:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   |   ^^^^^^^^^^^^ [1]
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:17:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+   |   ^^^^^^^^^^^^ [1]
+18 |   $x->prop_int *= 4;
+19 |   $x->prop_num /= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:18:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+   |   ^^^^^^^^^^^^ [1]
+19 |   $x->prop_num /= 4;
+20 |   $x->prop_num **= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:19:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+19 |   $x->prop_num /= 4;
+   |   ^^^^^^^^^^^^ [1]
+20 |   $x->prop_num **= 4;
+21 |   $x->prop_int %= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:20:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+17 |   $x->prop_int -= 4;
+18 |   $x->prop_int *= 4;
+19 |   $x->prop_num /= 4;
+20 |   $x->prop_num **= 4;
+   |   ^^^^^^^^^^^^ [1]
+21 |   $x->prop_int %= 4;
+22 |   $x->prop_int &= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:21:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+19 |   $x->prop_num /= 4;
+20 |   $x->prop_num **= 4;
+21 |   $x->prop_int %= 4;
+   |   ^^^^^^^^^^^^ [1]
+22 |   $x->prop_int &= 4;
+23 |   $x->prop_int |= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:22:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+20 |   $x->prop_num **= 4;
+21 |   $x->prop_int %= 4;
+22 |   $x->prop_int &= 4;
+   |   ^^^^^^^^^^^^ [1]
+23 |   $x->prop_int |= 4;
+24 |   $x->prop_int <<= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:23:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+21 |   $x->prop_int %= 4;
+22 |   $x->prop_int &= 4;
+23 |   $x->prop_int |= 4;
+   |   ^^^^^^^^^^^^ [1]
+24 |   $x->prop_int <<= 4;
+25 |   $x->prop_int >>= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:24:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+22 |   $x->prop_int &= 4;
+23 |   $x->prop_int |= 4;
+24 |   $x->prop_int <<= 4;
+   |   ^^^^^^^^^^^^ [1]
+25 |   $x->prop_int >>= 4;
+26 |   $x->prop_int ^= 4;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:25:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+23 |   $x->prop_int |= 4;
+24 |   $x->prop_int <<= 4;
+25 |   $x->prop_int >>= 4;
+   |   ^^^^^^^^^^^^ [1]
+26 |   $x->prop_int ^= 4;
+27 |   $x->prop_str ??= 'default';
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:26:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+24 |   $x->prop_int <<= 4;
+25 |   $x->prop_int >>= 4;
+26 |   $x->prop_int ^= 4;
+   |   ^^^^^^^^^^^^ [1]
+27 |   $x->prop_str ??= 'default';
+28 |   $x->prop_str ??= "some text";
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:27:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+25 |   $x->prop_int >>= 4;
+26 |   $x->prop_int ^= 4;
+27 |   $x->prop_str ??= 'default';
+   |   ^^^^^^^^^^^^ [1]
+28 |   $x->prop_str ??= "some text";
+29 |   $x->prop_str .= 'more text';
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:28:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+26 |   $x->prop_int ^= 4;
+27 |   $x->prop_str ??= 'default';
+28 |   $x->prop_str ??= "some text";
+   |   ^^^^^^^^^^^^ [1]
+29 |   $x->prop_str .= 'more text';
+30 |   $x->prop_int++;
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+test_unary_and_binary_operators.php:29:3
+12 | 
+13 | // Error on each line
+14 | function pure_function(Foo $x)[] : void {
+   |                               ^^ [2]
+15 |   $x->prop_int = 4;
+16 |   $x->prop_int += 4;
+   :
+27 |   $x->prop_str ??= 'default';
+28 |   $x->prop_str ??= "some text";
+29 |   $x->prop_str .= 'more text';
+   |   ^^^^^^^^^^^^ [1]
+30 |   $x->prop_int++;
+31 |   $x->prop_int--;
+
+34 errors found

@@ -1,2 +1,11 @@
-ERROR: File "enum_2.php", line 7, characters 7-9:
-Enums must be `int` or `string` or `arraykey`, not `mixed` (Typing[4024])
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `mixed` [1]
+
+enum_2.php:7:7
+5 | }
+6 | 
+7 | class Foo extends Enum {
+  |       ^^^ [1]
+8 |   const type TInner = mixed;
+9 |   const int FOO = 0;
+
+1 error found

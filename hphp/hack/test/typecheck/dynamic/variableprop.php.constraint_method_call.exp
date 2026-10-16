@@ -2,11 +2,32 @@ File "variableprop.php", line 5, characters 3-13:
   dynamic
 File "variableprop.php", line 7, characters 3-13:
   dynamic
-WARN: File "variableprop.php", line 4, characters 12-13:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "variableprop.php", line 3, characters 26-32:
-  This expression has type `dynamic`
-WARN: File "variableprop.php", line 6, characters 12-13:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "variableprop.php", line 3, characters 26-32:
-  This expression has type `dynamic`
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+variableprop.php:4:12
+1 | <?hh
+2 | 
+3 | function testDynamicProp(dynamic $x, string $y): void {
+  |                          ^^^^^^^ [2]
+4 |   $z = $x->$y();
+  |            ^^ [1]
+5 |   hh_show($z);
+6 |   $z = $x->$y;
+
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+variableprop.php:6:12
+1 | <?hh
+2 | 
+3 | function testDynamicProp(dynamic $x, string $y): void {
+  |                          ^^^^^^^ [2]
+4 |   $z = $x->$y();
+5 |   hh_show($z);
+6 |   $z = $x->$y;
+  |            ^^ [1]
+7 |   hh_show($z);
+8 | }
+
+2 errors found

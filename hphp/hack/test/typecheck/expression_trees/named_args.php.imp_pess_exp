@@ -1,4 +1,26 @@
-ERROR: File "named_args.php", line 8, characters 16-17:
-Expression trees do not support named parameters. (Parsing[1002])
-ERROR: File "named_args.php", line 5, characters 1-114:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Parsing[1002] Expression trees do not support named parameters. [1]
+
+named_args.php:8:16
+6 |   $x = 1;
+7 |   // Should be a parse error before we even type check.
+8 |   return foo(x=$x);
+  |                ^^ [1]
+9 | }`;
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+named_args.php:5:1
+3 | <<file: __EnableUnstableFeatures('expression_trees')>>
+4 | 
+5 | $x = ExampleDsl`() ==> {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   $x = 1;
+  |   ^^^^^^^ [1]
+7 |   // Should be a parse error before we even type check.
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |   return foo(x=$x);
+  |   ^^^^^^^^^^^^^^^^^ [1]
+9 | }`;
+  | ^^^ [1]
+
+2 errors found

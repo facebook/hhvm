@@ -1,6 +1,15 @@
-ERROR: File "bad_inout_hint_return2.php", line 4, characters 10-26:
-Invalid return type (Typing[4184])
-  File "bad_inout_hint_return2.php", line 4, characters 17-18:
-  This is an `inout` parameter
-  File "bad_inout_hint_return2.php", line 3, characters 27-29:
-  It is incompatible with a normal parameter
+error: Typing[4184] Invalid return type [1]
+-> This is an `inout` parameter [2]
+-> It is incompatible with a normal parameter [3]
+
+bad_inout_hint_return2.php:4:10
+1 | <?hh
+2 | 
+3 | function foo(): (function(int): int) {
+  |                           ^^^ [3]
+4 |   return (inout $x) ==> 42;
+  |          ^^^^^^^^^^^^^^^^^ [1]
+  |                 ^^ [2]
+5 | }
+
+1 error found

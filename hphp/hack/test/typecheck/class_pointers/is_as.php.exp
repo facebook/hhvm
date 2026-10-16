@@ -1,34 +1,97 @@
-ERROR: File "is_as.php", line 8, characters 13-20:
-Invalid `is` expression hint (Typing[4195])
-  File "is_as.php", line 8, characters 13-20:
-  The `is` operator cannot be used with a class pointer type
-ERROR: File "is_as.php", line 9, characters 12-13:
-Invalid return type (Typing[4110])
-  File "is_as.php", line 7, characters 25-32:
-  Expected `class<I>`
-  File "is_as.php", line 7, characters 14-18:
-  But got `mixed`
-ERROR: File "is_as.php", line 11, characters 13-25:
-Invalid `is` expression hint (Typing[4195])
-  File "is_as.php", line 11, characters 13-25:
-  The `is` operator cannot be used with a class pointer type
-ERROR: File "is_as.php", line 12, characters 12-13:
-Invalid return type (Typing[4110])
-  File "is_as.php", line 7, characters 25-32:
-  Expected `class<I>`
-  File "is_as.php", line 7, characters 14-18:
-  But got `mixed`
-ERROR: File "is_as.php", line 19, characters 18-25:
-Invalid `as` expression hint (Typing[4195])
-  File "is_as.php", line 19, characters 18-25:
-  The `as` operator cannot be used with a class pointer type
-ERROR: File "is_as.php", line 21, characters 12-30:
-Invalid return type (Typing[4110])
-  File "is_as.php", line 17, characters 34-41:
-  Expected `class<I>`
-  File "is_as.php", line 21, characters 12-30:
-  But got `bool`
-ERROR: File "is_as.php", line 21, characters 18-30:
-Invalid `is` expression hint (Typing[4195])
-  File "is_as.php", line 21, characters 18-30:
-  The `is` operator cannot be used with a class pointer type
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a class pointer type [1]
+
+is_as.php:8:13
+ 6 | 
+ 7 | function _is(mixed $m): class<I> {
+ 8 |   if ($m is class<C>) {
+   |             ^^^^^^^^ [1]
+ 9 |     return $m;
+10 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `class<I>` [2]
+-> But got `mixed` [3]
+
+is_as.php:9:12
+ 5 | class R<reify T> implements I {}
+ 6 | 
+ 7 | function _is(mixed $m): class<I> {
+   |              ^^^^^ [3]
+   |                         ^^^^^^^^ [2]
+ 8 |   if ($m is class<C>) {
+ 9 |     return $m;
+   |            ^^ [1]
+10 |   }
+11 |   if ($m is class<R<int>>) {
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a class pointer type [1]
+
+is_as.php:11:13
+ 9 |     return $m;
+10 |   }
+11 |   if ($m is class<R<int>>) {
+   |             ^^^^^^^^^^^^^ [1]
+12 |     return $m;
+13 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `class<I>` [2]
+-> But got `mixed` [3]
+
+is_as.php:12:12
+ 5 | class R<reify T> implements I {}
+ 6 | 
+ 7 | function _is(mixed $m): class<I> {
+   |              ^^^^^ [3]
+   |                         ^^^^^^^^ [2]
+ 8 |   if ($m is class<C>) {
+ 9 |     return $m;
+10 |   }
+11 |   if ($m is class<R<int>>) {
+12 |     return $m;
+   |            ^^ [1]
+13 |   }
+14 |   return C::class;
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a class pointer type [1]
+
+is_as.php:19:18
+17 | function _as(bool $b, mixed $m): class<I> {
+18 |   if ($b) {
+19 |     return $m as class<C>;
+   |                  ^^^^^^^^ [1]
+20 |   } else {
+21 |     return $m is class<R<int>>;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `class<I>` [2]
+-> But got `bool` [1]
+
+is_as.php:21:12
+15 | }
+16 | 
+17 | function _as(bool $b, mixed $m): class<I> {
+   |                                  ^^^^^^^^ [2]
+18 |   if ($b) {
+19 |     return $m as class<C>;
+20 |   } else {
+21 |     return $m is class<R<int>>;
+   |            ^^^^^^^^^^^^^^^^^^^ [1]
+22 |   }
+23 | }
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a class pointer type [1]
+
+is_as.php:21:18
+19 |     return $m as class<C>;
+20 |   } else {
+21 |     return $m is class<R<int>>;
+   |                  ^^^^^^^^^^^^^ [1]
+22 |   }
+23 | }
+
+7 errors found

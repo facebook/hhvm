@@ -1,8 +1,40 @@
-ERROR: File "ctx-const-bounds_multiple-conflicting.php", line 4, characters 26-44:
-Multiple `as` constraints on a ctx constant are not allowed (Parsing[1002])
-ERROR: File "ctx-const-bounds_multiple-conflicting.php", line 5, characters 26-50:
-Multiple `super` constraints on a ctx constant are not allowed (Parsing[1002])
-ERROR: File "ctx-const-bounds_multiple-conflicting.php", line 7, characters 27-66:
-Multiple `as` constraints on a ctx constant are not allowed (Parsing[1002])
-ERROR: File "ctx-const-bounds_multiple-conflicting.php", line 8, characters 27-69:
-Multiple `super` constraints on a ctx constant are not allowed (Parsing[1002])
+error: Parsing[1002] Multiple `as` constraints on a ctx constant are not allowed [1]
+
+ctx-const-bounds_multiple-conflicting.php:4:26
+2 | 
+3 | abstract class MultipleConflictingNotAllowed {
+4 |   abstract const ctx CUU as [] as [defaults];
+  |                          ^^^^^^^^^^^^^^^^^^^ [1]
+5 |   abstract const ctx CLL super [defaults] super [];
+6 | 
+
+error: Parsing[1002] Multiple `super` constraints on a ctx constant are not allowed [1]
+
+ctx-const-bounds_multiple-conflicting.php:5:26
+3 | abstract class MultipleConflictingNotAllowed {
+4 |   abstract const ctx CUU as [] as [defaults];
+5 |   abstract const ctx CLL super [defaults] super [];
+  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | 
+7 |   abstract const ctx CULU as [] super [defaults] as [read_globals];
+
+error: Parsing[1002] Multiple `as` constraints on a ctx constant are not allowed [1]
+
+ctx-const-bounds_multiple-conflicting.php:7:27
+5 |   abstract const ctx CLL super [defaults] super [];
+6 | 
+7 |   abstract const ctx CULU as [] super [defaults] as [read_globals];
+  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |   abstract const ctx CLUL super [] as [read_globals] super [defaults];
+9 | }
+
+error: Parsing[1002] Multiple `super` constraints on a ctx constant are not allowed [1]
+
+ctx-const-bounds_multiple-conflicting.php:8:27
+6 | 
+7 |   abstract const ctx CULU as [] super [defaults] as [read_globals];
+8 |   abstract const ctx CLUL super [] as [read_globals] super [defaults];
+  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | }
+
+4 errors found

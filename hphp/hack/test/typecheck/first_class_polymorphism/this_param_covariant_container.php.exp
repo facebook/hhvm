@@ -1,40 +1,179 @@
-ERROR: File "this_param_covariant_container.php", line 33, characters 14-22:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 16, characters 46-47:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 33, characters 14-22:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 16, characters 60-61:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 34, characters 14-22:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 17, characters 42-43:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 34, characters 14-22:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 17, characters 52-53:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 35, characters 14-21:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 18, characters 44-45:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 35, characters 14-21:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 18, characters 57-58:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 36, characters 14-24:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 20, characters 24-25:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 36, characters 14-24:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 21, characters 24-25:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 37, characters 14-27:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 24, characters 51-52:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_covariant_container.php", line 37, characters 14-27:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_covariant_container.php", line 24, characters 60-61:
-  a value of type `this` can be obtained from this parameter
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:33:14
+14 | 
+15 |   // c=2 -> ERROR
+16 |   public static function s_vec_two(vec<this> $_, vec<this> $_): void {}
+   |                                              ^^ [2]
+17 |   public static function s_opt_two(?this $_, ?this $_): void {}
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+   :
+31 |   $ok4 = A::s_shape_one<>;
+32 | 
+33 |   $bad1 = A::s_vec_two<>;
+   |              ^^^^^^^^^ [1]
+34 |   $bad2 = A::s_opt_two<>;
+35 |   $bad3 = A::s_co_two<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:33:14
+14 | 
+15 |   // c=2 -> ERROR
+16 |   public static function s_vec_two(vec<this> $_, vec<this> $_): void {}
+   |                                                            ^^ [2]
+17 |   public static function s_opt_two(?this $_, ?this $_): void {}
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+   :
+31 |   $ok4 = A::s_shape_one<>;
+32 | 
+33 |   $bad1 = A::s_vec_two<>;
+   |              ^^^^^^^^^ [1]
+34 |   $bad2 = A::s_opt_two<>;
+35 |   $bad3 = A::s_co_two<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:34:14
+15 |   // c=2 -> ERROR
+16 |   public static function s_vec_two(vec<this> $_, vec<this> $_): void {}
+17 |   public static function s_opt_two(?this $_, ?this $_): void {}
+   |                                          ^^ [2]
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+19 |   public static function s_shape_two(
+   :
+32 | 
+33 |   $bad1 = A::s_vec_two<>;
+34 |   $bad2 = A::s_opt_two<>;
+   |              ^^^^^^^^^ [1]
+35 |   $bad3 = A::s_co_two<>;
+36 |   $bad4 = A::s_shape_two<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:34:14
+15 |   // c=2 -> ERROR
+16 |   public static function s_vec_two(vec<this> $_, vec<this> $_): void {}
+17 |   public static function s_opt_two(?this $_, ?this $_): void {}
+   |                                                    ^^ [2]
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+19 |   public static function s_shape_two(
+   :
+32 | 
+33 |   $bad1 = A::s_vec_two<>;
+34 |   $bad2 = A::s_opt_two<>;
+   |              ^^^^^^^^^ [1]
+35 |   $bad3 = A::s_co_two<>;
+36 |   $bad4 = A::s_shape_two<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:35:14
+16 |   public static function s_vec_two(vec<this> $_, vec<this> $_): void {}
+17 |   public static function s_opt_two(?this $_, ?this $_): void {}
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+   |                                            ^^ [2]
+19 |   public static function s_shape_two(
+20 |     shape('x' => this) $_,
+   :
+33 |   $bad1 = A::s_vec_two<>;
+34 |   $bad2 = A::s_opt_two<>;
+35 |   $bad3 = A::s_co_two<>;
+   |              ^^^^^^^^ [1]
+36 |   $bad4 = A::s_shape_two<>;
+37 |   $bad5 = A::s_vec_and_bare<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:35:14
+16 |   public static function s_vec_two(vec<this> $_, vec<this> $_): void {}
+17 |   public static function s_opt_two(?this $_, ?this $_): void {}
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+   |                                                         ^^ [2]
+19 |   public static function s_shape_two(
+20 |     shape('x' => this) $_,
+   :
+33 |   $bad1 = A::s_vec_two<>;
+34 |   $bad2 = A::s_opt_two<>;
+35 |   $bad3 = A::s_co_two<>;
+   |              ^^^^^^^^ [1]
+36 |   $bad4 = A::s_shape_two<>;
+37 |   $bad5 = A::s_vec_and_bare<>;
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:36:14
+18 |   public static function s_co_two(Co<this> $_, Co<this> $_): void {}
+19 |   public static function s_shape_two(
+20 |     shape('x' => this) $_,
+   |                        ^^ [2]
+21 |     shape('x' => this) $_,
+22 |   ): void {}
+   :
+34 |   $bad2 = A::s_opt_two<>;
+35 |   $bad3 = A::s_co_two<>;
+36 |   $bad4 = A::s_shape_two<>;
+   |              ^^^^^^^^^^^ [1]
+37 |   $bad5 = A::s_vec_and_bare<>;
+38 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:36:14
+19 |   public static function s_shape_two(
+20 |     shape('x' => this) $_,
+21 |     shape('x' => this) $_,
+   |                        ^^ [2]
+22 |   ): void {}
+23 |   // mixed covariant-container kinds, c=2 -> ERROR
+   :
+34 |   $bad2 = A::s_opt_two<>;
+35 |   $bad3 = A::s_co_two<>;
+36 |   $bad4 = A::s_shape_two<>;
+   |              ^^^^^^^^^^^ [1]
+37 |   $bad5 = A::s_vec_and_bare<>;
+38 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:37:14
+22 |   ): void {}
+23 |   // mixed covariant-container kinds, c=2 -> ERROR
+24 |   public static function s_vec_and_bare(vec<this> $_, this $_): void {}
+   |                                                   ^^ [2]
+25 | }
+26 | 
+   :
+35 |   $bad3 = A::s_co_two<>;
+36 |   $bad4 = A::s_shape_two<>;
+37 |   $bad5 = A::s_vec_and_bare<>;
+   |              ^^^^^^^^^^^^^^ [1]
+38 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_covariant_container.php:37:14
+22 |   ): void {}
+23 |   // mixed covariant-container kinds, c=2 -> ERROR
+24 |   public static function s_vec_and_bare(vec<this> $_, this $_): void {}
+   |                                                            ^^ [2]
+25 | }
+26 | 
+   :
+35 |   $bad3 = A::s_co_two<>;
+36 |   $bad4 = A::s_shape_two<>;
+37 |   $bad5 = A::s_vec_and_bare<>;
+   |              ^^^^^^^^^^^^^^ [1]
+38 | }
+
+10 errors found

@@ -1,12 +1,32 @@
-ERROR: File "enum_dup_large_int_values.php", line 9, characters 6-13:
-This enum has members `A` and `B` with the same value `9223372036854775807`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_large_int_values.php", line 10, characters 3-3:
-  `A` is declared here
-  File "enum_dup_large_int_values.php", line 11, characters 3-3:
-  `B` is declared here
-ERROR: File "enum_dup_large_int_values.php", line 20, characters 6-20:
-This enum has members `C` and `D` with the same value `9223372036854775807`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_large_int_values.php", line 21, characters 3-3:
-  `C` is declared here
-  File "enum_dup_large_int_values.php", line 22, characters 3-3:
-  `D` is declared here
+error: Typing[4519] This enum has members `A` and `B` with the same value `9223372036854775807`. Duplicate enum values are not allowed. [1]
+-> `A` is declared here [2]
+-> `B` is declared here [3]
+
+enum_dup_large_int_values.php:9:6
+ 7 | // (see LargeNormalized below).
+ 8 | 
+ 9 | enum LargeDup: int {
+   |      ^^^^^^^^ [1]
+10 |   A = 9223372036854775807; // i64::MAX
+   |   ^ [2]
+11 |   B = 9223372036854775807; // same literal -> duplicate of A, flagged
+   |   ^ [3]
+12 | }
+13 | 
+
+error: Typing[4519] This enum has members `C` and `D` with the same value `9223372036854775807`. Duplicate enum values are not allowed. [1]
+-> `C` is declared here [2]
+-> `D` is declared here [3]
+
+enum_dup_large_int_values.php:20:6
+18 | 
+19 | // Spellings are canonicalised, so hex and decimal forms of one value collide.
+20 | enum LargeNormalized: int {
+   |      ^^^^^^^^^^^^^^^ [1]
+21 |   C = 9223372036854775807; // i64::MAX in decimal
+   |   ^ [2]
+22 |   D = 0x7FFFFFFFFFFFFFFF; // same value in hex -> duplicate of C, flagged
+   |   ^ [3]
+23 | }
+
+2 errors found

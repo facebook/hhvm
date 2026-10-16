@@ -1,72 +1,186 @@
-ERROR: File "call-error.php", line 11, characters 17-17:
-Invalid argument (Typing[4110])
-  File "call-error.php", line 8, characters 29-34:
-  Expected `string`
-  File "call-error.php", line 11, characters 17-17:
-  But got `int`
-ERROR: File "call-error.php", line 16, characters 8-12:
-Invalid argument (Typing[4110])
-  File "call-error.php", line 8, characters 29-34:
-  Expected `string`
-  File "call-error.php", line 15, characters 26-26:
-  But got `int`
-ERROR: File "call-error.php", line 20, characters 12-18:
-No instance method `missing` in `C` (Typing[4053])
-  File "call-error.php", line 10, characters 19-19:
-  Did you mean `g` instead?
-  File "call-error.php", line 7, characters 7-7:
-  This is why I think it is an object of type C
-  File "call-error.php", line 7, characters 7-7:
-  Declaration of `C` is here
-ERROR: File "call-error.php", line 24, characters 21-27:
-No instance method `missing` in `C` (Typing[4053])
-  File "call-error.php", line 10, characters 19-19:
-  Did you mean `g` instead?
-  File "call-error.php", line 7, characters 7-7:
-  This is why I think it is an object of type C
-  File "call-error.php", line 7, characters 7-7:
-  Declaration of `C` is here
-ERROR: File "call-error.php", line 32, characters 14-15:
-Invalid argument (Typing[4110])
-  File "call-error.php", line 31, characters 38-40:
-  Expected `int`
-  File "call-error.php", line 28, characters 37-42:
-  But got `string`
-ERROR: File "call-error.php", line 39, characters 5-18:
-Typing error (Typing[4323])
-  File "call-error.php", line 35, characters 21-21:
-  `T` is a constrained type parameter
-  File "call-error.php", line 35, characters 26-33:
-  This type constraint is violated
-  File "call-error.php", line 35, characters 26-33:
-  Expected `arraykey`
-  File "call-error.php", line 39, characters 14-17:
-  But got `bool`
-ERROR: File "call-error.php", line 46, characters 5-15:
-Typing error (Typing[4323])
-  File "call-error.php", line 42, characters 21-21:
-  `T` is a constrained type parameter
-  File "call-error.php", line 42, characters 26-31:
-  This type constraint is violated
-  File "call-error.php", line 42, characters 26-31:
-  Expected `string`
-  File "call-error.php", line 46, characters 14-14:
-  But got `int`
-ERROR: File "call-error.php", line 53, characters 5-21:
-Typing error (Typing[4323])
-  File "call-error.php", line 49, characters 22-22:
-  `T` is a constrained type parameter
-  File "call-error.php", line 49, characters 27-37:
-  This type constraint is violated
-  File "call-error.php", line 49, characters 31-36:
-  Expected `string`
-  File "call-error.php", line 53, characters 19-19:
-  But got `int`
-ERROR: File "call-error.php", line 59, characters 5-23:
-Typing error (Typing[4110])
-  File "call-error.php", line 56, characters 33-38:
-  Expected `string`
-  File "call-error.php", line 59, characters 21-21:
-  But got `int`
-  File "call-error.php", line 59, characters 21-21:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+call-error.php:11:17
+ 6 | 
+ 7 | class C {
+ 8 |   public function f(int $t, string $u): void {}
+   |                             ^^^^^^ [2]
+ 9 | 
+10 |   public function g(): void {
+11 |     $this->f(1, 2); // The primary position should be the expression 2
+   |                 ^ [1]
+12 |   }
+13 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+call-error.php:16:8
+ 6 | 
+ 7 | class C {
+ 8 |   public function f(int $t, string $u): void {}
+   |                             ^^^^^^ [2]
+ 9 | 
+10 |   public function g(): void {
+   :
+13 | 
+14 |   public function g2(): void {
+15 |     $f = $x ==> $x->f(1, 2);
+   |                          ^ [3]
+16 |     $f($this); // The primary position should be the $this
+   |        ^^^^^ [1]
+17 |   }
+18 | 
+
+error: Typing[4053] No instance method `missing` in `C` [1]
+-> Did you mean `g` instead? [2]
+-> This is why I think it is an object of type C [3]
+-> Declaration of `C` is here [3]
+
+call-error.php:20:12
+ 5 | }
+ 6 | 
+ 7 | class C {
+   |       ^ [3]
+ 8 |   public function f(int $t, string $u): void {}
+ 9 | 
+10 |   public function g(): void {
+   |                   ^ [2]
+11 |     $this->f(1, 2); // The primary position should be the expression 2
+12 |   }
+   :
+18 | 
+19 |   public function h(): void {
+20 |     $this->missing(); // The primary position should be the missing
+   |            ^^^^^^^ [1]
+21 |   }
+22 | 
+
+error: Typing[4053] No instance method `missing` in `C` [1]
+-> Did you mean `g` instead? [2]
+-> This is why I think it is an object of type C [3]
+-> Declaration of `C` is here [3]
+
+call-error.php:24:21
+ 5 | }
+ 6 | 
+ 7 | class C {
+   |       ^ [3]
+ 8 |   public function f(int $t, string $u): void {}
+ 9 | 
+10 |   public function g(): void {
+   |                   ^ [2]
+11 |     $this->f(1, 2); // The primary position should be the expression 2
+12 |   }
+   :
+22 | 
+23 |   public function h2(): void {
+24 |     $f = $x ==> $x->missing();
+   |                     ^^^^^^^ [1]
+25 |     $f($this); // The primary position should be the $this
+26 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+call-error.php:32:14
+26 |   }
+27 | 
+28 |   public function i((function (int, string): void) $f): void {
+   |                                     ^^^^^^ [3]
+29 |   }
+30 | 
+31 |   public function i2((function (int, int): void) $f): void {
+   |                                      ^^^ [2]
+32 |     $this->i($f); // The primary position should be $f
+   |              ^^ [1]
+33 |   }
+34 | 
+
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+call-error.php:39:5
+33 |   }
+34 | 
+35 |   public function j<T as arraykey>(T $x) : void {
+   |                     ^ [2]
+   |                          ^^^^^^^^ [3]
+36 |   }
+37 | 
+38 |   public function k(): void {
+39 |     $this->j(true); // The primary position should be the true expression
+   |     ^^^^^^^^^^^^^^ [1]
+   |              ^^^^ [4]
+40 |   }
+41 | 
+
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+call-error.php:46:5
+40 |   }
+41 | 
+42 |   public function l<T as string>(T $x): void {
+   |                     ^ [2]
+   |                          ^^^^^^ [3]
+43 |   }
+44 | 
+45 |   public function l2(): void {
+46 |     $this->l(1); // The primary position should be the 1
+   |     ^^^^^^^^^^^ [1]
+   |              ^ [4]
+47 |   }
+48 | 
+
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [4]
+-> But got `int` [5]
+
+call-error.php:53:5
+47 |   }
+48 | 
+49 |   public function l3<T as vec<string>>(T $x): void {
+   |                      ^ [2]
+   |                           ^^^^^^^^^^^ [3]
+   |                               ^^^^^^ [4]
+50 |   }
+51 | 
+52 |   public function l4(): void {
+53 |     $this->l3(vec[1]); // The primary position should be $x
+   |     ^^^^^^^^^^^^^^^^^ [1]
+   |                   ^ [5]
+54 |   }
+55 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+call-error.php:59:5
+54 |   }
+55 | 
+56 |   public function m<T as Vector<string>>(T $x): void {}
+   |                                 ^^^^^^ [2]
+57 | 
+58 |   public function m2(): void {
+59 |     $this->m(Vector{1}); // The primary position should be the Vector, but is the whole expression.
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+60 |   }
+61 | }
+
+9 errors found

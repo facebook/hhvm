@@ -1,8 +1,36 @@
-ERROR: File "lambda_bad_arity.php", line 15, characters 7-65:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "lambda_bad_arity.php", line 6, characters 5-32:
-  Definition is here
-ERROR: File "lambda_bad_arity.php", line 24, characters 12-44:
-Too few positional arguments (required 3 but got 2) (Typing[4104])
-  File "lambda_bad_arity.php", line 23, characters 39-73:
-  Definition is here
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+lambda_bad_arity.php:15:7
+ 4 | class C {
+ 5 |   public static function funcApply<Treturn, T1, T2>(
+ 6 |     (function(T1, T2): ?Treturn) $func,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 7 |     T1 $input1,
+ 8 |     T2 $input2,
+   :
+13 |   public static function example1(): ?string {
+14 |     return self::funcApply(
+15 |       function(int $x): string {
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |         return 'string';
+   |         ^^^^^^^^^^^^^^^^ [1]
+17 |       },
+   |       ^ [1]
+18 |       10,
+19 |       vec[1, 2, 3],
+
+error: Typing[4104] Too few positional arguments (required 3 but got 2) [1]
+-> Definition is here [2]
+
+lambda_bad_arity.php:24:12
+21 |   }
+22 | 
+23 |   public static function viaReturn(): (function(int, string, bool): void) {
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+24 |     return (int $_i, string $_s = '') ==> {};
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 |   }
+26 | }
+
+2 errors found

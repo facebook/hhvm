@@ -1,20 +1,69 @@
-ERROR: File "access_in_default_arg_pure.bad.php", line 17, characters 35-70:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "access_in_default_arg_pure.bad.php", line 8, characters 37-50:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_in_default_arg_pure.bad.php", line 8, characters 30-33:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_in_default_arg_pure.bad.php", line 11, characters 52-65:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_in_default_arg_pure.bad.php", line 11, characters 47-48:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_in_default_arg_pure.bad.php", line 12, characters 19-27:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "access_in_default_arg_pure.bad.php", line 12, characters 42-55:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_in_default_arg_pure.bad.php", line 12, characters 37-38:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "access_in_default_arg_pure.bad.php", line 17, characters 56-69:
-Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "access_in_default_arg_pure.bad.php", line 17, characters 30-31:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+access_in_default_arg_pure.bad.php:17:35
+15 | class NestedEnumClassAccess {
+16 |   public function __construct(
+17 |     private EnumClassWrapper $d = new EnumClassWrapper(MyClassEnum::A)
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   )[] {}
+19 | }
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+access_in_default_arg_pure.bad.php:8:37
+ 6 | }
+ 7 | 
+ 8 | function default_arg(MyClass $arg = MyClassEnum::A)[]: void {}
+   |                              ^^^^ [2]
+   |                                     ^^^^^^^^^^^^^^ [1]
+ 9 | 
+10 | class EnumClassWrapper {
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+access_in_default_arg_pure.bad.php:11:52
+ 9 | 
+10 | class EnumClassWrapper {
+11 |   public function __construct(private MyClass $a = MyClassEnum::A)[] {}
+   |                                               ^^ [2]
+   |                                                    ^^^^^^^^^^^^^^ [1]
+12 |   public function top_level(MyClass $a = MyClassEnum::A)[] {}
+13 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+access_in_default_arg_pure.bad.php:12:19
+10 | class EnumClassWrapper {
+11 |   public function __construct(private MyClass $a = MyClassEnum::A)[] {}
+12 |   public function top_level(MyClass $a = MyClassEnum::A)[] {}
+   |                   ^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+access_in_default_arg_pure.bad.php:12:42
+10 | class EnumClassWrapper {
+11 |   public function __construct(private MyClass $a = MyClassEnum::A)[] {}
+12 |   public function top_level(MyClass $a = MyClassEnum::A)[] {}
+   |                                     ^^ [2]
+   |                                          ^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4401] Accessing an enum class constant requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+access_in_default_arg_pure.bad.php:17:56
+15 | class NestedEnumClassAccess {
+16 |   public function __construct(
+17 |     private EnumClassWrapper $d = new EnumClassWrapper(MyClassEnum::A)
+   |                              ^^ [2]
+   |                                                        ^^^^^^^^^^^^^^ [1]
+18 |   )[] {}
+19 | }
+
+6 errors found

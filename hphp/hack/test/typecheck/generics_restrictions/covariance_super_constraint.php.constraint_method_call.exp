@@ -1,8 +1,25 @@
-ERROR: File "covariance_super_constraint.php", line 4, characters 23-24:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `T` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "covariance_super_constraint.php", line 4, characters 32-32:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "covariance_super_constraint.php", line 3, characters 12-12:
-  This is where the parameter was declared as contravariant `-`
-  File "covariance_super_constraint.php", line 4, characters 32-32:
-  `super` constraints on method type parameters are covariant
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `T` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+covariance_super_constraint.php:4:23
+2 | 
+3 | class Foo<-T> {
+4 |   public function bar<Tu super T>(): Tu {
+  |                       ^^ [1]
+5 |     throw new Exception();
+6 |   }
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `super` constraints on method type parameters are covariant [1]
+
+covariance_super_constraint.php:4:32
+1 | <?hh
+2 | 
+3 | class Foo<-T> {
+  |            ^ [2]
+4 |   public function bar<Tu super T>(): Tu {
+  |                                ^ [1]
+5 |     throw new Exception();
+6 |   }
+
+2 errors found

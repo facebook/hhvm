@@ -1,12 +1,35 @@
-ERROR: File "meth_caller7.php", line 9, characters 15-16:
-Invalid argument (Typing[4110])
-  File "meth_caller7.php", line 4, characters 24-26:
-  Expected `int`
-  File "meth_caller7.php", line 9, characters 15-16:
-  But got `string`
-ERROR: File "meth_caller7.php", line 9, characters 19-19:
-Invalid argument (Typing[4110])
-  File "meth_caller7.php", line 4, characters 32-37:
-  Expected `string`
-  File "meth_caller7.php", line 9, characters 19-19:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+meth_caller7.php:9:15
+ 2 | 
+ 3 | class C {
+ 4 |   public function foo2(int $x, string $y): void {}
+   |                        ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | function test(C $c): void {
+ 8 |   $caller = meth_caller(C::class, 'foo2');
+ 9 |   $caller($c, '', 0);
+   |               ^^ [1]
+10 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+meth_caller7.php:9:19
+ 2 | 
+ 3 | class C {
+ 4 |   public function foo2(int $x, string $y): void {}
+   |                                ^^^^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | function test(C $c): void {
+ 8 |   $caller = meth_caller(C::class, 'foo2');
+ 9 |   $caller($c, '', 0);
+   |                   ^ [1]
+10 | }
+
+2 errors found

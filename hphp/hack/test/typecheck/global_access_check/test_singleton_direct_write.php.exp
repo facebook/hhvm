@@ -1,54 +1,255 @@
-WARN: File "test_singleton_direct_write.php", line 27, characters 9-25:
-This `is` check is always `false`. The expression on the left has type `Bar` which shares no values with `null`. (Warn[12010])
-WARN: File "test_singleton_direct_write.php", line 34, characters 9-21:
-This `is` check is always `true`. The expression on the left has type `Bar` which is a subtype of `nonnull`. (Warn[12009])
-WARN: File "test_singleton_direct_write.php", line 40, characters 9-26:
-Invalid comparison: This expression will always return `false`.
-A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "test_singleton_direct_write.php", line 46, characters 9-19:
-Invalid comparison: This expression will always return `true`.
-A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "test_singleton_direct_write.php", line 52, characters 9-25:
-Invalid comparison: This expression will always return `false`.
-A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "test_singleton_direct_write.php", line 58, characters 9-18:
-Invalid comparison: This expression will always return `false`.
-A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
-ERROR: File "test_singleton_direct_write.php", line 21, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 22, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 25, characters 5-25:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 27, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 28, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 30, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 33, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 35, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_direct_write.php", line 37, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 40, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 41, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 43, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 47, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_direct_write.php", line 49, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 52, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 53, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 55, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 59, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_direct_write.php", line 61, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `Bar` which shares no values with `null`. [1]
+
+test_singleton_direct_write.php:27:9
+25 |     Foo::$bar = new Bar();
+26 | 
+27 |     if (Foo::$bar is null) {
+   |         ^^^^^^^^^^^^^^^^^ [1]
+28 |       Foo::$bar = new Bar(); // Singleton
+29 |     } else {
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `Bar` which is a subtype of `nonnull`. [1]
+
+test_singleton_direct_write.php:34:9
+32 | 
+33 |     $a = Foo::$bar;
+34 |     if ($a is nonnull) {
+   |         ^^^^^^^^^^^^^ [1]
+35 |       $a->prop = 1;
+36 |     } else {
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `Bar` can never be equal to a value of type `null` [1]
+
+test_singleton_direct_write.php:40:9
+38 |     }
+39 | 
+40 |     if (Foo::$bar === null) {
+   |         ^^^^^^^^^^^^^^^^^^ [1]
+41 |       Foo::$bar = new Bar(); // Singleton
+42 |     } else {
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `Bar` can never be equal to a value of type `null` [1]
+
+test_singleton_direct_write.php:46:9
+44 |     }
+45 | 
+46 |     if ($a !== null) {
+   |         ^^^^^^^^^^^ [1]
+47 |       $a->prop = 1;
+48 |     } else {
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `Bar` can never be equal to a value of type `null` [1]
+
+test_singleton_direct_write.php:52:9
+50 |     }
+51 | 
+52 |     if (Foo::$bar == null) {
+   |         ^^^^^^^^^^^^^^^^^ [1]
+53 |       Foo::$bar = new Bar(); // Singleton
+54 |     } else {
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `Bar` can never be equal to a value of type `null` [1]
+
+test_singleton_direct_write.php:58:9
+56 |     }
+57 | 
+58 |     if ($a != null) {
+   |         ^^^^^^^^^^ [1]
+59 |       $a->prop = 1;
+60 |     } else {
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. [1]
+
+test_singleton_direct_write.php:21:9
+19 | class Test {
+20 |   public function test_method_call(): void {
+21 |     if (Foo::$bar is null) {
+   |         ^^^^^^^^^ [1]
+22 |       Foo::$bar = new Bar(); // Singleton
+23 |     }
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:22:7
+20 |   public function test_method_call(): void {
+21 |     if (Foo::$bar is null) {
+22 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+23 |     }
+24 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:25:5
+23 |     }
+24 | 
+25 |     Foo::$bar = new Bar();
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+26 | 
+27 |     if (Foo::$bar is null) {
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_singleton_direct_write.php:27:9
+25 |     Foo::$bar = new Bar();
+26 | 
+27 |     if (Foo::$bar is null) {
+   |         ^^^^^^^^^ [1]
+28 |       Foo::$bar = new Bar(); // Singleton
+29 |     } else {
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:28:7
+26 | 
+27 |     if (Foo::$bar is null) {
+28 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |     } else {
+30 |       (Foo::$bar)->prop = 1;
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:30:7
+28 |       Foo::$bar = new Bar(); // Singleton
+29 |     } else {
+30 |       (Foo::$bar)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |     }
+32 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_singleton_direct_write.php:33:10
+31 |     }
+32 | 
+33 |     $a = Foo::$bar;
+   |          ^^^^^^^^^ [1]
+34 |     if ($a is nonnull) {
+35 |       $a->prop = 1;
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_direct_write.php:35:7
+33 |     $a = Foo::$bar;
+34 |     if ($a is nonnull) {
+35 |       $a->prop = 1;
+   |       ^^^^^^^^^^^^ [1]
+36 |     } else {
+37 |       Foo::$bar = new Bar(); // Singleton
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:37:7
+35 |       $a->prop = 1;
+36 |     } else {
+37 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+38 |     }
+39 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_singleton_direct_write.php:40:9
+38 |     }
+39 | 
+40 |     if (Foo::$bar === null) {
+   |         ^^^^^^^^^ [1]
+41 |       Foo::$bar = new Bar(); // Singleton
+42 |     } else {
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:41:7
+39 | 
+40 |     if (Foo::$bar === null) {
+41 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+42 |     } else {
+43 |       (Foo::$bar)->prop = 1;
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:43:7
+41 |       Foo::$bar = new Bar(); // Singleton
+42 |     } else {
+43 |       (Foo::$bar)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+44 |     }
+45 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_direct_write.php:47:7
+45 | 
+46 |     if ($a !== null) {
+47 |       $a->prop = 1;
+   |       ^^^^^^^^^^^^ [1]
+48 |     } else {
+49 |       Foo::$bar = new Bar(); // Singleton
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:49:7
+47 |       $a->prop = 1;
+48 |     } else {
+49 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+50 |     }
+51 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_singleton_direct_write.php:52:9
+50 |     }
+51 | 
+52 |     if (Foo::$bar == null) {
+   |         ^^^^^^^^^ [1]
+53 |       Foo::$bar = new Bar(); // Singleton
+54 |     } else {
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:53:7
+51 | 
+52 |     if (Foo::$bar == null) {
+53 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+54 |     } else {
+55 |       (Foo::$bar)->prop = 1;
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:55:7
+53 |       Foo::$bar = new Bar(); // Singleton
+54 |     } else {
+55 |       (Foo::$bar)->prop = 1;
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+56 |     }
+57 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_singleton_direct_write.php:59:7
+57 | 
+58 |     if ($a != null) {
+59 |       $a->prop = 1;
+   |       ^^^^^^^^^^^^ [1]
+60 |     } else {
+61 |       Foo::$bar = new Bar(); // Singleton
+
+error: Other[11001] [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_singleton_direct_write.php:61:7
+59 |       $a->prop = 1;
+60 |     } else {
+61 |       Foo::$bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+62 |     }
+63 |   }
+
+25 errors found

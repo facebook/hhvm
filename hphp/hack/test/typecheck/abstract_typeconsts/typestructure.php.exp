@@ -1,4 +1,19 @@
-ERROR: File "typestructure.php", line 11, characters 28-30:
-Cannot reference abstract constant `A::T` directly (Typing[4129])
-  File "typestructure.php", line 5, characters 23-23:
-  Declaration is here
+error: Typing[4129] Cannot reference abstract constant `A::T` directly [1]
+-> Declaration is here [2]
+
+typestructure.php:11:28
+ 3 | 
+ 4 | abstract class A {
+ 5 |   abstract const type T as num = int;
+   |                       ^ [2]
+ 6 | }
+ 7 | 
+ 8 | class B extends A {}
+ 9 | 
+10 | function f(): void {
+11 |   type_structure(A::class, 'T'); // error
+   |                            ^^^ [1]
+12 |   type_structure(B::class, 'T');
+13 | }
+
+1 error found

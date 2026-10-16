@@ -1,10 +1,20 @@
-ERROR: File "class_static_variable.php", line 6, characters 24-41:
-Some type arguments violate their constraints (Typing[4323])
-  File "class_static_variable.php", line 3, characters 22-22:
-  `T` is a constrained type parameter
-  File "class_static_variable.php", line 3, characters 27-29:
-  This type constraint is violated
-  File "class_static_variable.php", line 3, characters 27-29:
-  Expected `num`
-  File "class_static_variable.php", line 6, characters 35-40:
-  But got `string`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [4]
+
+class_static_variable.php:6:24
+1 | <?hh
+2 | 
+3 | interface Constraint<T as num> {}
+  |                      ^ [2]
+  |                           ^^^ [3]
+4 | 
+5 | class InvalidConstraint {
+6 |   public static ?(int, Constraint<string>) $x = null;
+  |                        ^^^^^^^^^^^^^^^^^^ [1]
+  |                                   ^^^^^^ [4]
+7 | }
+
+1 error found

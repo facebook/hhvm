@@ -1,6 +1,15 @@
-ERROR: File "extends.php", line 15, characters 10-11:
-Invalid return type (Typing[4110])
-  File "extends.php", line 14, characters 32-32:
-  Expected `B`
-  File "extends.php", line 14, characters 18-18:
-  But got `A`
+error: Typing[4110] Invalid return type [1]
+-> Expected `B` [2]
+-> But got `A` [3]
+
+extends.php:15:10
+12 |   return $t;
+13 | }
+14 | function h(class<A> $t): class<B> {
+   |                  ^ [3]
+   |                                ^ [2]
+15 |   return $t;
+   |          ^^ [1]
+16 | }
+
+1 error found

@@ -1,24 +1,98 @@
-ERROR: File "coeffects.php", line 18, characters 3-5:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "coeffects.php", line 14, characters 16-17:
-  From this declaration, the context of this function body provides the capability set {}
-  File "coeffects.php", line 10, characters 10-12:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "coeffects.php", line 20, characters 14-21:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "coeffects.php", line 14, characters 16-17:
-  From this declaration, the context of this function body provides the capability set {}
-  File "expr_tree.php", line 496, characters 19-24:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "coeffects.php", line 20, characters 16-18:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "coeffects.php", line 14, characters 16-17:
-  From this declaration, the context of this function body provides the capability set {}
-  File "coeffects.php", line 10, characters 10-12:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "coeffects.php", line 20, characters 16-20:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "coeffects.php", line 14, characters 16-17:
-  From this declaration, the context of this function body provides the capability set {}
-  File "expr_tree.php", line 139, characters 26-29:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+coeffects.php:18:3
+ 8 |   throw new Exception();
+ 9 | }
+10 | function baz(): ExampleExpression<ExampleInt> {
+   |          ^^^ [3]
+11 |   throw new Exception();
+12 | }
+13 | 
+14 | function pure()[]: void {
+   |                ^^ [2]
+15 |   // The coeffects of virtualized functions should not matter
+16 |   $fun_call = ExampleDsl`bar("baz")`;
+17 |   // But should still be respected outside the expression tree
+18 |   baz();
+   |   ^^^ [1]
+19 |   // And when invoking functions when splicing
+20 |   ExampleDsl`${baz()}`;
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+coeffects.php:20:14
+ 12 | }
+ 13 | 
+ 14 | function pure()[]: void {
+    |                ^^ [2]
+ 15 |   // The coeffects of virtualized functions should not matter
+ 16 |   $fun_call = ExampleDsl`bar("baz")`;
+ 17 |   // But should still be respected outside the expression tree
+ 18 |   baz();
+ 19 |   // And when invoking functions when splicing
+ 20 |   ExampleDsl`${baz()}`;
+    |              ^^^^^^^^ [1]
+ 21 | }
+
+expr_tree.php:496:19
+494 | 
+495 |   <<__NoAutoLikes>>
+496 |   public function splice<T>(
+    |                   ^^^^^^ [3]
+497 |     ?ExprPos $_,
+498 |     string $_key,
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+coeffects.php:20:16
+ 8 |   throw new Exception();
+ 9 | }
+10 | function baz(): ExampleExpression<ExampleInt> {
+   |          ^^^ [3]
+11 |   throw new Exception();
+12 | }
+13 | 
+14 | function pure()[]: void {
+   |                ^^ [2]
+15 |   // The coeffects of virtualized functions should not matter
+16 |   $fun_call = ExampleDsl`bar("baz")`;
+17 |   // But should still be respected outside the expression tree
+18 |   baz();
+19 |   // And when invoking functions when splicing
+20 |   ExampleDsl`${baz()}`;
+   |                ^^^ [1]
+21 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+coeffects.php:20:16
+ 12 | }
+ 13 | 
+ 14 | function pure()[]: void {
+    |                ^^ [2]
+ 15 |   // The coeffects of virtualized functions should not matter
+ 16 |   $fun_call = ExampleDsl`bar("baz")`;
+ 17 |   // But should still be respected outside the expression tree
+ 18 |   baz();
+ 19 |   // And when invoking functions when splicing
+ 20 |   ExampleDsl`${baz()}`;
+    |                ^^^^^ [1]
+ 21 | }
+
+expr_tree.php:139:26
+137 |   }
+138 | 
+139 |   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
+    |                          ^^^^ [3]
+140 |     ExampleUnion<THack, TInfer> $e,
+141 |   ): ExampleExpression<TInfer> {
+
+4 errors found

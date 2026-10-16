@@ -1,1 +1,2 @@
 --config everything_sdt=true
+--error-format plain_highlighted

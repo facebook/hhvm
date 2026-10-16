@@ -1,18 +1,57 @@
-ERROR: File "reified-generics.php", line 18, characters 5-29:
-Invalid reified hint (Typing[4305])
-  File "reified-generics.php", line 18, characters 5-29:
-  This is type refinement, it cannot be used as a reified type argument
-  File "reified-generics.php", line 11, characters 18-18:
-  `T` is reified
-ERROR: File "reified-generics.php", line 21, characters 5-36:
-Invalid reified hint (Typing[4305])
-  File "reified-generics.php", line 21, characters 11-35:
-  This is type refinement, it cannot be used as a reified type argument
-  File "reified-generics.php", line 11, characters 18-18:
-  `T` is reified
-ERROR: File "reified-generics.php", line 27, characters 19-50:
-Invalid reified hint (Typing[4305])
-  File "reified-generics.php", line 27, characters 25-49:
-  This is type refinement, it cannot be used as a reified type argument
-  File "reified-generics.php", line 24, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+reified-generics.php:18:5
+ 9 | }
+10 | 
+11 | function f<reify T>(T $a): void {}
+   |                  ^ [2]
+12 | function f_nonreified<T>(T $a): void {} // OK
+13 | 
+   :
+16 |   f_nonreified<Box with { type T = int }>($b); // OK
+17 | 
+18 |   f<Box with { type T = int }>($b); // ERROR
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | 
+20 |   $covar_b = new Covar($b);
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified-generics.php:21:5
+ 9 | }
+10 | 
+11 | function f<reify T>(T $a): void {}
+   |                  ^ [3]
+12 | function f_nonreified<T>(T $a): void {} // OK
+13 | 
+   :
+19 | 
+20 |   $covar_b = new Covar($b);
+21 |   f<Covar<Box with { type T = int }>>($covar_b); // ERROR
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+22 | }
+23 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified-generics.php:27:19
+22 | }
+23 | 
+24 | class C<reify T> {}
+   |               ^ [3]
+25 | class C2<reify T> extends C<T> {}
+26 | 
+27 | class D extends C<Covar<Box with { type T = int }>> {} // ERROR (nested)
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+28 | 
+29 | function in_bound_only<
+
+3 errors found

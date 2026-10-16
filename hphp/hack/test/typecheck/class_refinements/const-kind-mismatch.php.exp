@@ -1,8 +1,23 @@
-ERROR: File "const-kind-mismatch.php", line 8, characters 46-46:
-Invalid class refinement (Typing[4470])
-  File "const-kind-mismatch.php", line 8, characters 30-32:
-  Constant `C` in `Box` is not a type, did you mean ctx?
-ERROR: File "const-kind-mismatch.php", line 10, characters 45-45:
-Invalid class refinement (Typing[4470])
-  File "const-kind-mismatch.php", line 10, characters 30-32:
-  Constant `T` in `Box` is not a ctx, did you mean type?
+error: Typing[4470] Invalid class refinement [1]
+-> Constant `C` in `Box` is not a type, did you mean ctx? [2]
+
+const-kind-mismatch.php:8:46
+ 6 | }
+ 7 | 
+ 8 | function refined_ctx_as_type(Box with { type C = mixed } $_): void {}
+   |                              ^^^ [2]
+   |                                              ^ [1]
+ 9 | 
+10 | function refined_type_as_ctx(Box with { ctx T = [] } $_): void {}
+
+error: Typing[4470] Invalid class refinement [1]
+-> Constant `T` in `Box` is not a ctx, did you mean type? [2]
+
+const-kind-mismatch.php:10:45
+ 8 | function refined_ctx_as_type(Box with { type C = mixed } $_): void {}
+ 9 | 
+10 | function refined_type_as_ctx(Box with { ctx T = [] } $_): void {}
+   |                              ^^^ [2]
+   |                                             ^ [1]
+
+2 errors found

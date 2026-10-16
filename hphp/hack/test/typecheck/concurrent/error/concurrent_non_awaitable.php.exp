@@ -1,6 +1,19 @@
-ERROR: File "concurrent_non_awaitable.php", line 8, characters 10-20:
-`await` can only operate on an `Awaitable` (Typing[4110])
-  File "concurrent_non_awaitable.php", line 8, characters 10-20:
-  Expected `Awaitable<nothing>`
-  File "concurrent_non_awaitable.php", line 3, characters 17-19:
-  But got `int`
+error: Typing[4110] `await` can only operate on an `Awaitable` [1]
+-> Expected `Awaitable<nothing>` [1]
+-> But got `int` [2]
+
+concurrent_non_awaitable.php:8:10
+ 1 | <?hh
+ 2 | 
+ 3 | function get(): int { return 42; }
+   |                 ^^^ [2]
+ 4 | async function gen(): Awaitable<int> { return 42; }
+ 5 | 
+ 6 | async function foo(): Awaitable<void> {
+ 7 |   concurrent {
+ 8 |     $x = await get();
+   |          ^^^^^^^^^^^ [1]
+ 9 |     $y = await gen();
+10 |   }
+
+1 error found

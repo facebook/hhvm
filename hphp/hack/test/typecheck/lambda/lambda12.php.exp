@@ -1,6 +1,21 @@
-ERROR: File "lambda12.php", line 18, characters 19-33:
-Invalid return type (Typing[4110])
-  File "lambda12.php", line 12, characters 23-25:
-  Expected `int`
-  File "lambda12.php", line 14, characters 30-34:
-  But got `float`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `float` [3]
+
+lambda12.php:18:19
+10 |  */
+11 | 
+12 | type F = (function(): int);
+   |                       ^^^ [2]
+13 | class Foo {
+14 |   private function retDbl(): float {
+   |                              ^^^^^ [3]
+15 |     return 42.0;
+16 |   }
+17 |   public function get(): F {
+18 |     return () ==> $this->retDbl();
+   |                   ^^^^^^^^^^^^^^^ [1]
+19 |   }
+20 | }
+
+1 error found

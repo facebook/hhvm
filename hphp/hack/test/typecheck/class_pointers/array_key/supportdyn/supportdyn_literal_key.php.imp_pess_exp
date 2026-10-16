@@ -1,12 +1,46 @@
-ERROR: File "supportdyn_literal_key.php", line 12, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "supportdyn_literal_key.php", line 9, characters 18-37:
-  Definition is here
-ERROR: File "supportdyn_literal_key.php", line 19, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "supportdyn_literal_key.php", line 16, characters 15-22:
-  Definition is here
-ERROR: File "supportdyn_literal_key.php", line 26, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "supportdyn_literal_key.php", line 23, characters 33-52:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+supportdyn_literal_key.php:12:5
+ 7 | }
+ 8 | 
+ 9 | function wrapped(supportdyn<class<A>> $c): void {
+   |                  ^^^^^^^^^^^^^^^^^^^^ [2]
+10 |   $d = dict[$c => 1];
+11 |   foreach ($d as $k => $_) {
+12 |     $k::meth();
+   |     ^^ [1]
+13 |   }
+14 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+supportdyn_literal_key.php:19:5
+14 | }
+15 | 
+16 | function bare(class<A> $c): void {
+   |               ^^^^^^^^ [2]
+17 |   $d = dict[$c => 1];
+18 |   foreach ($d as $k => $_) {
+19 |     $k::meth();
+   |     ^^ [1]
+20 |   }
+21 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+supportdyn_literal_key.php:26:5
+21 | }
+22 | 
+23 | function wrapped_keyset_element(supportdyn<class<A>> $c): void {
+   |                                 ^^^^^^^^^^^^^^^^^^^^ [2]
+24 |   $k = keyset[$c];
+25 |   foreach ($k as $e) {
+26 |     $e::meth();
+   |     ^^ [1]
+27 |   }
+28 | }
+
+3 errors found

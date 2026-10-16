@@ -1,13 +1,33 @@
-WARN: File "case_type_equality_check.php", line 9, characters 12-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `MyInt` can never be equal to a value of type `MyBool` (Warn[12007])
-WARN: File "case_type_equality_check.php", line 9, characters 12-20:
-This expression is likely always `false` (Warn[12001])
-  File "case_type_equality_check.php", line 8, characters 12-16:
-  This is a value of type MyInt
-  File "case_type_equality_check.php", line 4, characters 11-15:
-  Typedef definition comes from here
-  File "case_type_equality_check.php", line 8, characters 22-27:
-  This is a value of type MyBool
-  File "case_type_equality_check.php", line 6, characters 11-16:
-  Typedef definition comes from here
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `MyInt` can never be equal to a value of type `MyBool` [1]
+
+case_type_equality_check.php:9:12
+ 7 | 
+ 8 | function f(MyInt $x, MyBool $y): bool {
+ 9 |     return $x === $y;
+   |            ^^^^^^^^^ [1]
+10 | }
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is a value of type MyInt [2]
+-> Typedef definition comes from here [3]
+-> This is a value of type MyBool [4]
+-> Typedef definition comes from here [5]
+
+case_type_equality_check.php:9:12
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type MyInt = int;
+   |           ^^^^^ [3]
+ 5 | 
+ 6 | case type MyBool = bool;
+   |           ^^^^^^ [5]
+ 7 | 
+ 8 | function f(MyInt $x, MyBool $y): bool {
+   |            ^^^^^ [2]
+   |                      ^^^^^^ [4]
+ 9 |     return $x === $y;
+   |            ^^^^^^^^^ [1]
+10 | }
+
+2 errors found

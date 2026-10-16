@@ -1,4 +1,17 @@
-ERROR: File "tconst6.php", line 16, characters 13-24:
-Invalid `is` expression hint (Typing[4195])
-  File "tconst6.php", line 12, characters 18-25:
-  The `is` operator cannot be used with a type with an erased generic type argument
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [2]
+
+tconst6.php:16:13
+10 | 
+11 | abstract class E {
+12 |   const type T = vec<int>;
+   |                  ^^^^^^^^ [2]
+13 | }
+14 | 
+15 | function f(mixed $x): void {
+16 |   if ($x is C::TD::TE::T) {
+   |             ^^^^^^^^^^^^ [1]
+17 |     expect_vec_int($x);
+18 |   }
+
+1 error found

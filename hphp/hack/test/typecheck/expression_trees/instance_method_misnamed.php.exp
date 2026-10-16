@@ -1,8 +1,22 @@
-ERROR: File "instance_method_misnamed.php", line 7, characters 11-14:
-No instance method `fooo` in `MyClass` (Typing[4053])
-  File "instance_method_misnamed.php", line 12, characters 19-21:
-  Did you mean `foo` instead?
-  File "instance_method_misnamed.php", line 6, characters 17-23:
-  This is why I think it is an object of type MyClass
-  File "instance_method_misnamed.php", line 11, characters 16-22:
-  Declaration of `MyClass` is here
+error: Typing[4053] No instance method `fooo` in `MyClass` [1]
+-> Did you mean `foo` instead? [2]
+-> This is why I think it is an object of type MyClass [3]
+-> Declaration of `MyClass` is here [4]
+
+instance_method_misnamed.php:7:11
+ 4 | 
+ 5 |   function test(): void {
+ 6 |     ExampleDsl`(MyClass $x) ==> {
+   |                 ^^^^^^^ [3]
+ 7 |       $x->fooo();
+   |           ^^^^ [1]
+ 8 |     }`;
+ 9 |   }
+10 | 
+11 | abstract class MyClass {
+   |                ^^^^^^^ [4]
+12 |   public function foo(ExampleInt $x): void {}
+   |                   ^^^ [2]
+13 | }
+
+1 error found

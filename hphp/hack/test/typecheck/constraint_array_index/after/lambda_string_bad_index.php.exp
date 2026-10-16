@@ -1,6 +1,14 @@
-ERROR: File "lambda_string_bad_index.php", line 4, characters 6-10:
-Invalid argument (Typing[4110])
-  File "lambda_string_bad_index.php", line 4, characters 6-10:
-  Expected `int` because only `int` can be used to index into a `string`.
-  File "lambda_string_bad_index.php", line 3, characters 19-20:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because only `int` can be used to index into a `string`. [1]
+-> But got `string` [2]
+
+lambda_string_bad_index.php:4:6
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v[""]);
+  |                   ^^ [2]
+4 |   $f("abc");
+  |      ^^^^^ [1]
+5 | }
+
+1 error found

@@ -1,20 +1,90 @@
-ERROR: File "level_5.php", line 37, characters 3-15:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 31, characters 31-38:
-  Definition is here
-ERROR: File "level_5.php", line 39, characters 3-17:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 31, characters 31-38:
-  Definition is here
-ERROR: File "level_5.php", line 41, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 31, characters 31-38:
-  Definition is here
-ERROR: File "level_5.php", line 43, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 31, characters 31-38:
-  Definition is here
-ERROR: File "level_5.php", line 45, characters 3-16:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_5.php", line 25, characters 35-42:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:37:3
+29 | }
+30 | 
+31 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+32 |   return C::class;
+33 | }
+34 | 
+35 | function test(): void {
+36 |   $string_union = id_string_union(get_class_pointer());
+37 |   $string_union::method();
+   |   ^^^^^^^^^^^^^ [1]
+38 |   $arraykey_union = id_arraykey_union(get_class_pointer());
+39 |   $arraykey_union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:39:3
+29 | }
+30 | 
+31 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+32 |   return C::class;
+33 | }
+   :
+37 |   $string_union::method();
+38 |   $arraykey_union = id_arraykey_union(get_class_pointer());
+39 |   $arraykey_union::method();
+   |   ^^^^^^^^^^^^^^^ [1]
+40 |   $stringish_union = id_stringish_union(get_class_pointer());
+41 |   $stringish_union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:41:3
+29 | }
+30 | 
+31 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+32 |   return C::class;
+33 | }
+   :
+39 |   $arraykey_union::method();
+40 |   $stringish_union = id_stringish_union(get_class_pointer());
+41 |   $stringish_union::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+42 |   $xhp_child_union = id_xhp_child_union(get_class_pointer());
+43 |   $xhp_child_union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:43:3
+29 | }
+30 | 
+31 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+32 |   return C::class;
+33 | }
+   :
+41 |   $stringish_union::method();
+42 |   $xhp_child_union = id_xhp_child_union(get_class_pointer());
+43 |   $xhp_child_union::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+44 |   $upper_arrives = lower_then_upper(get_class_pointer());
+45 |   $upper_arrives::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_5.php:45:3
+23 | }
+24 | 
+25 | function lower_then_upper<T super class<C> as (string | float)>(
+   |                                   ^^^^^^^^ [2]
+26 |   T $value,
+27 | ): T {
+   :
+43 |   $xhp_child_union::method();
+44 |   $upper_arrives = lower_then_upper(get_class_pointer());
+45 |   $upper_arrives::method();
+   |   ^^^^^^^^^^^^^^ [1]
+46 | }
+
+5 errors found

@@ -1,6 +1,31 @@
-ERROR: File "tparam_in_tparam_bound_variance.php", line 10, characters 5-5:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Cov1<TKey>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tparam_in_tparam_bound_variance.php", line 34, characters 5-5:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Contrav1<TKey>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tparam_in_tparam_bound_variance.php", line 53, characters 5-5:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Inv1<TKey>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Cov1<TKey>` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tparam_in_tparam_bound_variance.php:10:5
+ 8 | abstract final class Variance {
+ 9 |   public static function cov_class_in_cov_pos<
+10 |     T super Cov1<TKey>,
+   |     ^ [1]
+11 |     TKey super arraykey,
+12 |   >(): ?T {
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Contrav1<TKey>` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tparam_in_tparam_bound_variance.php:34:5
+32 | 
+33 |   public static function contrav_class_in_cov_pos<
+34 |     T super Contrav1<TKey>,
+   |     ^ [1]
+35 |     TKey as arraykey,
+36 |   >(): ?T {
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `Inv1<TKey>` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tparam_in_tparam_bound_variance.php:53:5
+51 | 
+52 |   public static function inv_class_in_cov_pos<
+53 |     T super Inv1<TKey>,
+   |     ^ [1]
+54 |     TKey as arraykey,
+55 |   >(): ?T {
+
+3 errors found

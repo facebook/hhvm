@@ -1,4 +1,13 @@
-ERROR: File "bad_inout_use_arg12.php", line 7, characters 11-15:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-  File "bad_inout_use_arg12.php", line 6, characters 8-23:
-  This is an object of type Vector<int>
+error: Typing[4208] Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. [1]
+-> This is an object of type Vector<int> [2]
+
+bad_inout_use_arg12.php:7:11
+4 | 
+5 | function test(): void {
+6 |   $x = Vector { 3, 42 };
+  |        ^^^^^^^^^^^^^^^^ [2]
+7 |   f(inout $x[1]);
+  |           ^^^^^ [1]
+8 | }
+
+1 error found

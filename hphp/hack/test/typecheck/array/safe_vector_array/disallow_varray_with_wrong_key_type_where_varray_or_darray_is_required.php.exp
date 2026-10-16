@@ -1,6 +1,15 @@
-ERROR: File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-15:
-Invalid return type (Typing[4110])
-  File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 3, characters 36-41:
-  Expected `string`
-  File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-15:
-  But got `int` because only `int` can be used to index into a `Vector` or `vec`.
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` because only `int` can be used to index into a `Vector` or `vec`. [1]
+
+disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php:4:10
+1 | <?hh
+2 | 
+3 | function test1(): varray_or_darray<string, int> {
+  |                                    ^^^^^^ [2]
+4 |   return vec[0]; // error
+  |          ^^^^^^ [1]
+5 | }
+6 | 
+
+1 error found

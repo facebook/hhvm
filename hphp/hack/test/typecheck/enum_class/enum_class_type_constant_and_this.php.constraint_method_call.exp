@@ -1,2 +1,11 @@
-ERROR: File "enum_class_type_constant_and_this.php", line 18, characters 23-23:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `FastAnimalTestRunner<this>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `FastAnimalTestRunner<this>` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+enum_class_type_constant_and_this.php:18:23
+16 | final class DogTest implements AnimalTest {
+17 | 
+18 |   public function run<T as FastAnimalTestRunner<this>>(
+   |                       ^ [1]
+19 |     HH\EnumClass\Label<FastAnimalTestRunners, T> $label,
+20 |   ): void {
+
+1 error found

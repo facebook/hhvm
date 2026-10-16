@@ -1,12 +1,21 @@
-ERROR: File "type_constant_nast.php", line 8, characters 27-38:
-Some type arguments violate their constraints (Typing[4323])
-  File "type_constant_nast.php", line 7, characters 19-19:
-  `T` is a constrained type parameter
-  File "type_constant_nast.php", line 7, characters 24-25:
-  This type constraint is violated
-  File "type_constant_nast.php", line 7, characters 24-25:
-  Expected `I2`
-  File "type_constant_nast.php", line 9, characters 19-20:
-  But got `I1`
-  File "type_constant_nast.php", line 8, characters 30-37:
-    resulting from expanding the type constant `this::TI`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I2` [3]
+-> But got `I1` [4]
+->   resulting from expanding the type constant `this::TI` [5]
+
+type_constant_nast.php:8:27
+ 5 | interface I2 extends I1 {}
+ 6 | 
+ 7 | abstract class A1<T as I2> {}
+   |                   ^ [2]
+   |                        ^^ [3]
+ 8 | abstract class A2 extends A1<this::TI> {
+   |                           ^^^^^^^^^^^^ [1]
+   |                              ^^^^^^^^ [5]
+ 9 |   const type TI = I1;
+   |                   ^^ [4]
+10 | }
+
+1 error found

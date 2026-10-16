@@ -1,18 +1,38 @@
-ERROR: File "higher_rank_escape_bad1.php", line 11, characters 12-13:
-Invalid argument (Typing[4110])
-  File "higher_rank_escape_bad1.php", line 7, characters 29-29:
-  Expected a first-class polymorphic function type.
-  File "higher_rank_escape_bad1.php", line 7, characters 29-29:
-  A higher rank generic `T#1` will escape its scope where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "higher_rank_escape_bad1.php", line 7, characters 29-29:
-  This type argument to `Box` must match exactly (it is invariant)
-  File "higher_rank_escape_bad1.php", line 10, characters 13-13:
-  Please make this type explicit
-ERROR: File "higher_rank_escape_bad1.php", line 11, characters 12-13:
-Invalid argument (Typing[4110])
-  File "higher_rank_escape_bad1.php", line 7, characters 29-29:
-  Expected a first-class polymorphic function type.
-  File "higher_rank_escape_bad1.php", line 7, characters 29-29:
-  A higher rank generic `T#1` will escape its scope where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "higher_rank_escape_bad1.php", line 10, characters 13-13:
-  Please make this type explicit
+error: Typing[4110] Invalid argument [1]
+-> Expected a first-class polymorphic function type. [2]
+-> A higher rank generic `T#1` will escape its scope where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [2]
+-> This type argument to `Box` must match exactly (it is invariant) [2]
+-> Please make this type explicit [3]
+
+higher_rank_escape_bad1.php:11:12
+ 5 | class Box<T> {}
+ 6 | 
+ 7 | function takePoly((function<T>(Box<T>): void) $g): void {}
+   |                             ^ [2]
+ 8 | 
+ 9 | function passWithTvar(): void {
+10 |   $g = (Box<_> $_): void ==> {};
+   |             ^ [3]
+11 |   takePoly($g);
+   |            ^^ [1]
+12 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a first-class polymorphic function type. [2]
+-> A higher rank generic `T#1` will escape its scope where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [2]
+-> Please make this type explicit [3]
+
+higher_rank_escape_bad1.php:11:12
+ 5 | class Box<T> {}
+ 6 | 
+ 7 | function takePoly((function<T>(Box<T>): void) $g): void {}
+   |                             ^ [2]
+ 8 | 
+ 9 | function passWithTvar(): void {
+10 |   $g = (Box<_> $_): void ==> {};
+   |             ^ [3]
+11 |   takePoly($g);
+   |            ^^ [1]
+12 | }
+
+2 errors found

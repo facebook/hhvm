@@ -1,16 +1,73 @@
-ERROR: File "is-expr-alias.php", line 19, characters 17-29:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expr-alias.php", line 9, characters 22-50:
-  The `is` operator cannot be used with type refinement
-ERROR: File "is-expr-alias.php", line 21, characters 12-37:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expr-alias.php", line 10, characters 19-44:
-  The `is` operator cannot be used with type refinement
-ERROR: File "is-expr-alias.php", line 24, characters 17-21:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expr-alias.php", line 12, characters 19-47:
-  The `is` operator cannot be used with type refinement
-ERROR: File "is-expr-alias.php", line 26, characters 12-32:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expr-alias.php", line 13, characters 19-44:
-  The `is` operator cannot be used with type refinement
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with type refinement [2]
+
+is-expr-alias.php:19:17
+ 7 |   abstract const type T;
+ 8 | }
+ 9 | type BoxWithString = Box with { type T = string; };
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | type BoxWithInt = Box with { type T = int; };
+11 | abstract class C {
+   :
+17 | 
+18 | function is_contains_box_refinement(mixed $b): bool {
+19 |   return ($b is BoxWithString) // ERROR (non-nested)
+   |                 ^^^^^^^^^^^^^ [1]
+20 |     ||
+21 |     ($b is shape('bad' => BoxWithInt)); // ERROR (nested)
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with type refinement [2]
+
+is-expr-alias.php:21:12
+ 8 | }
+ 9 | type BoxWithString = Box with { type T = string; };
+10 | type BoxWithInt = Box with { type T = int; };
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+11 | abstract class C {
+12 |   const type TS = Box with { type T = string; };
+   :
+19 |   return ($b is BoxWithString) // ERROR (non-nested)
+20 |     ||
+21 |     ($b is shape('bad' => BoxWithInt)); // ERROR (nested)
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 | }
+23 | function is_contains_box_refinement2(mixed $b): bool {
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with type refinement [2]
+
+is-expr-alias.php:24:17
+10 | type BoxWithInt = Box with { type T = int; };
+11 | abstract class C {
+12 |   const type TS = Box with { type T = string; };
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 |   const type TI = Box with { type T = int; };
+14 |   <<__Enforceable>>
+   :
+22 | }
+23 | function is_contains_box_refinement2(mixed $b): bool {
+24 |   return ($b is C::TS) // ERROR (non-nested)
+   |                 ^^^^^ [1]
+25 |     ||
+26 |     ($b is shape('bad' => C::TI)); // ERROR (nested)
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with type refinement [2]
+
+is-expr-alias.php:26:12
+11 | abstract class C {
+12 |   const type TS = Box with { type T = string; };
+13 |   const type TI = Box with { type T = int; };
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 |   <<__Enforceable>>
+15 |   abstract const type TC as Box with { type T = arraykey; };
+   :
+24 |   return ($b is C::TS) // ERROR (non-nested)
+25 |     ||
+26 |     ($b is shape('bad' => C::TI)); // ERROR (nested)
+   |            ^^^^^^^^^^^^^^^^^^^^^ [1]
+27 | }
+28 | abstract class D extends C {
+
+4 errors found

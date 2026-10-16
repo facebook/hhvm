@@ -1,4 +1,18 @@
-ERROR: File "do_break_undefined.php", line 11, characters 10-11:
-Variable `$s` is undefined, or not always defined. (Naming[2050])
-  File "do_break_undefined.php", line 4, characters 3-8:
-  Did you mean `$i` instead?
+error: Naming[2050] Variable `$s` is undefined, or not always defined. [1]
+-> Did you mean `$i` instead? [2]
+
+do_break_undefined.php:11:10
+ 2 | 
+ 3 | function test_flow():string {
+ 4 |   $i = 0;
+   |   ^^^^^^ [2]
+ 5 |   do {
+ 6 |     if ($i < 5) break;
+   :
+ 9 |   } while ($i < 10);
+10 |   // Because of the break statement $s isn't defined
+11 |   return $s;
+   |          ^^ [1]
+12 | }
+
+1 error found

@@ -1,14 +1,53 @@
-WARN: File "refinement.php", line 17, characters 7-25:
-This `is` check is always `false`. The expression on the left has type `C<int>` which shares no values with `AnyArray<Tk#1, Tv#1>`. (Warn[12010])
-ERROR: File "refinement.php", line 18, characters 11-12:
-Invalid return type (Typing[4110])
-  File "refinement.php", line 8, characters 46-70:
-  Expected `AnyArray<arraykey, mixed>`
-  File "refinement.php", line 17, characters 13-25:
-  But got `dynamic` from this `is` expression test
-ERROR: File "refinement.php", line 21, characters 18-19:
-Invalid argument (Typing[4110])
-  File "refinement.php", line 6, characters 24-29:
-  Expected `D<int>`
-  File "refinement.php", line 20, characters 13-16:
-  But got `dynamic` from this `is` expression test
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `C<int>` which shares no values with `AnyArray<Tk#1, Tv#1>`. [1]
+
+refinement.php:17:7
+15 |   }
+16 | 
+17 |   if ($x is AnyArray<_,_>) {
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+18 |    return $x;
+19 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `AnyArray<arraykey, mixed>` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+refinement.php:18:11
+ 6 | function expect_d_int (D<int> $i) : void {}
+ 7 | 
+ 8 | function f(dynamic $d, C<int> $c, bool $b) : AnyArray<arraykey, mixed> {
+   |                                              ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   if ($b) {
+10 |     $x = $d;
+   :
+15 |   }
+16 | 
+17 |   if ($x is AnyArray<_,_>) {
+   |             ^^^^^^^^^^^^^ [3]
+18 |    return $x;
+   |           ^^ [1]
+19 |   }
+20 |   if ($y is D<_>) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `D<int>` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+refinement.php:21:18
+ 4 | class D<T> extends C<T> {}
+ 5 | 
+ 6 | function expect_d_int (D<int> $i) : void {}
+   |                        ^^^^^^ [2]
+ 7 | 
+ 8 | function f(dynamic $d, C<int> $c, bool $b) : AnyArray<arraykey, mixed> {
+   :
+18 |    return $x;
+19 |   }
+20 |   if ($y is D<_>) {
+   |             ^^^^ [3]
+21 |     expect_d_int($y);
+   |                  ^^ [1]
+22 |   }
+23 |   return dict[];
+
+3 errors found

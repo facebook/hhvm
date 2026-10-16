@@ -1,20 +1,39 @@
-ERROR: File "case_type_cyclic_case_type_mutually.php", line 4, characters 11-11:
-Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_cyclic_case_type_mutually.php", line 4, characters 15-15:
-  This is the type `B`, which includes **ints** because it is a cyclic type
-  File "case_type_cyclic_case_type_mutually.php", line 6, characters 15-15:
-    via this variant of the case type `B`
-  File "case_type_cyclic_case_type_mutually.php", line 4, characters 15-15:
-    via this variant of the case type `A`
-  File "case_type_cyclic_case_type_mutually.php", line 4, characters 19-21:
-  It overlaps with `int`, which also includes **ints**
-ERROR: File "case_type_cyclic_case_type_mutually.php", line 6, characters 11-11:
-Invalid case type declaration. More than one variant of `B` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_cyclic_case_type_mutually.php", line 6, characters 15-15:
-  This is the type `A`, which includes **strings** because it is a cyclic type
-  File "case_type_cyclic_case_type_mutually.php", line 4, characters 15-15:
-    via this variant of the case type `A`
-  File "case_type_cyclic_case_type_mutually.php", line 6, characters 15-15:
-    via this variant of the case type `B`
-  File "case_type_cyclic_case_type_mutually.php", line 6, characters 19-24:
-  It overlaps with `string`, which also includes **strings**
+error: Typing[4475] Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag [1]
+-> This is the type `B`, which includes **ints** because it is a cyclic type [2]
+->   via this variant of the case type `B` [3]
+->   via this variant of the case type `A` [2]
+-> It overlaps with `int`, which also includes **ints** [4]
+
+case_type_cyclic_case_type_mutually.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A = B | int;
+  |           ^ [1]
+  |               ^ [2]
+  |                   ^^^ [4]
+5 | 
+6 | case type B = A | string;
+  |               ^ [3]
+7 | 
+8 | function f(A $a, B $b): void {
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `B` could contain values with the same runtime tag [1]
+-> This is the type `A`, which includes **strings** because it is a cyclic type [2]
+->   via this variant of the case type `A` [3]
+->   via this variant of the case type `B` [2]
+-> It overlaps with `string`, which also includes **strings** [4]
+
+case_type_cyclic_case_type_mutually.php:6:11
+2 | <<file:__EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+3 | 
+4 | case type A = B | int;
+  |               ^ [3]
+5 | 
+6 | case type B = A | string;
+  |           ^ [1]
+  |               ^ [2]
+  |                   ^^^^^^ [4]
+7 | 
+8 | function f(A $a, B $b): void {
+
+2 errors found

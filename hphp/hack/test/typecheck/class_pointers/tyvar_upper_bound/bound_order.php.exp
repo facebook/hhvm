@@ -1,12 +1,50 @@
-ERROR: File "bound_order.php", line 24, characters 3-8:
-It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. (Typing[4482])
-  File "bound_order.php", line 22, characters 38-45:
-  Definition is here
-ERROR: File "bound_order.php", line 29, characters 3-8:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "bound_order.php", line 10, characters 15-22:
-  Definition is here
-ERROR: File "bound_order.php", line 34, characters 3-8:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "bound_order.php", line 14, characters 32-39:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. [1]
+-> Definition is here [2]
+
+bound_order.php:24:3
+20 | }
+21 | 
+22 | function test_lower_arrives_abstract(class<C> $class): void {
+   |                                      ^^^^^^^^ [2]
+23 |   $value = lower_arrives_abstract($class);
+24 |   $value::method();
+   |   ^^^^^^ [1]
+25 | }
+26 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+bound_order.php:29:3
+ 8 | 
+ 9 | function lower_arrives<T as string>(?T $_ = null): T
+10 | where T super class<C> {
+   |               ^^^^^^^^ [2]
+11 |   throw new Exception();
+12 | }
+   :
+27 | function test_lower_arrives(): void {
+28 |   $value = lower_arrives();
+29 |   $value::method();
+   |   ^^^^^^ [1]
+30 | }
+31 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+bound_order.php:34:3
+12 | }
+13 | 
+14 | function upper_arrives<T super class<C> as string>(?T $_ = null): T {
+   |                                ^^^^^^^^ [2]
+15 |   throw new Exception();
+16 | }
+   :
+32 | function test_upper_arrives(): void {
+33 |   $value = upper_arrives();
+34 |   $value::method();
+   |   ^^^^^^ [1]
+35 | }
+
+3 errors found

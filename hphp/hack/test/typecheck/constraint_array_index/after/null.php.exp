@@ -1,4 +1,12 @@
-ERROR: File "null.php", line 3, characters 3-11:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "null.php", line 3, characters 3-6:
-  This is what makes me believe it can be `null`
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+null.php:3:3
+1 | <?hh
+2 | function f(): void {
+3 |   null["a"];
+  |   ^^^^^^^^^ [1]
+  |   ^^^^ [2]
+4 | }
+
+1 error found

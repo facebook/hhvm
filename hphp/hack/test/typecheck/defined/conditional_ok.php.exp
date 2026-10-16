@@ -1,4 +1,21 @@
-ERROR: File "conditional_ok.php", line 5, characters 14-15:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "conditional_ok.php", line 5, characters 26-27:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+conditional_ok.php:5:14
+3 | function foo(bool $b): int {
+4 |   // broken for now because eif is broken
+5 |   $y = $b ? ($x = 42) : ($x = -1);
+  |              ^^ [1]
+6 |   return $x;
+7 | }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+conditional_ok.php:5:26
+3 | function foo(bool $b): int {
+4 |   // broken for now because eif is broken
+5 |   $y = $b ? ($x = 42) : ($x = -1);
+  |                          ^^ [1]
+6 |   return $x;
+7 | }
+
+2 errors found

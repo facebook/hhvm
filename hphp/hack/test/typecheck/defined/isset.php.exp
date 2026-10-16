@@ -1,6 +1,28 @@
-ERROR: File "isset.php", line 8, characters 10-11:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "isset.php", line 3, characters 20-21:
-  Did you mean `$b` instead?
-ERROR: File "isset.php", line 7, characters 7-15:
-`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$b` instead? [2]
+
+isset.php:8:10
+ 1 | <?hh
+ 2 | 
+ 3 | function test(bool $b): void {
+   |                    ^^ [2]
+ 4 |   if ($b) {
+ 5 |     $x = 1;
+ 6 |   }
+ 7 |   if (isset($x)) {
+ 8 |     echo $x;
+   |          ^^ [1]
+ 9 |   }
+10 | }
+
+error: Typing[4016] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode [1]
+
+isset.php:7:7
+5 |     $x = 1;
+6 |   }
+7 |   if (isset($x)) {
+  |       ^^^^^^^^^ [1]
+8 |     echo $x;
+9 |   }
+
+2 errors found

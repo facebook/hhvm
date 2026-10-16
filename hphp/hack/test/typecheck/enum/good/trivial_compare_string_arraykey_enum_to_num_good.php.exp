@@ -1,12 +1,44 @@
-WARN: File "trivial_compare_string_arraykey_enum_to_num_good.php", line 9, characters 10-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `A` can never be equal to a value of type `num` (Warn[12007])
-WARN: File "trivial_compare_string_arraykey_enum_to_num_good.php", line 13, characters 10-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `num` can never be equal to a value of type `A` (Warn[12007])
-WARN: File "trivial_compare_string_arraykey_enum_to_num_good.php", line 17, characters 10-20:
-Invalid comparison: This expression will always return `true`.
-A value of type `A` can never be equal to a value of type `num` (Warn[12007])
-WARN: File "trivial_compare_string_arraykey_enum_to_num_good.php", line 21, characters 10-20:
-Invalid comparison: This expression will always return `true`.
-A value of type `num` can never be equal to a value of type `A` (Warn[12007])
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `A` can never be equal to a value of type `num` [1]
+
+trivial_compare_string_arraykey_enum_to_num_good.php:9:10
+ 7 | // Should not fail because A::X is constrained by arraykey (string | int), and ints not trivially unequal to nums
+ 8 | function f1(num $x): bool {
+ 9 |   return A::X === $x;
+   |          ^^^^^^^^^^^ [1]
+10 | }
+11 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `num` can never be equal to a value of type `A` [1]
+
+trivial_compare_string_arraykey_enum_to_num_good.php:13:10
+11 | 
+12 | function f2(num $x): bool {
+13 |   return $x === A::X;
+   |          ^^^^^^^^^^^ [1]
+14 | }
+15 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `A` can never be equal to a value of type `num` [1]
+
+trivial_compare_string_arraykey_enum_to_num_good.php:17:10
+15 | 
+16 | function f3(num $x): bool {
+17 |   return A::X !== $x;
+   |          ^^^^^^^^^^^ [1]
+18 | }
+19 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `num` can never be equal to a value of type `A` [1]
+
+trivial_compare_string_arraykey_enum_to_num_good.php:21:10
+19 | 
+20 | function f4(num $x): bool {
+21 |   return $x !== A::X;
+   |          ^^^^^^^^^^^ [1]
+22 | }
+
+4 errors found

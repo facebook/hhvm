@@ -1,12 +1,47 @@
-ERROR: File "lambda.php", line 16, characters 5-13:
-Unrecognized user attribute: `__Invalid` starts with __ but is not a standard attribute (Naming[2049])
-ERROR: File "lambda.php", line 15, characters 5-7:
-The `Bad` attribute cannot be used on a lambda expression. (Typing[4231])
-  File "lambda.php", line 7, characters 7-9:
-  The attribute's class is defined here. To be available for use on a lambda expression, the `Bad` class must implement `HH\LambdaAttribute`.
-ERROR: File "lambda.php", line 15, characters 21-36:
-Invalid argument (Typing[4110])
-  File "lambda.php", line 4, characters 38-40:
-  Expected `int`
-  File "lambda.php", line 15, characters 21-36:
-  But got `string`
+error: Naming[2049] Unrecognized user attribute: `__Invalid` starts with __ but is not a standard attribute [1]
+
+lambda.php:16:5
+14 | 
+15 |   <<Bad("hi"), Good('but not really')>> () ==> {};
+16 |   <<__Invalid>> async $x ==> null;
+   |     ^^^^^^^^^ [1]
+17 | }
+
+error: Typing[4231] The `Bad` attribute cannot be used on a lambda expression. [1]
+-> The attribute's class is defined here. To be available for use on a lambda expression, the `Bad` class must implement `HH\LambdaAttribute`. [2]
+
+lambda.php:15:5
+ 5 | }
+ 6 | 
+ 7 | class Bad implements HH\ClassAttribute {
+   |       ^^^ [2]
+ 8 |   public function __construct(public string $s) {}
+ 9 | }
+   :
+13 |   () ==> {};
+14 | 
+15 |   <<Bad("hi"), Good('but not really')>> () ==> {};
+   |     ^^^ [1]
+16 |   <<__Invalid>> async $x ==> null;
+17 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+lambda.php:15:21
+ 2 | 
+ 3 | class Good implements HH\LambdaAttribute {
+ 4 |   public function __construct(public int $i) {}
+   |                                      ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+13 |   () ==> {};
+14 | 
+15 |   <<Bad("hi"), Good('but not really')>> () ==> {};
+   |                     ^^^^^^^^^^^^^^^^ [1]
+16 |   <<__Invalid>> async $x ==> null;
+17 | }
+
+3 errors found

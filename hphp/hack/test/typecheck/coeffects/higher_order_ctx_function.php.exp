@@ -1,6 +1,15 @@
-ERROR: File "higher_order_ctx_function.php", line 12, characters 3-6:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "higher_order_ctx_function.php", line 10, characters 23-24:
-  From this declaration, the context of this function body provides the capability set {}
-  File "higher_order_ctx_function.php", line 12, characters 3-6:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [1]
+
+higher_order_ctx_function.php:12:3
+ 8 | function impure()[defaults]: void {}
+ 9 | 
+10 | function pure_caller()[]: void {
+   |                       ^^ [2]
+11 |   poly(pure<>);
+12 |   poly(impure<>);
+   |   ^^^^ [1]
+13 | }
+
+1 error found

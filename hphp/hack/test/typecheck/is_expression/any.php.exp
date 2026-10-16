@@ -1,2 +1,11 @@
-ERROR: File "any.php", line 6, characters 26-27:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+any.php:6:26
+4 |  * TODO(T29281383)
+5 |  */
+6 | function main(/* TAny */ $x): void {
+  |                          ^^ [1]
+7 |   if ($x is int) {
+8 |     expect_int($x);
+
+1 error found

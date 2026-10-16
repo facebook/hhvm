@@ -1,8 +1,31 @@
-ERROR: File "invalid_foreach_arrow1.php", line 4, characters 21-21:
-An arrow `=>` or right parenthesis `)` is expected here. (Parsing[1002])
-ERROR: File "invalid_foreach_arrow1.php", line 6, characters 19-20:
-Invalid argument (Typing[4110])
-  File "invalid_foreach_arrow1.php", line 11, characters 24-26:
-  Expected `int`
-  File "invalid_foreach_arrow1.php", line 3, characters 34-39:
-  But got `string`
+error: Parsing[1002] An arrow `=>` or right parenthesis `)` is expected here. [1]
+
+invalid_foreach_arrow1.php:4:21
+2 | 
+3 | function f(KeyedTraversable<int, string> $t): void {
+4 |   foreach ($t as $k @ $v) {
+  |                     ^ [1]
+5 |     expect_int($k);
+6 |     expect_string($v);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+invalid_foreach_arrow1.php:6:19
+ 1 | <?hh
+ 2 | 
+ 3 | function f(KeyedTraversable<int, string> $t): void {
+   |                                  ^^^^^^ [3]
+ 4 |   foreach ($t as $k @ $v) {
+ 5 |     expect_int($k);
+ 6 |     expect_string($v);
+   |                   ^^ [1]
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | function expect_int(int $x): void {}
+11 | function expect_string(int $x): void {}
+   |                        ^^^ [2]
+
+2 errors found

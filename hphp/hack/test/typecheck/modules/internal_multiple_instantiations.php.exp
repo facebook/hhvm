@@ -1,18 +1,38 @@
-ERROR: File "internal_multiple_instantiations.php--A.php", line 5, characters 21-28:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "internal_multiple_instantiations.php--A.php", line 4, characters 20-20:
-  It is declared as `internal` here
-ERROR: File "internal_multiple_instantiations.php--B.php", line 3, characters 17-17:
-This makes D implements F<arraykey> but it already implements F at another instantiation (Typing[4480])
-  File "internal_multiple_instantiations.php--B.php", line 3, characters 30-30:
-  It already implements F<float> via G
-  File "internal_multiple_instantiations.php--A.php", line 5, characters 21-21:
-  This is where G implements F
-  File "internal_multiple_instantiations.php--A.php", line 6, characters 20-20:
-  This is where C implements F
-  File "internal_multiple_instantiations.php--A.php", line 5, characters 21-21:
-  F<float> should be a subtype of F<arraykey>, but it's not because
-  File "internal_multiple_instantiations.php--A.php", line 6, characters 22-29:
-  Expected `arraykey`
-  File "internal_multiple_instantiations.php--A.php", line 5, characters 23-27:
-  But got `float`
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+internal_multiple_instantiations.php--A.php:5:21
+2 | module A;
+3 | 
+4 | internal interface F<+T> {}
+  |                    ^ [2]
+5 | interface G extends F<float> {}
+  |                     ^^^^^^^^ [1]
+6 | class C implements F<arraykey> {}
+
+error: Typing[4480] This makes D implements F<arraykey> but it already implements F at another instantiation [1]
+-> It already implements F<float> via G [2]
+-> This is where G implements F [3]
+-> This is where C implements F [4]
+-> F<float> should be a subtype of F<arraykey>, but it's not because [3]
+-> Expected `arraykey` [5]
+-> But got `float` [6]
+
+internal_multiple_instantiations.php--B.php:3:17
+1 | <?hh
+2 | module B;
+3 | class D extends C implements G {}
+  |                 ^ [1]
+  |                              ^ [2]
+
+internal_multiple_instantiations.php--A.php:5:21
+3 | 
+4 | internal interface F<+T> {}
+5 | interface G extends F<float> {}
+  |                     ^ [3]
+  |                       ^^^^^ [6]
+6 | class C implements F<arraykey> {}
+  |                    ^ [4]
+  |                      ^^^^^^^^ [5]
+
+2 errors found

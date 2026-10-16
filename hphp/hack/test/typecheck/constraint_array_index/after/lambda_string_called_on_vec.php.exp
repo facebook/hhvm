@@ -1,6 +1,15 @@
-ERROR: File "lambda_string_called_on_vec.php", line 4, characters 6-11:
-Invalid argument (Typing[4110])
-  File "lambda_string_called_on_vec.php", line 3, characters 16-17:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "lambda_string_called_on_vec.php", line 3, characters 19-29:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+lambda_string_called_on_vec.php:4:6
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v["oiia oiia"]);
+  |                ^^ [2]
+  |                   ^^^^^^^^^^^ [3]
+4 |   $f(vec[0]);
+  |      ^^^^^^ [1]
+5 | }
+
+1 error found

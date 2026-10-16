@@ -1,40 +1,92 @@
-ERROR: File "use_trait_bad_constraint.php", line 10, characters 7-28:
-Some type arguments violate their constraints (Typing[4323])
-  File "use_trait_bad_constraint.php", line 4, characters 14-15:
-  `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint.php", line 10, characters 16-17:
-  This type constraint is violated
-  File "use_trait_bad_constraint.php", line 10, characters 16-17:
-  Expected `this::TA`
-  File "use_trait_bad_constraint.php", line 10, characters 20-27:
-  But got `A1::TB super this::TB`
-ERROR: File "use_trait_bad_constraint.php", line 10, characters 7-28:
-Some type arguments violate their constraints (Typing[4323])
-  File "use_trait_bad_constraint.php", line 4, characters 14-15:
-  `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint.php", line 10, characters 16-17:
-  This type constraint is violated
-  File "use_trait_bad_constraint.php", line 10, characters 16-17:
-  Expected `this::TA`
-  File "use_trait_bad_constraint.php", line 10, characters 20-27:
-  But got `mixed`
-ERROR: File "use_trait_bad_constraint.php", line 10, characters 7-28:
-Some type arguments violate their constraints (Typing[4323])
-  File "use_trait_bad_constraint.php", line 4, characters 14-15:
-  `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint.php", line 10, characters 16-17:
-  This type constraint is violated
-  File "use_trait_bad_constraint.php", line 10, characters 16-17:
-  Expected `this::TA`
-  File "use_trait_bad_constraint.php", line 10, characters 20-27:
-  But got `this::TB as A1::TB`
-ERROR: File "use_trait_bad_constraint.php", line 16, characters 7-20:
-Some type arguments violate their constraints (Typing[4323])
-  File "use_trait_bad_constraint.php", line 4, characters 14-15:
-  `Tb` is a constrained type parameter
-  File "use_trait_bad_constraint.php", line 16, characters 10-15:
-  This type constraint is violated
-  File "use_trait_bad_constraint.php", line 16, characters 10-15:
-  Expected `string`
-  File "use_trait_bad_constraint.php", line 16, characters 17-19:
-  But got `int`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tb` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `this::TA` [3]
+-> But got `A1::TB super this::TB` [4]
+
+use_trait_bad_constraint.php:10:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | trait T1<Ta, Tb as Ta> {
+   |              ^^ [2]
+ 5 |   final public function do(Tb $in): Ta {
+ 6 |     return $in;
+ 7 |   }
+ 8 | }
+ 9 | abstract class A1 {
+10 |   use T1<this::TA, this::TB>;
+   |       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                ^^ [3]
+   |                    ^^^^^^^^ [4]
+11 |   abstract const type TA;
+12 |   abstract const type TB;
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tb` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `this::TA` [3]
+-> But got `mixed` [4]
+
+use_trait_bad_constraint.php:10:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | trait T1<Ta, Tb as Ta> {
+   |              ^^ [2]
+ 5 |   final public function do(Tb $in): Ta {
+ 6 |     return $in;
+ 7 |   }
+ 8 | }
+ 9 | abstract class A1 {
+10 |   use T1<this::TA, this::TB>;
+   |       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                ^^ [3]
+   |                    ^^^^^^^^ [4]
+11 |   abstract const type TA;
+12 |   abstract const type TB;
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tb` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `this::TA` [3]
+-> But got `this::TB as A1::TB` [4]
+
+use_trait_bad_constraint.php:10:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | trait T1<Ta, Tb as Ta> {
+   |              ^^ [2]
+ 5 |   final public function do(Tb $in): Ta {
+ 6 |     return $in;
+ 7 |   }
+ 8 | }
+ 9 | abstract class A1 {
+10 |   use T1<this::TA, this::TB>;
+   |       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                ^^ [3]
+   |                    ^^^^^^^^ [4]
+11 |   abstract const type TA;
+12 |   abstract const type TB;
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tb` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+use_trait_bad_constraint.php:16:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | trait T1<Ta, Tb as Ta> {
+   |              ^^ [2]
+ 5 |   final public function do(Tb $in): Ta {
+ 6 |     return $in;
+   :
+14 | 
+15 | class C1{
+16 |   use T1<string,int>;
+   |       ^^^^^^^^^^^^^^ [1]
+   |          ^^^^^^ [3]
+   |                 ^^^ [4]
+17 | }
+
+4 errors found

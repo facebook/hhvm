@@ -1,18 +1,78 @@
-ERROR: File "function_ref_static_inherited_specialized.php", line 32, characters 12-25:
-Invalid argument (Typing[4110])
-  File "function_ref_static_inherited_specialized.php", line 17, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_inherited_specialized.php", line 6, characters 26-27:
-  But got `(readonly function<TMethod>(int $value): ~int)` because method or function was called on dynamic or like-type
-ERROR: File "function_ref_static_inherited_specialized.php", line 33, characters 12-29:
-Invalid argument (Typing[4110])
-  File "function_ref_static_inherited_specialized.php", line 17, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_inherited_specialized.php", line 10, characters 26-28:
-  But got `(readonly function<TMethod>(vec<mixed> $_, string $_value): ~Box<string>)` because method or function was called on dynamic or like-type
-ERROR: File "function_ref_static_inherited_specialized.php", line 34, characters 12-24:
-Invalid argument (Typing[4110])
-  File "function_ref_static_inherited_specialized.php", line 17, characters 22-38:
-  Expected `HH\FunctionRef<_>`
-  File "function_ref_static_inherited_specialized.php", line 10, characters 26-28:
-  But got `(readonly function<TMethod>(vec<mixed> $_, $_value): ~Box<_>)` because method or function was called on dynamic or like-type
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<TMethod>(int $value): ~int)` because method or function was called on dynamic or like-type [3]
+
+function_ref_static_inherited_specialized.php:32:12
+ 4 | 
+ 5 | class Base<TClass> {
+ 6 |   public static function id<TMethod>(TMethod $value): TMethod {
+   |                          ^^ [3]
+ 7 |     return $value;
+ 8 |   }
+   :
+15 | class Child<TClass> extends Base<vec<TClass>> {}
+16 | 
+17 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+18 | 
+19 | function good(): void {
+   :
+30 | 
+31 | function bad(): void {
+32 |   take_ref(Child::id<int>);
+   |            ^^^^^^^^^^^^^^ [1]
+33 |   take_ref(Child::box<string>);
+34 |   take_ref(Child::box<_>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<TMethod>(vec<mixed> $_, string $_value): ~Box<string>)` because method or function was called on dynamic or like-type [3]
+
+function_ref_static_inherited_specialized.php:33:12
+ 8 |   }
+ 9 | 
+10 |   public static function box<TMethod>(TClass $_, TMethod $_value): Box<TMethod> {
+   |                          ^^^ [3]
+11 |     return new Box();
+12 |   }
+   :
+15 | class Child<TClass> extends Base<vec<TClass>> {}
+16 | 
+17 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+18 | 
+19 | function good(): void {
+   :
+31 | function bad(): void {
+32 |   take_ref(Child::id<int>);
+33 |   take_ref(Child::box<string>);
+   |            ^^^^^^^^^^^^^^^^^^ [1]
+34 |   take_ref(Child::box<_>);
+35 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<_>` [2]
+-> But got `(readonly function<TMethod>(vec<mixed> $_, $_value): ~Box<_>)` because method or function was called on dynamic or like-type [3]
+
+function_ref_static_inherited_specialized.php:34:12
+ 8 |   }
+ 9 | 
+10 |   public static function box<TMethod>(TClass $_, TMethod $_value): Box<TMethod> {
+   |                          ^^^ [3]
+11 |     return new Box();
+12 |   }
+   :
+15 | class Child<TClass> extends Base<vec<TClass>> {}
+16 | 
+17 | function take_ref<T>(HH\FunctionRef<T> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+18 | 
+19 | function good(): void {
+   :
+32 |   take_ref(Child::id<int>);
+33 |   take_ref(Child::box<string>);
+34 |   take_ref(Child::box<_>);
+   |            ^^^^^^^^^^^^^ [1]
+35 | }
+
+3 errors found

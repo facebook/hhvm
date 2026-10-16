@@ -1,20 +1,63 @@
-ERROR: File "void_return_errors2.php", line 7, characters 14-37:
-Invalid return type (Typing[4110])
-  File "void_return_errors2.php", line 7, characters 18-21:
-  Expected `void`
-  File "expr_tree.php", line 167, characters 38-48:
-  But got `ExampleVoid`
-ERROR: File "void_return_errors2.php", line 7, characters 14-37:
-You cannot return a value (Typing[4084])
-  File "void_return_errors2.php", line 7, characters 18-21:
-  This is a `void` function
-ERROR: File "void_return_errors2.php", line 7, characters 29-35:
-Invalid return type (Typing[4110])
-  File "void_return_errors2.php", line 7, characters 18-21:
-  Expected `void`
-  File "expr_tree.php", line 167, characters 38-48:
-  But got `ExampleVoid`
-ERROR: File "void_return_errors2.php", line 7, characters 29-35:
-You cannot return a value (Typing[4084])
-  File "void_return_errors2.php", line 7, characters 18-21:
-  This is a `void` function
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `ExampleVoid` [3]
+
+void_return_errors2.php:7:14
+  5 | function test(): void {
+  6 |   // Error, should be ExampleVoid since we virtualize void
+  7 |   ExampleDsl`(): void ==> { return; }`;
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                  ^^^^ [2]
+  8 | }
+
+expr_tree.php:167:38
+165 |     throw new Exception();
+166 |   }
+167 |   public static function voidType(): ExampleVoid {
+    |                                      ^^^^^^^^^^^ [3]
+168 |     throw new Exception();
+169 |   }
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+void_return_errors2.php:7:14
+5 | function test(): void {
+6 |   // Error, should be ExampleVoid since we virtualize void
+7 |   ExampleDsl`(): void ==> { return; }`;
+  |              ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                  ^^^^ [2]
+8 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `ExampleVoid` [3]
+
+void_return_errors2.php:7:29
+  5 | function test(): void {
+  6 |   // Error, should be ExampleVoid since we virtualize void
+  7 |   ExampleDsl`(): void ==> { return; }`;
+    |                  ^^^^ [2]
+    |                             ^^^^^^^ [1]
+  8 | }
+
+expr_tree.php:167:38
+165 |     throw new Exception();
+166 |   }
+167 |   public static function voidType(): ExampleVoid {
+    |                                      ^^^^^^^^^^^ [3]
+168 |     throw new Exception();
+169 |   }
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+void_return_errors2.php:7:29
+5 | function test(): void {
+6 |   // Error, should be ExampleVoid since we virtualize void
+7 |   ExampleDsl`(): void ==> { return; }`;
+  |                  ^^^^ [2]
+  |                             ^^^^^^^ [1]
+8 | }
+
+4 errors found

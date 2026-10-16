@@ -1,24 +1,114 @@
-WARN: File "module_weird_type_locations.php--also-A.php", line 7, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `T` which is a subtype of `int`. (Warn[12011])
-WARN: File "module_weird_type_locations.php--not-A.php", line 7, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `T` which is a subtype of `int`. (Warn[12011])
-ERROR: File "module_weird_type_locations.php--also-A.php", line 6, characters 42-44:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_weird_type_locations.php--A.php", line 6, characters 15-17:
-  It is declared as `internal` here
-ERROR: File "module_weird_type_locations.php--not-A.php", line 6, characters 39-41:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_weird_type_locations.php--A.php", line 6, characters 15-17:
-  This is from module `A`
-ERROR: File "module_weird_type_locations.php--not-A.php", line 7, characters 9-11:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_weird_type_locations.php--A.php", line 6, characters 15-17:
-  This is from module `A`
-ERROR: File "module_weird_type_locations.php--not-A.php", line 11, characters 20-22:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_weird_type_locations.php--A.php", line 6, characters 15-17:
-  This is from module `A`
-ERROR: File "module_weird_type_locations.php--not-A.php", line 13, characters 39-44:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_weird_type_locations.php--A.php", line 8, characters 16-21:
-  This is from module `A`
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `T` which is a subtype of `int`. [1]
+
+module_weird_type_locations.php--also-A.php:7:3
+5 | 
+6 | function foobar<T>(T $t): void where T = Foo {
+7 |   $t as Foo;
+  |   ^^^^^^^^^ [1]
+8 |   foobar($t);
+9 | }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `T` which is a subtype of `int`. [1]
+
+module_weird_type_locations.php--not-A.php:7:3
+5 | 
+6 | function baz<T>(T $t): void where T = Foo {
+7 |   $t as Foo;
+  |   ^^^^^^^^^ [1]
+8 |   baz($t);
+9 | }
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_weird_type_locations.php--also-A.php:6:42
+4 | module A;
+5 | 
+6 | function foobar<T>(T $t): void where T = Foo {
+  |                                          ^^^ [1]
+7 |   $t as Foo;
+8 |   foobar($t);
+
+module_weird_type_locations.php--A.php:6:15
+4 | module A;
+5 | 
+6 | internal type Foo = int;
+  |               ^^^ [2]
+7 | 
+8 | internal class Crosby {}
+
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_weird_type_locations.php--not-A.php:6:39
+4 | module B;
+5 | 
+6 | function baz<T>(T $t): void where T = Foo {
+  |                                       ^^^ [1]
+7 |   $t as Foo;
+8 |   baz($t);
+
+module_weird_type_locations.php--A.php:6:15
+4 | module A;
+5 | 
+6 | internal type Foo = int;
+  |               ^^^ [2]
+7 | 
+8 | internal class Crosby {}
+
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_weird_type_locations.php--not-A.php:7:9
+5 | 
+6 | function baz<T>(T $t): void where T = Foo {
+7 |   $t as Foo;
+  |         ^^^ [1]
+8 |   baz($t);
+9 | }
+
+module_weird_type_locations.php--A.php:6:15
+4 | module A;
+5 | 
+6 | internal type Foo = int;
+  |               ^^^ [2]
+7 | 
+8 | internal class Crosby {}
+
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_weird_type_locations.php--not-A.php:11:20
+ 9 | }
+10 | 
+11 | function bing<T as Foo>(T $_): void {}
+   |                    ^^^ [1]
+12 | 
+13 | function get_crosby<T>(): T where T = Crosby {
+
+module_weird_type_locations.php--A.php:6:15
+ 4 | module A;
+ 5 | 
+ 6 | internal type Foo = int;
+   |               ^^^ [2]
+ 7 | 
+ 8 | internal class Crosby {}
+
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_weird_type_locations.php--not-A.php:13:39
+11 | function bing<T as Foo>(T $_): void {}
+12 | 
+13 | function get_crosby<T>(): T where T = Crosby {
+   |                                       ^^^^^^ [1]
+14 |   invariant_violation('!!!');
+15 | }
+
+module_weird_type_locations.php--A.php:8:16
+ 6 | internal type Foo = int;
+ 7 | 
+ 8 | internal class Crosby {}
+   |                ^^^^^^ [2]
+
+7 errors found

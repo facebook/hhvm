@@ -1,6 +1,23 @@
-ERROR: File "lambda_tany.php", line 11, characters 31-32:
-Was expecting a type hint (Typing[4032])
-ERROR: File "lambda_tany.php", line 12, characters 15-16:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_tany.php", line 12, characters 8-9:
-  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+error: Typing[4032] Was expecting a type hint [1]
+
+lambda_tany.php:11:31
+ 9 | }
+10 | 
+11 | function test_tany(/* TAny */ $y): void {
+   |                               ^^ [1]
+12 |   $f = $x ==> $x->foo();
+13 |   $f($y);
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+lambda_tany.php:12:15
+10 | 
+11 | function test_tany(/* TAny */ $y): void {
+12 |   $f = $x ==> $x->foo();
+   |        ^^ [2]
+   |               ^^ [1]
+13 |   $f($y);
+14 |   $f(new C());
+
+2 errors found

@@ -1,6 +1,20 @@
-ERROR: File "escape_return_type.php", line 11, characters 8-84:
-Rigid type variable escapes its lambda (Typing[4442])
-  File "escape_return_type.php", line 12, characters 21-26:
-  Rigid type variable `T#4` is escaping
-  File "escape_return_type.php", line 11, characters 8-84:
-  in the return type of this lambda
+error: Typing[4442] Rigid type variable escapes its lambda [1]
+-> Rigid type variable `T#4` is escaping [2]
+-> in the return type of this lambda [1]
+
+escape_return_type.php:11:8
+ 9 |   $v = Vector{};
+10 |   $w = "";
+11 |   $f = (mixed $x) ==> {
+   |        ^^^^^^^^^^^^^^^^ [1]
+12 |     invariant($x is Box<_>, "");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                     ^^^^^^ [2]
+13 |     return new Box($x);
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+14 |   };
+   |   ^ [1]
+15 |   $b1 = $f(new Box(42));
+16 |   $b2 = $f(new Box("oops"));
+
+1 error found

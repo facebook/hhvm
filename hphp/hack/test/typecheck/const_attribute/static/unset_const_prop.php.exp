@@ -1,20 +1,99 @@
-ERROR: File "unset_const_prop.php", line 17, characters 19-22:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "unset_const_prop.php", line 18, characters 18-19:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "unset_const_prop.php", line 27, characters 12-15:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "unset_const_prop.php", line 28, characters 3-32:
-In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-ERROR: File "unset_const_prop.php", line 28, characters 12-15:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "unset_const_prop.php", line 28, characters 24-27:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "unset_const_prop.php", line 29, characters 12-16:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "unset_const_prop.php", line 33, characters 9-14:
-Cannot access static properties on reified generics (Typing[4346])
-ERROR: File "unset_const_prop.php", line 34, characters 9-15:
-Cannot access static properties on reified generics (Typing[4346])
-ERROR: File "unset_const_prop.php", line 34, characters 12-15:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:17:19
+15 | 
+16 |   public function write_const_static(): void{
+17 |     unset(static::$csa[2]);
+   |                   ^^^^ [1]
+18 |     unset($this->ca[2]);
+19 |     unset(static::$sa[2]); // ok
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:18:18
+16 |   public function write_const_static(): void{
+17 |     unset(static::$csa[2]);
+18 |     unset($this->ca[2]);
+   |                  ^^ [1]
+19 |     unset(static::$sa[2]); // ok
+20 |     unset(static::$sa[static::$index]); //ok
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:27:12
+25 | function test(): void {
+26 |   unset(A::$sa[2]);        // ok
+27 |   unset(A::$csa[2]);
+   |            ^^^^ [1]
+28 |   unset(A::$csa[2], A::$csa[2]);
+29 |   unset(A::$csa2[2][21]);
+
+error: Typing[4135] In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing [1]
+
+unset_const_prop.php:28:3
+26 |   unset(A::$sa[2]);        // ok
+27 |   unset(A::$csa[2]);
+28 |   unset(A::$csa[2], A::$csa[2]);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |   unset(A::$csa2[2][21]);
+30 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:28:12
+26 |   unset(A::$sa[2]);        // ok
+27 |   unset(A::$csa[2]);
+28 |   unset(A::$csa[2], A::$csa[2]);
+   |            ^^^^ [1]
+29 |   unset(A::$csa2[2][21]);
+30 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:28:24
+26 |   unset(A::$sa[2]);        // ok
+27 |   unset(A::$csa[2]);
+28 |   unset(A::$csa[2], A::$csa[2]);
+   |                        ^^^^ [1]
+29 |   unset(A::$csa2[2][21]);
+30 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:29:12
+27 |   unset(A::$csa[2]);
+28 |   unset(A::$csa[2], A::$csa[2]);
+29 |   unset(A::$csa2[2][21]);
+   |            ^^^^^ [1]
+30 | }
+31 | 
+
+error: Typing[4346] Cannot access static properties on reified generics [1]
+
+unset_const_prop.php:33:9
+31 | 
+32 | function f<reify T as A>(): void {
+33 |   unset(T::$sa[2]);        // ok
+   |         ^^^^^^ [1]
+34 |   unset(T::$csa[2]);
+35 | }
+
+error: Typing[4346] Cannot access static properties on reified generics [1]
+
+unset_const_prop.php:34:9
+32 | function f<reify T as A>(): void {
+33 |   unset(T::$sa[2]);        // ok
+34 |   unset(T::$csa[2]);
+   |         ^^^^^^^ [1]
+35 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+unset_const_prop.php:34:12
+32 | function f<reify T as A>(): void {
+33 |   unset(T::$sa[2]);        // ok
+34 |   unset(T::$csa[2]);
+   |            ^^^^ [1]
+35 | }
+
+10 errors found

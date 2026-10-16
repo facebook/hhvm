@@ -1,10 +1,20 @@
-ERROR: File "apply_toplevel_poly_uninstantiable.php", line 7, characters 6-6:
-Invalid argument (Typing[4323])
-  File "apply_toplevel_poly_uninstantiable.php", line 3, characters 27-28:
-  `T2` is a constrained type parameter
-  File "apply_toplevel_poly_uninstantiable.php", line 3, characters 33-38:
-  This type constraint is violated
-  File "apply_toplevel_poly_uninstantiable.php", line 3, characters 33-38:
-  Expected `string`
-  File "apply_toplevel_poly_uninstantiable.php", line 7, characters 6-6:
-  But got `int`
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [1]
+
+apply_toplevel_poly_uninstantiable.php:7:6
+1 | <?hh
+2 | 
+3 | function never<T1 as int, T2 as string super T1>(T1 $_, T2 $_): void {}
+  |                           ^^ [2]
+  |                                 ^^^^^^ [3]
+4 | 
+5 | function call_generic_bad(): void {
+6 |   $f = never<>;
+7 |   $f(3,'3');
+  |      ^ [1]
+8 | }
+
+1 error found

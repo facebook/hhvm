@@ -1,4 +1,21 @@
-ERROR: File "soft_internal_construct.php--use.php", line 7, characters 7-20:
-The `__SoftInternal` attribute cannot be used on a parameter. (Typing[4231])
-ERROR: File "soft_internal_construct.php--use.php", line 9, characters 25-38:
-The `__SoftInternal` attribute cannot be used on a parameter. (Typing[4231])
+error: Typing[4231] The `__SoftInternal` attribute cannot be used on a parameter. [1]
+
+soft_internal_construct.php--use.php:7:7
+5 | internal class Foo {
+6 |   public function __construct(<<__SoftInternal>> internal int $x,
+7 |     <<__SoftInternal>> int $w, // not ok
+  |       ^^^^^^^^^^^^^^ [1]
+8 |   ) {}
+9 |   public function foo(<<__SoftInternal>> int $l) // not ok
+
+error: Typing[4231] The `__SoftInternal` attribute cannot be used on a parameter. [1]
+
+soft_internal_construct.php--use.php:9:25
+ 7 |     <<__SoftInternal>> int $w, // not ok
+ 8 |   ) {}
+ 9 |   public function foo(<<__SoftInternal>> int $l) // not ok
+   |                         ^^^^^^^^^^^^^^ [1]
+10 |   : void {}
+11 | }
+
+2 errors found

@@ -1,2 +1,10 @@
-ERROR: File "meth_caller.php", line 10, characters 8-10:
-Function pointer syntax requires a static method. Use `meth_caller(Bar::class, 'baz')` to create a function pointer to the instance method (Typing[4407])
+error: Typing[4407] Function pointer syntax requires a static method. Use `meth_caller(Bar::class, 'baz')` to create a function pointer to the instance method [1]
+
+meth_caller.php:10:8
+ 8 | 
+ 9 | function test(): void {
+10 |   Bar::baz<>;
+   |        ^^^ [1]
+11 | }
+
+1 error found

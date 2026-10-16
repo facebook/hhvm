@@ -1,2 +1,11 @@
-ERROR: File "lambda_good_co.php", line 16, characters 15-19:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `bool` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `bool` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+lambda_good_co.php:16:15
+14 | }
+15 | 
+16 | function blah<Tblah super bool>(int $_): Tblah {
+   |               ^^^^^ [1]
+17 |   throw new Exception();
+18 | }
+
+1 error found

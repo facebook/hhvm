@@ -1,2 +1,11 @@
-ERROR: File "class_const_dollar_dollar.php", line 9, characters 22-30:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+class_const_dollar_dollar.php:9:22
+ 7 | /* TODO: Should error */
+ 8 | function baz(): void {
+ 9 |   $x = Foo::class |> $$::bar<>;
+   |                      ^^^^^^^^^ [1]
+10 |   $x(4);
+11 | }
+
+1 error found

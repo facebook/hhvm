@@ -1,14 +1,41 @@
-WARN: File "dynamic_as_mixed.php", line 16, characters 8-9:
-Indexing into a value of type `(dynamic & dict<arraykey, mixed>)` (Warn[12040])
-  File "dynamic_as_mixed.php", line 14, characters 12-18:
-  This expression has type `dynamic`
-ERROR: File "dynamic_as_mixed.php", line 18, characters 7-18:
-A `where` type constraint is violated here (Typing[4323])
-  File "dynamic_as_mixed.php", line 9, characters 25-36:
-  This is the method with `where` type constraints
-  File "dynamic_as_mixed.php", line 9, characters 59-74:
-  Expected `Container<mixed>`
-  File "dynamic_as_mixed.php", line 16, characters 8-12:
-  But got `dynamic`
-  File "dynamic_as_mixed.php", line 15, characters 8-9:
-    from this definition from this "as" assertion
+warning: Warn[12040] Indexing into a value of type `(dynamic & dict<arraykey, mixed>)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_as_mixed.php:16:8
+12 | }
+13 | 
+14 | function f(dynamic $d): void {
+   |            ^^^^^^^ [2]
+15 |   $d = $d as dict<_, _>;
+16 |   $v = $d[0];
+   |        ^^ [1]
+17 |   $e = expect($v);
+18 |   $e->toNotBeEmpty();
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Expected `Container<mixed>` [3]
+-> But got `dynamic` [4]
+->   from this definition from this "as" assertion [5]
+
+dynamic_as_mixed.php:18:7
+ 7 | 
+ 8 | final class ExpectObj<T> {
+ 9 |   final public function toNotBeEmpty()[]: void where T as Container<mixed> {}
+   |                         ^^^^^^^^^^^^ [2]
+   |                                                           ^^^^^^^^^^^^^^^^ [3]
+10 | 
+11 |   final public function __construct(protected T $obj)[] {}
+12 | }
+13 | 
+14 | function f(dynamic $d): void {
+15 |   $d = $d as dict<_, _>;
+   |        ^^ [5]
+16 |   $v = $d[0];
+   |        ^^^^^ [4]
+17 |   $e = expect($v);
+18 |   $e->toNotBeEmpty();
+   |       ^^^^^^^^^^^^ [1]
+19 | }
+
+2 errors found

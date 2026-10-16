@@ -1,96 +1,279 @@
-ERROR: File "recursive_tparam_bounds2.php", line 8, characters 3-19:
-hh_expect type mismatch (Typing[4453])
-  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
-  Expected `T2`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `T`
-ERROR: File "recursive_tparam_bounds2.php", line 8, characters 3-19:
-hh_expect type mismatch (Typing[4453])
-  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
-  Expected `T2`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `mixed`
-  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
-    by the definition of `T`
-ERROR: File "recursive_tparam_bounds2.php", line 8, characters 17-18:
-Invalid argument (Typing[4110])
-  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
-  Expected `T2`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `T`
-ERROR: File "recursive_tparam_bounds2.php", line 8, characters 17-18:
-Invalid argument (Typing[4110])
-  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
-  Expected `T2`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `mixed`
-  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
-    by the definition of `T`
-ERROR: File "recursive_tparam_bounds2.php", line 9, characters 3-22:
-hh_expect type mismatch (Typing[4453])
-  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
-  Expected `T2`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `T`
-ERROR: File "recursive_tparam_bounds2.php", line 9, characters 3-22:
-hh_expect type mismatch (Typing[4453])
-  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
-  Expected `T2`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `mixed`
-  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
-    by the definition of `T`
-ERROR: File "recursive_tparam_bounds2.php", line 9, characters 20-21:
-Invalid argument (Typing[4110])
-  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
-  Expected `T2`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `T`
-ERROR: File "recursive_tparam_bounds2.php", line 9, characters 20-21:
-Invalid argument (Typing[4110])
-  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
-  Expected `T2`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `mixed`
-  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
-    by the definition of `T`
-ERROR: File "recursive_tparam_bounds2.php", line 10, characters 3-23:
-hh_expect type mismatch (Typing[4453])
-  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
-  Expected `string`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `T`
-ERROR: File "recursive_tparam_bounds2.php", line 10, characters 3-23:
-hh_expect type mismatch (Typing[4453])
-  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
-  Expected `string`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `mixed`
-  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
-    by the definition of `T`
-ERROR: File "recursive_tparam_bounds2.php", line 10, characters 21-22:
-Invalid argument (Typing[4110])
-  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
-  Expected `string`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `T`
-ERROR: File "recursive_tparam_bounds2.php", line 10, characters 21-22:
-Invalid argument (Typing[4110])
-  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
-  Expected `string`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
-  But got `mixed`
-  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
-    by the definition of `T`
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `T2` [2]
+-> But got `T` [3]
+
+recursive_tparam_bounds2.php:8:3
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |                                                ^^^^ [3]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+   |   ^^^^^^^^^^^^^^^^^ [1]
+   |             ^^ [2]
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `T2` [2]
+-> But got `mixed` [3]
+->   by the definition of `T` [4]
+
+recursive_tparam_bounds2.php:8:3
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |            ^ [4]
+   |                                                ^^^^ [3]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+   |   ^^^^^^^^^^^^^^^^^ [1]
+   |             ^^ [2]
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T2` [2]
+->   via this generic `T` [3]
+-> But got `T` [4]
+
+recursive_tparam_bounds2.php:8:17
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |                                                ^^^^ [4]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+   |             ^^ [2]
+   |                 ^^ [1]
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T2` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+recursive_tparam_bounds2.php:8:17
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |            ^ [5]
+   |                                                ^^^^ [4]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+   |             ^^ [2]
+   |                 ^^ [1]
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `T2` [2]
+-> But got `T` [3]
+
+recursive_tparam_bounds2.php:9:3
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |                                                ^^^^ [3]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^ [2]
+10 |   hh_expect<string>($x);
+11 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `T2` [2]
+-> But got `mixed` [3]
+->   by the definition of `T` [4]
+
+recursive_tparam_bounds2.php:9:3
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |            ^ [4]
+   |                                                ^^^^ [3]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^ [2]
+10 |   hh_expect<string>($x);
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T2` [2]
+->   via this generic `T` [3]
+-> But got `T` [4]
+
+recursive_tparam_bounds2.php:9:20
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |                                                ^^^^ [4]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+   |             ^^^^^ [2]
+   |                    ^^ [1]
+10 |   hh_expect<string>($x);
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T2` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+recursive_tparam_bounds2.php:9:20
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |            ^ [5]
+   |                                                ^^^^ [4]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+   |             ^^^^^ [2]
+   |                    ^^ [1]
+10 |   hh_expect<string>($x);
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `string` [2]
+-> But got `T` [3]
+
+recursive_tparam_bounds2.php:10:3
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |                                                ^^^^ [3]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^^ [2]
+11 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   by the definition of `T` [4]
+
+recursive_tparam_bounds2.php:10:3
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |            ^ [4]
+   |                                                ^^^^ [3]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^^ [2]
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   via this generic `T` [3]
+-> But got `T` [4]
+
+recursive_tparam_bounds2.php:10:21
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |                                                ^^^^ [4]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+   |             ^^^^^^ [2]
+   |                     ^^ [1]
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+recursive_tparam_bounds2.php:10:21
+ 3 | type A<T> = T;
+ 4 | 
+ 5 | function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
+   |            ^ [5]
+   |                                                ^^^^ [4]
+ 6 |   hh_expect<T>($x);
+ 7 |   hh_expect<A<T>>($x);
+ 8 |   hh_expect<T2>($x);
+ 9 |   hh_expect<A<T2>>($x);
+10 |   hh_expect<string>($x);
+   |             ^^^^^^ [2]
+   |                     ^^ [1]
+11 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+12 errors found

@@ -1,8 +1,37 @@
-ERROR: File "unpack_call10_unset.php", line 6, characters 9-11:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
-ERROR: File "unpack_call10_unset.php", line 6, characters 12-12:
-An expression is expected here. (Parsing[1002])
-ERROR: File "unpack_call10_unset.php", line 6, characters 9-11:
-Unbound name: `...` (a global constant) (Naming[2049])
-ERROR: File "unpack_call10_unset.php", line 6, characters 9-11:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+unpack_call10_unset.php:6:9
+4 |   $args = vec["hello"];
+5 |   // HHVM doesn't support unpacking into unset
+6 |   unset(...$args);
+  |         ^^^ [1]
+7 | }
+
+error: Parsing[1002] An expression is expected here. [1]
+
+unpack_call10_unset.php:6:12
+4 |   $args = vec["hello"];
+5 |   // HHVM doesn't support unpacking into unset
+6 |   unset(...$args);
+  |            ^ [1]
+7 | }
+
+error: Naming[2049] Unbound name: `...` (a global constant) [1]
+
+unpack_call10_unset.php:6:9
+4 |   $args = vec["hello"];
+5 |   // HHVM doesn't support unpacking into unset
+6 |   unset(...$args);
+  |         ^^^ [1]
+7 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+unpack_call10_unset.php:6:9
+4 |   $args = vec["hello"];
+5 |   // HHVM doesn't support unpacking into unset
+6 |   unset(...$args);
+  |         ^^^ [1]
+7 | }
+
+4 errors found

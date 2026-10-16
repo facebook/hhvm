@@ -1,34 +1,158 @@
-ERROR: File "explicit_reify_static_methods.php", line 17, characters 18-18:
-You may not use reified generics of the class in a static method (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 26, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 27, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 30, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 34, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 35, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 38, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "explicit_reify_static_methods.php", line 16, characters 3-74:
-Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
-  File "explicit_reify_static_methods.php", line 16, characters 44-44:
-  Class-level reified generic used here.
-ERROR: File "explicit_reify_static_methods.php", line 24, characters 6-12:
-Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly (Typing[4347])
-  File "explicit_reify_static_methods.php", line 4, characters 49-50:
-  Definition is here
-ERROR: File "explicit_reify_static_methods.php", line 26, characters 9-15:
-Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly (Typing[4347])
-  File "explicit_reify_static_methods.php", line 4, characters 49-50:
-  Definition is here
-ERROR: File "explicit_reify_static_methods.php", line 32, characters 3-14:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "explicit_reify_static_methods.php", line 13, characters 40-41:
-  Definition is here
-ERROR: File "explicit_reify_static_methods.php", line 34, characters 3-17:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "explicit_reify_static_methods.php", line 13, characters 40-41:
-  Definition is here
+error: Parsing[1002] You may not use reified generics of the class in a static method [1]
+
+explicit_reify_static_methods.php:17:18
+15 |   }
+16 |   public static function bad_factory() : R<T> {
+17 |     return new R<T>();
+   |                  ^ [1]
+18 |   }
+19 | }
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+explicit_reify_static_methods.php:26:4
+24 |   E::factory();
+25 |   E::factory<A>();
+26 |   E<A>::factory();
+   |    ^^^ [1]
+27 |   E<A>::factory<A>();
+28 | 
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+explicit_reify_static_methods.php:27:4
+25 |   E::factory<A>();
+26 |   E<A>::factory();
+27 |   E<A>::factory<A>();
+   |    ^^^ [1]
+28 | 
+29 |   E::bad_factory();
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+explicit_reify_static_methods.php:30:4
+28 | 
+29 |   E::bad_factory();
+30 |   E<A>::bad_factory();
+   |    ^^^ [1]
+31 | 
+32 |   R::factory();
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+explicit_reify_static_methods.php:34:4
+32 |   R::factory();
+33 |   R::factory<A>();
+34 |   R<A>::factory();
+   |    ^^^ [1]
+35 |   R<A>::factory<A>();
+36 | 
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+explicit_reify_static_methods.php:35:4
+33 |   R::factory<A>();
+34 |   R<A>::factory();
+35 |   R<A>::factory<A>();
+   |    ^^^ [1]
+36 | 
+37 |   R::bad_factory();
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+explicit_reify_static_methods.php:38:4
+36 | 
+37 |   R::bad_factory();
+38 |   R<A>::bad_factory();
+   |    ^^^ [1]
+39 | }
+
+error: Typing[4358] Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. [1]
+-> Class-level reified generic used here. [2]
+
+explicit_reify_static_methods.php:16:3
+14 |     return new R<TF>();
+15 |   }
+16 |   public static function bad_factory() : R<T> {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                            ^ [2]
+17 |     return new R<T>();
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+18 |   }
+   |   ^ [1]
+19 | }
+20 | 
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_reify_static_methods.php:24:6
+ 2 | 
+ 3 | class E<<<__Explicit>> T>{
+ 4 |   public static function factory<<<__Explicit>> TF>() : E<TF> {
+   |                                                 ^^ [2]
+ 5 |     return new E<TF>();
+ 6 |   }
+   :
+22 | 
+23 | function test() : void {
+24 |   E::factory();
+   |      ^^^^^^^ [1]
+25 |   E::factory<A>();
+26 |   E<A>::factory();
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_reify_static_methods.php:26:9
+ 2 | 
+ 3 | class E<<<__Explicit>> T>{
+ 4 |   public static function factory<<<__Explicit>> TF>() : E<TF> {
+   |                                                 ^^ [2]
+ 5 |     return new E<TF>();
+ 6 |   }
+   :
+24 |   E::factory();
+25 |   E::factory<A>();
+26 |   E<A>::factory();
+   |         ^^^^^^^ [1]
+27 |   E<A>::factory<A>();
+28 | 
+
+error: Typing[4303] All type arguments must be specified because a type parameter is reified [1]
+-> Definition is here [2]
+
+explicit_reify_static_methods.php:32:3
+11 | 
+12 | class R<reify T>{
+13 |   public static function factory<reify TF>() : R<TF> {
+   |                                        ^^ [2]
+14 |     return new R<TF>();
+15 |   }
+   :
+30 |   E<A>::bad_factory();
+31 | 
+32 |   R::factory();
+   |   ^^^^^^^^^^^^ [1]
+33 |   R::factory<A>();
+34 |   R<A>::factory();
+
+error: Typing[4303] All type arguments must be specified because a type parameter is reified [1]
+-> Definition is here [2]
+
+explicit_reify_static_methods.php:34:3
+11 | 
+12 | class R<reify T>{
+13 |   public static function factory<reify TF>() : R<TF> {
+   |                                        ^^ [2]
+14 |     return new R<TF>();
+15 |   }
+   :
+32 |   R::factory();
+33 |   R::factory<A>();
+34 |   R<A>::factory();
+   |   ^^^^^^^^^^^^^^^ [1]
+35 |   R<A>::factory<A>();
+36 | 
+
+12 errors found

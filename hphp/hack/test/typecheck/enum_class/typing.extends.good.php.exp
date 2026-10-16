@@ -1,6 +1,30 @@
-ERROR: File "typing.extends.good.php", line 38, characters 18-22:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "typing.extends.good.php", line 76, characters 14-17:
-It is no longer allowed to use a `classname<this::TEnum>` in this position. Please use a `class<this::TEnum>` instead. (Typing[4482])
-  File "typestructure.hhi", line 64, characters 21-32:
-  Definition is here
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+typing.extends.good.php:38:18
+36 | }
+37 | 
+38 | function generic<TEnum as E, T>(HH\MemberOf<TEnum, Box<T>> $param): T {
+   |                  ^^^^^ [1]
+39 |   return $param->data;
+40 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<this::TEnum>` in this position. Please use a `class<this::TEnum>` instead. [1]
+-> Definition is here [2]
+
+typing.extends.good.php:76:14
+74 |     $ts = type_structure(static::class, 'TEnum');
+75 |     $cls = $ts['classname'];
+76 |     foreach ($cls::getValues() as $key => $elt) {
+   |              ^^^^ [1]
+77 |       $dict[$key] = $elt;
+78 |     }
+
+typestructure.hhi:64:21
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |                     ^^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+2 errors found

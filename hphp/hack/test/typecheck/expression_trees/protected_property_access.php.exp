@@ -1,6 +1,21 @@
-ERROR: File "protected_property_access.php", line 12, characters 7-8:
-Typing error (Typing[4448])
-  File "protected_property_access.php", line 12, characters 11-14:
-  Cannot access non-public members within expression trees.
-  File "protected_property_access.php", line 6, characters 13-22:
-  Member defined here
+error: Typing[4448] Typing error [1]
+-> Cannot access non-public members within expression trees. [2]
+-> Member defined here [3]
+
+protected_property_access.php:12:7
+ 4 | 
+ 5 | abstract class MyBaseClass {
+ 6 |   protected ExampleInt $prop;
+   |             ^^^^^^^^^^ [3]
+ 7 | }
+ 8 | 
+ 9 | abstract class MyClass extends MyBaseClass {
+10 |   public function test(): void {
+11 |     ExampleDsl`(MyClass $x) ==> {
+12 |       $x->prop;
+   |       ^^ [1]
+   |           ^^^^ [2]
+13 |     }`;
+14 |   }
+
+1 error found

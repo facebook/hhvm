@@ -1,6 +1,21 @@
-ERROR: File "trait_implements_require_implements.php", line 20, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "trait_implements_require_implements.php", line 20, characters 38-39:
-  No type constant `T2` in `UpperBound1`
-  File "trait_implements_require_implements.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+trait_implements_require_implements.php:20:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {}
+   |           ^^^^^^^^^^^ [3]
+ 4 | 
+ 5 | interface UpperBound2 extends UpperBound1 {
+   :
+18 | trait Tr1 implements I1 {
+19 |   require implements I2;
+20 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+21 | }
+22 | 
+
+1 error found

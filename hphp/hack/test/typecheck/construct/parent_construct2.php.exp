@@ -1,3 +1,12 @@
-ERROR: File "parent_construct2.php", line 32, characters 5-22:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because you forgot to call `parent::__construct` (NastCheck[3004])
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because you forgot to call `parent::__construct` [1]
+
+parent_construct2.php:32:5
+30 |     }
+31 |     $this->z = 0;
+32 |     $this->make_my_day();
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+33 |     parent::__construct();
+34 |   }
+
+1 error found

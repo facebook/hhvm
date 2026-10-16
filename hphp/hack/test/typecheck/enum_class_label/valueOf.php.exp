@@ -1,12 +1,55 @@
-ERROR: File "valueOf.php", line 29, characters 11-17:
-No static method `valueOf` in `E` (Typing[4090])
-  File "BuiltinEnum.hhi", line 118, characters 34-39:
-  Did you mean `nameOf` instead?
-  File "valueOf.php", line 4, characters 21-21:
-  Declaration of `E` is here
-ERROR: File "valueOf.php", line 31, characters 11-17:
-No static method `valueOf` in `E` (Typing[4090])
-  File "BuiltinEnum.hhi", line 118, characters 34-39:
-  Did you mean `nameOf` instead?
-  File "valueOf.php", line 4, characters 21-21:
-  Declaration of `E` is here
+error: Typing[4090] No static method `valueOf` in `E` [1]
+-> Did you mean `nameOf` instead? [2]
+-> Declaration of `E` is here [3]
+
+valueOf.php:29:11
+  2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+  3 | 
+  4 | abstract enum class E : mixed {
+    |                     ^ [3]
+  5 |   abstract int X;
+  6 |   int Y = 53;
+    :
+ 27 | 
+ 28 | function bad() : void {
+ 29 |   echo E::valueOf(E#X);
+    |           ^^^^^^^ [1]
+ 30 |   echo "\n";
+ 31 |   echo E::valueOf(E#Y);
+
+BuiltinEnum.hhi:118:34
+116 |   <<__EnumClass>>
+117 |   abstract class BuiltinAbstractEnumClass {
+118 |     final public static function nameOf<TType>(
+    |                                  ^^^^^^ [2]
+119 |       \HH\EnumClass\Label<this, TType> $label,
+120 |     )[]: string;
+
+error: Typing[4090] No static method `valueOf` in `E` [1]
+-> Did you mean `nameOf` instead? [2]
+-> Declaration of `E` is here [3]
+
+valueOf.php:31:11
+  2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+  3 | 
+  4 | abstract enum class E : mixed {
+    |                     ^ [3]
+  5 |   abstract int X;
+  6 |   int Y = 53;
+    :
+ 29 |   echo E::valueOf(E#X);
+ 30 |   echo "\n";
+ 31 |   echo E::valueOf(E#Y);
+    |           ^^^^^^^ [1]
+ 32 |   echo "\n";
+ 33 | }
+
+BuiltinEnum.hhi:118:34
+116 |   <<__EnumClass>>
+117 |   abstract class BuiltinAbstractEnumClass {
+118 |     final public static function nameOf<TType>(
+    |                                  ^^^^^^ [2]
+119 |       \HH\EnumClass\Label<this, TType> $label,
+120 |     )[]: string;
+
+2 errors found

@@ -1,50 +1,161 @@
-WARN: File "array_get_bad.php", line 49, characters 16-22:
-Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
-ERROR: File "array_get_bad.php", line 29, characters 18-20:
-Invalid index type for this vec (Typing[4449])
-  File "array_get_bad.php", line 14, characters 3-8:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "array_get_bad.php", line 29, characters 18-20:
-  It is incompatible with a string
-ERROR: File "array_get_bad.php", line 31, characters 17-19:
-Invalid index type for this vec (Typing[4449])
-  File "array_get_bad.php", line 15, characters 3-5:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "array_get_bad.php", line 31, characters 17-19:
-  It is incompatible with a string
-ERROR: File "array_get_bad.php", line 39, characters 19-20:
-Invalid index type for this dict (Typing[4449])
-  File "array_get_bad.php", line 20, characters 10-15:
-  This is a string
-  File "array_get_bad.php", line 39, characters 19-20:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 41, characters 18-19:
-Invalid index type for this dict (Typing[4449])
-  File "array_get_bad.php", line 21, characters 8-13:
-  This is a string
-  File "array_get_bad.php", line 41, characters 18-19:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 43, characters 20-21:
-Invalid index type for this Map (Typing[4324])
-  File "array_get_bad.php", line 22, characters 7-12:
-  This is a string
-  File "array_get_bad.php", line 43, characters 20-21:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 45, characters 21-22:
-Invalid index type for this ImmMap (Typing[4324])
-  File "array_get_bad.php", line 23, characters 10-15:
-  This is a string
-  File "array_get_bad.php", line 45, characters 21-22:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 47, characters 21-22:
-Invalid index type for this ConstMap (Typing[4324])
-  File "array_get_bad.php", line 24, characters 12-17:
-  This is a string
-  File "array_get_bad.php", line 47, characters 21-22:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 49, characters 20-21:
-Invalid index type for this keyset (Typing[4449])
-  File "array_get_bad.php", line 25, characters 10-15:
-  This is a string
-  File "array_get_bad.php", line 49, characters 20-21:
-  It is incompatible with an int
+warning: Warn[12034] Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+array_get_bad.php:49:16
+47 |   expectFloat($cmap[42]);
+48 |   $ks = (new Inv($ks))->item;
+49 |   expectString($ks[42]);
+   |                ^^^^^^^ [1]
+50 | }
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+array_get_bad.php:29:18
+12 | function test_array_get_on_tvar(
+13 |   // Vector-like stuff
+14 |   varray<bool> $a1,
+   |   ^^^^^^ [2]
+15 |   vec<bool> $v,
+16 |   Vector<bool> $vector,
+   :
+27 |   // Turns a concrete type into a lower bound on a Tvar
+28 |   $a1 = (new Inv($a1))->item;
+29 |   expectBool($a1["a"]);
+   |                  ^^^ [1]
+30 |   $v = (new Inv($v))->item;
+31 |   expectBool($v["a"]);
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+array_get_bad.php:31:17
+13 |   // Vector-like stuff
+14 |   varray<bool> $a1,
+15 |   vec<bool> $v,
+   |   ^^^ [2]
+16 |   Vector<bool> $vector,
+17 |   ConstVector<bool> $cvector,
+   :
+29 |   expectBool($a1["a"]);
+30 |   $v = (new Inv($v))->item;
+31 |   expectBool($v["a"]);
+   |                 ^^^ [1]
+32 |   $vector = (new Inv($vector))->item;
+33 |   expectBool($vector["a"]);
+
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+array_get_bad.php:39:19
+18 |   ImmVector<bool> $ivector,
+19 |   // Map-like stuff
+20 |   darray<string,float> $a2,
+   |          ^^^^^^ [2]
+21 |   dict<string,float> $d,
+22 |   Map<string,float> $map,
+   :
+37 |   expectBool($ivector["a"]);
+38 |   $a2 = (new Inv($a2))->item;
+39 |   expectFloat($a2[42]);
+   |                   ^^ [1]
+40 |   $d = (new Inv($d))->item;
+41 |   expectFloat($d[42]);
+
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+array_get_bad.php:41:18
+19 |   // Map-like stuff
+20 |   darray<string,float> $a2,
+21 |   dict<string,float> $d,
+   |        ^^^^^^ [2]
+22 |   Map<string,float> $map,
+23 |   ImmMap<string,float> $imap,
+   :
+39 |   expectFloat($a2[42]);
+40 |   $d = (new Inv($d))->item;
+41 |   expectFloat($d[42]);
+   |                  ^^ [1]
+42 |   $map = (new Inv($map))->item;
+43 |   expectFloat($map[42]);
+
+error: Typing[4324] Invalid index type for this Map [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+array_get_bad.php:43:20
+20 |   darray<string,float> $a2,
+21 |   dict<string,float> $d,
+22 |   Map<string,float> $map,
+   |       ^^^^^^ [2]
+23 |   ImmMap<string,float> $imap,
+24 |   ConstMap<string,float> $cmap,
+   :
+41 |   expectFloat($d[42]);
+42 |   $map = (new Inv($map))->item;
+43 |   expectFloat($map[42]);
+   |                    ^^ [1]
+44 |   $imap = (new Inv($imap))->item;
+45 |   expectFloat($imap[42]);
+
+error: Typing[4324] Invalid index type for this ImmMap [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+array_get_bad.php:45:21
+21 |   dict<string,float> $d,
+22 |   Map<string,float> $map,
+23 |   ImmMap<string,float> $imap,
+   |          ^^^^^^ [2]
+24 |   ConstMap<string,float> $cmap,
+25 |   keyset<string> $ks
+   :
+43 |   expectFloat($map[42]);
+44 |   $imap = (new Inv($imap))->item;
+45 |   expectFloat($imap[42]);
+   |                     ^^ [1]
+46 |   $cmap = (new Inv($cmap))->item;
+47 |   expectFloat($cmap[42]);
+
+error: Typing[4324] Invalid index type for this ConstMap [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+array_get_bad.php:47:21
+22 |   Map<string,float> $map,
+23 |   ImmMap<string,float> $imap,
+24 |   ConstMap<string,float> $cmap,
+   |            ^^^^^^ [2]
+25 |   keyset<string> $ks
+26 | ): void {
+   :
+45 |   expectFloat($imap[42]);
+46 |   $cmap = (new Inv($cmap))->item;
+47 |   expectFloat($cmap[42]);
+   |                     ^^ [1]
+48 |   $ks = (new Inv($ks))->item;
+49 |   expectString($ks[42]);
+
+error: Typing[4449] Invalid index type for this keyset [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+array_get_bad.php:49:20
+23 |   ImmMap<string,float> $imap,
+24 |   ConstMap<string,float> $cmap,
+25 |   keyset<string> $ks
+   |          ^^^^^^ [2]
+26 | ): void {
+27 |   // Turns a concrete type into a lower bound on a Tvar
+   :
+47 |   expectFloat($cmap[42]);
+48 |   $ks = (new Inv($ks))->item;
+49 |   expectString($ks[42]);
+   |                    ^^ [1]
+50 | }
+
+9 errors found

@@ -1,6 +1,14 @@
-ERROR: File "lambda_infer_bad_return.php", line 5, characters 17-20:
-Invalid return type (Typing[4110])
-  File "lambda_infer_bad_return.php", line 4, characters 33-38:
-  Expected `string`
-  File "lambda_infer_bad_return.php", line 5, characters 17-20:
-  But got `bool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `bool` [1]
+
+lambda_infer_bad_return.php:5:17
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function foo(): (function(int): string) {
+  |                                 ^^^^^^ [2]
+5 |   return $x ==> true;
+  |                 ^^^^ [1]
+6 | }
+
+1 error found

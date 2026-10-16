@@ -1,2 +1,10 @@
-ERROR: File "list_lvalue_only.php", line 5, characters 8-13:
-`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
+error: NastCheck[3092] `list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? [1]
+
+list_lvalue_only.php:5:8
+3 | function foo(): void {
+4 |   list($x, list(, $y)) = tuple(1, tuple(2, 3)); // OK
+5 |   $z = list(); // not OK
+  |        ^^^^^^ [1]
+6 | }
+
+1 error found

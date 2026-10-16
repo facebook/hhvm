@@ -1,52 +1,109 @@
-ERROR: File "insts3.php", line 16, characters 17-17:
-This makes G implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
-  File "insts3.php", line 16, characters 30-37:
-  It already implements J<mixed>
-  File "insts3.php", line 11, characters 20-20:
-  This is where E implements J
-  File "insts3.php", line 16, characters 30-30:
-  J<mixed> should be a subtype of J<arraykey>, but it's not because
-  File "insts3.php", line 11, characters 22-29:
-  Expected `arraykey`
-  File "insts3.php", line 16, characters 32-36:
-  But got `mixed`
-ERROR: File "insts3.php", line 18, characters 17-17:
-This makes H implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
-  File "insts3.php", line 18, characters 30-37:
-  It already implements J<float>
-  File "insts3.php", line 11, characters 20-20:
-  This is where E implements J
-  File "insts3.php", line 18, characters 30-30:
-  J<float> should be a subtype of J<arraykey>, but it's not because
-  File "insts3.php", line 11, characters 22-29:
-  Expected `arraykey`
-  File "insts3.php", line 18, characters 32-36:
-  But got `float`
-ERROR: File "insts3.php", line 24, characters 18-18:
-This makes GG implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
-  File "insts3.php", line 24, characters 31-31:
-  It already implements J<mixed> via K
-  File "insts3.php", line 21, characters 21-21:
-  This is where K implements J
-  File "insts3.php", line 11, characters 20-20:
-  This is where E implements J
-  File "insts3.php", line 21, characters 21-21:
-  J<mixed> should be a subtype of J<arraykey>, but it's not because
-  File "insts3.php", line 11, characters 22-29:
-  Expected `arraykey`
-  File "insts3.php", line 21, characters 23-27:
-  But got `mixed`
-ERROR: File "insts3.php", line 25, characters 18-18:
-This makes HH implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
-  File "insts3.php", line 25, characters 31-31:
-  It already implements J<float> via L
-  File "insts3.php", line 22, characters 21-21:
-  This is where L implements J
-  File "insts3.php", line 11, characters 20-20:
-  This is where E implements J
-  File "insts3.php", line 22, characters 21-21:
-  J<float> should be a subtype of J<arraykey>, but it's not because
-  File "insts3.php", line 11, characters 22-29:
-  Expected `arraykey`
-  File "insts3.php", line 22, characters 23-27:
-  But got `float`
+error: Typing[4480] This makes G implements J<arraykey> but it already implements J at another instantiation [1]
+-> It already implements J<mixed> [2]
+-> This is where E implements J [3]
+-> J<mixed> should be a subtype of J<arraykey>, but it's not because [4]
+-> Expected `arraykey` [5]
+-> But got `mixed` [6]
+
+insts3.php:16:17
+ 9 | interface J<+T> { }
+10 | 
+11 | class E implements J<arraykey> { }
+   |                    ^ [3]
+   |                      ^^^^^^^^ [5]
+12 | // Legal
+13 | class F extends E implements J<string> { }
+14 | 
+15 | // Illegal cos redundant
+16 | class G extends E implements J<mixed> { }
+   |                 ^ [1]
+   |                              ^^^^^^^^ [2]
+   |                              ^ [4]
+   |                                ^^^^^ [6]
+17 | // Illegal cos unrelated
+18 | class H extends E implements J<float> { }
+
+error: Typing[4480] This makes H implements J<arraykey> but it already implements J at another instantiation [1]
+-> It already implements J<float> [2]
+-> This is where E implements J [3]
+-> J<float> should be a subtype of J<arraykey>, but it's not because [4]
+-> Expected `arraykey` [5]
+-> But got `float` [6]
+
+insts3.php:18:17
+ 9 | interface J<+T> { }
+10 | 
+11 | class E implements J<arraykey> { }
+   |                    ^ [3]
+   |                      ^^^^^^^^ [5]
+12 | // Legal
+13 | class F extends E implements J<string> { }
+   :
+16 | class G extends E implements J<mixed> { }
+17 | // Illegal cos unrelated
+18 | class H extends E implements J<float> { }
+   |                 ^ [1]
+   |                              ^^^^^^^^ [2]
+   |                              ^ [4]
+   |                                ^^^^^ [6]
+19 | 
+20 | // Indirect variations on above
+
+error: Typing[4480] This makes GG implements J<arraykey> but it already implements J at another instantiation [1]
+-> It already implements J<mixed> via K [2]
+-> This is where K implements J [3]
+-> This is where E implements J [4]
+-> J<mixed> should be a subtype of J<arraykey>, but it's not because [3]
+-> Expected `arraykey` [5]
+-> But got `mixed` [6]
+
+insts3.php:24:18
+ 9 | interface J<+T> { }
+10 | 
+11 | class E implements J<arraykey> { }
+   |                    ^ [4]
+   |                      ^^^^^^^^ [5]
+12 | // Legal
+13 | class F extends E implements J<string> { }
+   :
+19 | 
+20 | // Indirect variations on above
+21 | interface K extends J<mixed> { }
+   |                     ^ [3]
+   |                       ^^^^^ [6]
+22 | interface L extends J<float> { }
+23 | 
+24 | class GG extends E implements K { }
+   |                  ^ [1]
+   |                               ^ [2]
+25 | class HH extends E implements L { }
+
+error: Typing[4480] This makes HH implements J<arraykey> but it already implements J at another instantiation [1]
+-> It already implements J<float> via L [2]
+-> This is where L implements J [3]
+-> This is where E implements J [4]
+-> J<float> should be a subtype of J<arraykey>, but it's not because [3]
+-> Expected `arraykey` [5]
+-> But got `float` [6]
+
+insts3.php:25:18
+ 9 | interface J<+T> { }
+10 | 
+11 | class E implements J<arraykey> { }
+   |                    ^ [4]
+   |                      ^^^^^^^^ [5]
+12 | // Legal
+13 | class F extends E implements J<string> { }
+   :
+20 | // Indirect variations on above
+21 | interface K extends J<mixed> { }
+22 | interface L extends J<float> { }
+   |                     ^ [3]
+   |                       ^^^^^ [6]
+23 | 
+24 | class GG extends E implements K { }
+25 | class HH extends E implements L { }
+   |                  ^ [1]
+   |                               ^ [2]
+
+4 errors found

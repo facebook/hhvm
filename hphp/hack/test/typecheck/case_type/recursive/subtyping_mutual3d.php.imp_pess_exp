@@ -1,60 +1,234 @@
-ERROR: File "subtyping_mutual3d.php", line 26, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual3d.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3d.php", line 4, characters 16-16:
-    by the definition of `A`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
-    by the definition of `B`
-ERROR: File "subtyping_mutual3d.php", line 27, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual3d.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3d.php", line 4, characters 16-16:
-    by the definition of `A`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
-    by the definition of `B`
-ERROR: File "subtyping_mutual3d.php", line 30, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual3d.php", line 15, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
-    by the definition of `B`
-ERROR: File "subtyping_mutual3d.php", line 31, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual3d.php", line 15, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3d.php", line 6, characters 11-11:
-    by the definition of `B`
-ERROR: File "subtyping_mutual3d.php", line 60, characters 12-15:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 8, characters 19-19:
-  Expected `A`
-  File "subtyping_mutual3d.php", line 22, characters 3-15:
-  But got `vec<vec<int>>`
-ERROR: File "subtyping_mutual3d.php", line 61, characters 12-15:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual3d.php", line 22, characters 3-15:
-  But got `vec<vec<int>>`
-ERROR: File "subtyping_mutual3d.php", line 62, characters 15-18:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 10, characters 26-26:
-  Expected `A`
-  File "subtyping_mutual3d.php", line 22, characters 7-14:
-  But got `vec<int>`
-ERROR: File "subtyping_mutual3d.php", line 63, characters 15-18:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3d.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual3d.php", line 22, characters 7-14:
-  But got `vec<int>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+->   by the definition of `B` [5]
+
+subtyping_mutual3d.php:26:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [4]
+ 5 | 
+ 6 | case type B = vec<A>;
+   |           ^ [5]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   vec<nothing> $v,
+   :
+24 |   expect_A($a); // ok: A <: A
+25 |   expect_B($a); // ok: A <: B -> ok with bound on A
+26 |   expect_vecA($a); // nok: A <: vec<A> -> B <: vec<A> -> nok, need bound on B
+   |               ^^ [1]
+27 |   expect_vecB($a); // nok: A <: vec<B> -> B <: vec<B> -> nok, need bound on B
+28 |   expect_A($b); // ok: B <: A -> B <: B -> ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+->   by the definition of `B` [5]
+
+subtyping_mutual3d.php:27:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A as B = B;
+   |                ^ [4]
+ 5 | 
+ 6 | case type B = vec<A>;
+   |           ^ [5]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   vec<nothing> $v,
+   :
+25 |   expect_B($a); // ok: A <: B -> ok with bound on A
+26 |   expect_vecA($a); // nok: A <: vec<A> -> B <: vec<A> -> nok, need bound on B
+27 |   expect_vecB($a); // nok: A <: vec<B> -> B <: vec<B> -> nok, need bound on B
+   |               ^^ [1]
+28 |   expect_A($b); // ok: B <: A -> B <: B -> ok
+29 |   expect_B($b); // ok: B <: B -> ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` [4]
+
+subtyping_mutual3d.php:30:15
+ 4 | case type A as B = B;
+ 5 | 
+ 6 | case type B = vec<A>;
+   |           ^ [4]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+15 |   B $b,
+   |   ^ [3]
+16 |   vec<nothing> $v,
+17 |   vec<A> $va,
+   :
+28 |   expect_A($b); // ok: B <: A -> B <: B -> ok
+29 |   expect_B($b); // ok: B <: B -> ok
+30 |   expect_vecA($b); // nok: B <: vec<A> -> nok, need bound on B
+   |               ^^ [1]
+31 |   expect_vecB($b); // nok: B <: vec<B> -> nok, need bound on B
+32 |   expect_A(
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` [4]
+
+subtyping_mutual3d.php:31:15
+ 4 | case type A as B = B;
+ 5 | 
+ 6 | case type B = vec<A>;
+   |           ^ [4]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | 
+13 | function foo(
+14 |   A $a,
+15 |   B $b,
+   |   ^ [3]
+16 |   vec<nothing> $v,
+17 |   vec<A> $va,
+   :
+29 |   expect_B($b); // ok: B <: B -> ok
+30 |   expect_vecA($b); // nok: B <: vec<A> -> nok, need bound on B
+31 |   expect_vecB($b); // nok: B <: vec<B> -> nok, need bound on B
+   |               ^^ [1]
+32 |   expect_A(
+33 |     $v,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<vec<int>>` [3]
+
+subtyping_mutual3d.php:60:12
+ 6 | case type B = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+   |                   ^ [2]
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |   ^^^^^^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a); // ok: A <: A
+   :
+58 | 
+59 |   // these are wrong
+60 |   expect_A($vvi);
+   |            ^^^^ [1]
+61 |   expect_B($vvi);
+62 |   expect_vecA($vvi);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<vec<int>>` [3]
+
+subtyping_mutual3d.php:61:12
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |   ^^^^^^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a); // ok: A <: A
+   :
+59 |   // these are wrong
+60 |   expect_A($vvi);
+61 |   expect_B($vvi);
+   |            ^^^^ [1]
+62 |   expect_vecA($vvi);
+63 |   expect_vecB($vvi);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<int>` [3]
+
+subtyping_mutual3d.php:62:15
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                          ^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |       ^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a); // ok: A <: A
+   :
+60 |   expect_A($vvi);
+61 |   expect_B($vvi);
+62 |   expect_vecA($vvi);
+   |               ^^^^ [1]
+63 |   expect_vecB($vvi);
+64 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<int>` [3]
+
+subtyping_mutual3d.php:63:15
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |       ^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a); // ok: A <: A
+   :
+61 |   expect_B($vvi);
+62 |   expect_vecA($vvi);
+63 |   expect_vecB($vvi);
+   |               ^^^^ [1]
+64 | }
+
+8 errors found

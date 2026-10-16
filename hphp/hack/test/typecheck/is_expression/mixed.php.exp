@@ -1,2 +1,11 @@
-WARN: File "mixed.php", line 4, characters 7-17:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `mixed`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `mixed`. [1]
+
+mixed.php:4:7
+2 | 
+3 | function main(int $x): void {
+4 |   if ($x is mixed) {
+  |       ^^^^^^^^^^^ [1]
+5 |     expect_int($x);
+6 |     expect_mixed($x);
+
+1 error found

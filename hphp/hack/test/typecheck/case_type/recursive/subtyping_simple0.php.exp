@@ -1,26 +1,84 @@
-ERROR: File "subtyping_simple0.php", line 4, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "subtyping_simple0.php", line 4, characters 16-16:
-  Cyclic use is here
-ERROR: File "subtyping_simple0.php", line 12, characters 17-18:
-Invalid argument (Typing[4110])
-  File "subtyping_simple0.php", line 7, characters 24-29:
-  Expected `string`
-  File "subtyping_simple0.php", line 10, characters 14-14:
-  But got `mixed`
-  File "subtyping_simple0.php", line 4, characters 16-16:
-    by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-ERROR: File "subtyping_simple0.php", line 13, characters 14-15:
-Invalid argument (Typing[4110])
-  File "subtyping_simple0.php", line 8, characters 21-23:
-  Expected `int`
-  File "subtyping_simple0.php", line 10, characters 14-14:
-  But got `mixed`
-  File "subtyping_simple0.php", line 4, characters 16-16:
-    by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-ERROR: File "subtyping_simple0.php", line 14, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_simple0.php", line 6, characters 19-19:
-  Expected `A`
-  File "subtyping_simple0.php", line 10, characters 28-33:
-  But got `string`
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+subtyping_simple0.php:4:11
+2 | <<file: __EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type A as A = int;
+  |           ^ [1]
+  |                ^ [2]
+5 | 
+6 | function expect_A(A $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [4]
+
+subtyping_simple0.php:12:17
+ 2 | <<file: __EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type A as A = int;
+   |                ^ [4]
+ 5 | 
+ 6 | function expect_A(A $_): void {}
+ 7 | function expect_string(string $_): void {}
+   |                        ^^^^^^ [2]
+ 8 | function expect_int(int $_): void {}
+ 9 | 
+10 | function foo(A $a, int $i, string $s): void {
+   |              ^ [3]
+11 |   expect_A($a);
+12 |   expect_string($a); // nok: A <: string -> A <: string -> recursing -> nok
+   |                 ^^ [1]
+13 |   expect_int($a); // nok: A <: int -> A <: int -> recursing -> nok
+14 |   expect_A($s); // nok: string <: A -> string <: A -> recursing -> nok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+->   by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [4]
+
+subtyping_simple0.php:13:14
+ 2 | <<file: __EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type A as A = int;
+   |                ^ [4]
+ 5 | 
+ 6 | function expect_A(A $_): void {}
+ 7 | function expect_string(string $_): void {}
+ 8 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+ 9 | 
+10 | function foo(A $a, int $i, string $s): void {
+   |              ^ [3]
+11 |   expect_A($a);
+12 |   expect_string($a); // nok: A <: string -> A <: string -> recursing -> nok
+13 |   expect_int($a); // nok: A <: int -> A <: int -> recursing -> nok
+   |              ^^ [1]
+14 |   expect_A($s); // nok: string <: A -> string <: A -> recursing -> nok
+15 |   expect_A($i); // ok: int <: A -> int <: int -> ok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `string` [3]
+
+subtyping_simple0.php:14:12
+ 4 | case type A as A = int;
+ 5 | 
+ 6 | function expect_A(A $_): void {}
+   |                   ^ [2]
+ 7 | function expect_string(string $_): void {}
+ 8 | function expect_int(int $_): void {}
+ 9 | 
+10 | function foo(A $a, int $i, string $s): void {
+   |                            ^^^^^^ [3]
+11 |   expect_A($a);
+12 |   expect_string($a); // nok: A <: string -> A <: string -> recursing -> nok
+13 |   expect_int($a); // nok: A <: int -> A <: int -> recursing -> nok
+14 |   expect_A($s); // nok: string <: A -> string <: A -> recursing -> nok
+   |            ^^ [1]
+15 |   expect_A($i); // ok: int <: A -> int <: int -> ok
+16 | }
+
+4 errors found

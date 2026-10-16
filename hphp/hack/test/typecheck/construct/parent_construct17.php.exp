@@ -1,4 +1,19 @@
-ERROR: File "parent_construct17.php", line 11, characters 5-10:
-This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>> (Typing[4451])
-  File "parent_construct17.php", line 3, characters 16-24:
-  Parent definition is here
+error: Typing[4451] This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>> [1]
+-> Parent definition is here [2]
+
+parent_construct17.php:11:5
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class FooParent {
+   |                ^^^^^^^^^ [2]
+ 4 |   protected function __construct() {}
+ 5 | }
+   :
+ 9 | 
+10 |   public function __construct() {
+11 |     parent::__construct();
+   |     ^^^^^^ [1]
+12 |   }
+13 | }
+
+1 error found

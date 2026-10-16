@@ -1,2 +1,11 @@
-ERROR: File "single_const_attribute_subclass.php", line 19, characters 12-13:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+single_const_attribute_subclass.php:19:12
+17 | 
+18 |   public function fail(): void {
+19 |     $this->CA = 7; // not allowed
+   |            ^^ [1]
+20 |   }
+21 | }
+
+1 error found

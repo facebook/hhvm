@@ -1,146 +1,528 @@
-ERROR: File "subscript_error.php", line 58, characters 41-46:
-`$arr[]` is append syntax and is currently unsupported in expression trees. Use `$arr[$idx]` for element access. (Parsing[1002])
-ERROR: File "subscript_error.php", line 77, characters 5-17:
-Subscript append is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 85, characters 7-28:
-Expression trees do not support array access (e.g. `arr[0]`) as the left side of the null coalesce operator (`??`). (Parsing[1002])
-ERROR: File "subscript_error.php", line 92, characters 5-17:
-Subscript append is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 101, characters 5-21:
-Subscript append is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 108, characters 5-18:
-Subscript increment/decrement is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 115, characters 5-24:
-Subscript append is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 122, characters 5-21:
-Subscript increment/decrement is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 135, characters 5-24:
-Unsupported expression tree syntax. (Parsing[1002])
-ERROR: File "subscript_error.php", line 144, characters 5-25:
-The pipe operator `|>` is not supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 144, characters 13-14:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-ERROR: File "subscript_error.php", line 144, characters 13-18:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "subscript_error.php", line 153, characters 5-21:
-Subscript append is not yet supported in expression trees. (Parsing[1002])
-ERROR: File "subscript_error.php", line 163, characters 5-17:
-Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])
-ERROR: File "subscript_error.php", line 58, characters 41-44:
-Variable `$arr` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 77, characters 5-8:
-Variable `$map` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 77, characters 14-17:
-Variable `$val` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 92, characters 5-8:
-Variable `$arr` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 92, characters 14-17:
-Variable `$val` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 101, characters 5-8:
-Variable `$arr` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 101, characters 10-11:
-Variable `$i` is undefined, or not always defined. (Naming[2050])
-  File "subscript_error.php", line 101, characters 5-12:
-  Did you mean `$arr` instead?
-ERROR: File "subscript_error.php", line 101, characters 18-21:
-Variable `$val` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 115, characters 5-8:
-Variable `$obj` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 115, characters 21-24:
-Variable `$val` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 144, characters 5-8:
-Variable `$arr` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 144, characters 16-17:
-Variable `$i` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
-  Did you mean `$$` instead?
-ERROR: File "subscript_error.php", line 144, characters 22-25:
-Variable `$val` is undefined, or not always defined. (Naming[2050])
-  File "", line 0, characters 0-0:
-  Did you mean `$$` instead?
-ERROR: File "subscript_error.php", line 153, characters 5-8:
-Variable `$arr` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 153, characters 12-13:
-Variable `$j` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 153, characters 18-21:
-Variable `$val` is undefined, or not always defined. (Naming[2050])
-ERROR: File "subscript_error.php", line 58, characters 41-44:
-Cannot use `[]` for reading (NastCheck[3047])
-ERROR: File "subscript_error.php", line 153, characters 5-8:
-Cannot use `[]` for reading (NastCheck[3047])
-ERROR: File "subscript_error.php", line 11, characters 61-70:
-Typing error (Typing[4110])
-  File "subscript_error.php", line 11, characters 61-64:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "subscript_error.php", line 11, characters 37-49:
-  But got `string`
-ERROR: File "subscript_error.php", line 11, characters 66-69:
-Invalid index type for this vec (Typing[4449])
-  File "subscript_error.php", line 11, characters 15-17:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "subscript_error.php", line 11, characters 37-49:
-  It is incompatible with a string
-ERROR: File "subscript_error.php", line 17, characters 70-73:
-Invalid index type for this dict (Typing[4449])
-  File "subscript_error.php", line 17, characters 11-23:
-  This is a string
-  File "subscript_error.php", line 17, characters 44-53:
-  It is incompatible with an int
-ERROR: File "subscript_error.php", line 24, characters 73-76:
-Invalid index type for this dict (Typing[4449])
-  File "subscript_error.php", line 24, characters 11-20:
-  This is an int
-  File "subscript_error.php", line 24, characters 44-56:
-  It is incompatible with a string
-ERROR: File "subscript_error.php", line 31, characters 64-73:
-Invalid return type (Typing[4110])
-  File "subscript_error.php", line 31, characters 46-58:
-  Expected `string`
-  File "subscript_error.php", line 31, characters 64-73:
-  But got `int`
-  File "subscript_error.php", line 31, characters 10-19:
-    from this definition
-ERROR: File "subscript_error.php", line 39, characters 7-16:
-Invalid return type (Typing[4110])
-  File "subscript_error.php", line 38, characters 65-77:
-  Expected `string`
-  File "subscript_error.php", line 39, characters 7-16:
-  But got `int`
-  File "subscript_error.php", line 38, characters 26-35:
-    from this definition
-ERROR: File "subscript_error.php", line 47, characters 7-18:
-Invalid return type (Typing[4110])
-  File "subscript_error.php", line 46, characters 64-76:
-  Expected `string`
-  File "subscript_error.php", line 47, characters 7-18:
-  But got `int`
-  File "subscript_error.php", line 46, characters 14-23:
-    from this definition
-ERROR: File "subscript_error.php", line 53, characters 51-58:
-Typing error (Typing[4110])
-  File "subscript_error.php", line 53, characters 51-58:
-  Expected an array that can be indexed
-  File "subscript_error.php", line 53, characters 15-24:
-  But got `int`
-ERROR: File "subscript_error.php", line 64, characters 59-68:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "subscript_error.php", line 64, characters 15-30:
-  This is what makes me believe it can be `null`
-ERROR: File "subscript_error.php", line 70, characters 69-78:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "subscript_error.php", line 70, characters 6-37:
-  This is what makes me believe it can be `null`
-ERROR: File "subscript_error.php", line 77, characters 5-17:
-an object of type dict<int, string> does not allow array append (Typing[4006])
-  File "subscript_error.php", line 76, characters 15-45:
-  Definition is here
-ERROR: File "subscript_error.php", line 135, characters 5-24:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 433, characters 5-20:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "subscript_error.php", line 130, characters 17-31:
-  But got `vec<int>`
-ERROR: File "subscript_error.php", line 178, characters 12-23:
-`ExampleStringOpType` does not support this operator (it has no instance method named `__plus`) (Typing[4053])
+error: Parsing[1002] `$arr[]` is append syntax and is currently unsupported in expression trees. Use `$arr[$idx]` for element access. [1]
+
+subscript_error.php:58:41
+56 | // Append syntax $arr[] as a read expression is not supported
+57 | function test_subscript_append_read(): void {
+58 |   ExampleDsl`(vec<ExampleInt> $arr) ==> $arr[]`;
+   |                                         ^^^^^^ [1]
+59 | }
+60 | 
+
+error: Parsing[1002] Subscript append is not yet supported in expression trees. [1]
+
+subscript_error.php:77:5
+75 | function test_dict_append(): void {
+76 |   ExampleDsl`(dict<ExampleInt, ExampleString> $map, ExampleString $val) ==> {
+77 |     $map[] = $val;
+   |     ^^^^^^^^^^^^^ [1]
+78 |   }`;
+79 | }
+
+error: Parsing[1002] Expression trees do not support array access (e.g. `arr[0]`) as the left side of the null coalesce operator (`??`). [1]
+
+subscript_error.php:85:7
+83 |   ExampleDsl`
+84 |     (vec<ExampleInt> $arr, ExampleInt $idx, ExampleInt $default) ==>
+85 |       $arr[$idx] ?? $default
+   |       ^^^^^^^^^^^^^^^^^^^^^^ [1]
+86 |   `;
+87 | }
+
+error: Parsing[1002] Subscript append is not yet supported in expression trees. [1]
+
+subscript_error.php:92:5
+90 | function test_array_append(): void {
+91 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $val) ==> {
+92 |     $arr[] = $val;
+   |     ^^^^^^^^^^^^^ [1]
+93 |   }`;
+94 | }
+
+error: Parsing[1002] Subscript append is not yet supported in expression trees. [1]
+
+subscript_error.php:101:5
+ 99 | function test_intermediate_append(): void {
+100 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $i, ExampleInt $val) ==> {
+101 |     $arr[$i][] = $val;
+    |     ^^^^^^^^^^^^^^^^^ [1]
+102 |   }`;
+103 | }
+
+error: Parsing[1002] Subscript increment/decrement is not yet supported in expression trees. [1]
+
+subscript_error.php:108:5
+106 | function test_nested_subscript_postfix_increment(): void {
+107 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $i, ExampleInt $j) ==> {
+108 |     $arr[$i][$j]++;
+    |     ^^^^^^^^^^^^^^ [1]
+109 |   }`;
+110 | }
+
+error: Parsing[1002] Subscript append is not yet supported in expression trees. [1]
+
+subscript_error.php:115:5
+113 | function test_mixed_chain_append(): void {
+114 |   ExampleDsl`(MyContainerForErrors $obj, ExampleInt $val) ==> {
+115 |     $obj->items[] = $val;
+    |     ^^^^^^^^^^^^^^^^^^^^ [1]
+116 |   }`;
+117 | }
+
+error: Parsing[1002] Subscript increment/decrement is not yet supported in expression trees. [1]
+
+subscript_error.php:122:5
+120 | function test_mixed_chain_unop(): void {
+121 |   ExampleDsl`(MyContainerForErrors $obj, ExampleInt $i) ==> {
+122 |     $obj->items[$i]++;
+    |     ^^^^^^^^^^^^^^^^^ [1]
+123 |   }`;
+124 | }
+
+error: Parsing[1002] Unsupported expression tree syntax. [1]
+
+subscript_error.php:135:5
+133 | function test_classget_root_subscript_assign(): void {
+134 |   ExampleDsl`(ExampleInt $i, ExampleInt $val) ==> {
+135 |     StaticHolder::$items[$i] = $val;
+    |     ^^^^^^^^^^^^^^^^^^^^ [1]
+136 |   }`;
+137 | }
+
+error: Parsing[1002] The pipe operator `|>` is not supported in expression trees. [1]
+
+subscript_error.php:144:5
+142 | function test_dollardollar_root_subscript_assign(): void {
+143 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i, ExampleInt $val) ==> {
+144 |     $arr |> $$[$i] = $val;
+    |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+145 |   }`;
+146 | }
+
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+subscript_error.php:144:13
+142 | function test_dollardollar_root_subscript_assign(): void {
+143 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i, ExampleInt $val) ==> {
+144 |     $arr |> $$[$i] = $val;
+    |             ^^ [1]
+145 |   }`;
+146 | }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+subscript_error.php:144:13
+142 | function test_dollardollar_root_subscript_assign(): void {
+143 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i, ExampleInt $val) ==> {
+144 |     $arr |> $$[$i] = $val;
+    |             ^^^^^^ [1]
+145 |   }`;
+146 | }
+
+error: Parsing[1002] Subscript append is not yet supported in expression trees. [1]
+
+subscript_error.php:153:5
+151 | function test_append_then_subscript(): void {
+152 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $j, ExampleInt $val) ==> {
+153 |     $arr[][$j] = $val;
+    |     ^^^^^^^^^^^^^^^^^ [1]
+154 |   }`;
+155 | }
+
+error: Parsing[1002] Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. [1]
+
+subscript_error.php:163:5
+161 | function test_compound_subscript_assignment(): void {
+162 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i) ==> {
+163 |     $arr[$i] += 1;
+    |     ^^^^^^^^^^^^^ [1]
+164 |   }`;
+165 | }
+
+error: Naming[2050] Variable `$arr` is undefined, or not always defined. [1]
+
+subscript_error.php:58:41
+56 | // Append syntax $arr[] as a read expression is not supported
+57 | function test_subscript_append_read(): void {
+58 |   ExampleDsl`(vec<ExampleInt> $arr) ==> $arr[]`;
+   |                                         ^^^^ [1]
+59 | }
+60 | 
+
+error: Naming[2050] Variable `$map` is undefined, or not always defined. [1]
+
+subscript_error.php:77:5
+75 | function test_dict_append(): void {
+76 |   ExampleDsl`(dict<ExampleInt, ExampleString> $map, ExampleString $val) ==> {
+77 |     $map[] = $val;
+   |     ^^^^ [1]
+78 |   }`;
+79 | }
+
+error: Naming[2050] Variable `$val` is undefined, or not always defined. [1]
+
+subscript_error.php:77:14
+75 | function test_dict_append(): void {
+76 |   ExampleDsl`(dict<ExampleInt, ExampleString> $map, ExampleString $val) ==> {
+77 |     $map[] = $val;
+   |              ^^^^ [1]
+78 |   }`;
+79 | }
+
+error: Naming[2050] Variable `$arr` is undefined, or not always defined. [1]
+
+subscript_error.php:92:5
+90 | function test_array_append(): void {
+91 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $val) ==> {
+92 |     $arr[] = $val;
+   |     ^^^^ [1]
+93 |   }`;
+94 | }
+
+error: Naming[2050] Variable `$val` is undefined, or not always defined. [1]
+
+subscript_error.php:92:14
+90 | function test_array_append(): void {
+91 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $val) ==> {
+92 |     $arr[] = $val;
+   |              ^^^^ [1]
+93 |   }`;
+94 | }
+
+error: Naming[2050] Variable `$arr` is undefined, or not always defined. [1]
+
+subscript_error.php:101:5
+ 99 | function test_intermediate_append(): void {
+100 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $i, ExampleInt $val) ==> {
+101 |     $arr[$i][] = $val;
+    |     ^^^^ [1]
+102 |   }`;
+103 | }
+
+error: Naming[2050] Variable `$i` is undefined, or not always defined. [1]
+-> Did you mean `$arr` instead? [2]
+
+subscript_error.php:101:10
+ 99 | function test_intermediate_append(): void {
+100 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $i, ExampleInt $val) ==> {
+101 |     $arr[$i][] = $val;
+    |     ^^^^^^^^ [2]
+    |          ^^ [1]
+102 |   }`;
+103 | }
+
+error: Naming[2050] Variable `$val` is undefined, or not always defined. [1]
+
+subscript_error.php:101:18
+ 99 | function test_intermediate_append(): void {
+100 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $i, ExampleInt $val) ==> {
+101 |     $arr[$i][] = $val;
+    |                  ^^^^ [1]
+102 |   }`;
+103 | }
+
+error: Naming[2050] Variable `$obj` is undefined, or not always defined. [1]
+
+subscript_error.php:115:5
+113 | function test_mixed_chain_append(): void {
+114 |   ExampleDsl`(MyContainerForErrors $obj, ExampleInt $val) ==> {
+115 |     $obj->items[] = $val;
+    |     ^^^^ [1]
+116 |   }`;
+117 | }
+
+error: Naming[2050] Variable `$val` is undefined, or not always defined. [1]
+
+subscript_error.php:115:21
+113 | function test_mixed_chain_append(): void {
+114 |   ExampleDsl`(MyContainerForErrors $obj, ExampleInt $val) ==> {
+115 |     $obj->items[] = $val;
+    |                     ^^^^ [1]
+116 |   }`;
+117 | }
+
+error: Naming[2050] Variable `$arr` is undefined, or not always defined. [1]
+
+subscript_error.php:144:5
+142 | function test_dollardollar_root_subscript_assign(): void {
+143 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i, ExampleInt $val) ==> {
+144 |     $arr |> $$[$i] = $val;
+    |     ^^^^ [1]
+145 |   }`;
+146 | }
+
+error: Naming[2050] Variable `$i` is undefined, or not always defined. [1]
+-> Did you mean `$$` instead? [2]
+
+subscript_error.php:144:16
+142 | function test_dollardollar_root_subscript_assign(): void {
+143 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i, ExampleInt $val) ==> {
+144 |     $arr |> $$[$i] = $val;
+    |                ^^ [1]
+145 |   }`;
+146 | }
+
+:0:0
+  0 | No source found
+
+error: Naming[2050] Variable `$val` is undefined, or not always defined. [1]
+-> Did you mean `$$` instead? [2]
+
+subscript_error.php:144:22
+142 | function test_dollardollar_root_subscript_assign(): void {
+143 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleInt $i, ExampleInt $val) ==> {
+144 |     $arr |> $$[$i] = $val;
+    |                      ^^^^ [1]
+145 |   }`;
+146 | }
+
+:0:0
+  0 | No source found
+
+error: Naming[2050] Variable `$arr` is undefined, or not always defined. [1]
+
+subscript_error.php:153:5
+151 | function test_append_then_subscript(): void {
+152 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $j, ExampleInt $val) ==> {
+153 |     $arr[][$j] = $val;
+    |     ^^^^ [1]
+154 |   }`;
+155 | }
+
+error: Naming[2050] Variable `$j` is undefined, or not always defined. [1]
+
+subscript_error.php:153:12
+151 | function test_append_then_subscript(): void {
+152 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $j, ExampleInt $val) ==> {
+153 |     $arr[][$j] = $val;
+    |            ^^ [1]
+154 |   }`;
+155 | }
+
+error: Naming[2050] Variable `$val` is undefined, or not always defined. [1]
+
+subscript_error.php:153:18
+151 | function test_append_then_subscript(): void {
+152 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $j, ExampleInt $val) ==> {
+153 |     $arr[][$j] = $val;
+    |                  ^^^^ [1]
+154 |   }`;
+155 | }
+
+error: NastCheck[3047] Cannot use `[]` for reading [1]
+
+subscript_error.php:58:41
+56 | // Append syntax $arr[] as a read expression is not supported
+57 | function test_subscript_append_read(): void {
+58 |   ExampleDsl`(vec<ExampleInt> $arr) ==> $arr[]`;
+   |                                         ^^^^ [1]
+59 | }
+60 | 
+
+error: NastCheck[3047] Cannot use `[]` for reading [1]
+
+subscript_error.php:153:5
+151 | function test_append_then_subscript(): void {
+152 |   ExampleDsl`(vec<vec<ExampleInt>> $arr, ExampleInt $j, ExampleInt $val) ==> {
+153 |     $arr[][$j] = $val;
+    |     ^^^^ [1]
+154 |   }`;
+155 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+subscript_error.php:11:61
+ 9 | // Wrong index type: string index on vec (expects int)
+10 | function test_subscript_wrong_index_type(): void {
+11 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleString $key) ==> $arr[$key]`;
+   |                                     ^^^^^^^^^^^^^ [3]
+   |                                                             ^^^^^^^^^^ [1]
+   |                                                             ^^^^ [2]
+12 | }
+13 | 
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [3]
+
+subscript_error.php:11:66
+ 9 | // Wrong index type: string index on vec (expects int)
+10 | function test_subscript_wrong_index_type(): void {
+11 |   ExampleDsl`(vec<ExampleInt> $arr, ExampleString $key) ==> $arr[$key]`;
+   |               ^^^ [2]
+   |                                     ^^^^^^^^^^^^^ [3]
+   |                                                                  ^^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is a string [2]
+-> It is incompatible with an int [3]
+
+subscript_error.php:17:70
+15 | function test_subscript_dict_wrong_key_read(): void {
+16 |   ExampleDsl`
+17 |     (dict<ExampleString, ExampleInt> $map, ExampleInt $key) ==> $map[$key]
+   |           ^^^^^^^^^^^^^ [2]
+   |                                            ^^^^^^^^^^ [3]
+   |                                                                      ^^^^ [1]
+18 |   `;
+19 | }
+
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is an int [2]
+-> It is incompatible with a string [3]
+
+subscript_error.php:24:73
+22 | function test_subscript_dict_int_key_wrong_key_read(): void {
+23 |   ExampleDsl`
+24 |     (dict<ExampleInt, ExampleString> $map, ExampleString $key) ==> $map[$key]
+   |           ^^^^^^^^^^ [2]
+   |                                            ^^^^^^^^^^^^^ [3]
+   |                                                                         ^^^^ [1]
+25 |   `;
+26 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+->   from this definition [3]
+
+subscript_error.php:31:64
+29 | function test_subscript_wrong_return_type_vec(): void {
+30 |   ExampleDsl`
+31 |     (vec<ExampleInt> $arr, ExampleInt $idx): ExampleString ==> $arr[$idx]
+   |          ^^^^^^^^^^ [3]
+   |                                              ^^^^^^^^^^^^^ [2]
+   |                                                                ^^^^^^^^^^ [1]
+32 |   `;
+33 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+->   from this definition [3]
+
+subscript_error.php:39:7
+36 | function test_subscript_wrong_return_type_dict(): void {
+37 |   ExampleDsl`
+38 |     (dict<ExampleString, ExampleInt> $map, ExampleString $key): ExampleString ==>
+   |                          ^^^^^^^^^^ [3]
+   |                                                                 ^^^^^^^^^^^^^ [2]
+39 |       $map[$key]
+   |       ^^^^^^^^^^ [1]
+40 |   `;
+41 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+->   from this definition [3]
+
+subscript_error.php:47:7
+44 | function test_subscript_nested_wrong_return_type(): void {
+45 |   ExampleDsl`
+46 |     (vec<vec<ExampleInt>> $arr, ExampleInt $i, ExampleInt $j): ExampleString ==>
+   |              ^^^^^^^^^^ [3]
+   |                                                                ^^^^^^^^^^^^^ [2]
+47 |       $arr[$i][$j]
+   |       ^^^^^^^^^^^^ [1]
+48 |   `;
+49 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `int` [2]
+
+subscript_error.php:53:51
+51 | // Subscript on non-indexable type
+52 | function test_subscript_non_indexable(): void {
+53 |   ExampleDsl`(ExampleInt $x, ExampleInt $idx) ==> $x[$idx]`;
+   |               ^^^^^^^^^^ [2]
+   |                                                   ^^^^^^^^ [1]
+54 | }
+55 | 
+
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+subscript_error.php:64:59
+62 | // (relevant to BKSFromNullable::vec auto-lifting patterns from D97586455)
+63 | function test_subscript_nullable_vec(): void {
+64 |   ExampleDsl`(?vec<ExampleInt> $arr, ExampleInt $idx) ==> $arr[$idx]`;
+   |               ^^^^^^^^^^^^^^^^ [2]
+   |                                                           ^^^^^^^^^^ [1]
+65 | }
+66 | 
+
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+subscript_error.php:70:69
+68 | function test_subscript_nullable_dict(): void {
+69 |   ExampleDsl`
+70 |     (?dict<ExampleString, ExampleInt> $map, ExampleString $key) ==> $map[$key]
+   |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                                     ^^^^^^^^^^ [1]
+71 |   `;
+72 | }
+
+error: Typing[4006] an object of type dict<int, string> does not allow array append [1]
+-> Definition is here [2]
+
+subscript_error.php:77:5
+74 | // Dict does not support array append syntax (Typing[4006])
+75 | function test_dict_append(): void {
+76 |   ExampleDsl`(dict<ExampleInt, ExampleString> $map, ExampleString $val) ==> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+77 |     $map[] = $val;
+   |     ^^^^^^^^^^^^^ [1]
+78 |   }`;
+79 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `vec<int>` [4]
+
+subscript_error.php:135:5
+128 | // that the chain walker doesn't have to handle ClassGet roots specially.
+129 | abstract class StaticHolder {
+130 |   public static vec<ExampleInt> $items = vec[];
+    |                 ^^^^^^^^^^^^^^^ [4]
+131 | }
+132 | 
+133 | function test_classget_root_subscript_assign(): void {
+134 |   ExampleDsl`(ExampleInt $i, ExampleInt $val) ==> {
+135 |     StaticHolder::$items[$i] = $val;
+    |     ^^^^^^^^^^^^^^^^^^^^ [1]
+136 |   }`;
+137 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+431 |   public function visitSubscriptAssign(
+432 |     ?ExprPos $_,
+433 |     ExampleDsl::TAst $root,
+    |     ^^^^^^^^^^^^^^^^ [3]
+434 |     vec<ExampleDsl::TAst> $keys,
+435 |     ExampleDsl::TAst $value,
+
+error: Typing[4053] `ExampleStringOpType` does not support this operator (it has no instance method named `__plus`) [1]
+
+subscript_error.php:178:12
+176 |   ) ==> {
+177 |     $arr[$i] = $widening_val;
+178 |     return $arr[$j] + 1;
+    |            ^^^^^^^^^^^^ [1]
+179 |   }`;
+180 | }
+
+45 errors found

@@ -1,4 +1,12 @@
-ERROR: File "lambda17.php", line 13, characters 17-18:
-Variable `$k` is undefined, or not always defined. (Naming[2050])
-  File "lambda17.php", line 13, characters 10-11:
-  Did you mean `$x` instead?
+error: Naming[2050] Variable `$k` is undefined, or not always defined. [1]
+-> Did you mean `$x` instead? [2]
+
+lambda17.php:13:17
+11 | 
+12 | function foo(): void {
+13 |   $bar = $x ==> $k; // $k isn't defined to be captured ...
+   |          ^^ [2]
+   |                 ^^ [1]
+14 | }
+
+1 error found

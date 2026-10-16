@@ -1,6 +1,18 @@
-ERROR: File "akempty_promotion_5.php", line 10, characters 5-6:
-Invalid argument (Typing[4110])
-  File "akempty_promotion_5.php", line 13, characters 12-14:
-  Expected `int`
-  File "akempty_promotion_5.php", line 8, characters 8-13:
-  But got `dict<int, string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `dict<int, string>` [3]
+
+akempty_promotion_5.php:10:5
+ 6 |  */
+ 7 | function test(int $i): void {
+ 8 |   $a = dict[];
+   |        ^^^^^^ [3]
+ 9 |   $a[$i] = 'aaa';
+10 |   f($a);
+   |     ^^ [1]
+11 | }
+12 | 
+13 | function f(int $_): void {}
+   |            ^^^ [2]
+
+1 error found

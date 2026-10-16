@@ -1,6 +1,31 @@
-ERROR: File "structural.php", line 3, characters 15-16:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "structural.php", line 3, characters 19-20:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "structural.php", line 4, characters 26-27:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+structural.php:3:15
+1 | <?hh
+2 | 
+3 | function disj<T1, T2, T3>() : void where T3 super (T2 & T1) {}
+  |               ^^ [1]
+4 | function overlap<T1, T2, T3>() : void where T3 as (T2 & T1) {}
+5 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+structural.php:3:19
+1 | <?hh
+2 | 
+3 | function disj<T1, T2, T3>() : void where T3 super (T2 & T1) {}
+  |                   ^^ [1]
+4 | function overlap<T1, T2, T3>() : void where T3 as (T2 & T1) {}
+5 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+structural.php:4:26
+2 | 
+3 | function disj<T1, T2, T3>() : void where T3 super (T2 & T1) {}
+4 | function overlap<T1, T2, T3>() : void where T3 as (T2 & T1) {}
+  |                          ^^ [1]
+5 | 
+6 | class C {}
+
+3 errors found

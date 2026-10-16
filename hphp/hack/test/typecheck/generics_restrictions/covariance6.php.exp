@@ -1,6 +1,14 @@
-ERROR: File "covariance6.php", line 4, characters 10-11:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "covariance6.php", line 3, characters 10-10:
-  This is where the parameter was declared as contravariant `-`
-  File "covariance6.php", line 4, characters 10-11:
-  A non private class property is always invariant
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> A non private class property is always invariant [1]
+
+covariance6.php:4:10
+1 | <?hh
+2 | 
+3 | class X<-T> {
+  |          ^ [2]
+4 |   public ?T $x;
+  |          ^^ [1]
+5 | }
+
+1 error found

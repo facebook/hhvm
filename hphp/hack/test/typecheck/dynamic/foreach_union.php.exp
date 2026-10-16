@@ -1,12 +1,39 @@
-ERROR: File "foreach_union.php", line 12, characters 20-21:
-Invalid argument (Typing[4110])
-  File "foreach_union.php", line 5, characters 25-32:
-  Expected `vec<int>`
-  File "foreach_union.php", line 7, characters 20-26:
-  But got `dynamic`
-ERROR: File "foreach_union.php", line 20, characters 12-13:
-Invalid `foreach` (Typing[4110])
-  File "foreach_union.php", line 20, characters 12-13:
-  Expected `Traversable<_>` because this is used in a `foreach` statement
-  File "foreach_union.php", line 16, characters 33-33:
-  But got `C`
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<int>` [2]
+-> But got `dynamic` [3]
+
+foreach_union.php:12:20
+ 3 | class C {}
+ 4 | 
+ 5 | function expect_vec_int(vec<int> $x): void {}
+   |                         ^^^^^^^^ [2]
+ 6 | 
+ 7 | function good_case(dynamic $dyn, vec<vec<int>> $vec): void {
+   |                    ^^^^^^^ [3]
+ 8 |   if ($dyn) {
+ 9 |     $vec = $dyn;
+10 |   }
+11 |   foreach ($vec as $x) {
+12 |     expect_vec_int($x); // error, result is dynamic | vec<int>
+   |                    ^^ [1]
+13 |   }
+14 | }
+
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected `Traversable<_>` because this is used in a `foreach` statement [1]
+-> But got `C` [2]
+
+foreach_union.php:20:12
+14 | }
+15 | 
+16 | function bad_case(dynamic $dyn, C $c): void {
+   |                                 ^ [2]
+17 |   if ($dyn) {
+18 |     $c = $dyn;
+19 |   }
+20 |   foreach ($c /* error */ as $x) {
+   |            ^^ [1]
+21 |   }
+22 | }
+
+2 errors found

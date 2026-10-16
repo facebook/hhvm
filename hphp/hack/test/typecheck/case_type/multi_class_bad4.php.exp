@@ -1,10 +1,21 @@
-ERROR: File "multi_class_bad4.php", line 4, characters 11-20:
-Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
-  File "multi_class_bad4.php", line 4, characters 24-24:
-  This is the type `I`, which includes **instances of the class B**
-  File "multi_class_bad4.php", line 7, characters 19-24:
-    via this requirement on `I`
-  File "multi_class_bad4.php", line 4, characters 28-28:
-  It overlaps with `C`, which includes **instances of the class C**
-  File "multi_class_bad4.php", line 4, characters 11-20:
-  Because **instances of the class B** contains **instances of the class C**, `I` and `C` cannot be in the same case type
+error: Typing[4475] Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag [1]
+-> This is the type `I`, which includes **instances of the class B** [2]
+->   via this requirement on `I` [3]
+-> It overlaps with `C`, which includes **instances of the class C** [4]
+-> Because **instances of the class B** contains **instances of the class C**, `I` and `C` cannot be in the same case type [1]
+
+multi_class_bad4.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type MultiClass = I | C;
+  |           ^^^^^^^^^^ [1]
+  |                        ^ [2]
+  |                            ^ [4]
+5 | 
+6 | interface IB {
+7 |   require extends B<int>;
+  |                   ^^^^^^ [3]
+8 |   public function i(): int;
+9 | }
+
+1 error found

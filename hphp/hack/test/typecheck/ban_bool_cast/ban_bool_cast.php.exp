@@ -1,2 +1,11 @@
-ERROR: File "ban_bool_cast.php", line 4, characters 9-12:
-(bool) casts are not allowed (Parsing[1002])
+error: Parsing[1002] (bool) casts are not allowed [1]
+
+ban_bool_cast.php:4:9
+2 | 
+3 | function test(mixed $x): void {
+4 |   $_ = (bool) $x;
+  |         ^^^^ [1]
+5 |   $_ = (int) $x;
+6 |   $_ = (string) $x;
+
+1 error found

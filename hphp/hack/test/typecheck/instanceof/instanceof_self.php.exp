@@ -1,4 +1,21 @@
-ERROR: File "instanceof_self.php", line 16, characters 15-18:
-Encountered unexpected text `self`, was expecting a type hint. (Parsing[1002])
-ERROR: File "instanceof_self.php", line 16, characters 19-19:
-A scope resolution operator `::` is expected here. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected text `self`, was expecting a type hint. [1]
+
+instanceof_self.php:16:15
+14 | 
+15 |   public static function test(mixed $x): void {
+16 |     if ($x is self) {
+   |               ^^^^ [1]
+17 |       hh_show($x);
+18 |       $x->g();
+
+error: Parsing[1002] A scope resolution operator `::` is expected here. [1]
+
+instanceof_self.php:16:19
+14 | 
+15 |   public static function test(mixed $x): void {
+16 |     if ($x is self) {
+   |                   ^ [1]
+17 |       hh_show($x);
+18 |       $x->g();
+
+2 errors found

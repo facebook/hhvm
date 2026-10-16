@@ -1,2 +1,11 @@
-ERROR: File "sound_containers.php", line 45, characters 18-18:
-Tuple accessed with an index out of bounds (Typing[4116])
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+sound_containers.php:45:18
+43 | ): void {
+44 |   if ($t === $x) {
+45 |     expect_c1($t[1]);
+   |                  ^ [1]
+46 |   }
+47 | }
+
+1 error found

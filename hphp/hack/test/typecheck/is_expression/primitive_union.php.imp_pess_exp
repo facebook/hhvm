@@ -1,12 +1,46 @@
-ERROR: File "primitive_union.php", line 9, characters 19-20:
-Invalid argument (Typing[4110])
-  File "primitive_union.php", line 13, characters 26-33:
-  Expected `arraykey`
-  File "primitive_union.php", line 3, characters 15-19:
-  But got `?(float | arraykey | (not num & nonnull))`
-ERROR: File "primitive_union.php", line 10, characters 14-15:
-Invalid argument (Typing[4110])
-  File "primitive_union.php", line 14, characters 21-23:
-  Expected `num`
-  File "primitive_union.php", line 3, characters 15-19:
-  But got `?(float | arraykey | (not num & nonnull))`
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `?(float | arraykey | (not num & nonnull))` [3]
+
+primitive_union.php:9:19
+ 1 | <?hh
+ 2 | 
+ 3 | function main(mixed $x): void {
+   |               ^^^^^ [3]
+ 4 |   if ($x is arraykey) {
+ 5 |     expect_arraykey($x);
+ 6 |   } else if ($x is num) {
+ 7 |     expect_num($x);
+ 8 |   }
+ 9 |   expect_arraykey($x);
+   |                   ^^ [1]
+10 |   expect_num($x);
+11 | }
+12 | 
+13 | function expect_arraykey(arraykey $x): void {}
+   |                          ^^^^^^^^ [2]
+14 | function expect_num(num $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `?(float | arraykey | (not num & nonnull))` [3]
+
+primitive_union.php:10:14
+ 1 | <?hh
+ 2 | 
+ 3 | function main(mixed $x): void {
+   |               ^^^^^ [3]
+ 4 |   if ($x is arraykey) {
+ 5 |     expect_arraykey($x);
+   :
+ 8 |   }
+ 9 |   expect_arraykey($x);
+10 |   expect_num($x);
+   |              ^^ [1]
+11 | }
+12 | 
+13 | function expect_arraykey(arraykey $x): void {}
+14 | function expect_num(num $x): void {}
+   |                     ^^^ [2]
+
+2 errors found

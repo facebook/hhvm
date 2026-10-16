@@ -1,28 +1,110 @@
-ERROR: File "dict.php", line 4, characters 13-16:
-Wrong number of type arguments (expected 2, got 0) (Typing[4101])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Definition is here
-ERROR: File "dict.php", line 6, characters 18-19:
-Invalid argument (Typing[4110])
-  File "dict.php", line 25, characters 28-30:
-  Expected `int`
-  File "hackarray.hhi", line 33, characters 30-37:
-  But got `arraykey`
-ERROR: File "dict.php", line 6, characters 18-19:
-Invalid argument (Typing[4110])
-  File "dict.php", line 25, characters 33-38:
-  Expected `string`
-  File "dict.php", line 4, characters 13-16:
-  But got `mixed` from this `is` expression test
-ERROR: File "dict.php", line 13, characters 18-19:
-Invalid argument (Typing[4110])
-  File "dict.php", line 25, characters 28-30:
-  Expected `int`
-  File "hackarray.hhi", line 33, characters 30-37:
-  But got `arraykey`
-ERROR: File "dict.php", line 13, characters 18-19:
-Invalid argument (Typing[4110])
-  File "dict.php", line 25, characters 33-38:
-  Expected `string`
-  File "dict.php", line 11, characters 13-22:
-  But got `mixed` from this `is` expression test
+error: Typing[4101] Wrong number of type arguments (expected 2, got 0) [1]
+-> Definition is here [2]
+
+dict.php:4:13
+ 2 | 
+ 3 | function f(mixed $x): void {
+ 4 |   if ($x is dict) {
+   |             ^^^^ [1]
+ 5 |     expect_dict1($x); // ok
+ 6 |     expect_dict2($x); // error
+
+hackarray.hhi:32:24
+30 |    */
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+   |                        ^^^^ [2]
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+34 |     <<__NoAutoBound>> +Tv,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+dict.php:6:18
+ 4 |   if ($x is dict) {
+ 5 |     expect_dict1($x); // ok
+ 6 |     expect_dict2($x); // error
+   |                  ^^ [1]
+ 7 |   }
+ 8 | }
+   :
+23 | 
+24 | function expect_dict1(dict<arraykey, mixed> $dict): void {}
+25 | function expect_dict2(dict<int, string> $dict): void {}
+   |                            ^^^ [2]
+
+hackarray.hhi:33:30
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` from this `is` expression test [3]
+
+dict.php:6:18
+ 2 | 
+ 3 | function f(mixed $x): void {
+ 4 |   if ($x is dict) {
+   |             ^^^^ [3]
+ 5 |     expect_dict1($x); // ok
+ 6 |     expect_dict2($x); // error
+   |                  ^^ [1]
+ 7 |   }
+ 8 | }
+   :
+23 | 
+24 | function expect_dict1(dict<arraykey, mixed> $dict): void {}
+25 | function expect_dict2(dict<int, string> $dict): void {}
+   |                                 ^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+dict.php:13:18
+11 |   if ($x is dict<_, _>) {
+12 |     expect_dict1($x); // ok
+13 |     expect_dict2($x); // error
+   |                  ^^ [1]
+14 |   }
+15 | }
+   :
+23 | 
+24 | function expect_dict1(dict<arraykey, mixed> $dict): void {}
+25 | function expect_dict2(dict<int, string> $dict): void {}
+   |                            ^^^ [2]
+
+hackarray.hhi:33:30
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` from this `is` expression test [3]
+
+dict.php:13:18
+ 9 | 
+10 | function g(mixed $x): void {
+11 |   if ($x is dict<_, _>) {
+   |             ^^^^^^^^^^ [3]
+12 |     expect_dict1($x); // ok
+13 |     expect_dict2($x); // error
+   |                  ^^ [1]
+14 |   }
+15 | }
+   :
+23 | 
+24 | function expect_dict1(dict<arraykey, mixed> $dict): void {}
+25 | function expect_dict2(dict<int, string> $dict): void {}
+   |                                 ^^^^^^ [2]
+
+5 errors found

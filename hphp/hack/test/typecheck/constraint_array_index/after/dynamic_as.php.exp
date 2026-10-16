@@ -1,4 +1,14 @@
-WARN: File "dynamic_as.php", line 4, characters 8-12:
-Indexing into a value of type `(dynamic & dict<arraykey, mixed>)` (Warn[12040])
-  File "dynamic_as.php", line 2, characters 12-18:
-  This expression has type `dynamic`
+warning: Warn[12040] Indexing into a value of type `(dynamic & dict<arraykey, mixed>)` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_as.php:4:8
+1 | <?hh
+2 | function f(dynamic $d): void {
+  |            ^^^^^^^ [2]
+3 |   $data = $d as dict<_, _>;
+4 |   $v = $data[0];
+  |        ^^^^^ [1]
+5 |   hh_expect_equivalent<(dynamic & mixed)>($v);
+6 | }
+
+1 error found

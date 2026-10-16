@@ -1,4 +1,20 @@
-WARN: File "like_keyset_array_get.php", line 4, characters 10-19:
-Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
-WARN: File "like_keyset_array_get.php", line 8, characters 10-18:
-Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+warning: Warn[12034] Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+like_keyset_array_get.php:4:10
+2 | 
+3 | function test_like_keyset(~keyset<string> $ks): ~string {
+4 |   return $ks["foo"];  // Should warn - underlying type is keyset
+  |          ^^^^^^^^^^ [1]
+5 | }
+6 | 
+
+warning: Warn[12034] Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+like_keyset_array_get.php:8:10
+6 | 
+7 | function test_like_keyset_variable(~keyset<int> $ks, int $key): ~int {
+8 |   return $ks[$key];  // Should warn - underlying type is keyset
+  |          ^^^^^^^^^ [1]
+9 | }
+
+2 errors found

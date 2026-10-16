@@ -1,24 +1,108 @@
-ERROR: File "module_internal_class.php--everywhere.php", line 3, characters 17-17:
-Cannot access an internal element from module `here` in the default module (Typing[4444])
-  File "module_internal_class.php--here.php", line 7, characters 16-16:
-  This is from module `here`
-ERROR: File "module_internal_class.php--here.php", line 15, characters 9-9:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_internal_class.php--here.php", line 7, characters 16-16:
-  It is declared as `internal` here
-ERROR: File "module_internal_class.php--here.php", line 19, characters 11-11:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_internal_class.php--here.php", line 7, characters 16-16:
-  It is declared as `internal` here
-ERROR: File "module_internal_class.php--here.php", line 23, characters 24-24:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_internal_class.php--here.php", line 7, characters 16-16:
-  It is declared as `internal` here
-ERROR: File "module_internal_class.php--here.php", line 27, characters 26-26:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_internal_class.php--here.php", line 7, characters 16-16:
-  It is declared as `internal` here
-ERROR: File "module_internal_class.php--there.php", line 6, characters 17-17:
-Cannot access an internal element from module `here` in module `there` (Typing[4444])
-  File "module_internal_class.php--here.php", line 7, characters 16-16:
-  This is from module `here`
+error: Typing[4444] Cannot access an internal element from module `here` in the default module [1]
+-> This is from module `here` [2]
+
+module_internal_class.php--everywhere.php:3:17
+1 | <?hh
+2 | 
+3 | class G extends C {} // Bad!
+  |                 ^ [1]
+
+module_internal_class.php--here.php:7:16
+5 | module here;
+6 | 
+7 | internal class C {
+  |                ^ [2]
+8 |   public function bar():void { }
+9 | }
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_internal_class.php--here.php:15:9
+ 5 | module here;
+ 6 | 
+ 7 | internal class C {
+   |                ^ [2]
+ 8 |   public function bar():void { }
+ 9 | }
+   :
+13 | class D
+14 | // Bad
+15 | extends C
+   |         ^ [1]
+16 | // Good
+17 | implements I {
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_internal_class.php--here.php:19:11
+ 5 | module here;
+ 6 | 
+ 7 | internal class C {
+   |                ^ [2]
+ 8 |   public function bar():void { }
+ 9 | }
+   :
+17 | implements I {
+18 |   // Bad
+19 |   public ?C $bad1;
+   |           ^ [1]
+20 |   // Good
+21 |   internal ?C $good1;
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_internal_class.php--here.php:23:24
+ 5 | module here;
+ 6 | 
+ 7 | internal class C {
+   |                ^ [2]
+ 8 |   public function bar():void { }
+ 9 | }
+   :
+21 |   internal ?C $good1;
+22 |   // Bad
+23 |   public function bad2(C $x):void { }
+   |                        ^ [1]
+24 |   // Good
+25 |   internal function good2(C $c):void { }
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_internal_class.php--here.php:27:26
+ 5 | module here;
+ 6 | 
+ 7 | internal class C {
+   |                ^ [2]
+ 8 |   public function bar():void { }
+ 9 | }
+   :
+25 |   internal function good2(C $c):void { }
+26 |   // Bad
+27 |   public function bad3():C { return new C(); }
+   |                          ^ [1]
+28 |   // Goood
+29 |   internal function good3():C { return new C(); }
+
+error: Typing[4444] Cannot access an internal element from module `here` in module `there` [1]
+-> This is from module `here` [2]
+
+module_internal_class.php--there.php:6:17
+4 | module there;
+5 | 
+6 | class F extends C {} // Bad!
+  |                 ^ [1]
+7 | 
+
+module_internal_class.php--here.php:7:16
+5 | module here;
+6 | 
+7 | internal class C {
+  |                ^ [2]
+8 |   public function bar():void { }
+9 | }
+
+6 errors found

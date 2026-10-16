@@ -1,2 +1,11 @@
-ERROR: File "property_access_error2.php", line 7, characters 12-32:
-`ExampleIntOpType` does not support this operator (it has no instance method named `__dot`) (Typing[4053])
+error: Typing[4053] `ExampleIntOpType` does not support this operator (it has no instance method named `__dot`) [1]
+
+property_access_error2.php:7:12
+5 | function test(): void {
+6 |   ExampleDsl`(MyState $x): ExampleInt ==> {
+7 |     return $x->my_prop . "Hello";
+  |            ^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |   }`;
+9 | }
+
+1 error found

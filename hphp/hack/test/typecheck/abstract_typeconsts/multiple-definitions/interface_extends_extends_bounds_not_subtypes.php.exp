@@ -1,28 +1,91 @@
-ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 22, characters 26-27:
-Some members in class `I3` are incompatible with those declared in type `I2` (Typing[4340])
-  File "interface_extends_extends_bounds_not_subtypes.php", line 14, characters 23-24:
-  The constraint on this type constant is inconsistent with its parent
-  File "interface_extends_extends_bounds_not_subtypes.php", line 18, characters 29-39:
-  Expected `UpperBound2`
-  File "interface_extends_extends_bounds_not_subtypes.php", line 14, characters 29-39:
-  But got `UpperBound1`
-ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 24, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "interface_extends_extends_bounds_not_subtypes.php", line 24, characters 38-39:
-  No type constant `T3` in `UpperBound1`
-  File "interface_extends_extends_bounds_not_subtypes.php", line 3, characters 11-21:
-  Declaration of `UpperBound1` is here
-ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 28, characters 26-27:
-Some members in class `I4` are incompatible with those declared in type `I1` (Typing[4340])
-  File "interface_extends_extends_bounds_not_subtypes.php", line 18, characters 23-24:
-  The constraint on this type constant is inconsistent with its parent
-  File "interface_extends_extends_bounds_not_subtypes.php", line 14, characters 29-39:
-  Expected `UpperBound1`
-  File "interface_extends_extends_bounds_not_subtypes.php", line 18, characters 29-39:
-  But got `UpperBound2`
-ERROR: File "interface_extends_extends_bounds_not_subtypes.php", line 29, characters 28-39:
-Invalid type hint (Typing[4090])
-  File "interface_extends_extends_bounds_not_subtypes.php", line 29, characters 38-39:
-  No type constant `T2` in `UpperBound2`
-  File "interface_extends_extends_bounds_not_subtypes.php", line 7, characters 11-21:
-  Declaration of `UpperBound2` is here
+error: Typing[4340] Some members in class `I3` are incompatible with those declared in type `I2` [1]
+-> The constraint on this type constant is inconsistent with its parent [2]
+-> Expected `UpperBound2` [3]
+-> But got `UpperBound1` [4]
+
+interface_extends_extends_bounds_not_subtypes.php:22:26
+12 | 
+13 | interface I1 {
+14 |   abstract const type T1 as UpperBound1;
+   |                       ^^ [2]
+   |                             ^^^^^^^^^^^ [4]
+15 | }
+16 | 
+17 | interface I2 {
+18 |   abstract const type T1 as UpperBound2;
+   |                             ^^^^^^^^^^^ [3]
+19 | }
+20 | 
+21 | // Error
+22 | interface I3 extends I1, I2 {
+   |                          ^^ [1]
+23 |   abstract const type T2 = this::T1::T2;
+24 |   abstract const type T3 = this::T1::T3;
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T3` in `UpperBound1` [2]
+-> Declaration of `UpperBound1` is here [3]
+
+interface_extends_extends_bounds_not_subtypes.php:24:28
+ 1 | <?hh
+ 2 | 
+ 3 | interface UpperBound1 {
+   |           ^^^^^^^^^^^ [3]
+ 4 |   abstract const type T2;
+ 5 | }
+   :
+22 | interface I3 extends I1, I2 {
+23 |   abstract const type T2 = this::T1::T2;
+24 |   abstract const type T3 = this::T1::T3;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+25 | }
+26 | 
+
+error: Typing[4340] Some members in class `I4` are incompatible with those declared in type `I1` [1]
+-> The constraint on this type constant is inconsistent with its parent [2]
+-> Expected `UpperBound1` [3]
+-> But got `UpperBound2` [4]
+
+interface_extends_extends_bounds_not_subtypes.php:28:26
+12 | 
+13 | interface I1 {
+14 |   abstract const type T1 as UpperBound1;
+   |                             ^^^^^^^^^^^ [3]
+15 | }
+16 | 
+17 | interface I2 {
+18 |   abstract const type T1 as UpperBound2;
+   |                       ^^ [2]
+   |                             ^^^^^^^^^^^ [4]
+19 | }
+20 | 
+   :
+26 | 
+27 | // Error
+28 | interface I4 extends I2, I1 {
+   |                          ^^ [1]
+29 |   abstract const type T2 = this::T1::T2;
+30 |   abstract const type T3 = this::T1::T3;
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `T2` in `UpperBound2` [2]
+-> Declaration of `UpperBound2` is here [3]
+
+interface_extends_extends_bounds_not_subtypes.php:29:28
+ 5 | }
+ 6 | 
+ 7 | interface UpperBound2 {
+   |           ^^^^^^^^^^^ [3]
+ 8 |   abstract const type T3;
+ 9 | }
+   :
+27 | // Error
+28 | interface I4 extends I2, I1 {
+29 |   abstract const type T2 = this::T1::T2;
+   |                            ^^^^^^^^^^^^ [1]
+   |                                      ^^ [2]
+30 |   abstract const type T3 = this::T1::T3;
+31 | }
+
+4 errors found

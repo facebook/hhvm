@@ -1,6 +1,14 @@
-ERROR: File "lambda_called_on_bad_dict.php", line 3, characters 19-19:
-Invalid index type for this dict (Typing[4449])
-  File "lambda_called_on_bad_dict.php", line 4, characters 6-27:
-  This is a string
-  File "lambda_called_on_bad_dict.php", line 3, characters 19-19:
-  It is incompatible with an int
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+lambda_called_on_bad_dict.php:3:19
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v[0]);
+  |                   ^ [1]
+4 |   $f(dict["oiia oiia" => 0]);
+  |      ^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 | }
+
+1 error found

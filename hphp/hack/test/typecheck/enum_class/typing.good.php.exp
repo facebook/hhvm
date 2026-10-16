@@ -1,4 +1,21 @@
-ERROR: File "typing.good.php", line 46, characters 18-22:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "typing.good.php", line 50, characters 19-23:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+typing.good.php:46:18
+44 | }
+45 | 
+46 | function generic<TEnum as E, T>(HH\MemberOf<TEnum, Box<T>> $param): T {
+   |                  ^^^^^ [1]
+47 |   return $param->data;
+48 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+typing.good.php:50:19
+48 | }
+49 | 
+50 | function generic2<TEnum as E, TBox as IBox>(
+   |                   ^^^^^ [1]
+51 |   HH\MemberOf<TEnum, TBox> $param,
+52 | ): int {
+
+2 errors found

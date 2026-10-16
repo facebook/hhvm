@@ -1,2 +1,11 @@
-ERROR: File "union_good.php", line 111, characters 21-23:
-Field `'b'` does not exist in the shape type (Typing[4512])
+error: Typing[4512] Field `'b'` does not exist in the shape type [1]
+
+union_good.php:111:21
+109 |   (shape('a' => int, 'b' => string) | shape('a' => float, ...)) $s,
+110 | ): void {
+111 |   shape('a' => $a, ?'b' => $b, ...) = $s; // no error: unified type has ?'b'
+    |                     ^^^ [1]
+112 | }
+113 | 
+
+1 error found

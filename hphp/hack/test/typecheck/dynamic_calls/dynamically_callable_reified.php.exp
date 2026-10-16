@@ -1,2 +1,10 @@
-ERROR: File "dynamically_callable_reified.php", line 3, characters 3-23:
-`__DynamicallyCallable` cannot be used on reified functions or methods (NastCheck[3089])
+error: NastCheck[3089] `__DynamicallyCallable` cannot be used on reified functions or methods [1]
+
+dynamically_callable_reified.php:3:3
+1 | <?hh
+2 | 
+3 | <<__DynamicallyCallable>>
+  |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+4 | function test<reify T>(): void {}
+
+1 error found

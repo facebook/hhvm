@@ -1,38 +1,190 @@
-ERROR: File "syntactic_error.php", line 15, characters 17-24:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 16, characters 18-25:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 28, characters 40-47:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 29, characters 42-49:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 32, characters 11-18:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 36, characters 12-19:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 46, characters 3-10:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 47, characters 10-17:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 49, characters 9-16:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 53, characters 20-30:
-Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
-ERROR: File "syntactic_error.php", line 54, characters 29-39:
-Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
-ERROR: File "syntactic_error.php", line 57, characters 14-21:
-Using `E::class` in this position will trigger an implicit runtime conversion to string, please use `nameof E` (Typing[4482])
-ERROR: File "syntactic_error.php", line 61, characters 7-14:
-Using `E::class` in this position will trigger an implicit runtime conversion to string, please use `nameof E` (Typing[4482])
-ERROR: File "syntactic_error.php", line 65, characters 6-13:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 66, characters 8-15:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 67, characters 9-16:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 68, characters 10-17:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 69, characters 9-16:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "syntactic_error.php", line 70, characters 12-19:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:15:17
+13 | 
+14 | function error_cases(): void {
+15 |   expect_string(C::class);
+   |                 ^^^^^^^^ [1]
+16 |   expect_nstring(C::class);
+17 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:16:18
+14 | function error_cases(): void {
+15 |   expect_string(C::class);
+16 |   expect_nstring(C::class);
+   |                  ^^^^^^^^ [1]
+17 | }
+18 | 
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:28:40
+26 | }
+27 | 
+28 | function ret_string(): string { return C::class; }
+   |                                        ^^^^^^^^ [1]
+29 | function ret_nstring(): ?string { return C::class; }
+30 | 
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:29:42
+27 | 
+28 | function ret_string(): string { return C::class; }
+29 | function ret_nstring(): ?string { return C::class; }
+   |                                          ^^^^^^^^ [1]
+30 | 
+31 | function prop_string(C $c): void {
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:32:11
+30 | 
+31 | function prop_string(C $c): void {
+32 |   $c->s = C::class;
+   |           ^^^^^^^^ [1]
+33 |   C::$ss = C::class;
+34 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:36:12
+34 | }
+35 | function prop_nstring(C $c): void {
+36 |   $c->ns = C::class;
+   |            ^^^^^^^^ [1]
+37 |   C::$sns = C::class;
+38 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:46:3
+44 | <<Attr("abcd".C::class)>>
+45 | function concat(): void {
+46 |   C::class."abcd";
+   |   ^^^^^^^^ [1]
+47 |   "abcd".C::class;
+48 |   $x = "abcd";
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:47:10
+45 | function concat(): void {
+46 |   C::class."abcd";
+47 |   "abcd".C::class;
+   |          ^^^^^^^^ [1]
+48 |   $x = "abcd";
+49 |   $x .= C::class;
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:49:9
+47 |   "abcd".C::class;
+48 |   $x = "abcd";
+49 |   $x .= C::class;
+   |         ^^^^^^^^ [1]
+50 | }
+51 | 
+
+error: Typing[4482] Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` [1]
+
+syntactic_error.php:53:20
+51 | 
+52 | abstract class A {
+53 |   const string S = self::class;
+   |                    ^^^^^^^^^^^ [1]
+54 |   abstract const string T = self::class;
+55 | }
+
+error: Typing[4482] Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` [1]
+
+syntactic_error.php:54:29
+52 | abstract class A {
+53 |   const string S = self::class;
+54 |   abstract const string T = self::class;
+   |                             ^^^^^^^^^^^ [1]
+55 | }
+56 | enum class EC: mixed {
+
+error: Typing[4482] Using `E::class` in this position will trigger an implicit runtime conversion to string, please use `nameof E` [1]
+
+syntactic_error.php:57:14
+55 | }
+56 | enum class EC: mixed {
+57 |   string A = E::class;
+   |              ^^^^^^^^ [1]
+58 | }
+59 | 
+
+error: Typing[4482] Using `E::class` in this position will trigger an implicit runtime conversion to string, please use `nameof E` [1]
+
+syntactic_error.php:61:7
+59 | 
+60 | enum E: string {
+61 |   A = E::class;
+   |       ^^^^^^^^ [1]
+62 | }
+63 | 
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:65:6
+63 | 
+64 | function ak(dict<string, mixed> $d): void {
+65 |   $d[C::class];
+   |      ^^^^^^^^ [1]
+66 |   dict[C::class => 4];
+67 |   Map { C::class => 4 };
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:66:8
+64 | function ak(dict<string, mixed> $d): void {
+65 |   $d[C::class];
+66 |   dict[C::class => 4];
+   |        ^^^^^^^^ [1]
+67 |   Map { C::class => 4 };
+68 |   keyset[C::class];
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:67:9
+65 |   $d[C::class];
+66 |   dict[C::class => 4];
+67 |   Map { C::class => 4 };
+   |         ^^^^^^^^ [1]
+68 |   keyset[C::class];
+69 |   Set { C::class };
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:68:10
+66 |   dict[C::class => 4];
+67 |   Map { C::class => 4 };
+68 |   keyset[C::class];
+   |          ^^^^^^^^ [1]
+69 |   Set { C::class };
+70 |   ImmSet { C::class };
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:69:9
+67 |   Map { C::class => 4 };
+68 |   keyset[C::class];
+69 |   Set { C::class };
+   |         ^^^^^^^^ [1]
+70 |   ImmSet { C::class };
+71 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+syntactic_error.php:70:12
+68 |   keyset[C::class];
+69 |   Set { C::class };
+70 |   ImmSet { C::class };
+   |            ^^^^^^^^ [1]
+71 | }
+
+19 errors found

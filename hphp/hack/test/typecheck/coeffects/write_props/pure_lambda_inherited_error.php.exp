@@ -1,14 +1,51 @@
-ERROR: File "pure_lambda_inherited_error.php", line 11, characters 7-18:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "pure_lambda_inherited_error.php", line 18, characters 5-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-ERROR: File "pure_lambda_inherited_error.php", line 11, characters 7-14:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "pure_lambda_inherited_error.php", line 9, characters 49-50:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "pure_lambda_inherited_error.php", line 18, characters 5-12:
-This object's property is being mutated (used as an lvalue)
-Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "pure_lambda_inherited_error.php", line 16, characters 42-43:
-  The local (enclosing) context provides the capability set {}
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+pure_lambda_inherited_error.php:11:7
+ 9 |   public function pure_lambda_inherited_method()[]: void {
+10 |     $f = (Foo $x) ==> {
+11 |       $x->prop = 4;
+   |       ^^^^^^^^^^^^ [1]
+12 |     };
+13 |   }
+
+error: Parsing[1002] Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). [1]
+
+pure_lambda_inherited_error.php:18:5
+16 | function pure_lambda_inherited_function()[]: void {
+17 |   $f = (Foo $x) ==> {
+18 |     $x->prop = 4;
+   |     ^^^^^^^^^^^^ [1]
+19 |   };
+20 | }
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+pure_lambda_inherited_error.php:11:7
+ 7 |    ) {}
+ 8 | 
+ 9 |   public function pure_lambda_inherited_method()[]: void {
+   |                                                 ^^ [2]
+10 |     $f = (Foo $x) ==> {
+11 |       $x->prop = 4;
+   |       ^^^^^^^^ [1]
+12 |     };
+13 |   }
+
+error: Typing[4401] This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+pure_lambda_inherited_error.php:18:5
+14 | }
+15 | 
+16 | function pure_lambda_inherited_function()[]: void {
+   |                                          ^^ [2]
+17 |   $f = (Foo $x) ==> {
+18 |     $x->prop = 4;
+   |     ^^^^^^^^ [1]
+19 |   };
+20 | }
+
+4 errors found

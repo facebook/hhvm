@@ -1,36 +1,142 @@
-ERROR: File "is.php", line 5, characters 35-44:
-`is` is not supported in expression trees. (Parsing[1002])
-ERROR: File "is.php", line 6, characters 35-47:
-`is` is not supported in expression trees. (Parsing[1002])
-ERROR: File "is.php", line 7, characters 35-50:
-`is` is not supported in expression trees. (Parsing[1002])
-ERROR: File "is.php", line 5, characters 35-36:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "is.php", line 6, characters 35-36:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "is.php", line 7, characters 35-36:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "is.php", line 5, characters 35-44:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 366, characters 6-21:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "is.php", line 5, characters 35-44:
-  But got `bool`
-ERROR: File "is.php", line 6, characters 35-47:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 366, characters 6-21:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "is.php", line 6, characters 35-47:
-  But got `bool`
-ERROR: File "is.php", line 7, characters 35-50:
-Invalid argument (Typing[4110])
-  File "expr_tree.php", line 95, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 366, characters 6-21:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "is.php", line 7, characters 35-50:
-  But got `bool`
+error: Parsing[1002] `is` is not supported in expression trees. [1]
+
+is.php:5:35
+3 | 
+4 | function test(): void {
+5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+  |                                   ^^^^^^^^^^ [1]
+6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+
+error: Parsing[1002] `is` is not supported in expression trees. [1]
+
+is.php:6:35
+4 | function test(): void {
+5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+  |                                   ^^^^^^^^^^^^^ [1]
+7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+8 | }
+
+error: Parsing[1002] `is` is not supported in expression trees. [1]
+
+is.php:7:35
+5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+  |                                   ^^^^^^^^^^^^^^^^ [1]
+8 | }
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+is.php:5:35
+3 | 
+4 | function test(): void {
+5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+  |                                   ^^ [1]
+6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+is.php:6:35
+4 | function test(): void {
+5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+  |                                   ^^ [1]
+7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+8 | }
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+is.php:7:35
+5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+  |                                   ^^ [1]
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `bool` [1]
+
+is.php:5:35
+  3 | 
+  4 | function test(): void {
+  5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+    |                                   ^^^^^^^^^^ [1]
+  6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+  7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+364 |   public function visitReturn(
+365 |     ?ExprPos $_,
+366 |     ?ExampleDsl::TAst $return_val,
+    |      ^^^^^^^^^^^^^^^^ [3]
+367 |   )[]: ExampleDsl::TAst {
+368 |     if ($return_val is null) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `bool` [1]
+
+is.php:6:35
+  4 | function test(): void {
+  5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+  6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+    |                                   ^^^^^^^^^^^^^ [1]
+  7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+  8 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+364 |   public function visitReturn(
+365 |     ?ExprPos $_,
+366 |     ?ExampleDsl::TAst $return_val,
+    |      ^^^^^^^^^^^^^^^^ [3]
+367 |   )[]: ExampleDsl::TAst {
+368 |     if ($return_val is null) {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `ExampleDsl::TAst` [3]
+-> But got `bool` [1]
+
+is.php:7:35
+  5 |   ExampleDsl`(?ExampleInt $x) ==> $x is null`;
+  6 |   ExampleDsl`(?ExampleInt $x) ==> $x is nonnull`;
+  7 |   ExampleDsl`(?ExampleInt $x) ==> $x is ExampleInt`;
+    |                                   ^^^^^^^^^^^^^^^^ [1]
+  8 | }
+
+expr_tree.php:95:21
+ 93 | // should return something that implements Spliceable, here an ExprTree
+ 94 | class ExampleDsl {
+ 95 |   const type TAst = string;
+    |                     ^^^^^^ [2]
+ 96 | 
+ 97 |   // The desugared expression tree literal will call this method.
+    :
+364 |   public function visitReturn(
+365 |     ?ExprPos $_,
+366 |     ?ExampleDsl::TAst $return_val,
+    |      ^^^^^^^^^^^^^^^^ [3]
+367 |   )[]: ExampleDsl::TAst {
+368 |     if ($return_val is null) {
+
+9 errors found

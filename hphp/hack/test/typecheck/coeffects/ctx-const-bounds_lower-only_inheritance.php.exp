@@ -1,20 +1,91 @@
-ERROR: File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 3-43:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 13-13:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "coeffect/contexts.hhi", line 77, characters 5-40:
-  Expected `the capability ImplicitPolicyLocal`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-37:
-  But got `the capability AccessGlobals`
-ERROR: File "ctx-const-bounds_lower-only_inheritance.php", line 18, characters 13-13:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "coeffect/contexts.hhi", line 77, characters 5-40:
-  Expected `the capability ImplicitPolicyLocal`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-37:
-  But got `the capability AccessGlobals`
-ERROR: File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 22-22:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "coeffect/contexts.hhi", line 77, characters 5-40:
-  Expected `the capability ImplicitPolicyLocal`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-37:
-  But got `the capability AccessGlobals`
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_lower-only_inheritance.php:14:3
+12 | class BadConcreteViolatingExplicitBound extends CAbstract {
+13 |   // ERROR: [defaults] is not a supertype of [globals]
+14 |   const ctx C super [globals] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+16 | class BadConcreteViolatingInheritedBound extends CAbstract {
+
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `the capability ImplicitPolicyLocal` [2]
+-> But got `the capability AccessGlobals` [3]
+
+ctx-const-bounds_lower-only_inheritance.php:14:13
+ 7 | abstract class CAbstract extends B {
+ 8 |   // OK: moves the lower bound up toward pure ([])
+ 9 |   abstract const ctx C super [globals];
+   |                               ^^^^^^^ [3]
+10 | }
+11 | 
+12 | class BadConcreteViolatingExplicitBound extends CAbstract {
+13 |   // ERROR: [defaults] is not a supertype of [globals]
+14 |   const ctx C super [globals] = [defaults];
+   |             ^ [1]
+15 | }
+16 | class BadConcreteViolatingInheritedBound extends CAbstract {
+
+coeffect/contexts.hhi:77:5
+75 |     \HH\Capabilities\RxLocal &
+76 |     \HH\Capabilities\SystemLocal &
+77 |     \HH\Capabilities\ImplicitPolicyLocal &
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+78 |     \HH\Capabilities\IO &
+79 |   );
+
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `the capability ImplicitPolicyLocal` [2]
+-> But got `the capability AccessGlobals` [3]
+
+ctx-const-bounds_lower-only_inheritance.php:18:13
+ 7 | abstract class CAbstract extends B {
+ 8 |   // OK: moves the lower bound up toward pure ([])
+ 9 |   abstract const ctx C super [globals];
+   |                               ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+16 | class BadConcreteViolatingInheritedBound extends CAbstract {
+17 |   // ERROR: [defaults] is not a supertype of [globals]
+18 |   const ctx C = [defaults];
+   |             ^ [1]
+19 | }
+20 | 
+
+coeffect/contexts.hhi:77:5
+75 |     \HH\Capabilities\RxLocal &
+76 |     \HH\Capabilities\SystemLocal &
+77 |     \HH\Capabilities\ImplicitPolicyLocal &
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+78 |     \HH\Capabilities\IO &
+79 |   );
+
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `the capability ImplicitPolicyLocal` [2]
+-> But got `the capability AccessGlobals` [3]
+
+ctx-const-bounds_lower-only_inheritance.php:27:22
+ 7 | abstract class CAbstract extends B {
+ 8 |   // OK: moves the lower bound up toward pure ([])
+ 9 |   abstract const ctx C super [globals];
+   |                               ^^^^^^^ [3]
+10 | }
+11 | 
+   :
+25 | abstract class BadAbstractWronglyRefined extends CAbstract {
+26 |   // ERROR: C was refined to be >: [globals]
+27 |   abstract const ctx C super [defaults];
+   |                      ^ [1]
+28 | }
+29 | abstract class GoodAbstractRefinedImpure extends CAbstract {
+
+coeffect/contexts.hhi:77:5
+75 |     \HH\Capabilities\RxLocal &
+76 |     \HH\Capabilities\SystemLocal &
+77 |     \HH\Capabilities\ImplicitPolicyLocal &
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+78 |     \HH\Capabilities\IO &
+79 |   );
+
+4 errors found

@@ -1,2 +1,11 @@
-ERROR: File "dict_update_lvalue_bad.php", line 10, characters 4-9:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+dict_update_lvalue_bad.php:10:4
+ 8 | function bar():dict<int,string> {
+ 9 |   $x = dict[2 => 'a'];
+10 |   (id($x))[3] = 'b';
+   |    ^^^^^^ [1]
+11 |   return $x;
+12 | }
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "meth_caller1.php", line 17, characters 22-24:
-The two arguments to `meth_caller()` must be:
+error: Naming[2026] The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
- - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
+ - second: a single-quoted string literal containing the name of a non-static method of that class [1]
+
+meth_caller1.php:17:22
+15 | 
+16 | function test1(): (function(X): void) {
+17 |   return meth_caller('X', 'foo');
+   |                      ^^^ [1]
+18 | }
+19 | 
+
+1 error found

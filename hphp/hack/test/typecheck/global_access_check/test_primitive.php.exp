@@ -1,20 +1,101 @@
-ERROR: File "test_primitive.php", line 8, characters 12-28:
-[Foo::get_int]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
-ERROR: File "test_primitive.php", line 12, characters 5-26:
-[Foo::set_int]{Foo::$static_int}(int) A global variable is definitely written. (Other[11001])
-ERROR: File "test_primitive.php", line 16, characters 12-31:
-[Foo::get_string]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])
-ERROR: File "test_primitive.php", line 20, characters 5-29:
-[Foo::set_string]{Foo::$static_string}(string) A global variable is definitely written. (Other[11001])
-ERROR: File "test_primitive.php", line 30, characters 5-24:
-[Test::test_method_call]{Foo::$static_int}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_primitive.php", line 31, characters 5-31:
-[Test::test_method_call]{Foo::$static_string}(string)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_primitive.php", line 33, characters 10-25:
-[Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
-ERROR: File "test_primitive.php", line 36, characters 10-28:
-[Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])
-ERROR: File "test_primitive.php", line 42, characters 5-38:
-[Test::test_method_call]{Test::$static_int}(int) A global variable is definitely written. (Other[11001])
-ERROR: File "test_primitive.php", line 43, characters 5-44:
-[Test::test_method_call]{Test::$static_string}(string) A global variable is definitely written. (Other[11001])
+error: Other[11004] [Foo::get_int]{Foo::$static_int}(int) A global variable is definitely read. [1]
+
+test_primitive.php:8:12
+ 6 | 
+ 7 |   public static function get_int(): int {
+ 8 |     return self::$static_int;
+   |            ^^^^^^^^^^^^^^^^^ [1]
+ 9 |   }
+10 | 
+
+error: Other[11001] [Foo::set_int]{Foo::$static_int}(int) A global variable is definitely written. [1]
+
+test_primitive.php:12:5
+10 | 
+11 |   public static function set_int(int $i): void {
+12 |     self::$static_int = $i; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   }
+14 | 
+
+error: Other[11004] [Foo::get_string]{Foo::$static_string}(string) A global variable is definitely read. [1]
+
+test_primitive.php:16:12
+14 | 
+15 |   public static function get_string(): string {
+16 |     return self::$static_string;
+   |            ^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   }
+18 | 
+
+error: Other[11001] [Foo::set_string]{Foo::$static_string}(string) A global variable is definitely written. [1]
+
+test_primitive.php:20:5
+18 | 
+19 |   public static function set_string(string $s): void {
+20 |     self::$static_string = $s; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   }
+22 | }
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_int}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_primitive.php:30:5
+28 | 
+29 |   public function test_method_call(): void {
+30 |     Foo::$static_int = 1; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+31 |     Foo::$static_string = "Foo"; // A global variable is written.
+32 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_string}(string)<WriteLiteral> A global variable is definitely written. [1]
+
+test_primitive.php:31:5
+29 |   public function test_method_call(): void {
+30 |     Foo::$static_int = 1; // A global variable is written.
+31 |     Foo::$static_string = "Foo"; // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+32 | 
+33 |     $a = Foo::$static_int;
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely read. [1]
+
+test_primitive.php:33:10
+31 |     Foo::$static_string = "Foo"; // A global variable is written.
+32 | 
+33 |     $a = Foo::$static_int;
+   |          ^^^^^^^^^^^^^^^^ [1]
+34 |     $a = 2;
+35 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely read. [1]
+
+test_primitive.php:36:10
+34 |     $a = 2;
+35 | 
+36 |     $b = Foo::$static_string;
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+37 |     $b = "Foo2";
+38 | 
+
+error: Other[11001] [Test::test_method_call]{Test::$static_int}(int) A global variable is definitely written. [1]
+
+test_primitive.php:42:5
+40 |     Foo::set_string("Foo3");
+41 | 
+42 |     self::$static_int = Foo::get_int(); // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+43 |     self::$static_string = Foo::get_string(); // A global variable is written.
+44 |   }
+
+error: Other[11001] [Test::test_method_call]{Test::$static_string}(string) A global variable is definitely written. [1]
+
+test_primitive.php:43:5
+41 | 
+42 |     self::$static_int = Foo::get_int(); // A global variable is written.
+43 |     self::$static_string = Foo::get_string(); // A global variable is written.
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+44 |   }
+45 | }
+
+10 errors found

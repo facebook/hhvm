@@ -1,6 +1,14 @@
-ERROR: File "vec_called_on_int_imm_map.php", line 3, characters 3-24:
-Typing error (Typing[4110])
-  File "vec_called_on_int_imm_map.php", line 3, characters 3-17:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "vec_called_on_int_imm_map.php", line 3, characters 19-23:
-  But got `vec<nothing>`
+error: Typing[4110] Typing error [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `vec<nothing>` [3]
+
+vec_called_on_int_imm_map.php:3:3
+1 | <?hh
+2 | function f(): void {
+3 |   ImmMap {0 => 0}[vec[]];
+  |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |   ^^^^^^^^^^^^^^^ [2]
+  |                   ^^^^^ [3]
+4 | }
+
+1 error found

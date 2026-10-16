@@ -1,24 +1,121 @@
-ERROR: File "method_variance_check.php", line 3, characters 16-16:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 4, characters 16-16:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 5, characters 16-16:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 6, characters 16-16:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 6, characters 20-21:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 7, characters 16-16:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 15, characters 25-25:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 16, characters 25-25:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 17, characters 25-25:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 18, characters 25-25:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 18, characters 29-30:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
-ERROR: File "method_variance_check.php", line 19, characters 25-25:
-Covariance or contravariance is not allowed in type parameters of methods or functions. (Typing[4313])
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:3:16
+1 | <?hh
+2 | 
+3 | function bar0<+T>(): void {}
+  |                ^ [1]
+4 | function bar1<-T>(): void {}
+5 | function bar2<+T as Foo>(): void {}
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:4:16
+2 | 
+3 | function bar0<+T>(): void {}
+4 | function bar1<-T>(): void {}
+  |                ^ [1]
+5 | function bar2<+T as Foo>(): void {}
+6 | function bar3<-T, +T1>(): void {}
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:5:16
+3 | function bar0<+T>(): void {}
+4 | function bar1<-T>(): void {}
+5 | function bar2<+T as Foo>(): void {}
+  |                ^ [1]
+6 | function bar3<-T, +T1>(): void {}
+7 | function bar4<-T, T1>(): void {}
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:6:16
+4 | function bar1<-T>(): void {}
+5 | function bar2<+T as Foo>(): void {}
+6 | function bar3<-T, +T1>(): void {}
+  |                ^ [1]
+7 | function bar4<-T, T1>(): void {}
+8 | 
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:6:20
+4 | function bar1<-T>(): void {}
+5 | function bar2<+T as Foo>(): void {}
+6 | function bar3<-T, +T1>(): void {}
+  |                    ^^ [1]
+7 | function bar4<-T, T1>(): void {}
+8 | 
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:7:16
+5 | function bar2<+T as Foo>(): void {}
+6 | function bar3<-T, +T1>(): void {}
+7 | function bar4<-T, T1>(): void {}
+  |                ^ [1]
+8 | 
+9 | // Don't expect error
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:15:25
+13 | 
+14 | class Foo {
+15 |   public function bar0<+T>(): void {}
+   |                         ^ [1]
+16 |   public function bar1<-T>(): void {}
+17 |   public function bar2<+T as Foo>(): void {}
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:16:25
+14 | class Foo {
+15 |   public function bar0<+T>(): void {}
+16 |   public function bar1<-T>(): void {}
+   |                         ^ [1]
+17 |   public function bar2<+T as Foo>(): void {}
+18 |   public function bar3<-T, +T1>(): void {}
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:17:25
+15 |   public function bar0<+T>(): void {}
+16 |   public function bar1<-T>(): void {}
+17 |   public function bar2<+T as Foo>(): void {}
+   |                         ^ [1]
+18 |   public function bar3<-T, +T1>(): void {}
+19 |   public function bar4<-T, T1>(): void {}
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:18:25
+16 |   public function bar1<-T>(): void {}
+17 |   public function bar2<+T as Foo>(): void {}
+18 |   public function bar3<-T, +T1>(): void {}
+   |                         ^ [1]
+19 |   public function bar4<-T, T1>(): void {}
+20 | 
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:18:29
+16 |   public function bar1<-T>(): void {}
+17 |   public function bar2<+T as Foo>(): void {}
+18 |   public function bar3<-T, +T1>(): void {}
+   |                             ^^ [1]
+19 |   public function bar4<-T, T1>(): void {}
+20 | 
+
+error: Typing[4313] Covariance or contravariance is not allowed in type parameters of methods or functions. [1]
+
+method_variance_check.php:19:25
+17 |   public function bar2<+T as Foo>(): void {}
+18 |   public function bar3<-T, +T1>(): void {}
+19 |   public function bar4<-T, T1>(): void {}
+   |                         ^ [1]
+20 | 
+21 |   // Don't expect error
+
+12 errors found

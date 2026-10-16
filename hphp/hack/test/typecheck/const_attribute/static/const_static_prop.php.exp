@@ -1,14 +1,70 @@
-ERROR: File "const_static_prop.php", line 10, characters 5-16:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-ERROR: File "const_static_prop.php", line 16, characters 5-12:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-ERROR: File "const_static_prop.php", line 9, characters 12-29:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "const_static_prop.php", line 15, characters 8-25:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "const_static_prop.php", line 17, characters 12-21:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "const_static_prop.php", line 21, characters 13-30:
-Cannot mutate a `__Const` property (Typing[4196])
-ERROR: File "const_static_prop.php", line 26, characters 6-23:
-Cannot mutate a `__Const` property (Typing[4196])
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+const_static_prop.php:10:5
+ 8 |   public function __construct(){
+ 9 |     $this::$static_const_prop = 50;  // illegal
+10 |     $this::CONST = 40;               // illegal
+   |     ^^^^^^^^^^^^ [1]
+11 |     $this->const_prop = 40;          // ok, not static elt
+12 |   }
+
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+const_static_prop.php:16:5
+14 |   public function write_const():void{
+15 |     A::$static_const_prop = 10;      // illegal
+16 |     A::CONST = 50;                   // illegal
+   |     ^^^^^^^^ [1]
+17 |     $this->const_prop = 40;          // illegal
+18 |   }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_static_prop.php:9:12
+ 7 | 
+ 8 |   public function __construct(){
+ 9 |     $this::$static_const_prop = 50;  // illegal
+   |            ^^^^^^^^^^^^^^^^^^ [1]
+10 |     $this::CONST = 40;               // illegal
+11 |     $this->const_prop = 40;          // ok, not static elt
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_static_prop.php:15:8
+13 | 
+14 |   public function write_const():void{
+15 |     A::$static_const_prop = 10;      // illegal
+   |        ^^^^^^^^^^^^^^^^^^ [1]
+16 |     A::CONST = 50;                   // illegal
+17 |     $this->const_prop = 40;          // illegal
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_static_prop.php:17:12
+15 |     A::$static_const_prop = 10;      // illegal
+16 |     A::CONST = 50;                   // illegal
+17 |     $this->const_prop = 40;          // illegal
+   |            ^^^^^^^^^^ [1]
+18 |   }
+19 | 
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_static_prop.php:21:13
+19 | 
+20 |   public function write_const_static():void{
+21 |     static::$static_const_prop = 50;
+   |             ^^^^^^^^^^^^^^^^^^ [1]
+22 |   }
+23 | }
+
+error: Typing[4196] Cannot mutate a `__Const` property [1]
+
+const_static_prop.php:26:6
+24 | 
+25 | function write_outside_class():void{
+26 |   A::$static_const_prop = 50;       // illegal
+   |      ^^^^^^^^^^^^^^^^^^ [1]
+27 | }
+
+7 errors found

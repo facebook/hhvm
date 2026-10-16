@@ -1,4 +1,21 @@
-WARN: File "subscript.php", line 80, characters 72-80:
-Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
-WARN: File "subscript.php", line 86, characters 72-80:
-Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+warning: Warn[12034] Array access on type `keyset<int>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+subscript.php:80:72
+78 | // Keyset subscript (int keys)
+79 | function test_subscript_keyset_int(): void {
+80 |   ExampleDsl`(keyset<ExampleInt> $ks, ExampleInt $key): ExampleInt ==> $ks[$key]`;
+   |                                                                        ^^^^^^^^^ [1]
+81 | }
+82 | 
+
+warning: Warn[12034] Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+subscript.php:86:72
+84 | function test_subscript_keyset_string(): void {
+85 |   ExampleDsl`
+86 |     (keyset<ExampleString> $ks, ExampleString $key): ExampleString ==> $ks[$key]
+   |                                                                        ^^^^^^^^^ [1]
+87 |   `;
+88 | }
+
+2 errors found

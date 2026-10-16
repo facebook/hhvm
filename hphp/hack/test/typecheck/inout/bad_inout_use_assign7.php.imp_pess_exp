@@ -1,6 +1,20 @@
-ERROR: File "bad_inout_use_assign7.php", line 16, characters 3-9:
-Invalid assignment to an `inout` parameter (Typing[4337])
-  File "bad_inout_use_assign7.php", line 10, characters 20-21:
-  Expected `D`
-  File "bad_inout_use_assign7.php", line 14, characters 14-14:
-  But got `C`
+error: Typing[4337] Invalid assignment to an `inout` parameter [1]
+-> Expected `D` [2]
+-> But got `C` [3]
+
+bad_inout_use_assign7.php:16:3
+ 8 | }
+ 9 | 
+10 | function f(inout D $s): void {
+   |                    ^^ [2]
+11 |   if (launder()) {
+12 |     $s = new D();
+13 |   } else {
+14 |     $s = new C();
+   |              ^ [3]
+15 |   }
+16 |   return;
+   |   ^^^^^^^ [1]
+17 | }
+
+1 error found

@@ -1,20 +1,81 @@
-ERROR: File "this_access_union_intersect.php", line 37, characters 64-64:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "this_access_union_intersect.php", line 41, characters 57-57:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "this_access_union_intersect.php", line 41, characters 60-61:
-No type constant `TP` in `IEmpty` (Typing[4090])
-  File "this_access_union_intersect.php", line 33, characters 11-16:
-  Declaration of `IEmpty` is here
-ERROR: File "this_access_union_intersect.php", line 42, characters 12-14:
-No instance method `get` in `IEmpty` (Typing[4053])
-  File "this_access_union_intersect.php", line 41, characters 27-32:
-  This is why I think it is an object of type IEmpty
-  File "this_access_union_intersect.php", line 33, characters 11-16:
-  Declaration of `IEmpty` is here
-ERROR: File "this_access_union_intersect.php", line 66, characters 10-11:
-Invalid return type (Typing[4110])
-  File "this_access_union_intersect.php", line 64, characters 51-52:
-  Expected `JA`
-  File "this_access_union_intersect.php", line 18, characters 26-27:
-  But got `JB`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+this_access_union_intersect.php:37:64
+35 | // This is fine, because even though neither IB nor IEmpty have the
+36 | // type constant, IA does
+37 | function test1<T as (IA & (IB | IEmpty)),TP>(T $x):TP where TP=T::TP {
+   |                                                                ^ [1]
+38 |   return $x->get();
+39 | }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+this_access_union_intersect.php:41:57
+39 | }
+40 | // This is not ok
+41 | function test2<T as (IB | IEmpty),TP>(T $x):TP where TP=T::TP {
+   |                                                         ^ [1]
+42 |   $y = $x->get();
+43 |   //hh_show($y);
+
+error: Typing[4090] No type constant `TP` in `IEmpty` [1]
+-> Declaration of `IEmpty` is here [2]
+
+this_access_union_intersect.php:41:60
+31 |   public function get():this::TP;
+32 | }
+33 | interface IEmpty { }
+   |           ^^^^^^ [2]
+34 | 
+35 | // This is fine, because even though neither IB nor IEmpty have the
+   :
+39 | }
+40 | // This is not ok
+41 | function test2<T as (IB | IEmpty),TP>(T $x):TP where TP=T::TP {
+   |                                                            ^^ [1]
+42 |   $y = $x->get();
+43 |   //hh_show($y);
+
+error: Typing[4053] No instance method `get` in `IEmpty` [1]
+-> This is why I think it is an object of type IEmpty [2]
+-> Declaration of `IEmpty` is here [3]
+
+this_access_union_intersect.php:42:12
+31 |   public function get():this::TP;
+32 | }
+33 | interface IEmpty { }
+   |           ^^^^^^ [3]
+34 | 
+35 | // This is fine, because even though neither IB nor IEmpty have the
+   :
+39 | }
+40 | // This is not ok
+41 | function test2<T as (IB | IEmpty),TP>(T $x):TP where TP=T::TP {
+   |                           ^^^^^^ [2]
+42 |   $y = $x->get();
+   |            ^^^ [1]
+43 |   //hh_show($y);
+44 |   return $y;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `JA` [2]
+-> But got `JB` [3]
+
+this_access_union_intersect.php:66:10
+16 | // Just method
+17 | interface IB {
+18 |   public function get(): JB;
+   |                          ^^ [3]
+19 |   public function methb():void;
+20 | }
+   :
+62 | 
+63 | 
+64 | function testcomplex3<T as (IB & IA)>(T $x):(JB & JA) {
+   |                                                   ^^ [2]
+65 |   $y = $x->get();
+66 |   return $y;
+   |          ^^ [1]
+67 | }
+
+5 errors found

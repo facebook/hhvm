@@ -1,4 +1,18 @@
-ERROR: File "source_level_3.php", line 17, characters 3-9:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "source_level_3.php", line 11, characters 33-44:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+source_level_3.php:17:3
+ 9 | newtype ClassPointer = class<C>;
+10 | 
+11 | function newtype_source<T super ClassPointer as string>(?T $_ = null): T {
+   |                                 ^^^^^^^^^^^^ [2]
+12 |   throw new Exception();
+13 | }
+14 | 
+15 | function test_newtype(): void {
+16 |   $result = newtype_source();
+17 |   $result::method();
+   |   ^^^^^^^ [1]
+18 | }
+
+1 error found

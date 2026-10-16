@@ -1,24 +1,76 @@
-ERROR: File "covariant_in_where_bad.php", line 9, characters 52-52:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariant_in_where_bad.php", line 4, characters 12-12:
-  This is where the parameter was declared as covariant `+`
-  File "covariant_in_where_bad.php", line 9, characters 52-52:
-  `where _ as _` constraints are covariant on the left, contravariant on the right
-ERROR: File "covariant_in_where_bad.php", line 13, characters 46-46:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariant_in_where_bad.php", line 4, characters 12-12:
-  This is where the parameter was declared as covariant `+`
-  File "covariant_in_where_bad.php", line 13, characters 46-46:
-  `where _ super _` constraints are contravariant on the left, covariant on the right
-ERROR: File "covariant_in_where_bad.php", line 17, characters 50-51:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariant_in_where_bad.php", line 4, characters 12-12:
-  This is where the parameter was declared as covariant `+`
-  File "covariant_in_where_bad.php", line 17, characters 50-51:
-  `where _ = _` constraints are invariant on the left and right
-ERROR: File "covariant_in_where_bad.php", line 21, characters 43-43:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariant_in_where_bad.php", line 4, characters 12-12:
-  This is where the parameter was declared as covariant `+`
-  File "covariant_in_where_bad.php", line 21, characters 43-43:
-  `where _ super _` constraints are contravariant on the left, covariant on the right
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> `where _ as _` constraints are covariant on the left, contravariant on the right [1]
+
+covariant_in_where_bad.php:9:52
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Cov<+T> {
+   |            ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function get(): T { return $this->item; }
+ 7 | 
+ 8 |   // Now some fake setters
+ 9 |   public function set1<Tu>(Tu $x):void where Tu as T {
+   |                                                    ^ [1]
+10 |     $this->item = $x;
+11 |   }
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> `where _ super _` constraints are contravariant on the left, covariant on the right [1]
+
+covariant_in_where_bad.php:13:46
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Cov<+T> {
+   |            ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function get(): T { return $this->item; }
+   :
+11 |   }
+12 | 
+13 |   public function set2<Tu>(Tu $x):void where T super Tu {
+   |                                              ^ [1]
+14 |     $this->item = $x;
+15 |   }
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> `where _ = _` constraints are invariant on the left and right [1]
+
+covariant_in_where_bad.php:17:50
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Cov<+T> {
+   |            ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function get(): T { return $this->item; }
+   :
+15 |   }
+16 | 
+17 |   public function set3<Tu>(Tu $x):void where T = Tu {
+   |                                                  ^^ [1]
+18 |     $this->item = $x;
+19 |   }
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> `where _ super _` constraints are contravariant on the left, covariant on the right [1]
+
+covariant_in_where_bad.php:21:43
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Cov<+T> {
+   |            ^ [2]
+ 5 |   public function __construct(private T $item) { }
+ 6 |     public function get(): T { return $this->item; }
+   :
+19 |   }
+20 | 
+21 |   public function set4(int $x):void where T super int {
+   |                                           ^ [1]
+22 |     $this->item = $x;
+23 |   }
+
+4 errors found

@@ -1,12 +1,25 @@
-ERROR: File "constraint_override_bad3.php", line 24, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "constraint_override_bad3.php", line 24, characters 19-21:
-  Method `foo` has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as B)` in `BadSub`
-  File "constraint_override_bad3.php", line 12, characters 19-21:
-  But it has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)` in parent `Super<Tz>`
-  File "constraint_override_bad3.php", line 24, characters 19-21:
-  Type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as B)` is not a subtype of `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)`
-  File "constraint_override_bad3.php", line 24, characters 73-73:
-  Expected `B`
-  File "constraint_override_bad3.php", line 24, characters 67-68:
-  But got `Tz as GB<Tz, Tf>`
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as B)` in `BadSub` [1]
+-> But it has type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)` in parent `Super<Tz>` [2]
+-> Type `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as B)` is not a subtype of `(function<Tf as GA<Tz>>(GB<Tf, Tz> $x): GC<Tf> where Tz as GB<Tz, Tf>)` [1]
+-> Expected `B` [3]
+-> But got `Tz as GB<Tz, Tf>` [4]
+
+constraint_override_bad3.php:24:19
+10 | class Super<T> {
+11 |   // Complicated types
+12 |   public function foo<Tf as GA<T>>(GB<Tf, T> $x) : GC<Tf> where T as GB<T, Tf>
+   |                   ^^^ [2]
+13 |   { return new GC(); }
+14 | }
+   :
+22 | // Now a negative case
+23 | class BadSub<Tz> extends Super<Tz> {
+24 |   public function foo<Tf as GA<Tz>>(GB<Tf, Tz> $x) : GC<Tf> where Tz as B
+   |                   ^^^ [1]
+   |                                                                   ^^ [4]
+   |                                                                         ^ [3]
+25 |   { return new GC(); }
+26 | }
+
+1 error found

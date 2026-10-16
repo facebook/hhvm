@@ -1,4 +1,14 @@
-ERROR: File "type_structure.php", line 6, characters 18-20:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "type_structure.php", line 5, characters 12-23:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+type_structure.php:6:18
+3 | class C { const type T = int; }
+4 | 
+5 | function f(classname<C> $cn, class<C> $c): void {
+  |            ^^^^^^^^^^^^ [2]
+6 |   type_structure($cn, 'T');
+  |                  ^^^ [1]
+7 |   type_structure($c, 'T');
+8 | }
+
+1 error found

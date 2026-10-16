@@ -1,12 +1,32 @@
-ERROR: File "unpack_call6.php", line 12, characters 13-17:
-Invalid argument (Typing[4359])
-  File "unpack_call6.php", line 12, characters 13-17:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call6.php", line 4, characters 19-29:
-  Definition is here
-ERROR: File "unpack_call6.php", line 12, characters 13-17:
-Invalid argument (Typing[4110])
-  File "unpack_call6.php", line 12, characters 13-17:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call6.php", line 11, characters 11-18:
-  But got `string`
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call6.php:12:13
+ 2 | 
+ 3 | class C1 {
+ 4 |   public function __construct(
+   |                   ^^^^^^^^^^^ [2]
+ 5 |     private int $foo,
+ 6 |     private mixed ...$args
+   :
+10 | function test(): void {
+11 |   $args = 'string';
+12 |   new C1(...$args); // should be error
+   |             ^^^^^ [1]
+13 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Traversable<_>` (it is unpacked with `...`) [1]
+-> But got `string` [2]
+
+unpack_call6.php:12:13
+ 9 | 
+10 | function test(): void {
+11 |   $args = 'string';
+   |           ^^^^^^^^ [2]
+12 |   new C1(...$args); // should be error
+   |             ^^^^^ [1]
+13 | }
+
+2 errors found

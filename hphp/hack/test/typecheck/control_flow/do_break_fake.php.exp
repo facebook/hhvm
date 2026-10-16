@@ -1,6 +1,22 @@
-ERROR: File "do_break_fake.php", line 13, characters 14-22:
-Invalid argument (Typing[4110])
-  File "do_break_fake.php", line 6, characters 21-23:
-  Expected `int`
-  File "do_break_fake.php", line 4, characters 17-20:
-  But got `?int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+
+do_break_fake.php:13:14
+ 2 | 
+ 3 | class C {
+ 4 |   public static ?int $thing = null;
+   |                 ^^^^ [3]
+ 5 | }
+ 6 | function expect_int(int $x):void { }
+   |                     ^^^ [2]
+ 7 | 
+ 8 | <<__EntryPoint>>
+   :
+11 |     break;
+12 |   } while (C::$thing !== null);
+13 |   expect_int(C::$thing);
+   |              ^^^^^^^^^ [1]
+14 | }
+
+1 error found

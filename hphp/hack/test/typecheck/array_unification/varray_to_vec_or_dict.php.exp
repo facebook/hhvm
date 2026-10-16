@@ -1,10 +1,35 @@
-ERROR: File "varray_to_vec_or_dict.php", line 11, characters 29-39:
-Too few type arguments for this type (Naming[2071])
-ERROR: File "varray_to_vec_or_dict.php", line 11, characters 29-39:
-Unbound name: `vec_or_dict` (Naming[2049])
-ERROR: File "varray_to_vec_or_dict.php", line 12, characters 10-11:
-Invalid return type (Typing[4110])
-  File "varray_to_vec_or_dict.php", line 11, characters 29-39:
-  Expected `vec_or_dict`
-  File "varray_to_vec_or_dict.php", line 11, characters 12-22:
-  But got `vec<int>`
+error: Naming[2071] Too few type arguments for this type [1]
+
+varray_to_vec_or_dict.php:11:29
+ 9 | }
+10 | 
+11 | function h(varray<int> $v): vec_or_dict {
+   |                             ^^^^^^^^^^^ [1]
+12 |   return $v;
+13 | }
+
+error: Naming[2049] Unbound name: `vec_or_dict` [1]
+
+varray_to_vec_or_dict.php:11:29
+ 9 | }
+10 | 
+11 | function h(varray<int> $v): vec_or_dict {
+   |                             ^^^^^^^^^^^ [1]
+12 |   return $v;
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `vec_or_dict` [2]
+-> But got `vec<int>` [3]
+
+varray_to_vec_or_dict.php:12:10
+ 9 | }
+10 | 
+11 | function h(varray<int> $v): vec_or_dict {
+   |            ^^^^^^^^^^^ [3]
+   |                             ^^^^^^^^^^^ [2]
+12 |   return $v;
+   |          ^^ [1]
+13 | }
+
+3 errors found

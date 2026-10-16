@@ -1,14 +1,44 @@
-ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-You cannot decorate this argument as `inout` (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 5-23:
-Invalid argument (Typing[4110])
-  File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
-  Expected `vec<int>`
-  File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-  But got `(int, int)`
-ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-Invalid argument to an `inout` parameter (Typing[4110])
-  File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-  Expected `(int, int)`
-  File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
-  But got `vec<int>`
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_lvalue9.php:6:11
+4 | 
+5 | function test(int $x, int $y): void {
+6 |   f(inout tuple($x, $y));
+  |           ^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<int>` [2]
+-> But got `(int, int)` [3]
+
+bad_inout_use_lvalue9.php:6:5
+1 | <?hh
+2 | 
+3 | function f(inout varray<int> $a): void {}
+  |                  ^^^^^^^^^^^ [2]
+4 | 
+5 | function test(int $x, int $y): void {
+6 |   f(inout tuple($x, $y));
+  |     ^^^^^^^^^^^^^^^^^^^ [1]
+  |           ^^^^^^^^^^^^^ [3]
+7 | }
+8 | 
+
+error: Typing[4110] Invalid argument to an `inout` parameter [1]
+-> Expected `(int, int)` [1]
+-> But got `vec<int>` [2]
+
+bad_inout_use_lvalue9.php:6:11
+1 | <?hh
+2 | 
+3 | function f(inout varray<int> $a): void {}
+  |                  ^^^^^^^^^^^ [2]
+4 | 
+5 | function test(int $x, int $y): void {
+6 |   f(inout tuple($x, $y));
+  |           ^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+3 errors found

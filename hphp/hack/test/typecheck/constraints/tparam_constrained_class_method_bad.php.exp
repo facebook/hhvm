@@ -1,8 +1,27 @@
-ERROR: File "tparam_constrained_class_method_bad.php", line 6, characters 3-4:
-It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. (Typing[4482])
-  File "tparam_constrained_class_method_bad.php", line 5, characters 23-34:
-  Definition is here
-ERROR: File "tparam_constrained_class_method_bad.php", line 6, characters 7-18:
-No static method `doesNotExist` in `C` (Typing[4090])
-  File "tparam_constrained_class_method_bad.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4482] It is no longer allowed to use a `classname<T>` in this position. Please use a `class<T>` instead. [1]
+-> Definition is here [2]
+
+tparam_constrained_class_method_bad.php:6:3
+3 | class C {}
+4 | 
+5 | function test<T as C>(classname<T> $c): void {
+  |                       ^^^^^^^^^^^^ [2]
+6 |   $c::doesNotExist();
+  |   ^^ [1]
+7 | }
+
+error: Typing[4090] No static method `doesNotExist` in `C` [1]
+-> Declaration of `C` is here [2]
+
+tparam_constrained_class_method_bad.php:6:7
+1 | <?hh
+2 | 
+3 | class C {}
+  |       ^ [2]
+4 | 
+5 | function test<T as C>(classname<T> $c): void {
+6 |   $c::doesNotExist();
+  |       ^^^^^^^^^^^^ [1]
+7 | }
+
+2 errors found

@@ -1,4 +1,20 @@
-ERROR: File "test_shape_splat.php", line 16, characters 20-44:
-[test_shape_splat_global_access]{ShapeSplatGlobals::$value}(shape('value' => ShapeSplatGlobalValue)) A global variable is definitely read. (Other[11004])
-ERROR: File "test_shape_splat.php", line 17, characters 20-24:
-[test_shape_splat_global_access]{ShapeSplatGlobals::$value}(shape('value' => ShapeSplatGlobalValue)) A global variable is possibly written via function call. (Other[11003])
+error: Other[11004] [test_shape_splat_global_access]{ShapeSplatGlobals::$value}(shape('value' => ShapeSplatGlobalValue)) A global variable is definitely read. [1]
+
+test_shape_splat.php:16:20
+14 | 
+15 | function test_shape_splat_global_access(): void {
+16 |   $copy = shape(...ShapeSplatGlobals::$value);
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   shape_splat_sink($copy);
+18 | }
+
+error: Other[11003] [test_shape_splat_global_access]{ShapeSplatGlobals::$value}(shape('value' => ShapeSplatGlobalValue)) A global variable is possibly written via function call. [1]
+
+test_shape_splat.php:17:20
+15 | function test_shape_splat_global_access(): void {
+16 |   $copy = shape(...ShapeSplatGlobals::$value);
+17 |   shape_splat_sink($copy);
+   |                    ^^^^^ [1]
+18 | }
+
+2 errors found

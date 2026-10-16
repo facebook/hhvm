@@ -1,12 +1,29 @@
-ERROR: File "4324-index_mismatch.php", line 7, characters 10-19:
-Typing error (Typing[4110])
-  File "4324-index_mismatch.php", line 7, characters 10-11:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "4324-index_mismatch.php", line 7, characters 13-18:
-  But got `string`
-ERROR: File "4324-index_mismatch.php", line 7, characters 13-18:
-Invalid index type for this vec (Typing[4449])
-  File "4324-index_mismatch.php", line 6, characters 10-14:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "4324-index_mismatch.php", line 7, characters 13-18:
-  It is incompatible with a string
+error: Typing[4110] Typing error [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+4324-index_mismatch.php:7:10
+5 |   public function foo() : void {
+6 |     $v = vec[];
+7 |     echo $v["nine"];
+  |          ^^^^^^^^^^ [1]
+  |          ^^ [2]
+  |             ^^^^^^ [3]
+8 |   }
+9 | }
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+4324-index_mismatch.php:7:13
+4 | class IndexMismatch {
+5 |   public function foo() : void {
+6 |     $v = vec[];
+  |          ^^^^^ [2]
+7 |     echo $v["nine"];
+  |             ^^^^^^ [1]
+8 |   }
+9 | }
+
+2 errors found

@@ -1,92 +1,422 @@
-WARN: File "module_protected_internal_bad_static_override.php--B.php", line 3, characters 17-17:
-Static property is overridden: `$bar` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--B.php", line 13, characters 17-19:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--B.php", line 3, characters 17-17:
-Static property is overridden: `$foo` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--B.php", line 11, characters 20-22:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
-Static property is overridden: `$bar` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--C.php", line 19, characters 19-21:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
-Static property is overridden: `$baz` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--C.php", line 21, characters 29-31:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
-Static property is overridden: `$foo` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--C.php", line 17, characters 29-31:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
-Static property is overridden: `$quux` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--C.php", line 25, characters 29-31:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--C.php", line 5, characters 17-17:
-Static property is overridden: `$qux` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--C.php", line 23, characters 29-31:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--D.php", line 5, characters 17-17:
-Static property is overridden: `$bar` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--D.php", line 15, characters 19-21:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--D.php", line 5, characters 17-17:
-Static property is overridden: `$corge` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--D.php", line 17, characters 18-20:
-  Overriding static property is here
-WARN: File "module_protected_internal_bad_static_override.php--D.php", line 5, characters 17-17:
-Static property is overridden: `$foo` (Warn[12021])
-  File "module_protected_internal_bad_static_override.php--D.php", line 13, characters 29-31:
-  Overriding static property is here
-ERROR: File "module_protected_internal_bad_static_override.php--B.php", line 9, characters 27-31:
-This member visibility is: `private` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 11, characters 37-41:
-  `protected internal` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 11, characters 38-40:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 8, characters 27-29:
-  `internal` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 13, characters 38-40:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 9, characters 28-30:
-  `protected` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 15, characters 38-41:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 10, characters 25-28:
-  `public` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 21, characters 29-31:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 14, characters 18-20:
-  `internal` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 23, characters 29-31:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 15, characters 19-21:
-  `protected` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--C.php", line 25, characters 29-31:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 16, characters 16-18:
-  `public` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 7, characters 38-40:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_static_override.php--A.php", line 6, characters 37-39:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 9, characters 28-30:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_static_override.php--A.php", line 7, characters 37-39:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 11, characters 27-31:
-This member visibility is: `private` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 11, characters 37-41:
-  `protected internal` was expected
-ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 13, characters 29-31:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_static_override.php--A.php", line 12, characters 28-30:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 15, characters 19-21:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_static_override.php--A.php", line 13, characters 28-30:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_static_override.php--D.php", line 17, characters 18-20:
-This member visibility is: `private` (Typing[4113])
-  File "module_protected_internal_bad_static_override.php--A.php", line 17, characters 28-30:
-  `protected internal` was expected
+warning: Warn[12021] Static property is overridden: `$bar` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--B.php:3:17
+ 1 | <?hh
+ 2 | 
+ 3 | class B extends A {
+   |                 ^ [1]
+ 4 |   // OK since we are widening visibility
+ 5 |   public static function foo(): void {}
+   :
+11 |   protected static int $foo = 42;
+12 |   // OK since we are widening visibility
+13 |   public static int $bar = 42;
+   |                 ^^^ [2]
+14 | }
+
+warning: Warn[12021] Static property is overridden: `$foo` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--B.php:3:17
+ 1 | <?hh
+ 2 | 
+ 3 | class B extends A {
+   |                 ^ [1]
+ 4 |   // OK since we are widening visibility
+ 5 |   public static function foo(): void {}
+   :
+ 9 |   private static function corge(): void {}
+10 |   // OK since we are widening visibility
+11 |   protected static int $foo = 42;
+   |                    ^^^ [2]
+12 |   // OK since we are widening visibility
+13 |   public static int $bar = 42;
+
+warning: Warn[12021] Static property is overridden: `$bar` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--C.php:5:17
+ 3 | module M1;
+ 4 | 
+ 5 | class C extends A {
+   |                 ^ [1]
+ 6 |   // OK since we are in the same module
+ 7 |   protected internal static function foo(): void {}
+   :
+17 |   protected internal static int $foo = 42;
+18 |   // OK since we are widening visibility and in the same module
+19 |   internal static int $bar = 42;
+   |                   ^^^ [2]
+20 |   // Not OK since we are narrowing visibility even though we are in the same module
+21 |   protected internal static int $baz = 42;
+
+warning: Warn[12021] Static property is overridden: `$baz` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--C.php:5:17
+ 3 | module M1;
+ 4 | 
+ 5 | class C extends A {
+   |                 ^ [1]
+ 6 |   // OK since we are in the same module
+ 7 |   protected internal static function foo(): void {}
+   :
+19 |   internal static int $bar = 42;
+20 |   // Not OK since we are narrowing visibility even though we are in the same module
+21 |   protected internal static int $baz = 42;
+   |                             ^^^ [2]
+22 |   // Not OK since we are narrowing visibility even though we are in the same module
+23 |   protected internal static int $qux = 42;
+
+warning: Warn[12021] Static property is overridden: `$foo` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--C.php:5:17
+ 3 | module M1;
+ 4 | 
+ 5 | class C extends A {
+   |                 ^ [1]
+ 6 |   // OK since we are in the same module
+ 7 |   protected internal static function foo(): void {}
+   :
+15 |   protected internal static function quux(): void {}
+16 |   // OK since we are in the same module
+17 |   protected internal static int $foo = 42;
+   |                             ^^^ [2]
+18 |   // OK since we are widening visibility and in the same module
+19 |   internal static int $bar = 42;
+
+warning: Warn[12021] Static property is overridden: `$quux` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--C.php:5:17
+ 3 | module M1;
+ 4 | 
+ 5 | class C extends A {
+   |                 ^ [1]
+ 6 |   // OK since we are in the same module
+ 7 |   protected internal static function foo(): void {}
+   :
+23 |   protected internal static int $qux = 42;
+24 |   // Not OK since we are narrowing visibility even though we are in the same module
+25 |   protected internal static int $quux = 42;
+   |                             ^^^ [2]
+26 | }
+
+warning: Warn[12021] Static property is overridden: `$qux` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--C.php:5:17
+ 3 | module M1;
+ 4 | 
+ 5 | class C extends A {
+   |                 ^ [1]
+ 6 |   // OK since we are in the same module
+ 7 |   protected internal static function foo(): void {}
+   :
+21 |   protected internal static int $baz = 42;
+22 |   // Not OK since we are narrowing visibility even though we are in the same module
+23 |   protected internal static int $qux = 42;
+   |                             ^^^ [2]
+24 |   // Not OK since we are narrowing visibility even though we are in the same module
+25 |   protected internal static int $quux = 42;
+
+warning: Warn[12021] Static property is overridden: `$bar` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--D.php:5:17
+ 3 | module M2;
+ 4 | 
+ 5 | class D extends A {
+   |                 ^ [1]
+ 6 |   // Not OK since we are in a different module
+ 7 |   protected internal static function foo(): void {}
+   :
+13 |   protected static internal int $foo = 42;
+14 |   // Not OK since we are in a different module
+15 |   internal static int $bar = 42;
+   |                   ^^^ [2]
+16 |   // Not OK since we are narrowing visibility and in a different module
+17 |   private static int $corge = 42;
+
+warning: Warn[12021] Static property is overridden: `$corge` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--D.php:5:17
+ 3 | module M2;
+ 4 | 
+ 5 | class D extends A {
+   |                 ^ [1]
+ 6 |   // Not OK since we are in a different module
+ 7 |   protected internal static function foo(): void {}
+   :
+15 |   internal static int $bar = 42;
+16 |   // Not OK since we are narrowing visibility and in a different module
+17 |   private static int $corge = 42;
+   |                  ^^^ [2]
+18 | }
+
+warning: Warn[12021] Static property is overridden: `$foo` [1]
+-> Overriding static property is here [2]
+
+module_protected_internal_bad_static_override.php--D.php:5:17
+ 3 | module M2;
+ 4 | 
+ 5 | class D extends A {
+   |                 ^ [1]
+ 6 |   // Not OK since we are in a different module
+ 7 |   protected internal static function foo(): void {}
+   :
+11 |   private static function corge(): void {}
+12 |   // Not OK since we are in a different module
+13 |   protected static internal int $foo = 42;
+   |                             ^^^ [2]
+14 |   // Not OK since we are in a different module
+15 |   internal static int $bar = 42;
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `protected internal` was expected [2]
+
+module_protected_internal_bad_static_override.php--B.php:9:27
+ 7 |   protected static function bar(): void {}
+ 8 |   // Not OK since we are narrowing visibility
+ 9 |   private static function corge(): void {}
+   |                           ^^^^^ [1]
+10 |   // OK since we are widening visibility
+11 |   protected static int $foo = 42;
+
+module_protected_internal_bad_static_override.php--A.php:11:37
+ 9 |  protected static function qux(): void {}
+10 |  public static function quux(): void {}
+11 |  protected static internal function corge(): void {}
+   |                                     ^^^^^ [2]
+12 |  protected static internal int $foo = 42;
+13 |  protected static internal int $bar = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `internal` was expected [2]
+
+module_protected_internal_bad_static_override.php--C.php:11:38
+ 9 |   internal static function bar(): void {}
+10 |   // Not OK since we are narrowing visibility even though we are in the same module
+11 |   protected internal static function baz(): void {}
+   |                                      ^^^ [1]
+12 |   // Not OK since we are narrowing visibility even though we are in the same module
+13 |   protected internal static function qux(): void {}
+
+module_protected_internal_bad_static_override.php--A.php:8:27
+ 6 |  protected internal static function foo(): void {}
+ 7 |  protected internal static function bar(): void {}
+ 8 |  internal static function baz(): void {}
+   |                           ^^^ [2]
+ 9 |  protected static function qux(): void {}
+10 |  public static function quux(): void {}
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `protected` was expected [2]
+
+module_protected_internal_bad_static_override.php--C.php:13:38
+11 |   protected internal static function baz(): void {}
+12 |   // Not OK since we are narrowing visibility even though we are in the same module
+13 |   protected internal static function qux(): void {}
+   |                                      ^^^ [1]
+14 |   // Not OK since we are narrowing visibility even though we are in the same module
+15 |   protected internal static function quux(): void {}
+
+module_protected_internal_bad_static_override.php--A.php:9:28
+ 7 |  protected internal static function bar(): void {}
+ 8 |  internal static function baz(): void {}
+ 9 |  protected static function qux(): void {}
+   |                            ^^^ [2]
+10 |  public static function quux(): void {}
+11 |  protected static internal function corge(): void {}
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `public` was expected [2]
+
+module_protected_internal_bad_static_override.php--C.php:15:38
+13 |   protected internal static function qux(): void {}
+14 |   // Not OK since we are narrowing visibility even though we are in the same module
+15 |   protected internal static function quux(): void {}
+   |                                      ^^^^ [1]
+16 |   // OK since we are in the same module
+17 |   protected internal static int $foo = 42;
+
+module_protected_internal_bad_static_override.php--A.php:10:25
+ 8 |  internal static function baz(): void {}
+ 9 |  protected static function qux(): void {}
+10 |  public static function quux(): void {}
+   |                         ^^^^ [2]
+11 |  protected static internal function corge(): void {}
+12 |  protected static internal int $foo = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `internal` was expected [2]
+
+module_protected_internal_bad_static_override.php--C.php:21:29
+19 |   internal static int $bar = 42;
+20 |   // Not OK since we are narrowing visibility even though we are in the same module
+21 |   protected internal static int $baz = 42;
+   |                             ^^^ [1]
+22 |   // Not OK since we are narrowing visibility even though we are in the same module
+23 |   protected internal static int $qux = 42;
+
+module_protected_internal_bad_static_override.php--A.php:14:18
+12 |  protected static internal int $foo = 42;
+13 |  protected static internal int $bar = 42;
+14 |  internal static int $baz = 42;
+   |                  ^^^ [2]
+15 |  protected static int $qux = 42;
+16 |  public static int $quux = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `protected` was expected [2]
+
+module_protected_internal_bad_static_override.php--C.php:23:29
+21 |   protected internal static int $baz = 42;
+22 |   // Not OK since we are narrowing visibility even though we are in the same module
+23 |   protected internal static int $qux = 42;
+   |                             ^^^ [1]
+24 |   // Not OK since we are narrowing visibility even though we are in the same module
+25 |   protected internal static int $quux = 42;
+
+module_protected_internal_bad_static_override.php--A.php:15:19
+13 |  protected static internal int $bar = 42;
+14 |  internal static int $baz = 42;
+15 |  protected static int $qux = 42;
+   |                   ^^^ [2]
+16 |  public static int $quux = 42;
+17 |  protected internal static int $corge = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `public` was expected [2]
+
+module_protected_internal_bad_static_override.php--C.php:25:29
+23 |   protected internal static int $qux = 42;
+24 |   // Not OK since we are narrowing visibility even though we are in the same module
+25 |   protected internal static int $quux = 42;
+   |                             ^^^ [1]
+26 | }
+
+module_protected_internal_bad_static_override.php--A.php:16:16
+14 |  internal static int $baz = 42;
+15 |  protected static int $qux = 42;
+16 |  public static int $quux = 42;
+   |                ^^^ [2]
+17 |  protected internal static int $corge = 42;
+18 | }
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_static_override.php--D.php:7:38
+5 | class D extends A {
+6 |   // Not OK since we are in a different module
+7 |   protected internal static function foo(): void {}
+  |                                      ^^^ [1]
+8 |   // Not OK since we are in a different module
+9 |   internal static function bar(): void {}
+
+module_protected_internal_bad_static_override.php--A.php:6:37
+4 | 
+5 | class A {
+6 |  protected internal static function foo(): void {}
+  |                                     ^^^ [2]
+7 |  protected internal static function bar(): void {}
+8 |  internal static function baz(): void {}
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_static_override.php--D.php:9:28
+ 7 |   protected internal static function foo(): void {}
+ 8 |   // Not OK since we are in a different module
+ 9 |   internal static function bar(): void {}
+   |                            ^^^ [1]
+10 |   // Not OK since we are narrowing visibility and in a different module
+11 |   private static function corge(): void {}
+
+module_protected_internal_bad_static_override.php--A.php:7:37
+ 5 | class A {
+ 6 |  protected internal static function foo(): void {}
+ 7 |  protected internal static function bar(): void {}
+   |                                     ^^^ [2]
+ 8 |  internal static function baz(): void {}
+ 9 |  protected static function qux(): void {}
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `protected internal` was expected [2]
+
+module_protected_internal_bad_static_override.php--D.php:11:27
+ 9 |   internal static function bar(): void {}
+10 |   // Not OK since we are narrowing visibility and in a different module
+11 |   private static function corge(): void {}
+   |                           ^^^^^ [1]
+12 |   // Not OK since we are in a different module
+13 |   protected static internal int $foo = 42;
+
+module_protected_internal_bad_static_override.php--A.php:11:37
+ 9 |  protected static function qux(): void {}
+10 |  public static function quux(): void {}
+11 |  protected static internal function corge(): void {}
+   |                                     ^^^^^ [2]
+12 |  protected static internal int $foo = 42;
+13 |  protected static internal int $bar = 42;
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_static_override.php--D.php:13:29
+11 |   private static function corge(): void {}
+12 |   // Not OK since we are in a different module
+13 |   protected static internal int $foo = 42;
+   |                             ^^^ [1]
+14 |   // Not OK since we are in a different module
+15 |   internal static int $bar = 42;
+
+module_protected_internal_bad_static_override.php--A.php:12:28
+10 |  public static function quux(): void {}
+11 |  protected static internal function corge(): void {}
+12 |  protected static internal int $foo = 42;
+   |                            ^^^ [2]
+13 |  protected static internal int $bar = 42;
+14 |  internal static int $baz = 42;
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_static_override.php--D.php:15:19
+13 |   protected static internal int $foo = 42;
+14 |   // Not OK since we are in a different module
+15 |   internal static int $bar = 42;
+   |                   ^^^ [1]
+16 |   // Not OK since we are narrowing visibility and in a different module
+17 |   private static int $corge = 42;
+
+module_protected_internal_bad_static_override.php--A.php:13:28
+11 |  protected static internal function corge(): void {}
+12 |  protected static internal int $foo = 42;
+13 |  protected static internal int $bar = 42;
+   |                            ^^^ [2]
+14 |  internal static int $baz = 42;
+15 |  protected static int $qux = 42;
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `protected internal` was expected [2]
+
+module_protected_internal_bad_static_override.php--D.php:17:18
+15 |   internal static int $bar = 42;
+16 |   // Not OK since we are narrowing visibility and in a different module
+17 |   private static int $corge = 42;
+   |                  ^^^ [1]
+18 | }
+
+module_protected_internal_bad_static_override.php--A.php:17:28
+15 |  protected static int $qux = 42;
+16 |  public static int $quux = 42;
+17 |  protected internal static int $corge = 42;
+   |                            ^^^ [2]
+18 | }
+
+23 errors found

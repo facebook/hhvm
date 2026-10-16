@@ -1,4 +1,20 @@
-ERROR: File "bad_inout_decl_async_generator.php", line 5, characters 25-29:
-Parameters may not be marked `inout` on `async` functions (Parsing[1002])
-ERROR: File "bad_inout_decl_async_generator.php", line 7, characters 3-10:
-Parameters may not be marked `inout` on `async` generators (Parsing[1002])
+error: Parsing[1002] Parameters may not be marked `inout` on `async` functions [1]
+
+bad_inout_decl_async_generator.php:5:25
+3 | async function gen_void(): Awaitable<void> {}
+4 | 
+5 | async function gen_test(inout string $s): AsyncIterator<int> {
+  |                         ^^^^^ [1]
+6 |   await gen_void();
+7 |   yield 42;
+
+error: Parsing[1002] Parameters may not be marked `inout` on `async` generators [1]
+
+bad_inout_decl_async_generator.php:7:3
+5 | async function gen_test(inout string $s): AsyncIterator<int> {
+6 |   await gen_void();
+7 |   yield 42;
+  |   ^^^^^^^^ [1]
+8 | }
+
+2 errors found

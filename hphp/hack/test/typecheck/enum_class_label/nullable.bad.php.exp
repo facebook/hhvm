@@ -1,16 +1,52 @@
-ERROR: File "nullable.bad.php", line 18, characters 10-11:
-Invalid argument (Typing[4110])
-  File "nullable.bad.php", line 8, characters 35-37:
-  Expected `int`
-  File "nullable.bad.php", line 5, characters 3-8:
-  But got `string`
-ERROR: File "nullable.bad.php", line 22, characters 10-11:
-Invalid argument (Typing[4110])
-  File "nullable.bad.php", line 22, characters 10-11:
-  Expected a class with a constant `Z`
-  File "nullable.bad.php", line 8, characters 32-32:
-  But got `E`
-  File "nullable.bad.php", line 3, characters 12-12:
-  `E` is defined here
-  File "nullable.bad.php", line 4, characters 7-7:
-  Did you mean `X`?
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+nullable.bad.php:18:10
+ 3 | enum class E : mixed {
+ 4 |   int X = 42;
+ 5 |   string Y = 'yolo';
+   |   ^^^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | function g(?HH\EnumClass\Label<E, int> $label): int {
+   |                                   ^^^ [2]
+ 9 |   if ($label is nonnull) {
+10 |     return E::valueOf($label);
+   :
+16 | <<__EntryPoint>>
+17 | function run(): void {
+18 |   $x = g(#Y);
+   |          ^^ [1]
+19 |   echo $x;
+20 |   echo "\n";
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `Z` [1]
+-> But got `E` [2]
+-> `E` is defined here [3]
+-> Did you mean `X`? [4]
+
+nullable.bad.php:22:10
+ 1 | <?hh
+ 2 | 
+ 3 | enum class E : mixed {
+   |            ^ [3]
+ 4 |   int X = 42;
+   |       ^ [4]
+ 5 |   string Y = 'yolo';
+ 6 | }
+ 7 | 
+ 8 | function g(?HH\EnumClass\Label<E, int> $label): int {
+   |                                ^ [2]
+ 9 |   if ($label is nonnull) {
+10 |     return E::valueOf($label);
+   :
+20 |   echo "\n";
+21 | 
+22 |   $x = g(#Z);
+   |          ^^ [1]
+23 |   echo $x;
+24 |   echo "\n";
+
+2 errors found

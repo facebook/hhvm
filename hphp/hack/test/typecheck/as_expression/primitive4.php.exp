@@ -1,6 +1,21 @@
-ERROR: File "primitive4.php", line 10, characters 5-6:
-Invalid argument (Typing[4110])
-  File "primitive4.php", line 3, characters 12-14:
-  Expected `int`
-  File "primitive4.php", line 5, characters 12-16:
-  But got `mixed`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+primitive4.php:10:5
+ 1 | <?hh
+ 2 | 
+ 3 | function g(int $x): void {}
+   |            ^^^ [2]
+ 4 | 
+ 5 | function f(mixed $x, bool $b): void {
+   |            ^^^^^ [3]
+ 6 |   if ($b) {
+ 7 |     $x as int;
+ 8 |     g($x);
+ 9 |   }
+10 |   g($x);
+   |     ^^ [1]
+11 | }
+
+1 error found

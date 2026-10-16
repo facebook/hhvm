@@ -1,20 +1,90 @@
-ERROR: File "level_4.php", line 35, characters 3-18:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 29, characters 31-38:
-  Definition is here
-ERROR: File "level_4.php", line 37, characters 3-20:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 29, characters 31-38:
-  Definition is here
-ERROR: File "level_4.php", line 39, characters 3-21:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 29, characters 31-38:
-  Definition is here
-ERROR: File "level_4.php", line 41, characters 3-21:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 29, characters 31-38:
-  Definition is here
-ERROR: File "level_4.php", line 43, characters 3-8:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "level_4.php", line 29, characters 31-38:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:35:3
+27 | }
+28 | 
+29 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+30 |   return C::class;
+31 | }
+32 | 
+33 | function test(): void {
+34 |   $nullable_string = id_nullable_string(get_class_pointer());
+35 |   $nullable_string::method();
+   |   ^^^^^^^^^^^^^^^^ [1]
+36 |   $nullable_arraykey = id_nullable_arraykey(get_class_pointer());
+37 |   $nullable_arraykey::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:37:3
+27 | }
+28 | 
+29 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+30 |   return C::class;
+31 | }
+   :
+35 |   $nullable_string::method();
+36 |   $nullable_arraykey = id_nullable_arraykey(get_class_pointer());
+37 |   $nullable_arraykey::method();
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+38 |   $nullable_stringish = id_nullable_stringish(get_class_pointer());
+39 |   $nullable_stringish::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:39:3
+27 | }
+28 | 
+29 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+30 |   return C::class;
+31 | }
+   :
+37 |   $nullable_arraykey::method();
+38 |   $nullable_stringish = id_nullable_stringish(get_class_pointer());
+39 |   $nullable_stringish::method();
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+40 |   $nullable_xhp_child = id_nullable_xhp_child(get_class_pointer());
+41 |   $nullable_xhp_child::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:41:3
+27 | }
+28 | 
+29 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+30 |   return C::class;
+31 | }
+   :
+39 |   $nullable_stringish::method();
+40 |   $nullable_xhp_child = id_nullable_xhp_child(get_class_pointer());
+41 |   $nullable_xhp_child::method();
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+42 |   $union = id_union(get_class_pointer());
+43 |   $union::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+level_4.php:43:3
+27 | }
+28 | 
+29 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+30 |   return C::class;
+31 | }
+   :
+41 |   $nullable_xhp_child::method();
+42 |   $union = id_union(get_class_pointer());
+43 |   $union::method();
+   |   ^^^^^^ [1]
+44 | }
+
+5 errors found

@@ -1,36 +1,148 @@
-ERROR: File "tyvar_lower_bound.php", line 39, characters 3-9:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 33, characters 31-38:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 41, characters 3-20:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 37, characters 15-26:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 45, characters 3-11:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 33, characters 31-38:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 47, characters 3-16:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 29, characters 35-42:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 49, characters 3-11:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 33, characters 31-38:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 51, characters 3-12:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 33, characters 31-38:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 56, characters 3-8:
-It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 54, characters 26-45:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 61, characters 3-9:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 59, characters 33-44:
-  Definition is here
-ERROR: File "tyvar_lower_bound.php", line 66, characters 3-9:
-It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. (Typing[4482])
-  File "tyvar_lower_bound.php", line 64, characters 29-36:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:39:3
+31 | }
+32 | 
+33 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+34 |   return C::class;
+35 | }
+36 | 
+37 | function test(classname<C> $classname): void {
+38 |   $string = id_string(get_class_pointer());
+39 |   $string::method();
+   |   ^^^^^^^ [1]
+40 |   $already_classname = id_string($classname);
+41 |   $already_classname::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:41:3
+35 | }
+36 | 
+37 | function test(classname<C> $classname): void {
+   |               ^^^^^^^^^^^^ [2]
+38 |   $string = id_string(get_class_pointer());
+39 |   $string::method();
+40 |   $already_classname = id_string($classname);
+41 |   $already_classname::method();
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+42 |   $unconstrained = id_unconstrained(get_class_pointer());
+43 |   $unconstrained::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:45:3
+31 | }
+32 | 
+33 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+34 |   return C::class;
+35 | }
+   :
+43 |   $unconstrained::method();
+44 |   $multiple = id_multiple(get_class_pointer());
+45 |   $multiple::method();
+   |   ^^^^^^^^^ [1]
+46 |   $upper_arrives = lower_then_upper(get_class_pointer());
+47 |   $upper_arrives::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:47:3
+27 | }
+28 | 
+29 | function lower_then_upper<T super class<C> as string>(T $value): T {
+   |                                   ^^^^^^^^ [2]
+30 |   return $value;
+31 | }
+   :
+45 |   $multiple::method();
+46 |   $upper_arrives = lower_then_upper(get_class_pointer());
+47 |   $upper_arrives::method();
+   |   ^^^^^^^^^^^^^^ [1]
+48 |   $arraykey = id_arraykey(get_class_pointer());
+49 |   $arraykey::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:49:3
+31 | }
+32 | 
+33 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+34 |   return C::class;
+35 | }
+   :
+47 |   $upper_arrives::method();
+48 |   $arraykey = id_arraykey(get_class_pointer());
+49 |   $arraykey::method();
+   |   ^^^^^^^^^ [1]
+50 |   $stringish = id_stringish(get_class_pointer());
+51 |   $stringish::method();
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:51:3
+31 | }
+32 | 
+33 | function get_class_pointer(): class<C> {
+   |                               ^^^^^^^^ [2]
+34 |   return C::class;
+35 | }
+   :
+49 |   $arraykey::method();
+50 |   $stringish = id_stringish(get_class_pointer());
+51 |   $stringish::method();
+   |   ^^^^^^^^^^ [1]
+52 | }
+53 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:56:3
+52 | }
+53 | 
+54 | function test_supportdyn(supportdyn<class<C>> $class): void {
+   |                          ^^^^^^^^^^^^^^^^^^^^ [2]
+55 |   $value = id_string($class);
+56 |   $value::method();
+   |   ^^^^^^ [1]
+57 | }
+58 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:61:3
+57 | }
+58 | 
+59 | function test_union((class<C> | classname<C>) $value): void {
+   |                                 ^^^^^^^^^^^^ [2]
+60 |   $result = id_string($value);
+61 |   $result::method();
+   |   ^^^^^^^ [1]
+62 | }
+63 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<<expr#2> as C>` in this position. Please use a `class<<expr#2> as C>` instead. [1]
+-> Definition is here [2]
+
+tyvar_lower_bound.php:66:3
+62 | }
+63 | 
+64 | function test_intersection((class<C> & string) $value): void {
+   |                             ^^^^^^^^ [2]
+65 |   $result = id_string($value);
+66 |   $result::method();
+   |   ^^^^^^^ [1]
+67 | }
+
+9 errors found

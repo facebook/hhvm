@@ -1,48 +1,200 @@
-ERROR: File "explicit_generics.php", line 7, characters 3-11:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 4, characters 35-35:
-  Definition is here
-ERROR: File "explicit_generics.php", line 8, characters 3-11:
-Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 5, characters 39-40:
-  Definition is here
-ERROR: File "explicit_generics.php", line 10, characters 16-16:
-Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 5, characters 39-40:
-  Definition is here
-ERROR: File "explicit_generics.php", line 11, characters 20-20:
-Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 5, characters 39-40:
-  Definition is here
-ERROR: File "explicit_generics.php", line 12, characters 42-42:
-Illegal wildcard (`_`): generic type parameter `Tout` must be specified explicitly (Typing[4347])
-  File "soundness.hhi", line 31, characters 78-81:
-  Definition is here
-ERROR: File "explicit_generics.php", line 19, characters 12-16:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 16, characters 40-40:
-  Definition is here
-ERROR: File "explicit_generics.php", line 20, characters 12-16:
-Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 17, characters 44-45:
-  Definition is here
-ERROR: File "explicit_generics.php", line 22, characters 21-21:
-Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 17, characters 44-45:
-  Definition is here
-ERROR: File "explicit_generics.php", line 23, characters 25-25:
-Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 17, characters 44-45:
-  Definition is here
-ERROR: File "explicit_generics.php", line 31, characters 13-13:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 27, characters 24-24:
-  Definition is here
-ERROR: File "explicit_generics.php", line 32, characters 15-15:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 27, characters 24-24:
-  Definition is here
-ERROR: File "explicit_generics.php", line 33, characters 19-19:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 27, characters 24-24:
-  Definition is here
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:7:3
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | function toplevel1<<<__Explicit>> T>(T $x): void {}
+  |                                   ^ [2]
+5 | function toplevel2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+6 | function bar(dynamic $m): void {
+7 |   toplevel1(3);
+  |   ^^^^^^^^^ [1]
+8 |   toplevel2(2, 3);
+9 |   toplevel2<_, string>(3, "a");
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:8:3
+ 3 | 
+ 4 | function toplevel1<<<__Explicit>> T>(T $x): void {}
+ 5 | function toplevel2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+   |                                       ^^ [2]
+ 6 | function bar(dynamic $m): void {
+ 7 |   toplevel1(3);
+ 8 |   toplevel2(2, 3);
+   |   ^^^^^^^^^ [1]
+ 9 |   toplevel2<_, string>(3, "a");
+10 |   toplevel2<_, _>(3, "a");
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:10:16
+ 3 | 
+ 4 | function toplevel1<<<__Explicit>> T>(T $x): void {}
+ 5 | function toplevel2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+   |                                       ^^ [2]
+ 6 | function bar(dynamic $m): void {
+ 7 |   toplevel1(3);
+ 8 |   toplevel2(2, 3);
+ 9 |   toplevel2<_, string>(3, "a");
+10 |   toplevel2<_, _>(3, "a");
+   |                ^ [1]
+11 |   toplevel2<_, vec<_>>(3, vec["A"]);
+12 |   $x = HH\FIXME\UNSAFE_CAST<dynamic, vec<_>>($m, 'blah');
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:11:20
+ 3 | 
+ 4 | function toplevel1<<<__Explicit>> T>(T $x): void {}
+ 5 | function toplevel2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+   |                                       ^^ [2]
+ 6 | function bar(dynamic $m): void {
+ 7 |   toplevel1(3);
+ 8 |   toplevel2(2, 3);
+ 9 |   toplevel2<_, string>(3, "a");
+10 |   toplevel2<_, _>(3, "a");
+11 |   toplevel2<_, vec<_>>(3, vec["A"]);
+   |                    ^ [1]
+12 |   $x = HH\FIXME\UNSAFE_CAST<dynamic, vec<_>>($m, 'blah');
+13 | }
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `Tout` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:12:42
+10 |   toplevel2<_, _>(3, "a");
+11 |   toplevel2<_, vec<_>>(3, vec["A"]);
+12 |   $x = HH\FIXME\UNSAFE_CAST<dynamic, vec<_>>($m, 'blah');
+   |                                          ^ [1]
+13 | }
+14 | 
+
+soundness.hhi:31:78
+29 |  * expression.
+30 |  */
+31 | function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
+   |                                                                              ^^^^ [2]
+32 |   Tin $t,
+33 |   ?\HH\FormatString<nothing> $msg = null,
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:19:12
+14 | 
+15 | class C {
+16 |   public function meth1<<<__Explicit>> T>(T $x): void {}
+   |                                        ^ [2]
+17 |   public function meth2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+18 |   public function barmeth(): void {
+19 |     $this->meth1(3);
+   |            ^^^^^ [1]
+20 |     $this->meth2(2, 3);
+21 |     $this->meth2<_, string>(3, "a");
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:20:12
+15 | class C {
+16 |   public function meth1<<<__Explicit>> T>(T $x): void {}
+17 |   public function meth2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+   |                                            ^^ [2]
+18 |   public function barmeth(): void {
+19 |     $this->meth1(3);
+20 |     $this->meth2(2, 3);
+   |            ^^^^^ [1]
+21 |     $this->meth2<_, string>(3, "a");
+22 |     $this->meth2<_, _>(3, "a");
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:22:21
+15 | class C {
+16 |   public function meth1<<<__Explicit>> T>(T $x): void {}
+17 |   public function meth2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+   |                                            ^^ [2]
+18 |   public function barmeth(): void {
+19 |     $this->meth1(3);
+20 |     $this->meth2(2, 3);
+21 |     $this->meth2<_, string>(3, "a");
+22 |     $this->meth2<_, _>(3, "a");
+   |                     ^ [1]
+23 |     $this->meth2<_, vec<_>>(3, vec["A"]);
+24 |   }
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:23:25
+15 | class C {
+16 |   public function meth1<<<__Explicit>> T>(T $x): void {}
+17 |   public function meth2<T1, <<__Explicit>> T2>(T1 $x, T2 $y): void {}
+   |                                            ^^ [2]
+18 |   public function barmeth(): void {
+19 |     $this->meth1(3);
+20 |     $this->meth2(2, 3);
+21 |     $this->meth2<_, string>(3, "a");
+22 |     $this->meth2<_, _>(3, "a");
+23 |     $this->meth2<_, vec<_>>(3, vec["A"]);
+   |                         ^ [1]
+24 |   }
+25 | }
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:31:13
+25 | }
+26 | 
+27 | class G<<<__Explicit>> T> {
+   |                        ^ [2]
+28 | 
+29 | }
+30 | function testnew(): void {
+31 |   $g1 = new G();
+   |             ^ [1]
+32 |   $g2 = new G<_>();
+33 |   $g3 = new G<vec<_>>();
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:32:15
+25 | }
+26 | 
+27 | class G<<<__Explicit>> T> {
+   |                        ^ [2]
+28 | 
+29 | }
+30 | function testnew(): void {
+31 |   $g1 = new G();
+32 |   $g2 = new G<_>();
+   |               ^ [1]
+33 |   $g3 = new G<vec<_>>();
+34 | }
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+explicit_generics.php:33:19
+25 | }
+26 | 
+27 | class G<<<__Explicit>> T> {
+   |                        ^ [2]
+28 | 
+29 | }
+30 | function testnew(): void {
+31 |   $g1 = new G();
+32 |   $g2 = new G<_>();
+33 |   $g3 = new G<vec<_>>();
+   |                   ^ [1]
+34 | }
+
+12 errors found

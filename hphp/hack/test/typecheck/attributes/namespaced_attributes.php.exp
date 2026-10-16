@@ -1,6 +1,20 @@
-ERROR: File "namespaced_attributes.php", line 23, characters 7-7:
-Invalid argument (Typing[4110])
-  File "namespaced_attributes.php", line 9, characters 40-45:
-  Expected `string`
-  File "namespaced_attributes.php", line 23, characters 7-7:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+namespaced_attributes.php:23:7
+ 7 | 
+ 8 |   class Y implements \HH\FunctionAttribute {
+ 9 |     public function __construct(public string $s) {}
+   |                                        ^^^^^^ [2]
+10 |   }
+11 | }
+   :
+21 |   function g(): void {}
+22 | 
+23 |   <<Y(4)>>
+   |       ^ [1]
+24 |   function h(): void {}
+25 | }
+
+1 error found

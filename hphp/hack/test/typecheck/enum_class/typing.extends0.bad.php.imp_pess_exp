@@ -1,14 +1,48 @@
-ERROR: File "typing.extends0.bad.php", line 44, characters 16-19:
-Invalid argument (Typing[4110])
-  File "typing.extends0.bad.php", line 34, characters 30-35:
-  Expected `Box<_>`
-  File "typing.extends0.bad.php", line 39, characters 4-11:
-  But got `dynamic`
-ERROR: File "typing.extends0.bad.php", line 44, characters 16-19:
-Invalid argument (Typing[4110])
-  File "typing.extends0.bad.php", line 39, characters 13-13:
-  Expected `F`
-  File "typing.extends0.bad.php", line 34, characters 27-27:
-  But got `E`
-  File "typing.extends0.bad.php", line 34, characters 27-27:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `Box<_>` [2]
+-> But got `dynamic` [3]
+
+typing.extends0.bad.php:44:16
+32 | }
+33 | 
+34 | function e<T>(HH\MemberOf<E, Box<T>> $param): T {
+   |                              ^^^^^^ [2]
+35 |   return $param->data;
+36 | }
+37 | 
+38 | enum class F: ExBox extends E {
+39 |    Box<num> C = new Box(3.14);
+   |    ^^^^^^^^ [3]
+40 | }
+41 | 
+42 | function testit3(): void {
+43 |   // errors correctly (need to improve error message, super is confusing)
+44 |   expect_num(e(F::C));
+   |                ^^^^ [1]
+45 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `E` [3]
+-> This type argument to `HH\MemberOf` only allows supertypes (it is contravariant) [3]
+
+typing.extends0.bad.php:44:16
+32 | }
+33 | 
+34 | function e<T>(HH\MemberOf<E, Box<T>> $param): T {
+   |                           ^ [3]
+35 |   return $param->data;
+36 | }
+37 | 
+38 | enum class F: ExBox extends E {
+39 |    Box<num> C = new Box(3.14);
+   |             ^ [2]
+40 | }
+41 | 
+42 | function testit3(): void {
+43 |   // errors correctly (need to improve error message, super is confusing)
+44 |   expect_num(e(F::C));
+   |                ^^^^ [1]
+45 | }
+
+2 errors found

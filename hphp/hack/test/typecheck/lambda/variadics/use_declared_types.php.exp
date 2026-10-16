@@ -1,12 +1,43 @@
-ERROR: File "use_declared_types.php", line 35, characters 23-24:
-Invalid argument (Typing[4110])
-  File "use_declared_types.php", line 11, characters 28-29:
-  Expected `B` (variadic argument)
-  File "use_declared_types.php", line 34, characters 11-12:
-  But got `A` (variadic argument)
-ERROR: File "use_declared_types.php", line 40, characters 21-22:
-Invalid argument (Typing[4110])
-  File "use_declared_types.php", line 11, characters 28-29:
-  Expected `B` (variadic argument)
-  File "use_declared_types.php", line 39, characters 19-20:
-  But got `A` (variadic argument)
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` (variadic argument) [2]
+-> But got `A` (variadic argument) [3]
+
+use_declared_types.php:35:23
+ 9 | }
+10 | 
+11 | function Bs_to_string(B ...$b): string {
+   |                            ^^ [2]
+12 |   return "some string";
+13 | }
+   :
+32 | 
+33 |   provide_Bs(
+34 |     (A ...$b) ==> {
+   |           ^^ [3]
+35 |       Bs_to_string(...$b);
+   |                       ^^ [1]
+36 |     },
+37 |   );
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` (variadic argument) [2]
+-> But got `A` (variadic argument) [3]
+
+use_declared_types.php:40:21
+ 9 | }
+10 | 
+11 | function Bs_to_string(B ...$b): string {
+   |                            ^^ [2]
+12 |   return "some string";
+13 | }
+   :
+37 |   );
+38 | 
+39 |   $lambda = (A ...$b) ==> {
+   |                   ^^ [3]
+40 |     Bs_to_string(...$b);
+   |                     ^^ [1]
+41 |   };
+42 | }
+
+2 errors found

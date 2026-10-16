@@ -1,2 +1,11 @@
-ERROR: File "class_by_reference.php", line 11, characters 34-34:
-Encountered unexpected token `&`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `&`. [1]
+
+class_by_reference.php:11:34
+ 9 | class Foo {
+10 |   <<__Memoize>>
+11 |   public function someMethod(Bar &$arg): string {
+   |                                  ^ [1]
+12 |     return "hello";
+13 |   }
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "bad_inout_use_arg20.php", line 9, characters 11-15:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-  File "bad_inout_use_arg20.php", line 8, characters 8-15:
-  This is a string
+error: Typing[4208] Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. [1]
+-> This is a string [2]
+
+bad_inout_use_arg20.php:9:11
+ 6 | 
+ 7 | function test(): void {
+ 8 |   $x = 'foobar';
+   |        ^^^^^^^^ [2]
+ 9 |   f(inout $x[5]);
+   |           ^^^^^ [1]
+10 | }
+
+1 error found

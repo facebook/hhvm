@@ -1,16 +1,71 @@
-ERROR: File "invalid_syntax_bad.php", line 5, characters 24-26:
-Ellipsis `...` is only valid in shape destructuring patterns (Parsing[1002])
-ERROR: File "invalid_syntax_bad.php", line 6, characters 20-22:
-Ellipsis `...` is only valid in tuple destructuring patterns (Parsing[1002])
-ERROR: File "invalid_syntax_bad.php", line 10, characters 14-22:
-Optional field syntax `?` is only valid in shape destructuring patterns (Parsing[1002])
-ERROR: File "invalid_syntax_bad.php", line 10, characters 14-22:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "invalid_syntax_bad.php", line 11, characters 14-16:
-Optional field syntax `?` is only valid in shape destructuring patterns (Parsing[1002])
-ERROR: File "invalid_syntax_bad.php", line 11, characters 14-16:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "invalid_syntax_bad.php", line 11, characters 15-16:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "invalid_syntax_bad.php", line 10, characters 3-23:
-  Did you mean `$s` instead?
+error: Parsing[1002] Ellipsis `...` is only valid in shape destructuring patterns [1]
+
+invalid_syntax_bad.php:5:24
+3 | 
+4 | function test_ellipsis_on_rhs(): void {
+5 |   $s = shape('x' => 1, ...);
+  |                        ^^^ [1]
+6 |   $t = tuple(1, 2, ...);
+7 | }
+
+error: Parsing[1002] Ellipsis `...` is only valid in tuple destructuring patterns [1]
+
+invalid_syntax_bad.php:6:20
+4 | function test_ellipsis_on_rhs(): void {
+5 |   $s = shape('x' => 1, ...);
+6 |   $t = tuple(1, 2, ...);
+  |                    ^^^ [1]
+7 | }
+8 | 
+
+error: Parsing[1002] Optional field syntax `?` is only valid in shape destructuring patterns [1]
+
+invalid_syntax_bad.php:10:14
+ 8 | 
+ 9 | function test_question_on_rhs(): void {
+10 |   $s = shape(?'x' => 1);
+   |              ^^^^^^^^^ [1]
+11 |   $t = shape(?$x);
+12 | }
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+invalid_syntax_bad.php:10:14
+ 8 | 
+ 9 | function test_question_on_rhs(): void {
+10 |   $s = shape(?'x' => 1);
+   |              ^^^^^^^^^ [1]
+11 |   $t = shape(?$x);
+12 | }
+
+error: Parsing[1002] Optional field syntax `?` is only valid in shape destructuring patterns [1]
+
+invalid_syntax_bad.php:11:14
+ 9 | function test_question_on_rhs(): void {
+10 |   $s = shape(?'x' => 1);
+11 |   $t = shape(?$x);
+   |              ^^^ [1]
+12 | }
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+invalid_syntax_bad.php:11:14
+ 9 | function test_question_on_rhs(): void {
+10 |   $s = shape(?'x' => 1);
+11 |   $t = shape(?$x);
+   |              ^^^ [1]
+12 | }
+
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$s` instead? [2]
+
+invalid_syntax_bad.php:11:15
+ 8 | 
+ 9 | function test_question_on_rhs(): void {
+10 |   $s = shape(?'x' => 1);
+   |   ^^^^^^^^^^^^^^^^^^^^^ [2]
+11 |   $t = shape(?$x);
+   |               ^^ [1]
+12 | }
+
+7 errors found

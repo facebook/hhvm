@@ -1,4 +1,16 @@
-ERROR: File "indirect_opaque.php--file1.php", line 3, characters 11-11:
-Cyclic type definition (Typing[4498])
-  File "indirect_opaque.php--file2.php", line 3, characters 26-26:
-  Cyclic use is here
+error: Typing[4498] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+indirect_opaque.php--file1.php:3:11
+1 | <?hh
+2 | 
+3 | case type A = shape('a' => ?B);
+  |           ^ [1]
+
+indirect_opaque.php--file2.php:3:26
+1 | <?hh
+2 | 
+3 | newtype B = shape('b' => A);
+  |                          ^ [2]
+
+1 error found

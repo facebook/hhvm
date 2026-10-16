@@ -1,2 +1,11 @@
-ERROR: File "await_in_splice_conditional.php", line 13, characters 15-59:
-Cannot use unstable feature: `allow_conditional_await_syntax` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `allow_conditional_await_syntax` [1]
+
+await_in_splice_conditional.php:13:15
+11 |   bool $b,
+12 | ): Awaitable<C<ExampleExpression<ExampleInt>>> {
+13 |   return $b ? new C(ExampleDsl`${await myTestFunction2()}`) : new C(ExampleDsl`2`);
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | }
+15 | 
+
+1 error found

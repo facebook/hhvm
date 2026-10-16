@@ -1,2 +1,10 @@
-ERROR: File "lambda05.php", line 13, characters 33-33:
-Encountered unexpected token `}`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `}`. [1]
+
+lambda05.php:13:33
+11 | 
+12 | function foo(): void {
+13 |   $x = ($x, $y) ==> { return $x }; // expected ;
+   |                                 ^ [1]
+14 | }
+
+1 error found

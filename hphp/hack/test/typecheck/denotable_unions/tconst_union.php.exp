@@ -1,2 +1,11 @@
-ERROR: File "tconst_union.php", line 14, characters 56-56:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_union.php:14:56
+12 | }
+13 | 
+14 | function foo<T as (I & (C|D)), TP>(T $x):TP where TP = T::TP {
+   |                                                        ^ [1]
+15 |   return $x->get()[0];
+16 | }
+
+1 error found

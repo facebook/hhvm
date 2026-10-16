@@ -1,6 +1,14 @@
-ERROR: File "explicit_type_collection_generic_mismatch1.php", line 4, characters 10-37:
-Some elements in this collection are incompatible (Typing[4110])
-  File "explicit_type_collection_generic_mismatch1.php", line 4, characters 14-14:
-  Expected `T`
-  File "explicit_type_collection_generic_mismatch1.php", line 4, characters 33-36:
-  But got `null`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `T` [2]
+-> But got `null` [3]
+
+explicit_type_collection_generic_mismatch1.php:4:10
+2 | 
+3 | function f<T>(T $value): vec<T> {
+4 |   return vec<T>[$value, $value, null];
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |              ^ [2]
+  |                                 ^^^^ [3]
+5 | }
+
+1 error found

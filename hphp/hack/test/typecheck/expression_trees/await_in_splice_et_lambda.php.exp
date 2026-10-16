@@ -1,2 +1,19 @@
-ERROR: File "await_in_splice_et_lambda.php", line 9, characters 7-102:
-Cannot use unstable feature: `allow_conditional_await_syntax` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `allow_conditional_await_syntax` [1]
+
+await_in_splice_et_lambda.php:9:7
+ 7 | ): Awaitable<ExampleExpression<ExampleInt>> {
+ 8 |   return $b
+ 9 |     ? ExampleDsl`(
+   |       ^^^^^^^^^^^^ [1]
+10 |         $x ==> {
+   |         ^^^^^^^^ [1]
+11 |           return ${await myTestFunction2()};
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |         }
+   |         ^ [1]
+13 |       )(2)`
+   |       ^^^^^ [1]
+14 |     : ExampleDsl`2`;
+15 | }
+
+1 error found

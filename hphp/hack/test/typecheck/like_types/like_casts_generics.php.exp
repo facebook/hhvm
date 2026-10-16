@@ -1,16 +1,47 @@
-ERROR: File "like_casts_generics.php", line 4, characters 8-9:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts_generics.php", line 4, characters 8-9:
-  The `as` operator cannot be used with an erased generic type parameter
-ERROR: File "like_casts_generics.php", line 5, characters 8-10:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts_generics.php", line 5, characters 9-10:
-  The `as` operator cannot be used with an erased generic type parameter
-ERROR: File "like_casts_generics.php", line 6, characters 8-9:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts_generics.php", line 6, characters 8-9:
-  The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>`
-ERROR: File "like_casts_generics.php", line 7, characters 8-10:
-Invalid `as` expression hint (Typing[4195])
-  File "like_casts_generics.php", line 7, characters 9-10:
-  The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>`
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with an erased generic type parameter [1]
+
+like_casts_generics.php:4:8
+2 | 
+3 | function f<T1, reify T2, <<__Enforceable>> reify T3>(): void {
+4 |   1 as T1; // error
+  |        ^^ [1]
+5 |   2 as ~T1; // error
+6 |   3 as T2; // error
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with an erased generic type parameter [2]
+
+like_casts_generics.php:5:8
+3 | function f<T1, reify T2, <<__Enforceable>> reify T3>(): void {
+4 |   1 as T1; // error
+5 |   2 as ~T1; // error
+  |        ^^^ [1]
+  |         ^^ [2]
+6 |   3 as T2; // error
+7 |   4 as ~T2; // error
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>` [1]
+
+like_casts_generics.php:6:8
+4 |   1 as T1; // error
+5 |   2 as ~T1; // error
+6 |   3 as T2; // error
+  |        ^^ [1]
+7 |   4 as ~T2; // error
+8 |   5 as T3; // OK
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a reified type parameter that is not marked `<<__Enforceable>>` [2]
+
+like_casts_generics.php:7:8
+5 |   2 as ~T1; // error
+6 |   3 as T2; // error
+7 |   4 as ~T2; // error
+  |        ^^^ [1]
+  |         ^^ [2]
+8 |   5 as T3; // OK
+9 |   6 as ~T3; // OK
+
+4 errors found

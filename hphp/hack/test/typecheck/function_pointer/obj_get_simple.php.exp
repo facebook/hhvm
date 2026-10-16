@@ -1,2 +1,11 @@
-ERROR: File "obj_get_simple.php", line 11, characters 8-16:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+obj_get_simple.php:11:8
+ 9 | function baz(): void {
+10 |   $x = new Foo();
+11 |   $y = $x->bar<>;
+   |        ^^^^^^^^^ [1]
+12 |   $y(4);
+13 | }
+
+1 error found

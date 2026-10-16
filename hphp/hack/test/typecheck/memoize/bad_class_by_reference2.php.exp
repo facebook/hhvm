@@ -1,6 +1,23 @@
-ERROR: File "bad_class_by_reference2.php", line 6, characters 28-28:
-Encountered unexpected token `&`. (Parsing[1002])
-ERROR: File "bad_class_by_reference2.php", line 6, characters 29-32:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "bad_class_by_reference2.php", line 6, characters 24-26:
-  This is an object of type Bar
+error: Parsing[1002] Encountered unexpected token `&`. [1]
+
+bad_class_by_reference2.php:6:28
+4 | 
+5 | <<__Memoize>>
+6 | function some_function(Bar &$arg): string {
+  |                            ^ [1]
+7 |   return 'hello';
+8 | }
+
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type Bar [2]
+
+bad_class_by_reference2.php:6:29
+4 | 
+5 | <<__Memoize>>
+6 | function some_function(Bar &$arg): string {
+  |                        ^^^ [2]
+  |                             ^^^^ [1]
+7 |   return 'hello';
+8 | }
+
+2 errors found

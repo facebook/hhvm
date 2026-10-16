@@ -1,2 +1,10 @@
-ERROR: File "await_in_splice_xhp_cond.php", line 21, characters 10-60:
-Cannot use unstable feature: `allow_conditional_await_syntax` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `allow_conditional_await_syntax` [1]
+
+await_in_splice_xhp_cond.php:21:10
+19 | 
+20 | async function f(): Awaitable<void> {
+21 |   true ? <xhp x = {ExampleDsl`${await myTestFunction2()}`}/> : false;
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 | }
+
+1 error found

@@ -1,34 +1,100 @@
-ERROR: File "case_type_subtyping.php", line 17, characters 8-11:
-Invalid argument (Typing[4110])
-  File "case_type_subtyping.php", line 6, characters 13-19:
-  Expected `CT<int>`
-  File "case_type_subtyping.php", line 17, characters 8-11:
-  But got `float`
-ERROR: File "case_type_subtyping.php", line 18, characters 8-13:
-Invalid argument (Typing[4110])
-  File "case_type_subtyping.php", line 6, characters 13-19:
-  Expected `CT<int>`
-  File "case_type_subtyping.php", line 18, characters 8-13:
-  But got `string`
-ERROR: File "case_type_subtyping.php", line 19, characters 8-16:
-Invalid argument (Typing[4110])
-  File "case_type_subtyping.php", line 6, characters 13-19:
-  Expected `CT<int>`
-  File "case_type_subtyping.php", line 19, characters 8-16:
-  But got `vec<null>`
-ERROR: File "case_type_subtyping.php", line 20, characters 8-25:
-Invalid argument (Typing[4110])
-  File "case_type_subtyping.php", line 6, characters 13-19:
-  Expected `CT<int>`
-  File "case_type_subtyping.php", line 20, characters 8-25:
-  But got `Vector<_>`
-ERROR: File "case_type_subtyping.php", line 20, characters 8-25:
-Invalid argument (Typing[4110])
-  File "case_type_subtyping.php", line 6, characters 16-18:
-  Expected `int`
-  File "case_type_subtyping.php", line 4, characters 48-48:
-    via this generic `T`
-  File "case_type_subtyping.php", line 20, characters 17-23:
-  But got `vec<int>`
-  File "case_type_subtyping.php", line 20, characters 17-23:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT<int>` [2]
+-> But got `float` [1]
+
+case_type_subtyping.php:17:8
+ 4 | case type CT<T> = int | bool | vec<T> | Vector<T>;
+ 5 | 
+ 6 | function ct(CT<int> $c): void {
+   |             ^^^^^^^ [2]
+ 7 | }
+ 8 | 
+   :
+15 | 
+16 | function bad(): void {
+17 |     ct(10.0);
+   |        ^^^^ [1]
+18 |     ct("true");
+19 |     ct(vec[null]);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT<int>` [2]
+-> But got `string` [1]
+
+case_type_subtyping.php:18:8
+ 4 | case type CT<T> = int | bool | vec<T> | Vector<T>;
+ 5 | 
+ 6 | function ct(CT<int> $c): void {
+   |             ^^^^^^^ [2]
+ 7 | }
+ 8 | 
+   :
+16 | function bad(): void {
+17 |     ct(10.0);
+18 |     ct("true");
+   |        ^^^^^^ [1]
+19 |     ct(vec[null]);
+20 |     ct(Vector { vec[10] });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT<int>` [2]
+-> But got `vec<null>` [1]
+
+case_type_subtyping.php:19:8
+ 4 | case type CT<T> = int | bool | vec<T> | Vector<T>;
+ 5 | 
+ 6 | function ct(CT<int> $c): void {
+   |             ^^^^^^^ [2]
+ 7 | }
+ 8 | 
+   :
+17 |     ct(10.0);
+18 |     ct("true");
+19 |     ct(vec[null]);
+   |        ^^^^^^^^^ [1]
+20 |     ct(Vector { vec[10] });
+21 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CT<int>` [2]
+-> But got `Vector<_>` [1]
+
+case_type_subtyping.php:20:8
+ 4 | case type CT<T> = int | bool | vec<T> | Vector<T>;
+ 5 | 
+ 6 | function ct(CT<int> $c): void {
+   |             ^^^^^^^ [2]
+ 7 | }
+ 8 | 
+   :
+18 |     ct("true");
+19 |     ct(vec[null]);
+20 |     ct(Vector { vec[10] });
+   |        ^^^^^^^^^^^^^^^^^^ [1]
+21 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `vec<int>` [4]
+-> This type argument to `Vector` must match exactly (it is invariant) [4]
+
+case_type_subtyping.php:20:8
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT<T> = int | bool | vec<T> | Vector<T>;
+   |                                                ^ [3]
+ 5 | 
+ 6 | function ct(CT<int> $c): void {
+   |                ^^^ [2]
+ 7 | }
+ 8 | 
+   :
+18 |     ct("true");
+19 |     ct(vec[null]);
+20 |     ct(Vector { vec[10] });
+   |        ^^^^^^^^^^^^^^^^^^ [1]
+   |                 ^^^^^^^ [4]
+21 | }
+
+5 errors found

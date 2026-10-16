@@ -1,18 +1,49 @@
-ERROR: File "enum_dup_intish_arraykey.php", line 8, characters 6-21:
-This enum has members `INT` and `STRING` with the same value `0`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_intish_arraykey.php", line 9, characters 3-5:
-  `INT` is declared here
-  File "enum_dup_intish_arraykey.php", line 10, characters 3-8:
-  `STRING` is declared here
-ERROR: File "enum_dup_intish_arraykey.php", line 14, characters 6-14:
-This enum has members `X` and `Y` with the same value `5`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_intish_arraykey.php", line 15, characters 3-3:
-  `X` is declared here
-  File "enum_dup_intish_arraykey.php", line 16, characters 3-3:
-  `Y` is declared here
-ERROR: File "enum_dup_intish_arraykey.php", line 22, characters 6-25:
-This enum has members `DECIMAL_STRING` and `HEX_INT` with the same value `4611686018427387904`. Duplicate enum values are not allowed. (Typing[4519])
-  File "enum_dup_intish_arraykey.php", line 24, characters 3-16:
-  `DECIMAL_STRING` is declared here
-  File "enum_dup_intish_arraykey.php", line 23, characters 3-9:
-  `HEX_INT` is declared here
+error: Typing[4519] This enum has members `INT` and `STRING` with the same value `0`. Duplicate enum values are not allowed. [1]
+-> `INT` is declared here [2]
+-> `STRING` is declared here [3]
+
+enum_dup_intish_arraykey.php:8:6
+ 6 | // canonicalizes intish strings to catch this.
+ 7 | 
+ 8 | enum DemoIntishString: arraykey {
+   |      ^^^^^^^^^^^^^^^^ [1]
+ 9 |   INT = 0;
+   |   ^^^ [2]
+10 |   STRING = '0'; // '0' coerces to int 0 -> duplicate of INT, flagged
+   |   ^^^^^^ [3]
+11 | }
+12 | 
+
+error: Typing[4519] This enum has members `X` and `Y` with the same value `5`. Duplicate enum values are not allowed. [1]
+-> `X` is declared here [2]
+-> `Y` is declared here [3]
+
+enum_dup_intish_arraykey.php:14:6
+12 | 
+13 | // Two intish strings equal to an int also collide.
+14 | enum TwoIntish: arraykey {
+   |      ^^^^^^^^^ [1]
+15 |   X = '5';
+   |   ^ [2]
+16 |   Y = 5; // 5 == '5' -> flagged
+   |   ^ [3]
+17 | }
+18 | 
+
+error: Typing[4519] This enum has members `DECIMAL_STRING` and `HEX_INT` with the same value `4611686018427387904`. Duplicate enum values are not allowed. [1]
+-> `DECIMAL_STRING` is declared here [2]
+-> `HEX_INT` is declared here [3]
+
+enum_dup_intish_arraykey.php:22:6
+20 | // decimal, so it collides with the equivalent intish string whatever spelling
+21 | // the literal uses.
+22 | enum LargeIntishCollision: arraykey {
+   |      ^^^^^^^^^^^^^^^^^^^^ [1]
+23 |   HEX_INT = 0x4000000000000000;
+   |   ^^^^^^^ [3]
+24 |   DECIMAL_STRING = '4611686018427387904'; // same value -> flagged
+   |   ^^^^^^^^^^^^^^ [2]
+25 | }
+26 | 
+
+3 errors found

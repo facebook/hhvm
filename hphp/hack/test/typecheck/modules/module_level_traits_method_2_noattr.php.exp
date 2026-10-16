@@ -1,4 +1,20 @@
-ERROR: File "module_level_traits_method_2_noattr.php--A.php", line 12, characters 9-11:
-Cannot access an internal element from module `B` in module `A` (Typing[4444])
-  File "module_level_traits_method_2_noattr.php--B.php", line 6, characters 21-23:
-  This is from module `B`
+error: Typing[4444] Cannot access an internal element from module `B` in module `A` [1]
+-> This is from module `B` [2]
+
+module_level_traits_method_2_noattr.php--A.php:12:9
+10 | public trait T {
+11 |   public function getFoo(D $d): void {
+12 |     $d->foo();
+   |         ^^^ [1]
+13 |   }
+14 | }
+
+module_level_traits_method_2_noattr.php--B.php:6:21
+ 4 | 
+ 5 | class D {
+ 6 |   internal function foo(): void { echo "foo\n"; }
+   |                     ^^^ [2]
+ 7 | }
+ 8 | 
+
+1 error found

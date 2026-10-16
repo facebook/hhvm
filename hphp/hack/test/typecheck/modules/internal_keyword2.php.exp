@@ -1,2 +1,10 @@
-ERROR: File "internal_keyword2.php--test.php", line 5, characters 10-17:
-Methods cannot have multiple visibility modifiers except for `protected internal`. (Parsing[1002])
+error: Parsing[1002] Methods cannot have multiple visibility modifiers except for `protected internal`. [1]
+
+internal_keyword2.php--test.php:5:10
+3 | module foo;
+4 | class Foo {
+5 |   public internal function bar(): void {}
+  |          ^^^^^^^^ [1]
+6 | }
+
+1 error found

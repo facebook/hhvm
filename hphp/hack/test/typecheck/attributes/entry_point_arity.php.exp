@@ -1,4 +1,19 @@
-ERROR: File "entry_point_arity.php", line 7, characters 1-61:
-Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_arity.php:3) (Parsing[1002])
-ERROR: File "entry_point_arity.php", line 8, characters 33-34:
-`__EntryPoint` functions cannot take arguments. (NastCheck[3085])
+error: Parsing[1002] Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_arity.php:3) [1]
+
+entry_point_arity.php:7:1
+5 | 
+6 | // This will fatal when we run.
+7 | <<__EntryPoint>>
+  | ^^^^^^^^^^^^^^^^ [1]
+8 | function bad_required_arg(mixed $_): void {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+error: NastCheck[3085] `__EntryPoint` functions cannot take arguments. [1]
+
+entry_point_arity.php:8:33
+6 | // This will fatal when we run.
+7 | <<__EntryPoint>>
+8 | function bad_required_arg(mixed $_): void {}
+  |                                 ^^ [1]
+
+2 errors found

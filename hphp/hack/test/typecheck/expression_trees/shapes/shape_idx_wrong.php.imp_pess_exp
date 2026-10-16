@@ -1,96 +1,399 @@
-ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 8, characters 15-43:
-  Expected `dynamic`
-  File "expr_tree.php", line 109, characters 8-32:
-  But got `ExampleExpression<_>`
-ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 8, characters 15-43:
-  Expected `~ExampleExpression<int>`
-  File "shape_idx_wrong.php", line 9, characters 21-100:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
-ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 8, characters 33-42:
-  Expected `int`
-  File "shape_idx_wrong.php", line 11, characters 12-40:
-  But got `null`
-ERROR: File "shape_idx_wrong.php", line 11, characters 37-39:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shape_idx_wrong.php", line 10, characters 10-29:
-  The field `z` is not defined in this shape
-ERROR: File "shape_idx_wrong.php", line 19, characters 37-39:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shape_idx_wrong.php", line 18, characters 10-29:
-  The field `z` is not defined in this shape
-ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 25, characters 15-43:
-  Expected `dynamic`
-  File "expr_tree.php", line 109, characters 8-32:
-  But got `ExampleExpression<_>`
-ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 25, characters 15-43:
-  Expected `~ExampleExpression<int>`
-  File "shape_idx_wrong.php", line 26, characters 21-98:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
-ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 25, characters 33-42:
-  Expected `int`
-  File "shape_idx_wrong.php", line 26, characters 21-98:
-  But got `?string` because method or function was called on dynamic or like-type
-ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 33, characters 16-44:
-  Expected `dynamic`
-  File "expr_tree.php", line 109, characters 8-32:
-  But got `ExampleExpression<_>`
-ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 33, characters 16-44:
-  Expected `~ExampleExpression<int>`
-  File "shape_idx_wrong.php", line 34, characters 21-93:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
-ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 33, characters 34-43:
-  Expected `int`
-  File "shape_idx_wrong.php", line 34, characters 21-93:
-  But got `string` because method or function was called on dynamic or like-type
-ERROR: File "shape_idx_wrong.php", line 36, characters 37-39:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shape_idx_wrong.php", line 35, characters 10-16:
-  The field `y` is not defined in this shape
-ERROR: File "shape_idx_wrong.php", line 43, characters 5-45:
-Too many positional arguments (expected 3 but got 4) (Typing[4105])
-  File "Shapes.hhi", line 41, characters 28-30:
-  Definition is here
-ERROR: File "shape_idx_wrong.php", line 46, characters 34-39:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shape_idx_wrong.php", line 49, characters 5-32:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "Shapes.hhi", line 41, characters 28-30:
-  Definition is here
-ERROR: File "shape_idx_wrong.php", line 52, characters 34-36:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shape_idx_wrong.php", line 41, characters 15-28:
-  The field `x` is not defined in this shape
-ERROR: File "shape_idx_wrong.php", line 55, characters 26-28:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 42, characters 19-24:
-  Expected `shape(?'y' => _, ...)`
-  File "expr_tree.php", line 164, characters 40-45:
-  But got `string`
-ERROR: File "shape_idx_wrong.php", line 62, characters 10-140:
-Invalid return type (Typing[4110])
-  File "shape_idx_wrong.php", line 59, characters 33-45:
-  Expected `string`
-  File "shape_idx_wrong.php", line 63, characters 24-33:
-  But got `mixed` because the field `y` may be set to any type in this shape
-  File "Shapes.hhi", line 45, characters 10-11:
-    via this generic `Tv`
-  File "expr_tree.php", line 109, characters 26-31:
-    via this generic `TInfer`
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `ExampleExpression<_>` [3]
+
+shape_idx_wrong.php:9:10
+  6 | 
+  7 | // known to not exists
+  8 | function a(): ExampleExpression<ExampleInt> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+  9 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 10 |     $x = shape('y' => 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 11 |     return ExampleDsl::shapeIdx($x, 'z');//
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 12 |   }`;
+    |   ^^ [1]
+ 13 | }
+ 14 | 
+
+expr_tree.php:109:8
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~ExampleExpression<int>` [2]
+-> But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type [3]
+
+shape_idx_wrong.php:9:10
+ 6 | 
+ 7 | // known to not exists
+ 8 | function a(): ExampleExpression<ExampleInt> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+10 |     $x = shape('y' => 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+11 |     return ExampleDsl::shapeIdx($x, 'z');//
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+12 |   }`;
+   |   ^^ [1]
+   |   ^ [3]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+shape_idx_wrong.php:9:10
+ 6 | 
+ 7 | // known to not exists
+ 8 | function a(): ExampleExpression<ExampleInt> {
+   |                                 ^^^^^^^^^^ [2]
+ 9 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+10 |     $x = shape('y' => 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |     return ExampleDsl::shapeIdx($x, 'z');//
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+12 |   }`;
+   |   ^^ [1]
+13 | }
+14 | 
+
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `z` is not defined in this shape [2]
+
+shape_idx_wrong.php:11:37
+ 8 | function a(): ExampleExpression<ExampleInt> {
+ 9 |   return ExampleDsl`{
+10 |     $x = shape('y' => 'test');
+   |          ^^^^^^^^^^^^^^^^^^^^ [2]
+11 |     return ExampleDsl::shapeIdx($x, 'z');//
+   |                                     ^^^ [1]
+12 |   }`;
+13 | }
+
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `z` is not defined in this shape [2]
+
+shape_idx_wrong.php:19:37
+16 | function b(): ExampleExpression<ExampleInt> {
+17 |   return ExampleDsl`{
+18 |     $x = shape('y' => 'test');
+   |          ^^^^^^^^^^^^^^^^^^^^ [2]
+19 |     return ExampleDsl::shapeIdx($x, 'z', 3);
+   |                                     ^^^ [1]
+20 |   }`;
+21 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `ExampleExpression<_>` [3]
+
+shape_idx_wrong.php:26:10
+ 23 | 
+ 24 | // wrong return type
+ 25 | function f(): ExampleExpression<ExampleInt> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 26 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 27 |     $x = shape('y' => 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 28 |     return ExampleDsl::shapeIdx($x, 'y');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 29 |   }`;
+    |   ^^ [1]
+ 30 | }
+ 31 | 
+
+expr_tree.php:109:8
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~ExampleExpression<int>` [2]
+-> But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type [3]
+
+shape_idx_wrong.php:26:10
+23 | 
+24 | // wrong return type
+25 | function f(): ExampleExpression<ExampleInt> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+26 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+27 |     $x = shape('y' => 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+28 |     return ExampleDsl::shapeIdx($x, 'y');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+29 |   }`;
+   |   ^^ [1]
+   |   ^ [3]
+30 | }
+31 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `?string` because method or function was called on dynamic or like-type [3]
+
+shape_idx_wrong.php:26:10
+23 | 
+24 | // wrong return type
+25 | function f(): ExampleExpression<ExampleInt> {
+   |                                 ^^^^^^^^^^ [2]
+26 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+27 |     $x = shape('y' => 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+28 |     return ExampleDsl::shapeIdx($x, 'y');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+29 |   }`;
+   |   ^^ [1]
+   |   ^ [3]
+30 | }
+31 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `ExampleExpression<_>` [3]
+
+shape_idx_wrong.php:34:10
+ 31 | 
+ 32 | // wrong return type
+ 33 | function f2(): ExampleExpression<ExampleInt> {
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 34 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 35 |     $x = shape();
+    |     ^^^^^^^^^^^^^ [1]
+ 36 |     return ExampleDsl::shapeIdx($x, 'y', 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 37 |   }`;
+    |   ^^ [1]
+ 38 | }
+ 39 | 
+
+expr_tree.php:109:8
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~ExampleExpression<int>` [2]
+-> But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type [3]
+
+shape_idx_wrong.php:34:10
+31 | 
+32 | // wrong return type
+33 | function f2(): ExampleExpression<ExampleInt> {
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+34 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+35 |     $x = shape();
+   |     ^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^ [3]
+36 |     return ExampleDsl::shapeIdx($x, 'y', 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+37 |   }`;
+   |   ^^ [1]
+   |   ^ [3]
+38 | }
+39 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` because method or function was called on dynamic or like-type [3]
+
+shape_idx_wrong.php:34:10
+31 | 
+32 | // wrong return type
+33 | function f2(): ExampleExpression<ExampleInt> {
+   |                                  ^^^^^^^^^^ [2]
+34 |   return ExampleDsl`{
+   |          ^^^^^^^^^^^^ [1]
+   |                     ^ [3]
+35 |     $x = shape();
+   |     ^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^ [3]
+36 |     return ExampleDsl::shapeIdx($x, 'y', 'test');
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+37 |   }`;
+   |   ^^ [1]
+   |   ^ [3]
+38 | }
+39 | 
+
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `y` is not defined in this shape [2]
+
+shape_idx_wrong.php:36:37
+33 | function f2(): ExampleExpression<ExampleInt> {
+34 |   return ExampleDsl`{
+35 |     $x = shape();
+   |          ^^^^^^^ [2]
+36 |     return ExampleDsl::shapeIdx($x, 'y', 'test');
+   |                                     ^^^ [1]
+37 |   }`;
+38 | }
+
+error: Typing[4105] Too many positional arguments (expected 3 but got 4) [1]
+-> Definition is here [2]
+
+shape_idx_wrong.php:43:5
+41 |   ExampleDsl`(MyExampleShape $shape) ==> {
+42 |     // Too many arguments
+43 |     ExampleDsl::shapeIdx($shape, 'x', 'y', 3);//
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+44 | 
+45 |     // Not a literal key
+
+Shapes.hhi:41:28
+39 |      */
+40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+41 |     public static function idx<Tv>(
+   |                            ^^^ [2]
+42 |       ?shape(...) $shape,
+43 |       arraykey $index,
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shape_idx_wrong.php:46:34
+44 | 
+45 |     // Not a literal key
+46 |     ExampleDsl::shapeIdx($shape, ''.'y');//
+   |                                  ^^^^^^ [1]
+47 | 
+48 |     // Too few args
+
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+shape_idx_wrong.php:49:5
+47 | 
+48 |     // Too few args
+49 |     ExampleDsl::shapeIdx($shape);//
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+50 | 
+51 |     // Non existing field
+
+Shapes.hhi:41:28
+39 |      */
+40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+41 |     public static function idx<Tv>(
+   |                            ^^^ [2]
+42 |       ?shape(...) $shape,
+43 |       arraykey $index,
+
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `x` is not defined in this shape [2]
+
+shape_idx_wrong.php:52:34
+39 | 
+40 | function g(): void {
+41 |   ExampleDsl`(MyExampleShape $shape) ==> {
+   |               ^^^^^^^^^^^^^^ [2]
+42 |     // Too many arguments
+43 |     ExampleDsl::shapeIdx($shape, 'x', 'y', 3);//
+   :
+50 | 
+51 |     // Non existing field
+52 |     ExampleDsl::shapeIdx($shape, 'x');
+   |                                  ^^^ [1]
+53 | 
+54 |     // Not a shape
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape(?'y' => _, ...)` [2]
+-> But got `string` [3]
+
+shape_idx_wrong.php:55:26
+ 53 | 
+ 54 |     // Not a shape
+ 55 |     ExampleDsl::shapeIdx('y', 'y');
+    |                          ^^^ [1]
+ 56 |   }`;
+ 57 | }
+
+Shapes.hhi:42:19
+ 40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+ 41 |     public static function idx<Tv>(
+ 42 |       ?shape(...) $shape,
+    |                   ^^^^^^ [2]
+ 43 |       arraykey $index,
+ 44 |       ?Tv $default = null,
+
+expr_tree.php:164:40
+162 |     throw new Exception();
+163 |   }
+164 |   public static function stringType(): string {
+    |                                        ^^^^^^ [3]
+165 |     throw new Exception();
+166 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `mixed` because the field `y` may be set to any type in this shape [3]
+->   via this generic `Tv` [4]
+->   via this generic `TInfer` [5]
+
+shape_idx_wrong.php:62:10
+ 57 | }
+ 58 | 
+ 59 | function j(): ExampleExpression<ExampleString> {
+    |                                 ^^^^^^^^^^^^^ [2]
+ 60 |   // open shapes are  not supported, as we can't lift the type of mixed => ExampleMixed yet,
+ 61 |   // until type unification is implemented
+ 62 |   return ExampleDsl`{
+    |          ^^^^^^^^^^^^ [1]
+ 63 |     $f = (ExampleShape<shape(...)> $shape) ==> ExampleDsl::shapeIdx($shape, 'y', 'test');
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                        ^^^^^^^^^^ [3]
+ 64 |     return $f(shape());
+    |     ^^^^^^^^^^^^^^^^^^^ [1]
+ 65 |   }`;
+    |   ^^ [1]
+ 66 | }
+
+Shapes.hhi:45:10
+ 43 |       arraykey $index,
+ 44 |       ?Tv $default = null,
+ 45 |     )[]: Tv;
+    |          ^^ [4]
+ 46 | 
+ 47 |     /**
+
+expr_tree.php:109:26
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+109 |   )[]: ExampleExpression<TInfer> {
+    |                          ^^^^^^ [5]
+110 |     return new ExprTree($pos, $metadata, $ast);
+111 |   }
+
+18 errors found

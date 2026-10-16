@@ -1,8 +1,18 @@
-ERROR: File "non_const_prop_override.php", line 9, characters 10-12:
-The property `p` has the wrong type (Typing[4341])
-  File "non_const_prop_override.php", line 9, characters 10-12:
-  Typing error
-  File "non_const_prop_override.php", line 9, characters 10-12:
-  Expected `int`
-  File "non_const_prop_override.php", line 5, characters 10-17:
-  But got `arraykey`
+error: Typing[4341] The property `p` has the wrong type [1]
+-> Typing error [1]
+-> Expected `int` [1]
+-> But got `arraykey` [2]
+
+non_const_prop_override.php:9:10
+ 3 | 
+ 4 | class A {
+ 5 |   public arraykey $p = 5;
+   |          ^^^^^^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | class B extends A {
+ 9 |   public int $p = 5; // error
+   |          ^^^ [1]
+10 | }
+
+1 error found

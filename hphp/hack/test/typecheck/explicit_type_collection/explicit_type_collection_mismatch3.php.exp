@@ -1,6 +1,14 @@
-ERROR: File "explicit_type_collection_mismatch3.php", line 4, characters 8-58:
-The values of this `dict` are incompatible (Typing[4110])
-  File "explicit_type_collection_mismatch3.php", line 4, characters 21-23:
-  Expected `int`
-  File "explicit_type_collection_mismatch3.php", line 4, characters 33-35:
-  But got `string`
+error: Typing[4110] The values of this `dict` are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+explicit_type_collection_mismatch3.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $b = dict<string, int>["6" => "6", "1" => 11, "2" => 12];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                     ^^^ [2]
+  |                                 ^^^ [3]
+5 | }
+
+1 error found

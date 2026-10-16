@@ -1,12 +1,51 @@
-ERROR: File "case_type_enum_base_type.php", line 6, characters 6-7:
-Cannot use a case type as the base type for an enum/enum class (Typing[4024])
-  File "case_type_enum_base_type.php", line 4, characters 11-15:
-  `MyInt` is declared as a case type here
-ERROR: File "case_type_enum_base_type.php", line 11, characters 6-7:
-Cannot use a case type as the base type for an enum/enum class (Typing[4024])
-  File "case_type_enum_base_type.php", line 4, characters 11-15:
-  `MyInt` is declared as a case type here
-ERROR: File "case_type_enum_base_type.php", line 16, characters 12-13:
-Cannot use a case type as the base type for an enum/enum class (Typing[4024])
-  File "case_type_enum_base_type.php", line 4, characters 11-15:
-  `MyInt` is declared as a case type here
+error: Typing[4024] Cannot use a case type as the base type for an enum/enum class [1]
+-> `MyInt` is declared as a case type here [2]
+
+case_type_enum_base_type.php:6:6
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type MyInt as int = int;
+  |           ^^^^^ [2]
+5 | 
+6 | enum E1 : int as MyInt {
+  |      ^^ [1]
+7 |   A = 1;
+8 |   B = 2;
+
+error: Typing[4024] Cannot use a case type as the base type for an enum/enum class [1]
+-> `MyInt` is declared as a case type here [2]
+
+case_type_enum_base_type.php:11:6
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type MyInt as int = int;
+   |           ^^^^^ [2]
+ 5 | 
+ 6 | enum E1 : int as MyInt {
+   :
+ 9 | }
+10 | 
+11 | enum E2 : MyInt {
+   |      ^^ [1]
+12 |   A = 1;
+13 |   B = 2;
+
+error: Typing[4024] Cannot use a case type as the base type for an enum/enum class [1]
+-> `MyInt` is declared as a case type here [2]
+
+case_type_enum_base_type.php:16:12
+ 2 | <<file:__EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type MyInt as int = int;
+   |           ^^^^^ [2]
+ 5 | 
+ 6 | enum E1 : int as MyInt {
+   :
+14 | }
+15 | 
+16 | enum class E3 : MyInt {
+   |            ^^ [1]
+17 |   MyInt A = 1;
+18 |   MyInt B = 2;
+
+3 errors found

@@ -1,6 +1,20 @@
-ERROR: File "with_tconst_bad1.php", line 12, characters 14-15:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "with_tconst_bad1.php", line 7, characters 29-29:
-  Expected `I`
-  File "with_tconst_bad1.php", line 12, characters 19-26:
-  But got `stdClass`
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `I` [2]
+-> But got `stdClass` [3]
+
+with_tconst_bad1.php:12:14
+ 5 | 
+ 6 | abstract class ALoader {
+ 7 |   abstract const type Ti as I;
+   |                             ^ [2]
+ 8 |   abstract const classname<this::Ti> I_NAME;
+ 9 | }
+10 | 
+11 | class CLoader extends ALoader {
+12 |   const type Ti = stdClass;
+   |              ^^ [1]
+   |                   ^^^^^^^^ [3]
+13 |   const classname<this::Ti> I_NAME = nameof stdClass;
+14 | }
+
+1 error found

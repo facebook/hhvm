@@ -1,4 +1,21 @@
-ERROR: File "if_func_call.php", line 7, characters 9-10:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "if_func_call.php", line 9, characters 9-10:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+if_func_call.php:7:9
+5 | function bar(bool $b): int {
+6 |   if ($b) {
+7 |     foo($x = 1);
+  |         ^^ [1]
+8 |   } else {
+9 |     foo($x = 2);
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+if_func_call.php:9:9
+ 7 |     foo($x = 1);
+ 8 |   } else {
+ 9 |     foo($x = 2);
+   |         ^^ [1]
+10 |   }
+11 |   return $x;
+
+2 errors found

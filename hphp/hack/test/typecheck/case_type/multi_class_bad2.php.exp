@@ -1,24 +1,46 @@
-ERROR: File "multi_class_bad2.php", line 4, characters 11-20:
-Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
-  File "multi_class_bad2.php", line 4, characters 24-24:
-  This is the type `C`, which includes **instances of the class C**
-  File "multi_class_bad2.php", line 4, characters 28-29:
-  It may overlap with `I1`, which includes **instances of the interface I1**
-  File "multi_class_bad2.php", line 4, characters 11-20:
-  Because it is possible for values to be both **instances of the class C** and **instances of the interface I1**, `C` and `I1` cannot be in the same case type
-ERROR: File "multi_class_bad2.php", line 4, characters 11-20:
-Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
-  File "multi_class_bad2.php", line 4, characters 24-24:
-  This is the type `C`, which includes **instances of the class C**
-  File "multi_class_bad2.php", line 4, characters 33-34:
-  It may overlap with `I2`, which includes **instances of the interface I2**
-  File "multi_class_bad2.php", line 4, characters 11-20:
-  Because it is possible for values to be both **instances of the class C** and **instances of the interface I2**, `C` and `I2` cannot be in the same case type
-ERROR: File "multi_class_bad2.php", line 4, characters 11-20:
-Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
-  File "multi_class_bad2.php", line 4, characters 28-29:
-  This is the type `I1`, which includes **instances of the interface I1**
-  File "multi_class_bad2.php", line 4, characters 33-34:
-  It may overlap with `I2`, which includes **instances of the interface I2**
-  File "multi_class_bad2.php", line 4, characters 11-20:
-  Because it is possible for values to be both **instances of the interface I1** and **instances of the interface I2**, `I1` and `I2` cannot be in the same case type
+error: Typing[4475] Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag [1]
+-> This is the type `C`, which includes **instances of the class C** [2]
+-> It may overlap with `I1`, which includes **instances of the interface I1** [3]
+-> Because it is possible for values to be both **instances of the class C** and **instances of the interface I1**, `C` and `I1` cannot be in the same case type [1]
+
+multi_class_bad2.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type MultiClass = C | I1 | I2;
+  |           ^^^^^^^^^^ [1]
+  |                        ^ [2]
+  |                            ^^ [3]
+5 | 
+6 | class C {
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag [1]
+-> This is the type `C`, which includes **instances of the class C** [2]
+-> It may overlap with `I2`, which includes **instances of the interface I2** [3]
+-> Because it is possible for values to be both **instances of the class C** and **instances of the interface I2**, `C` and `I2` cannot be in the same case type [1]
+
+multi_class_bad2.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type MultiClass = C | I1 | I2;
+  |           ^^^^^^^^^^ [1]
+  |                        ^ [2]
+  |                                 ^^ [3]
+5 | 
+6 | class C {
+
+error: Typing[4475] Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag [1]
+-> This is the type `I1`, which includes **instances of the interface I1** [2]
+-> It may overlap with `I2`, which includes **instances of the interface I2** [3]
+-> Because it is possible for values to be both **instances of the interface I1** and **instances of the interface I2**, `I1` and `I2` cannot be in the same case type [1]
+
+multi_class_bad2.php:4:11
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | case type MultiClass = C | I1 | I2;
+  |           ^^^^^^^^^^ [1]
+  |                            ^^ [2]
+  |                                 ^^ [3]
+5 | 
+6 | class C {
+
+3 errors found

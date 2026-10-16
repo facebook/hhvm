@@ -1,2 +1,11 @@
-ERROR: File "lambda_called_on_pair_bad.php", line 3, characters 19-21:
-Tuple elements can only be accessed with an integer literal (Typing[4116])
+error: Typing[4116] Tuple elements can only be accessed with an integer literal [1]
+
+lambda_called_on_pair_bad.php:3:19
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v["a"]);
+  |                   ^^^ [1]
+4 |   $f(Pair {"a", "b"});
+5 | }
+
+1 error found

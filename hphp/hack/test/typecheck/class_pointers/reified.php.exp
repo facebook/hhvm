@@ -1,48 +1,182 @@
-ERROR: File "reified.php", line 11, characters 7-14:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 7, characters 19-26:
-  This is a class pointer type, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 12, characters 7-15:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 8, characters 20-31:
-  This is a classname, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 19, characters 5-12:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 19, characters 5-12:
-  This is a class pointer type, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 20, characters 5-16:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 20, characters 5-16:
-  This is a classname, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 22, characters 5-9:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 7, characters 19-26:
-  This is a class pointer type, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 23, characters 5-10:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 8, characters 20-31:
-  This is a classname, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 25, characters 5-6:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 3, characters 11-18:
-  This is a class pointer type, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
-ERROR: File "reified.php", line 26, characters 5-7:
-Invalid reified hint (Typing[4305])
-  File "reified.php", line 4, characters 12-23:
-  This is a classname, it cannot be used as a reified type argument
-  File "reified.php", line 16, characters 18-18:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is a class pointer type, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified.php:11:7
+ 5 | 
+ 6 | class C {
+ 7 |   const type Tc = class<C>;
+   |                   ^^^^^^^^ [2]
+ 8 |   const type Tcn = classname<C>;
+ 9 | 
+10 |   public function m(): void {
+11 |     f<this::Tc>();
+   |       ^^^^^^^^ [1]
+12 |     f<this::Tcn>();
+13 |   }
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [3]
+17 | 
+18 | function g(): void {
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified.php:12:7
+ 6 | class C {
+ 7 |   const type Tc = class<C>;
+ 8 |   const type Tcn = classname<C>;
+   |                    ^^^^^^^^^^^^ [2]
+ 9 | 
+10 |   public function m(): void {
+11 |     f<this::Tc>();
+12 |     f<this::Tcn>();
+   |       ^^^^^^^^^ [1]
+13 |   }
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [3]
+17 | 
+18 | function g(): void {
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a class pointer type, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+reified.php:19:5
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [2]
+17 | 
+18 | function g(): void {
+19 |   f<class<C>>();
+   |     ^^^^^^^^ [1]
+20 |   f<classname<C>>();
+21 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+reified.php:20:5
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [2]
+17 | 
+18 | function g(): void {
+19 |   f<class<C>>();
+20 |   f<classname<C>>();
+   |     ^^^^^^^^^^^^ [1]
+21 | 
+22 |   f<C::Tc>();
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a class pointer type, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified.php:22:5
+ 5 | 
+ 6 | class C {
+ 7 |   const type Tc = class<C>;
+   |                   ^^^^^^^^ [2]
+ 8 |   const type Tcn = classname<C>;
+ 9 | 
+   :
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [3]
+17 | 
+18 | function g(): void {
+19 |   f<class<C>>();
+20 |   f<classname<C>>();
+21 | 
+22 |   f<C::Tc>();
+   |     ^^^^^ [1]
+23 |   f<C::Tcn>();
+24 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified.php:23:5
+ 6 | class C {
+ 7 |   const type Tc = class<C>;
+ 8 |   const type Tcn = classname<C>;
+   |                    ^^^^^^^^^^^^ [2]
+ 9 | 
+10 |   public function m(): void {
+   :
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [3]
+17 | 
+18 | function g(): void {
+   :
+21 | 
+22 |   f<C::Tc>();
+23 |   f<C::Tcn>();
+   |     ^^^^^^ [1]
+24 | 
+25 |   f<Tc>();
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a class pointer type, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified.php:25:5
+ 1 | <?hh
+ 2 | 
+ 3 | type Tc = class<C>;
+   |           ^^^^^^^^ [2]
+ 4 | type Tcn = classname<C>;
+ 5 | 
+   :
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [3]
+17 | 
+18 | function g(): void {
+   :
+23 |   f<C::Tcn>();
+24 | 
+25 |   f<Tc>();
+   |     ^^ [1]
+26 |   f<Tcn>();
+27 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reified.php:26:5
+ 2 | 
+ 3 | type Tc = class<C>;
+ 4 | type Tcn = classname<C>;
+   |            ^^^^^^^^^^^^ [2]
+ 5 | 
+ 6 | class C {
+   :
+14 | }
+15 | 
+16 | function f<reify T>(): void {}
+   |                  ^ [3]
+17 | 
+18 | function g(): void {
+   :
+24 | 
+25 |   f<Tc>();
+26 |   f<Tcn>();
+   |     ^^^ [1]
+27 | }
+
+8 errors found

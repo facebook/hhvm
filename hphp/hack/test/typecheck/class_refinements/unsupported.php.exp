@@ -1,16 +1,54 @@
-ERROR: File "unsupported.php", line 14, characters 41-62:
-Invalid type hint (Typing[4469])
-  File "unsupported.php", line 14, characters 41-62:
-  Unsupported refinement, only class types can be refined
-ERROR: File "unsupported.php", line 26, characters 24-48:
-Invalid type hint (Typing[4469])
-  File "unsupported.php", line 26, characters 24-48:
-  Unsupported refinement, only class types can be refined
-ERROR: File "unsupported.php", line 26, characters 24-48:
-Unsupported refinement, only class types can be refined (Typing[4469])
-ERROR: File "unsupported.php", line 32, characters 23-47:
-Invalid type hint (Typing[4469])
-  File "unsupported.php", line 32, characters 23-47:
-  Unsupported refinement, only class types can be refined
-ERROR: File "unsupported.php", line 32, characters 23-47:
-Unsupported refinement, only class types can be refined (Typing[4469])
+error: Typing[4469] Invalid type hint [1]
+-> Unsupported refinement, only class types can be refined [1]
+
+unsupported.php:14:41
+12 | }
+13 | 
+14 | function unsupported_root<Ta as Box, T>(Ta with { type T = T } $b): T {
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   while (true) {
+16 |   }
+
+error: Typing[4469] Invalid type hint [1]
+-> Unsupported refinement, only class types can be refined [1]
+
+unsupported.php:26:24
+24 |   public static function subOuterRefinement<T0, TBox0>(
+25 |     Covariant<TBox0> $cov_box,
+26 |   ): T0 where TBox0 as TBox with { type T = T0 } { // unsupported in Hack
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |     return $cov_box->unwrap()->get(); // ERROR: `TBox0` doesn't have `get`
+28 |   } // NOTE: ^ works in Scala, but we disallow `with` on generics by design
+
+error: Typing[4469] Unsupported refinement, only class types can be refined [1]
+
+unsupported.php:26:24
+24 |   public static function subOuterRefinement<T0, TBox0>(
+25 |     Covariant<TBox0> $cov_box,
+26 |   ): T0 where TBox0 as TBox with { type T = T0 } { // unsupported in Hack
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |     return $cov_box->unwrap()->get(); // ERROR: `TBox0` doesn't have `get`
+28 |   } // NOTE: ^ works in Scala, but we disallow `with` on generics by design
+
+error: Typing[4469] Invalid type hint [1]
+-> Unsupported refinement, only class types can be refined [1]
+
+unsupported.php:32:23
+30 |   public static function eqOuterRefinement<T0, TBox0>(
+31 |     Covariant<TBox0> $cov_box,
+32 |   ): T0 where TBox0 = TBox with { type T = T0 } { // unsupported in Hack
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+33 |     return $cov_box->unwrap()->get(); // ERROR: `TBox0` doesn't have `get`
+34 |   } // NOTE: ^ works in Scala, but we disallow `with` on generics by design
+
+error: Typing[4469] Unsupported refinement, only class types can be refined [1]
+
+unsupported.php:32:23
+30 |   public static function eqOuterRefinement<T0, TBox0>(
+31 |     Covariant<TBox0> $cov_box,
+32 |   ): T0 where TBox0 = TBox with { type T = T0 } { // unsupported in Hack
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+33 |     return $cov_box->unwrap()->get(); // ERROR: `TBox0` doesn't have `get`
+34 |   } // NOTE: ^ works in Scala, but we disallow `with` on generics by design
+
+5 errors found

@@ -1,6 +1,13 @@
-ERROR: File "explicit_type_collection_mismatch1.php", line 4, characters 12-14:
-Wrong type hint (Typing[4110])
-  File "explicit_type_collection_mismatch1.php", line 4, characters 12-14:
-  Expected `int`
-  File "explicit_type_collection_mismatch1.php", line 4, characters 17-21:
-  But got `string`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `string` [2]
+
+explicit_type_collection_mismatch1.php:4:12
+2 | 
+3 | function f(): void {
+4 |   $a = vec<int>["foo"];
+  |            ^^^ [1]
+  |                 ^^^^^ [2]
+5 | }
+
+1 error found

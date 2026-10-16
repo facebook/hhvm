@@ -1,12 +1,43 @@
-ERROR: File "vec3.php", line 5, characters 15-16:
-Invalid argument (Typing[4110])
-  File "vec3.php", line 11, characters 23-32:
-  Expected `vec<mixed>`
-  File "vec3.php", line 3, characters 12-28:
-  But got `Container<string>`
-ERROR: File "vec3.php", line 6, characters 15-16:
-Invalid argument (Typing[4110])
-  File "vec3.php", line 12, characters 23-33:
-  Expected `vec<string>`
-  File "vec3.php", line 3, characters 12-28:
-  But got `Container<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<mixed>` [2]
+-> But got `Container<string>` [3]
+
+vec3.php:5:15
+ 1 | <?hh
+ 2 | 
+ 3 | function f(Container<string> $x): void {
+   |            ^^^^^^^^^^^^^^^^^ [3]
+ 4 |   $y = $x ?as vec<_>;
+ 5 |   expect_vec1($x); // error
+   |               ^^ [1]
+ 6 |   expect_vec2($x); // error
+ 7 |   expect_vec1($y); // ok
+ 8 |   expect_vec2($y); // ok
+ 9 | }
+10 | 
+11 | function expect_vec1(?vec<mixed> $vec): void {}
+   |                       ^^^^^^^^^^ [2]
+12 | function expect_vec2(?vec<string> $vec): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<string>` [2]
+-> But got `Container<string>` [3]
+
+vec3.php:6:15
+ 1 | <?hh
+ 2 | 
+ 3 | function f(Container<string> $x): void {
+   |            ^^^^^^^^^^^^^^^^^ [3]
+ 4 |   $y = $x ?as vec<_>;
+ 5 |   expect_vec1($x); // error
+ 6 |   expect_vec2($x); // error
+   |               ^^ [1]
+ 7 |   expect_vec1($y); // ok
+ 8 |   expect_vec2($y); // ok
+ 9 | }
+10 | 
+11 | function expect_vec1(?vec<mixed> $vec): void {}
+12 | function expect_vec2(?vec<string> $vec): void {}
+   |                       ^^^^^^^^^^^ [2]
+
+2 errors found

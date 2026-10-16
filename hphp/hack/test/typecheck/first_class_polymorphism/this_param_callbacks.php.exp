@@ -1,20 +1,90 @@
-ERROR: File "this_param_callbacks.php", line 45, characters 14-26:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_callbacks.php", line 17, characters 24-25:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_callbacks.php", line 45, characters 14-26:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_callbacks.php", line 18, characters 24-25:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_callbacks.php", line 46, characters 14-26:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_callbacks.php", line 30, characters 46-47:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_callbacks.php", line 46, characters 14-26:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_callbacks.php", line 31, characters 46-47:
-  a value of type `this` can be obtained from this parameter
-ERROR: File "this_param_callbacks.php", line 47, characters 33-43:
-Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` (Typing[4517])
-  File "this_param_callbacks.php", line 37, characters 48-49:
-  a value of type `this` can be obtained from this parameter
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_callbacks.php:45:14
+15 |   // (function(): this): contra . cov = contravariant; obtainable=2 -> ERROR
+16 |   public static function s_returns_two(
+17 |     (function(): this) $_,
+   |                        ^^ [2]
+18 |     (function(): this) $_,
+19 |   ): void {}
+   :
+43 |   $ok3 = meth_caller(A::class, 'i_accepts');
+44 | 
+45 |   $bad1 = A::s_returns_two<>;
+   |              ^^^^^^^^^^^^^ [1]
+46 |   $bad2 = A::s_deep_unsafe<>;
+47 |   $bad3 = meth_caller(A::class, 'i_returns');
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_callbacks.php:45:14
+16 |   public static function s_returns_two(
+17 |     (function(): this) $_,
+18 |     (function(): this) $_,
+   |                        ^^ [2]
+19 |   ): void {}
+20 | 
+   :
+43 |   $ok3 = meth_caller(A::class, 'i_accepts');
+44 | 
+45 |   $bad1 = A::s_returns_two<>;
+   |              ^^^^^^^^^^^^^ [1]
+46 |   $bad2 = A::s_deep_unsafe<>;
+47 |   $bad3 = meth_caller(A::class, 'i_returns');
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_callbacks.php:46:14
+28 |   // obtainable=2 -> ERROR
+29 |   public static function s_deep_unsafe(
+30 |     (function((function(this): void)): void) $_,
+   |                                              ^^ [2]
+31 |     (function((function(this): void)): void) $_,
+32 |   ): void {}
+   :
+44 | 
+45 |   $bad1 = A::s_returns_two<>;
+46 |   $bad2 = A::s_deep_unsafe<>;
+   |              ^^^^^^^^^^^^^ [1]
+47 |   $bad3 = meth_caller(A::class, 'i_returns');
+48 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_callbacks.php:46:14
+29 |   public static function s_deep_unsafe(
+30 |     (function((function(this): void)): void) $_,
+31 |     (function((function(this): void)): void) $_,
+   |                                              ^^ [2]
+32 |   ): void {}
+33 | 
+   :
+44 | 
+45 |   $bad1 = A::s_returns_two<>;
+46 |   $bad2 = A::s_deep_unsafe<>;
+   |              ^^^^^^^^^^^^^ [1]
+47 |   $bad3 = meth_caller(A::class, 'i_returns');
+48 | }
+
+error: Typing[4517] Cannot take a pointer to this method because a value of type `this` can be obtained from two or more of its parameters (counting the implicit receiver of an instance method), so the function pointer could be used to relate two unrelated subtypes of `this` [1]
+-> a value of type `this` can be obtained from this parameter [2]
+
+this_param_callbacks.php:47:33
+35 |   public function i_accepts((function(this): void) $_): void {}
+36 |   // instance receiver(1) + returns(1) = 2 -> ERROR
+37 |   public function i_returns((function(): this) $_): void {}
+   |                                                ^^ [2]
+38 | }
+39 | 
+   :
+45 |   $bad1 = A::s_returns_two<>;
+46 |   $bad2 = A::s_deep_unsafe<>;
+47 |   $bad3 = meth_caller(A::class, 'i_returns');
+   |                                 ^^^^^^^^^^^ [1]
+48 | }
+
+5 errors found

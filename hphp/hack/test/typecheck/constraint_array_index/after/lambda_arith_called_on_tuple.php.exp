@@ -1,2 +1,11 @@
-ERROR: File "lambda_arith_called_on_tuple.php", line 3, characters 19-21:
-Tuple elements can only be accessed with an integer literal (Typing[4116])
+error: Typing[4116] Tuple elements can only be accessed with an integer literal [1]
+
+lambda_arith_called_on_tuple.php:3:19
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v[0+0]);
+  |                   ^^^ [1]
+4 |   $f(tuple(0));
+5 | }
+
+1 error found

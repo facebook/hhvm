@@ -1,48 +1,151 @@
-ERROR: File "unpack_call13_arity.php", line 14, characters 20-26:
-Invalid argument (Typing[4105])
-  File "unpack_call13_arity.php", line 14, characters 20-26:
-  Too many positional arguments (expected 1 but got 2)
-  File "unpack_call13_arity.php", line 36, characters 10-22:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 15, characters 23-29:
-Invalid argument (Typing[4105])
-  File "unpack_call13_arity.php", line 15, characters 23-29:
-  Too many positional arguments (expected 2 but got 3)
-  File "unpack_call13_arity.php", line 37, characters 10-22:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 16, characters 23-29:
-Invalid argument (Typing[4104])
-  File "unpack_call13_arity.php", line 16, characters 23-29:
-  Too few positional arguments (required 3 but got 2)
-  File "unpack_call13_arity.php", line 42, characters 10-25:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 27, characters 20-24:
-Invalid argument (Typing[4359])
-  File "unpack_call13_arity.php", line 27, characters 20-24:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call13_arity.php", line 36, characters 10-22:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 28, characters 23-27:
-Invalid argument (Typing[4359])
-  File "unpack_call13_arity.php", line 28, characters 23-27:
-  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-  File "unpack_call13_arity.php", line 36, characters 10-22:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 29, characters 20-24:
-Invalid argument (Typing[4359])
-  File "unpack_call13_arity.php", line 29, characters 20-24:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call13_arity.php", line 37, characters 10-22:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 30, characters 23-27:
-Invalid argument (Typing[4359])
-  File "unpack_call13_arity.php", line 30, characters 23-27:
-  An array cannot be unpacked into the required arguments of a function
-  File "unpack_call13_arity.php", line 37, characters 10-22:
-  Definition is here
-ERROR: File "unpack_call13_arity.php", line 31, characters 26-30:
-Invalid argument (Typing[4359])
-  File "unpack_call13_arity.php", line 31, characters 26-30:
-  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-  File "unpack_call13_arity.php", line 37, characters 10-22:
-  Definition is here
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:14:20
+12 | 
+13 |   // Errors
+14 |   expect_const1(...$tuple2);
+   |                    ^^^^^^^ [1]
+15 |   expect_const2(0, ...$tuple2);
+16 |   expect_variadic3(...$tuple2);
+   :
+34 | type M = mixed;
+35 | 
+36 | function expect_const1(M $a): void {}
+   |          ^^^^^^^^^^^^^ [2]
+37 | function expect_const2(M $a, M $b): void {}
+38 | function expect_const3(M $a, M $b, M $c): void {}
+
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:15:23
+13 |   // Errors
+14 |   expect_const1(...$tuple2);
+15 |   expect_const2(0, ...$tuple2);
+   |                       ^^^^^^^ [1]
+16 |   expect_variadic3(...$tuple2);
+17 | 
+   :
+35 | 
+36 | function expect_const1(M $a): void {}
+37 | function expect_const2(M $a, M $b): void {}
+   |          ^^^^^^^^^^^^^ [2]
+38 | function expect_const3(M $a, M $b, M $c): void {}
+39 | function expect_variadic0(M ...$as): void {}
+
+error: Typing[4104] Invalid argument [1]
+-> Too few positional arguments (required 3 but got 2) [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:16:23
+14 |   expect_const1(...$tuple2);
+15 |   expect_const2(0, ...$tuple2);
+16 |   expect_variadic3(...$tuple2);
+   |                       ^^^^^^^ [1]
+17 | 
+18 |   $vec2 = vec[1, 2];
+   :
+40 | function expect_variadic1(M $a, M ...$bs): void {}
+41 | function expect_variadic2(M $a, M $b, M ...$cs): void {}
+42 | function expect_variadic3(M $a, M $b, M $c, M...$ds): void {}
+   |          ^^^^^^^^^^^^^^^^ [2]
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:27:20
+25 | 
+26 |   // Errors
+27 |   expect_const1(...$vec2);
+   |                    ^^^^^ [1]
+28 |   expect_const1(0, ...$vec2);
+29 |   expect_const2(...$vec2);
+   :
+34 | type M = mixed;
+35 | 
+36 | function expect_const1(M $a): void {}
+   |          ^^^^^^^^^^^^^ [2]
+37 | function expect_const2(M $a, M $b): void {}
+38 | function expect_const3(M $a, M $b, M $c): void {}
+
+error: Typing[4359] Invalid argument [1]
+-> A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:28:23
+26 |   // Errors
+27 |   expect_const1(...$vec2);
+28 |   expect_const1(0, ...$vec2);
+   |                       ^^^^^ [1]
+29 |   expect_const2(...$vec2);
+30 |   expect_const2(0, ...$vec2);
+   :
+34 | type M = mixed;
+35 | 
+36 | function expect_const1(M $a): void {}
+   |          ^^^^^^^^^^^^^ [2]
+37 | function expect_const2(M $a, M $b): void {}
+38 | function expect_const3(M $a, M $b, M $c): void {}
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:29:20
+27 |   expect_const1(...$vec2);
+28 |   expect_const1(0, ...$vec2);
+29 |   expect_const2(...$vec2);
+   |                    ^^^^^ [1]
+30 |   expect_const2(0, ...$vec2);
+31 |   expect_const2(0, 1, ...$vec2);
+   :
+35 | 
+36 | function expect_const1(M $a): void {}
+37 | function expect_const2(M $a, M $b): void {}
+   |          ^^^^^^^^^^^^^ [2]
+38 | function expect_const3(M $a, M $b, M $c): void {}
+39 | function expect_variadic0(M ...$as): void {}
+
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:30:23
+28 |   expect_const1(0, ...$vec2);
+29 |   expect_const2(...$vec2);
+30 |   expect_const2(0, ...$vec2);
+   |                       ^^^^^ [1]
+31 |   expect_const2(0, 1, ...$vec2);
+32 | }
+   :
+35 | 
+36 | function expect_const1(M $a): void {}
+37 | function expect_const2(M $a, M $b): void {}
+   |          ^^^^^^^^^^^^^ [2]
+38 | function expect_const3(M $a, M $b, M $c): void {}
+39 | function expect_variadic0(M ...$as): void {}
+
+error: Typing[4359] Invalid argument [1]
+-> A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array [1]
+-> Definition is here [2]
+
+unpack_call13_arity.php:31:26
+29 |   expect_const2(...$vec2);
+30 |   expect_const2(0, ...$vec2);
+31 |   expect_const2(0, 1, ...$vec2);
+   |                          ^^^^^ [1]
+32 | }
+33 | 
+34 | type M = mixed;
+35 | 
+36 | function expect_const1(M $a): void {}
+37 | function expect_const2(M $a, M $b): void {}
+   |          ^^^^^^^^^^^^^ [2]
+38 | function expect_const3(M $a, M $b, M $c): void {}
+39 | function expect_variadic0(M ...$as): void {}
+
+8 errors found

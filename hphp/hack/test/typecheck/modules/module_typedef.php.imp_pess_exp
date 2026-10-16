@@ -1,36 +1,153 @@
-WARN: File "module_typedef.php--A.php", line 26, characters 8-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-WARN: File "module_typedef.php--A.php", line 30, characters 8-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-ERROR: File "module_typedef.php--A.php", line 14, characters 21-22:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_typedef.php--A.php", line 7, characters 15-16:
-  It is declared as `internal` here
-ERROR: File "module_typedef.php--A.php", line 18, characters 21-25:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "module_typedef.php--A.php", line 9, characters 18-22:
-  It is declared as `internal` here
-ERROR: File "module_typedef.php--B.php", line 7, characters 12-13:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_typedef.php--A.php", line 7, characters 15-16:
-  This is from module `A`
-ERROR: File "module_typedef.php--B.php", line 9, characters 16-20:
-Cannot access an internal element from module `A` in module `B` (Typing[4444])
-  File "module_typedef.php--A.php", line 9, characters 18-22:
-  This is from module `A`
-ERROR: File "module_typedef.php--no-module.php", line 3, characters 12-13:
-Cannot access an internal element from module `A` in the default module (Typing[4444])
-  File "module_typedef.php--A.php", line 7, characters 15-16:
-  This is from module `A`
-ERROR: File "module_typedef.php--no-module.php", line 5, characters 16-20:
-Cannot access an internal element from module `A` in the default module (Typing[4444])
-  File "module_typedef.php--A.php", line 9, characters 18-22:
-  This is from module `A`
-ERROR: File "module_typedef.php--still-A.php", line 6, characters 8-9:
-Typing error (Typing[4429])
-  File "module_typedef.php--still-A.php", line 6, characters 8-13:
-  Expected `num` because this is used in an arithmetic operation
-  File "module_typedef.php--still-A.php", line 4, characters 29-33:
-  But got `mixed`
-  File "module_typedef.php--A.php", line 9, characters 18-22:
-    by the definition of `TyNew`
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+module_typedef.php--A.php:26:8
+24 | 
+25 | function f(): void {
+26 |   $x = 1 as Ty; // ok
+   |        ^^^^^^^ [1]
+27 | }
+28 | 
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+module_typedef.php--A.php:30:8
+28 | 
+29 | function g(): void {
+30 |   $x = 1 as TyNew; // ok
+   |        ^^^^^^^^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_typedef.php--A.php:14:21
+ 5 | module A;
+ 6 | 
+ 7 | internal type Ty = int;
+   |               ^^ [2]
+ 8 | 
+ 9 | internal newtype TyNew = int;
+   :
+12 | 
+13 | class A {
+14 |   public function a(Ty $x): void {} // error
+   |                     ^^ [1]
+15 | 
+16 |   internal function b(Ty $x): void {} // ok
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+module_typedef.php--A.php:18:21
+ 7 | internal type Ty = int;
+ 8 | 
+ 9 | internal newtype TyNew = int;
+   |                  ^^^^^ [2]
+10 | 
+11 | // In Signatures
+   :
+16 |   internal function b(Ty $x): void {} // ok
+17 | 
+18 |   public function c(TyNew $x): void {} // error
+   |                     ^^^^^ [1]
+19 | 
+20 |   internal function d(TyNew $x): void {} // ok
+
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_typedef.php--B.php:7:12
+5 | module B;
+6 | 
+7 | function h(Ty $x): void {} // error
+  |            ^^ [1]
+8 | 
+9 | function h_new(TyNew $x): void {} // error
+
+module_typedef.php--A.php:7:15
+5 | module A;
+6 | 
+7 | internal type Ty = int;
+  |               ^^ [2]
+8 | 
+9 | internal newtype TyNew = int;
+
+error: Typing[4444] Cannot access an internal element from module `A` in module `B` [1]
+-> This is from module `A` [2]
+
+module_typedef.php--B.php:9:16
+ 7 | function h(Ty $x): void {} // error
+ 8 | 
+ 9 | function h_new(TyNew $x): void {} // error
+   |                ^^^^^ [1]
+
+module_typedef.php--A.php:9:18
+ 7 | internal type Ty = int;
+ 8 | 
+ 9 | internal newtype TyNew = int;
+   |                  ^^^^^ [2]
+10 | 
+11 | // In Signatures
+
+error: Typing[4444] Cannot access an internal element from module `A` in the default module [1]
+-> This is from module `A` [2]
+
+module_typedef.php--no-module.php:3:12
+1 | <?hh
+2 | 
+3 | function j(Ty $x): void {} // error
+  |            ^^ [1]
+4 | 
+5 | function j_new(TyNew $x): void {} // error
+
+module_typedef.php--A.php:7:15
+5 | module A;
+6 | 
+7 | internal type Ty = int;
+  |               ^^ [2]
+8 | 
+9 | internal newtype TyNew = int;
+
+error: Typing[4444] Cannot access an internal element from module `A` in the default module [1]
+-> This is from module `A` [2]
+
+module_typedef.php--no-module.php:5:16
+ 3 | function j(Ty $x): void {} // error
+ 4 | 
+ 5 | function j_new(TyNew $x): void {} // error
+   |                ^^^^^ [1]
+
+module_typedef.php--A.php:9:18
+ 7 | internal type Ty = int;
+ 8 | 
+ 9 | internal newtype TyNew = int;
+   |                  ^^^^^ [2]
+10 | 
+11 | // In Signatures
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `mixed` [3]
+->   by the definition of `TyNew` [4]
+
+module_typedef.php--still-A.php:6:8
+ 2 | 
+ 3 | module A;
+ 4 | internal function k2(Ty $x, TyNew $y): void {
+   |                             ^^^^^ [3]
+ 5 |   $z = $x + 5; // ok
+ 6 |   $z = $y + 6; // error, opaque outside of file level type alias
+   |        ^^ [1]
+   |        ^^^^^^ [2]
+ 7 | }
+
+module_typedef.php--A.php:9:18
+ 7 | internal type Ty = int;
+ 8 | 
+ 9 | internal newtype TyNew = int;
+   |                  ^^^^^ [4]
+10 | 
+11 | // In Signatures
+
+9 errors found

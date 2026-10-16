@@ -1,6 +1,30 @@
-ERROR: File "type-alias-bad.php", line 8, characters 3-27:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-alias-bad.php", line 11, characters 17-44:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-alias-bad.php", line 12, characters 22-47:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-alias-bad.php:8:3
+ 6 | 
+ 7 | type TBad =
+ 8 |   Box with { type T = int }; // ERROR (refinements only allowed under flag)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | 
+10 | type TBadNested = shape(
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-alias-bad.php:11:17
+ 9 | 
+10 | type TBadNested = shape(
+11 |   'in_shape' => Box with { type T = string }, // ERROR
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   'in_tparam' => vec<Box with { type T = bool }>, // ERROR
+13 | );
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-alias-bad.php:12:22
+10 | type TBadNested = shape(
+11 |   'in_shape' => Box with { type T = string }, // ERROR
+12 |   'in_tparam' => vec<Box with { type T = bool }>, // ERROR
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | );
+
+3 errors found

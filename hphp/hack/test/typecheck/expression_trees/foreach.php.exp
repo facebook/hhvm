@@ -1,2 +1,15 @@
-ERROR: File "foreach.php", line 8, characters 5-50:
-Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
+error: Parsing[1002] Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. [1]
+
+foreach.php:8:5
+ 6 |   ExampleDsl`(vec<int> $vi) ==> {
+ 7 |     $x = 0;
+ 8 |     foreach($vi as $i) {
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |       $x = $x + $i;
+   |       ^^^^^^^^^^^^^ [1]
+10 |     }
+   |     ^ [1]
+11 |   }`;
+12 | }
+
+1 error found

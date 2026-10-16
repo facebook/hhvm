@@ -1,4 +1,18 @@
-ERROR: File "bad_shape.php", line 13, characters 38-39:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "bad_shape.php", line 7, characters 16-18:
-  This is an object of type Bar
+error: Typing[4149] Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize [1]
+-> This is an object of type Bar [2]
+
+bad_shape.php:13:38
+ 5 | type MyShape = shape(
+ 6 |   'first' => ?float,
+ 7 |   'second' => ?Bar,
+   |                ^^^ [2]
+ 8 |   'third' => ?string,
+ 9 | );
+10 | 
+11 | class Foo {
+12 |   <<__Memoize>>
+13 |   public function someMethod(MyShape $i): void {}
+   |                                      ^^ [1]
+14 | }
+
+1 error found

@@ -1,10 +1,28 @@
-ERROR: File "covariance_static_function_bad.php", line 7, characters 30-30:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "covariance_static_function_bad.php", line 6, characters 12-12:
-  This is where the parameter was declared as covariant `+`
-  File "covariance_static_function_bad.php", line 7, characters 30-30:
-  Function parameters are contravariant
-ERROR: File "covariance_static_function_bad.php", line 21, characters 5-6:
-It is no longer allowed to use a `classname<Cov<Base>>` in this position. Please use a `class<Cov<Base>>` instead. (Typing[4482])
-  File "covariance_static_function_bad.php", line 20, characters 30-49:
-  Definition is here
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> Function parameters are contravariant [1]
+
+covariance_static_function_bad.php:7:30
+4 |   public function __construct(public int $v) {}
+5 | }
+6 | class Cov<+T> {
+  |            ^ [2]
+7 |   public static function foo(T $v): void {}
+  |                              ^ [1]
+8 | }
+9 | class Concrete extends Cov<Derived> {
+
+error: Typing[4482] It is no longer allowed to use a `classname<Cov<Base>>` in this position. Please use a `class<Cov<Base>>` instead. [1]
+-> Definition is here [2]
+
+covariance_static_function_bad.php:21:5
+18 |     self::bar($z);
+19 |   }
+20 |   public static function bar(classname<Cov<Base>> $y): void {
+   |                              ^^^^^^^^^^^^^^^^^^^^ [2]
+21 |     $y::foo(new Base()); // Concrete::foo tries to coax an `int $v` out of Base!
+   |     ^^ [1]
+22 |     // It's not very effective.
+23 |   }
+
+2 errors found

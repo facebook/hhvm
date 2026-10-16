@@ -1,16 +1,40 @@
-ERROR: File "apply_toplevel_poly_uninstantiable_where.php", line 9, characters 8-12:
-Typing error (Typing[4110])
-  File "apply_toplevel_poly_uninstantiable_where.php", line 5, characters 11-13:
-  Expected `int`
-  File "apply_toplevel_poly_uninstantiable_where.php", line 5, characters 3-6:
-  But got `bool`
-ERROR: File "apply_toplevel_poly_uninstantiable_where.php", line 10, characters 6-6:
-Invalid argument (Typing[4323])
-  File "apply_toplevel_poly_uninstantiable_where.php", line 3, characters 27-28:
-  `T2` is a constrained type parameter
-  File "apply_toplevel_poly_uninstantiable_where.php", line 3, characters 33-38:
-  This type constraint is violated
-  File "apply_toplevel_poly_uninstantiable_where.php", line 3, characters 33-38:
-  Expected `string`
-  File "apply_toplevel_poly_uninstantiable_where.php", line 10, characters 6-6:
-  But got `int`
+error: Typing[4110] Typing error [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+apply_toplevel_poly_uninstantiable_where.php:9:8
+ 3 | function never<T1 as int, T2 as string>(T1 $_, T2 $_): void
+ 4 | where
+ 5 |   bool as int,
+   |   ^^^^ [3]
+   |           ^^^ [2]
+ 6 |   T2 super T1 {}
+ 7 | 
+ 8 | function call_generic_bad(): void {
+ 9 |   $f = never<>;
+   |        ^^^^^ [1]
+10 |   $f(3, '3');
+11 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T2` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [1]
+
+apply_toplevel_poly_uninstantiable_where.php:10:6
+ 1 | <?hh
+ 2 | 
+ 3 | function never<T1 as int, T2 as string>(T1 $_, T2 $_): void
+   |                           ^^ [2]
+   |                                 ^^^^^^ [3]
+ 4 | where
+ 5 |   bool as int,
+   :
+ 8 | function call_generic_bad(): void {
+ 9 |   $f = never<>;
+10 |   $f(3, '3');
+   |      ^ [1]
+11 | }
+
+2 errors found

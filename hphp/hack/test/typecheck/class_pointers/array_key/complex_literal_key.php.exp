@@ -2,23 +2,80 @@ File "complex_literal_key.php--main.php", line 23, characters 3-13:
   dict<classname<(A | B)>, int>
 File "complex_literal_key.php--main.php", line 30, characters 3-13:
   dict<string, int>
-ERROR: File "complex_literal_key.php--main.php", line 8, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "complex_literal_key.php--main.php", line 5, characters 15-22:
-  Definition is here
-ERROR: File "complex_literal_key.php--main.php", line 16, characters 5-6:
-It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. (Typing[4482])
-  File "complex_literal_key.php--main.php", line 12, characters 34-41:
-  Definition is here
-ERROR: File "complex_literal_key.php--main.php", line 36, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "complex_literal_key.php--main.php", line 33, characters 39-39:
-  Definition is here
-ERROR: File "complex_literal_key.php--main.php", line 46, characters 7-8:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "complex_literal_key.php--main.php", line 43, characters 29-32:
-  Definition is here
-ERROR: File "complex_literal_key.php--main.php", line 54, characters 5-6:
-It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
-  File "complex_literal_key.php--main.php", line 51, characters 25-34:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+complex_literal_key.php--main.php:8:5
+ 3 | <<file: __EnableUnstableFeatures('class_type')>>
+ 4 | 
+ 5 | function bare(class<A> $c): void {
+   |               ^^^^^^^^ [2]
+ 6 |   $d = dict[$c => 1];
+ 7 |   foreach ($d as $k => $_) {
+ 8 |     $k::meth();
+   |     ^^ [1]
+ 9 |   }
+10 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<(A | B)>` in this position. Please use a `class<(A | B)>` instead. [1]
+-> Definition is here [2]
+
+complex_literal_key.php--main.php:16:5
+10 | }
+11 | 
+12 | function union_of_class_pointers(class<A> $a, class<B> $b, bool $cond): void {
+   |                                  ^^^^^^^^ [2]
+13 |   $c = $cond ? $a : $b;
+14 |   $d = dict[$c => 1];
+15 |   foreach ($d as $k => $_) {
+16 |     $k::meth();
+   |     ^^ [1]
+17 |   }
+18 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+complex_literal_key.php--main.php:36:5
+31 | }
+32 | 
+33 | function generic_bound<T as class<A>>(T $c): void {
+   |                                       ^ [2]
+34 |   $d = dict[$c => 1];
+35 |   foreach ($d as $k => $_) {
+36 |     $k::meth();
+   |     ^^ [1]
+37 |   }
+38 | }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+complex_literal_key.php--main.php:46:7
+41 |   abstract const type TCls as class<A>;
+42 | 
+43 |   public function key(this::TCls $c): void {
+   |                             ^^^^ [2]
+44 |     $d = dict[$c => 1];
+45 |     foreach ($d as $k => $_) {
+46 |       $k::meth();
+   |       ^^ [1]
+47 |     }
+48 |   }
+
+error: Typing[4482] It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. [1]
+-> Definition is here [2]
+
+complex_literal_key.php--main.php:54:5
+49 | }
+50 | 
+51 | function opaque_newtype(OpaqueClsA $c): void {
+   |                         ^^^^^^^^^^ [2]
+52 |   $d = dict[$c => 1];
+53 |   foreach ($d as $k => $_) {
+54 |     $k::meth();
+   |     ^^ [1]
+55 |   }
+56 | }
+
+5 errors found

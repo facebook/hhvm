@@ -1,104 +1,429 @@
-ERROR: File "function_ref.php", line 50, characters 17-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 38, characters 37-42:
-  Expected `string`
-  File "function_ref.php", line 42, characters 37-44:
-  But got `arraykey`
-ERROR: File "function_ref.php", line 50, characters 17-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 42, characters 48-55:
-  Expected `arraykey`
-  File "function_ref.php", line 38, characters 46-50:
-  But got `mixed`
-ERROR: File "function_ref.php", line 67, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 18, characters 28-35:
-  Expected `arraykey`
-  File "function_ref.php", line 38, characters 46-50:
-  But got `mixed`
-ERROR: File "function_ref.php", line 67, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 38, characters 37-42:
-  Expected `string`
-  File "function_ref.php", line 18, characters 14-21:
-  But got `arraykey`
-ERROR: File "function_ref.php", line 74, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 4, characters 52-59:
-  Expected `arraykey`
-  File "function_ref.php", line 38, characters 46-50:
-  But got `mixed`
-ERROR: File "function_ref.php", line 74, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 38, characters 37-42:
-  Expected `string`
-  File "function_ref.php", line 4, characters 38-45:
-  But got `arraykey`
-ERROR: File "function_ref.php", line 84, characters 16-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 30, characters 3-57:
-  Expected `HH\FunctionRef<(readonly function(arraykey): arraykey)>`
-  File "function_ref.php", line 81, characters 10-39:
-  But got `(function(arraykey $x): arraykey)`
-ERROR: File "function_ref.php", line 89, characters 16-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 21, characters 22-22:
-  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "function_ref.php", line 30, characters 48-55:
-  But got `arraykey`
-ERROR: File "function_ref.php", line 89, characters 16-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 30, characters 37-44:
-  Expected `arraykey`
-  File "function_ref.php", line 21, characters 22-22:
-  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref.php", line 89, characters 16-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 30, characters 37-44:
-  Expected `arraykey`
-  File "function_ref.php", line 21, characters 22-22:
-  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref.php", line 94, characters 16-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 10, characters 46-46:
-  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "function_ref.php", line 30, characters 48-55:
-  But got `arraykey`
-ERROR: File "function_ref.php", line 94, characters 16-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 30, characters 37-44:
-  Expected `arraykey`
-  File "function_ref.php", line 10, characters 46-46:
-  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref.php", line 94, characters 16-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 30, characters 37-44:
-  Expected `arraykey`
-  File "function_ref.php", line 10, characters 46-46:
-  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref.php", line 99, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 13, characters 32-32:
-  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-  File "function_ref.php", line 34, characters 51-58:
-  But got `arraykey`
-ERROR: File "function_ref.php", line 99, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 34, characters 40-47:
-  Expected `arraykey`
-  File "function_ref.php", line 13, characters 32-32:
-  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref.php", line 99, characters 17-19:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 34, characters 40-47:
-  Expected `arraykey`
-  File "function_ref.php", line 13, characters 32-32:
-  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
-ERROR: File "function_ref.php", line 103, characters 19-38:
-Invalid argument (Typing[4411])
-  File "function_ref.php", line 103, characters 19-38:
-  Function readonly mismatch
-  File "function_ref.php", line 103, characters 19-38:
-  This function is not marked readonly
-  File "function_ref.php", line 18, characters 10-12:
-  This function is marked readonly
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+function_ref.php:50:17
+36 | }
+37 | function acceptFunRef2(
+38 |   HH\FunctionRef<(readonly function(string): mixed)> $f,
+   |                                     ^^^^^^ [2]
+39 | ): void {}
+40 | 
+41 | function applyFunRef(
+42 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                     ^^^^^^^^ [3]
+43 | ): void {
+44 |   ($f)(3);
+   :
+48 |   acceptFunRef($f);
+49 |   // But this should be an error
+50 |   acceptFunRef2($f);
+   |                 ^^ [1]
+51 | }
+52 | function expectAK(arraykey $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+function_ref.php:50:17
+36 | }
+37 | function acceptFunRef2(
+38 |   HH\FunctionRef<(readonly function(string): mixed)> $f,
+   |                                              ^^^^^ [3]
+39 | ): void {}
+40 | 
+41 | function applyFunRef(
+42 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                                ^^^^^^^^ [2]
+43 | ): void {
+44 |   ($f)(3);
+   :
+48 |   acceptFunRef($f);
+49 |   // But this should be an error
+50 |   acceptFunRef2($f);
+   |                 ^^ [1]
+51 | }
+52 | function expectAK(arraykey $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+function_ref.php:67:17
+16 | }
+17 | 
+18 | function top(arraykey $x): arraykey {
+   |                            ^^^^^^^^ [2]
+19 |   return $x;
+20 | }
+   :
+36 | }
+37 | function acceptFunRef2(
+38 |   HH\FunctionRef<(readonly function(string): mixed)> $f,
+   |                                              ^^^^^ [3]
+39 | ): void {}
+40 | 
+   :
+65 |   acceptFunRef($tf);
+66 |   // Should reject
+67 |   acceptFunRef2($tf);
+   |                 ^^^ [1]
+68 | 
+69 |   $sm = C::static_meth<>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+function_ref.php:67:17
+16 | }
+17 | 
+18 | function top(arraykey $x): arraykey {
+   |              ^^^^^^^^ [3]
+19 |   return $x;
+20 | }
+   :
+36 | }
+37 | function acceptFunRef2(
+38 |   HH\FunctionRef<(readonly function(string): mixed)> $f,
+   |                                     ^^^^^^ [2]
+39 | ): void {}
+40 | 
+   :
+65 |   acceptFunRef($tf);
+66 |   // Should reject
+67 |   acceptFunRef2($tf);
+   |                 ^^^ [1]
+68 | 
+69 |   $sm = C::static_meth<>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+function_ref.php:74:17
+ 2 | 
+ 3 | class C {
+ 4 |   public static function static_meth(arraykey $x): arraykey {
+   |                                                    ^^^^^^^^ [2]
+ 5 |     return $x;
+ 6 |   }
+   :
+36 | }
+37 | function acceptFunRef2(
+38 |   HH\FunctionRef<(readonly function(string): mixed)> $f,
+   |                                              ^^^^^ [3]
+39 | ): void {}
+40 | 
+   :
+72 |   acceptFunRef($sm);
+73 |   // Should reject
+74 |   acceptFunRef2($sm);
+   |                 ^^^ [1]
+75 | 
+76 |   $m = meth_caller(C::class, 'meth');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+function_ref.php:74:17
+ 2 | 
+ 3 | class C {
+ 4 |   public static function static_meth(arraykey $x): arraykey {
+   |                                      ^^^^^^^^ [3]
+ 5 |     return $x;
+ 6 |   }
+   :
+36 | }
+37 | function acceptFunRef2(
+38 |   HH\FunctionRef<(readonly function(string): mixed)> $f,
+   |                                     ^^^^^^ [2]
+39 | ): void {}
+40 | 
+   :
+72 |   acceptFunRef($sm);
+73 |   // Should reject
+74 |   acceptFunRef2($sm);
+   |                 ^^^ [1]
+75 | 
+76 |   $m = meth_caller(C::class, 'meth');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FunctionRef<(readonly function(arraykey): arraykey)>` [2]
+-> But got `(function(arraykey $x): arraykey)` [3]
+
+function_ref.php:84:16
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+31 | ): void {
+32 | }
+   :
+79 |   acceptMethRef($m);
+80 | 
+81 |   $lam = (arraykey $x): arraykey ==> $x;
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+82 |   acceptFun($lam);
+83 |   // Should be rejected
+84 |   acceptFunRef($lam);
+   |                ^^^^ [1]
+85 | 
+86 |   $gt = generic_top<>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [2]
+-> But got `arraykey` [3]
+
+function_ref.php:89:16
+19 |   return $x;
+20 | }
+21 | function generic_top<T>(T $x): T {
+   |                      ^ [2]
+22 |   return $x;
+23 | }
+   :
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                                ^^^^^^^^ [3]
+31 | ): void {
+32 | }
+   :
+87 |   acceptFun($gt);
+88 |   // Should be rejected, because generic
+89 |   acceptFunRef($gt);
+   |                ^^^ [1]
+90 | 
+91 |   $gsm = C::static_generic_meth<>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref.php:89:16
+19 |   return $x;
+20 | }
+21 | function generic_top<T>(T $x): T {
+   |                      ^ [3]
+22 |   return $x;
+23 | }
+   :
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                     ^^^^^^^^ [2]
+31 | ): void {
+32 | }
+   :
+87 |   acceptFun($gt);
+88 |   // Should be rejected, because generic
+89 |   acceptFunRef($gt);
+   |                ^^^ [1]
+90 | 
+91 |   $gsm = C::static_generic_meth<>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref.php:89:16
+19 |   return $x;
+20 | }
+21 | function generic_top<T>(T $x): T {
+   |                      ^ [3]
+22 |   return $x;
+23 | }
+   :
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                     ^^^^^^^^ [2]
+31 | ): void {
+32 | }
+   :
+87 |   acceptFun($gt);
+88 |   // Should be rejected, because generic
+89 |   acceptFunRef($gt);
+   |                ^^^ [1]
+90 | 
+91 |   $gsm = C::static_generic_meth<>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [2]
+-> But got `arraykey` [3]
+
+function_ref.php:94:16
+ 8 |     return $x;
+ 9 |   }
+10 |   public static function static_generic_meth<T>(T $x): T {
+   |                                              ^ [2]
+11 |     return $x;
+12 |   }
+   :
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                                ^^^^^^^^ [3]
+31 | ): void {
+32 | }
+   :
+92 |   acceptFun($gsm);
+93 |   // Should be rejected, because generic
+94 |   acceptFunRef($gsm);
+   |                ^^^^ [1]
+95 | 
+96 |   $gm = meth_caller(C::class, 'generic_meth');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref.php:94:16
+ 8 |     return $x;
+ 9 |   }
+10 |   public static function static_generic_meth<T>(T $x): T {
+   |                                              ^ [3]
+11 |     return $x;
+12 |   }
+   :
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                     ^^^^^^^^ [2]
+31 | ): void {
+32 | }
+   :
+92 |   acceptFun($gsm);
+93 |   // Should be rejected, because generic
+94 |   acceptFunRef($gsm);
+   |                ^^^^ [1]
+95 | 
+96 |   $gm = meth_caller(C::class, 'generic_meth');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref.php:94:16
+ 8 |     return $x;
+ 9 |   }
+10 |   public static function static_generic_meth<T>(T $x): T {
+   |                                              ^ [3]
+11 |     return $x;
+12 |   }
+   :
+28 | }
+29 | function acceptFunRef(
+30 |   HH\FunctionRef<(readonly function(arraykey): arraykey)> $f,
+   |                                     ^^^^^^^^ [2]
+31 | ): void {
+32 | }
+   :
+92 |   acceptFun($gsm);
+93 |   // Should be rejected, because generic
+94 |   acceptFunRef($gsm);
+   |                ^^^^ [1]
+95 | 
+96 |   $gm = meth_caller(C::class, 'generic_meth');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [2]
+-> But got `arraykey` [3]
+
+function_ref.php:99:17
+ 11 |     return $x;
+ 12 |   }
+ 13 |   public function generic_meth<T>(T $x): T {
+    |                                ^ [2]
+ 14 |     return $x;
+ 15 |   }
+    :
+ 32 | }
+ 33 | function acceptMethRef(
+ 34 |   HH\FunctionRef<(readonly function(C, arraykey): arraykey)> $f,
+    |                                                   ^^^^^^^^ [3]
+ 35 | ): void {
+ 36 | }
+    :
+ 97 |   acceptMeth($gm);
+ 98 |   // Should be rejected, because generic
+ 99 |   acceptMethRef($gm);
+    |                 ^^^ [1]
+100 | 
+101 |   $mf = new MockFunction(top<>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref.php:99:17
+ 11 |     return $x;
+ 12 |   }
+ 13 |   public function generic_meth<T>(T $x): T {
+    |                                ^ [3]
+ 14 |     return $x;
+ 15 |   }
+    :
+ 32 | }
+ 33 | function acceptMethRef(
+ 34 |   HH\FunctionRef<(readonly function(C, arraykey): arraykey)> $f,
+    |                                        ^^^^^^^^ [2]
+ 35 | ): void {
+ 36 | }
+    :
+ 97 |   acceptMeth($gm);
+ 98 |   // Should be rejected, because generic
+ 99 |   acceptMethRef($gm);
+    |                 ^^^ [1]
+100 | 
+101 |   $mf = new MockFunction(top<>);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function [3]
+
+function_ref.php:99:17
+ 11 |     return $x;
+ 12 |   }
+ 13 |   public function generic_meth<T>(T $x): T {
+    |                                ^ [3]
+ 14 |     return $x;
+ 15 |   }
+    :
+ 32 | }
+ 33 | function acceptMethRef(
+ 34 |   HH\FunctionRef<(readonly function(C, arraykey): arraykey)> $f,
+    |                                        ^^^^^^^^ [2]
+ 35 | ): void {
+ 36 | }
+    :
+ 97 |   acceptMeth($gm);
+ 98 |   // Should be rejected, because generic
+ 99 |   acceptMethRef($gm);
+    |                 ^^^ [1]
+100 | 
+101 |   $mf = new MockFunction(top<>);
+
+error: Typing[4411] Invalid argument [1]
+-> Function readonly mismatch [1]
+-> This function is not marked readonly [1]
+-> This function is marked readonly [2]
+
+function_ref.php:103:19
+ 16 | }
+ 17 | 
+ 18 | function top(arraykey $x): arraykey {
+    |          ^^^ [2]
+ 19 |   return $x;
+ 20 | }
+    :
+101 |   $mf = new MockFunction(top<>);
+102 |   $mf->mock((arraykey $x) ==> $x);
+103 |   $mf->mockStrict((arraykey $x) ==> $x);
+    |                   ^^^^^^^^^^^^^^^^^^^^ [1]
+104 | }
+
+17 errors found

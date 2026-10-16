@@ -1,2 +1,11 @@
-ERROR: File "enum_5.php--use.php", line 4, characters 7-9:
-Enums must be `int` or `string` or `arraykey`, not `foo_alias` (Typing[4024])
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `foo_alias` [1]
+
+enum_5.php--use.php:4:7
+2 | 
+3 | // Should work because foo is an int
+4 | class Bar extends Enum {
+  |       ^^^ [1]
+5 |   const type TInner = foo_alias;
+6 |   const foo_alias FOO = Foo::FOO;
+
+1 error found

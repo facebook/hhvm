@@ -1,10 +1,20 @@
-ERROR: File "4323-bad_type_constraint.php", line 7, characters 5-20:
-Typing error (Typing[4323])
-  File "4323-bad_type_constraint.php", line 5, characters 23-23:
-  `T` is a constrained type parameter
-  File "4323-bad_type_constraint.php", line 5, characters 28-35:
-  This type constraint is violated
-  File "4323-bad_type_constraint.php", line 5, characters 28-35:
-  Expected `arraykey`
-  File "4323-bad_type_constraint.php", line 7, characters 16-19:
-  But got `bool`
+error: Typing[4323] Typing error [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+4323-bad_type_constraint.php:7:5
+3 | 
+4 | class BadTypeConstraint {
+5 |   public function foo<T as arraykey>(T $t) : void {}
+  |                       ^ [2]
+  |                            ^^^^^^^^ [3]
+6 |   public function bar() : void {
+7 |     $this->foo(true);
+  |     ^^^^^^^^^^^^^^^^ [1]
+  |                ^^^^ [4]
+8 |   }
+9 | }
+
+1 error found

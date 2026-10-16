@@ -1,84 +1,346 @@
-ERROR: File "subtyping_mutual3.php", line 25, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 25, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual3.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 26, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual3.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 27, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual3.php", line 14, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 30, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 10, characters 22-27:
-  Expected `vec<A>`
-  File "subtyping_mutual3.php", line 15, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3.php", line 6, characters 11-11:
-    by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 31, characters 15-16:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 11, characters 22-27:
-  Expected `vec<B>`
-  File "subtyping_mutual3.php", line 15, characters 3-3:
-  But got `mixed`
-  File "subtyping_mutual3.php", line 6, characters 11-11:
-    by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 40, characters 5-7:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 40, characters 5-7:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual3.php", line 17, characters 7-7:
-  But got `mixed`
-  File "subtyping_mutual3.php", line 4, characters 11-11:
-    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_mutual3.php", line 62, characters 12-15:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 8, characters 19-19:
-  Expected `A`
-  File "subtyping_mutual3.php", line 22, characters 3-15:
-  But got `vec<vec<int>>`
-ERROR: File "subtyping_mutual3.php", line 63, characters 12-15:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 9, characters 19-19:
-  Expected `B`
-  File "subtyping_mutual3.php", line 22, characters 3-15:
-  But got `vec<vec<int>>`
-ERROR: File "subtyping_mutual3.php", line 64, characters 15-18:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 10, characters 26-26:
-  Expected `A`
-  File "subtyping_mutual3.php", line 22, characters 7-14:
-  But got `vec<int>`
-ERROR: File "subtyping_mutual3.php", line 65, characters 15-18:
-Invalid argument (Typing[4110])
-  File "subtyping_mutual3.php", line 11, characters 26-26:
-  Expected `B`
-  File "subtyping_mutual3.php", line 22, characters 7-14:
-  But got `vec<int>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+subtyping_mutual3.php:25:12
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B;
+   |           ^ [3]
+ 5 | 
+ 6 | case type B = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+23 | ): void {
+24 |   expect_A($a);
+25 |   expect_B($a); // nok: A <: B -> nok, need bound on A
+   |            ^^ [1]
+26 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need bound on A
+27 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need bound on A
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_mutual3.php:25:12
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   vec<nothing> $v,
+   :
+23 | ): void {
+24 |   expect_A($a);
+25 |   expect_B($a); // nok: A <: B -> nok, need bound on A
+   |            ^^ [1]
+26 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need bound on A
+27 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need bound on A
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_mutual3.php:26:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   vec<nothing> $v,
+   :
+24 |   expect_A($a);
+25 |   expect_B($a); // nok: A <: B -> nok, need bound on A
+26 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need bound on A
+   |               ^^ [1]
+27 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need bound on A
+28 |   expect_A($b);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_mutual3.php:27:15
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B = vec<A>;
+   :
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | 
+13 | function foo(
+14 |   A $a,
+   |   ^ [3]
+15 |   B $b,
+16 |   vec<nothing> $v,
+   :
+25 |   expect_B($a); // nok: A <: B -> nok, need bound on A
+26 |   expect_vecA($a); // nok: A <: vec<A> -> nok, need bound on A
+27 |   expect_vecB($a); // nok: A <: vec<B> -> nok, need bound on A
+   |               ^^ [1]
+28 |   expect_A($b);
+29 |   expect_B($b);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<A>` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_mutual3.php:30:15
+ 4 | case type A = B;
+ 5 | 
+ 6 | case type B = vec<A>;
+   |           ^ [4]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                      ^^^^^^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+13 | function foo(
+14 |   A $a,
+15 |   B $b,
+   |   ^ [3]
+16 |   vec<nothing> $v,
+17 |   vec<A> $va,
+   :
+28 |   expect_A($b);
+29 |   expect_B($b);
+30 |   expect_vecA($b); // nok, would need bound on B
+   |               ^^ [1]
+31 |   expect_vecB($b); // nok, would need bound on B and/or A
+32 |   expect_A($v);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `vec<B>` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_mutual3.php:31:15
+ 4 | case type A = B;
+ 5 | 
+ 6 | case type B = vec<A>;
+   |           ^ [4]
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                      ^^^^^^ [2]
+12 | 
+13 | function foo(
+14 |   A $a,
+15 |   B $b,
+   |   ^ [3]
+16 |   vec<nothing> $v,
+17 |   vec<A> $va,
+   :
+29 |   expect_B($b);
+30 |   expect_vecA($b); // nok, would need bound on B
+31 |   expect_vecB($b); // nok, would need bound on B and/or A
+   |               ^^ [1]
+32 |   expect_A($v);
+33 |   expect_B($v);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+subtyping_mutual3.php:40:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B;
+   |           ^ [3]
+ 5 | 
+ 6 | case type B = vec<A>;
+   :
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+   :
+38 |   expect_vecA($va);
+39 |   expect_vecB(
+40 |     $va,
+   |     ^^^ [1]
+41 |   ); // nok: vec<A> <: vec<B> -> vec<A> <: vec<vec<A>> -> A <: vec<A> -> nok, need bound on A
+42 |   expect_A(
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+subtyping_mutual3.php:40:5
+ 2 | <<file: __EnableUnstableFeatures('case_types', 'recursive_case_types')>>
+ 3 | 
+ 4 | case type A = B;
+   |           ^ [4]
+ 5 | 
+ 6 | case type B = vec<A>;
+   :
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+14 |   A $a,
+15 |   B $b,
+16 |   vec<nothing> $v,
+17 |   vec<A> $va,
+   |       ^ [3]
+18 |   vec<B> $vb,
+19 |   vec<vec<nothing>> $vv,
+   :
+38 |   expect_vecA($va);
+39 |   expect_vecB(
+40 |     $va,
+   |     ^^^ [1]
+41 |   ); // nok: vec<A> <: vec<B> -> vec<A> <: vec<vec<A>> -> A <: vec<A> -> nok, need bound on A
+42 |   expect_A(
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<vec<int>>` [3]
+
+subtyping_mutual3.php:62:12
+ 6 | case type B = vec<A>;
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+   |                   ^ [2]
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |   ^^^^^^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a);
+   :
+60 | 
+61 |   // these are wrong
+62 |   expect_A($vvi); // nok
+   |            ^^^^ [1]
+63 |   expect_B($vvi); // nok
+64 |   expect_vecA($vvi); // nok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<vec<int>>` [3]
+
+subtyping_mutual3.php:63:12
+ 7 | 
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+   |                   ^ [2]
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |   ^^^^^^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a);
+   :
+61 |   // these are wrong
+62 |   expect_A($vvi); // nok
+63 |   expect_B($vvi); // nok
+   |            ^^^^ [1]
+64 |   expect_vecA($vvi); // nok
+65 |   expect_vecB($vvi); // nok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `vec<int>` [3]
+
+subtyping_mutual3.php:64:15
+ 8 | function expect_A(A $x): void {}
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+   |                          ^ [2]
+11 | function expect_vecB(vec<B> $x): void {}
+12 | 
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |       ^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a);
+   :
+62 |   expect_A($vvi); // nok
+63 |   expect_B($vvi); // nok
+64 |   expect_vecA($vvi); // nok
+   |               ^^^^ [1]
+65 |   expect_vecB($vvi); // nok
+66 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `vec<int>` [3]
+
+subtyping_mutual3.php:65:15
+ 9 | function expect_B(B $x): void {}
+10 | function expect_vecA(vec<A> $x): void {}
+11 | function expect_vecB(vec<B> $x): void {}
+   |                          ^ [2]
+12 | 
+13 | function foo(
+   :
+20 |   vec<vec<A>> $vva,
+21 |   vec<vec<B>> $vvb,
+22 |   vec<vec<int>> $vvi,
+   |       ^^^^^^^^ [3]
+23 | ): void {
+24 |   expect_A($a);
+   :
+63 |   expect_B($vvi); // nok
+64 |   expect_vecA($vvi); // nok
+65 |   expect_vecB($vvi); // nok
+   |               ^^^^ [1]
+66 | }
+
+12 errors found

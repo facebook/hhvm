@@ -1,6 +1,13 @@
-ERROR: File "bad_inout_use_arg17.php", line 6, characters 11-27:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-  File "bad_inout_use_arg17.php", line 6, characters 11-20:
-  This is an object of type Map<string, int>
-  File "bad_inout_use_arg17.php", line 6, characters 11-20:
-    from this definition because a type could not be determined here
+error: Typing[4208] Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. [1]
+-> This is an object of type Map<string, int> [2]
+->   from this definition because a type could not be determined here [2]
+
+bad_inout_use_arg17.php:6:11
+4 | 
+5 | function test(shape('eggs' => Map<string, int>) $x): void {
+6 |   f(inout $x['eggs']['foo']);
+  |           ^^^^^^^^^^^^^^^^^ [1]
+  |           ^^^^^^^^^^ [2]
+7 | }
+
+1 error found

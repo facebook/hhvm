@@ -1,4 +1,20 @@
-ERROR: File "disallow_zero_type_parameters_for_varray.php", line 3, characters 18-23:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+disallow_zero_type_parameters_for_varray.php:3:18
+ 1 | <?hh
+ 2 | 
+ 3 | function test(): varray {
+   |                  ^^^^^^ [1]
+ 4 |   return vec[0, 1, 2];
+ 5 | }
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+1 error found

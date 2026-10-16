@@ -1,16 +1,54 @@
-ERROR: File "indexing_collections.php", line 7, characters 3-14:
-Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 6, characters 2-3:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "indexing_collections.php", line 8, characters 3-14:
-Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 6, characters 2-3:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "indexing_collections.php", line 15, characters 3-14:
-Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 14, characters 2-3:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "indexing_collections.php", line 16, characters 3-14:
-Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 14, characters 2-3:
-  The local (enclosing) context provides the capability set {}
+error: Typing[4401] Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+indexing_collections.php:7:3
+4 |   Map<int, string> $m,
+5 |   Map<int, string> $mm,
+6 | )[]: void {
+  |  ^^ [2]
+7 |   $m[1] = "42"; // ERROR
+  |   ^^^^^^^^^^^^ [1]
+8 |   $mm[0] = "0"; // ERROR
+9 | }
+
+error: Typing[4401] Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+indexing_collections.php:8:3
+ 4 |   Map<int, string> $m,
+ 5 |   Map<int, string> $mm,
+ 6 | )[]: void {
+   |  ^^ [2]
+ 7 |   $m[1] = "42"; // ERROR
+ 8 |   $mm[0] = "0"; // ERROR
+   |   ^^^^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+error: Typing[4401] Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+indexing_collections.php:15:3
+12 |   Vector<string> $v,
+13 |   Vector<string> $mv,
+14 | )[]: void {
+   |  ^^ [2]
+15 |   $v[1] = "42"; // ERROR
+   |   ^^^^^^^^^^^^ [1]
+16 |   $mv[0] = "0"; // ERROR
+17 | }
+
+error: Typing[4401] Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+indexing_collections.php:16:3
+12 |   Vector<string> $v,
+13 |   Vector<string> $mv,
+14 | )[]: void {
+   |  ^^ [2]
+15 |   $v[1] = "42"; // ERROR
+16 |   $mv[0] = "0"; // ERROR
+   |   ^^^^^^^^^^^^ [1]
+17 | }
+
+4 errors found

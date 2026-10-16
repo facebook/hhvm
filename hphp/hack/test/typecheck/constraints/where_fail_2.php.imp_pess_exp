@@ -1,68 +1,136 @@
-ERROR: File "where_fail_2.php", line 8, characters 33-36:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 8, characters 35-35:
-  But got `C<T> where T as C<T>`
-  File "where_fail_2.php", line 8, characters 33-36:
-    by the definition of `T`
-ERROR: File "where_fail_2.php", line 8, characters 33-36:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 8, characters 35-35:
-  But got `T as C<T>`
-ERROR: File "where_fail_2.php", line 8, characters 33-36:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 8, characters 35-35:
-  But got `mixed`
-  File "where_fail_2.php", line 8, characters 28-28:
-    by the definition of `T`
-ERROR: File "where_fail_2.php", line 17, characters 51-54:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 17, characters 53-53:
-  But got `C<T> where T as C<T>`
-  File "where_fail_2.php", line 17, characters 51-54:
-    by the definition of `T`
-ERROR: File "where_fail_2.php", line 17, characters 51-54:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 17, characters 53-53:
-  But got `T as C<T>`
-ERROR: File "where_fail_2.php", line 17, characters 51-54:
-Some type arguments violate their constraints (Typing[4323])
-  File "where_fail_2.php", line 5, characters 9-9:
-  `T` is a constrained type parameter
-  File "where_fail_2.php", line 5, characters 14-14:
-  This type constraint is violated
-  File "where_fail_2.php", line 5, characters 14-14:
-  Expected `I`
-  File "where_fail_2.php", line 17, characters 53-53:
-  But got `mixed`
-  File "where_fail_2.php", line 17, characters 26-26:
-    by the definition of `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `C<T> where T as C<T>` [4]
+->   by the definition of `T` [1]
+
+where_fail_2.php:8:33
+ 3 | 
+ 4 | interface I { }
+ 5 | class C<T as I> { }
+   |         ^ [2]
+   |              ^ [3]
+ 6 | 
+ 7 | class D<Td as I> {
+ 8 |   public function bounded1<T as C<T>>(T $x):void { }
+   |                                 ^^^^ [1]
+   |                                   ^ [4]
+ 9 | 
+10 |   // This should succeed. Despite appearances, order of `as` doesn't matter
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `T as C<T>` [4]
+
+where_fail_2.php:8:33
+ 3 | 
+ 4 | interface I { }
+ 5 | class C<T as I> { }
+   |         ^ [2]
+   |              ^ [3]
+ 6 | 
+ 7 | class D<Td as I> {
+ 8 |   public function bounded1<T as C<T>>(T $x):void { }
+   |                                 ^^^^ [1]
+   |                                   ^ [4]
+ 9 | 
+10 |   // This should succeed. Despite appearances, order of `as` doesn't matter
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+where_fail_2.php:8:33
+ 3 | 
+ 4 | interface I { }
+ 5 | class C<T as I> { }
+   |         ^ [2]
+   |              ^ [3]
+ 6 | 
+ 7 | class D<Td as I> {
+ 8 |   public function bounded1<T as C<T>>(T $x):void { }
+   |                            ^ [5]
+   |                                 ^^^^ [1]
+   |                                   ^ [4]
+ 9 | 
+10 |   // This should succeed. Despite appearances, order of `as` doesn't matter
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `C<T> where T as C<T>` [4]
+->   by the definition of `T` [1]
+
+where_fail_2.php:17:51
+ 3 | 
+ 4 | interface I { }
+ 5 | class C<T as I> { }
+   |         ^ [2]
+   |              ^ [3]
+ 6 | 
+ 7 | class D<Td as I> {
+   :
+15 | 
+16 |   // This should fail, just like bounded1
+17 |   public function where1<T>(T $x):void where T as C<T>  { }
+   |                                                   ^^^^ [1]
+   |                                                     ^ [4]
+18 | 
+19 |   // This should succeed, just like bounded2
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `T as C<T>` [4]
+
+where_fail_2.php:17:51
+ 3 | 
+ 4 | interface I { }
+ 5 | class C<T as I> { }
+   |         ^ [2]
+   |              ^ [3]
+ 6 | 
+ 7 | class D<Td as I> {
+   :
+15 | 
+16 |   // This should fail, just like bounded1
+17 |   public function where1<T>(T $x):void where T as C<T>  { }
+   |                                                   ^^^^ [1]
+   |                                                     ^ [4]
+18 | 
+19 |   // This should succeed, just like bounded2
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` [5]
+
+where_fail_2.php:17:51
+ 3 | 
+ 4 | interface I { }
+ 5 | class C<T as I> { }
+   |         ^ [2]
+   |              ^ [3]
+ 6 | 
+ 7 | class D<Td as I> {
+   :
+15 | 
+16 |   // This should fail, just like bounded1
+17 |   public function where1<T>(T $x):void where T as C<T>  { }
+   |                          ^ [5]
+   |                                                   ^^^^ [1]
+   |                                                     ^ [4]
+18 | 
+19 |   // This should succeed, just like bounded2
+
+6 errors found

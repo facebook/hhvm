@@ -1,4 +1,21 @@
-ERROR: File "invalid_call1.php", line 15, characters 5-18:
-Expression trees only support static method calls on `static` and named classes. (Parsing[1002])
-ERROR: File "invalid_call1.php", line 15, characters 5-6:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
+error: Parsing[1002] Expression trees only support static method calls on `static` and named classes. [1]
+
+invalid_call1.php:15:5
+13 | function foo(): void {
+14 |   $fun_call = ExampleDsl`(MyClass $y) ==> {
+15 |     $y::bar("baz");
+   |     ^^^^^^^^^^^^^^ [1]
+16 |   }`;
+17 | }
+
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+
+invalid_call1.php:15:5
+13 | function foo(): void {
+14 |   $fun_call = ExampleDsl`(MyClass $y) ==> {
+15 |     $y::bar("baz");
+   |     ^^ [1]
+16 |   }`;
+17 | }
+
+2 errors found

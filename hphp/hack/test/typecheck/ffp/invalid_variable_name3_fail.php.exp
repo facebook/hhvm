@@ -1,8 +1,37 @@
-ERROR: File "invalid_variable_name3_fail.php", line 14, characters 8-13:
-Splice syntax ${...} can only occur inside expression trees Foo``...``. (Parsing[1002])
-ERROR: File "invalid_variable_name3_fail.php", line 14, characters 8-13:
-Splicing can only occur inside expression tree literals (between backticks) (Parsing[1002])
-ERROR: File "invalid_variable_name3_fail.php", line 14, characters 10-12:
-Unbound name: `foo` (a global constant) (Naming[2049])
-ERROR: File "invalid_variable_name3_fail.php", line 14, characters 10-12:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Splice syntax ${...} can only occur inside expression trees Foo``...``. [1]
+
+invalid_variable_name3_fail.php:14:8
+12 | function test(): void {
+13 |   $foo = 5;
+14 |   $x = ${foo};
+   |        ^^^^^^ [1]
+15 | }
+
+error: Parsing[1002] Splicing can only occur inside expression tree literals (between backticks) [1]
+
+invalid_variable_name3_fail.php:14:8
+12 | function test(): void {
+13 |   $foo = 5;
+14 |   $x = ${foo};
+   |        ^^^^^^ [1]
+15 | }
+
+error: Naming[2049] Unbound name: `foo` (a global constant) [1]
+
+invalid_variable_name3_fail.php:14:10
+12 | function test(): void {
+13 |   $foo = 5;
+14 |   $x = ${foo};
+   |          ^^^ [1]
+15 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_variable_name3_fail.php:14:10
+12 | function test(): void {
+13 |   $foo = 5;
+14 |   $x = ${foo};
+   |          ^^^ [1]
+15 | }
+
+4 errors found

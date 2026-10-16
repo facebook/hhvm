@@ -1,14 +1,56 @@
-ERROR: File "tconst7.php", line 11, characters 20-29:
-Invalid `as` expression hint (Typing[4195])
-  File "tconst7.php", line 4, characters 23-26:
-  The `as` operator cannot be used with the abstract type constant TFoo because it is not marked `<<__Enforceable>>`
-ERROR: File "tconst7.php", line 15, characters 14-30:
-Invalid argument (Typing[4110])
-  File "tconst7.php", line 6, characters 21-30:
-  Expected `~this::TFoo`
-  File "tconst7.php", line 15, characters 14-30:
-  But got `?this::TFoo where this::TFoo as C::TFoo`
-ERROR: File "tconst7.php", line 15, characters 21-30:
-Invalid `as` expression hint (Typing[4195])
-  File "tconst7.php", line 4, characters 23-26:
-  The `as` operator cannot be used with the abstract type constant TFoo because it is not marked `<<__Enforceable>>`
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant TFoo because it is not marked `<<__Enforceable>>` [2]
+
+tconst7.php:11:20
+ 2 | 
+ 3 | abstract class C {
+ 4 |   abstract const type TFoo as num;
+   |                       ^^^^ [2]
+ 5 | 
+ 6 |   public function f(this::TFoo $foo): void {
+   :
+ 9 | 
+10 |   private function g1(mixed $x): void {
+11 |     $this->f($x as this::TFoo);
+   |                    ^^^^^^^^^^ [1]
+12 |   }
+13 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~this::TFoo` [2]
+-> But got `?this::TFoo where this::TFoo as C::TFoo` [1]
+
+tconst7.php:15:14
+ 4 |   abstract const type TFoo as num;
+ 5 | 
+ 6 |   public function f(this::TFoo $foo): void {
+   |                     ^^^^^^^^^^ [2]
+ 7 |     $this->h($foo);
+ 8 |   }
+   :
+13 | 
+14 |   private function g2(mixed $x): void {
+15 |     $this->f($x ?as this::TFoo);
+   |              ^^^^^^^^^^^^^^^^^ [1]
+16 |   }
+17 | 
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant TFoo because it is not marked `<<__Enforceable>>` [2]
+
+tconst7.php:15:21
+ 2 | 
+ 3 | abstract class C {
+ 4 |   abstract const type TFoo as num;
+   |                       ^^^^ [2]
+ 5 | 
+ 6 |   public function f(this::TFoo $foo): void {
+   :
+13 | 
+14 |   private function g2(mixed $x): void {
+15 |     $this->f($x ?as this::TFoo);
+   |                     ^^^^^^^^^^ [1]
+16 |   }
+17 | 
+
+3 errors found

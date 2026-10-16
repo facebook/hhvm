@@ -1,42 +1,106 @@
-ERROR: File "simple_subtyping.php", line 20, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 19, characters 37-43:
-  Expected `CT<int>`
-  File "simple_subtyping.php", line 19, characters 26-30:
-  But got `float`
-ERROR: File "simple_subtyping.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 23, characters 39-46:
-  Expected `CT<null>`
-  File "simple_subtyping.php", line 23, characters 28-32:
-  But got `float`
-ERROR: File "simple_subtyping.php", line 34, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 33, characters 35-43:
-  Expected `CT<?bool>`
-  File "simple_subtyping.php", line 33, characters 25-28:
-  But got `bool`
-ERROR: File "simple_subtyping.php", line 38, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 37, characters 33-43:
-  Expected `CT<nothing>`
-  File "simple_subtyping.php", line 37, characters 23-26:
-  But got `bool`
-ERROR: File "simple_subtyping.php", line 42, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 41, characters 35-42:
-  Expected `CT<null>`
-  File "simple_subtyping.php", line 41, characters 25-28:
-  But got `bool`
-ERROR: File "simple_subtyping.php", line 52, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 51, characters 37-44:
-  Expected `CT<?num>`
-  File "simple_subtyping.php", line 51, characters 25-30:
-  But got `string`
-ERROR: File "simple_subtyping.php", line 60, characters 10-11:
-Invalid return type (Typing[4110])
-  File "simple_subtyping.php", line 59, characters 37-44:
-  Expected `CT<null>`
-  File "simple_subtyping.php", line 59, characters 25-30:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<int>` [2]
+-> But got `float` [3]
+
+simple_subtyping.php:20:10
+17 | }
+18 | 
+19 | function sub_fails_super(float $x): CT<int> {
+   |                          ^^^^^ [3]
+   |                                     ^^^^^^^ [2]
+20 |   return $x;
+   |          ^^ [1]
+21 | }
+22 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<null>` [2]
+-> But got `float` [3]
+
+simple_subtyping.php:24:10
+21 | }
+22 | 
+23 | function other_fails_super(float $x): CT<null> {
+   |                            ^^^^^ [3]
+   |                                       ^^^^^^^^ [2]
+24 |   return $x;
+   |          ^^ [1]
+25 | }
+26 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<?bool>` [2]
+-> But got `bool` [3]
+
+simple_subtyping.php:34:10
+31 | }
+32 | 
+33 | function super_fails_eq(bool $x): CT<?bool> {
+   |                         ^^^^ [3]
+   |                                   ^^^^^^^^^ [2]
+34 |   return $x;
+   |          ^^ [1]
+35 | }
+36 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<nothing>` [2]
+-> But got `bool` [3]
+
+simple_subtyping.php:38:10
+35 | }
+36 | 
+37 | function sub_fails_eq(bool $x): CT<nothing> {
+   |                       ^^^^ [3]
+   |                                 ^^^^^^^^^^^ [2]
+38 |   return $x;
+   |          ^^ [1]
+39 | }
+40 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<null>` [2]
+-> But got `bool` [3]
+
+simple_subtyping.php:42:10
+39 | }
+40 | 
+41 | function other_fails_eq(bool $x): CT<null> {
+   |                         ^^^^ [3]
+   |                                   ^^^^^^^^ [2]
+42 |   return $x;
+   |          ^^ [1]
+43 | }
+44 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<?num>` [2]
+-> But got `string` [3]
+
+simple_subtyping.php:52:10
+49 | }
+50 | 
+51 | function super_fails_as(string $x): CT<?num> {
+   |                         ^^^^^^ [3]
+   |                                     ^^^^^^^^ [2]
+52 |   return $x;
+   |          ^^ [1]
+53 | }
+54 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `CT<null>` [2]
+-> But got `string` [3]
+
+simple_subtyping.php:60:10
+57 | }
+58 | 
+59 | function other_fails_as(string $x): CT<null> {
+   |                         ^^^^^^ [3]
+   |                                     ^^^^^^^^ [2]
+60 |   return $x;
+   |          ^^ [1]
+61 | }
+62 | 
+
+7 errors found

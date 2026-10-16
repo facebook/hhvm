@@ -1,18 +1,68 @@
-ERROR: File "accessloose.php", line 13, characters 57-58:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "accessloose.php", line 17, characters 57-58:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "accessloose.php", line 43, characters 18-20:
-Invalid argument (Typing[4468])
-  File "accessloose.php", line 17, characters 61-61:
-  Type member `T` cannot be accessed
-  File "accessloose.php", line 37, characters 19-44:
-    on a loose refinement
-ERROR: File "accessloose.php", line 50, characters 10-16:
-A `where` type constraint is violated here (Typing[4323])
-  File "accessloose.php", line 17, characters 10-16:
-  This is the method with `where` type constraints
-  File "accessloose.php", line 17, characters 61-61:
-  Type member `T` cannot be accessed
-  File "accessloose.php", line 50, characters 18-43:
-    on a loose refinement
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+accessloose.php:13:57
+11 | }
+12 | 
+13 | function external_get<TB as Box, T>(TB $b): T where T = TB::T {
+   |                                                         ^^ [1]
+14 |   return $b->get();
+15 | }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+accessloose.php:17:57
+15 | }
+16 | 
+17 | function mut_get<TB as Box, T>(Ref<TB> $b): T where T = TB::T {
+   |                                                         ^^ [1]
+18 |   return $b->data->get();
+19 | }
+
+error: Typing[4468] Invalid argument [1]
+-> Type member `T` cannot be accessed [2]
+->   on a loose refinement [3]
+
+accessloose.php:43:18
+15 | }
+16 | 
+17 | function mut_get<TB as Box, T>(Ref<TB> $b): T where T = TB::T {
+   |                                                             ^ [2]
+18 |   return $b->data->get();
+19 | }
+   :
+35 | }
+36 | 
+37 | function bad3(Ref<Box with { type T as int }> $mb): int {
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+38 |   // Here we are performing a type access on
+39 |   // a loose refinement since no expresion-
+40 |   // dependent type is created to reflect
+41 |   // the contents of the Ref<>; so the
+42 |   // typechecker correctly flags an error
+43 |   return mut_get($mb);
+   |                  ^^^ [1]
+44 | }
+45 | 
+
+error: Typing[4323] A `where` type constraint is violated here [1]
+-> This is the method with `where` type constraints [2]
+-> Type member `T` cannot be accessed [3]
+->   on a loose refinement [4]
+
+accessloose.php:50:10
+15 | }
+16 | 
+17 | function mut_get<TB as Box, T>(Ref<TB> $b): T where T = TB::T {
+   |          ^^^^^^^ [2]
+   |                                                             ^ [3]
+18 |   return $b->data->get();
+19 | }
+   :
+48 |   // in the typechecker because no type variable
+49 |   // is created for TB on the call.
+50 |   return mut_get<Box with { type T as int }, _>($mb);
+   |          ^^^^^^^ [1]
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+51 | }
+
+4 errors found

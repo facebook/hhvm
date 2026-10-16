@@ -1,2 +1,10 @@
-ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 43-45:
-Encountered unexpected token `==>`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `==>`. [1]
+
+polymorphic_lambda_syntax_with_use_bad.php:5:43
+3 | 
+4 | function thisParseErrorIsFun(int $y): void {
+5 |   $_ = function<T>(T $x): (T,int) use($y) ==> { return tuple($x, $y);};
+  |                                           ^^^ [1]
+6 | }
+
+1 error found

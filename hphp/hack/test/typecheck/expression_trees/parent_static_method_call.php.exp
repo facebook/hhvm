@@ -1,4 +1,21 @@
-ERROR: File "parent_static_method_call.php", line 15, characters 28-45:
-Expression trees only support static method calls on `static` and named classes. (Parsing[1002])
-ERROR: File "parent_static_method_call.php", line 15, characters 28-33:
-Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `MyParent::bar` instead (Naming[2112])
+error: Parsing[1002] Expression trees only support static method calls on `static` and named classes. [1]
+
+parent_static_method_call.php:15:28
+13 | class MyClass extends MyParent {
+14 |   public function test(): void {
+15 |     $fun_call = ExampleDsl`parent::bar("baz")`;
+   |                            ^^^^^^^^^^^^^^^^^^ [1]
+16 |   }
+17 | }
+
+error: Naming[2112] Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `MyParent::bar` instead [1]
+
+parent_static_method_call.php:15:28
+13 | class MyClass extends MyParent {
+14 |   public function test(): void {
+15 |     $fun_call = ExampleDsl`parent::bar("baz")`;
+   |                            ^^^^^^ [1]
+16 |   }
+17 | }
+
+2 errors found

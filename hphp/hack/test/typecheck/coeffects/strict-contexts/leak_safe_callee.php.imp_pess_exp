@@ -1,6 +1,25 @@
-ERROR: File "leak_safe_callee.php", line 22, characters 3-8:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "leak_safe_callee.php", line 19, characters 51-76:
-  From this declaration, the context of this function body provides the capability set {AccessGlobals, WriteProperty}
-  File "leak_safe_callee.php", line 3, characters 19-27:
-  But the function being called requires the capability set {ReadGlobals, System, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {AccessGlobals, WriteProperty} [2]
+-> But the function being called requires the capability set {ReadGlobals, System, WriteProperty} [3]
+
+leak_safe_callee.php:22:3
+ 1 | <?hh
+ 2 | 
+ 3 | function callee()[leak_safe]: void {}
+   |                   ^^^^^^^^^ [3]
+ 4 | 
+ 5 | function callable_from_defaults()[defaults]: void {
+   :
+17 | class MyP {}
+18 | 
+19 | function uncallable_from_write_props_and_globals()[
+   |                                                   ^ [2]
+20 |   write_props, globals
+   |   ^^^^^^^^^^^^^^^^^^^^ [2]
+21 | ]: void {
+   | ^ [2]
+22 |   callee(); // ERROR (missing a dedicated capability)
+   |   ^^^^^^ [1]
+23 | }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "obj_get_dollar_dollar.php", line 7, characters 19-27:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])
+error: Parsing[1002] Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. [1]
+
+obj_get_dollar_dollar.php:7:19
+5 | 
+6 |   public function foo(): void{
+7 |     $x = $this |> $$->bar<>;
+  |                   ^^^^^^^^^ [1]
+8 |     $x(4);
+9 |   }
+
+1 error found

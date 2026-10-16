@@ -1,6 +1,29 @@
-ERROR: File "typing.extends6.bad.php", line 22, characters 7-7:
-Enum NormalEnum includes enum E but their base types are incompatible (Typing[4388])
-ERROR: File "typing.extends6.bad.php", line 22, characters 7-7:
-Enums can only extend int, string, or arraykey. (Typing[4115])
-  File "typing.extends6.bad.php", line 16, characters 12-12:
-  This is an enum class.
+error: Typing[4388] Enum NormalEnum includes enum E but their base types are incompatible [1]
+
+typing.extends6.bad.php:22:7
+20 | 
+21 | enum NormalEnum : int {
+22 |   use E;
+   |       ^ [1]
+23 |   Z = 42;
+24 | }
+
+error: Typing[4115] Enums can only extend int, string, or arraykey. [1]
+-> This is an enum class. [2]
+
+typing.extends6.bad.php:22:7
+14 | }
+15 | 
+16 | enum class E: ExBox {
+   |            ^ [2]
+17 |    Box<string> A = new Box('zuck');
+18 |    IBox B = new IBox(42);
+19 | }
+20 | 
+21 | enum NormalEnum : int {
+22 |   use E;
+   |       ^ [1]
+23 |   Z = 42;
+24 | }
+
+2 errors found

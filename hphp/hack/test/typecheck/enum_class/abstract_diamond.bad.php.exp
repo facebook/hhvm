@@ -1,12 +1,45 @@
-ERROR: File "abstract_diamond.bad.php", line 16, characters 12-12:
-This class must be declared `abstract`, or provide an implementation for the abstract constant `Y` (Typing[4047])
-  File "abstract_diamond.bad.php", line 16, characters 32-32:
-  `H` uses `G`
-  File "abstract_diamond.bad.php", line 12, characters 38-38:
-  `G` uses `E`
-  File "abstract_diamond.bad.php", line 5, characters 19-19:
-  The constant is defined here
-ERROR: File "abstract_diamond.bad.php", line 22, characters 11-11:
-Cannot reference abstract constant `H::Y` directly (Typing[4129])
-  File "abstract_diamond.bad.php", line 5, characters 19-19:
-  Declaration is here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract constant `Y` [1]
+-> `H` uses `G` [2]
+-> `G` uses `E` [3]
+-> The constant is defined here [4]
+
+abstract_diamond.bad.php:16:12
+ 3 | 
+ 4 | abstract enum class E: mixed {
+ 5 |   abstract string Y;
+   |                   ^ [4]
+ 6 | }
+ 7 | 
+   :
+10 | }
+11 | 
+12 | abstract enum class G: mixed extends E {
+   |                                      ^ [3]
+13 |   abstract string Z;
+14 | }
+15 | 
+16 | enum class H: mixed extends F, G {
+   |            ^ [1]
+   |                                ^ [2]
+17 |   string Z = 'yolo';
+18 | }
+
+error: Typing[4129] Cannot reference abstract constant `H::Y` directly [1]
+-> Declaration is here [2]
+
+abstract_diamond.bad.php:22:11
+ 3 | 
+ 4 | abstract enum class E: mixed {
+ 5 |   abstract string Y;
+   |                   ^ [2]
+ 6 | }
+ 7 | 
+   :
+20 | <<__EntryPoint>>
+21 | function main(): void {
+22 |   echo H::Y;
+   |           ^ [1]
+23 |   echo "\n";
+24 |   echo H::Z;
+
+2 errors found

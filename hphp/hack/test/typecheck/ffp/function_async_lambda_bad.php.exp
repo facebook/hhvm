@@ -1,16 +1,43 @@
-ERROR: File "function_async_lambda_bad.php", line 6, characters 18-20:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "function_async_lambda_bad.php", line 10, characters 26-28:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "function_async_lambda_bad.php", line 6, characters 18-20:
-Invalid return type (Typing[4110])
-  File "function_async_lambda_bad.php", line 6, characters 18-20:
-  Expected `int`
-  File "function_async_lambda_bad.php", line 6, characters 18-20:
-  But got `Awaitable<_>` (result of an `async` function)
-ERROR: File "function_async_lambda_bad.php", line 10, characters 26-28:
-Invalid return type (Typing[4110])
-  File "function_async_lambda_bad.php", line 10, characters 26-28:
-  Expected `int`
-  File "function_async_lambda_bad.php", line 10, characters 26-28:
-  But got `Awaitable<_>` (result of an `async` function)
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+function_async_lambda_bad.php:6:18
+4 | 
+5 | function foo(): void {
+6 |   $f = async (): int ==> 1;
+  |                  ^^^ [1]
+7 | }
+8 | 
+
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+function_async_lambda_bad.php:10:26
+ 8 | 
+ 9 | function bar(): void {
+10 |   $f = async function(): int { return 1; };
+   |                          ^^^ [1]
+11 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [1]
+-> But got `Awaitable<_>` (result of an `async` function) [1]
+
+function_async_lambda_bad.php:6:18
+4 | 
+5 | function foo(): void {
+6 |   $f = async (): int ==> 1;
+  |                  ^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [1]
+-> But got `Awaitable<_>` (result of an `async` function) [1]
+
+function_async_lambda_bad.php:10:26
+ 8 | 
+ 9 | function bar(): void {
+10 |   $f = async function(): int { return 1; };
+   |                          ^^^ [1]
+11 | }
+
+4 errors found

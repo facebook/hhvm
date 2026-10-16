@@ -1,2 +1,11 @@
-ERROR: File "single_const_attribute_prop.php", line 4, characters 7-7:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
+
+single_const_attribute_prop.php:4:7
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class A {
+  |       ^ [1]
+5 |   <<__Const>> public int $p = 5;
+6 | }
+
+1 error found

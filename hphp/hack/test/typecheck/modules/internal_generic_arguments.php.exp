@@ -1,30 +1,96 @@
-ERROR: File "internal_generic_arguments.php--A.php", line 16, characters 8-13:
-Invalid argument (Typing[4110])
-  File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
-  Expected `int`
-  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
-  But got `string`
-  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
-  This type argument to `F` must match exactly (it is invariant)
-ERROR: File "internal_generic_arguments.php--A.php", line 16, characters 8-13:
-Invalid argument (Typing[4110])
-  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
-  Expected `string`
-  File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
-  But got `int`
-  File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
-  This type argument to `F` must match exactly (it is invariant)
-ERROR: File "internal_generic_arguments.php--A.php", line 20, characters 23-23:
-You cannot use this type in a public declaration. (Typing[4446])
-  File "internal_generic_arguments.php--A.php", line 4, characters 16-16:
-  It is declared as `internal` here
-ERROR: File "internal_generic_arguments.php--B.php", line 4, characters 8-13:
-Invalid argument (Typing[4110])
-  File "internal_generic_arguments.php--A.php", line 12, characters 16-16:
-  Expected `F<string>` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_generic_arguments.php--A.php", line 8, characters 28-36:
-  The type originated from here
-  File "internal_generic_arguments.php--A.php", line 12, characters 16-16:
-  But got `F<int>` because this is an internal symbol from module A, which is opaque outside of the module.
-  File "internal_generic_arguments.php--A.php", line 5, characters 31-36:
-  The type originated from here
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+-> This type argument to `F` must match exactly (it is invariant) [3]
+
+internal_generic_arguments.php--A.php:16:8
+ 3 | 
+ 4 | internal class T {
+ 5 |   public static function g(): F<int> {
+   |                                 ^^^ [2]
+ 6 |     return new F();
+ 7 |   }
+ 8 |   public static function h(F<string> $_): void {
+   |                              ^^^^^^ [3]
+ 9 |   }
+10 | }
+   :
+14 | 
+15 | function test(): void {
+16 |   T::h(T::g()); // This will error
+   |        ^^^^^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+-> This type argument to `F` must match exactly (it is invariant) [3]
+
+internal_generic_arguments.php--A.php:16:8
+ 3 | 
+ 4 | internal class T {
+ 5 |   public static function g(): F<int> {
+   |                                 ^^^ [3]
+ 6 |     return new F();
+ 7 |   }
+ 8 |   public static function h(F<string> $_): void {
+   |                              ^^^^^^ [2]
+ 9 |   }
+10 | }
+   :
+14 | 
+15 | function test(): void {
+16 |   T::h(T::g()); // This will error
+   |        ^^^^^^ [1]
+17 | }
+18 | 
+
+error: Typing[4446] You cannot use this type in a public declaration. [1]
+-> It is declared as `internal` here [2]
+
+internal_generic_arguments.php--A.php:20:23
+ 2 | module A;
+ 3 | 
+ 4 | internal class T {
+   |                ^ [2]
+ 5 |   public static function g(): F<int> {
+ 6 |     return new F();
+   :
+18 | 
+19 | // This now errors: we don't allow public classes to extend internal ones
+20 | final class C extends T {
+   |                       ^ [1]
+21 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F<string>` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [3]
+-> But got `F<int>` because this is an internal symbol from module A, which is opaque outside of the module. [2]
+-> The type originated from here [4]
+
+internal_generic_arguments.php--B.php:4:8
+ 2 | module B;
+ 3 | async function main(): Awaitable<void> {
+ 4 |   C::h(C::g()); // This should also error, even though F is treated opaquely here
+   |        ^^^^^^ [1]
+ 5 | }
+
+internal_generic_arguments.php--A.php:12:16
+ 3 | 
+ 4 | internal class T {
+ 5 |   public static function g(): F<int> {
+   |                               ^^^^^^ [4]
+ 6 |     return new F();
+ 7 |   }
+ 8 |   public static function h(F<string> $_): void {
+   |                            ^^^^^^^^^ [3]
+ 9 |   }
+10 | }
+11 | 
+12 | internal class F<T> {
+   |                ^ [2]
+13 | }
+14 | 
+
+4 errors found

@@ -1,12 +1,60 @@
-ERROR: File "readonly_statics.php", line 16, characters 10-16:
-Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])
-ERROR: File "readonly_statics.php", line 17, characters 5-11:
-Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
-ERROR: File "readonly_statics.php", line 22, characters 10-16:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "readonly_statics.php", line 23, characters 5-11:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
-ERROR: File "readonly_statics.php", line 23, characters 5-11:
-Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
-ERROR: File "readonly_statics.php", line 24, characters 19-25:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+error: Parsing[1002] Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. [1]
+
+readonly_statics.php:16:10
+14 | 
+15 | function read_globals_error_on_access()[read_globals] : void {
+16 |     $x = Foo::$i; // Readonly error
+   |          ^^^^^^^ [1]
+17 |     Foo::$i = 5; // Globals error
+18 |     $y = readonly Foo::$i; // No error
+
+error: Parsing[1002] Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). [1]
+
+readonly_statics.php:17:5
+15 | function read_globals_error_on_access()[read_globals] : void {
+16 |     $x = Foo::$i; // Readonly error
+17 |     Foo::$i = 5; // Globals error
+   |     ^^^^^^^ [1]
+18 |     $y = readonly Foo::$i; // No error
+19 | }
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+readonly_statics.php:22:10
+20 | 
+21 | function pure_errors_on_read_and_access()[] : void {
+22 |     $x = Foo::$i; // ReadGlobals error
+   |          ^^^^^^^ [1]
+23 |     Foo::$i = 5; // Globals error, ReadGlobals error
+24 |     $y = readonly Foo::$i; // ReadGlobals error
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+readonly_statics.php:23:5
+21 | function pure_errors_on_read_and_access()[] : void {
+22 |     $x = Foo::$i; // ReadGlobals error
+23 |     Foo::$i = 5; // Globals error, ReadGlobals error
+   |     ^^^^^^^ [1]
+24 |     $y = readonly Foo::$i; // ReadGlobals error
+25 | }
+
+error: Parsing[1002] Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). [1]
+
+readonly_statics.php:23:5
+21 | function pure_errors_on_read_and_access()[] : void {
+22 |     $x = Foo::$i; // ReadGlobals error
+23 |     Foo::$i = 5; // Globals error, ReadGlobals error
+   |     ^^^^^^^ [1]
+24 |     $y = readonly Foo::$i; // ReadGlobals error
+25 | }
+
+error: Parsing[1002] Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). [1]
+
+readonly_statics.php:24:19
+22 |     $x = Foo::$i; // ReadGlobals error
+23 |     Foo::$i = 5; // Globals error, ReadGlobals error
+24 |     $y = readonly Foo::$i; // ReadGlobals error
+   |                   ^^^^^^^ [1]
+25 | }
+
+6 errors found

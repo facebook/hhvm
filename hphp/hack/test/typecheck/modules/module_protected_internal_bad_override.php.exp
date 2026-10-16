@@ -1,52 +1,245 @@
-ERROR: File "module_protected_internal_bad_override.php--B.php", line 9, characters 20-24:
-This member visibility is: `private` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 11, characters 30-34:
-  `protected internal` was expected
-ERROR: File "module_protected_internal_bad_override.php--C.php", line 11, characters 31-33:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 8, characters 20-22:
-  `internal` was expected
-ERROR: File "module_protected_internal_bad_override.php--C.php", line 13, characters 31-33:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 9, characters 21-23:
-  `protected` was expected
-ERROR: File "module_protected_internal_bad_override.php--C.php", line 15, characters 31-34:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 10, characters 18-21:
-  `public` was expected
-ERROR: File "module_protected_internal_bad_override.php--C.php", line 21, characters 22-24:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 14, characters 11-13:
-  `internal` was expected
-ERROR: File "module_protected_internal_bad_override.php--C.php", line 23, characters 22-24:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 15, characters 12-14:
-  `protected` was expected
-ERROR: File "module_protected_internal_bad_override.php--C.php", line 25, characters 22-24:
-This member visibility is: `protected internal` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 16, characters 9-11:
-  `public` was expected
-ERROR: File "module_protected_internal_bad_override.php--D.php", line 7, characters 31-33:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_override.php--A.php", line 6, characters 30-32:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_override.php--D.php", line 9, characters 21-23:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_override.php--A.php", line 7, characters 30-32:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_override.php--D.php", line 11, characters 20-24:
-This member visibility is: `private` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 11, characters 30-34:
-  `protected internal` was expected
-ERROR: File "module_protected_internal_bad_override.php--D.php", line 13, characters 22-24:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_override.php--A.php", line 12, characters 21-23:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_override.php--D.php", line 15, characters 12-14:
-Cannot override this member in module `M2` (Typing[4444])
-  File "module_protected_internal_bad_override.php--A.php", line 13, characters 21-23:
-  This member is internal to module `M1`
-ERROR: File "module_protected_internal_bad_override.php--D.php", line 17, characters 11-13:
-This member visibility is: `private` (Typing[4113])
-  File "module_protected_internal_bad_override.php--A.php", line 17, characters 21-23:
-  `protected internal` was expected
+error: Typing[4113] This member visibility is: `private` [1]
+-> `protected internal` was expected [2]
+
+module_protected_internal_bad_override.php--B.php:9:20
+ 7 |   protected function bar(): void {}
+ 8 |   // Not OK since we are narrowing visibility
+ 9 |   private function corge(): void {}
+   |                    ^^^^^ [1]
+10 |   // OK since we are widening visibility
+11 |   protected int $foo = 42;
+
+module_protected_internal_bad_override.php--A.php:11:30
+ 9 |  protected function qux(): void {}
+10 |  public function quux(): void {}
+11 |  protected internal function corge(): void {}
+   |                              ^^^^^ [2]
+12 |  protected internal int $foo = 42;
+13 |  protected internal int $bar = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `internal` was expected [2]
+
+module_protected_internal_bad_override.php--C.php:11:31
+ 9 |   internal function bar(): void {}
+10 |   // Not OK since we are narrowing visibility even though we are in the same module
+11 |   protected internal function baz(): void {}
+   |                               ^^^ [1]
+12 |   // Not OK since we are narrowing visibility even though we are in the same module
+13 |   protected internal function qux(): void {}
+
+module_protected_internal_bad_override.php--A.php:8:20
+ 6 |  protected internal function foo(): void {}
+ 7 |  protected internal function bar(): void {}
+ 8 |  internal function baz(): void {}
+   |                    ^^^ [2]
+ 9 |  protected function qux(): void {}
+10 |  public function quux(): void {}
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `protected` was expected [2]
+
+module_protected_internal_bad_override.php--C.php:13:31
+11 |   protected internal function baz(): void {}
+12 |   // Not OK since we are narrowing visibility even though we are in the same module
+13 |   protected internal function qux(): void {}
+   |                               ^^^ [1]
+14 |   // Not OK since we are narrowing visibility even though we are in the same module
+15 |   protected internal function quux(): void {}
+
+module_protected_internal_bad_override.php--A.php:9:21
+ 7 |  protected internal function bar(): void {}
+ 8 |  internal function baz(): void {}
+ 9 |  protected function qux(): void {}
+   |                     ^^^ [2]
+10 |  public function quux(): void {}
+11 |  protected internal function corge(): void {}
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `public` was expected [2]
+
+module_protected_internal_bad_override.php--C.php:15:31
+13 |   protected internal function qux(): void {}
+14 |   // Not OK since we are narrowing visibility even though we are in the same module
+15 |   protected internal function quux(): void {}
+   |                               ^^^^ [1]
+16 |   // OK since we are in the same module
+17 |   protected internal int $foo = 42;
+
+module_protected_internal_bad_override.php--A.php:10:18
+ 8 |  internal function baz(): void {}
+ 9 |  protected function qux(): void {}
+10 |  public function quux(): void {}
+   |                  ^^^^ [2]
+11 |  protected internal function corge(): void {}
+12 |  protected internal int $foo = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `internal` was expected [2]
+
+module_protected_internal_bad_override.php--C.php:21:22
+19 |   internal int $bar = 42;
+20 |   // Not OK since we are narrowing visibility even though we are in the same module
+21 |   protected internal int $baz = 42;
+   |                      ^^^ [1]
+22 |   // Not OK since we are narrowing visibility even though we are in the same module
+23 |   protected internal int $qux = 42;
+
+module_protected_internal_bad_override.php--A.php:14:11
+12 |  protected internal int $foo = 42;
+13 |  protected internal int $bar = 42;
+14 |  internal int $baz = 42;
+   |           ^^^ [2]
+15 |  protected int $qux = 42;
+16 |  public int $quux = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `protected` was expected [2]
+
+module_protected_internal_bad_override.php--C.php:23:22
+21 |   protected internal int $baz = 42;
+22 |   // Not OK since we are narrowing visibility even though we are in the same module
+23 |   protected internal int $qux = 42;
+   |                      ^^^ [1]
+24 |   // Not OK since we are narrowing visibility even though we are in the same module
+25 |   protected internal int $quux = 42;
+
+module_protected_internal_bad_override.php--A.php:15:12
+13 |  protected internal int $bar = 42;
+14 |  internal int $baz = 42;
+15 |  protected int $qux = 42;
+   |            ^^^ [2]
+16 |  public int $quux = 42;
+17 |  protected internal int $corge = 42;
+
+error: Typing[4113] This member visibility is: `protected internal` [1]
+-> `public` was expected [2]
+
+module_protected_internal_bad_override.php--C.php:25:22
+23 |   protected internal int $qux = 42;
+24 |   // Not OK since we are narrowing visibility even though we are in the same module
+25 |   protected internal int $quux = 42;
+   |                      ^^^ [1]
+26 | }
+
+module_protected_internal_bad_override.php--A.php:16:9
+14 |  internal int $baz = 42;
+15 |  protected int $qux = 42;
+16 |  public int $quux = 42;
+   |         ^^^ [2]
+17 |  protected internal int $corge = 42;
+18 | }
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_override.php--D.php:7:31
+5 | class D extends A {
+6 |   // Not OK since we are in a different module
+7 |   protected internal function foo(): void {}
+  |                               ^^^ [1]
+8 |   // Not OK since we are in a different module
+9 |   internal function bar(): void {}
+
+module_protected_internal_bad_override.php--A.php:6:30
+4 | 
+5 | class A {
+6 |  protected internal function foo(): void {}
+  |                              ^^^ [2]
+7 |  protected internal function bar(): void {}
+8 |  internal function baz(): void {}
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_override.php--D.php:9:21
+ 7 |   protected internal function foo(): void {}
+ 8 |   // Not OK since we are in a different module
+ 9 |   internal function bar(): void {}
+   |                     ^^^ [1]
+10 |   // Not OK since we are narrowing visibility and in a different module
+11 |   private function corge(): void {}
+
+module_protected_internal_bad_override.php--A.php:7:30
+ 5 | class A {
+ 6 |  protected internal function foo(): void {}
+ 7 |  protected internal function bar(): void {}
+   |                              ^^^ [2]
+ 8 |  internal function baz(): void {}
+ 9 |  protected function qux(): void {}
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `protected internal` was expected [2]
+
+module_protected_internal_bad_override.php--D.php:11:20
+ 9 |   internal function bar(): void {}
+10 |   // Not OK since we are narrowing visibility and in a different module
+11 |   private function corge(): void {}
+   |                    ^^^^^ [1]
+12 |   // Not OK since we are in a different module
+13 |   protected internal int $foo = 42;
+
+module_protected_internal_bad_override.php--A.php:11:30
+ 9 |  protected function qux(): void {}
+10 |  public function quux(): void {}
+11 |  protected internal function corge(): void {}
+   |                              ^^^^^ [2]
+12 |  protected internal int $foo = 42;
+13 |  protected internal int $bar = 42;
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_override.php--D.php:13:22
+11 |   private function corge(): void {}
+12 |   // Not OK since we are in a different module
+13 |   protected internal int $foo = 42;
+   |                      ^^^ [1]
+14 |   // Not OK since we are in a different module
+15 |   internal int $bar = 42;
+
+module_protected_internal_bad_override.php--A.php:12:21
+10 |  public function quux(): void {}
+11 |  protected internal function corge(): void {}
+12 |  protected internal int $foo = 42;
+   |                     ^^^ [2]
+13 |  protected internal int $bar = 42;
+14 |  internal int $baz = 42;
+
+error: Typing[4444] Cannot override this member in module `M2` [1]
+-> This member is internal to module `M1` [2]
+
+module_protected_internal_bad_override.php--D.php:15:12
+13 |   protected internal int $foo = 42;
+14 |   // Not OK since we are in a different module
+15 |   internal int $bar = 42;
+   |            ^^^ [1]
+16 |   // Not OK since we are narrowing visibility and in a different module
+17 |   private int $corge = 42;
+
+module_protected_internal_bad_override.php--A.php:13:21
+11 |  protected internal function corge(): void {}
+12 |  protected internal int $foo = 42;
+13 |  protected internal int $bar = 42;
+   |                     ^^^ [2]
+14 |  internal int $baz = 42;
+15 |  protected int $qux = 42;
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `protected internal` was expected [2]
+
+module_protected_internal_bad_override.php--D.php:17:11
+15 |   internal int $bar = 42;
+16 |   // Not OK since we are narrowing visibility and in a different module
+17 |   private int $corge = 42;
+   |           ^^^ [1]
+18 | }
+
+module_protected_internal_bad_override.php--A.php:17:21
+15 |  protected int $qux = 42;
+16 |  public int $quux = 42;
+17 |  protected internal int $corge = 42;
+   |                     ^^^ [2]
+18 | }
+
+13 errors found

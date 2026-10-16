@@ -1,8 +1,25 @@
-ERROR: File "bad_inout_use_lvalue3.php", line 10, characters 11-31:
-You cannot decorate this argument as `inout` (Parsing[1002])
-ERROR: File "bad_inout_use_lvalue3.php", line 10, characters 11-31:
-Invalid argument to an `inout` parameter (Typing[4110])
-  File "bad_inout_use_lvalue3.php", line 10, characters 11-31:
-  Expected `float` because of this class constant access
-  File "bad_inout_use_lvalue3.php", line 7, characters 24-25:
-  But got `dynamic` because the type of this inout parameter is implicitly a like-type
+error: Parsing[1002] You cannot decorate this argument as `inout` [1]
+
+bad_inout_use_lvalue3.php:10:11
+ 8 | 
+ 9 | function test(): void {
+10 |   f(inout Cls::Some_CLASS_CONST);
+   |           ^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+error: Typing[4110] Invalid argument to an `inout` parameter [1]
+-> Expected `float` because of this class constant access [1]
+-> But got `dynamic` because the type of this inout parameter is implicitly a like-type [2]
+
+bad_inout_use_lvalue3.php:10:11
+ 5 | }
+ 6 | 
+ 7 | function f(inout float $i): void {}
+   |                        ^^ [2]
+ 8 | 
+ 9 | function test(): void {
+10 |   f(inout Cls::Some_CLASS_CONST);
+   |           ^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+2 errors found

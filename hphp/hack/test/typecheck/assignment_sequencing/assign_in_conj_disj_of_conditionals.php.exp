@@ -1,52 +1,201 @@
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 4, characters 14-15:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 15, characters 14-15:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 7, characters 16-17:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
-  Expected `int`
-  File "assign_in_conj_disj_of_conditionals.php", line 3, characters 21-26:
-  But got `string`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 8, characters 19-20:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
-  Expected `string`
-  File "assign_in_conj_disj_of_conditionals.php", line 4, characters 19-19:
-  But got `int`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 10, characters 14-15:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
-  Expected `int`
-  File "assign_in_conj_disj_of_conditionals.php", line 3, characters 21-26:
-  But got `string`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 11, characters 17-18:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
-  Expected `string`
-  File "assign_in_conj_disj_of_conditionals.php", line 4, characters 19-19:
-  But got `int`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 16, characters 16-17:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
-  Expected `int`
-  File "assign_in_conj_disj_of_conditionals.php", line 14, characters 21-26:
-  But got `string`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 17, characters 19-20:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
-  Expected `string`
-  File "assign_in_conj_disj_of_conditionals.php", line 15, characters 19-19:
-  But got `int`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 21, characters 14-15:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
-  Expected `int`
-  File "assign_in_conj_disj_of_conditionals.php", line 14, characters 21-26:
-  But got `string`
-ERROR: File "assign_in_conj_disj_of_conditionals.php", line 22, characters 17-18:
-Invalid argument (Typing[4110])
-  File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
-  Expected `string`
-  File "assign_in_conj_disj_of_conditionals.php", line 15, characters 19-19:
-  But got `int`
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+assign_in_conj_disj_of_conditionals.php:4:14
+2 | 
+3 | function f(bool $b, string $x): void {
+4 |   if ($b && ($x = 1) !== 0) {
+  |              ^^ [1]
+5 |     expect_int($x); // ok
+6 |   } else {
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+assign_in_conj_disj_of_conditionals.php:15:14
+13 | 
+14 | function g(bool $b, string $x): void {
+15 |   if ($b || ($x = 1) !== 0) {
+   |              ^^ [1]
+16 |     expect_int($x); // error: if $b is true, $x is a string
+17 |     expect_string($x); // error: if $b is false, $x is an int
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+assign_in_conj_disj_of_conditionals.php:7:16
+ 1 | <?hh
+ 2 | 
+ 3 | function f(bool $b, string $x): void {
+   |                     ^^^^^^ [3]
+ 4 |   if ($b && ($x = 1) !== 0) {
+ 5 |     expect_int($x); // ok
+ 6 |   } else {
+ 7 |     expect_int($x); // error: if $b is false, $x is a string
+   |                ^^ [1]
+ 8 |     expect_string($x); // error: if $b is true, $x is an int
+ 9 |   }
+   :
+23 | }
+24 | 
+25 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+26 | function expect_string(string $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+assign_in_conj_disj_of_conditionals.php:8:19
+ 2 | 
+ 3 | function f(bool $b, string $x): void {
+ 4 |   if ($b && ($x = 1) !== 0) {
+   |                   ^ [3]
+ 5 |     expect_int($x); // ok
+ 6 |   } else {
+ 7 |     expect_int($x); // error: if $b is false, $x is a string
+ 8 |     expect_string($x); // error: if $b is true, $x is an int
+   |                   ^^ [1]
+ 9 |   }
+10 |   expect_int($x); // error
+   :
+24 | 
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+assign_in_conj_disj_of_conditionals.php:10:14
+ 1 | <?hh
+ 2 | 
+ 3 | function f(bool $b, string $x): void {
+   |                     ^^^^^^ [3]
+ 4 |   if ($b && ($x = 1) !== 0) {
+ 5 |     expect_int($x); // ok
+   :
+ 8 |     expect_string($x); // error: if $b is true, $x is an int
+ 9 |   }
+10 |   expect_int($x); // error
+   |              ^^ [1]
+11 |   expect_string($x); // error
+12 | }
+   :
+23 | }
+24 | 
+25 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+26 | function expect_string(string $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+assign_in_conj_disj_of_conditionals.php:11:17
+ 2 | 
+ 3 | function f(bool $b, string $x): void {
+ 4 |   if ($b && ($x = 1) !== 0) {
+   |                   ^ [3]
+ 5 |     expect_int($x); // ok
+ 6 |   } else {
+   :
+ 9 |   }
+10 |   expect_int($x); // error
+11 |   expect_string($x); // error
+   |                 ^^ [1]
+12 | }
+13 | 
+   :
+24 | 
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+assign_in_conj_disj_of_conditionals.php:16:16
+12 | }
+13 | 
+14 | function g(bool $b, string $x): void {
+   |                     ^^^^^^ [3]
+15 |   if ($b || ($x = 1) !== 0) {
+16 |     expect_int($x); // error: if $b is true, $x is a string
+   |                ^^ [1]
+17 |     expect_string($x); // error: if $b is false, $x is an int
+18 |   } else {
+   :
+23 | }
+24 | 
+25 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+26 | function expect_string(string $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+assign_in_conj_disj_of_conditionals.php:17:19
+13 | 
+14 | function g(bool $b, string $x): void {
+15 |   if ($b || ($x = 1) !== 0) {
+   |                   ^ [3]
+16 |     expect_int($x); // error: if $b is true, $x is a string
+17 |     expect_string($x); // error: if $b is false, $x is an int
+   |                   ^^ [1]
+18 |   } else {
+19 |     expect_int($x); // ok: $b is necessarily false, so $x is an int
+   :
+24 | 
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+assign_in_conj_disj_of_conditionals.php:21:14
+12 | }
+13 | 
+14 | function g(bool $b, string $x): void {
+   |                     ^^^^^^ [3]
+15 |   if ($b || ($x = 1) !== 0) {
+16 |     expect_int($x); // error: if $b is true, $x is a string
+   :
+19 |     expect_int($x); // ok: $b is necessarily false, so $x is an int
+20 |   }
+21 |   expect_int($x); // error
+   |              ^^ [1]
+22 |   expect_string($x); // error
+23 | }
+24 | 
+25 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+26 | function expect_string(string $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+assign_in_conj_disj_of_conditionals.php:22:17
+13 | 
+14 | function g(bool $b, string $x): void {
+15 |   if ($b || ($x = 1) !== 0) {
+   |                   ^ [3]
+16 |     expect_int($x); // error: if $b is true, $x is a string
+17 |     expect_string($x); // error: if $b is false, $x is an int
+   :
+20 |   }
+21 |   expect_int($x); // error
+22 |   expect_string($x); // error
+   |                 ^^ [1]
+23 | }
+24 | 
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+
+10 errors found

@@ -1,6 +1,23 @@
-ERROR: File "typename_no_new.php", line 9, characters 14-15:
-It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
-  File "typename_no_new.php", line 8, characters 16-32:
-  Definition is here
-ERROR: File "typename_no_new.php", line 13, characters 14-15:
-Was expecting a class, but got a string (Typing[4026])
+error: Typing[4482] It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. [1]
+-> Definition is here [2]
+
+typename_no_new.php:9:14
+ 6 | type CAlias = C;
+ 7 | 
+ 8 | function new_c(classname<CAlias> $c): CAlias {
+   |                ^^^^^^^^^^^^^^^^^ [2]
+ 9 |   return new $c();
+   |              ^^ [1]
+10 | }
+11 | 
+
+error: Typing[4026] Was expecting a class, but got a string [1]
+
+typename_no_new.php:13:14
+11 | 
+12 | function bad_new_c(typename<CAlias> $c): CAlias {
+13 |   return new $c();
+   |              ^^ [1]
+14 | }
+
+2 errors found

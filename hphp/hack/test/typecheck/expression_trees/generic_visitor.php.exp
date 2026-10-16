@@ -1,14 +1,64 @@
-ERROR: File "generic_visitor.php", line 7, characters 18-18:
-A semicolon `;` is expected here. (Parsing[1002])
-ERROR: File "generic_visitor.php", line 7, characters 18-20:
-Expression trees must provide the DSL name. (Parsing[1002])
-ERROR: File "generic_visitor.php", line 7, characters 3-12:
-Unbound name: `ExampleDsl` (a global function) (Naming[2049])
-ERROR: File "generic_visitor.php", line 7, characters 18-18:
-Unbound name: `MISSING_DSL` (Naming[2049])
-ERROR: File "generic_visitor.php", line 7, characters 18-18:
-Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
-ERROR: File "generic_visitor.php", line 7, characters 19-19:
-Unbound name: `MISSING_DSL` (an object type) (Naming[2049])
-ERROR: File "generic_visitor.php", line 7, characters 3-12:
-Unbound name (typing): `ExampleDsl` (Typing[4107])
+error: Parsing[1002] A semicolon `;` is expected here. [1]
+
+generic_visitor.php:7:18
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |                  ^ [1]
+8 | }
+
+error: Parsing[1002] Expression trees must provide the DSL name. [1]
+
+generic_visitor.php:7:18
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |                  ^^^ [1]
+8 | }
+
+error: Naming[2049] Unbound name: `ExampleDsl` (a global function) [1]
+
+generic_visitor.php:7:3
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |   ^^^^^^^^^^ [1]
+8 | }
+
+error: Naming[2049] Unbound name: `MISSING_DSL` [1]
+
+generic_visitor.php:7:18
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |                  ^ [1]
+8 | }
+
+error: Naming[2049] Unbound name: `MISSING_DSL` (an object type) [1]
+
+generic_visitor.php:7:18
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |                  ^ [1]
+8 | }
+
+error: Naming[2049] Unbound name: `MISSING_DSL` (an object type) [1]
+
+generic_visitor.php:7:19
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |                   ^ [1]
+8 | }
+
+error: Typing[4107] Unbound name (typing): `ExampleDsl` [1]
+
+generic_visitor.php:7:3
+5 | function foo(): void {
+6 |   // This syntax isn't legal
+7 |   ExampleDsl<int>`1`;
+  |   ^^^^^^^^^^ [1]
+8 | }
+
+7 errors found

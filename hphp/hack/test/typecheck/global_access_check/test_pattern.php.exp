@@ -1,50 +1,251 @@
-ERROR: File "test_pattern.php", line 38, characters 16-19:
-Unbound name: `Time` (an object type) (Naming[2049])
-ERROR: File "test_pattern.php", line 39, characters 16-34:
-Unbound name: `SV_MESSAGING_CONFIG` (an object type) (Naming[2049])
-ERROR: File "test_pattern.php", line 20, characters 5-25:
-[Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 21, characters 5-26:
-[Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 22, characters 5-23:
-[Test::test_method_call]{Foo::$static_prop}(int)<CounterIncrement> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 24, characters 10-27:
-[Test::test_method_call]{Foo::$nullable_bar}(?Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_pattern.php", line 26, characters 7-36:
-[Test::test_method_call]{Foo::$nullable_bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 28, characters 7-18:
-[Test::test_method_call]{Foo::$nullable_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_pattern.php", line 31, characters 5-29:
-[Test::test_method_call]{Foo::$nullable_bar}(null)<WriteEmptyOrNull> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 33, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_pattern.php", line 35, characters 5-26:
-[Test::test_method_call]{Foo::$static_prop}(int)<WriteGlobalToGlobal> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 37, characters 5-36:
-[Test::test_method_call]{Foo::$bar}(int)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_pattern.php", line 38, characters 5-30:
-[Test::test_method_call]{Foo::$bar}(nothing)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_pattern.php", line 39, characters 5-64:
-[Test::test_method_call]{Foo::$bar}(nothing)<WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_pattern.php", line 40, characters 5-32:
-[Test::test_method_call]{Foo::$static_prop}(nothing)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 42, characters 5-56:
-[Test::test_method_call]{Foo::$bar}(int)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_pattern.php", line 42, characters 40-56:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
-ERROR: File "test_pattern.php", line 43, characters 5-77:
-[Test::test_method_call]{Foo::$bar;Foo::$static_prop}(int) A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_pattern.php", line 43, characters 40-56:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
-ERROR: File "test_pattern.php", line 45, characters 5-76:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>)<WriteLiteral,WriteGlobalToGlobal> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 45, characters 43-59:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_pattern.php", line 46, characters 5-93:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 46, characters 43-59:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely read. (Other[11004])
-ERROR: File "test_pattern.php", line 47, characters 5-30:
-[Test::test_method_call]{Foo::$static_dict}(dict<nothing, nothing>)<WriteEmptyOrNull> A global variable is definitely written. (Other[11001])
-ERROR: File "test_pattern.php", line 48, characters 5-32:
-[Test::test_method_call]{Foo::$static_dict}(int)<Caching,WriteLiteral> A global variable is definitely written. (Other[11001])
+error: Naming[2049] Unbound name: `Time` (an object type) [1]
+
+test_pattern.php:38:16
+36 | 
+37 |     $b->prop = (int)\microtime(true); // WriteNonSensitive
+38 |     $b->prop = Time::nowInMS(); // WriteNonSensitive
+   |                ^^^^ [1]
+39 |     $b->prop = SV_MESSAGING_CONFIG::getWithMarkedArrays_LEGACY(); // WriteNonSensitive
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+
+error: Naming[2049] Unbound name: `SV_MESSAGING_CONFIG` (an object type) [1]
+
+test_pattern.php:39:16
+37 |     $b->prop = (int)\microtime(true); // WriteNonSensitive
+38 |     $b->prop = Time::nowInMS(); // WriteNonSensitive
+39 |     $b->prop = SV_MESSAGING_CONFIG::getWithMarkedArrays_LEGACY(); // WriteNonSensitive
+   |                ^^^^^^^^^^^^^^^^^^^ [1]
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+41 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_pattern.php:20:5
+18 | class Test {
+19 |   public function test_method_call(): void {
+20 |     Foo::$static_prop = 2; // WriteLiteral
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |     Foo::$static_prop += 2; // WriteLiteral
+22 |     Foo::$static_prop++; // CounterIncrement
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. [1]
+
+test_pattern.php:21:5
+19 |   public function test_method_call(): void {
+20 |     Foo::$static_prop = 2; // WriteLiteral
+21 |     Foo::$static_prop += 2; // WriteLiteral
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 |     Foo::$static_prop++; // CounterIncrement
+23 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<CounterIncrement> A global variable is definitely written. [1]
+
+test_pattern.php:22:5
+20 |     Foo::$static_prop = 2; // WriteLiteral
+21 |     Foo::$static_prop += 2; // WriteLiteral
+22 |     Foo::$static_prop++; // CounterIncrement
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+23 | 
+24 |     $a = Foo::$nullable_bar;
+
+error: Other[11004] [Test::test_method_call]{Foo::$nullable_bar}(?Bar) A global variable is definitely read. [1]
+
+test_pattern.php:24:10
+22 |     Foo::$static_prop++; // CounterIncrement
+23 | 
+24 |     $a = Foo::$nullable_bar;
+   |          ^^^^^^^^^^^^^^^^^^ [1]
+25 |     if ($a is null) {
+26 |       Foo::$nullable_bar = new Bar(); // Singleton
+
+error: Other[11001] [Test::test_method_call]{Foo::$nullable_bar}(Bar)<Singleton> A global variable is definitely written. [1]
+
+test_pattern.php:26:7
+24 |     $a = Foo::$nullable_bar;
+25 |     if ($a is null) {
+26 |       Foo::$nullable_bar = new Bar(); // Singleton
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |     } else {
+28 |       $a->prop = 1; // WriteLiteral
+
+error: Other[11002] [Test::test_method_call]{Foo::$nullable_bar}(int)<WriteLiteral> A global variable is possibly written via reference. [1]
+
+test_pattern.php:28:7
+26 |       Foo::$nullable_bar = new Bar(); // Singleton
+27 |     } else {
+28 |       $a->prop = 1; // WriteLiteral
+   |       ^^^^^^^^^^^^ [1]
+29 |     }
+30 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$nullable_bar}(null)<WriteEmptyOrNull> A global variable is definitely written. [1]
+
+test_pattern.php:31:5
+29 |     }
+30 | 
+31 |     Foo::$nullable_bar = null; // WriteEmptyOrNUll
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+32 | 
+33 |     $b = Foo::$bar;
+
+error: Other[11004] [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. [1]
+
+test_pattern.php:33:10
+31 |     Foo::$nullable_bar = null; // WriteEmptyOrNUll
+32 | 
+33 |     $b = Foo::$bar;
+   |          ^^^^^^^^^ [1]
+34 |     $c = $b->prop;
+35 |     Foo::$static_prop = $c; // WriteGlobalToGlobal
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(int)<WriteGlobalToGlobal> A global variable is definitely written. [1]
+
+test_pattern.php:35:5
+33 |     $b = Foo::$bar;
+34 |     $c = $b->prop;
+35 |     Foo::$static_prop = $c; // WriteGlobalToGlobal
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+36 | 
+37 |     $b->prop = (int)\microtime(true); // WriteNonSensitive
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteNonSensitive> A global variable is possibly written via reference. [1]
+
+test_pattern.php:37:5
+35 |     Foo::$static_prop = $c; // WriteGlobalToGlobal
+36 | 
+37 |     $b->prop = (int)\microtime(true); // WriteNonSensitive
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+38 |     $b->prop = Time::nowInMS(); // WriteNonSensitive
+39 |     $b->prop = SV_MESSAGING_CONFIG::getWithMarkedArrays_LEGACY(); // WriteNonSensitive
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(nothing)<WriteNonSensitive> A global variable is possibly written via reference. [1]
+
+test_pattern.php:38:5
+36 | 
+37 |     $b->prop = (int)\microtime(true); // WriteNonSensitive
+38 |     $b->prop = Time::nowInMS(); // WriteNonSensitive
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+39 |     $b->prop = SV_MESSAGING_CONFIG::getWithMarkedArrays_LEGACY(); // WriteNonSensitive
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(nothing)<WriteNonSensitive> A global variable is possibly written via reference. [1]
+
+test_pattern.php:39:5
+37 |     $b->prop = (int)\microtime(true); // WriteNonSensitive
+38 |     $b->prop = Time::nowInMS(); // WriteNonSensitive
+39 |     $b->prop = SV_MESSAGING_CONFIG::getWithMarkedArrays_LEGACY(); // WriteNonSensitive
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+41 | 
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_prop}(nothing)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is definitely written. [1]
+
+test_pattern.php:40:5
+38 |     $b->prop = Time::nowInMS(); // WriteNonSensitive
+39 |     $b->prop = SV_MESSAGING_CONFIG::getWithMarkedArrays_LEGACY(); // WriteNonSensitive
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+41 | 
+42 |     $b->prop = (int)\microtime(true) + Foo::$static_prop; // WriteNonSensitive, WriteGlobalToGlobal
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar}(int)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is possibly written via reference. [1]
+
+test_pattern.php:42:5
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+41 | 
+42 |     $b->prop = (int)\microtime(true) + Foo::$static_prop; // WriteNonSensitive, WriteGlobalToGlobal
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+43 |     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+44 | 
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. [1]
+
+test_pattern.php:42:40
+40 |     Foo::$static_prop = $b->prop; // WriteGlobalToGlobal, WriteNonSensitive
+41 | 
+42 |     $b->prop = (int)\microtime(true) + Foo::$static_prop; // WriteNonSensitive, WriteGlobalToGlobal
+   |                                        ^^^^^^^^^^^^^^^^^ [1]
+43 |     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+44 | 
+
+error: Other[11002] [Test::test_method_call]{Foo::$bar;Foo::$static_prop}(int) A global variable is possibly written via reference. [1]
+
+test_pattern.php:43:5
+41 | 
+42 |     $b->prop = (int)\microtime(true) + Foo::$static_prop; // WriteNonSensitive, WriteGlobalToGlobal
+43 |     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+44 | 
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. [1]
+
+test_pattern.php:43:40
+41 | 
+42 |     $b->prop = (int)\microtime(true) + Foo::$static_prop; // WriteNonSensitive, WriteGlobalToGlobal
+43 |     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+   |                                        ^^^^^^^^^^^^^^^^^ [1]
+44 | 
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_dict}(dict<string, int>)<WriteLiteral,WriteGlobalToGlobal> A global variable is definitely written. [1]
+
+test_pattern.php:45:5
+43 |     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+44 | 
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+46 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+47 |     Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely read. [1]
+
+test_pattern.php:45:43
+43 |     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+44 | 
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+   |                                           ^^^^^^^^^^^^^^^^^ [1]
+46 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+47 |     Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely written. [1]
+
+test_pattern.php:46:5
+44 | 
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+46 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+47 |     Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+48 |     Foo::$static_dict["1"] ??= 1; // Caching
+
+error: Other[11004] [Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely read. [1]
+
+test_pattern.php:46:43
+44 | 
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+46 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+   |                                           ^^^^^^^^^^^^^^^^^ [1]
+47 |     Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+48 |     Foo::$static_dict["1"] ??= 1; // Caching
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_dict}(dict<nothing, nothing>)<WriteEmptyOrNull> A global variable is definitely written. [1]
+
+test_pattern.php:47:5
+45 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+46 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+47 |     Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+48 |     Foo::$static_dict["1"] ??= 1; // Caching
+49 |   }
+
+error: Other[11001] [Test::test_method_call]{Foo::$static_dict}(int)<Caching,WriteLiteral> A global variable is definitely written. [1]
+
+test_pattern.php:48:5
+46 |     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+47 |     Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+48 |     Foo::$static_dict["1"] ??= 1; // Caching
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+49 |   }
+50 | }
+
+25 errors found

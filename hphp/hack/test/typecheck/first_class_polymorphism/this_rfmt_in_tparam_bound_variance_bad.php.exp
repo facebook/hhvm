@@ -1,256 +1,540 @@
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 112, characters 38-56:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 19, characters 35-35:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 19, characters 40-71:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 19, characters 40-71:
-  Expected a class with `{type TC as ConcBase3}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 112, characters 42-54:
-  But got `WithTC3_Mixed`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 112, characters 8-16:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 19, characters 35-35:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 19, characters 40-71:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 112, characters 8-16:
-  Expected `ConcBase3`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 19, characters 66-69:
-    via this generic `this`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 115, characters 5-23:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 5-37:
-  Expected a class with `{type TC as Base3}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 115, characters 9-21:
-  But got `WithTC3_Mixed`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 31-35:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 40, characters 31-35:
-  Expected `Base3`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 119, characters 41-57:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 25, characters 5-5:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 25, characters 10-44:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 25, characters 10-44:
-  Expected a class with `{type TC super ConcBase3}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 119, characters 45-55:
-  But got `WithTC3_Int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 119, characters 8-16:
-  This `super` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 25, characters 5-5:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 25, characters 10-44:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 119, characters 8-16:
-  But got `ConcBase3`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 25, characters 39-42:
-    via this generic `this`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 122, characters 5-21:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 121, characters 9-17:
-  But got `ConcBase3`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 41-57:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 43-73:
-  Expected a class with `{type TC = ConcBase3}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 45-55:
-  But got `WithTC3_Int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 8-16:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 8-16:
-  Expected `ConcBase3`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 68-71:
-    via this generic `this`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  But got `int`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 41-57:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 43-73:
-  Expected a class with `{type TC = ConcBase3}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 45-55:
-  But got `WithTC3_Int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 8-16:
-  This `super` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 126, characters 8-16:
-  But got `ConcBase3`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 29, characters 68-71:
-    via this generic `this`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 129, characters 5-21:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 128, characters 9-17:
-  But got `ConcBase3`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 129, characters 5-21:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 50, characters 50-54:
-  `Tthis` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 50, characters 59-63:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 50, characters 59-63:
-  Expected `Base3`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  But got `int`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 135, characters 45-63:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 61, characters 35-35:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 61, characters 40-71:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 61, characters 40-71:
-  Expected a class with `{type TC as ConcBase3_WithTC}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 135, characters 49-61:
-  But got `WithTC3_Mixed`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 135, characters 8-23:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 61, characters 35-35:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 61, characters 40-71:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 135, characters 8-23:
-  Expected `ConcBase3_WithTC`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 61, characters 66-69:
-    via this generic `this`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 138, characters 5-23:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 85, characters 5-73:
-  Expected a class with `{type TC as Base3_WithTC with { type TBase = _ }}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 138, characters 9-21:
-  But got `WithTC3_Mixed`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 85, characters 31-71:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 85, characters 31-71:
-  Expected `Base3_WithTC`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 138, characters 5-23:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 85, characters 5-73:
-  Expected a class with `{type TC as Base3_WithTC with { type TBase = _ }}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 138, characters 9-21:
-  But got `WithTC3_Mixed`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 85, characters 31-71:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 85, characters 31-71:
-  Expected a class with `{type TBase = _}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 10, characters 19-23:
-  But got `mixed`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 143, characters 48-64:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 66, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 66, characters 43-77:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 66, characters 43-77:
-  Expected a class with `{type TC super ConcBase3_WithTC}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 143, characters 52-62:
-  But got `WithTC3_Int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 143, characters 8-23:
-  This `super` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 66, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 66, characters 43-77:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 143, characters 8-23:
-  But got `ConcBase3_WithTC`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 66, characters 72-75:
-    via this generic `this`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 146, characters 5-21:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 145, characters 9-24:
-  But got `ConcBase3_WithTC`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 48-64:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 43-73:
-  Expected a class with `{type TC = ConcBase3_WithTC}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 52-62:
-  But got `WithTC3_Int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 8-23:
-  This `as` or `=` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 8-23:
-  Expected `ConcBase3_WithTC`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 68-71:
-    via this generic `this`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  But got `int`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 48-64:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 43-73:
-  Expected a class with `{type TC = ConcBase3_WithTC}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 52-62:
-  But got `WithTC3_Int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 8-23:
-  This `super` refinement constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 38-38:
-  `T` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 43-73:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 151, characters 8-23:
-  But got `ConcBase3_WithTC`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 71, characters 68-71:
-    via this generic `this`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 154, characters 5-21:
-Invalid argument (Typing[4110])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  Expected `int`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 153, characters 9-24:
-  But got `ConcBase3_WithTC`
-ERROR: File "this_rfmt_in_tparam_bound_variance_bad.php", line 154, characters 5-21:
-Invalid argument (Typing[4323])
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 102, characters 5-9:
-  `Tthis` is a constrained type parameter
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 102, characters 14-54:
-  This type constraint is violated
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 102, characters 14-54:
-  Expected a class with `{type TBase = _}`
-  File "this_rfmt_in_tparam_bound_variance_bad.php", line 14, characters 19-21:
-  But got `int`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC as ConcBase3}` [3]
+-> But got `WithTC3_Mixed` [4]
+-> This `as` or `=` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase3` [5]
+->   via this generic `this` [6]
+-> But got `mixed` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:112:38
+  8 | 
+  9 | class WithTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [7]
+ 11 | }
+ 12 | 
+    :
+ 17 | abstract class Base3 {
+ 18 |   // this in `as` refinement → eliminated, simplified to (Base3, WithTC3 with { type TC as Base3 }): void
+ 19 |   public function as_rfmt_contrav<T as WithTC3 with { type TC as this }>(
+    |                                   ^ [2]
+    |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                  ^^^^ [6]
+ 20 |     T $_,
+ 21 |   ): void {}
+    :
+110 | function test_reject(): void {
+111 |   // as_rfmt: WithTC3_Mixed has TC=mixed, mixed is NOT <: ConcBase3 → rejected
+112 |   (new ConcBase3())->as_rfmt_contrav(new WithTC3_Mixed());
+    |        ^^^^^^^^^ [5]
+    |                                      ^^^^^^^^^^^^^^^^^^^ [1]
+    |                                          ^^^^^^^^^^^^^ [4]
+113 |   RejectSimplified::as_rfmt_contrav_simp(
+114 |     new ConcBase3(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with `{type TC as Base3}` [2]
+-> But got `WithTC3_Mixed` [3]
+-> This `as` or `=` refinement constraint is violated [4]
+-> Expected `Base3` [4]
+-> But got `mixed` [5]
+
+this_rfmt_in_tparam_bound_variance_bad.php:115:5
+  8 | 
+  9 | class WithTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [5]
+ 11 | }
+ 12 | 
+    :
+ 38 |   public static function as_rfmt_contrav_simp(
+ 39 |     Base3 $_,
+ 40 |     WithTC3 with { type TC as Base3 } $_,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    |                               ^^^^^ [4]
+ 41 |   ): void {}
+ 42 | 
+    :
+113 |   RejectSimplified::as_rfmt_contrav_simp(
+114 |     new ConcBase3(),
+115 |     new WithTC3_Mixed(),
+    |     ^^^^^^^^^^^^^^^^^^^ [1]
+    |         ^^^^^^^^^^^^^ [3]
+116 |   );
+117 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC super ConcBase3}` [3]
+-> But got `WithTC3_Int` [4]
+-> This `super` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [6]
+-> But got `ConcBase3` [5]
+->   via this generic `this` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:119:41
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [6]
+ 15 | }
+ 16 | 
+    :
+ 23 |   // this in `super` refinement → kept, simplified to <Tthis as Base3>(Tthis, WithTC3 with { type TC super Tthis }): void
+ 24 |   public function super_rfmt_contrav<
+ 25 |     T as WithTC3 with { type TC super this },
+    |     ^ [2]
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                       ^^^^ [7]
+ 26 |   >(T $_): void {}
+ 27 | 
+    :
+117 | 
+118 |   // super_rfmt: WithTC3_Int has TC=int, int is NOT super ConcBase3 → rejected
+119 |   (new ConcBase3())->super_rfmt_contrav(new WithTC3_Int());
+    |        ^^^^^^^^^ [5]
+    |                                         ^^^^^^^^^^^^^^^^^ [1]
+    |                                             ^^^^^^^^^^^ [4]
+120 |   RejectSimplified::super_rfmt_contrav_simp(
+121 |     new ConcBase3(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `ConcBase3` [3]
+
+this_rfmt_in_tparam_bound_variance_bad.php:122:5
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [2]
+ 15 | }
+ 16 | 
+    :
+119 |   (new ConcBase3())->super_rfmt_contrav(new WithTC3_Int());
+120 |   RejectSimplified::super_rfmt_contrav_simp(
+121 |     new ConcBase3(),
+    |         ^^^^^^^^^ [3]
+122 |     new WithTC3_Int(),
+    |     ^^^^^^^^^^^^^^^^^ [1]
+123 |   );
+124 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC = ConcBase3}` [3]
+-> But got `WithTC3_Int` [4]
+-> This `as` or `=` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase3` [5]
+->   via this generic `this` [6]
+-> But got `int` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:126:41
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [7]
+ 15 | }
+ 16 | 
+    :
+ 27 | 
+ 28 |   // this in exact refinement → kept, simplified to <Tthis as Base3>(Tthis, WithTC3 with { type TC = Tthis }): void
+ 29 |   public function exact_rfmt_contrav<T as WithTC3 with { type TC = this }>(
+    |                                      ^ [2]
+    |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                    ^^^^ [6]
+ 30 |     T $_,
+ 31 |   ): void {}
+    :
+124 | 
+125 |   // exact_rfmt: WithTC3_Int has TC=int, int ≠ ConcBase3 → rejected
+126 |   (new ConcBase3())->exact_rfmt_contrav(new WithTC3_Int());
+    |        ^^^^^^^^^ [5]
+    |                                         ^^^^^^^^^^^^^^^^^ [1]
+    |                                             ^^^^^^^^^^^ [4]
+127 |   RejectSimplified::exact_rfmt_contrav_simp(
+128 |     new ConcBase3(),
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC = ConcBase3}` [3]
+-> But got `WithTC3_Int` [4]
+-> This `super` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [6]
+-> But got `ConcBase3` [5]
+->   via this generic `this` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:126:41
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [6]
+ 15 | }
+ 16 | 
+    :
+ 27 | 
+ 28 |   // this in exact refinement → kept, simplified to <Tthis as Base3>(Tthis, WithTC3 with { type TC = Tthis }): void
+ 29 |   public function exact_rfmt_contrav<T as WithTC3 with { type TC = this }>(
+    |                                      ^ [2]
+    |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                    ^^^^ [7]
+ 30 |     T $_,
+ 31 |   ): void {}
+    :
+124 | 
+125 |   // exact_rfmt: WithTC3_Int has TC=int, int ≠ ConcBase3 → rejected
+126 |   (new ConcBase3())->exact_rfmt_contrav(new WithTC3_Int());
+    |        ^^^^^^^^^ [5]
+    |                                         ^^^^^^^^^^^^^^^^^ [1]
+    |                                             ^^^^^^^^^^^ [4]
+127 |   RejectSimplified::exact_rfmt_contrav_simp(
+128 |     new ConcBase3(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `ConcBase3` [3]
+
+this_rfmt_in_tparam_bound_variance_bad.php:129:5
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [2]
+ 15 | }
+ 16 | 
+    :
+126 |   (new ConcBase3())->exact_rfmt_contrav(new WithTC3_Int());
+127 |   RejectSimplified::exact_rfmt_contrav_simp(
+128 |     new ConcBase3(),
+    |         ^^^^^^^^^ [3]
+129 |     new WithTC3_Int(),
+    |     ^^^^^^^^^^^^^^^^^ [1]
+130 |   );
+131 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `Tthis` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Base3` [3]
+-> But got `int` [4]
+
+this_rfmt_in_tparam_bound_variance_bad.php:129:5
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [4]
+ 15 | }
+ 16 | 
+    :
+ 48 | 
+ 49 |   // Simplified version of exact_rfmt_contrav (this kept)
+ 50 |   public static function exact_rfmt_contrav_simp<Tthis as Base3>(
+    |                                                  ^^^^^ [2]
+    |                                                           ^^^^^ [3]
+ 51 |     Tthis $_,
+ 52 |     WithTC3 with { type TC = Tthis } $_,
+    :
+127 |   RejectSimplified::exact_rfmt_contrav_simp(
+128 |     new ConcBase3(),
+129 |     new WithTC3_Int(),
+    |     ^^^^^^^^^^^^^^^^^ [1]
+130 |   );
+131 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC as ConcBase3_WithTC}` [3]
+-> But got `WithTC3_Mixed` [4]
+-> This `as` or `=` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase3_WithTC` [5]
+->   via this generic `this` [6]
+-> But got `mixed` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:135:45
+  8 | 
+  9 | class WithTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [7]
+ 11 | }
+ 12 | 
+    :
+ 59 |   abstract const type TBase as arraykey;
+ 60 | 
+ 61 |   public function as_rfmt_contrav<T as WithTC3 with { type TC as this }>(
+    |                                   ^ [2]
+    |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                  ^^^^ [6]
+ 62 |     T $_,
+ 63 |     this::TBase $_,
+    :
+133 | 
+134 |   // as_rfmt: WithTC3_Mixed has TC=mixed, mixed is NOT <: ConcBase3_WithTC → rejected
+135 |   (new ConcBase3_WithTC())->as_rfmt_contrav(new WithTC3_Mixed(), 0);
+    |        ^^^^^^^^^^^^^^^^ [5]
+    |                                             ^^^^^^^^^^^^^^^^^^^ [1]
+    |                                                 ^^^^^^^^^^^^^ [4]
+136 |   RejectSimplified_WithTC::as_rfmt_contrav_simp(
+137 |     new ConcBase3_WithTC(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with `{type TC as Base3_WithTC with { type TBase = _ }}` [2]
+-> But got `WithTC3_Mixed` [3]
+-> This `as` or `=` refinement constraint is violated [4]
+-> Expected `Base3_WithTC` [4]
+-> But got `mixed` [5]
+
+this_rfmt_in_tparam_bound_variance_bad.php:138:5
+  8 | 
+  9 | class WithTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [5]
+ 11 | }
+ 12 | 
+    :
+ 83 |   public static function as_rfmt_contrav_simp<TBase0 as arraykey>(
+ 84 |     Base3_WithTC with { type TBase = TBase0 } $_,
+ 85 |     WithTC3 with { type TC as Base3_WithTC with { type TBase = TBase0 } } $_,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+ 86 |     TBase0 $_,
+ 87 |   ): void {}
+    :
+136 |   RejectSimplified_WithTC::as_rfmt_contrav_simp(
+137 |     new ConcBase3_WithTC(),
+138 |     new WithTC3_Mixed(),
+    |     ^^^^^^^^^^^^^^^^^^^ [1]
+    |         ^^^^^^^^^^^^^ [3]
+139 |     0,
+140 |   );
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with `{type TC as Base3_WithTC with { type TBase = _ }}` [2]
+-> But got `WithTC3_Mixed` [3]
+-> This `as` or `=` refinement constraint is violated [4]
+-> Expected a class with `{type TBase = _}` [4]
+-> But got `mixed` [5]
+
+this_rfmt_in_tparam_bound_variance_bad.php:138:5
+  8 | 
+  9 | class WithTC3_Mixed extends WithTC3 {
+ 10 |   const type TC = mixed;
+    |                   ^^^^^ [5]
+ 11 | }
+ 12 | 
+    :
+ 83 |   public static function as_rfmt_contrav_simp<TBase0 as arraykey>(
+ 84 |     Base3_WithTC with { type TBase = TBase0 } $_,
+ 85 |     WithTC3 with { type TC as Base3_WithTC with { type TBase = TBase0 } } $_,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+ 86 |     TBase0 $_,
+ 87 |   ): void {}
+    :
+136 |   RejectSimplified_WithTC::as_rfmt_contrav_simp(
+137 |     new ConcBase3_WithTC(),
+138 |     new WithTC3_Mixed(),
+    |     ^^^^^^^^^^^^^^^^^^^ [1]
+    |         ^^^^^^^^^^^^^ [3]
+139 |     0,
+140 |   );
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC super ConcBase3_WithTC}` [3]
+-> But got `WithTC3_Int` [4]
+-> This `super` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [6]
+-> But got `ConcBase3_WithTC` [5]
+->   via this generic `this` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:143:48
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [6]
+ 15 | }
+ 16 | 
+    :
+ 64 |   ): void {}
+ 65 | 
+ 66 |   public function super_rfmt_contrav<T as WithTC3 with { type TC super this }>(
+    |                                      ^ [2]
+    |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                        ^^^^ [7]
+ 67 |     T $_,
+ 68 |     this::TBase $_,
+    :
+141 | 
+142 |   // super_rfmt: WithTC3_Int has TC=int, int is NOT super ConcBase3_WithTC → rejected
+143 |   (new ConcBase3_WithTC())->super_rfmt_contrav(new WithTC3_Int(), 0);
+    |        ^^^^^^^^^^^^^^^^ [5]
+    |                                                ^^^^^^^^^^^^^^^^^ [1]
+    |                                                    ^^^^^^^^^^^ [4]
+144 |   RejectSimplified_WithTC::super_rfmt_contrav_simp(
+145 |     new ConcBase3_WithTC(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `ConcBase3_WithTC` [3]
+
+this_rfmt_in_tparam_bound_variance_bad.php:146:5
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [2]
+ 15 | }
+ 16 | 
+    :
+143 |   (new ConcBase3_WithTC())->super_rfmt_contrav(new WithTC3_Int(), 0);
+144 |   RejectSimplified_WithTC::super_rfmt_contrav_simp(
+145 |     new ConcBase3_WithTC(),
+    |         ^^^^^^^^^^^^^^^^ [3]
+146 |     new WithTC3_Int(),
+    |     ^^^^^^^^^^^^^^^^^ [1]
+147 |     0,
+148 |   );
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC = ConcBase3_WithTC}` [3]
+-> But got `WithTC3_Int` [4]
+-> This `as` or `=` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `ConcBase3_WithTC` [5]
+->   via this generic `this` [6]
+-> But got `int` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:151:48
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [7]
+ 15 | }
+ 16 | 
+    :
+ 69 |   ): void {}
+ 70 | 
+ 71 |   public function exact_rfmt_contrav<T as WithTC3 with { type TC = this }>(
+    |                                      ^ [2]
+    |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                    ^^^^ [6]
+ 72 |     T $_,
+ 73 |     this::TBase $_,
+    :
+149 | 
+150 |   // exact_rfmt: WithTC3_Int has TC=int, int ≠ ConcBase3_WithTC → rejected
+151 |   (new ConcBase3_WithTC())->exact_rfmt_contrav(new WithTC3_Int(), 0);
+    |        ^^^^^^^^^^^^^^^^ [5]
+    |                                                ^^^^^^^^^^^^^^^^^ [1]
+    |                                                    ^^^^^^^^^^^ [4]
+152 |   RejectSimplified_WithTC::exact_rfmt_contrav_simp(
+153 |     new ConcBase3_WithTC(),
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TC = ConcBase3_WithTC}` [3]
+-> But got `WithTC3_Int` [4]
+-> This `super` refinement constraint is violated [5]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [6]
+-> But got `ConcBase3_WithTC` [5]
+->   via this generic `this` [7]
+
+this_rfmt_in_tparam_bound_variance_bad.php:151:48
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [6]
+ 15 | }
+ 16 | 
+    :
+ 69 |   ): void {}
+ 70 | 
+ 71 |   public function exact_rfmt_contrav<T as WithTC3 with { type TC = this }>(
+    |                                      ^ [2]
+    |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+    |                                                                    ^^^^ [7]
+ 72 |     T $_,
+ 73 |     this::TBase $_,
+    :
+149 | 
+150 |   // exact_rfmt: WithTC3_Int has TC=int, int ≠ ConcBase3_WithTC → rejected
+151 |   (new ConcBase3_WithTC())->exact_rfmt_contrav(new WithTC3_Int(), 0);
+    |        ^^^^^^^^^^^^^^^^ [5]
+    |                                                ^^^^^^^^^^^^^^^^^ [1]
+    |                                                    ^^^^^^^^^^^ [4]
+152 |   RejectSimplified_WithTC::exact_rfmt_contrav_simp(
+153 |     new ConcBase3_WithTC(),
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `ConcBase3_WithTC` [3]
+
+this_rfmt_in_tparam_bound_variance_bad.php:154:5
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [2]
+ 15 | }
+ 16 | 
+    :
+151 |   (new ConcBase3_WithTC())->exact_rfmt_contrav(new WithTC3_Int(), 0);
+152 |   RejectSimplified_WithTC::exact_rfmt_contrav_simp(
+153 |     new ConcBase3_WithTC(),
+    |         ^^^^^^^^^^^^^^^^ [3]
+154 |     new WithTC3_Int(),
+    |     ^^^^^^^^^^^^^^^^^ [1]
+155 |     0,
+156 |   );
+
+error: Typing[4323] Invalid argument [1]
+-> `Tthis` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected a class with `{type TBase = _}` [3]
+-> But got `int` [4]
+
+this_rfmt_in_tparam_bound_variance_bad.php:154:5
+ 12 | 
+ 13 | class WithTC3_Int extends WithTC3 {
+ 14 |   const type TC = int;
+    |                   ^^^ [4]
+ 15 | }
+ 16 | 
+    :
+100 |   public static function exact_rfmt_contrav_simp<
+101 |     TBase0 as arraykey,
+102 |     Tthis as Base3_WithTC with { type TBase = TBase0 },
+    |     ^^^^^ [2]
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+103 |   >(
+104 |     Tthis $_,
+    :
+152 |   RejectSimplified_WithTC::exact_rfmt_contrav_simp(
+153 |     new ConcBase3_WithTC(),
+154 |     new WithTC3_Int(),
+    |     ^^^^^^^^^^^^^^^^^ [1]
+155 |     0,
+156 |   );
+
+17 errors found

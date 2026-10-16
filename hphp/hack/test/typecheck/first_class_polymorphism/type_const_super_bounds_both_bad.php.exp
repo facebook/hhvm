@@ -1,40 +1,105 @@
-ERROR: File "type_const_super_bounds_both_bad.php", line 23, characters 3-161:
-hh_expect type mismatch (Typing[4323])
-  File "type_const_super_bounds_both_bad.php", line 8, characters 35-36:
-  `Ta#1` is a constrained type parameter
-  File "type_const_super_bounds_both_bad.php", line 6, characters 29-34:
-  This type constraint is violated
-  File "type_const_super_bounds_both_bad.php", line 6, characters 29-34:
-  Expected `Wobble`
-  File "type_const_super_bounds_both_bad.php", line 6, characters 42-47:
-  But got `Wibble`
-ERROR: File "type_const_super_bounds_both_bad.php", line 23, characters 3-161:
-hh_expect type mismatch (Typing[4323])
-  File "type_const_super_bounds_both_bad.php", line 24, characters 39-41:
-  `Ta1` is a constrained type parameter
-  File "type_const_super_bounds_both_bad.php", line 24, characters 46-51:
-  This type constraint is violated
-  File "type_const_super_bounds_both_bad.php", line 24, characters 46-51:
-  Expected `Wobble`
-  File "type_const_super_bounds_both_bad.php", line 24, characters 59-64:
-  But got `Wibble`
-ERROR: File "type_const_super_bounds_both_bad.php", line 28, characters 5-9:
-Invalid argument (Typing[4323])
-  File "type_const_super_bounds_both_bad.php", line 8, characters 35-36:
-  `Ta#1` is a constrained type parameter
-  File "type_const_super_bounds_both_bad.php", line 6, characters 29-34:
-  This type constraint is violated
-  File "type_const_super_bounds_both_bad.php", line 6, characters 29-34:
-  Expected `Wobble`
-  File "type_const_super_bounds_both_bad.php", line 6, characters 42-47:
-  But got `Wibble`
-ERROR: File "type_const_super_bounds_both_bad.php", line 28, characters 5-9:
-Invalid argument (Typing[4323])
-  File "type_const_super_bounds_both_bad.php", line 24, characters 39-41:
-  `Ta1` is a constrained type parameter
-  File "type_const_super_bounds_both_bad.php", line 24, characters 46-51:
-  This type constraint is violated
-  File "type_const_super_bounds_both_bad.php", line 24, characters 46-51:
-  Expected `Wobble`
-  File "type_const_super_bounds_both_bad.php", line 24, characters 59-64:
-  But got `Wibble`
+error: Typing[4323] hh_expect type mismatch [1]
+-> `Ta#1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Wobble` [3]
+-> But got `Wibble` [4]
+
+type_const_super_bounds_both_bad.php:23:3
+ 4 | 
+ 5 | abstract class BoundedTyconst {
+ 6 |   abstract const type Ta as Wobble super Wibble;
+   |                             ^^^^^^ [3]
+   |                                          ^^^^^^ [4]
+ 7 | 
+ 8 |   public function elaborate(this::Ta $_): void {}
+   |                                   ^^ [2]
+ 9 | }
+10 | 
+   :
+21 |   $fptr = meth_caller(BoundedTyconst::class, 'elaborate');
+22 |   // Error! Wibble is not a subtype of Wobble
+23 |   hh_expect<
+   |   ^^^^^^^^^^ [1]
+24 |     HH\FunctionRef<(readonly function<Ta1 as Wobble super Wibble>(
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 |       BoundedTyconst with { type Ta = Ta1 },
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |       Ta1,
+   |       ^^^^ [1]
+27 |     ): void)>,
+   |     ^^^^^^^^^^ [1]
+28 |   >($fptr);
+   |   ^^^^^^^^ [1]
+29 | }
+
+error: Typing[4323] hh_expect type mismatch [1]
+-> `Ta1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Wobble` [3]
+-> But got `Wibble` [4]
+
+type_const_super_bounds_both_bad.php:23:3
+21 |   $fptr = meth_caller(BoundedTyconst::class, 'elaborate');
+22 |   // Error! Wibble is not a subtype of Wobble
+23 |   hh_expect<
+   |   ^^^^^^^^^^ [1]
+24 |     HH\FunctionRef<(readonly function<Ta1 as Wobble super Wibble>(
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                       ^^^ [2]
+   |                                              ^^^^^^ [3]
+   |                                                           ^^^^^^ [4]
+25 |       BoundedTyconst with { type Ta = Ta1 },
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |       Ta1,
+   |       ^^^^ [1]
+27 |     ): void)>,
+   |     ^^^^^^^^^^ [1]
+28 |   >($fptr);
+   |   ^^^^^^^^ [1]
+29 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `Ta#1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Wobble` [3]
+-> But got `Wibble` [4]
+
+type_const_super_bounds_both_bad.php:28:5
+ 4 | 
+ 5 | abstract class BoundedTyconst {
+ 6 |   abstract const type Ta as Wobble super Wibble;
+   |                             ^^^^^^ [3]
+   |                                          ^^^^^^ [4]
+ 7 | 
+ 8 |   public function elaborate(this::Ta $_): void {}
+   |                                   ^^ [2]
+ 9 | }
+10 | 
+   :
+26 |       Ta1,
+27 |     ): void)>,
+28 |   >($fptr);
+   |     ^^^^^ [1]
+29 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `Ta1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Wobble` [3]
+-> But got `Wibble` [4]
+
+type_const_super_bounds_both_bad.php:28:5
+22 |   // Error! Wibble is not a subtype of Wobble
+23 |   hh_expect<
+24 |     HH\FunctionRef<(readonly function<Ta1 as Wobble super Wibble>(
+   |                                       ^^^ [2]
+   |                                              ^^^^^^ [3]
+   |                                                           ^^^^^^ [4]
+25 |       BoundedTyconst with { type Ta = Ta1 },
+26 |       Ta1,
+27 |     ): void)>,
+28 |   >($fptr);
+   |     ^^^^^ [1]
+29 | }
+
+4 errors found

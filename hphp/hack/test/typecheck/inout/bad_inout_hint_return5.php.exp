@@ -1,12 +1,37 @@
-ERROR: File "bad_inout_hint_return5.php", line 4, characters 10-55:
-Invalid return type (Typing[4110])
-  File "bad_inout_hint_return5.php", line 3, characters 33-35:
-  Expected `int`
-  File "bad_inout_hint_return5.php", line 4, characters 25-30:
-  But got `string`
-ERROR: File "bad_inout_hint_return5.php", line 4, characters 10-55:
-Invalid return type (Typing[4110])
-  File "bad_inout_hint_return5.php", line 4, characters 25-30:
-  Expected `string`
-  File "bad_inout_hint_return5.php", line 3, characters 33-35:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+bad_inout_hint_return5.php:4:10
+1 | <?hh
+2 | 
+3 | function foo(): (function(inout int): int) {
+  |                                 ^^^ [2]
+4 |   return function(inout string $x) {
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                         ^^^^^^ [3]
+5 |     return 42;
+  |     ^^^^^^^^^^ [1]
+6 |   };
+  |   ^ [1]
+7 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+bad_inout_hint_return5.php:4:10
+1 | <?hh
+2 | 
+3 | function foo(): (function(inout int): int) {
+  |                                 ^^^ [3]
+4 |   return function(inout string $x) {
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                         ^^^^^^ [2]
+5 |     return 42;
+  |     ^^^^^^^^^^ [1]
+6 |   };
+  |   ^ [1]
+7 | }
+
+2 errors found

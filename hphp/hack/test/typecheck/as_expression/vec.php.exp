@@ -1,16 +1,60 @@
-ERROR: File "vec.php", line 4, characters 9-11:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Definition is here
-ERROR: File "vec.php", line 6, characters 15-16:
-Invalid argument (Typing[4110])
-  File "vec.php", line 22, characters 26-31:
-  Expected `string`
-  File "vec.php", line 4, characters 3-4:
-  But got `mixed` from this "as" assertion
-ERROR: File "vec.php", line 12, characters 15-16:
-Invalid argument (Typing[4110])
-  File "vec.php", line 22, characters 26-31:
-  Expected `string`
-  File "vec.php", line 10, characters 3-4:
-  But got `mixed` from this "as" assertion
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+vec.php:4:9
+ 2 | 
+ 3 | function f(mixed $x): void {
+ 4 |   $x as vec;
+   |         ^^^ [1]
+ 5 |   expect_vec1($x); // ok
+ 6 |   expect_vec2($x); // error
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` from this "as" assertion [3]
+
+vec.php:6:15
+ 2 | 
+ 3 | function f(mixed $x): void {
+ 4 |   $x as vec;
+   |   ^^ [3]
+ 5 |   expect_vec1($x); // ok
+ 6 |   expect_vec2($x); // error
+   |               ^^ [1]
+ 7 | }
+ 8 | 
+   :
+20 | 
+21 | function expect_vec1(vec<mixed> $vec): void {}
+22 | function expect_vec2(vec<string> $vec): void {}
+   |                          ^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` from this "as" assertion [3]
+
+vec.php:12:15
+ 8 | 
+ 9 | function g(mixed $x): void {
+10 |   $x as vec<_>;
+   |   ^^ [3]
+11 |   expect_vec1($x); // ok
+12 |   expect_vec2($x); // error
+   |               ^^ [1]
+13 | }
+14 | 
+   :
+20 | 
+21 | function expect_vec1(vec<mixed> $vec): void {}
+22 | function expect_vec2(vec<string> $vec): void {}
+   |                          ^^^^^^ [2]
+
+3 errors found

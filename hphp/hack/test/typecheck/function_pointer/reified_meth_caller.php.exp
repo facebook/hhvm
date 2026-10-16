@@ -1,2 +1,10 @@
-ERROR: File "reified_meth_caller.php", line 8, characters 3-36:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
+error: Typing[4381] Invalid function reference. This function requires reified generics. Prefer using a lambda instead. [1]
+
+reified_meth_caller.php:8:3
+6 | 
+7 | function test(): void {
+8 |   meth_caller(MyClass::class, 'foo');
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

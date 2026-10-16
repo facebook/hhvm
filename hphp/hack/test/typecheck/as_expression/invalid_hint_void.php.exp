@@ -1,6 +1,20 @@
-ERROR: File "invalid_hint_void.php", line 4, characters 9-12:
-You can only use the `void` type as the return type of a function or method (Naming[2063])
-ERROR: File "invalid_hint_void.php", line 4, characters 9-12:
-Invalid `as` expression hint (Typing[4195])
-  File "invalid_hint_void.php", line 4, characters 9-12:
-  The `as` operator cannot be used with the `void` type
+error: Naming[2063] You can only use the `void` type as the return type of a function or method [1]
+
+invalid_hint_void.php:4:9
+2 | 
+3 | function foo(mixed $x): void {
+4 |   $x as void;
+  |         ^^^^ [1]
+5 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the `void` type [1]
+
+invalid_hint_void.php:4:9
+2 | 
+3 | function foo(mixed $x): void {
+4 |   $x as void;
+  |         ^^^^ [1]
+5 | }
+
+2 errors found

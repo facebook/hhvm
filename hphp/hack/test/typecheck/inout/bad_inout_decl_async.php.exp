@@ -1,2 +1,9 @@
-ERROR: File "bad_inout_decl_async.php", line 3, characters 25-29:
-Parameters may not be marked `inout` on `async` functions (Parsing[1002])
+error: Parsing[1002] Parameters may not be marked `inout` on `async` functions [1]
+
+bad_inout_decl_async.php:3:25
+1 | <?hh
+2 | 
+3 | async function gen_test(inout int $i): Awaitable<void> {}
+  |                         ^^^^^ [1]
+
+1 error found

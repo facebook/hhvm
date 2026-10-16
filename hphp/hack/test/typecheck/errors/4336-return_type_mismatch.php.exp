@@ -1,6 +1,13 @@
-ERROR: File "4336-return_type_mismatch.php", line 5, characters 19-21:
-Invalid return type (Typing[4336])
-  File "4336-return_type_mismatch.php", line 5, characters 27-29:
-  Expected `int`
-  File "4336-return_type_mismatch.php", line 5, characters 19-21:
-  But got `void` because this function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+4336-return_type_mismatch.php:5:19
+3 | 
+4 | class Foo {
+5 |   public function bar() : int {}
+  |                   ^^^ [1]
+  |                           ^^^ [2]
+6 | }
+
+1 error found

@@ -1,14 +1,54 @@
-ERROR: File "lambda_variadic_generic.php", line 38, characters 19-19:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "lambda_variadic_generic.php", line 9, characters 7-7:
-  Definition is here
-ERROR: File "lambda_variadic_generic.php", line 40, characters 47-49:
-No instance method `bar` in `C` (Typing[4053])
-  File "lambda_variadic_generic.php", line 4, characters 19-21:
-  Did you mean `foo` instead?
-  File "lambda_variadic_generic.php", line 16, characters 37-37:
-  This is why I think it is an object of type C
-  File "lambda_variadic_generic.php", line 11, characters 29-29:
-    via this generic `T`
-  File "lambda_variadic_generic.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+lambda_variadic_generic.php:38:19
+ 7 | }
+ 8 | 
+ 9 | class A<T> {
+   |       ^ [2]
+10 |   public function __construct(private T $value) {}
+11 |   public function foobar(): T {
+   :
+36 |   }); //OK
+37 | 
+38 |   expect_Generic((A ...$y) ==> $y[0]->foobar()); //Error
+   |                   ^ [1]
+39 | 
+40 |   expect_Generic((...$y) ==> $y[0]->foobar()->bar()); //Error
+
+error: Typing[4053] No instance method `bar` in `C` [1]
+-> Did you mean `foo` instead? [2]
+-> This is why I think it is an object of type C [3]
+->   via this generic `T` [4]
+-> Declaration of `C` is here [5]
+
+lambda_variadic_generic.php:40:47
+ 1 | <?hh
+ 2 | 
+ 3 | class C {
+   |       ^ [5]
+ 4 |   public function foo(): int {
+   |                   ^^^ [2]
+ 5 |     return 3;
+ 6 |   }
+   :
+ 9 | class A<T> {
+10 |   public function __construct(private T $value) {}
+11 |   public function foobar(): T {
+   |                             ^ [4]
+12 |     return $this->value;
+13 |   }
+14 | }
+15 | 
+16 | function expect_Generic((function(A<C>...): C) $f): void {
+   |                                     ^ [3]
+17 |   $f(new A(new C()));
+18 | }
+   :
+38 |   expect_Generic((A ...$y) ==> $y[0]->foobar()); //Error
+39 | 
+40 |   expect_Generic((...$y) ==> $y[0]->foobar()->bar()); //Error
+   |                                               ^^^ [1]
+41 | }
+
+2 errors found

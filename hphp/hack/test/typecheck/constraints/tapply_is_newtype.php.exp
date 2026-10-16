@@ -1,10 +1,21 @@
-ERROR: File "tapply_is_newtype.php--file2.php", line 4, characters 18-37:
-Some type arguments violate their constraints (Typing[4323])
-  File "tapply_is_newtype.php--file1.php", line 5, characters 23-23:
-  `T` is a constrained type parameter
-  File "tapply_is_newtype.php--file1.php", line 5, characters 28-30:
-  This type constraint is violated
-  File "tapply_is_newtype.php--file1.php", line 5, characters 28-30:
-  Expected `num`
-  File "tapply_is_newtype.php--file2.php", line 4, characters 32-36:
-  But got `mixed`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `mixed` [4]
+
+tapply_is_newtype.php--file2.php:4:18
+2 | 
+3 | // Test that we check constraints for the 'as' part of newtypes
+4 | function invalid(NewConstraint<mixed> $x): void {}
+  |                  ^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                ^^^^^ [4]
+
+tapply_is_newtype.php--file1.php:5:23
+3 | interface Constraint<T as num> {}
+4 | 
+5 | newtype NewConstraint<T as num> as Constraint<T> = Constraint<T>;
+  |                       ^ [2]
+  |                            ^^^ [3]
+
+1 error found

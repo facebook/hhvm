@@ -1,6 +1,31 @@
-ERROR: File "foreach.php", line 6, characters 21-22:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
-ERROR: File "foreach.php", line 9, characters 22-23:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
-ERROR: File "foreach.php", line 12, characters 28-29:
-This variable cannot be reassigned because it is used for a dependent context (Typing[4404])
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+foreach.php:6:21
+4 | 
+5 | function foreach_v(V $v)[$v::C]: void {
+6 |   foreach (vec[] as $v) {}}
+  |                     ^^ [1]
+7 | 
+8 | function foreach_kv_l(V $v)[$v::C]: void {
+
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+foreach.php:9:22
+ 7 | 
+ 8 | function foreach_kv_l(V $v)[$v::C]: void {
+ 9 |   foreach (dict[] as $v => $_) {}}
+   |                      ^^ [1]
+10 | 
+11 | function foreach_kv_r(V $v)[$v::C]: void {
+
+error: Typing[4404] This variable cannot be reassigned because it is used for a dependent context [1]
+
+foreach.php:12:28
+10 | 
+11 | function foreach_kv_r(V $v)[$v::C]: void {
+12 |   foreach (dict[] as $_ => $v) {}}
+   |                            ^^ [1]
+13 | 
+14 | //
+
+3 errors found

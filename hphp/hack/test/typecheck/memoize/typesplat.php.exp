@@ -1,4 +1,19 @@
-ERROR: File "typesplat.php", line 6, characters 35-36:
-Memoized functions cannot be variadic or use the type-splat operator. (NastCheck[3086])
-ERROR: File "typesplat.php", line 10, characters 46-47:
-Memoized functions cannot be variadic or use the type-splat operator. (NastCheck[3086])
+error: NastCheck[3086] Memoized functions cannot be variadic or use the type-splat operator. [1]
+
+typesplat.php:6:35
+4 | class Foo<T as (mixed...)> {
+5 |   <<__Memoize>>
+6 |   public function someMethod(...T $_): void {}
+  |                                   ^^ [1]
+7 | }
+8 | 
+
+error: NastCheck[3086] Memoized functions cannot be variadic or use the type-splat operator. [1]
+
+typesplat.php:10:46
+ 8 | 
+ 9 | <<__Memoize>>
+10 | function some_function<T as (mixed...)>(...T $_): void {}
+   |                                              ^^ [1]
+
+2 errors found

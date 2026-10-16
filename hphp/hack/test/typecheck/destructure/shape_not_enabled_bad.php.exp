@@ -1,12 +1,61 @@
-ERROR: File "shape_not_enabled_bad.php", line 4, characters 3-18:
-Cannot use unstable feature: `shape_and_tuple_destructuring` (Parsing[1002])
-ERROR: File "shape_not_enabled_bad.php", line 5, characters 3-59:
-Cannot use unstable feature: `shape_and_tuple_destructuring` (Parsing[1002])
-ERROR: File "shape_not_enabled_bad.php", line 5, characters 13-40:
-Cannot use unstable feature: `shape_and_tuple_destructuring` (Parsing[1002])
-ERROR: File "shape_not_enabled_bad.php", line 5, characters 20-35:
-Cannot use unstable feature: `shape_and_tuple_destructuring` (Parsing[1002])
-ERROR: File "shape_not_enabled_bad.php", line 5, characters 43-58:
-Cannot use unstable feature: `shape_and_tuple_destructuring` (Parsing[1002])
-ERROR: File "shape_not_enabled_bad.php", line 7, characters 3-15:
-Cannot use unstable feature: `shape_and_tuple_destructuring` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `shape_and_tuple_destructuring` [1]
+
+shape_not_enabled_bad.php:4:3
+2 | 
+3 | function f(shape('a' => int) $x): void {
+4 |   shape('a' => $a) = $x;
+  |   ^^^^^^^^^^^^^^^^ [1]
+5 |   tuple($x, tuple (shape('a' => $a), $y), shape('a' => $b)) =
+6 |     tuple(1, tuple($x, 2), $x);
+
+error: Parsing[1002] Cannot use unstable feature: `shape_and_tuple_destructuring` [1]
+
+shape_not_enabled_bad.php:5:3
+3 | function f(shape('a' => int) $x): void {
+4 |   shape('a' => $a) = $x;
+5 |   tuple($x, tuple (shape('a' => $a), $y), shape('a' => $b)) =
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |     tuple(1, tuple($x, 2), $x);
+7 |   tuple($x, $y) = tuple(1, 2);
+
+error: Parsing[1002] Cannot use unstable feature: `shape_and_tuple_destructuring` [1]
+
+shape_not_enabled_bad.php:5:13
+3 | function f(shape('a' => int) $x): void {
+4 |   shape('a' => $a) = $x;
+5 |   tuple($x, tuple (shape('a' => $a), $y), shape('a' => $b)) =
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |     tuple(1, tuple($x, 2), $x);
+7 |   tuple($x, $y) = tuple(1, 2);
+
+error: Parsing[1002] Cannot use unstable feature: `shape_and_tuple_destructuring` [1]
+
+shape_not_enabled_bad.php:5:20
+3 | function f(shape('a' => int) $x): void {
+4 |   shape('a' => $a) = $x;
+5 |   tuple($x, tuple (shape('a' => $a), $y), shape('a' => $b)) =
+  |                    ^^^^^^^^^^^^^^^^ [1]
+6 |     tuple(1, tuple($x, 2), $x);
+7 |   tuple($x, $y) = tuple(1, 2);
+
+error: Parsing[1002] Cannot use unstable feature: `shape_and_tuple_destructuring` [1]
+
+shape_not_enabled_bad.php:5:43
+3 | function f(shape('a' => int) $x): void {
+4 |   shape('a' => $a) = $x;
+5 |   tuple($x, tuple (shape('a' => $a), $y), shape('a' => $b)) =
+  |                                           ^^^^^^^^^^^^^^^^ [1]
+6 |     tuple(1, tuple($x, 2), $x);
+7 |   tuple($x, $y) = tuple(1, 2);
+
+error: Parsing[1002] Cannot use unstable feature: `shape_and_tuple_destructuring` [1]
+
+shape_not_enabled_bad.php:7:3
+5 |   tuple($x, tuple (shape('a' => $a), $y), shape('a' => $b)) =
+6 |     tuple(1, tuple($x, 2), $x);
+7 |   tuple($x, $y) = tuple(1, 2);
+  |   ^^^^^^^^^^^^^ [1]
+8 | }
+9 | 
+
+6 errors found

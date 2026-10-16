@@ -1,8 +1,36 @@
-ERROR: File "bad_inout_use_arg19.php", line 15, characters 11-15:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-  File "bad_inout_use_arg19.php", line 10, characters 3-81:
-  This is an object of type Pair<int, int> or an object of type vec<int> because of this statement
-ERROR: File "bad_inout_use_arg19.php", line 15, characters 11-15:
-You cannot mutate this (Typing[4011])
-  File "bad_inout_use_arg19.php", line 11, characters 10-23:
-  This is an object of type Pair<int, int>
+error: Typing[4208] Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. [1]
+-> This is an object of type Pair<int, int> or an object of type vec<int> because of this statement [2]
+
+bad_inout_use_arg19.php:15:11
+ 8 | 
+ 9 | function test(): void {
+10 |   if (launder()) {
+   |   ^^^^^^^^^^^^^^^^ [2]
+11 |     $x = Pair { 5, 42 };
+   |     ^^^^^^^^^^^^^^^^^^^^ [2]
+12 |   } else {
+   |   ^^^^^^^^ [2]
+13 |     $x = vec[1, 2, 3];
+   |     ^^^^^^^^^^^^^^^^^^ [2]
+14 |   }
+   |   ^ [2]
+15 |   f(inout $x[1]);
+   |           ^^^^^ [1]
+16 | }
+
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type Pair<int, int> [2]
+
+bad_inout_use_arg19.php:15:11
+ 9 | function test(): void {
+10 |   if (launder()) {
+11 |     $x = Pair { 5, 42 };
+   |          ^^^^^^^^^^^^^^ [2]
+12 |   } else {
+13 |     $x = vec[1, 2, 3];
+14 |   }
+15 |   f(inout $x[1]);
+   |           ^^^^^ [1]
+16 | }
+
+2 errors found

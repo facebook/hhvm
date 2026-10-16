@@ -1,4 +1,19 @@
-ERROR: File "super_nested_attribute.php", line 7, characters 34-53:
-Attribute arguments must be literals (Parsing[1002])
-ERROR: File "super_nested_attribute.php", line 7, characters 34-40:
-Unbound name: `MyClass` (an object type) (Naming[2049])
+error: Parsing[1002] Attribute arguments must be literals [1]
+
+super_nested_attribute.php:7:34
+5 | }
+6 | 
+7 | <<A(shape("A" => dict[123 => vec[MyClass::CLASS_CONST]]))>>
+  |                                  ^^^^^^^^^^^^^^^^^^^^ [1]
+8 | class X {}
+
+error: Naming[2049] Unbound name: `MyClass` (an object type) [1]
+
+super_nested_attribute.php:7:34
+5 | }
+6 | 
+7 | <<A(shape("A" => dict[123 => vec[MyClass::CLASS_CONST]]))>>
+  |                                  ^^^^^^^ [1]
+8 | class X {}
+
+2 errors found

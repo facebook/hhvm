@@ -1,4 +1,18 @@
-ERROR: File "do_def_after_break.php", line 10, characters 10-11:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "do_def_after_break.php", line 3, characters 17-18:
-  Did you mean `$b` instead?
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$b` instead? [2]
+
+do_def_after_break.php:10:10
+ 1 | <?hh
+ 2 | 
+ 3 | function f(bool $b): int {
+   |                 ^^ [2]
+ 4 |   do {
+ 5 |     if ($b) {
+   :
+ 8 |     $x = 1;
+ 9 |   } while ($x == 0); // no error
+10 |   return $x; // undefined error
+   |          ^^ [1]
+11 | }
+
+1 error found

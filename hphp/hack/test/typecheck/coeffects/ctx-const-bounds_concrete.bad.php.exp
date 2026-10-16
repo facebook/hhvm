@@ -1,18 +1,90 @@
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 4, characters 3-49:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 5, characters 3-46:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 6, characters 3-54:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 10, characters 3-49:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 11, characters 3-46:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 12, characters 3-54:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 16, characters 3-49:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 17, characters 3-46:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
-ERROR: File "ctx-const-bounds_concrete.bad.php", line 18, characters 3-54:
-Constraints on a context constant requires it to be abstract (Parsing[1002])
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:4:3
+2 | 
+3 | class BadWhenBoundsAppearInConcreteClass {
+4 |   const ctx Clower super [defaults] = [defaults];
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   const ctx Cupper as [defaults] = [defaults];
+6 |   const ctx Cboth as [] super [defaults] = [defaults];
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:5:3
+3 | class BadWhenBoundsAppearInConcreteClass {
+4 |   const ctx Clower super [defaults] = [defaults];
+5 |   const ctx Cupper as [defaults] = [defaults];
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   const ctx Cboth as [] super [defaults] = [defaults];
+7 | }
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:6:3
+4 |   const ctx Clower super [defaults] = [defaults];
+5 |   const ctx Cupper as [defaults] = [defaults];
+6 |   const ctx Cboth as [] super [defaults] = [defaults];
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:10:3
+ 8 | 
+ 9 | abstract class BadWhenBoundsAppearInAbstractClass {
+10 |   const ctx Clower super [defaults] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   const ctx Cupper as [defaults] = [defaults];
+12 |   const ctx Cboth as [] super [defaults] = [defaults];
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:11:3
+ 9 | abstract class BadWhenBoundsAppearInAbstractClass {
+10 |   const ctx Clower super [defaults] = [defaults];
+11 |   const ctx Cupper as [defaults] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   const ctx Cboth as [] super [defaults] = [defaults];
+13 | }
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:12:3
+10 |   const ctx Clower super [defaults] = [defaults];
+11 |   const ctx Cupper as [defaults] = [defaults];
+12 |   const ctx Cboth as [] super [defaults] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:16:3
+14 | 
+15 | interface BadWhenBoundsAppearInInterface {
+16 |   const ctx Clower super [defaults] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   const ctx Cupper as [defaults] = [defaults];
+18 |   const ctx Cboth as [] super [defaults] = [defaults];
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:17:3
+15 | interface BadWhenBoundsAppearInInterface {
+16 |   const ctx Clower super [defaults] = [defaults];
+17 |   const ctx Cupper as [defaults] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   const ctx Cboth as [] super [defaults] = [defaults];
+19 | }
+
+error: Parsing[1002] Constraints on a context constant requires it to be abstract [1]
+
+ctx-const-bounds_concrete.bad.php:18:3
+16 |   const ctx Clower super [defaults] = [defaults];
+17 |   const ctx Cupper as [defaults] = [defaults];
+18 |   const ctx Cboth as [] super [defaults] = [defaults];
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+9 errors found

@@ -1,2 +1,11 @@
-ERROR: File "lambda_called_on_small_tuple.php", line 3, characters 19-19:
-Tuple accessed with an index out of bounds (Typing[4116])
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+lambda_called_on_small_tuple.php:3:19
+1 | <?hh
+2 | function f(): void {
+3 |   $f = ($v ==> $v[1]);
+  |                   ^ [1]
+4 |   $f(tuple("a"));
+5 | }
+
+1 error found

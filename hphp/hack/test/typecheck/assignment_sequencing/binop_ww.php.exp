@@ -1,8 +1,33 @@
-ERROR: File "binop_ww.php", line 4, characters 9-10:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "binop_ww.php", line 4, characters 22-23:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "binop_ww.php", line 4, characters 9-10:
-Unsequenced modifications to local variable. Modified here (Typing[4144])
-  File "binop_ww.php", line 4, characters 22-23:
-  And also modified here
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+binop_ww.php:4:9
+2 | 
+3 | function x(int $y): string {
+4 |   $y = ($x = 'lol').($x = 'wut');
+  |         ^^ [1]
+5 |   return $x;
+6 | }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+binop_ww.php:4:22
+2 | 
+3 | function x(int $y): string {
+4 |   $y = ($x = 'lol').($x = 'wut');
+  |                      ^^ [1]
+5 |   return $x;
+6 | }
+
+error: Typing[4144] Unsequenced modifications to local variable. Modified here [1]
+-> And also modified here [2]
+
+binop_ww.php:4:9
+2 | 
+3 | function x(int $y): string {
+4 |   $y = ($x = 'lol').($x = 'wut');
+  |         ^^ [1]
+  |                      ^^ [2]
+5 |   return $x;
+6 | }
+
+3 errors found

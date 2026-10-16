@@ -1,2 +1,11 @@
-ERROR: File "postfix_minus_minus_error2.php", line 10, characters 5-8:
-`ExampleFloatOpType` does not support this operator (it has no instance method named `__postfixMinusMinus`) (Typing[4053])
+error: Typing[4053] `ExampleFloatOpType` does not support this operator (it has no instance method named `__postfixMinusMinus`) [1]
+
+postfix_minus_minus_error2.php:10:5
+ 8 |   ExampleDsl`() ==> {
+ 9 |     $i = 1.0;
+10 |     $i--;
+   |     ^^^^ [1]
+11 |   }`;
+12 | }
+
+1 error found

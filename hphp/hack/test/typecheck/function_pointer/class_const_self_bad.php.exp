@@ -1,6 +1,18 @@
-ERROR: File "class_const_self_bad.php", line 8, characters 8-14:
-Invalid argument (Typing[4110])
-  File "class_const_self_bad.php", line 4, characters 30-32:
-  Expected `int`
-  File "class_const_self_bad.php", line 8, characters 8-14:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+class_const_self_bad.php:8:8
+ 2 | 
+ 3 | final class Foo {
+ 4 |   public static function baz(int $x): void {}
+   |                              ^^^ [2]
+ 5 | 
+ 6 |   public function bar(): void {
+ 7 |     $x = self::baz<>;
+ 8 |     $x('hello');
+   |        ^^^^^^^ [1]
+ 9 |   }
+10 | }
+
+1 error found

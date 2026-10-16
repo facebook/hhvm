@@ -1,28 +1,84 @@
-ERROR: File "typing3.bad.php", line 34, characters 19-23:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "typing3.bad.php", line 42, characters 23-27:
-Invalid argument (Typing[4323])
-  File "typing3.bad.php", line 34, characters 31-34:
-  `TBox` is a constrained type parameter
-  File "typing3.bad.php", line 34, characters 39-42:
-  This type constraint is violated
-  File "typing3.bad.php", line 34, characters 39-42:
-  Expected `IBox`
-  File "typing3.bad.php", line 31, characters 4-11:
-  But got `Box<int>`
-ERROR: File "typing3.bad.php", line 42, characters 23-27:
-Invalid argument (Typing[4323])
-  File "typing3.bad.php", line 34, characters 31-34:
-  `TBox` is a constrained type parameter
-  File "typing3.bad.php", line 34, characters 39-42:
-  This type constraint is violated
-  File "typing3.bad.php", line 34, characters 39-42:
-  Expected `IBox`
-  File "typing3.bad.php", line 31, characters 4-11:
-  But got `dynamic`
-ERROR: File "typing3.bad.php", line 42, characters 23-27:
-Invalid argument (Typing[4110])
-  File "typing3.bad.php", line 35, characters 28-33:
-  Expected `~HH\MemberOf<_, _>` because method must be callable in a dynamic context
-  File "typing3.bad.php", line 31, characters 13-14:
-  But got `HH\MemberOf<E, ~Box<int>>`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+typing3.bad.php:34:19
+32 | }
+33 | 
+34 | function generic2<TEnum as E, TBox as IBox>(
+   |                   ^^^^^ [1]
+35 |   HH\MemberOf<TEnum, TBox> $param
+36 |   ): int {
+
+error: Typing[4323] Invalid argument [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `IBox` [3]
+-> But got `Box<int>` [4]
+
+typing3.bad.php:42:23
+29 |    Box<string> A = new Box('bli');
+30 |    IBox B = Helper::ibox();
+31 |    Box<int> B2 = new Box(42);
+   |    ^^^^^^^^ [4]
+32 | }
+33 | 
+34 | function generic2<TEnum as E, TBox as IBox>(
+   |                               ^^^^ [2]
+   |                                       ^^^^ [3]
+35 |   HH\MemberOf<TEnum, TBox> $param
+36 |   ): int {
+   :
+40 | 
+41 | function testit2(): void {
+42 |   expect_int(generic2(E::B2)); // errors as it should
+   |                       ^^^^^ [1]
+43 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `TBox` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `IBox` [3]
+-> But got `dynamic` [4]
+
+typing3.bad.php:42:23
+29 |    Box<string> A = new Box('bli');
+30 |    IBox B = Helper::ibox();
+31 |    Box<int> B2 = new Box(42);
+   |    ^^^^^^^^ [4]
+32 | }
+33 | 
+34 | function generic2<TEnum as E, TBox as IBox>(
+   |                               ^^^^ [2]
+   |                                       ^^^^ [3]
+35 |   HH\MemberOf<TEnum, TBox> $param
+36 |   ): int {
+   :
+40 | 
+41 | function testit2(): void {
+42 |   expect_int(generic2(E::B2)); // errors as it should
+   |                       ^^^^^ [1]
+43 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~HH\MemberOf<_, _>` because method must be callable in a dynamic context [2]
+-> But got `HH\MemberOf<E, ~Box<int>>` [3]
+
+typing3.bad.php:42:23
+29 |    Box<string> A = new Box('bli');
+30 |    IBox B = Helper::ibox();
+31 |    Box<int> B2 = new Box(42);
+   |             ^^ [3]
+32 | }
+33 | 
+34 | function generic2<TEnum as E, TBox as IBox>(
+35 |   HH\MemberOf<TEnum, TBox> $param
+   |                            ^^^^^^ [2]
+36 |   ): int {
+37 |   $param->add(42);
+   :
+40 | 
+41 | function testit2(): void {
+42 |   expect_int(generic2(E::B2)); // errors as it should
+   |                       ^^^^^ [1]
+43 | }
+
+4 errors found

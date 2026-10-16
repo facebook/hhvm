@@ -1,20 +1,85 @@
 File "acts_as_string.php", line 11, characters 3-13:
   class<Tr>
-ERROR: File "acts_as_string.php", line 17, characters 16-24:
-Using `Tr::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Tr` (Typing[4482])
-ERROR: File "acts_as_string.php", line 18, characters 16-23:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "acts_as_string.php", line 19, characters 16-23:
-Using `I::class` in this position will trigger an implicit runtime conversion to string, please use `nameof I` (Typing[4482])
-ERROR: File "acts_as_string.php", line 20, characters 16-26:
-Using `Tdef::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Tdef` (Typing[4482])
-ERROR: File "acts_as_string.php", line 21, characters 16-27:
-Using `NTdef::class` in this position will trigger an implicit runtime conversion to string, please use `nameof NTdef` (Typing[4482])
-ERROR: File "acts_as_string.php", line 22, characters 10-17:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "acts_as_string.php", line 30, characters 8-9:
-Invalid argument (Typing[4110])
-  File "pseudofunctions.hhi", line 44, characters 29-33:
-  Expected `arraykey` (variadic argument)
-  File "acts_as_string.php", line 29, characters 26-34:
-  But got `Stringish`
+error: Typing[4482] Using `Tr::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Tr` [1]
+
+acts_as_string.php:17:16
+15 |   print_stringish(nameof Tdef);
+16 |   print_stringish(nameof NTdef);
+17 |   print_string(Tr::class);
+   |                ^^^^^^^^^ [1]
+18 |   print_string(C::class);
+19 |   print_string(I::class);
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+acts_as_string.php:18:16
+16 |   print_stringish(nameof NTdef);
+17 |   print_string(Tr::class);
+18 |   print_string(C::class);
+   |                ^^^^^^^^ [1]
+19 |   print_string(I::class);
+20 |   print_string(Tdef::class);
+
+error: Typing[4482] Using `I::class` in this position will trigger an implicit runtime conversion to string, please use `nameof I` [1]
+
+acts_as_string.php:19:16
+17 |   print_string(Tr::class);
+18 |   print_string(C::class);
+19 |   print_string(I::class);
+   |                ^^^^^^^^ [1]
+20 |   print_string(Tdef::class);
+21 |   print_string(NTdef::class);
+
+error: Typing[4482] Using `Tdef::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Tdef` [1]
+
+acts_as_string.php:20:16
+18 |   print_string(C::class);
+19 |   print_string(I::class);
+20 |   print_string(Tdef::class);
+   |                ^^^^^^^^^^^ [1]
+21 |   print_string(NTdef::class);
+22 |   return C::class;
+
+error: Typing[4482] Using `NTdef::class` in this position will trigger an implicit runtime conversion to string, please use `nameof NTdef` [1]
+
+acts_as_string.php:21:16
+19 |   print_string(I::class);
+20 |   print_string(Tdef::class);
+21 |   print_string(NTdef::class);
+   |                ^^^^^^^^^^^^ [1]
+22 |   return C::class;
+23 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+acts_as_string.php:22:10
+20 |   print_string(Tdef::class);
+21 |   print_string(NTdef::class);
+22 |   return C::class;
+   |          ^^^^^^^^ [1]
+23 | }
+24 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` (variadic argument) [2]
+-> But got `Stringish` [3]
+
+acts_as_string.php:30:8
+27 | }
+28 | 
+29 | function print_stringish(Stringish $s): void {
+   |                          ^^^^^^^^^ [3]
+30 |   echo $s, "\n";
+   |        ^^ [1]
+31 | }
+32 | 
+
+pseudofunctions.hhi:44:29
+42 |    */
+43 |   <<__SupportDynamicType>>
+44 |   function echo(arraykey ...$args): void;
+   |                             ^^^^^ [2]
+45 | }
+46 | 
+
+7 errors found

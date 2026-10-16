@@ -1,20 +1,80 @@
-ERROR: File "helper_function_noreturn_bad.php", line 22, characters 22-31:
-Invalid argument (Typing[4110])
-  File "helper_function_noreturn_bad.php", line 20, characters 47-47:
-  Expected `T`
-  File "helper_function_noreturn_bad.php", line 7, characters 62-69:
-  But got `noreturn`
-ERROR: File "helper_function_noreturn_bad.php", line 22, characters 22-31:
-You are using the return value of a `noreturn` function (Typing[4133])
-  File "helper_function_noreturn_bad.php", line 7, characters 62-69:
-  A `noreturn` function always throws or exits.
-ERROR: File "helper_function_noreturn_bad.php", line 23, characters 22-26:
-Invalid argument (Typing[4110])
-  File "helper_function_noreturn_bad.php", line 20, characters 47-47:
-  Expected `T`
-  File "helper_function_noreturn_bad.php", line 14, characters 60-67:
-  But got `noreturn`
-ERROR: File "helper_function_noreturn_bad.php", line 23, characters 22-26:
-You are using the return value of a `noreturn` function (Typing[4133])
-  File "helper_function_noreturn_bad.php", line 14, characters 60-67:
-  A `noreturn` function always throws or exits.
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+-> But got `noreturn` [3]
+
+helper_function_noreturn_bad.php:22:22
+ 5 | class Foo {
+ 6 |   public static async function bar(ExampleContext $_):
+ 7 |     Awaitable<ExampleExpression<ExampleFunction<(function(): noreturn)>>>
+   |                                                              ^^^^^^^^ [3]
+ 8 |   {
+ 9 |     throw new Exception();
+   :
+18 | 
+19 | function test<T>(
+20 |   ExampleExpression<ExampleFunction<(function(T): T)>> $x,
+   |                                               ^ [2]
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+   |                      ^^^^^^^^^^ [1]
+23 |   ExampleDsl`${ $x }(baz())`;
+24 | }
+
+error: Typing[4133] You are using the return value of a `noreturn` function [1]
+-> A `noreturn` function always throws or exits. [2]
+
+helper_function_noreturn_bad.php:22:22
+ 5 | class Foo {
+ 6 |   public static async function bar(ExampleContext $_):
+ 7 |     Awaitable<ExampleExpression<ExampleFunction<(function(): noreturn)>>>
+   |                                                              ^^^^^^^^ [2]
+ 8 |   {
+ 9 |     throw new Exception();
+   :
+20 |   ExampleExpression<ExampleFunction<(function(T): T)>> $x,
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+   |                      ^^^^^^^^^^ [1]
+23 |   ExampleDsl`${ $x }(baz())`;
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+-> But got `noreturn` [3]
+
+helper_function_noreturn_bad.php:23:22
+12 | 
+13 | function baz(ExampleContext $_):
+14 |   Awaitable<ExampleExpression<ExampleFunction<(function(): noreturn)>>>
+   |                                                            ^^^^^^^^ [3]
+15 | {
+16 |   throw new Exception();
+17 | }
+18 | 
+19 | function test<T>(
+20 |   ExampleExpression<ExampleFunction<(function(T): T)>> $x,
+   |                                               ^ [2]
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+23 |   ExampleDsl`${ $x }(baz())`;
+   |                      ^^^^^ [1]
+24 | }
+
+error: Typing[4133] You are using the return value of a `noreturn` function [1]
+-> A `noreturn` function always throws or exits. [2]
+
+helper_function_noreturn_bad.php:23:22
+12 | 
+13 | function baz(ExampleContext $_):
+14 |   Awaitable<ExampleExpression<ExampleFunction<(function(): noreturn)>>>
+   |                                                            ^^^^^^^^ [2]
+15 | {
+16 |   throw new Exception();
+   :
+21 | ): void {
+22 |   ExampleDsl`${ $x }(Foo::bar())`;
+23 |   ExampleDsl`${ $x }(baz())`;
+   |                      ^^^^^ [1]
+24 | }
+
+4 errors found

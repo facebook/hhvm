@@ -1,40 +1,145 @@
-ERROR: File "simple.php", line 10, characters 37-51:
-Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl2 inside of ExampleDsl (Parsing[1002])
-ERROR: File "simple.php", line 11, characters 38-50:
-Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl inside of ExampleDsl2 (Parsing[1002])
-ERROR: File "simple.php", line 7, characters 20-36:
-Invalid argument (Typing[4110])
-  File "simple.php", line 7, characters 8-18:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
-ERROR: File "simple.php", line 7, characters 34-34:
-Invalid argument (Typing[4110])
-  File "simple.php", line 7, characters 22-32:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
-ERROR: File "simple.php", line 8, characters 44-44:
-Invalid argument (Typing[4110])
-  File "simple.php", line 8, characters 32-42:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
-ERROR: File "simple.php", line 9, characters 29-29:
-Invalid argument (Typing[4110])
-  File "simple.php", line 9, characters 17-27:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
-ERROR: File "simple.php", line 10, characters 49-50:
-Invalid argument (Typing[4110])
-  File "simple.php", line 10, characters 37-47:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
-ERROR: File "simple.php", line 11, characters 20-56:
-Invalid argument (Typing[4110])
-  File "simple.php", line 11, characters 8-18:
-  Expected `ExampleDsl2`
-  File "expr_tree.php", line 108, characters 16-25:
-  But got `ExampleDsl`
+error: Parsing[1002] Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl2 inside of ExampleDsl [1]
+
+simple.php:10:37
+ 8 |   $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+ 9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+10 |   $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+   |                                     ^^^^^^^^^^^^^^^ [1]
+11 |   $y = ExampleDsl2`${(() ==> {return ExampleDsl`1`;})()}`; // Error: different name
+12 | }
+
+error: Parsing[1002] Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl inside of ExampleDsl2 [1]
+
+simple.php:11:38
+ 9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+10 |   $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+11 |   $y = ExampleDsl2`${(() ==> {return ExampleDsl`1`;})()}`; // Error: different name
+   |                                      ^^^^^^^^^^^^^ [1]
+12 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+simple.php:7:20
+  5 | function f(): void {
+  6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+  7 |   $y = ExampleDsl2`${ExampleDsl2`1`}`; // Ok
+    |        ^^^^^^^^^^^ [2]
+    |                    ^^^^^^^^^^^^^^^^^ [1]
+  8 |   $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+  9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+simple.php:7:34
+  5 | function f(): void {
+  6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+  7 |   $y = ExampleDsl2`${ExampleDsl2`1`}`; // Ok
+    |                      ^^^^^^^^^^^ [2]
+    |                                  ^ [1]
+  8 |   $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+  9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+simple.php:8:44
+  6 |   $y = ExampleDsl`${ExampleDsl`1`}`; // Ok
+  7 |   $y = ExampleDsl2`${ExampleDsl2`1`}`; // Ok
+  8 |   $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+    |                                ^^^^^^^^^^^ [2]
+    |                                            ^ [1]
+  9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+ 10 |   $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+simple.php:9:29
+  7 |   $y = ExampleDsl2`${ExampleDsl2`1`}`; // Ok
+  8 |   $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+  9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+    |                 ^^^^^^^^^^^ [2]
+    |                             ^ [1]
+ 10 |   $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+ 11 |   $y = ExampleDsl2`${(() ==> {return ExampleDsl`1`;})()}`; // Error: different name
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+simple.php:10:49
+  8 |   $y = (() ==> {ExampleDsl`1`; ExampleDsl2`1`; return 1;})(); // Ok
+  9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+ 10 |   $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+    |                                     ^^^^^^^^^^^ [2]
+    |                                                 ^^ [1]
+ 11 |   $y = ExampleDsl2`${(() ==> {return ExampleDsl`1`;})()}`; // Error: different name
+ 12 | }
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ExampleDsl2` [2]
+-> But got `ExampleDsl` [3]
+
+simple.php:11:20
+  9 |   $y = (() ==> {ExampleDsl2`1`; ExampleDsl`1`; return 1;})(); // Ok
+ 10 |   $y = ExampleDsl`${(() ==> {return ExampleDsl2`""`;})()}`; // Error: different name
+ 11 |   $y = ExampleDsl2`${(() ==> {return ExampleDsl`1`;})()}`; // Error: different name
+    |        ^^^^^^^^^^^ [2]
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 12 | }
+
+expr_tree.php:108:16
+106 |       'lexically_enclosing_tree' => ?ExprPos,
+107 |     ) $metadata,
+108 |     ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
+    |                ^^^^^^^^^^ [3]
+109 |   )[]: ExampleExpression<TInfer> {
+110 |     return new ExprTree($pos, $metadata, $ast);
+
+8 errors found

@@ -1,26 +1,61 @@
-WARN: File "multiple_concrete_defs_from_traits_good.php", line 16, characters 7-7:
-Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime (Warn[12008])
-ERROR: File "multiple_concrete_defs_from_traits_good.php", line 17, characters 7-8:
-Some members in class `C` are incompatible with those declared in type `T1` (Typing[4341])
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  The property `$p` has the wrong type
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  `T3` and `T1` both declare ambiguous implementations of `$p`.
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  `T3`'s definition is here.
-  File "multiple_concrete_defs_from_traits_good.php", line 5, characters 29-31:
-  `T1`'s definition is here.
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  Redeclare `$p` in `C` with a compatible signature.
-ERROR: File "multiple_concrete_defs_from_traits_good.php", line 17, characters 11-12:
-Some members in class `C` are incompatible with those declared in type `T2` (Typing[4341])
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  The property `$p` has the wrong type
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  `T3` and `T2` both declare ambiguous implementations of `$p`.
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  `T3`'s definition is here.
-  File "multiple_concrete_defs_from_traits_good.php", line 9, characters 29-31:
-  `T2`'s definition is here.
-  File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
-  Redeclare `$p` in `C` with a compatible signature.
+warning: Warn[12008] Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime [1]
+
+multiple_concrete_defs_from_traits_good.php:16:7
+14 | }
+15 | 
+16 | class C {
+   |       ^ [1]
+17 |   use T1, T2, T3;
+18 | }
+
+error: Typing[4341] Some members in class `C` are incompatible with those declared in type `T1` [1]
+-> The property `$p` has the wrong type [2]
+-> `T3` and `T1` both declare ambiguous implementations of `$p`. [2]
+-> `T3`'s definition is here. [2]
+-> `T1`'s definition is here. [3]
+-> Redeclare `$p` in `C` with a compatible signature. [2]
+
+multiple_concrete_defs_from_traits_good.php:17:7
+ 3 | 
+ 4 | trait T1 {
+ 5 |   <<__Const>> public static num $p = 5.4;
+   |                             ^^^ [3]
+ 6 | }
+ 7 | 
+   :
+11 | 
+12 | trait T3 {
+13 |   <<__Const>> public static num $p = 4;
+   |                             ^^^ [2]
+14 | }
+15 | 
+16 | class C {
+17 |   use T1, T2, T3;
+   |       ^^ [1]
+18 | }
+
+error: Typing[4341] Some members in class `C` are incompatible with those declared in type `T2` [1]
+-> The property `$p` has the wrong type [2]
+-> `T3` and `T2` both declare ambiguous implementations of `$p`. [2]
+-> `T3`'s definition is here. [2]
+-> `T2`'s definition is here. [3]
+-> Redeclare `$p` in `C` with a compatible signature. [2]
+
+multiple_concrete_defs_from_traits_good.php:17:11
+ 7 | 
+ 8 | trait T2 {
+ 9 |   <<__Const>> public static num $p = 5.0;
+   |                             ^^^ [3]
+10 | }
+11 | 
+12 | trait T3 {
+13 |   <<__Const>> public static num $p = 4;
+   |                             ^^^ [2]
+14 | }
+15 | 
+16 | class C {
+17 |   use T1, T2, T3;
+   |           ^^ [1]
+18 | }
+
+3 errors found

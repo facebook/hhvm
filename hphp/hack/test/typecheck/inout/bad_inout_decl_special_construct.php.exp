@@ -1,4 +1,19 @@
-ERROR: File "bad_inout_decl_special_construct.php", line 4, characters 31-35:
-Parameters may not be marked `inout` on constructors (Parsing[1002])
-ERROR: File "bad_inout_decl_special_construct.php", line 4, characters 41-42:
-Methods with special semantics cannot have `inout` parameters. (NastCheck[3043])
+error: Parsing[1002] Parameters may not be marked `inout` on constructors [1]
+
+bad_inout_decl_special_construct.php:4:31
+2 | 
+3 | class C {
+4 |   public function __construct(inout int $x) {}
+  |                               ^^^^^ [1]
+5 | }
+
+error: NastCheck[3043] Methods with special semantics cannot have `inout` parameters. [1]
+
+bad_inout_decl_special_construct.php:4:41
+2 | 
+3 | class C {
+4 |   public function __construct(inout int $x) {}
+  |                                         ^^ [1]
+5 | }
+
+2 errors found

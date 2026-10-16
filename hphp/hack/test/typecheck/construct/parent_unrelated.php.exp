@@ -1,4 +1,13 @@
-ERROR: File "parent_unrelated.php", line 14, characters 19-29:
-You are extending a class that needs to be initialized
+error: NastCheck[3012] You are extending a class that needs to be initialized
 Make sure you call `parent::__construct`.
- (NastCheck[3012])
+ [1]
+
+parent_unrelated.php:14:19
+12 | 
+13 | class D extends C {
+14 |   public function __construct() {
+   |                   ^^^^^^^^^^^ [1]
+15 |     parent::init(); // unrelated parent method
+16 |   }
+
+1 error found

@@ -1,6 +1,19 @@
-ERROR: File "is_in_loop.php", line 12, characters 10-16:
-Invalid return type (Typing[4110])
-  File "is_in_loop.php", line 8, characters 50-50:
-  Expected `T`
-  File "is_in_loop.php", line 12, characters 14-14:
-  But got `B`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `B` [3]
+
+is_in_loop.php:12:10
+ 6 | class E extends C<B> { }
+ 7 | 
+ 8 | function test_flow<T>(vec<C<T>> $cs, bool $flag):T {
+   |                                                  ^ [2]
+ 9 |   foreach ($cs as $c) {
+10 |     if (!$c is E) break;
+11 |   }
+12 |   return new B();
+   |          ^^^^^^^ [1]
+   |              ^ [3]
+13 | }
+14 | 
+
+1 error found

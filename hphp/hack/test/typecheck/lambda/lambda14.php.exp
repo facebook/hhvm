@@ -1,4 +1,27 @@
-ERROR: File "lambda14.php", line 36, characters 14-15:
-Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "lambda14.php", line 24, characters 3-68:
-  Did you mean `$baz` instead?
+error: Naming[2050] Variable `$z` is undefined, or not always defined. [1]
+-> Did you mean `$baz` instead? [2]
+
+lambda14.php:36:14
+22 | 
+23 |   // Also shouldn't capture $x, $y:
+24 |   $baz = () ==> {
+   |   ^^^^^^^^^^^^^^^ [2]
+25 |     $x = 12;
+   |     ^^^^^^^^ [2]
+26 |     $y = 13;
+   |     ^^^^^^^^ [2]
+27 |     echo $x.$y."\n";
+   |     ^^^^^^^^^^^^^^^^ [2]
+28 |   };
+   |   ^ [2]
+29 |   $baz();
+30 | 
+   :
+34 |   // ahead-of-type error from hh about $z not being defined.
+35 |   $quux = () ==> {
+36 |     whatever($z);
+   |              ^^ [1]
+37 |   };
+38 |   $z = "function scope is weird\n";
+
+1 error found

@@ -1,6 +1,6 @@
 ---
 name: analyze-www
-description: "Analyze code patterns across WWW using a TAST logger."
+description: "Analyze code patterns across WWW using a TAST logger. Uses hh_distc for fast distributed type checking (~20 min)."
 user-invocable: true
 disable-model-invocation: true
 argument-hint: "<question about WWW code patterns>"

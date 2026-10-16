@@ -12,9 +12,10 @@ open Client_command
 open Client_env
 
 (** Whether an option is shown in --help or only in --ultrahelp.
-  * See snapshot tests: $FBCODE/hphp/hack/test/help
- *)
-type arg_kind =
+    Default new arguments to [Arg_non_user_facing]. Use [Arg_user_facing]
+    only for established, commonly used user or agent workflows.
+    See snapshot tests: $FBCODE/hphp/hack/test/help *)
+type arg_visibility =
   | Arg_user_facing
       (** An argument that is for users and agents.
     * Will be shown in both hh --help and hh --ultrahelp
@@ -24,6 +25,14 @@ type arg_kind =
       or for very rare use cases.
     * will be shown only in hh --ultrahelp
     *)
+
+(** Use [Help_modes] for arguments that select an operation, such as
+    [--find-refs], or a standalone action, such as [--version].
+    Use [Help_options] for arguments that supply inputs, such as [--single],
+    or configure an operation, such as [--json]. *)
+type help_section =
+  | Help_modes
+  | Help_options
 
 (** Arg specs shared across more than 1 arg parser. *)
 module Common_argspecs = struct
@@ -261,11 +270,6 @@ let validate_check_args ~invalid_warning_codes =
            @@ List.map invalid_warning_codes ~f:Int.to_string))
       ~usage:None
 
-(* *** *** NB *** *** ***
- * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
- * if you are making significant changes you need to update the manpage as
- * well. Experimental or otherwise volatile options need not be documented
- * there, but keep what's there up to date please. *)
 let parse_check_args cmd ~from_default : Client_env.client_check_env =
   (* arg parse output refs *)
   let autostart = ref true in
@@ -431,17 +435,19 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       (* Please keep these sorted in the alphabetical order. *)
       tuple_3_append
         (Common_argspecs.allow_non_opt_build allow_non_opt_build)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       ( "--autostart-server",
         Arg.Bool (( := ) autostart),
         " automatically start hh_server if it's not running (default: true)",
-        Arg_non_user_facing );
-      tuple_3_append (Common_argspecs.config config) Arg_user_facing;
+        (Arg_non_user_facing, Help_options) );
+      tuple_3_append
+        (Common_argspecs.config config)
+        (Arg_non_user_facing, Help_options);
       ( "--cst-search",
         Arg.Unit (fun () -> set_mode (MODE_CST_SEARCH None)),
-        " (mode) Search the concrete syntax trees of files in the codebase"
+        " Search the concrete syntax trees of files in the codebase"
         ^ " for a given pattern",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--cst-search-files",
         Arg.Rest
           begin
@@ -458,13 +464,13 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
           end,
         " Run CST search on this set of files,"
         ^ " rather than all the files in the codebase.",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       tuple_3_append
         (Common_argspecs.custom_hhi_path custom_hhi_path)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       tuple_3_append
         (Common_argspecs.custom_telemetry_data custom_telemetry_data)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       ( "--deps-out-at-pos-batch",
         Arg.Rest
           begin
@@ -477,8 +483,8 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) for each entry in input list get list of what it depends on [file:line:character list]",
-        Arg_user_facing );
+        " for each entry in input list get list of what it depends on [file:line:character list]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--deps-in-at-pos-batch",
         Arg.Rest
           begin
@@ -491,16 +497,16 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_DEPS_IN_AT_POS_BATCH (position :: positions)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) for each entry in input list get list of what depends on it [file:line:character list]",
-        Arg_user_facing );
+        " for each entry in input list get list of what depends on it [file:line:character list]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--dump-config",
         Arg.Set dump_config,
         " Output configuration",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x)),
         "",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--dump-symbol-info",
         Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files)),
         (*  Input format:
@@ -513,7 +519,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
          *    ]
          *  Note: results list can be in any order *)
         "",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--error-format",
         Arg.String
           (fun s ->
@@ -528,7 +534,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
               error_format := Some Diagnostics.PlainHighlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<format> Error formatting style (default: highlighted); valid formats: agent, extended, raw, context, highlighted, plain, plain_highlighted",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--enforcement-at-pos-batch",
         Arg.Rest
           begin
@@ -541,113 +547,113 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_ENFORCEMENT_AT_POS_BATCH (position :: positions)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) show enforcement at multiple positions [file:line:character list]",
-        Arg_user_facing );
+        " show enforcement at multiple positions [file:line:character list]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--file-dependents",
         Arg.Unit
           (fun () ->
             let () = prechecked := Some false in
             set_mode MODE_FILE_LEVEL_DEPENDENCIES),
-        " (mode) Given a list of filepaths, shows list of (possibly) dependent files",
-        Arg_user_facing );
+        " Given a list of filepaths, shows list of (possibly) dependent files",
+        (Arg_non_user_facing, Help_modes) );
       ( "--find-class-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x)),
-        " (mode) finds references of the provided class name",
-        Arg_user_facing );
+        " finds references of the provided class name",
+        (Arg_user_facing, Help_modes) );
       ( "--find-isolatable-clusters",
         Arg.Unit
           (fun () ->
             set_mode (MODE_FIND_ISOLATABLE_CLUSTERS (isolation_options ()))),
-        " (mode) find clusters of files that can be isolated from the codebase",
-        Arg_non_user_facing );
+        " find clusters of files that can be isolated from the codebase",
+        (Arg_non_user_facing, Help_modes) );
       ( "--isolation-grow",
         Arg.Set isolation_grow,
         " grow a bigger cluster around each starting file, instead of reporting its smallest isolatable set",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-output",
         Arg.String (fun s -> isolation_output := Some s),
         " <file> write clusters to <file> as JSON lines as they are found, and print only the summary",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-seed-framework",
         Arg.String (fun s -> isolation_seed_framework := Some s),
         " <class> start from every subclass of <class> — an entry-point family — instead of scanning for seeds",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-seed-list",
         Arg.String (fun s -> isolation_seed_list := Some s),
         " <file> grow from the repo-relative paths listed in <file> instead of scanning for seeds",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-seed-dir",
         Arg.String (fun s -> isolation_seed_dir := Some s),
         " <dir> grow from every Hack file under <dir>",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-max-dependents",
         Arg.Int (fun n -> isolation_max_dependents := Some n),
         " <n> the most files that may depend on a candidate for it to be taken along with them",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-max-cluster-size",
         Arg.Int (fun n -> isolation_max_cluster_size := Some n),
         " <n> stop growing a cluster once it reaches <n> files",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-allow-long-run",
         Arg.Set isolation_allow_long_run,
         " run even when the seed count says this will take hours",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-batch-size",
         Arg.Int (fun n -> isolation_batch_size := Some n),
         " <n> grow <n> clusters at a time; they are all held in memory together, so this sets how much memory the run needs, and a larger batch drops more overlapping clusters so it also changes how many are reported",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-max-seeds",
         Arg.Int (fun n -> isolation_max_seeds := Some n),
         " <n> grow from at most <n> seeds",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--isolation-seed-offset",
         Arg.Set_int isolation_seed_offset,
         " <n> skip the first <n> seeds; pair with --isolation-max-seeds to walk the seed list in chunks",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--find-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_REFS x)),
-        " (mode) finds references of the provided symbol; optionally specify the symbol kind like \"Kind|Symbol\" (looks for functions or methods if unspecified)"
+        " finds references of the provided symbol; optionally specify the symbol kind like \"Kind|Symbol\" (looks for functions or methods if unspecified)"
         ^ "; valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst"
         ^ "; use ExplicitClass instead of Class to exclude references via self/static/parent",
-        Arg_user_facing );
+        (Arg_user_facing, Help_modes) );
       ( "--find-my-tests",
         Arg.String
           (fun path -> set_mode ~validate:true (MODE_FIND_MY_TESTS path)),
-        " (mode) return test files that reference the given symbols, using the version specified in the JSON config (default: staging)",
-        Arg_non_user_facing );
+        " return test files that reference the given symbols, using the version specified in the JSON config (default: staging)",
+        (Arg_non_user_facing, Help_modes) );
       ( "--find-my-tests-staging",
         Arg.String
           (fun path -> set_mode ~validate:true (MODE_FIND_MY_TESTS path)),
         " (deprecated, use --find-my-tests) alias for --find-my-tests",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       tuple_3_append
         (Common_argspecs.force_dormant_start force_dormant_start)
-        Arg_non_user_facing;
-      tuple_3_append (Common_argspecs.from from) Arg_user_facing;
+        (Arg_non_user_facing, Help_options);
+      tuple_3_append (Common_argspecs.from from) (Arg_user_facing, Help_options);
       ( "--from-arc-diff",
         Arg.Unit (set_from "arc_diff"),
         " (deprecated) equivalent to --from arc_diff",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--from-arc-land",
         Arg.Unit (set_from "arc_land"),
         " (deprecated) equivalent to --from arc_land",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--from-check-trunk",
         Arg.Unit (set_from "check_trunk"),
         " (deprecated) equivalent to --from check_trunk",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--from-emacs",
         Arg.Unit (set_from "emacs"),
         " (deprecated) equivalent to --from emacs",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--from-vim",
         Arg.Unit (fun () -> from := "vim"),
         " (deprecated) equivalent to --from vim",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--full-fidelity-schema",
         Arg.Unit (fun () -> set_mode MODE_FULL_FIDELITY_SCHEMA),
         "",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--fun-deps-at-pos-batch",
         Arg.Rest
           begin
@@ -660,32 +666,32 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) for each entry in input list get list of function dependencies [file:line:character list]",
-        Arg_non_user_facing );
+        " for each entry in input list get list of function dependencies [file:line:character list]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--get-method-name",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x)),
         (* alias for --identify-function *) "",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--go-to-impl-class",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS x)),
-        " (mode) goes to implementation of the provided class/trait/interface/etc. with the given name",
-        Arg_non_user_facing );
+        " goes to implementation of the provided class/trait/interface/etc. with the given name",
+        (Arg_non_user_facing, Help_modes) );
       ( "--go-to-impl-method",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_METHOD x)),
-        " (mode) goes to implementation of the provided method name",
-        Arg_non_user_facing );
+        " goes to implementation of the provided method name",
+        (Arg_non_user_facing, Help_modes) );
       ( "--hack-to-notebook",
         Arg.Unit (fun () -> set_mode MODE_HACK_TO_NOTEBOOK),
-        "Convert a Hack file generated by `hh --notebook-to-hack` into a notebook. Pass hack file contents via stdin",
-        Arg_non_user_facing );
+        " Convert a Hack file generated by `hh --notebook-to-hack` into a notebook. Pass hack file contents via stdin",
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-find-refs-by-symbol",
         Arg.String
           (fun x ->
             set_mode
               (MODE_IDE_FIND_REFS_BY_SYMBOL
                  (Find_refs_wire_format.CliArgs.from_string_exn x))),
-        "(mode) similar to IDE_FIND_REFS, but takes a symbol name rather than position",
-        Arg_non_user_facing );
+        " similar to IDE_FIND_REFS, but takes a symbol name rather than position",
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-find-refs-by-symbol3",
         (let action = ref "" in
          let stream_file = ref "-" in
@@ -700,50 +706,50 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                       (Find_refs_wire_format.CliArgs.from_string_triple_exn
                          (!action, !stream_file, hints))));
            ]),
-        "(mode) similar to FIND_REFS, but takes [action stream_file hints]",
-        Arg_non_user_facing );
+        " similar to FIND_REFS, but takes [action stream_file hints]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-go-to-impl-by-symbol",
         Arg.String
           (fun x ->
             set_mode
               (MODE_IDE_GO_TO_IMPL_BY_SYMBOL
                  (Find_refs_wire_format.CliArgs.from_string_exn x))),
-        "(mode) similar to IDE_GO_TO_IMPL, but takes a symbol name rather than position",
-        Arg_non_user_facing );
+        " similar to IDE_GO_TO_IMPL, but takes a symbol name rather than position",
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-get-definition",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x)),
         (* alias for --identify-function *) "",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-outline",
         Arg.Unit (fun () -> set_mode MODE_OUTLINE2),
         "",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-rename-by-symbol",
         Arg.String (fun x -> set_mode (MODE_IDE_RENAME_BY_SYMBOL x)),
-        " (mode) renames, but takes a Find_refs.action. Usage: "
+        " renames, but takes a Find_refs.action. Usage: "
         ^ " <new name>|<comma_separated_action>",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--identify-function",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x)),
-        " (mode) print the full function name at the position "
+        " print the full function name at the position "
         ^ "[line:character] of the text on stdin",
-        Arg_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--identify",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL x)),
-        " (mode) identify the named symbol",
-        Arg_user_facing );
+        " identify the named symbol",
+        (Arg_user_facing, Help_modes) );
       tuple_3_append
         (Common_argspecs.ignore_hh_version ignore_hh_version)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       ( "--in-memory-dep-table-size",
         Arg.Unit (fun () -> set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
         " number of entries in the in-memory dependency table",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestor-classes",
         Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Class"))),
-        " (mode) prints a list of classes that this class extends",
-        (* can use --inheritance-ancestor-classes-batch *) Arg_non_user_facing
-      );
+        " prints a list of classes that this class extends",
+        (* can use --inheritance-ancestor-classes-batch *)
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestor-classes-batch",
         Arg.Rest
           begin
@@ -756,14 +762,14 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Class")
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) prints a list of classes that these classes extend",
-        Arg_user_facing );
+        " prints a list of classes that these classes extend",
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestor-interfaces",
         Arg.String
           (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Interface"))),
-        " (mode) prints a list of interfaces that this class implements",
+        " prints a list of interfaces that this class implements",
         (* can use --inheritance-ancestor-interfaces-batch *)
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestor-interfaces-batch",
         Arg.Rest
           begin
@@ -779,12 +785,13 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                     (class_ :: classes, "Interface")
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) prints a list of interfaces that these classes implement",
-        Arg_user_facing );
+        " prints a list of interfaces that these classes implement",
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestor-traits",
         Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Trait"))),
-        " (mode) prints a list of traits that this class uses",
-        (* can use --inheritance-ancestor-traits-batch *) Arg_non_user_facing );
+        " prints a list of traits that this class uses",
+        (* can use --inheritance-ancestor-traits-batch *)
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestor-traits-batch",
         Arg.Rest
           begin
@@ -797,79 +804,79 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Trait")
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) prints a list of traits that these classes use",
-        Arg_user_facing );
+        " prints a list of traits that these classes use",
+        (Arg_non_user_facing, Help_modes) );
       ( "--inheritance-ancestors",
         Arg.String
           (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "No_filter"))),
-        " (mode) prints a list of all related classes or methods"
+        " prints a list of all related classes or methods"
         ^ " to the given class",
-        Arg_user_facing );
+        (Arg_user_facing, Help_modes) );
       ( "--inheritance-children",
         Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x)),
-        " (mode) prints a list of all related classes or methods"
+        " prints a list of all related classes or methods"
         ^ " to the given class",
-        Arg_user_facing );
+        (Arg_user_facing, Help_modes) );
       ( "--json",
         Arg.Set output_json,
         " output json for machine consumption (default: false)",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--jsonl",
         Arg.Set output_jsonl,
         " output streaming jsonl (JSON Lines) for machine consumption (default: false)",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
-        " (mode) lint the given list of files",
-        Arg_user_facing );
+        " lint the given list of files",
+        (Arg_non_user_facing, Help_modes) );
       ( "--lint-all",
         Arg.Int (fun x -> set_mode (MODE_LINT_ALL x)),
-        " (mode) find all occurrences of lint with the given error code",
-        Arg_user_facing );
+        " find all occurrences of lint with the given error code",
+        (Arg_non_user_facing, Help_modes) );
       ( "--lint-stdin",
         Arg.String (fun filename -> set_mode (MODE_LINT_STDIN filename)),
-        " (mode) lint a file given on stdin; the filename should be the"
+        " lint a file given on stdin; the filename should be the"
         ^ " argument to this option",
-        Arg_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--list-files",
         Arg.Unit (fun () -> set_mode MODE_LIST_FILES),
-        " (mode) list files with errors",
-        Arg_user_facing );
+        " list files with errors",
+        (Arg_user_facing, Help_modes) );
       ( "--lock-file",
         Arg.Set lock_file,
-        " (mode) show lock file name and exit",
-        Arg_non_user_facing );
+        " show lock file name and exit",
+        (Arg_non_user_facing, Help_modes) );
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       tuple_3_append
         (Common_argspecs.preexisting_warnings preexisting_warnings)
-        Arg_user_facing;
+        (Arg_user_facing, Help_options);
       ( "--logname",
         Arg.Set logname,
-        " (mode) show log filename and exit",
-        Arg_user_facing );
+        " show log filename and exit",
+        (Arg_non_user_facing, Help_modes) );
       ( "--monitor-logname",
         Arg.Set monitor_logname,
-        " (mode) show monitor log filename and exit",
-        Arg_non_user_facing );
+        " show monitor log filename and exit",
+        (Arg_non_user_facing, Help_modes) );
       ( "--client-logname",
         Arg.Set client_logname,
-        " (mode) show client log filename and exit",
-        Arg_non_user_facing );
+        " show client log filename and exit",
+        (Arg_non_user_facing, Help_modes) );
       ( "--ide-logname",
         Arg.Set ide_logname,
-        " (mode) show client ide log filename and exit",
-        Arg_non_user_facing );
+        " show client ide log filename and exit",
+        (Arg_non_user_facing, Help_modes) );
       ( "--lsp-logname",
         Arg.Set lsp_logname,
-        " (mode) show client lsp log filename and exit",
-        Arg_non_user_facing );
+        " show client lsp log filename and exit",
+        (Arg_non_user_facing, Help_modes) );
       ( "--no-load",
         Arg.Set no_load,
         " start from a fresh state",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--notebook-to-hack",
         (let notebook_number = ref "" in
          Arg.Tuple
@@ -881,21 +888,21 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                    (MODE_NOTEBOOK_TO_HACK
                       { notebook_number = !notebook_number; notebook_header }));
            ]),
-        "Convert notebook to a Hack file. Arg: notebook_number (example: \"N12345\"). "
+        " Convert notebook to a Hack file. Arg: notebook_number (example: \"N12345\"). "
         ^ "Pass notebook in .ipynb format to stdin and a header (such as a copyright notice comment)",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--outline",
         Arg.Unit (fun () -> set_mode MODE_OUTLINE),
-        " (mode) prints an outline of the text on stdin",
-        Arg_user_facing );
+        " prints an outline of the text on stdin",
+        (Arg_user_facing, Help_modes) );
       ( "--outline-for-agents",
         Arg.String (fun x -> set_mode (MODE_OUTLINE_FOR_AGENTS x)),
-        " <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files",
-        Arg_user_facing );
+        " <file> outline the file, including line spans, to help agents efficiently navigate large files",
+        (Arg_user_facing, Help_modes) );
       ( "--package-lint",
         Arg.String (fun x -> set_mode (MODE_PACKAGE_LINT x)),
-        "Support for linting of __PackageOverride annotations",
-        Arg_non_user_facing );
+        " Support for linting of __PackageOverride annotations",
+        (Arg_non_user_facing, Help_modes) );
       ( "--package-lint-full",
         (let target_file = ref "" in
          Arg.Tuple
@@ -914,18 +921,20 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                  set_mode (MODE_PACKAGE_LINT_FULL (!target_file, candidates)));
            ]),
         " <target_file> <file1,file2,...> Package-aware find-refs lint",
-        Arg_non_user_facing );
-      tuple_3_append (Common_argspecs.prechecked prechecked) Arg_non_user_facing;
+        (Arg_non_user_facing, Help_modes) );
+      tuple_3_append
+        (Common_argspecs.prechecked prechecked)
+        (Arg_non_user_facing, Help_options);
       tuple_3_append
         (Common_argspecs.no_prechecked prechecked)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       tuple_3_append
         (Common_argspecs.with_mini_state mini_state)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--refactor",
         (let rename_mode = ref Unspecified in
          Arg.Tuple
@@ -938,9 +947,9 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                (fun x ->
                  set_mode (MODE_RENAME (!rename_mode, !rename_before, x)));
            ]),
-        " (mode) rename a symbol, Usage: --refactor "
+        " rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>",
-        Arg_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--remove-dead-fixme",
         Arg.Int
           begin
@@ -953,37 +962,37 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
                   MODE_REMOVE_DEAD_FIXMES (code :: codel)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) remove dead HH_FIXME for specified error code "
+        " remove dead HH_FIXME for specified error code "
         ^ "(first do hh_client restart --no-load)",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--remove-dead-fixmes",
         Arg.Unit (fun () -> set_mode (MODE_REMOVE_DEAD_FIXMES [])),
-        " (mode) remove dead HH_FIXME for any error code < 5000 "
+        " remove dead HH_FIXME for any error code < 5000 "
         ^ "(first do hh_client restart --no-load)",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--remove-dead-unsafe-casts",
         Arg.Unit (fun () -> set_mode MODE_REMOVE_DEAD_UNSAFE_CASTS),
-        " (mode) remove dead UNSAFE_CASTS (first do hh_client restart --no-load)",
-        Arg_non_user_facing );
+        " remove dead UNSAFE_CASTS (first do hh_client restart --no-load)",
+        (Arg_non_user_facing, Help_modes) );
       ( "--reason",
         Arg.String (fun value -> reason := Some value),
         " reason for invoking hh, logged to telemetry",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--retries",
         Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
         " (deprecated) same as --timeout",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--retry-if-init",
         Arg.Bool (fun _ -> ()),
         " (deprecated and ignored)",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--rewrite-declarations",
         Arg.Unit (fun () -> set_mode MODE_REWRITE_DECLARATIONS),
-        {|Rewrite Hack source code allowed in notebooks to valid Hack.
+        {| Rewrite Hack source code allowed in notebooks to valid Hack.
 For example in `function foo(): void {} function foo(): void{}` we
 rewrite to the function names to something like `foo_1` and `foo_2`.
 |},
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--rewrite-lambda-parameters",
         Arg.Rest
           begin
@@ -996,90 +1005,90 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
                   MODE_REWRITE_LAMBDA_PARAMETERS (fn :: fnl)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) rewrite lambdas in the files from the given list"
+        " rewrite lambdas in the files from the given list"
         ^ " with suggested parameter types",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--save-naming",
         Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x)),
-        " (mode) Save the naming table to the given file."
+        " Save the naming table to the given file."
         ^ " Returns the number of files and symbols written to disk.",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--save-64bit",
         Arg.String (fun x -> save_64bit := Some x),
         " save discovered 64-bit to the given directory",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--save-human-readable-64bit-dep-map",
         Arg.String (fun x -> save_human_readable_64bit_dep_map := Some x),
         " save map of 64bit hashes to names to files in the given directory",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       tuple_3_append
         (Common_argspecs.saved_state_ignore_hhconfig
            saved_state_ignore_hhconfig)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       ( "--search",
         Arg.String (fun x -> set_mode (MODE_SEARCH x)),
-        " (mode) --search this_is_just_to_check_liveness_of_hh_server",
-        Arg_non_user_facing );
+        " --search this_is_just_to_check_liveness_of_hh_server",
+        (Arg_non_user_facing, Help_modes) );
       ( "--server-rage",
         Arg.Unit (fun () -> set_mode MODE_SERVER_RAGE),
-        " (mode) dumps internal state of hh_server",
-        Arg_non_user_facing );
+        " dumps internal state of hh_server",
+        (Arg_non_user_facing, Help_modes) );
       ( "--show-spinner",
         Arg.Bool (fun x -> show_spinner := Some x),
         " shows a spinner while awaiting the typechecker",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--single",
         Arg.String add_single,
         "<path> Return errors in file with provided name (give '-' for stdin)",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--multi",
         Arg.String add_multi,
         "<path> Return errors for files read from the given file (one per line)",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--log-errors",
         Arg.Unit (fun () -> only_log_errors := true),
-        " (mode) type check the given list of files and log their errors (use --log-to-file to specify output file)",
-        Arg_non_user_facing );
+        " type check the given list of files and log their errors (use --log-to-file to specify output file)",
+        (Arg_non_user_facing, Help_modes) );
       ( "--log-to-file",
         Arg.String set_log_to_file,
         "<path> Write logged errors to specified file (use with --log-errors)",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--show-tast",
         Arg.Unit (fun () -> show_tast := true),
         " in combination with `--single`, output the TASTs of the file along with TAST hashes.",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--sort-results",
         Arg.Set sort_results,
         " sort output for CST search.",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--stats",
         Arg.Unit (fun () -> set_mode MODE_STATS),
         " display some server statistics",
-        Arg_user_facing );
+        (Arg_non_user_facing, Help_modes) );
       ( "--stdin-name",
         Arg.String (fun x -> stdin_name := Some x),
         " substitute stdin for contents of file with specified name",
-        Arg_non_user_facing );
+        (Arg_non_user_facing, Help_options) );
       ( "--status",
         Arg.Unit (fun () -> set_mode MODE_STATUS),
-        " (mode) show a human readable list of errors (default)",
-        Arg_user_facing );
+        " show a human readable list of errors (default)",
+        (Arg_user_facing, Help_modes) );
       ( "--timeout",
         Arg.Float (fun x -> timeout := Some (Float.max 5. x)),
         " set the timeout in seconds (default: no timeout)",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "--type-at-pos",
         Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x)),
-        " (mode) show type at a given position in file [file:line:character]",
-        (* can use --type-at-pos-batch *) Arg_non_user_facing );
+        " show type at a given position in file [file:line:character]",
+        (* can use --type-at-pos-batch *) (Arg_non_user_facing, Help_modes) );
       ( "--infer-dynamic",
         Arg.String (fun x -> set_mode (MODE_INFER_DYNAMIC (x, false))),
-        " (mode) infer types for dynamic locals [function_name or ClassName::method_name]",
-        Arg_user_facing );
+        " infer types for dynamic locals [function_name or ClassName::method_name]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--infer-dynamic-as-data",
         Arg.String (fun x -> set_mode (MODE_INFER_DYNAMIC (x, true))),
-        " (mode) infer types for dynamic locals as data [function_name or ClassName::method_name]",
-        Arg_user_facing );
+        " infer types for dynamic locals as data [function_name or ClassName::method_name]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--type-at-pos-batch",
         Arg.Rest
           begin
@@ -1092,48 +1101,48 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
                   MODE_TYPE_AT_POS_BATCH (position :: positions)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
-        " (mode) show types at multiple positions [file:line:character list]",
-        Arg_user_facing );
+        " show types at multiple positions [file:line:character list]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--type-error-at-pos",
         Arg.String (fun x -> set_mode (MODE_TYPE_ERROR_AT_POS x)),
-        " (mode) show type error at a given position in file [line:character]",
-        Arg_user_facing );
+        " show type error at a given position in file [line:character]",
+        (Arg_non_user_facing, Help_modes) );
       ( "--is-subtype",
         Arg.Unit (fun () -> set_mode MODE_IS_SUBTYPE),
-        " (mode) take a JSON list of subtype queries via stdin",
-        Arg_user_facing );
+        " take a JSON list of subtype queries via stdin",
+        (Arg_non_user_facing, Help_modes) );
       ( "--tast-holes",
         Arg.String (fun x -> set_mode (MODE_TAST_HOLES x)),
-        " (mode) return all TAST Holes in a given file",
-        Arg_non_user_facing );
+        " return all TAST Holes in a given file",
+        (Arg_non_user_facing, Help_modes) );
       ( "--tast-holes-batch",
         Arg.String (fun x -> set_mode (MODE_TAST_HOLES_BATCH x)),
-        " (mode) return all TAST Holes for a set of files. Argument is a file containing a newline-separated list of files",
-        Arg_non_user_facing );
+        " return all TAST Holes for a set of files. Argument is a file containing a newline-separated list of files",
+        (Arg_non_user_facing, Help_modes) );
       ( "--validate-isolation",
         Arg.String (fun f -> set_mode (MODE_VALIDATE_ISOLATION f)),
-        " (mode) <file> check whether the repo-relative paths listed in <file> could be a strict-isolation package; rebuilds decls in shared heaps, so use a server given over to this and restart it afterwards",
-        Arg_non_user_facing );
+        " <file> check whether the repo-relative paths listed in <file> could be a strict-isolation package; rebuilds decls in shared heaps, so use a server given over to this and restart it afterwards",
+        (Arg_non_user_facing, Help_modes) );
       ( "--verbose-on",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE true)),
-        " (mode) turn on verbose server log",
-        Arg_non_user_facing );
+        " turn on verbose server log",
+        (Arg_non_user_facing, Help_modes) );
       ( "--verbose-off",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE false)),
-        " (mode) turn off verbose server log",
-        Arg_non_user_facing );
+        " turn off verbose server log",
+        (Arg_non_user_facing, Help_modes) );
       ( "--version",
         Arg.Set version,
-        " (mode) show version and exit",
-        Arg_user_facing );
+        " show version and exit",
+        (Arg_user_facing, Help_modes) );
       ( "-Wall",
         Arg.Unit (fun () -> add_warning_switch Filter_diagnostics.WAll),
         " show all warnings",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "-Wnone",
         Arg.Unit (fun () -> add_warning_switch Filter_diagnostics.WNone),
         " hide all warnings",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "-W",
         Arg.Int
           (fun code ->
@@ -1141,7 +1150,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
             | None -> add_invalid_warning_code code
             | Some code -> add_warning_switch @@ Filter_diagnostics.Code_on code),
         " show all warnings with a given code, e.g. -W 12001",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "-Wno",
         Arg.Int
           (fun code ->
@@ -1150,7 +1159,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
             | Some code ->
               add_warning_switch @@ Filter_diagnostics.Code_off code),
         " hide all warnings with a given code, e.g. -Wno 12001",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "-Wignore-files",
         Arg.String
           (fun regexp ->
@@ -1164,15 +1173,15 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
             in
             add_warning_switch (Filter_diagnostics.Ignored_files regexp)),
         " hide warnings in files matching a regexp",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       ( "-Wgenerated",
         Arg.Unit
           (fun () -> add_warning_switch Filter_diagnostics.Generated_files_on),
         " show warnings in generated files",
-        Arg_user_facing );
+        (Arg_user_facing, Help_options) );
       tuple_3_append
         (Common_argspecs.watchman_debug_logging watchman_debug_logging)
-        Arg_non_user_facing;
+        (Arg_non_user_facing, Help_options);
       (* Please keep these sorted in the alphabetical order *)
     ]
   in
@@ -1216,37 +1225,51 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   let to_arg_specs options =
     List.map options ~f:(fun (key, spec, doc, _kind) -> (key, spec, doc))
   in
-  (* To keep `--help` readable for users and agents:
-     --help shows only Arg_user_facing options
-     --ultrahelp shows all options. *)
-  if argv_has "--ultrahelp" then begin
+  let ultrahelp = argv_has "--ultrahelp" in
+  if ultrahelp || argv_has "--help" || argv_has "-help" then begin
     let display_options =
+      List.filter options ~f:(fun (_key, _spec, _doc, (visibility, _section)) ->
+          ultrahelp
+          ||
+          match visibility with
+          | Arg_user_facing -> true
+          | Arg_non_user_facing -> false)
+    in
+    let (modes, options) =
+      List.partition_tf
+        display_options
+        ~f:(fun (_key, _spec, _doc, (_visibility, section)) ->
+          match section with
+          | Help_modes -> true
+          | Help_options -> false)
+    in
+    let modes =
+      List.map (to_arg_specs modes) ~f:(fun (key, spec, doc) ->
+          ( key,
+            spec,
+            if String.is_empty doc then
+              doc
+            else
+              " " ^ String.strip doc ))
+      @ [
+          ("-help", Arg.Unit (fun () -> ()), "");
+          ("--help", Arg.Unit (fun () -> ()), "");
+        ]
+    in
+    let options =
       to_arg_specs options
       @ [
           ( "--ultrahelp",
             Arg.Unit (fun () -> ()),
-            " see full options (for language and release teams)" );
+            " see all modes and options, including less frequently used ones" );
         ]
     in
-    print_string (Arg.usage_string (Arg.align display_options) usage);
-    exit 0
-  end;
-  if argv_has "--help" || argv_has "-help" then begin
-    let main_options =
-      List.filter options ~f:(fun (_key, _spec, _doc, kind) ->
-          match kind with
-          | Arg_user_facing -> true
-          | Arg_non_user_facing -> false)
-    in
-    let display_options =
-      to_arg_specs main_options
-      @ [
-          ( "--ultrahelp",
-            Arg.Unit (fun () -> ()),
-            " see full options (for language and release teams)" );
-        ]
-    in
-    print_string (Arg.usage_string (Arg.align display_options) usage);
+    print_string
+      (Arg.usage_string
+         (Arg.align modes)
+         (usage
+         ^ "\nModes (mutually exclusive; choose one; default: --status):\n"));
+    print_string (Arg.usage_string (Arg.align options) "\nOptions:\n");
     exit 0
   end;
   let args =

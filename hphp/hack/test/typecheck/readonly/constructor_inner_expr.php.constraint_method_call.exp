@@ -1,8 +1,21 @@
-ERROR: File "constructor_inner_expr.php", line 17, characters 7-20:
-Typing error (Typing[4411])
-  File "constructor_inner_expr.php", line 3, characters 28-35:
-  Function readonly return mismatch
-  File "constructor_inner_expr.php", line 3, characters 28-35:
-  This function returns a readonly value
-  File "constructor_inner_expr.php", line 17, characters 7-20:
-  This function does not return a readonly value
+error: Typing[4411] Typing error [1]
+-> Function readonly return mismatch [2]
+-> This function returns a readonly value [2]
+-> This function does not return a readonly value [1]
+
+constructor_inner_expr.php:17:7
+ 1 | <?hh
+ 2 | final class X {
+ 3 |   public readonly function getValue(): readonly int {
+   |                            ^^^^^^^^ [2]
+ 4 |     return readonly 5;
+ 5 |   }
+   :
+15 |     $x = new X();
+16 |     return readonly new XContainer(
+17 |       $x->getValue(),
+   |       ^^^^^^^^^^^^^^ [1]
+18 |     );
+19 |   }
+
+1 error found

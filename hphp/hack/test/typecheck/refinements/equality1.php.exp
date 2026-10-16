@@ -1,12 +1,43 @@
-ERROR: File "equality1.php", line 10, characters 13-14:
-Invalid argument (Typing[4110])
-  File "equality1.php", line 3, characters 20-22:
-  Expected `int`
-  File "equality1.php", line 5, characters 15-17:
-  But got `num`
-ERROR: File "equality1.php", line 11, characters 13-14:
-Invalid argument (Typing[4110])
-  File "equality1.php", line 3, characters 20-22:
-  Expected `int`
-  File "equality1.php", line 5, characters 23-30:
-  But got `arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+
+equality1.php:10:13
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_int(int $_): void {}
+   |                    ^^^ [2]
+ 4 | 
+ 5 | function main(num $n, arraykey $a): void {
+   |               ^^^ [3]
+ 6 |   if ($n === $a) {
+ 7 |     takes_int($n); // No error, int is the only thing it can be
+ 8 |     takes_int($a); // No error, int is the only thing it can be
+ 9 |   }
+10 |   takes_int($n); // Error
+   |             ^^ [1]
+11 |   takes_int($a); // Error
+12 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+equality1.php:11:13
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_int(int $_): void {}
+   |                    ^^^ [2]
+ 4 | 
+ 5 | function main(num $n, arraykey $a): void {
+   |                       ^^^^^^^^ [3]
+ 6 |   if ($n === $a) {
+ 7 |     takes_int($n); // No error, int is the only thing it can be
+ 8 |     takes_int($a); // No error, int is the only thing it can be
+ 9 |   }
+10 |   takes_int($n); // Error
+11 |   takes_int($a); // Error
+   |             ^^ [1]
+12 | }
+
+2 errors found

@@ -1,6 +1,21 @@
-ERROR: File "class-method-access.php", line 9, characters 9-9:
-No static method `f` in `C` (Typing[4090])
-  File "class-method-access.php", line 4, characters 19-19:
-  Did you mean instance method `f` instead?
-  File "class-method-access.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4090] No static method `f` in `C` [1]
+-> Did you mean instance method `f` instead? [2]
+-> Declaration of `C` is here [3]
+
+class-method-access.php:9:9
+ 1 | <?hh
+ 2 | 
+ 3 | class C {
+   |       ^ [3]
+ 4 |   public function f<reify T>(): void {}
+   |                   ^ [2]
+ 5 | }
+ 6 | 
+ 7 | class D<reify T1 as C> {
+ 8 |   public function f(): void {
+ 9 |     T1::f<C>();
+   |         ^ [1]
+10 |   }
+11 | }
+
+1 error found

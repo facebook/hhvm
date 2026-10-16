@@ -1,18 +1,57 @@
-ERROR: File "option_is_not_subtype_of_nonnull2.php", line 4, characters 28-28:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "option_is_not_subtype_of_nonnull2.php", line 8, characters 10-19:
-It is no longer allowed to use a `classname<I>` in this position. Please use a `class<I>` instead. (Typing[4482])
-  File "option_is_not_subtype_of_nonnull2.php", line 7, characters 15-26:
-  Definition is here
-ERROR: File "option_is_not_subtype_of_nonnull2.php", line 8, characters 10-24:
-Invalid return type (Typing[4110])
-  File "option_is_not_subtype_of_nonnull2.php", line 7, characters 41-47:
-  Expected `nonnull`
-  File "option_is_not_subtype_of_nonnull2.php", line 4, characters 34-35:
-  But got `?_`
-ERROR: File "option_is_not_subtype_of_nonnull2.php", line 8, characters 10-24:
-Invalid return type (Typing[4110])
-  File "option_is_not_subtype_of_nonnull2.php", line 7, characters 41-47:
-  Expected `nonnull`
-  File "option_is_not_subtype_of_nonnull2.php", line 4, characters 34-35:
-  But got `null`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+option_is_not_subtype_of_nonnull2.php:4:28
+2 | 
+3 | interface I {
+4 |   public static function f<T>(): ?T;
+  |                            ^ [1]
+5 | }
+6 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<I>` in this position. Please use a `class<I>` instead. [1]
+-> Definition is here [2]
+
+option_is_not_subtype_of_nonnull2.php:8:10
+5 | }
+6 | 
+7 | function test(classname<I> $classname): nonnull {
+  |               ^^^^^^^^^^^^ [2]
+8 |   return $classname::f();
+  |          ^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `?_` [3]
+
+option_is_not_subtype_of_nonnull2.php:8:10
+2 | 
+3 | interface I {
+4 |   public static function f<T>(): ?T;
+  |                                  ^^ [3]
+5 | }
+6 | 
+7 | function test(classname<I> $classname): nonnull {
+  |                                         ^^^^^^^ [2]
+8 |   return $classname::f();
+  |          ^^^^^^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `null` [3]
+
+option_is_not_subtype_of_nonnull2.php:8:10
+2 | 
+3 | interface I {
+4 |   public static function f<T>(): ?T;
+  |                                  ^^ [3]
+5 | }
+6 | 
+7 | function test(classname<I> $classname): nonnull {
+  |                                         ^^^^^^^ [2]
+8 |   return $classname::f();
+  |          ^^^^^^^^^^^^^^^ [1]
+9 | }
+
+4 errors found

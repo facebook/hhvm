@@ -1,40 +1,173 @@
-ERROR: File "re_prefixed_string.php", line 23, characters 16-17:
-Invalid argument (Typing[4110])
-  File "re_prefixed_string.php", line 26, characters 43-65:
-  Expected `HH\Lib\Regex\Pattern<_>`
-  File "re_prefixed_string.php", line 20, characters 8-20:
-  But got `string` because this is the result of a concatenation
-ERROR: File "re_prefixed_string.php", line 26, characters 10-16:
-Invalid return type (Typing[4336])
-  File "re_prefixed_string.php", line 26, characters 78-78:
-  Expected `T`
-  File "re_prefixed_string.php", line 26, characters 10-16:
-  But got `void` because this function does not always return a value
-ERROR: File "re_prefixed_string.php", line 32, characters 13-35:
-Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 33, characters 13-29:
-Bad regex pattern; group name must start with a non-digit [5]. (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 34, characters 13-18:
-Bad regex pattern; \c at end of pattern [2]. (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 41, characters 16-35:
-Strings with embedded expressions are not allowed to be to be `re`-prefixed (Typing[4274])
-ERROR: File "re_prefixed_string.php", line 47, characters 13-19:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 49, characters 13-20:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 51, characters 13-21:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 52, characters 13-20:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 55, characters 13-21:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 57, characters 14-24:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 58, characters 14-21:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 68, characters 13-23:
-Bad regex pattern; Invalid global option(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 77, characters 13-68:
-Bad regex pattern; Missing delimiter(s). (Typing[4275])
-ERROR: File "re_prefixed_string.php", line 81, characters 14-15:
-Bad regex pattern; This pattern is empty. (Typing[4275])
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\Lib\Regex\Pattern<_>` [2]
+-> But got `string` because this is the result of a concatenation [3]
+
+re_prefixed_string.php:23:16
+18 | 
+19 |   // `re`-prefixed strings can still be concatenated like strings
+20 |   $z = $x.", world!";
+   |        ^^^^^^^^^^^^^ [3]
+21 | 
+22 |   // $z is a string but not an HH\Lib|Regex\Pattern
+23 |   $w = goodbye($z);
+   |                ^^ [1]
+24 | }
+25 | 
+26 | function goodbye<T as HH\Lib\Regex\Match>(HH\Lib\Regex\Pattern<T> $pattern): T {
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+27 | }
+28 | 
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `void` because this function does not always return a value [1]
+
+re_prefixed_string.php:26:10
+24 | }
+25 | 
+26 | function goodbye<T as HH\Lib\Regex\Match>(HH\Lib\Regex\Pattern<T> $pattern): T {
+   |          ^^^^^^^ [1]
+   |                                                                              ^ [2]
+27 | }
+28 | 
+
+error: Typing[4275] Bad regex pattern; two named subpatterns have the same name [14]. [1]
+
+re_prefixed_string.php:32:13
+30 | function g(): void {
+31 |   $good0 = re"/Hel(\D)(?'o'\D)/";
+32 |   $bad1 = re"/He(?'l'\D)(?'l'\D)o/";
+   |             ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+33 |   $bad2 = re"/He(?'42'\D)lo/";
+34 |   $bad3 = re"/\c/";
+
+error: Typing[4275] Bad regex pattern; group name must start with a non-digit [5]. [1]
+
+re_prefixed_string.php:33:13
+31 |   $good0 = re"/Hel(\D)(?'o'\D)/";
+32 |   $bad1 = re"/He(?'l'\D)(?'l'\D)o/";
+33 |   $bad2 = re"/He(?'42'\D)lo/";
+   |             ^^^^^^^^^^^^^^^^^ [1]
+34 |   $bad3 = re"/\c/";
+35 | }
+
+error: Typing[4275] Bad regex pattern; \c at end of pattern [2]. [1]
+
+re_prefixed_string.php:34:13
+32 |   $bad1 = re"/He(?'l'\D)(?'l'\D)o/";
+33 |   $bad2 = re"/He(?'42'\D)lo/";
+34 |   $bad3 = re"/\c/";
+   |             ^^^^^^ [1]
+35 | }
+36 | 
+
+error: Typing[4274] Strings with embedded expressions are not allowed to be to be `re`-prefixed [1]
+
+re_prefixed_string.php:41:16
+39 | function h(): void {
+40 |   $world = "world";
+41 |   $string2 = re"/Hello, {$world}!/";
+   |                ^^^^^^^^^^^^^^^^^^^^ [1]
+42 | }
+43 | 
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:47:13
+45 |    non-backslash matching characters. */
+46 | function missing_delimiter(): void {
+47 |   $bad0 = re"Hello";
+   |             ^^^^^^^ [1]
+48 |   $good1 = re"/Hello/";
+49 |   $bad2 = re"/Hello";
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:49:13
+47 |   $bad0 = re"Hello";
+48 |   $good1 = re"/Hello/";
+49 |   $bad2 = re"/Hello";
+   |             ^^^^^^^^ [1]
+50 |   $good3 = re"#Hello#";
+51 |   $bad4 = re"#Hello/";
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:51:13
+49 |   $bad2 = re"/Hello";
+50 |   $good3 = re"#Hello#";
+51 |   $bad4 = re"#Hello/";
+   |             ^^^^^^^^^ [1]
+52 |   $bad5 = re"#Hello";
+53 |   $good6 = re"(Hello)";
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:52:13
+50 |   $good3 = re"#Hello#";
+51 |   $bad4 = re"#Hello/";
+52 |   $bad5 = re"#Hello";
+   |             ^^^^^^^^ [1]
+53 |   $good6 = re"(Hello)";
+54 |   $good7 = re")Hello)";
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:55:13
+53 |   $good6 = re"(Hello)";
+54 |   $good7 = re")Hello)";
+55 |   $bad8 = re"(Hello(";
+   |             ^^^^^^^^^ [1]
+56 |   $good9 = re"[Hello]";
+57 |   $bad10 = re"\\Hello\\";
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:57:14
+55 |   $bad8 = re"(Hello(";
+56 |   $good9 = re"[Hello]";
+57 |   $bad10 = re"\\Hello\\";
+   |              ^^^^^^^^^^^ [1]
+58 |   $bad11 = re"HelloH";
+59 | }
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:58:14
+56 |   $good9 = re"[Hello]";
+57 |   $bad10 = re"\\Hello\\";
+58 |   $bad11 = re"HelloH";
+   |              ^^^^^^^^ [1]
+59 | }
+60 | 
+
+error: Typing[4275] Bad regex pattern; Invalid global option(s). [1]
+
+re_prefixed_string.php:68:13
+66 | function invalid_global_option(): void {
+67 |   $good0 = re"#Hello#imsxADSUXu";
+68 |   $bad1 = re"#Hello#42";
+   |             ^^^^^^^^^^^ [1]
+69 |   $bad2 = re"#What # are you#";
+70 |   $good3 = re"#What \# are you#";
+
+error: Typing[4275] Bad regex pattern; Missing delimiter(s). [1]
+
+re_prefixed_string.php:77:13
+75 |   $good0 = re"(He\(?'one'\D\)\(\D\)\(?'three'\D\)\(\D\)\(\D\)\(?'six'\D\))";
+76 |   $bad1 = re"(He(?'one'\D)(\D)(?'three'\D)(\D)(\D)(?'six'\D))";
+77 |   $bad2 = re"(He(?'one'\D\)(\D\)(?'three'\D\)(\D\)(\D\)(?'six'\D\))";
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+78 | }
+79 | 
+
+error: Typing[4275] Bad regex pattern; This pattern is empty. [1]
+
+re_prefixed_string.php:81:14
+79 | 
+80 | function empty_pattern(): void {
+81 |   $empty = re"";
+   |              ^^ [1]
+82 | }
+
+16 errors found

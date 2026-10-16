@@ -1,26 +1,114 @@
-ERROR: File "newable_targ_basic.php", line 11, characters 32-32:
-The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes (Typing[4308])
-ERROR: File "newable_targ_basic.php", line 14, characters 5-6:
-A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-  File "newable_targ_basic.php", line 11, characters 32-32:
-  Type parameter `T` was declared `__Newable` here
-ERROR: File "newable_targ_basic.php", line 15, characters 5-11:
-A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-  File "newable_targ_basic.php", line 11, characters 32-32:
-  Type parameter `T` was declared `__Newable` here
-ERROR: File "newable_targ_basic.php", line 19, characters 5-5:
-A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-  File "newable_targ_basic.php", line 11, characters 32-32:
-  Type parameter `T` was declared `__Newable` here
-ERROR: File "newable_targ_basic.php", line 20, characters 5-5:
-A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-  File "newable_targ_basic.php", line 11, characters 32-32:
-  Type parameter `T` was declared `__Newable` here
-ERROR: File "newable_targ_basic.php", line 21, characters 5-5:
-A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-  File "newable_targ_basic.php", line 11, characters 32-32:
-  Type parameter `T` was declared `__Newable` here
-ERROR: File "newable_targ_basic.php", line 22, characters 5-6:
-A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
-  File "newable_targ_basic.php", line 11, characters 32-32:
-  Type parameter `T` was declared `__Newable` here
+error: Typing[4308] The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes [1]
+
+newable_targ_basic.php:11:32
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [1]
+12 | 
+13 | function non_happly(): void {
+
+error: Typing[4307] A newable type argument must be a concrete class or a newable type parameter. [1]
+-> Type parameter `T` was declared `__Newable` here [2]
+
+newable_targ_basic.php:14:5
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [2]
+12 | 
+13 | function non_happly(): void {
+14 |   f<Ty>();
+   |     ^^ [1]
+15 |   f<dynamic>();
+16 | }
+
+error: Typing[4307] A newable type argument must be a concrete class or a newable type parameter. [1]
+-> Type parameter `T` was declared `__Newable` here [2]
+
+newable_targ_basic.php:15:5
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [2]
+12 | 
+13 | function non_happly(): void {
+14 |   f<Ty>();
+15 |   f<dynamic>();
+   |     ^^^^^^^ [1]
+16 | }
+17 | 
+
+error: Typing[4307] A newable type argument must be a concrete class or a newable type parameter. [1]
+-> Type parameter `T` was declared `__Newable` here [2]
+
+newable_targ_basic.php:19:5
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [2]
+12 | 
+13 | function non_happly(): void {
+   :
+17 | 
+18 | function not_concrete(): void {
+19 |   f<E>();
+   |     ^ [1]
+20 |   f<I>();
+21 |   f<A>();
+
+error: Typing[4307] A newable type argument must be a concrete class or a newable type parameter. [1]
+-> Type parameter `T` was declared `__Newable` here [2]
+
+newable_targ_basic.php:20:5
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [2]
+12 | 
+13 | function non_happly(): void {
+   :
+18 | function not_concrete(): void {
+19 |   f<E>();
+20 |   f<I>();
+   |     ^ [1]
+21 |   f<A>();
+22 |   f<Tr>();
+
+error: Typing[4307] A newable type argument must be a concrete class or a newable type parameter. [1]
+-> Type parameter `T` was declared `__Newable` here [2]
+
+newable_targ_basic.php:21:5
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [2]
+12 | 
+13 | function non_happly(): void {
+   :
+19 |   f<E>();
+20 |   f<I>();
+21 |   f<A>();
+   |     ^ [1]
+22 |   f<Tr>();
+23 | }
+
+error: Typing[4307] A newable type argument must be a concrete class or a newable type parameter. [1]
+-> Type parameter `T` was declared `__Newable` here [2]
+
+newable_targ_basic.php:22:5
+ 9 | type Ty = C;
+10 | 
+11 | function f<<<__Newable>> reify T>(): void {}
+   |                                ^ [2]
+12 | 
+13 | function non_happly(): void {
+   :
+20 |   f<I>();
+21 |   f<A>();
+22 |   f<Tr>();
+   |     ^^ [1]
+23 | }
+24 | 
+
+7 errors found

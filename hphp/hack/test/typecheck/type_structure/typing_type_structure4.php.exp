@@ -1,4 +1,13 @@
-ERROR: File "typing_type_structure4.php", line 5, characters 29-35:
-`MyTrait` is uninstantiable (Typing[4002])
-  File "typing_type_structure4.php", line 3, characters 7-13:
-  Declaration is here
+error: Typing[4002] `MyTrait` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_type_structure4.php:5:29
+1 | <?hh
+2 | 
+3 | trait MyTrait {}
+  |       ^^^^^^^ [2]
+4 | 
+5 | function test(TypeStructure<MyTrait> $x): void {}
+  |                             ^^^^^^^ [1]
+
+1 error found

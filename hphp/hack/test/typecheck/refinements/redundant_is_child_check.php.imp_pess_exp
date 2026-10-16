@@ -1,2 +1,11 @@
-WARN: File "redundant_is_child_check.php", line 22, characters 31-53:
-This `is` check is always `false`. The expression on the left has type `(IMyGenericTaker<T> & not FooTaker)` which shares no values with `FooTakerChild`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(IMyGenericTaker<T> & not FooTaker)` which shares no values with `FooTakerChild`. [1]
+
+redundant_is_child_check.php:22:31
+20 |   public async function split(): Awaitable<void> {
+21 |     $taker = $this->taker;
+22 |     if ($taker is FooTaker || $taker is FooTakerChild) {
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 |       // if $taker is FooTaker, then T = Foo, so $this->t : Foo
+24 |       // `$taker is FooTakerChild` is redundant, but it should not affect this
+
+1 error found

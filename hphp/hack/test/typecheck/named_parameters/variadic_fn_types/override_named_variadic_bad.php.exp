@@ -1,24 +1,43 @@
-ERROR: File "override_named_variadic_bad.php", line 11, characters 19-21:
-The method `bar` is not compatible with the overridden method (Typing[4341])
-  File "override_named_variadic_bad.php", line 11, characters 19-21:
-  Method `bar` has type `(function(int $x, arraykey $y, arraykey $a): void)` in `D`
-  File "override_named_variadic_bad.php", line 6, characters 19-21:
-  But it has type `(function(int $x, string $rest...): void)` in parent `C`
-  File "override_named_variadic_bad.php", line 11, characters 19-21:
-  Type `(function(int $x, arraykey $y, arraykey $a): void)` is not a subtype of `(function(int $x, string $rest...): void)`
-  File "override_named_variadic_bad.php", line 11, characters 19-21:
-  Too many mandatory arguments (expected 1 but got 3)
-  File "override_named_variadic_bad.php", line 6, characters 19-21:
-  Because of this definition
-ERROR: File "override_named_variadic_bad.php", line 12, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "override_named_variadic_bad.php", line 12, characters 19-21:
-  Method `foo` has type `(function(int $x, named arraykey $y, named arraykey $a): void)` in `D`
-  File "override_named_variadic_bad.php", line 7, characters 19-21:
-  But it has type `(function(int $x, named string...): void)` in parent `C`
-  File "override_named_variadic_bad.php", line 12, characters 19-21:
-  Type `(function(int $x, named arraykey $y, named arraykey $a): void)` is not a subtype of `(function(int $x, named string...): void)`
-  File "override_named_variadic_bad.php", line 12, characters 19-21:
-  Unexpected named parameters: y, a
-  File "override_named_variadic_bad.php", line 7, characters 19-21:
-  Because of this definition
+error: Typing[4341] The method `bar` is not compatible with the overridden method [1]
+-> Method `bar` has type `(function(int $x, arraykey $y, arraykey $a): void)` in `D` [1]
+-> But it has type `(function(int $x, string $rest...): void)` in parent `C` [2]
+-> Type `(function(int $x, arraykey $y, arraykey $a): void)` is not a subtype of `(function(int $x, string $rest...): void)` [1]
+-> Too many mandatory arguments (expected 1 but got 3) [1]
+-> Because of this definition [2]
+
+override_named_variadic_bad.php:11:19
+ 4 | 
+ 5 | class C {
+ 6 |   public function bar(int $x, string... $rest):void { }
+   |                   ^^^ [2]
+ 7 |   public function foo(int $x, named string...):void { }
+ 8 | }
+ 9 | 
+10 | class D extends C {
+11 |   public function bar(int $x, arraykey $y, arraykey $a):void { }
+   |                   ^^^ [1]
+12 |   public function foo(int $x, named arraykey $y, named arraykey $a):void { }
+13 | }
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(int $x, named arraykey $y, named arraykey $a): void)` in `D` [1]
+-> But it has type `(function(int $x, named string...): void)` in parent `C` [2]
+-> Type `(function(int $x, named arraykey $y, named arraykey $a): void)` is not a subtype of `(function(int $x, named string...): void)` [1]
+-> Unexpected named parameters: y, a [1]
+-> Because of this definition [2]
+
+override_named_variadic_bad.php:12:19
+ 5 | class C {
+ 6 |   public function bar(int $x, string... $rest):void { }
+ 7 |   public function foo(int $x, named string...):void { }
+   |                   ^^^ [2]
+ 8 | }
+ 9 | 
+10 | class D extends C {
+11 |   public function bar(int $x, arraykey $y, arraykey $a):void { }
+12 |   public function foo(int $x, named arraykey $y, named arraykey $a):void { }
+   |                   ^^^ [1]
+13 | }
+14 | 
+
+2 errors found

@@ -1,10 +1,27 @@
-ERROR: File "trait_diamond_property_mtd_01.bad.php", line 18, characters 7-13:
-Class `MyClass` inherits trait property `myprop` via multiple paths. Currently, traits with properties are not supported by the <<__EnableMethodTraitDiamond>> experimental feature. (Typing[4462])
-  File "trait_diamond_property_mtd_01.bad.php", line 11, characters 10-12:
-  Trait property is defined here
-  File "trait_diamond_property_mtd_01.bad.php", line 20, characters 7-14:
-  `MyClass` uses `MyTrait2`
-  File "trait_diamond_property_mtd_01.bad.php", line 14, characters 7-19:
-  `MyTrait2` uses `MyTrait1`
-  File "trait_diamond_property_mtd_01.bad.php", line 19, characters 7-22:
-  `MyClass` uses `MyTrait1`
+error: Typing[4462] Class `MyClass` inherits trait property `myprop` via multiple paths. Currently, traits with properties are not supported by the <<__EnableMethodTraitDiamond>> experimental feature. [1]
+-> Trait property is defined here [2]
+-> `MyClass` uses `MyTrait2` [3]
+-> `MyTrait2` uses `MyTrait1` [4]
+-> `MyClass` uses `MyTrait1` [5]
+
+trait_diamond_property_mtd_01.bad.php:18:7
+ 9 | 
+10 | trait MyTrait1<T> {
+11 |   public int $myprop = 1;
+   |          ^^^ [2]
+12 | }
+13 | trait MyTrait2 {
+14 |   use MyTrait1<int>;
+   |       ^^^^^^^^^^^^^ [4]
+15 | }
+16 | 
+17 | <<__EnableMethodTraitDiamond>>
+18 | class MyClass {
+   |       ^^^^^^^ [1]
+19 |   use MyTrait1<string>;
+   |       ^^^^^^^^^^^^^^^^ [5]
+20 |   use MyTrait2;
+   |       ^^^^^^^^ [3]
+21 | }
+
+1 error found

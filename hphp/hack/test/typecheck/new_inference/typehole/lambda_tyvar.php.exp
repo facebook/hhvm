@@ -1,12 +1,36 @@
-ERROR: File "lambda_tyvar.php", line 7, characters 31-32:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_tyvar.php", line 7, characters 9-22:
-  It is unknown because type parameter `T` of `just_return_it` could not be determined. Please add explicit type parameters to the invocation of `just_return_it`
-  File "lambda_tyvar.php", line 4, characters 38-38:
-    via this generic `T`
-ERROR: File "lambda_tyvar.php", line 8, characters 42-43:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_tyvar.php", line 8, characters 9-22:
-  It is unknown because type parameter `T` of `just_return_it` could not be determined. Please add explicit type parameters to the invocation of `just_return_it`
-  File "lambda_tyvar.php", line 4, characters 38-38:
-    via this generic `T`
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `just_return_it` could not be determined. Please add explicit type parameters to the invocation of `just_return_it` [2]
+->   via this generic `T` [3]
+
+lambda_tyvar.php:7:31
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function just_return_it<T>((function(T):void) $f):(function(T):void) { return $f; }
+  |                                      ^ [3]
+5 | 
+6 | function break_it(string $ss):void {
+7 |   $g1 = just_return_it($y ==> $y->this_method_does_not_exist());
+  |         ^^^^^^^^^^^^^^ [2]
+  |                               ^^ [1]
+8 |   $g2 = just_return_it($y ==> { $z = $y; $z->this_method_also_does_not_exist(); });
+9 |   $g1("hahahaha");
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `just_return_it` could not be determined. Please add explicit type parameters to the invocation of `just_return_it` [2]
+->   via this generic `T` [3]
+
+lambda_tyvar.php:8:42
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function just_return_it<T>((function(T):void) $f):(function(T):void) { return $f; }
+   |                                      ^ [3]
+ 5 | 
+ 6 | function break_it(string $ss):void {
+ 7 |   $g1 = just_return_it($y ==> $y->this_method_does_not_exist());
+ 8 |   $g2 = just_return_it($y ==> { $z = $y; $z->this_method_also_does_not_exist(); });
+   |         ^^^^^^^^^^^^^^ [2]
+   |                                          ^^ [1]
+ 9 |   $g1("hahahaha");
+10 | }
+
+2 errors found

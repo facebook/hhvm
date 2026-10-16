@@ -1,28 +1,95 @@
-ERROR: File "unpack_optional_named_bad.php", line 9, characters 8-15:
-Invalid argument (Typing[4104])
-  File "unpack_optional_named_bad.php", line 9, characters 8-15:
-  Too few positional arguments (required 2 but got 1)
-  File "unpack_optional_named_bad.php", line 4, characters 10-10:
-  Definition is here
-ERROR: File "unpack_optional_named_bad.php", line 10, characters 8-21:
-Invalid argument (Typing[4105])
-  File "unpack_optional_named_bad.php", line 10, characters 8-21:
-  Too many positional arguments (expected 2 but got 3)
-  File "unpack_optional_named_bad.php", line 4, characters 10-10:
-  Definition is here
-ERROR: File "unpack_optional_named_bad.php", line 11, characters 8-24:
-Invalid argument (Typing[4110])
-  File "unpack_optional_named_bad.php", line 4, characters 12-14:
-  Expected `int`
-  File "unpack_optional_named_bad.php", line 11, characters 14-20:
-  But got `string`
-ERROR: File "unpack_optional_named_bad.php", line 12, characters 25-31:
-Invalid argument (Typing[4110])
-  File "unpack_optional_named_bad.php", line 4, characters 34-36:
-  Expected `int`
-  File "unpack_optional_named_bad.php", line 12, characters 25-31:
-  But got `string`
-ERROR: File "unpack_optional_named_bad.php", line 13, characters 3-29:
-Missing required named argument: n (Typing[4499])
-  File "unpack_optional_named_bad.php", line 6, characters 10-23:
-  Definition is here
+error: Typing[4104] Invalid argument [1]
+-> Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+unpack_optional_named_bad.php:9:8
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function f(int $x, int $y, named int $n = 0): void {}
+   |          ^ [2]
+ 5 | 
+ 6 | function required_named(int $x, named int $n, named int $m = 0): void {}
+ 7 | 
+ 8 | function test(): void {
+ 9 |   f(...tuple(0));
+   |        ^^^^^^^^ [1]
+10 |   f(...tuple(0, 0, 0));
+11 |   f(...tuple('wrong', 0));
+
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+
+unpack_optional_named_bad.php:10:8
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function f(int $x, int $y, named int $n = 0): void {}
+   |          ^ [2]
+ 5 | 
+ 6 | function required_named(int $x, named int $n, named int $m = 0): void {}
+ 7 | 
+ 8 | function test(): void {
+ 9 |   f(...tuple(0));
+10 |   f(...tuple(0, 0, 0));
+   |        ^^^^^^^^^^^^^^ [1]
+11 |   f(...tuple('wrong', 0));
+12 |   f(...tuple(0, 0), n = 'wrong');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+unpack_optional_named_bad.php:11:8
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function f(int $x, int $y, named int $n = 0): void {}
+   |            ^^^ [2]
+ 5 | 
+ 6 | function required_named(int $x, named int $n, named int $m = 0): void {}
+   :
+ 9 |   f(...tuple(0));
+10 |   f(...tuple(0, 0, 0));
+11 |   f(...tuple('wrong', 0));
+   |        ^^^^^^^^^^^^^^^^^ [1]
+   |              ^^^^^^^ [3]
+12 |   f(...tuple(0, 0), n = 'wrong');
+13 |   required_named(...tuple(0));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+unpack_optional_named_bad.php:12:25
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function f(int $x, int $y, named int $n = 0): void {}
+   |                                  ^^^ [2]
+ 5 | 
+ 6 | function required_named(int $x, named int $n, named int $m = 0): void {}
+   :
+10 |   f(...tuple(0, 0, 0));
+11 |   f(...tuple('wrong', 0));
+12 |   f(...tuple(0, 0), n = 'wrong');
+   |                         ^^^^^^^ [1]
+13 |   required_named(...tuple(0));
+14 | }
+
+error: Typing[4499] Missing required named argument: n [1]
+-> Definition is here [2]
+
+unpack_optional_named_bad.php:13:3
+ 4 | function f(int $x, int $y, named int $n = 0): void {}
+ 5 | 
+ 6 | function required_named(int $x, named int $n, named int $m = 0): void {}
+   |          ^^^^^^^^^^^^^^ [2]
+ 7 | 
+ 8 | function test(): void {
+   :
+11 |   f(...tuple('wrong', 0));
+12 |   f(...tuple(0, 0), n = 'wrong');
+13 |   required_named(...tuple(0));
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | }
+15 | //
+
+5 errors found

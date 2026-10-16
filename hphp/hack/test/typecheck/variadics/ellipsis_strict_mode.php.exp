@@ -1,2 +1,9 @@
-ERROR: File "ellipsis_strict_mode.php", line 31, characters 19-20:
-Was expecting a type hint on this variadic parameter (Typing[4033])
+error: Typing[4033] Was expecting a type hint on this variadic parameter [1]
+
+ellipsis_strict_mode.php:31:19
+29 | }
+30 | 
+31 | function test5(...$_): void {}
+   |                   ^^ [1]
+
+1 error found

@@ -1,6 +1,29 @@
-ERROR: File "arity_error.php", line 4, characters 10-45:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "soundness.hhi", line 31, characters 10-20:
-  Definition is here
-ERROR: File "arity_error.php", line 8, characters 51-53:
-This argument must be a literal format string (Typing[4027])
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+arity_error.php:4:10
+ 2 | 
+ 3 | function f(): ~int {
+ 4 |   return \HH\FIXME\UNSAFE_CAST<string, int>();
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 5 | }
+ 6 | 
+
+soundness.hhi:31:10
+29 |  * expression.
+30 |  */
+31 | function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
+   |          ^^^^^^^^^^^ [2]
+32 |   Tin $t,
+33 |   ?\HH\FormatString<nothing> $msg = null,
+
+error: Typing[4027] This argument must be a literal format string [1]
+
+arity_error.php:8:51
+6 | 
+7 | function g(dynamic $m1, dynamic $m2): ~int {
+8 |   return \HH\FIXME\UNSAFE_CAST<dynamic, int>($m1, $m2);
+  |                                                   ^^^ [1]
+9 | }
+
+2 errors found

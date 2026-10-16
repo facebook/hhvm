@@ -1,8 +1,46 @@
-ERROR: File "multiple_errors.php", line 7, characters 5-12:
-Default case in `switch` must be terminal (Parsing[1002])
-ERROR: File "multiple_errors.php", line 7, characters 5-12:
-There can be only one `default` case in `switch` (Parsing[1002])
-ERROR: File "multiple_errors.php", line 5, characters 3-104:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "multiple_errors.php", line 5, characters 11-12:
-  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Parsing[1002] Default case in `switch` must be terminal [1]
+
+multiple_errors.php:7:5
+5 |   switch ($s) {
+6 |     default:
+7 |     default:
+  |     ^^^^^^^^ [1]
+8 |       return 0;
+9 |       break;
+
+error: Parsing[1002] There can be only one `default` case in `switch` [1]
+
+multiple_errors.php:7:5
+5 |   switch ($s) {
+6 |     default:
+7 |     default:
+  |     ^^^^^^^^ [1]
+8 |       return 0;
+9 |       break;
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+multiple_errors.php:5:3
+ 3 | 
+ 4 | function foo(string $s) : int {
+ 5 |   switch ($s) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 6 |     default:
+   |     ^^^^^^^^ [1]
+ 7 |     default:
+   |     ^^^^^^^^ [1]
+ 8 |       return 0;
+   |       ^^^^^^^^^ [1]
+ 9 |       break;
+   |       ^^^^^^ [1]
+10 |     case '1':
+   |     ^^^^^^^^^ [1]
+11 |       return 1;
+   |       ^^^^^^^^^ [1]
+12 |   }
+   |   ^ [1]
+13 | }
+
+3 errors found

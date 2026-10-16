@@ -1,2 +1,10 @@
-ERROR: File "function_pointer.php", line 7, characters 15-34:
-`HH\FIXME\UNSAFE_CAST` cannot be used as a function pointer (Naming[2105])
+error: Naming[2105] `HH\FIXME\UNSAFE_CAST` cannot be used as a function pointer [1]
+
+function_pointer.php:7:15
+5 | }
+6 | function f(): void {
+7 |   $x = map(1, HH\FIXME\UNSAFE_CAST<int, string>);
+  |               ^^^^^^^^^^^^^^^^^^^^ [1]
+8 | }
+
+1 error found

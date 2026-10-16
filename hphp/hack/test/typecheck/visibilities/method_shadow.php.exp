@@ -1,12 +1,40 @@
-ERROR: File "method_shadow.php", line 6, characters 12-20:
-Invalid return type (Typing[4110])
-  File "method_shadow.php", line 5, characters 32-37:
-  Expected `string`
-  File "method_shadow.php", line 8, characters 27-29:
-  But got `int`
-ERROR: File "method_shadow.php", line 6, characters 16-18:
-This object access to `get` is ambiguous (Typing[4256])
-  File "method_shadow.php", line 8, characters 20-22:
-  You will access the private instance declared in `A`
-  File "method_shadow.php", line 17, characters 19-21:
-  Instead of the public instance declared in `B`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+method_shadow.php:6:12
+ 3 | class A {
+ 4 |   public function __construct() {}
+ 5 |   public function break(B $b): string {
+   |                                ^^^^^^ [2]
+ 6 |     return $b->get();
+   |            ^^^^^^^^^ [1]
+ 7 |   }
+ 8 |   private function get(): int {
+   |                           ^^^ [3]
+ 9 |     return 42;
+10 |   }
+
+error: Typing[4256] This object access to `get` is ambiguous [1]
+-> You will access the private instance declared in `A` [2]
+-> Instead of the public instance declared in `B` [3]
+
+method_shadow.php:6:16
+ 4 |   public function __construct() {}
+ 5 |   public function break(B $b): string {
+ 6 |     return $b->get();
+   |                ^^^ [1]
+ 7 |   }
+ 8 |   private function get(): int {
+   |                    ^^^ [2]
+ 9 |     return 42;
+10 |   }
+   :
+15 |     parent::__construct();
+16 |   }
+17 |   public function get(): string {
+   |                   ^^^ [3]
+18 |     return "-1";
+19 |   }
+
+2 errors found

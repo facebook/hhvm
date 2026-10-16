@@ -1,4 +1,21 @@
-ERROR: File "lambda.php", line 16, characters 5-16:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "lambda.php", line 18, characters 5-16:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+lambda.php:16:5
+14 |   $f =
+15 |     readonly (Foo $x, readonly Foo $y) ==> {
+16 |     $z->prop = 4; // error, $z is readonly
+   |     ^^^^^^^^^^^^ [1]
+17 |     $x->prop = 4; // ok
+18 |     $y->prop = 4; // obviously not ok
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+lambda.php:18:5
+16 |     $z->prop = 4; // error, $z is readonly
+17 |     $x->prop = 4; // ok
+18 |     $y->prop = 4; // obviously not ok
+   |     ^^^^^^^^^^^^ [1]
+19 |     return;
+20 |   };
+
+2 errors found

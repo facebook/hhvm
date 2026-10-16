@@ -1,12 +1,50 @@
-ERROR: File "call.php", line 21, characters 3-4:
-This expression is readonly, so it can only call readonly methods (Typing[4413])
-  File "call.php", line 9, characters 19-21:
-  This method is not readonly
-ERROR: File "call.php", line 27, characters 3-4:
-This function is readonly, so it must be marked readonly at declaration time to be called. (Typing[4428])
-  File "call.php", line 25, characters 74-91:
-  Did you mean to annotate this typehint as a (readonly function(): ~void)?
-ERROR: File "call.php", line 29, characters 4-12:
-This function is readonly, so it must be marked readonly at declaration time to be called. (Typing[4428])
-  File "call.php", line 4, characters 10-27:
-  Did you mean to declare this as a `readonly` function?
+error: Typing[4413] This expression is readonly, so it can only call readonly methods [1]
+-> This method is not readonly [2]
+
+call.php:21:3
+ 7 |     $this->fprop = () ==> {};
+ 8 |   }
+ 9 |   public function set(int $y) : void {
+   |                   ^^^ [2]
+10 |     $this->prop = $y;
+11 |   }
+   :
+19 |   $x = readonly new Foo();
+20 |   $y = $x->get(); // ok
+21 |   $x->set(6); // error, can't call mutable function on readonly
+   |   ^^ [1]
+22 | }
+23 | 
+
+error: Typing[4428] This function is readonly, so it must be marked readonly at declaration time to be called. [1]
+-> Did you mean to annotate this typehint as a (readonly function(): ~void)? [2]
+
+call.php:27:3
+23 | 
+24 | // TODO: error against the $g typehint in nastcheck
+25 | function test_closure(readonly (readonly function() : void) $f, readonly (function(): void) $g) : void {
+   |                                                                          ^^^^^^^^^^^^^^^^^^ [2]
+26 |   $f(); // ok
+27 |   $g(); // error $g can't be called
+   |   ^^ [1]
+28 |   $x = readonly new Foo();
+29 |   ($x->fprop)();
+
+error: Typing[4428] This function is readonly, so it must be marked readonly at declaration time to be called. [1]
+-> Did you mean to declare this as a `readonly` function? [2]
+
+call.php:29:4
+ 2 | class Foo {
+ 3 |   public int $prop;
+ 4 |   public (function(): void) $fprop;
+   |          ^^^^^^^^^^^^^^^^^^ [2]
+ 5 |   public function __construct() {
+ 6 |     $this->prop = 1;
+   :
+27 |   $g(); // error $g can't be called
+28 |   $x = readonly new Foo();
+29 |   ($x->fprop)();
+   |    ^^^^^^^^^ [1]
+30 | }
+
+3 errors found

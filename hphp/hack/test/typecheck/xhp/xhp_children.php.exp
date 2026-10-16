@@ -1,8 +1,39 @@
-ERROR: File "xhp_children.php", line 15, characters 5-9:
-Unbound name: `:body` (an object type) (Naming[2049])
-ERROR: File "xhp_children.php", line 18, characters 5-10:
-Unbound name: `banana` (an object type) (Naming[2049])
-ERROR: File "xhp_children.php", line 21, characters 6-11:
-Unbound name: `PCDATA` (an object type) (Naming[2049])
-ERROR: File "xhp_children.php", line 21, characters 15-23:
-Unbound name: `Undefined` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `:body` (an object type) [1]
+
+xhp_children.php:15:5
+13 |   children (
+14 |     :head,
+15 |     :body,
+   |     ^^^^^ [1]
+16 |     pcdata,
+17 |     any*,
+
+error: Naming[2049] Unbound name: `banana` (an object type) [1]
+
+xhp_children.php:18:5
+16 |     pcdata,
+17 |     any*,
+18 |     banana,
+   |     ^^^^^^ [1]
+19 |     ClassThatDefinitelyExists,
+20 |     %other,
+
+error: Naming[2049] Unbound name: `PCDATA` (an object type) [1]
+
+xhp_children.php:21:6
+19 |     ClassThatDefinitelyExists,
+20 |     %other,
+21 |     (PCDATA | Undefined+));
+   |      ^^^^^^ [1]
+22 | }
+
+error: Naming[2049] Unbound name: `Undefined` (an object type) [1]
+
+xhp_children.php:21:15
+19 |     ClassThatDefinitelyExists,
+20 |     %other,
+21 |     (PCDATA | Undefined+));
+   |               ^^^^^^^^^ [1]
+22 | }
+
+4 errors found

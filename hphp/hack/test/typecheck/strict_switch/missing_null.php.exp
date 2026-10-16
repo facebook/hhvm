@@ -1,7 +1,29 @@
-WARN: File "missing_null.php", line 7, characters 10-11:
-Invalid case: This case will never match.
-A value of type `null` can never be equal to a value of type `int` (Warn[12007])
-ERROR: File "missing_null.php", line 6, characters 3-46:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
-  File "missing_null.php", line 6, characters 11-12:
-  The scrutinee has type `null`.
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `null` can never be equal to a value of type `int` [1]
+
+missing_null.php:7:10
+5 | function missing_null(null $x): void {
+6 |   switch ($x) {
+7 |     case 42:
+  |          ^^ [1]
+8 |       return;
+9 |   }
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `null` [1]
+-> The scrutinee has type `null`. [2]
+
+missing_null.php:6:3
+ 4 | // <<__StrictSwitch>>
+ 5 | function missing_null(null $x): void {
+ 6 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 7 |     case 42:
+   |     ^^^^^^^^ [1]
+ 8 |       return;
+   |       ^^^^^^^ [1]
+ 9 |   }
+   |   ^ [1]
+10 | }
+
+2 errors found

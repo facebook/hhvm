@@ -1,14 +1,47 @@
-ERROR: File "with_refinement.php", line 23, characters 18-40:
-Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
-ERROR: File "with_refinement.php", line 23, characters 14-14:
-Invalid type (Typing[4322])
-  File "with_refinement.php", line 11, characters 5-15:
-  This type constant has the `__Reifiable` attribute
-  File "with_refinement.php", line 23, characters 18-40:
-  It cannot contain type refinement
-ERROR: File "with_refinement.php", line 30, characters 5-27:
-Invalid reified hint (Typing[4305])
-  File "with_refinement.php", line 30, characters 5-27:
-  This is type refinement, it cannot be used as a reified type argument
-  File "with_refinement.php", line 26, characters 18-18:
-  `T` is reified
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type constant. [1]
+
+with_refinement.php:23:18
+21 | class Z extends X {
+22 |   // illegal by NastCheck as well as by reified check
+23 |   const type T = C with { type T = int };
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+24 | }
+25 | 
+
+error: Typing[4322] Invalid type [1]
+-> This type constant has the `__Reifiable` attribute [2]
+-> It cannot contain type refinement [3]
+
+with_refinement.php:23:14
+ 9 | 
+10 | abstract class X {
+11 |   <<__Reifiable>>
+   |     ^^^^^^^^^^^ [2]
+12 |   abstract const type T as C with { type T = int };
+13 | 
+   :
+21 | class Z extends X {
+22 |   // illegal by NastCheck as well as by reified check
+23 |   const type T = C with { type T = int };
+   |              ^ [1]
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+24 | }
+25 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is type refinement, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+with_refinement.php:30:5
+24 | }
+25 | 
+26 | function f<reify T>(): void {}
+   |                  ^ [2]
+27 | 
+28 | function test(): void {
+29 |   // illegal by reified check
+30 |   f<C with { type T = int }>();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+31 | }
+
+3 errors found

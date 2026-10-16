@@ -1,8 +1,41 @@
-WARN: File "null_cond.php", line 10, characters 12-16:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "null_cond.php", line 12, characters 7-8:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "null_cond.php", line 12, characters 7-16:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "null_cond.php", line 12, characters 12-16:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+null_cond.php:10:12
+ 8 | function testit(bool $b):int {
+ 9 |   $x = null;
+10 |   foreach (any() as $y) {
+   |            ^^^^^ [1]
+11 |     if ($b) {
+12 |       $x = any();
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+null_cond.php:12:7
+10 |   foreach (any() as $y) {
+11 |     if ($b) {
+12 |       $x = any();
+   |       ^^ [1]
+13 |       break;
+14 |     }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+null_cond.php:12:7
+10 |   foreach (any() as $y) {
+11 |     if ($b) {
+12 |       $x = any();
+   |       ^^^^^^^^^^ [1]
+13 |       break;
+14 |     }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+null_cond.php:12:12
+10 |   foreach (any() as $y) {
+11 |     if ($b) {
+12 |       $x = any();
+   |            ^^^^^ [1]
+13 |       break;
+14 |     }
+
+4 errors found

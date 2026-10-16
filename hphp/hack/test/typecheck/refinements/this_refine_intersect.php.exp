@@ -1,6 +1,31 @@
-WARN: File "this_refine_intersect.php", line 17, characters 9-18:
-This `is` check is always `false`. The expression on the left has type `this` which shares no values with `A`. (Warn[12010])
-WARN: File "this_refine_intersect.php", line 24, characters 9-15:
-This `is` check is always `false`. The expression on the left has type `this` which shares no values with `A`. (Warn[12010])
-WARN: File "this_refine_intersect.php", line 31, characters 9-15:
-This `is` check is always `false`. The expression on the left has type `Tthis` which shares no values with `A`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `this` which shares no values with `A`. [1]
+
+this_refine_intersect.php:17:9
+15 | abstract class D extends C {
+16 |   public function testit():Derived {
+17 |     if ($this is A) {
+   |         ^^^^^^^^^^ [1]
+18 |       $x = $this->item;
+19 |       return $x;
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `this` which shares no values with `A`. [1]
+
+this_refine_intersect.php:24:9
+22 |   }
+23 |   public function testit1(this $a):Derived {
+24 |     if ($a is A) {
+   |         ^^^^^^^ [1]
+25 |       $x = $a->item;
+26 |       return $x;
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `Tthis` which shares no values with `A`. [1]
+
+this_refine_intersect.php:31:9
+29 |   }
+30 |   public function testit2<Tthis as D>(Tthis $a):Derived {
+31 |     if ($a is A) {
+   |         ^^^^^^^ [1]
+32 |       $x = $a->item;
+33 |       return $x;
+
+3 errors found

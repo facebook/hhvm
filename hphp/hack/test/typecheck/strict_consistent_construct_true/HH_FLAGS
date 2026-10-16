@@ -1,1 +1,2 @@
 --config strict_consistent_construct=true
+--error-format plain_highlighted

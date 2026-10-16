@@ -1,14 +1,40 @@
-ERROR: File "class_interface_1.bad.php", line 12, characters 7-7:
-Constant X is defined concretely in multiple ancestors (Typing[4374])
-  File "class_interface_1.bad.php", line 5, characters 13-13:
-  One conflicting definition is here
-  File "class_interface_1.bad.php", line 9, characters 13-13:
-  Another conflicting definition is here
-ERROR: File "class_interface_1.bad.php", line 12, characters 17-17:
-Some members in class `D` are incompatible with those declared in type `C` (Typing[4374])
-  File "class_interface_1.bad.php", line 9, characters 13-13:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "class_interface_1.bad.php", line 5, characters 13-13:
-  `X` inherited from `C`
-  File "class_interface_1.bad.php", line 9, characters 13-13:
-  conflicts with constant `X` inherited from `I`.
+error: Typing[4374] Constant X is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+class_interface_1.bad.php:12:7
+ 3 | 
+ 4 | abstract class C {
+ 5 |   const int X = 1;
+   |             ^ [2]
+ 6 | }
+ 7 | 
+ 8 | interface I {
+ 9 |   const int X = 2;
+   |             ^ [3]
+10 | }
+11 | 
+12 | class D extends C implements I {}
+   |       ^ [1]
+
+error: Typing[4374] Some members in class `D` are incompatible with those declared in type `C` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `X` inherited from `C` [3]
+-> conflicts with constant `X` inherited from `I`. [2]
+
+class_interface_1.bad.php:12:17
+ 3 | 
+ 4 | abstract class C {
+ 5 |   const int X = 1;
+   |             ^ [3]
+ 6 | }
+ 7 | 
+ 8 | interface I {
+ 9 |   const int X = 2;
+   |             ^ [2]
+10 | }
+11 | 
+12 | class D extends C implements I {}
+   |                 ^ [1]
+
+2 errors found

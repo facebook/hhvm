@@ -1,4 +1,17 @@
-ERROR: File "single_readonly_method.php", line 8, characters 10-14:
-This expression is readonly, so it can only call readonly methods (Typing[4413])
-  File "single_readonly_method.php", line 4, characters 19-21:
-  This method is not readonly
+error: Typing[4413] This expression is readonly, so it can only call readonly methods [1]
+-> This method is not readonly [2]
+
+single_readonly_method.php:8:10
+ 2 | 
+ 3 | class Foo {
+ 4 |   public function get(): Foo {
+   |                   ^^^ [2]
+ 5 |     return new Foo();
+ 6 |   }
+ 7 |   public readonly function test(): void {
+ 8 |     $x = $this->get();
+   |          ^^^^^ [1]
+ 9 |   }
+10 | }
+
+1 error found

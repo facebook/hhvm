@@ -1,2 +1,11 @@
-WARN: File "nameof_as.php", line 5, characters 5-22:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<C>` which is a subtype of `string`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<C>` which is a subtype of `string`. [1]
+
+nameof_as.php:5:5
+3 | class C {
+4 |   public static function f(): void {
+5 |     nameof C as string; // T171578360
+  |     ^^^^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

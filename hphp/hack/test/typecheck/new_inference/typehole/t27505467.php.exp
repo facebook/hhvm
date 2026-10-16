@@ -1,6 +1,22 @@
-ERROR: File "t27505467.php", line 15, characters 7-9:
-No instance method `foo` in `D` (Typing[4053])
-  File "t27505467.php", line 12, characters 43-43:
-  This is why I think it is an object of type D
-  File "t27505467.php", line 7, characters 7-7:
-  Declaration of `D` is here
+error: Typing[4053] No instance method `foo` in `D` [1]
+-> This is why I think it is an object of type D [2]
+-> Declaration of `D` is here [3]
+
+t27505467.php:15:7
+ 5 |   public function foo():void { }
+ 6 | }
+ 7 | class D {
+   |       ^ [3]
+ 8 | }
+ 9 | 
+10 | function testit():void {
+11 |   $v = Vector{};
+12 |   $v->add(() ==> new C())->add(() ==> new D());
+   |                                           ^ [2]
+13 |   // $v is assigned type Vector<function():C> !!
+14 |   $f = ($v[1])();
+15 |   $f->foo();
+   |       ^^^ [1]
+16 | }
+
+1 error found

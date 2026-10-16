@@ -1,6 +1,14 @@
-ERROR: File "nullsafe-call-2.php", line 9, characters 10-19:
-Invalid return type (Typing[4110])
-  File "nullsafe-call-2.php", line 8, characters 23-23:
-  Expected `D`
-  File "nullsafe-call-2.php", line 9, characters 10-19:
-  But got `?D` (use of `?->` operator)
+error: Typing[4110] Invalid return type [1]
+-> Expected `D` [2]
+-> But got `?D` (use of `?->` operator) [1]
+
+nullsafe-call-2.php:9:10
+ 6 | }
+ 7 | class D {}
+ 8 | function test(?C $c): D {
+   |                       ^ [2]
+ 9 |   return $c?->foo();
+   |          ^^^^^^^^^^ [1]
+10 | }
+
+1 error found

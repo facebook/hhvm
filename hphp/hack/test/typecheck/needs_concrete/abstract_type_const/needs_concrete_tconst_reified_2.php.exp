@@ -1,16 +1,71 @@
-ERROR: File "needs_concrete_tconst_reified_2.php", line 15, characters 17-23:
-Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
-  Declaration is here
-ERROR: File "needs_concrete_tconst_reified_2.php", line 20, characters 13-19:
-Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
-  Declaration is here
-ERROR: File "needs_concrete_tconst_reified_2.php", line 25, characters 16-22:
-Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
-  Declaration is here
-ERROR: File "needs_concrete_tconst_reified_2.php", line 30, characters 15-21:
-Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_tconst_reified_2.php", line 11, characters 39-39:
-  Declaration is here
+error: Typing[4529] Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_tconst_reified_2.php:15:17
+ 9 | 
+10 | abstract class Base {
+11 |   <<__Reifiable>> abstract const type T;
+   |                                       ^ [2]
+12 | 
+13 |   public static function nested(): void {
+14 |     // error: nested in a reified type argument
+15 |     capture<vec<this::T>>();
+   |                 ^^^^^^^ [1]
+16 |   }
+17 | 
+
+error: Typing[4529] Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_tconst_reified_2.php:20:13
+ 9 | 
+10 | abstract class Base {
+11 |   <<__Reifiable>> abstract const type T;
+   |                                       ^ [2]
+12 | 
+13 |   public static function nested(): void {
+   :
+18 |   public static function constructor(): void {
+19 |     // error: reified class type argument
+20 |     new Box<this::T>();
+   |             ^^^^^^^ [1]
+21 |   }
+22 | 
+
+error: Typing[4529] Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_tconst_reified_2.php:25:16
+ 9 | 
+10 | abstract class Base {
+11 |   <<__Reifiable>> abstract const type T;
+   |                                       ^ [2]
+12 | 
+13 |   public static function nested(): void {
+   :
+23 |   public static function static_method(): void {
+24 |     // error: reified static method type argument
+25 |     Box::smeth<this::T>();
+   |                ^^^^^^^ [1]
+26 |   }
+27 | 
+
+error: Typing[4529] Dangerous access of abstract member `Base::T`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_tconst_reified_2.php:30:15
+ 9 | 
+10 | abstract class Base {
+11 |   <<__Reifiable>> abstract const type T;
+   |                                       ^ [2]
+12 | 
+13 |   public static function nested(): void {
+   :
+28 |   public static function instance_method(Box<int> $b): void {
+29 |     // error: reified instance method type argument
+30 |     $b->imeth<this::T>();
+   |               ^^^^^^^ [1]
+31 |   }
+32 | 
+
+4 errors found

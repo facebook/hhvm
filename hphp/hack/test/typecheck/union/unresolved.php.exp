@@ -12,5 +12,14 @@ File "unresolved.php", line 51, characters 3-13:
   nonnull
 File "unresolved.php", line 54, characters 3-13:
   (int | _ | string)
-ERROR: File "unresolved.php", line 5, characters 48-51:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+unresolved.php:5:48
+3 | class A {}
+4 | 
+5 | function test(bool $b, ?string $s, nonnull $n, $any): void {
+  |                                                ^^^^ [1]
+6 |   // make first unresolved
+7 |   if ($b) {
+
+1 error found

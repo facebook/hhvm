@@ -1,54 +1,118 @@
-ERROR: File "typeconst_splat_opaque.php", line 21, characters 52-64:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 21, characters 28-65:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 21, characters 52-64:
-  But got `A::TSPlain`
-ERROR: File "typeconst_splat_opaque.php", line 21, characters 52-64:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 21, characters 28-65:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 21, characters 52-64:
-  But got `mixed`
-ERROR: File "typeconst_splat_opaque.php", line 21, characters 52-64:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 21, characters 28-65:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 21, characters 52-64:
-  But got `this::TSPlain`
-ERROR: File "typeconst_splat_opaque.php", line 40, characters 38-50:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 40, characters 29-63:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 40, characters 38-50:
-  But got `A::TSPlain`
-ERROR: File "typeconst_splat_opaque.php", line 40, characters 38-50:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 40, characters 29-63:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 40, characters 38-50:
-  But got `mixed`
-ERROR: File "typeconst_splat_opaque.php", line 40, characters 38-50:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 40, characters 29-63:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 40, characters 38-50:
-  But got `this::TSPlain`
-ERROR: File "typeconst_splat_opaque.php", line 55, characters 50-62:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 55, characters 26-63:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 55, characters 50-62:
-  But got `A::TSPlain super this::TSPlain`
-ERROR: File "typeconst_splat_opaque.php", line 55, characters 50-62:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 55, characters 26-63:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 55, characters 50-62:
-  But got `mixed`
-ERROR: File "typeconst_splat_opaque.php", line 55, characters 50-62:
-Some type arguments violate their constraints (Typing[4323])
-  File "typeconst_splat_opaque.php", line 55, characters 26-63:
-  Expected `shape(...)`
-  File "typeconst_splat_opaque.php", line 55, characters 50-62:
-  But got `this::TSPlain as A::TSPlain`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `A::TSPlain` [1]
+
+typeconst_splat_opaque.php:21:52
+19 |   const type TSBoth = shape(...this::TSAs, ...this::TSOther);
+20 | 
+21 |   const type TSBothPlain = shape(...this::TSAs, ...this::TSPlain);
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                    ^^^^^^^^^^^^^ [1]
+22 | 
+23 |   // Opaque, so it stays a residual element.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `mixed` [1]
+
+typeconst_splat_opaque.php:21:52
+19 |   const type TSBoth = shape(...this::TSAs, ...this::TSOther);
+20 | 
+21 |   const type TSBothPlain = shape(...this::TSAs, ...this::TSPlain);
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                    ^^^^^^^^^^^^^ [1]
+22 | 
+23 |   // Opaque, so it stays a residual element.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `this::TSPlain` [1]
+
+typeconst_splat_opaque.php:21:52
+19 |   const type TSBoth = shape(...this::TSAs, ...this::TSOther);
+20 | 
+21 |   const type TSBothPlain = shape(...this::TSAs, ...this::TSPlain);
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                    ^^^^^^^^^^^^^ [1]
+22 | 
+23 |   // Opaque, so it stays a residual element.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `A::TSPlain` [1]
+
+typeconst_splat_opaque.php:40:38
+38 | 
+39 |   // REJECT: no `as` clause, so this is `mixed`. `B` instantiates it as `int`.
+40 |   public function unbounded(shape(...this::TSPlain, ...shape()) $s): void {}
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                      ^^^^^^^^^^^^^ [1]
+41 | 
+42 |   // Concrete: expands.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `mixed` [1]
+
+typeconst_splat_opaque.php:40:38
+38 | 
+39 |   // REJECT: no `as` clause, so this is `mixed`. `B` instantiates it as `int`.
+40 |   public function unbounded(shape(...this::TSPlain, ...shape()) $s): void {}
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                      ^^^^^^^^^^^^^ [1]
+41 | 
+42 |   // Concrete: expands.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `this::TSPlain` [1]
+
+typeconst_splat_opaque.php:40:38
+38 | 
+39 |   // REJECT: no `as` clause, so this is `mixed`. `B` instantiates it as `int`.
+40 |   public function unbounded(shape(...this::TSPlain, ...shape()) $s): void {}
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                      ^^^^^^^^^^^^^ [1]
+41 | 
+42 |   // Concrete: expands.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `A::TSPlain super this::TSPlain` [1]
+
+typeconst_splat_opaque.php:55:50
+53 |     shape(...this::TSBothPlain, ...shape()) $s,
+54 |   ): void {
+55 |     hh_expect_equivalent<shape(...this::TSAs, ...this::TSPlain)>($s);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                  ^^^^^^^^^^^^^ [1]
+56 |   }
+57 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `mixed` [1]
+
+typeconst_splat_opaque.php:55:50
+53 |     shape(...this::TSBothPlain, ...shape()) $s,
+54 |   ): void {
+55 |     hh_expect_equivalent<shape(...this::TSAs, ...this::TSPlain)>($s);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                  ^^^^^^^^^^^^^ [1]
+56 |   }
+57 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `this::TSPlain as A::TSPlain` [1]
+
+typeconst_splat_opaque.php:55:50
+53 |     shape(...this::TSBothPlain, ...shape()) $s,
+54 |   ): void {
+55 |     hh_expect_equivalent<shape(...this::TSAs, ...this::TSPlain)>($s);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                  ^^^^^^^^^^^^^ [1]
+56 |   }
+57 | }
+
+9 errors found

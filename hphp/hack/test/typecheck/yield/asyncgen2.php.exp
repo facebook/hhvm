@@ -2,9 +2,23 @@ File "asyncgen2.php", line 14, characters 5-15:
   nothing
 File "asyncgen2.php", line 15, characters 5-15:
   nothing
-ERROR: File "asyncgen2.php", line 13, characters 12-14:
-Invalid `foreach` (Typing[4110])
-  File "asyncgen2.php", line 13, characters 12-14:
-  Expected `KeyedTraversable<_, _>` because this is used in a `foreach` statement
-  File "asyncgen2.php", line 7, characters 21-53:
-  But got `AsyncGenerator<int, string, void>`
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected `KeyedTraversable<_, _>` because this is used in a `foreach` statement [1]
+-> But got `AsyncGenerator<int, string, void>` [2]
+
+asyncgen2.php:13:12
+ 5 | }
+ 6 | 
+ 7 | async function f(): AsyncGenerator<int, string, void> {
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 |   $x = await foo();
+ 9 |   yield 42 => $x;
+10 | }
+11 | 
+12 | async function g(): Awaitable<void> {
+13 |   foreach (f() as $x => $y) {
+   |            ^^^ [1]
+14 |     hh_show($x);
+15 |     hh_show($y);
+
+1 error found

@@ -10,93 +10,241 @@ File "lvar_expr_dependent.php", line 34, characters 5-28:
   ~<expr#15>::T where <expr#15>::T as C::T, <expr#15>::T as I::T
 File "lvar_expr_dependent.php", line 41, characters 5-22:
   ~<expr#18>::T where <expr#18>::T as C::T
-ERROR: File "lvar_expr_dependent.php", line 27, characters 13-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#13>::T`
-  File "lvar_expr_dependent.php", line 27, characters 5-6:
-    where `<expr#13>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#15>::T as C::T`
-  File "lvar_expr_dependent.php", line 27, characters 13-20:
-    where `<expr#15>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 27, characters 13-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#13>::T`
-  File "lvar_expr_dependent.php", line 27, characters 5-6:
-    where `<expr#13>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#15>::T, \C::T as num`
-  File "lvar_expr_dependent.php", line 27, characters 13-20:
-    where `<expr#15>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 27, characters 13-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#13>::T`
-  File "lvar_expr_dependent.php", line 27, characters 5-6:
-    where `<expr#13>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `num`
-  File "lvar_expr_dependent.php", line 27, characters 13-20:
-    where `<expr#15>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#15>::T`
-  File "lvar_expr_dependent.php", line 28, characters 5-12:
-    where `<expr#15>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#13>::T as C::T`
-  File "lvar_expr_dependent.php", line 28, characters 19-20:
-    where `<expr#13>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#15>::T`
-  File "lvar_expr_dependent.php", line 28, characters 5-12:
-    where `<expr#15>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#15>::T, \C::T as num`
-  File "lvar_expr_dependent.php", line 28, characters 19-20:
-    where `<expr#13>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 28, characters 19-27:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#15>::T`
-  File "lvar_expr_dependent.php", line 28, characters 5-12:
-    where `<expr#15>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `num`
-  File "lvar_expr_dependent.php", line 28, characters 19-20:
-    where `<expr#13>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#18>::T`
-  File "lvar_expr_dependent.php", line 42, characters 5-6:
-    where `<expr#18>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `<expr#13>::T as C::T`
-  File "lvar_expr_dependent.php", line 38, characters 14-15:
-    where `<expr#13>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#18>::T`
-  File "lvar_expr_dependent.php", line 42, characters 5-6:
-    where `<expr#18>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#15>::T, \C::T super <expr#18>::T, \C::T as num`
-  File "lvar_expr_dependent.php", line 38, characters 14-15:
-    where `<expr#13>` is a reference to this expression
-ERROR: File "lvar_expr_dependent.php", line 42, characters 13-18:
-Invalid argument (Typing[4110])
-  File "lvar_expr_dependent.php", line 13, characters 26-32:
-  Expected `<expr#18>::T`
-  File "lvar_expr_dependent.php", line 42, characters 5-6:
-    where `<expr#18>` is a reference to this expression
-  File "lvar_expr_dependent.php", line 12, characters 35-41:
-  But got `num`
-  File "lvar_expr_dependent.php", line 38, characters 14-15:
-    where `<expr#13>` is a reference to this expression
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#13>::T` [2]
+->   where `<expr#13>` is a reference to this expression [3]
+-> But got `<expr#15>::T as C::T` [4]
+->   where `<expr#15>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:27:13
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+25 |     // Assigning $c to another local variable doesn't transfer the expression id
+26 |     $c_alias = $c;
+27 |     $c->set($c_alias->get());
+   |     ^^ [3]
+   |             ^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^^^^ [5]
+28 |     $c_alias->set($c->get());
+29 |     hh_show($c_alias->get());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#13>::T` [2]
+->   where `<expr#13>` is a reference to this expression [3]
+-> But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#15>::T, \C::T as num` [4]
+->   where `<expr#15>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:27:13
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+25 |     // Assigning $c to another local variable doesn't transfer the expression id
+26 |     $c_alias = $c;
+27 |     $c->set($c_alias->get());
+   |     ^^ [3]
+   |             ^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^^^^ [5]
+28 |     $c_alias->set($c->get());
+29 |     hh_show($c_alias->get());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#13>::T` [2]
+->   where `<expr#13>` is a reference to this expression [3]
+-> But got `num` [4]
+->   where `<expr#15>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:27:13
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+25 |     // Assigning $c to another local variable doesn't transfer the expression id
+26 |     $c_alias = $c;
+27 |     $c->set($c_alias->get());
+   |     ^^ [3]
+   |             ^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^^^^ [5]
+28 |     $c_alias->set($c->get());
+29 |     hh_show($c_alias->get());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#15>::T` [2]
+->   where `<expr#15>` is a reference to this expression [3]
+-> But got `<expr#13>::T as C::T` [4]
+->   where `<expr#13>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:28:19
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+26 |     $c_alias = $c;
+27 |     $c->set($c_alias->get());
+28 |     $c_alias->set($c->get());
+   |     ^^^^^^^^ [3]
+   |                   ^^^^^^^^^ [1]
+   |                   ^^ [5]
+29 |     hh_show($c_alias->get());
+30 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#15>::T` [2]
+->   where `<expr#15>` is a reference to this expression [3]
+-> But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#15>::T, \C::T as num` [4]
+->   where `<expr#13>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:28:19
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+26 |     $c_alias = $c;
+27 |     $c->set($c_alias->get());
+28 |     $c_alias->set($c->get());
+   |     ^^^^^^^^ [3]
+   |                   ^^^^^^^^^ [1]
+   |                   ^^ [5]
+29 |     hh_show($c_alias->get());
+30 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#15>::T` [2]
+->   where `<expr#15>` is a reference to this expression [3]
+-> But got `num` [4]
+->   where `<expr#13>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:28:19
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+26 |     $c_alias = $c;
+27 |     $c->set($c_alias->get());
+28 |     $c_alias->set($c->get());
+   |     ^^^^^^^^ [3]
+   |                   ^^^^^^^^^ [1]
+   |                   ^^ [5]
+29 |     hh_show($c_alias->get());
+30 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#18>::T` [2]
+->   where `<expr#18>` is a reference to this expression [3]
+-> But got `<expr#13>::T as C::T` [4]
+->   where `<expr#13>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:42:13
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+36 |     // Assigning $c a new value creates a new expression id, so future
+37 |     // expression dependent types will be incompatible with previous ones
+38 |     $c_num = $c->get();
+   |              ^^ [5]
+39 |     $c->set($c_num);
+40 |     $c = $this->get_a_C();
+41 |     hh_show($c->get());
+42 |     $c->set($c_num);
+   |     ^^ [3]
+   |             ^^^^^^ [1]
+43 |   }
+44 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#18>::T` [2]
+->   where `<expr#18>` is a reference to this expression [3]
+-> But got `C::T where \C::T super <expr#13>::T, \C::T super <expr#15>::T, \C::T super <expr#18>::T, \C::T as num` [4]
+->   where `<expr#13>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:42:13
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+36 |     // Assigning $c a new value creates a new expression id, so future
+37 |     // expression dependent types will be incompatible with previous ones
+38 |     $c_num = $c->get();
+   |              ^^ [5]
+39 |     $c->set($c_num);
+40 |     $c = $this->get_a_C();
+41 |     hh_show($c->get());
+42 |     $c->set($c_num);
+   |     ^^ [3]
+   |             ^^^^^^ [1]
+43 |   }
+44 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#18>::T` [2]
+->   where `<expr#18>` is a reference to this expression [3]
+-> But got `num` [4]
+->   where `<expr#13>` is a reference to this expression [5]
+
+lvar_expr_dependent.php:42:13
+10 |   abstract const type T as num;
+11 | 
+12 |   abstract public function get(): this::T;
+   |                                   ^^^^^^^ [4]
+13 |   protected function set(this::T $x): void {}
+   |                          ^^^^^^^ [2]
+14 | 
+15 |   abstract public function get_a_C(): C;
+   :
+36 |     // Assigning $c a new value creates a new expression id, so future
+37 |     // expression dependent types will be incompatible with previous ones
+38 |     $c_num = $c->get();
+   |              ^^ [5]
+39 |     $c->set($c_num);
+40 |     $c = $this->get_a_C();
+41 |     hh_show($c->get());
+42 |     $c->set($c_num);
+   |     ^^ [3]
+   |             ^^^^^^ [1]
+43 |   }
+44 | }
+
+9 errors found

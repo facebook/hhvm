@@ -1,4 +1,13 @@
-ERROR: File "cannot_assign_tparam1.php", line 4, characters 19-19:
-A type constant cannot use type parameters (NastCheck[3027])
-  File "cannot_assign_tparam1.php", line 3, characters 9-9:
-  `T` was declared as a type parameter here
+error: NastCheck[3027] A type constant cannot use type parameters [1]
+-> `T` was declared as a type parameter here [2]
+
+cannot_assign_tparam1.php:4:19
+1 | <?hh
+2 | 
+3 | class A<T> {
+  |         ^ [2]
+4 |   const type Ta = T;
+  |                   ^ [1]
+5 | }
+
+1 error found

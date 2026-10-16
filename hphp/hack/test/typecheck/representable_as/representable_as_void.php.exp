@@ -1,14 +1,55 @@
-ERROR: File "representable_as_void.php", line 11, characters 31-44:
-You are using the return value of a `void` function (Typing[4119])
-  File "representable_as_void.php", line 7, characters 26-29:
-  A `void` function doesn't return a value.
-ERROR: File "representable_as_void.php", line 16, characters 34-47:
-Invalid argument (Typing[4110])
-  File "representable_as_void.php", line 5, characters 69-75:
-  Expected `nonnull`
-  File "representable_as_void.php", line 7, characters 26-29:
-  But got `null`
-ERROR: File "representable_as_void.php", line 16, characters 34-47:
-You are using the return value of a `void` function (Typing[4119])
-  File "representable_as_void.php", line 7, characters 26-29:
-  A `void` function doesn't return a value.
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+representable_as_void.php:11:31
+ 5 | function takes_representable_as_nonnull(\HH\Runtime\RepresentableAs<nonnull> $c): void {}
+ 6 | 
+ 7 | function returns_void(): void {}
+   |                          ^^^^ [2]
+ 8 | 
+ 9 | function test_void_sub_representable_as_null(): void {
+10 |   // void <: RepresentableAs<null> — should pass
+11 |   takes_representable_as_null(returns_void());
+   |                               ^^^^^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `nonnull` [2]
+-> But got `null` [3]
+
+representable_as_void.php:16:34
+ 3 | 
+ 4 | function takes_representable_as_null(\HH\Runtime\RepresentableAs<null> $c): void {}
+ 5 | function takes_representable_as_nonnull(\HH\Runtime\RepresentableAs<nonnull> $c): void {}
+   |                                                                     ^^^^^^^ [2]
+ 6 | 
+ 7 | function returns_void(): void {}
+   |                          ^^^^ [3]
+ 8 | 
+ 9 | function test_void_sub_representable_as_null(): void {
+   :
+14 | function test_void_sub_representable_as_nonnull(): void {
+15 |   // void <: RepresentableAs<nonnull> — should FAIL
+16 |   takes_representable_as_nonnull(returns_void());
+   |                                  ^^^^^^^^^^^^^^ [1]
+17 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+representable_as_void.php:16:34
+ 5 | function takes_representable_as_nonnull(\HH\Runtime\RepresentableAs<nonnull> $c): void {}
+ 6 | 
+ 7 | function returns_void(): void {}
+   |                          ^^^^ [2]
+ 8 | 
+ 9 | function test_void_sub_representable_as_null(): void {
+   :
+14 | function test_void_sub_representable_as_nonnull(): void {
+15 |   // void <: RepresentableAs<nonnull> — should FAIL
+16 |   takes_representable_as_nonnull(returns_void());
+   |                                  ^^^^^^^^^^^^^^ [1]
+17 | }
+
+3 errors found

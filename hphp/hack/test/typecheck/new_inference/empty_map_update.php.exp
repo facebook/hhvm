@@ -1,12 +1,48 @@
-ERROR: File "empty_map_update.php", line 11, characters 3-15:
-Invalid assignment (Typing[4110])
-  File "empty_map_update.php", line 5, characters 8-13:
-  Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 58, characters 32-33:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 1111, characters 26-27:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 845, characters 26-27:
-    via this generic `Tv`
-  File "empty_map_update.php", line 7, characters 3-45:
-  But got `Map<string, int>` because of this statement
+error: Typing[4110] Invalid assignment [1]
+-> Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+->   via this generic `Tv` [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+-> But got `Map<string, int>` because of this statement [6]
+
+empty_map_update.php:11:3
+   3 | 
+   4 | function test_empty_map_update(Map<string,int> $msi): void {
+   5 |   $m = Map {};
+     |        ^^^^^^ [2]
+   6 |   $data = idx($m, 3);
+   7 |   if ($data === null) {
+     |   ^^^^^^^^^^^^^^^^^^^^^ [6]
+   8 |     $data = $msi;
+     |     ^^^^^^^^^^^^^ [6]
+   9 |   }
+     |   ^ [6]
+  10 |   $data['x'] = 5;
+  11 |   $m[4] = $data;
+     |   ^^^^^^^^^^^^^ [1]
+  12 | }
+
+collections/Map.hhi:58:32
+  56 |    */
+  57 |   final class Map<Tk as arraykey, Tv>
+  58 |     implements \MutableMap<Tk, Tv> {
+     |                                ^^ [3]
+  59 |     /**
+  60 |      * Creates a `Map` from the given `KeyedTraversable`, or an empty `Map` if
+
+collections/interfaces.hhi:1111:26
+ 843 |   interface ConstMap<Tk as arraykey, +Tv>
+ 844 |     extends
+ 845 |       KeyedContainer<Tk, Tv>,
+     |                          ^^ [5]
+ 846 |       ConstCollection<Pair<Tk, Tv>>,
+ 847 |       ConstMapAccess<Tk, Tv>,
+     :
+1109 |   <<__Sealed(Map::class)>>
+1110 |   interface MutableMap<Tk as arraykey, Tv>
+1111 |     extends ConstMap<Tk, Tv>, Collection<Pair<Tk, Tv>>, MapAccess<Tk, Tv> {
+     |                          ^^ [4]
+1112 |     /**
+1113 |      * Returns a `MutableVector` containing the values of the current
+
+1 error found

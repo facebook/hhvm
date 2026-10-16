@@ -1,6 +1,17 @@
-ERROR: File "void_is_not_subtype_of_nonnull.php", line 6, characters 10-12:
-Invalid return type (Typing[4110])
-  File "void_is_not_subtype_of_nonnull.php", line 5, characters 15-21:
-  Expected `nonnull`
-  File "void_is_not_subtype_of_nonnull.php", line 3, characters 15-18:
-  But got `void`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `void` [3]
+
+void_is_not_subtype_of_nonnull.php:6:10
+1 | <?hh
+2 | 
+3 | function f(): void {}
+  |               ^^^^ [3]
+4 | 
+5 | function g(): nonnull {
+  |               ^^^^^^^ [2]
+6 |   return f();
+  |          ^^^ [1]
+7 | }
+
+1 error found

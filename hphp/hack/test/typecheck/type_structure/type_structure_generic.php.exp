@@ -1,8 +1,39 @@
-ERROR: File "type_structure_generic.php", line 11, characters 14-24:
-The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-16:
-  This is where the field was declared as optional.
-ERROR: File "type_structure_generic.php", line 15, characters 14-24:
-The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-16:
-  This is where the field was declared as optional.
+error: Typing[4165] The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure_generic.php:11:14
+ 9 | 
+10 |   public static function getClassname<T>(TypeStructure<T> $ts): ?classname<T> {
+11 |     $y = $ts['classname'];
+   |              ^^^^^^^^^^^ [1]
+12 |     return $y;
+13 |   }
+
+typestructure.hhi:64:6
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |      ^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+error: Typing[4165] The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure_generic.php:15:14
+13 |   }
+14 |   public static function getClassname2<T as mixed>(TypeStructure<T> $ts): ?classname<T> {
+15 |     $y = $ts['classname'];
+   |              ^^^^^^^^^^^ [1]
+16 |     return $y;
+17 |   }
+
+typestructure.hhi:64:6
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |      ^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+2 errors found

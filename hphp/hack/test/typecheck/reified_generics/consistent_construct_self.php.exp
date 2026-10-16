@@ -1,4 +1,21 @@
-ERROR: File "consistent_construct_self.php", line 5, characters 7-7:
-This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. (Typing[4312])
-ERROR: File "consistent_construct_self.php", line 7, characters 5-16:
-Cannot call `new static` because the current class has reified generics (Typing[4310])
+error: Typing[4312] This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. [1]
+
+consistent_construct_self.php:5:7
+3 | 
+4 | <<__ConsistentConstruct>>
+5 | class C<reify T> {
+  |       ^ [1]
+6 |   public function f(): void {
+7 |     new static();
+
+error: Typing[4310] Cannot call `new static` because the current class has reified generics [1]
+
+consistent_construct_self.php:7:5
+5 | class C<reify T> {
+6 |   public function f(): void {
+7 |     new static();
+  |     ^^^^^^^^^^^^ [1]
+8 |   }
+9 | }
+
+2 errors found

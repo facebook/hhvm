@@ -1,56 +1,206 @@
-ERROR: File "representable_as_shape.php", line 27, characters 44-45:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 4, characters 94-96:
-  Expected `int`
-  File "representable_as_shape.php", line 25, characters 70-75:
-  But got `string`
-ERROR: File "representable_as_shape.php", line 37, characters 39-40:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 8, characters 79-81:
-  Expected `int`
-  File "representable_as_shape.php", line 35, characters 43-71:
-  But got `string`
-ERROR: File "representable_as_shape.php", line 42, characters 42-43:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 7, characters 82-87:
-  Expected `string`
-  File "representable_as_shape.php", line 40, characters 44-65:
-  But got `arraykey`
-ERROR: File "representable_as_shape.php", line 42, characters 42-43:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 7, characters 90-92:
-  Expected `int`
-  File "representable_as_shape.php", line 40, characters 44-65:
-  But got `mixed`
-ERROR: File "representable_as_shape.php", line 48, characters 44-45:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 4, characters 94-96:
-  Expected `int`
-  File "representable_as_shape.php", line 45, characters 46-67:
-  But got `mixed`
-ERROR: File "representable_as_shape.php", line 61, characters 44-45:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 4, characters 94-96:
-  Expected `int`
-  File "representable_as_shape.php", line 58, characters 68-72:
-  But got `float`
-ERROR: File "representable_as_shape.php", line 94, characters 42-43:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 7, characters 82-87:
-  Expected `string`
-  File "representable_as_shape.php", line 78, characters 9-11:
-  But got `int`
-  File "representable_as_shape.php", line 78, characters 16-18:
-    by the definition of `F`
-ERROR: File "representable_as_shape.php", line 128, characters 42-43:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 101, characters 89-91:
-  Expected `int`
-  File "representable_as_shape.php", line 126, characters 75-80:
-  But got `string`
-ERROR: File "representable_as_shape.php", line 133, characters 55-56:
-Invalid argument (Typing[4110])
-  File "representable_as_shape.php", line 103, characters 115-117:
-  Expected `int`
-  File "representable_as_shape.php", line 131, characters 88-93:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_shape.php:27:44
+ 2 | <<file: __EnableUnstableFeatures('representable_as')>>
+ 3 | 
+ 4 | function takes_representable_as_dict_arraykey_int(\HH\Runtime\RepresentableAs<dict<arraykey, int>> $c): void {}
+   |                                                                                              ^^^ [2]
+ 5 | function takes_representable_as_dict_arraykey_num(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+   :
+23 | }
+24 | 
+25 | function test_shape_int_string_not_dict_int(shape('a' => int, 'b' => string) $s): void {
+   |                                                                      ^^^^^^ [3]
+26 |   // shape('a' => int, 'b' => string) <: RepresentableAs<dict<arraykey, int>> — should FAIL
+27 |   takes_representable_as_dict_arraykey_int($s);
+   |                                            ^^ [1]
+28 | }
+29 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_shape.php:37:39
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+ 7 | function takes_representable_as_dict_string_int(\HH\Runtime\RepresentableAs<dict<string, int>> $c): void {}
+ 8 | function takes_representable_as_dict_int_int(\HH\Runtime\RepresentableAs<dict<int, int>> $c): void {}
+   |                                                                               ^^^ [2]
+ 9 | 
+10 | function test_shape_int_int(shape('a' => int, 'b' => int) $s): void {
+   :
+33 | }
+34 | 
+35 | function test_closed_shape_dict_int_fails(shape('a' => int, 'b' => int) $s): void {
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+36 |   // Closed shape keys are strings, not ints — should FAIL
+37 |   takes_representable_as_dict_int_int($s);
+   |                                       ^^ [1]
+38 | }
+39 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+representable_as_shape.php:42:42
+ 5 | function takes_representable_as_dict_arraykey_num(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+ 7 | function takes_representable_as_dict_string_int(\HH\Runtime\RepresentableAs<dict<string, int>> $c): void {}
+   |                                                                                  ^^^^^^ [2]
+ 8 | function takes_representable_as_dict_int_int(\HH\Runtime\RepresentableAs<dict<int, int>> $c): void {}
+ 9 | 
+   :
+38 | }
+39 | 
+40 | function test_open_shape_dict_string_fails(shape('a' => int, ...) $s): void {
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^ [3]
+41 |   // Open shape keys are arraykey, not string — should FAIL
+42 |   takes_representable_as_dict_string_int($s);
+   |                                          ^^ [1]
+43 | }
+44 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+representable_as_shape.php:42:42
+ 5 | function takes_representable_as_dict_arraykey_num(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+ 7 | function takes_representable_as_dict_string_int(\HH\Runtime\RepresentableAs<dict<string, int>> $c): void {}
+   |                                                                                          ^^^ [2]
+ 8 | function takes_representable_as_dict_int_int(\HH\Runtime\RepresentableAs<dict<int, int>> $c): void {}
+ 9 | 
+   :
+38 | }
+39 | 
+40 | function test_open_shape_dict_string_fails(shape('a' => int, ...) $s): void {
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^ [3]
+41 |   // Open shape keys are arraykey, not string — should FAIL
+42 |   takes_representable_as_dict_string_int($s);
+   |                                          ^^ [1]
+43 | }
+44 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+representable_as_shape.php:48:44
+ 2 | <<file: __EnableUnstableFeatures('representable_as')>>
+ 3 | 
+ 4 | function takes_representable_as_dict_arraykey_int(\HH\Runtime\RepresentableAs<dict<arraykey, int>> $c): void {}
+   |                                                                                              ^^^ [2]
+ 5 | function takes_representable_as_dict_arraykey_num(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+   :
+43 | }
+44 | 
+45 | function test_open_shape_dict_arraykey_mixed(shape('a' => int, ...) $s): void {
+   |                                              ^^^^^^^^^^^^^^^^^^^^^^ [3]
+46 |   // Open shape unknown values are mixed, so value union is int|mixed = mixed
+47 |   // dict<arraykey, mixed> <: dict<arraykey, int> — should FAIL
+48 |   takes_representable_as_dict_arraykey_int($s);
+   |                                            ^^ [1]
+49 | }
+50 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `float` [3]
+
+representable_as_shape.php:61:44
+ 2 | <<file: __EnableUnstableFeatures('representable_as')>>
+ 3 | 
+ 4 | function takes_representable_as_dict_arraykey_int(\HH\Runtime\RepresentableAs<dict<arraykey, int>> $c): void {}
+   |                                                                                              ^^^ [2]
+ 5 | function takes_representable_as_dict_arraykey_num(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+   :
+56 | 
+57 | function test_open_shape_dict_arraykey_num_pass(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+58 | function test_open_shape_dict_arraykey_string_ok(shape('a' => int, float...) $s):void {
+   |                                                                    ^^^^^ [3]
+59 |   test_open_shape_dict_arraykey_num_pass($s);
+60 |   // Should FAIL
+61 |   takes_representable_as_dict_arraykey_int($s);
+   |                                            ^^ [1]
+62 | }
+63 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+->   by the definition of `F` [4]
+
+representable_as_shape.php:94:42
+ 5 | function takes_representable_as_dict_arraykey_num(\HH\Runtime\RepresentableAs<dict<arraykey, num>> $c): void {}
+ 6 | function takes_representable_as_dict_arraykey_arraykey(\HH\Runtime\RepresentableAs<dict<arraykey, arraykey>> $c): void {}
+ 7 | function takes_representable_as_dict_string_int(\HH\Runtime\RepresentableAs<dict<string, int>> $c): void {}
+   |                                                                                  ^^^^^^ [2]
+ 8 | function takes_representable_as_dict_int_int(\HH\Runtime\RepresentableAs<dict<int, int>> $c): void {}
+ 9 | 
+   :
+76 | }
+77 | 
+78 | enum F: int as int {
+   |         ^^^ [3]
+   |                ^^^ [4]
+79 |   X = 1;
+80 | }
+   :
+92 | function test_int_enum_const_key_dict_string_fails(shape(F::X => int) $s): void {
+93 |   // F::X resolves to enum type F with `as int`, int is not string — should FAIL
+94 |   takes_representable_as_dict_string_int($s);
+   |                                          ^^ [1]
+95 | }
+96 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_shape.php:128:42
+ 99 | // and Traversable<V>, so these should work transitively.
+100 | 
+101 | function takes_representable_as_traversable_int(\HH\Runtime\RepresentableAs<Traversable<int>> $c): void {}
+    |                                                                                         ^^^ [2]
+102 | function takes_representable_as_traversable_num(\HH\Runtime\RepresentableAs<Traversable<num>> $c): void {}
+103 | function takes_representable_as_keyed_traversable_string_int(\HH\Runtime\RepresentableAs<KeyedTraversable<string, int>> $c): void {}
+    :
+124 | }
+125 | 
+126 | function test_closed_shape_traversable_int_fails(shape('a' => int, 'b' => string) $s): void {
+    |                                                                           ^^^^^^ [3]
+127 |   // dict<string, int|string> <: Traversable<int> — should FAIL
+128 |   takes_representable_as_traversable_int($s);
+    |                                          ^^ [1]
+129 | }
+130 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_shape.php:133:55
+101 | function takes_representable_as_traversable_int(\HH\Runtime\RepresentableAs<Traversable<int>> $c): void {}
+102 | function takes_representable_as_traversable_num(\HH\Runtime\RepresentableAs<Traversable<num>> $c): void {}
+103 | function takes_representable_as_keyed_traversable_string_int(\HH\Runtime\RepresentableAs<KeyedTraversable<string, int>> $c): void {}
+    |                                                                                                                   ^^^ [2]
+104 | function takes_representable_as_keyed_traversable_arraykey_int(\HH\Runtime\RepresentableAs<KeyedTraversable<arraykey, int>> $c): void {}
+105 | 
+    :
+129 | }
+130 | 
+131 | function test_closed_shape_keyed_traversable_string_int_fails(shape('a' => int, 'b' => string) $s): void {
+    |                                                                                        ^^^^^^ [3]
+132 |   // dict<string, int|string> <: KeyedTraversable<string, int> — should FAIL
+133 |   takes_representable_as_keyed_traversable_string_int($s);
+    |                                                       ^^ [1]
+134 | }
+
+9 errors found

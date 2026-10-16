@@ -1,8 +1,27 @@
-ERROR: File "trait_reuse_indirect_additional.php", line 23, characters 7-17:
-Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyBase`. (Typing[4186])
-  File "trait_reuse_indirect_additional.php", line 11, characters 7-12:
-  `MyBase` is defined here
-  File "trait_reuse_indirect_additional.php", line 12, characters 7-17:
-  `MyBase` uses `ReusedTrait`
-  File "trait_reuse_indirect_additional.php", line 7, characters 25-27:
-  `ReusedTrait` has a final method `bar`
+error: Typing[4186] Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyBase`. [1]
+-> `MyBase` is defined here [2]
+-> `MyBase` uses `ReusedTrait` [3]
+-> `ReusedTrait` has a final method `bar` [4]
+
+trait_reuse_indirect_additional.php:23:7
+ 5 | }
+ 6 | trait ReusedTrait {
+ 7 |   public final function bar(): void {}
+   |                         ^^^ [4]
+ 8 |   use TraitOne;
+ 9 | }
+10 | 
+11 | class MyBase {
+   |       ^^^^^^ [2]
+12 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [3]
+13 | }
+14 | 
+   :
+21 | // large class hierarchies where repetition can be overwhelming.
+22 | class BadClass extends MyBase {
+23 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+24 | }
+
+1 error found

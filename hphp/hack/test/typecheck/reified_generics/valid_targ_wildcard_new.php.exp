@@ -1,16 +1,49 @@
-ERROR: File "valid_targ_wildcard_new.php", line 7, characters 3-12:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "valid_targ_wildcard_new.php", line 4, characters 15-16:
-  Definition is here
-ERROR: File "valid_targ_wildcard_new.php", line 8, characters 9-12:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_wildcard_new.php", line 8, characters 11-11:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "valid_targ_wildcard_new.php", line 4, characters 15-16:
-  `Tc` is reified
-ERROR: File "valid_targ_wildcard_new.php", line 8, characters 11-11:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_wildcard_new.php", line 8, characters 11-11:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "valid_targ_wildcard_new.php", line 4, characters 15-16:
-  `Tc` is reified
+error: Typing[4303] All type arguments must be specified because a type parameter is reified [1]
+-> Definition is here [2]
+
+valid_targ_wildcard_new.php:7:3
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [2]
+5 | 
+6 | function test(): void {
+7 |   new C<_>();
+  |   ^^^^^^^^^^ [1]
+8 |   new C<C<_>>();
+9 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [2]
+-> `Tc` is reified [3]
+
+valid_targ_wildcard_new.php:8:9
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [3]
+5 | 
+6 | function test(): void {
+7 |   new C<_>();
+8 |   new C<C<_>>();
+  |         ^^^^ [1]
+  |           ^ [2]
+9 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+valid_targ_wildcard_new.php:8:11
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [2]
+5 | 
+6 | function test(): void {
+7 |   new C<_>();
+8 |   new C<C<_>>();
+  |           ^ [1]
+9 | }
+
+3 errors found

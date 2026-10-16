@@ -1,4 +1,13 @@
-ERROR: File "tconst_bad_access.php", line 5, characters 31-31:
-No type constant `T` in `C` (Typing[4090])
-  File "tconst_bad_access.php", line 4, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4090] No type constant `T` in `C` [1]
+-> Declaration of `C` is here [2]
+
+tconst_bad_access.php:5:31
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | class C {
+  |       ^ [2]
+5 |   public function foo():this::T { throw new Exception("E"); }
+  |                               ^ [1]
+6 | }
+
+1 error found

@@ -1,32 +1,106 @@
-ERROR: File "native_bad1.php", line 3, characters 28-28:
-Non-native functions must have a body (Parsing[1002])
-ERROR: File "native_bad1.php", line 5, characters 34-34:
-Non-native functions must have a body (Parsing[1002])
-ERROR: File "native_bad1.php", line 8, characters 7-12:
-Class `Foobar` contains an abstract method and must therefore be declared `abstract` (Parsing[1002])
-ERROR: File "native_bad1.php", line 10, characters 34-34:
-A method must have a body or be marked `abstract`. (Parsing[1002])
-ERROR: File "native_bad1.php", line 19, characters 34-34:
-A method must have a body or be marked `abstract`. (Parsing[1002])
-ERROR: File "native_bad1.php", line 3, characters 10-18:
-Invalid return type (Typing[4336])
-  File "native_bad1.php", line 3, characters 23-27:
-  Expected `float`
-  File "native_bad1.php", line 3, characters 10-18:
-  But got `void` because this function does not always return a value
-ERROR: File "native_bad1.php", line 10, characters 19-25:
-Invalid return type (Typing[4336])
-  File "native_bad1.php", line 10, characters 30-33:
-  Expected `null`
-  File "native_bad1.php", line 10, characters 19-25:
-  But got `void` because this function does not always return a value
-ERROR: File "native_bad1.php", line 12, characters 28-37:
-Method `getNothing` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "native_bad1.php", line 8, characters 7-12:
-  Or make the class abstract.
-ERROR: File "native_bad1.php", line 19, characters 19-25:
-Invalid return type (Typing[4336])
-  File "native_bad1.php", line 19, characters 30-33:
-  Expected `null`
-  File "native_bad1.php", line 19, characters 19-25:
-  But got `void` because this function does not always return a value
+error: Parsing[1002] Non-native functions must have a body [1]
+
+native_bad1.php:3:28
+1 | <?hh
+2 | 
+3 | function get_float(): float;
+  |                            ^ [1]
+4 | 
+5 | function get_void_no_attr(): void;
+
+error: Parsing[1002] Non-native functions must have a body [1]
+
+native_bad1.php:5:34
+3 | function get_float(): float;
+4 | 
+5 | function get_void_no_attr(): void;
+  |                                  ^ [1]
+6 | 
+7 | <<__NativeData>>
+
+error: Parsing[1002] Class `Foobar` contains an abstract method and must therefore be declared `abstract` [1]
+
+native_bad1.php:8:7
+ 6 | 
+ 7 | <<__NativeData>>
+ 8 | class Foobar {
+   |       ^^^^^^ [1]
+ 9 | 
+10 |   public function getNull(): null;
+
+error: Parsing[1002] A method must have a body or be marked `abstract`. [1]
+
+native_bad1.php:10:34
+ 8 | class Foobar {
+ 9 | 
+10 |   public function getNull(): null;
+   |                                  ^ [1]
+11 | 
+12 |   abstract public function getNothing(): nothing;
+
+error: Parsing[1002] A method must have a body or be marked `abstract`. [1]
+
+native_bad1.php:19:34
+17 | abstract class Baz {
+18 | 
+19 |   public function getNull(): null;
+   |                                  ^ [1]
+20 | 
+21 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `float` [2]
+-> But got `void` because this function does not always return a value [1]
+
+native_bad1.php:3:10
+1 | <?hh
+2 | 
+3 | function get_float(): float;
+  |          ^^^^^^^^^ [1]
+  |                       ^^^^^ [2]
+4 | 
+5 | function get_void_no_attr(): void;
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `null` [2]
+-> But got `void` because this function does not always return a value [1]
+
+native_bad1.php:10:19
+ 8 | class Foobar {
+ 9 | 
+10 |   public function getNull(): null;
+   |                   ^^^^^^^ [1]
+   |                              ^^^^ [2]
+11 | 
+12 |   abstract public function getNothing(): nothing;
+
+error: Typing[4465] Method `getNothing` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+native_bad1.php:12:28
+ 6 | 
+ 7 | <<__NativeData>>
+ 8 | class Foobar {
+   |       ^^^^^^ [2]
+ 9 | 
+10 |   public function getNull(): null;
+11 | 
+12 |   abstract public function getNothing(): nothing;
+   |                            ^^^^^^^^^^ [1]
+13 | 
+14 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `null` [2]
+-> But got `void` because this function does not always return a value [1]
+
+native_bad1.php:19:19
+17 | abstract class Baz {
+18 | 
+19 |   public function getNull(): null;
+   |                   ^^^^^^^ [1]
+   |                              ^^^^ [2]
+20 | 
+21 | }
+
+9 errors found

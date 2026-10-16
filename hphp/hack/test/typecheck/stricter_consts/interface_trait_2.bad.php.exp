@@ -1,14 +1,44 @@
-ERROR: File "interface_trait_2.bad.php", line 12, characters 7-7:
-Constant X is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_trait_2.bad.php", line 5, characters 13-13:
-  One conflicting definition is here
-  File "interface_trait_2.bad.php", line 9, characters 13-13:
-  Another conflicting definition is here
-ERROR: File "interface_trait_2.bad.php", line 13, characters 7-7:
-Some members in class `C` are incompatible with those declared in type `T` (Typing[4374])
-  File "interface_trait_2.bad.php", line 5, characters 13-13:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "interface_trait_2.bad.php", line 9, characters 13-13:
-  `X` inherited from `T`
-  File "interface_trait_2.bad.php", line 5, characters 13-13:
-  conflicts with constant `X` inherited from `I`.
+error: Typing[4374] Constant X is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+interface_trait_2.bad.php:12:7
+ 3 | 
+ 4 | interface I {
+ 5 |   const int X = 2;
+   |             ^ [2]
+ 6 | }
+ 7 | 
+ 8 | trait T {
+ 9 |   const int X = 1;
+   |             ^ [3]
+10 | }
+11 | 
+12 | class C implements I {
+   |       ^ [1]
+13 |   use T;
+14 | }
+
+error: Typing[4374] Some members in class `C` are incompatible with those declared in type `T` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `X` inherited from `T` [3]
+-> conflicts with constant `X` inherited from `I`. [2]
+
+interface_trait_2.bad.php:13:7
+ 3 | 
+ 4 | interface I {
+ 5 |   const int X = 2;
+   |             ^ [2]
+ 6 | }
+ 7 | 
+ 8 | trait T {
+ 9 |   const int X = 1;
+   |             ^ [3]
+10 | }
+11 | 
+12 | class C implements I {
+13 |   use T;
+   |       ^ [1]
+14 | }
+
+2 errors found

@@ -1,4 +1,17 @@
-ERROR: File "readonly_closure_expand.php", line 13, characters 10-11:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "readonly_closure_expand.php", line 9, characters 39-66:
-  The function call is defined here.
+error: Typing[4412] This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The function call is defined here. [2]
+
+readonly_closure_expand.php:13:10
+ 7 | 
+ 8 | final class MyFoo {
+ 9 |   public function __construct(private (function(): readonly MyBar) $getter) {}
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | 
+11 |   public function getBar(): MyBar {
+12 |     $f = $this->getter;
+13 |     $z = $f();
+   |          ^^ [1]
+14 |     return $z;
+15 |   }
+
+1 error found

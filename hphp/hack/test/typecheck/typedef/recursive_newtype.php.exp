@@ -1,16 +1,69 @@
-ERROR: File "recursive_newtype.php--f1.php", line 3, characters 6-7:
-Cyclic type definition (Typing[4014])
-  File "recursive_newtype.php--f2.php", line 3, characters 11-12:
-  Cyclic use is here
-ERROR: File "recursive_newtype.php--f1.php", line 5, characters 9-10:
-Cyclic type definition (Typing[4014])
-  File "recursive_newtype.php--f2.php", line 5, characters 14-15:
-  Cyclic use is here
-ERROR: File "recursive_newtype.php--f2.php", line 3, characters 6-7:
-Cyclic type definition (Typing[4014])
-  File "recursive_newtype.php--f1.php", line 3, characters 12-13:
-  Cyclic use is here
-ERROR: File "recursive_newtype.php--f2.php", line 5, characters 9-10:
-Cyclic type definition (Typing[4014])
-  File "recursive_newtype.php--f1.php", line 5, characters 15-16:
-  Cyclic use is here
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_newtype.php--f1.php:3:6
+1 | <?hh
+2 | 
+3 | type T1 = ?T2;
+  |      ^^ [1]
+4 | 
+5 | newtype N1 = ?N2;
+
+recursive_newtype.php--f2.php:3:11
+1 | <?hh
+2 | 
+3 | type T2 = T1;
+  |           ^^ [2]
+4 | 
+5 | newtype N2 = N1;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_newtype.php--f1.php:5:9
+3 | type T1 = ?T2;
+4 | 
+5 | newtype N1 = ?N2;
+  |         ^^ [1]
+
+recursive_newtype.php--f2.php:5:14
+3 | type T2 = T1;
+4 | 
+5 | newtype N2 = N1;
+  |              ^^ [2]
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_newtype.php--f2.php:3:6
+1 | <?hh
+2 | 
+3 | type T2 = T1;
+  |      ^^ [1]
+4 | 
+5 | newtype N2 = N1;
+
+recursive_newtype.php--f1.php:3:12
+1 | <?hh
+2 | 
+3 | type T1 = ?T2;
+  |            ^^ [2]
+4 | 
+5 | newtype N1 = ?N2;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_newtype.php--f2.php:5:9
+3 | type T2 = T1;
+4 | 
+5 | newtype N2 = N1;
+  |         ^^ [1]
+
+recursive_newtype.php--f1.php:5:15
+3 | type T1 = ?T2;
+4 | 
+5 | newtype N1 = ?N2;
+  |               ^^ [2]
+
+4 errors found

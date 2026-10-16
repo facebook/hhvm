@@ -1,10 +1,37 @@
-ERROR: File "named_params_optional.php", line 24, characters 29-30:
-Invalid argument (Typing[4110])
-  File "named_params_optional.php", line 8, characters 9-11:
-  Expected `int`
-  File "named_params_optional.php", line 24, characters 29-30:
-  But got `string`
-ERROR: File "named_params_optional.php", line 27, characters 3-30:
-Unexpected named argument: d (Typing[4500])
-  File "named_params_optional.php", line 6, characters 10-29:
-  Definition is here
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+named_params_optional.php:24:29
+ 6 | function with_optional_params(
+ 7 |   int $a,
+ 8 |   named int $b = 42,
+   |         ^^^ [2]
+ 9 |   named int $c = 43,
+10 | ): void {}
+   :
+22 | 
+23 |   // Error: Wrong type
+24 |   with_optional_params(1, b="");
+   |                             ^^ [1]
+25 | 
+26 |   // Error: Providing unexpected named parameter
+
+error: Typing[4500] Unexpected named argument: d [1]
+-> Definition is here [2]
+
+named_params_optional.php:27:3
+ 4 | // Tests for optional named parameters
+ 5 | 
+ 6 | function with_optional_params(
+   |          ^^^^^^^^^^^^^^^^^^^^ [2]
+ 7 |   int $a,
+ 8 |   named int $b = 42,
+   :
+25 | 
+26 |   // Error: Providing unexpected named parameter
+27 |   with_optional_params(1, d=4);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 | }
+
+2 errors found

@@ -1,4 +1,22 @@
-ERROR: File "bool_int.php", line 22, characters 3-78:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "bool_int.php", line 22, characters 11-12:
-  The scrutinee has type `(int | bool)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `(int | bool)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+bool_int.php:22:3
+20 | // <<__StrictSwitch>>
+21 | function union_bool_int_no_int_default((bool | int) $x): void {
+22 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+23 |     case true:
+   |     ^^^^^^^^^^ [1]
+24 |       return;
+   |       ^^^^^^^ [1]
+25 |     case false:
+   |     ^^^^^^^^^^^ [1]
+26 |       return;
+   |       ^^^^^^^ [1]
+27 |   }
+   |   ^ [1]
+28 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "type_structure8.php", line 8, characters 18-20:
-Was expecting a class, but got a string (Typing[4026])
+error: Typing[4026] Was expecting a class, but got a string [1]
+
+type_structure8.php:8:18
+6 | 
+7 | function test(): void {
+8 |   type_structure('C', 'T');
+  |                  ^^^ [1]
+9 | }
+
+1 error found

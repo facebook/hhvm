@@ -1,2 +1,9 @@
-ERROR: File "fc_enum_of_nonnull.php", line 3, characters 6-8:
-Enums must be `int` or `string` or `arraykey`, not `nonnull` (Typing[4024])
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `nonnull` [1]
+
+fc_enum_of_nonnull.php:3:6
+1 | <?hh
+2 | 
+3 | enum Foo: nonnull {}
+  |      ^^^ [1]
+
+1 error found

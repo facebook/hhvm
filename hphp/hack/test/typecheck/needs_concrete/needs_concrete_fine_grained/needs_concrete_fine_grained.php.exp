@@ -1,24 +1,109 @@
-WARN: File "needs_concrete_fine_grained.php", line 4, characters 9-20:
-Dangerous call to `Base::concreteOnly` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `Base` is not concrete. (Warn[12024])
-  File "needs_concrete_fine_grained.php", line 12, characters 26-37:
-  Declaration is here
-ERROR: File "needs_concrete_fine_grained.php", line 15, characters 13-26:
-Dangerous access of abstract member `Base::abstractMethod`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_fine_grained.php", line 9, characters 35-48:
-  Declaration is here
-ERROR: File "needs_concrete_fine_grained.php", line 16, characters 9-14:
-Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4530])
-  File "needs_concrete_fine_grained.php", line 8, characters 16-19:
-  Declaration is here
-ERROR: File "needs_concrete_fine_grained.php", line 23, characters 11-22:
-Dangerous call to `Child::concreteOnly` (a `<<__NeedsConcrete>>` method) via `self`. It requires `static` to refer to a concrete class, but `self` sets `static` to a class that may not be concrete. (Typing[4528])
-  File "needs_concrete_fine_grained.php", line 12, characters 26-37:
-  Declaration is here
-ERROR: File "needs_concrete_fine_grained.php", line 24, characters 13-24:
-Dangerous call to `Base::concreteOnly` (a `<<__NeedsConcrete>>` method) via `parent`. It requires `static` to refer to a concrete class, but `parent` sets `static` to a class that may not be concrete. (Typing[4528])
-  File "needs_concrete_fine_grained.php", line 12, characters 26-37:
-  Declaration is here
-ERROR: File "needs_concrete_fine_grained.php", line 25, characters 13-24:
-Dangerous call to `Child::concreteOnly` (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete. (Typing[4528])
-  File "needs_concrete_fine_grained.php", line 12, characters 26-37:
-  Declaration is here
+warning: Warn[12024] Dangerous call to `Base::concreteOnly` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `Base` is not concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_fine_grained.php:4:9
+ 2 | 
+ 3 | function classCallCheck(): void {
+ 4 |   Base::concreteOnly();
+   |         ^^^^^^^^^^^^ [1]
+ 5 | }
+ 6 | 
+   :
+10 | 
+11 |   <<__NeedsConcrete>>
+12 |   public static function concreteOnly(): void {}
+   |                          ^^^^^^^^^^^^ [2]
+13 | 
+14 |   public static function definitionChecks(): void {
+
+error: Typing[4529] Dangerous access of abstract member `Base::abstractMethod`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_fine_grained.php:15:13
+ 7 | <<__ConsistentConstruct>>
+ 8 | abstract class Base {
+ 9 |   public static abstract function abstractMethod(): void;
+   |                                   ^^^^^^^^^^^^^^ [2]
+10 | 
+11 |   <<__NeedsConcrete>>
+12 |   public static function concreteOnly(): void {}
+13 | 
+14 |   public static function definitionChecks(): void {
+15 |     static::abstractMethod();
+   |             ^^^^^^^^^^^^^^ [1]
+16 |     new static();
+17 |   }
+
+error: Typing[4530] Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_fine_grained.php:16:9
+ 6 | 
+ 7 | <<__ConsistentConstruct>>
+ 8 | abstract class Base {
+   |                ^^^^ [2]
+ 9 |   public static abstract function abstractMethod(): void;
+10 | 
+   :
+14 |   public static function definitionChecks(): void {
+15 |     static::abstractMethod();
+16 |     new static();
+   |         ^^^^^^ [1]
+17 |   }
+18 | 
+
+error: Typing[4528] Dangerous call to `Child::concreteOnly` (a `<<__NeedsConcrete>>` method) via `self`. It requires `static` to refer to a concrete class, but `self` sets `static` to a class that may not be concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_fine_grained.php:23:11
+10 | 
+11 |   <<__NeedsConcrete>>
+12 |   public static function concreteOnly(): void {}
+   |                          ^^^^^^^^^^^^ [2]
+13 | 
+14 |   public static function definitionChecks(): void {
+   :
+21 | abstract class Child extends Base {
+22 |   public static function forwardingCallChecks(): void {
+23 |     self::concreteOnly();
+   |           ^^^^^^^^^^^^ [1]
+24 |     parent::concreteOnly();
+25 |     static::concreteOnly();
+
+error: Typing[4528] Dangerous call to `Base::concreteOnly` (a `<<__NeedsConcrete>>` method) via `parent`. It requires `static` to refer to a concrete class, but `parent` sets `static` to a class that may not be concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_fine_grained.php:24:13
+10 | 
+11 |   <<__NeedsConcrete>>
+12 |   public static function concreteOnly(): void {}
+   |                          ^^^^^^^^^^^^ [2]
+13 | 
+14 |   public static function definitionChecks(): void {
+   :
+22 |   public static function forwardingCallChecks(): void {
+23 |     self::concreteOnly();
+24 |     parent::concreteOnly();
+   |             ^^^^^^^^^^^^ [1]
+25 |     static::concreteOnly();
+26 |   }
+
+error: Typing[4528] Dangerous call to `Child::concreteOnly` (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_fine_grained.php:25:13
+10 | 
+11 |   <<__NeedsConcrete>>
+12 |   public static function concreteOnly(): void {}
+   |                          ^^^^^^^^^^^^ [2]
+13 | 
+14 |   public static function definitionChecks(): void {
+   :
+23 |     self::concreteOnly();
+24 |     parent::concreteOnly();
+25 |     static::concreteOnly();
+   |             ^^^^^^^^^^^^ [1]
+26 |   }
+27 | }
+
+6 errors found

@@ -1,2 +1,11 @@
-ERROR: File "using_bad_syntax_2.php", line 15, characters 5-28:
-Using statement in function scoped form may only be used at the top level of a function or a method (Parsing[1002])
+error: Parsing[1002] Using statement in function scoped form may only be used at the top level of a function or a method [1]
+
+using_bad_syntax_2.php:15:5
+13 |   // This is not
+14 |   if ($b) {
+15 |     using $y = new Handle();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   }
+17 | }
+
+1 error found

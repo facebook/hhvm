@@ -1,4 +1,21 @@
-ERROR: File "internal_class_missing_attr.php--bar.php", line 7, characters 21-26:
-`secret` has `<<__TestsBypassVisibility>>` but its containing `internal` class `BadClass` does not (Typing[4515])
-ERROR: File "internal_class_missing_attr.php--bar.php", line 10, characters 28-31:
-`stat` has `<<__TestsBypassVisibility>>` but its containing `internal` class `BadClass` does not (Typing[4515])
+error: Typing[4515] `secret` has `<<__TestsBypassVisibility>>` but its containing `internal` class `BadClass` does not [1]
+
+internal_class_missing_attr.php--bar.php:7:21
+5 | internal class BadClass {
+6 |   <<__TestsBypassVisibility>>
+7 |   internal function secret(): void {} // error: class is internal but lacks attribute
+  |                     ^^^^^^ [1]
+8 | 
+9 |   <<__TestsBypassVisibility>>
+
+error: Typing[4515] `stat` has `<<__TestsBypassVisibility>>` but its containing `internal` class `BadClass` does not [1]
+
+internal_class_missing_attr.php--bar.php:10:28
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   internal static function stat(): void {} // error: class is internal but lacks attribute
+   |                            ^^^^ [1]
+11 | 
+12 |   internal function ok(): void {} // ok: no attribute on method
+
+2 errors found

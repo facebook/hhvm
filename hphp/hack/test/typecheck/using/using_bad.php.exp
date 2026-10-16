@@ -1,26 +1,78 @@
-ERROR: File "using_bad.php", line 16, characters 5-10:
-Disposable objects must only be assigned in a `using` statement (Typing[4179])
-ERROR: File "using_bad.php", line 20, characters 29-30:
-Local variable already used in `using` statement (Typing[4178])
-ERROR: File "using_bad.php", line 26, characters 9-10:
-Local variable already used in `using` statement (Typing[4178])
-ERROR: File "using_bad.php", line 29, characters 10-31:
-This expression is used in a `using` clause so it must have type `\IDisposable` (Typing[4110])
-  File "using_bad.php", line 29, characters 10-31:
-  No instance method `__dispose` in `AsyncHandle`
-  File "using_bad.php", line 9, characters 25-38:
-  Did you mean `__disposeAsync` instead?
-  File "using_bad.php", line 29, characters 19-29:
-  This is why I think it is an object of type AsyncHandle
-  File "using_bad.php", line 8, characters 7-17:
-  Declaration of `AsyncHandle` is here
-ERROR: File "using_bad.php", line 33, characters 15-31:
-This expression is used in a `using` clause with await so it must have type `\IAsyncDisposable` (Typing[4110])
-  File "using_bad.php", line 33, characters 15-31:
-  No instance method `__disposeAsync` in `Handle`
-  File "using_bad.php", line 5, characters 19-27:
-  Did you mean `__dispose` instead?
-  File "using_bad.php", line 33, characters 24-29:
-  This is why I think it is an object of type Handle
-  File "using_bad.php", line 4, characters 7-12:
-  Declaration of `Handle` is here
+error: Typing[4179] Disposable objects must only be assigned in a `using` statement [1]
+
+using_bad.php:16:5
+14 |   using ($x = new Handle()) {
+15 |     // Should not be able to assign $x as it's a using variable
+16 |     $x = 3;
+   |     ^^^^^^ [1]
+17 |   }
+18 | 
+
+error: Typing[4178] Local variable already used in `using` statement [1]
+
+using_bad.php:20:29
+18 | 
+19 |   // Repeated variables in same using clause
+20 |   using ($x = new Handle(), $x = new Handle()) {
+   |                             ^^ [1]
+21 |     $x->foo();
+22 |   }
+
+error: Typing[4178] Local variable already used in `using` statement [1]
+
+using_bad.php:26:9
+24 |   // Now with function scope
+25 |   using $x = new Handle();
+26 |   using $x = new Handle();
+   |         ^^ [1]
+27 | 
+28 |   // Should have await here
+
+error: Typing[4110] This expression is used in a `using` clause so it must have type `\IDisposable` [1]
+-> No instance method `__dispose` in `AsyncHandle` [1]
+-> Did you mean `__disposeAsync` instead? [2]
+-> This is why I think it is an object of type AsyncHandle [3]
+-> Declaration of `AsyncHandle` is here [4]
+
+using_bad.php:29:10
+ 6 |   public function foo():void { }
+ 7 | }
+ 8 | class AsyncHandle implements IAsyncDisposable {
+   |       ^^^^^^^^^^^ [4]
+ 9 |   public async function __disposeAsync():Awaitable<void> { }
+   |                         ^^^^^^^^^^^^^^ [2]
+10 |   public function bar():void { }
+11 | }
+   :
+27 | 
+28 |   // Should have await here
+29 |   using ($a = new AsyncHandle()) {
+   |          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                   ^^^^^^^^^^^ [3]
+30 |     $a->bar();
+31 |   }
+
+error: Typing[4110] This expression is used in a `using` clause with await so it must have type `\IAsyncDisposable` [1]
+-> No instance method `__disposeAsync` in `Handle` [1]
+-> Did you mean `__dispose` instead? [2]
+-> This is why I think it is an object of type Handle [3]
+-> Declaration of `Handle` is here [4]
+
+using_bad.php:33:15
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Handle implements IDisposable {
+   |       ^^^^^^ [4]
+ 5 |   public function __dispose():void { }
+   |                   ^^^^^^^^^ [2]
+ 6 |   public function foo():void { }
+ 7 | }
+   :
+31 |   }
+32 |   // Shouldn't have await here
+33 |   await using $b = new Handle();
+   |               ^^^^^^^^^^^^^^^^^ [1]
+   |                        ^^^^^^ [3]
+34 | }
+
+5 errors found

@@ -1,6 +1,38 @@
-ERROR: File "return_with_and_without_expr5.php", line 10, characters 15-201:
-This function can exit with and without returning a value (Typing[4421])
-  File "return_with_and_without_expr5.php", line 18, characters 9-18:
-  Returning a value here.
-  File "return_with_and_without_expr5.php", line 20, characters 9-15:
-  Returning without a value here
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+return_with_and_without_expr5.php:10:15
+ 8 |    // good
+ 9 | 
+10 |     $level2 = (int $x2) ==> {
+   |               ^^^^^^^^^^^^^^^ [1]
+11 |     // bad
+   |     ^^^^^^ [1]
+12 | 
+13 |       $level3 = (int $x3) ==> {
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |       // good
+   |       ^^^^^^^ [1]
+15 |         return "";
+   |         ^^^^^^^^^^ [1]
+16 |       };
+   |       ^^ [1]
+17 |       if ($x2 == 1) {
+   |       ^^^^^^^^^^^^^^^ [1]
+18 |         return "";
+   |         ^^^^^^^^^^ [1]
+   |         ^^^^^^^^^^ [2]
+19 |       } else {
+   |       ^^^^^^^^ [1]
+20 |         return;
+   |         ^^^^^^^ [1]
+   |         ^^^^^^^ [3]
+21 |       }
+   |       ^ [1]
+22 |     };
+   |     ^ [1]
+23 |     echo "";
+24 |   };
+
+1 error found

@@ -1,4 +1,11 @@
-ERROR: File "attribute_shape_splat_access.php--use.php", line 4, characters 16-63:
-Error while evaluating this SimpliHack expression (Typing[4495])
-  File "attribute_shape_splat_access.php--use.php", line 4, characters 16-63:
-  Unsupported expression
+error: Typing[4495] Error while evaluating this SimpliHack expression [1]
+-> Unsupported expression [1]
+
+attribute_shape_splat_access.php--use.php:4:16
+2 | <<file:__EnableUnstableFeatures('simpli_hack', 'shape_splat_concrete', 'shape_splat_type_parameters', 'shape_splat_expression')>>
+3 | 
+4 | <<__SimpliHack(shape(...shape('class' => InternalClass::class)))>>
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | function f(): void {}
+
+1 error found

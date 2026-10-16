@@ -1,4 +1,19 @@
-ERROR: File "typedef_unbound_class.php--file1.php", line 4, characters 10-14:
-Type aliases to type constants are not supported (Parsing[1002])
-ERROR: File "typedef_unbound_class.php--file1.php", line 4, characters 10-10:
-Unbound name: `D` (Naming[2049])
+error: Parsing[1002] Type aliases to type constants are not supported [1]
+
+typedef_unbound_class.php--file1.php:4:10
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | type T = D::T2;
+  |          ^^^^^ [1]
+5 | 
+
+error: Naming[2049] Unbound name: `D` [1]
+
+typedef_unbound_class.php--file1.php:4:10
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | type T = D::T2;
+  |          ^ [1]
+5 | 
+
+2 errors found

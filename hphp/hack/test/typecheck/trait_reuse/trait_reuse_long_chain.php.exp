@@ -1,12 +1,38 @@
-ERROR: File "trait_reuse_long_chain.php", line 23, characters 7-17:
-Traits with final methods cannot be reused, and `ReusedTrait` is already used by `GrandParent`. (Typing[4186])
-  File "trait_reuse_long_chain.php", line 15, characters 7-17:
-  `GrandParent` is defined here
-  File "trait_reuse_long_chain.php", line 16, characters 7-16:
-  `GrandParent` uses `TraitThree`
-  File "trait_reuse_long_chain.php", line 12, characters 7-14:
-  `TraitThree` uses `TraitTwo`
-  File "trait_reuse_long_chain.php", line 8, characters 7-17:
-  `TraitTwo` uses `ReusedTrait`
-  File "trait_reuse_long_chain.php", line 4, characters 25-27:
-  `ReusedTrait` has a final method `foo`
+error: Typing[4186] Traits with final methods cannot be reused, and `ReusedTrait` is already used by `GrandParent`. [1]
+-> `GrandParent` is defined here [2]
+-> `GrandParent` uses `TraitThree` [3]
+-> `TraitThree` uses `TraitTwo` [4]
+-> `TraitTwo` uses `ReusedTrait` [5]
+-> `ReusedTrait` has a final method `foo` [6]
+
+trait_reuse_long_chain.php:23:7
+ 2 | 
+ 3 | trait ReusedTrait {
+ 4 |   public final function foo(): void {}
+   |                         ^^^ [6]
+ 5 | }
+ 6 | 
+ 7 | trait TraitTwo {
+ 8 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [5]
+ 9 | }
+10 | 
+11 | trait TraitThree {
+12 |   use TraitTwo;
+   |       ^^^^^^^^ [4]
+13 | }
+14 | 
+15 | class GrandParent {
+   |       ^^^^^^^^^^^ [2]
+16 |   use TraitThree;
+   |       ^^^^^^^^^^ [3]
+17 | }
+18 | 
+   :
+21 | 
+22 | class BadClass extends MyParent {
+23 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+24 | }
+
+1 error found

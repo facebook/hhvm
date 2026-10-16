@@ -14,19 +14,80 @@ File "type_structure_tuple.php", line 28, characters 3-27:
   (TypeStructure<float>)
 File "type_structure_tuple.php", line 31, characters 3-30:
   TypeStructure<nonnull>
-ERROR: File "type_structure_tuple.php", line 19, characters 6-26:
-The field `optional_elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 66, characters 6-26:
-  This is where the field was declared as optional.
-ERROR: File "type_structure_tuple.php", line 21, characters 6-20:
-The field `variadic_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 67, characters 6-20:
-  This is where the field was declared as optional.
-ERROR: File "type_structure_tuple.php", line 26, characters 6-20:
-The field `variadic_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 67, characters 6-20:
-  This is where the field was declared as optional.
-ERROR: File "type_structure_tuple.php", line 30, characters 6-26:
-The field `optional_elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 66, characters 6-26:
-  This is where the field was declared as optional.
+error: Typing[4165] The field `optional_elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure_tuple.php:19:6
+17 |   hh_show($x['elem_types']);
+18 |   // Expect an error, because TC doesn't have optional elements
+19 |   $x['optional_elem_types'];
+   |      ^^^^^^^^^^^^^^^^^^^^^ [1]
+20 |   // Expect an error, because TC doesn't have a variadic element
+21 |   $x['variadic_type'];
+
+typestructure.hhi:66:6
+64 |     ?'classname' => classname<T>,
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+   |      ^^^^^^^^^^^^^^^^^^^^^ [2]
+67 |     ?'variadic_type' => mixed,
+68 |     ?'return_type' => mixed,
+
+error: Typing[4165] The field `variadic_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure_tuple.php:21:6
+19 |   $x['optional_elem_types'];
+20 |   // Expect an error, because TC doesn't have a variadic element
+21 |   $x['variadic_type'];
+   |      ^^^^^^^^^^^^^^^ [1]
+22 |   hh_show($y);
+23 |   hh_show($y['elem_types']);
+
+typestructure.hhi:67:6
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+67 |     ?'variadic_type' => mixed,
+   |      ^^^^^^^^^^^^^^^ [2]
+68 |     ?'return_type' => mixed,
+69 |     ?'param_types' => varray<mixed>,
+
+error: Typing[4165] The field `variadic_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure_tuple.php:26:6
+24 |   hh_show($y['optional_elem_types']);
+25 |   // Expect an error, because TC2 doesn't have a variadic element
+26 |   $y['variadic_type'];
+   |      ^^^^^^^^^^^^^^^ [1]
+27 |   hh_show($z);
+28 |   hh_show($z['elem_types']);
+
+typestructure.hhi:67:6
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+67 |     ?'variadic_type' => mixed,
+   |      ^^^^^^^^^^^^^^^ [2]
+68 |     ?'return_type' => mixed,
+69 |     ?'param_types' => varray<mixed>,
+
+error: Typing[4165] The field `optional_elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure_tuple.php:30:6
+28 |   hh_show($z['elem_types']);
+29 |   // Expect an error, because TC3 doesn't have optional elements
+30 |   $z['optional_elem_types'];
+   |      ^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |   hh_show($z['variadic_type']);
+32 | }
+
+typestructure.hhi:66:6
+64 |     ?'classname' => classname<T>,
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+   |      ^^^^^^^^^^^^^^^^^^^^^ [2]
+67 |     ?'variadic_type' => mixed,
+68 |     ?'return_type' => mixed,
+
+4 errors found

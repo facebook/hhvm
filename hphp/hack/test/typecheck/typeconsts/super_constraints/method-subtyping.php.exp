@@ -1,84 +1,280 @@
-ERROR: File "method-subtyping.php", line 22, characters 23-31:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 12, characters 29-31:
-  Expected `int`
-  File "method-subtyping.php", line 21, characters 29-35:
-  But got `B1::T where \B1::T super num, \B1::T super this::T`
-ERROR: File "method-subtyping.php", line 22, characters 23-31:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 12, characters 29-31:
-  Expected `int`
-  File "method-subtyping.php", line 21, characters 29-35:
-  But got `mixed`
-ERROR: File "method-subtyping.php", line 22, characters 23-31:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 12, characters 29-31:
-  Expected `int`
-  File "method-subtyping.php", line 21, characters 29-35:
-  But got `this::T where this::T super num, this::T as B1::T`
-ERROR: File "method-subtyping.php", line 28, characters 16-22:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 10, characters 22-28:
-  Expected `this::T`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2`
-ERROR: File "method-subtyping.php", line 28, characters 16-22:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 10, characters 22-28:
-  Expected `this::T`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `mixed`
-ERROR: File "method-subtyping.php", line 28, characters 16-22:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 10, characters 22-28:
-  Expected `this::T`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
-ERROR: File "method-subtyping.php", line 28, characters 16-22:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 17, characters 31-33:
-  Expected `num`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2`
-ERROR: File "method-subtyping.php", line 28, characters 16-22:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 17, characters 31-33:
-  Expected `num`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `mixed`
-ERROR: File "method-subtyping.php", line 28, characters 16-22:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 17, characters 31-33:
-  Expected `num`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
-ERROR: File "method-subtyping.php", line 29, characters 23-29:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 12, characters 29-31:
-  Expected `int`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2`
-ERROR: File "method-subtyping.php", line 29, characters 23-29:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 12, characters 29-31:
-  Expected `int`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `mixed`
-ERROR: File "method-subtyping.php", line 29, characters 23-29:
-Invalid argument (Typing[4110])
-  File "method-subtyping.php", line 12, characters 29-31:
-  Expected `int`
-  File "method-subtyping.php", line 27, characters 22-29:
-  But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2`
-ERROR: File "method-subtyping.php", line 34, characters 19-29:
-The method `returns_int` is not compatible with the overridden method (Typing[4341])
-  File "method-subtyping.php", line 34, characters 19-29:
-  Method `returns_int` has type `(function(): this::T)` in `B1`
-  File "method-subtyping.php", line 13, characters 19-29:
-  But it has type `(function(): int)` in parent `A`
-  File "method-subtyping.php", line 34, characters 19-29:
-  Type `(function(): this::T)` is not a subtype of `(function(): int)`
-  File "method-subtyping.php", line 13, characters 34-36:
-  Expected `int`
-  File "method-subtyping.php", line 34, characters 34-40:
-  But got `this::T where this::T super num, this::T as B1::T`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `B1::T where \B1::T super num, \B1::T super this::T` [3]
+
+method-subtyping.php:22:23
+10 |   public function do(this::T $any): this::T { return $any; }
+11 | 
+12 |   public function takes_int(int $_): void {}
+   |                             ^^^ [2]
+13 |   public function returns_int(): int { return 42; }
+14 | }
+   :
+19 | 
+20 |   <<__Override>>
+21 |   public function takes_int(this::T $superInt): void {  // OK
+   |                             ^^^^^^^ [3]
+22 |     parent::takes_int($superInt);  // ERROR
+   |                       ^^^^^^^^^ [1]
+23 |     parent::do($superInt);  // OK
+24 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+method-subtyping.php:22:23
+10 |   public function do(this::T $any): this::T { return $any; }
+11 | 
+12 |   public function takes_int(int $_): void {}
+   |                             ^^^ [2]
+13 |   public function returns_int(): int { return 42; }
+14 | }
+   :
+19 | 
+20 |   <<__Override>>
+21 |   public function takes_int(this::T $superInt): void {  // OK
+   |                             ^^^^^^^ [3]
+22 |     parent::takes_int($superInt);  // ERROR
+   |                       ^^^^^^^^^ [1]
+23 |     parent::do($superInt);  // OK
+24 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `this::T where this::T super num, this::T as B1::T` [3]
+
+method-subtyping.php:22:23
+10 |   public function do(this::T $any): this::T { return $any; }
+11 | 
+12 |   public function takes_int(int $_): void {}
+   |                             ^^^ [2]
+13 |   public function returns_int(): int { return 42; }
+14 | }
+   :
+19 | 
+20 |   <<__Override>>
+21 |   public function takes_int(this::T $superInt): void {  // OK
+   |                             ^^^^^^^ [3]
+22 |     parent::takes_int($superInt);  // ERROR
+   |                       ^^^^^^^^^ [1]
+23 |     parent::do($superInt);  // OK
+24 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::T` [2]
+-> But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2` [3]
+
+method-subtyping.php:28:16
+ 8 |   abstract const type T super int;
+ 9 | 
+10 |   public function do(this::T $any): this::T { return $any; }
+   |                      ^^^^^^^ [2]
+11 | 
+12 |   public function takes_int(int $_): void {}
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+   |                ^^^^^^^ [1]
+29 |     parent::takes_int($superT);  // ERROR
+30 |     return parent::returns_int();  // OK
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::T` [2]
+-> But got `mixed` [3]
+
+method-subtyping.php:28:16
+ 8 |   abstract const type T super int;
+ 9 | 
+10 |   public function do(this::T $any): this::T { return $any; }
+   |                      ^^^^^^^ [2]
+11 | 
+12 |   public function takes_int(int $_): void {}
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+   |                ^^^^^^^ [1]
+29 |     parent::takes_int($superT);  // ERROR
+30 |     return parent::returns_int();  // OK
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::T` [2]
+-> But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2` [3]
+
+method-subtyping.php:28:16
+ 8 |   abstract const type T super int;
+ 9 | 
+10 |   public function do(this::T $any): this::T { return $any; }
+   |                      ^^^^^^^ [2]
+11 | 
+12 |   public function takes_int(int $_): void {}
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+   |                ^^^^^^^ [1]
+29 |     parent::takes_int($superT);  // ERROR
+30 |     return parent::returns_int();  // OK
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2` [3]
+
+method-subtyping.php:28:16
+15 | 
+16 | abstract class B1 extends A {
+17 |   abstract const type T super num;
+   |                               ^^^ [2]
+18 |   abstract const type T2 super this::T;  // OK
+19 | 
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+   |                ^^^^^^^ [1]
+29 |     parent::takes_int($superT);  // ERROR
+30 |     return parent::returns_int();  // OK
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `mixed` [3]
+
+method-subtyping.php:28:16
+15 | 
+16 | abstract class B1 extends A {
+17 |   abstract const type T super num;
+   |                               ^^^ [2]
+18 |   abstract const type T2 super this::T;  // OK
+19 | 
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+   |                ^^^^^^^ [1]
+29 |     parent::takes_int($superT);  // ERROR
+30 |     return parent::returns_int();  // OK
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2` [3]
+
+method-subtyping.php:28:16
+15 | 
+16 | abstract class B1 extends A {
+17 |   abstract const type T super num;
+   |                               ^^^ [2]
+18 |   abstract const type T2 super this::T;  // OK
+19 | 
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+   |                ^^^^^^^ [1]
+29 |     parent::takes_int($superT);  // ERROR
+30 |     return parent::returns_int();  // OK
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `B1::T2 where \B1::T2 super this::T, \B1::T2 super this::T2` [3]
+
+method-subtyping.php:29:23
+10 |   public function do(this::T $any): this::T { return $any; }
+11 | 
+12 |   public function takes_int(int $_): void {}
+   |                             ^^^ [2]
+13 |   public function returns_int(): int { return 42; }
+14 | }
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+29 |     parent::takes_int($superT);  // ERROR
+   |                       ^^^^^^^ [1]
+30 |     return parent::returns_int();  // OK
+31 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+method-subtyping.php:29:23
+10 |   public function do(this::T $any): this::T { return $any; }
+11 | 
+12 |   public function takes_int(int $_): void {}
+   |                             ^^^ [2]
+13 |   public function returns_int(): int { return 42; }
+14 | }
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+29 |     parent::takes_int($superT);  // ERROR
+   |                       ^^^^^^^ [1]
+30 |     return parent::returns_int();  // OK
+31 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `this::T2 where this::T2 super this::T, this::T2 as B1::T2` [3]
+
+method-subtyping.php:29:23
+10 |   public function do(this::T $any): this::T { return $any; }
+11 | 
+12 |   public function takes_int(int $_): void {}
+   |                             ^^^ [2]
+13 |   public function returns_int(): int { return 42; }
+14 | }
+   :
+25 | 
+26 |   <<__Override>>
+27 |   public function do(this::T2 $superT): this::T {  // OK
+   |                      ^^^^^^^^ [3]
+28 |     parent::do($superT);  // ERROR
+29 |     parent::takes_int($superT);  // ERROR
+   |                       ^^^^^^^ [1]
+30 |     return parent::returns_int();  // OK
+31 |   }
+
+error: Typing[4341] The method `returns_int` is not compatible with the overridden method [1]
+-> Method `returns_int` has type `(function(): this::T)` in `B1` [1]
+-> But it has type `(function(): int)` in parent `A` [2]
+-> Type `(function(): this::T)` is not a subtype of `(function(): int)` [1]
+-> Expected `int` [3]
+-> But got `this::T where this::T super num, this::T as B1::T` [4]
+
+method-subtyping.php:34:19
+11 | 
+12 |   public function takes_int(int $_): void {}
+13 |   public function returns_int(): int { return 42; }
+   |                   ^^^^^^^^^^^ [2]
+   |                                  ^^^ [3]
+14 | }
+15 | 
+   :
+32 | 
+33 |   <<__Override>>
+34 |   public function returns_int(): this::T {  // ERROR
+   |                   ^^^^^^^^^^^ [1]
+   |                                  ^^^^^^^ [4]
+35 |     return 42;
+36 |   }
+
+13 errors found

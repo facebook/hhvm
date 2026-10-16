@@ -1,32 +1,81 @@
-ERROR: File "readonly_method_call_like_types.php", line 11, characters 3-22:
-Typing error (Typing[4411])
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  Function readonly mismatch
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  This function is not marked readonly
-  File "readonly_method_call_like_types.php", line 11, characters 3-22:
-  This function is marked readonly
-ERROR: File "readonly_method_call_like_types.php", line 14, characters 5-24:
-Typing error (Typing[4411])
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  Function readonly mismatch
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  This function is not marked readonly
-  File "readonly_method_call_like_types.php", line 14, characters 5-24:
-  This function is marked readonly
-ERROR: File "readonly_method_call_like_types.php", line 18, characters 5-15:
-Typing error (Typing[4411])
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  Function readonly mismatch
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  This function is not marked readonly
-  File "readonly_method_call_like_types.php", line 18, characters 5-15:
-  This function is marked readonly
-ERROR: File "readonly_method_call_like_types.php", line 19, characters 5-24:
-Typing error (Typing[4411])
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  Function readonly mismatch
-  File "readonly_method_call_like_types.php", line 3, characters 19-23:
-  This function is not marked readonly
-  File "readonly_method_call_like_types.php", line 19, characters 5-24:
-  This function is marked readonly
+error: Typing[4411] Typing error [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [1]
+
+readonly_method_call_like_types.php:11:3
+ 1 | <?hh
+ 2 | class Foo {
+ 3 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 4 |     return "";
+ 5 |   }
+   :
+ 9 |   $readonly_x = readonly $x;
+10 |   $x->hello();
+11 |   $readonly_x->hello(); // error
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   $f = () ==> {
+13 |     $x->hello(); // no error
+
+error: Typing[4411] Typing error [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [1]
+
+readonly_method_call_like_types.php:14:5
+ 1 | <?hh
+ 2 | class Foo {
+ 3 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 4 |     return "";
+ 5 |   }
+   :
+12 |   $f = () ==> {
+13 |     $x->hello(); // no error
+14 |     $readonly_x->hello(); // error
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   };
+16 |   $f();
+
+error: Typing[4411] Typing error [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [1]
+
+readonly_method_call_like_types.php:18:5
+ 1 | <?hh
+ 2 | class Foo {
+ 3 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 4 |     return "";
+ 5 |   }
+   :
+16 |   $f();
+17 |   $f = readonly () ==> {
+18 |     $x->hello(); // error
+   |     ^^^^^^^^^^^ [1]
+19 |     $readonly_x->hello(); // error
+20 |   };
+
+error: Typing[4411] Typing error [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [1]
+
+readonly_method_call_like_types.php:19:5
+ 1 | <?hh
+ 2 | class Foo {
+ 3 |   public function hello(): string {
+   |                   ^^^^^ [2]
+ 4 |     return "";
+ 5 |   }
+   :
+17 |   $f = readonly () ==> {
+18 |     $x->hello(); // error
+19 |     $readonly_x->hello(); // error
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+20 |   };
+21 |   $f();
+
+4 errors found

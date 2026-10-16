@@ -1,4 +1,20 @@
-ERROR: File "policied_static_prop.php", line 10, characters 8-13:
-Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])
-ERROR: File "policied_static_prop.php", line 12, characters 3-8:
-Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
+error: Parsing[1002] Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. [1]
+
+policied_static_prop.php:10:8
+ 8 |   $y = new Foo();
+ 9 |   $v = readonly $y::$x; // ok
+10 |   $z = $y::$x; // not ok
+   |        ^^^^^^ [1]
+11 |   // not ok
+12 |   $y::$x = new Foo();
+
+error: Parsing[1002] Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). [1]
+
+policied_static_prop.php:12:3
+10 |   $z = $y::$x; // not ok
+11 |   // not ok
+12 |   $y::$x = new Foo();
+   |   ^^^^^^ [1]
+13 | }
+
+2 errors found

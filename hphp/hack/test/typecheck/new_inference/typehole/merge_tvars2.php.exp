@@ -1,6 +1,19 @@
-ERROR: File "merge_tvars2.php", line 15, characters 19-27:
-Invalid argument (Typing[4110])
-  File "merge_tvars2.php", line 18, characters 27-32:
-  Expected `string`
-  File "merge_tvars2.php", line 14, characters 11-11:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+merge_tvars2.php:15:19
+12 | function test(): void {
+13 |   $x = new A(); // x : A<v1, v2>, -v2 <: +v1
+14 |   $x->put(0); // int <: -v2
+   |           ^ [3]
+15 |   take_string_opt($x->get()); // +v1 <: string -> should error
+   |                   ^^^^^^^^^ [1]
+16 | }
+17 | 
+18 | function take_string_opt(?string $x): void {
+   |                           ^^^^^^ [2]
+19 |   var_dump($x);
+20 | }
+
+1 error found

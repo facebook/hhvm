@@ -1,6 +1,13 @@
-ERROR: File "disjoint_attr_bad_generic_generic.php", line 5, characters 9-11:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_generic_generic.php", line 5, characters 60-61:
-  type parameter `T1` may provide shape fields here
-  File "disjoint_attr_bad_generic_generic.php", line 5, characters 67-68:
-  type parameter `T2` may provide shape fields here
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> type parameter `T1` may provide shape fields here [2]
+-> type parameter `T2` may provide shape fields here [3]
+
+disjoint_attr_bad_generic_generic.php:5:9
+3 | 
+4 | <<__DisjointShapeSplat>>
+5 | newtype Bad<T1 as shape(...), T2 as shape(...)> = shape(...T1, ...T2);
+  |         ^^^ [1]
+  |                                                            ^^ [2]
+  |                                                                   ^^ [3]
+
+1 error found

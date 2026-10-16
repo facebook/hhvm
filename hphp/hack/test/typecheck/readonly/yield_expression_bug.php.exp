@@ -1,2 +1,11 @@
-ERROR: File "yield_expression_bug.php", line 11, characters 9-10:
-This expression is readonly. We currently do not support yielding readonly values. (Parsing[1002])
+error: Parsing[1002] This expression is readonly. We currently do not support yielding readonly values. [1]
+
+yield_expression_bug.php:11:9
+ 9 | function generator<T>(readonly T $n): Generator<int, T, void> {
+10 |   // should error here
+11 |   yield $n;
+   |         ^^ [1]
+12 | }
+13 | 
+
+1 error found

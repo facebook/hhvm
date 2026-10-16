@@ -1,14 +1,40 @@
-ERROR: File "interface_interface_1.bad.php", line 14, characters 7-7:
-Constant ONCALL is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_interface_1.bad.php", line 7, characters 15-20:
-  One conflicting definition is here
-  File "interface_interface_1.bad.php", line 11, characters 16-21:
-  Another conflicting definition is here
-ERROR: File "interface_interface_1.bad.php", line 14, characters 20-21:
-Some members in class `A` are incompatible with those declared in type `IA` (Typing[4374])
-  File "interface_interface_1.bad.php", line 11, characters 16-21:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "interface_interface_1.bad.php", line 7, characters 15-20:
-  `ONCALL` inherited from `IA`
-  File "interface_interface_1.bad.php", line 11, characters 16-21:
-  conflicts with constant `ONCALL` inherited from `IB`.
+error: Typing[4374] Constant ONCALL is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+interface_interface_1.bad.php:14:7
+ 5 | 
+ 6 | interface IA {
+ 7 |  const string ONCALL = "a";
+   |               ^^^^^^ [2]
+ 8 | }
+ 9 | 
+10 | interface IB {
+11 |   const string ONCALL = "b";
+   |                ^^^^^^ [3]
+12 | }
+13 | 
+14 | class A implements IA, IB {}
+   |       ^ [1]
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `IA` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `ONCALL` inherited from `IA` [3]
+-> conflicts with constant `ONCALL` inherited from `IB`. [2]
+
+interface_interface_1.bad.php:14:20
+ 5 | 
+ 6 | interface IA {
+ 7 |  const string ONCALL = "a";
+   |               ^^^^^^ [3]
+ 8 | }
+ 9 | 
+10 | interface IB {
+11 |   const string ONCALL = "b";
+   |                ^^^^^^ [2]
+12 | }
+13 | 
+14 | class A implements IA, IB {}
+   |                    ^^ [1]
+
+2 errors found

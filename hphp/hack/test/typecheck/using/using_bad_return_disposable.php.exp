@@ -1,14 +1,70 @@
-ERROR: File "using_bad_return_disposable.php", line 14, characters 12-16:
-Return expression must be new disposable in function marked `<<__ReturnDisposable>>` (Typing[4205])
-ERROR: File "using_bad_return_disposable.php", line 14, characters 12-16:
-`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4192])
-ERROR: File "using_bad_return_disposable.php", line 18, characters 12-13:
-Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
-ERROR: File "using_bad_return_disposable.php", line 18, characters 12-13:
-Return expression must be new disposable in function marked `<<__ReturnDisposable>>` (Typing[4205])
-ERROR: File "using_bad_return_disposable.php", line 35, characters 10-25:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_return_disposable.php", line 38, characters 8-24:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_return_disposable.php", line 41, characters 8-16:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+error: Typing[4205] Return expression must be new disposable in function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_return_disposable.php:14:12
+12 |   <<__ReturnDisposable>>
+13 |   public function bad_alias():this {
+14 |     return $this;
+   |            ^^^^^ [1]
+15 |   }
+16 |   <<__ReturnDisposable>>
+
+error: Typing[4192] `$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_return_disposable.php:14:12
+12 |   <<__ReturnDisposable>>
+13 |   public function bad_alias():this {
+14 |     return $this;
+   |            ^^^^^ [1]
+15 |   }
+16 |   <<__ReturnDisposable>>
+
+error: Typing[4188] Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_return_disposable.php:18:12
+16 |   <<__ReturnDisposable>>
+17 |   public function bad_escape(<<__AcceptDisposable>> IDisposable $x):IDisposable {
+18 |     return $x;
+   |            ^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4205] Return expression must be new disposable in function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_return_disposable.php:18:12
+16 |   <<__ReturnDisposable>>
+17 |   public function bad_escape(<<__AcceptDisposable>> IDisposable $x):IDisposable {
+18 |     return $x;
+   |            ^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_return_disposable.php:35:10
+33 |     $x->foo();
+34 |     // This is illegal
+35 |     $w = $x->new_handle();
+   |          ^^^^^^^^^^^^^^^^ [1]
+36 |   }
+37 |   // This should be illegal
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_return_disposable.php:38:8
+36 |   }
+37 |   // This should be illegal
+38 |   $z = make_handle(true);
+   |        ^^^^^^^^^^^^^^^^^ [1]
+39 |   // And this!
+40 |   $f = make_handle<>;
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_return_disposable.php:41:8
+39 |   // And this!
+40 |   $f = make_handle<>;
+41 |   $x = $f(false);
+   |        ^^^^^^^^^ [1]
+42 | }
+
+7 errors found

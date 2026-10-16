@@ -2,7 +2,24 @@ File "is_reified_generic.php", line 5, characters 5-15:
   T
 File "is_reified_generic.php", line 7, characters 5-15:
   not T
-WARN: File "is_reified_generic.php", line 12, characters 7-13:
-This `is` check is always `true`. The expression on the left has type `T` which is a subtype of `T`. (Warn[12009])
-WARN: File "is_reified_generic.php", line 20, characters 7-13:
-This `is` check is always `false`. The expression on the left has type `float` which shares no values with `T`. (Warn[12010])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `T` which is a subtype of `T`. [1]
+
+is_reified_generic.php:12:7
+10 | 
+11 | function test_identity<<<__Enforceable>> reify T>(T $x): void {
+12 |   if ($x is T) {
+   |       ^^^^^^^ [1]
+13 |     hh_expect_equivalent<T>($x);
+14 |   } else {
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `float` which shares no values with `T`. [1]
+
+is_reified_generic.php:20:7
+18 | 
+19 | function test_bounded<<<__Enforceable>> reify T as arraykey>(float $x): void {
+20 |   if ($x is T) {
+   |       ^^^^^^^ [1]
+21 |     hh_expect_equivalent<nothing>($x);
+22 |   } else {
+
+2 errors found

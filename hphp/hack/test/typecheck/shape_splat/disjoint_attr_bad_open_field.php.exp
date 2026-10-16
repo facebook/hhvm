@@ -1,6 +1,13 @@
-ERROR: File "disjoint_attr_bad_open_field.php", line 7, characters 6-8:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_open_field.php", line 7, characters 27-29:
-  Shape field `z` is defined here
-  File "disjoint_attr_bad_open_field.php", line 7, characters 21-24:
-  Shape field `z` may also be provided by an open shape
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `z` is defined here [2]
+-> Shape field `z` may also be provided by an open shape [3]
+
+disjoint_attr_bad_open_field.php:7:6
+5 | 
+6 | <<__DisjointShapeSplat>>
+7 | type Bad = shape(...Open, 'z' => bool);
+  |      ^^^ [1]
+  |                     ^^^^ [3]
+  |                           ^^^ [2]
+
+1 error found

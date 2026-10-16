@@ -1,8 +1,28 @@
-ERROR: File "error_splat_representable_as.php", line 12, characters 8-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "error_splat_representable_as.php", line 11, characters 3-86:
-  Expected `shape(...)`
-  File "error_splat_representable_as.php", line 12, characters 8-53:
-  But got `mixed`
-  File "representable_as.hhi", line 7, characters 11-25:
-    by the definition of `HH\Runtime\RepresentableAs` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `mixed` [1]
+->   by the definition of `HH\Runtime\RepresentableAs` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+error_splat_representable_as.php:12:8
+ 9 | // RepresentableAs<shape(...)> is deliberately one-way and cannot be unpacked.
+10 | function test(
+11 |   shape(
+   |   ^^^^^^ [2]
+12 |     ...\HH\Runtime\RepresentableAs<shape('x' => int)>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |     'y' => string,
+   |     ^^^^^^^^^^^^^^ [2]
+14 |   ) $_,
+   |   ^ [2]
+15 | ): void {}
+
+representable_as.hhi:7:11
+ 5 | namespace HH\Runtime {
+ 6 |   <<__GatedByFeatureFlag('representable_as')>>
+ 7 |   newtype RepresentableAs<+T> = T;
+   |           ^^^^^^^^^^^^^^^ [3]
+ 8 | 
+ 9 |   <<__GatedByFeatureFlag('representable_as')>>
+
+1 error found

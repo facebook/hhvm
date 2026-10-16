@@ -1,2 +1,11 @@
-ERROR: File "await.php", line 23, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+await.php:23:3
+21 | async function test(): Awaitable<void> {
+22 |   $x = await readonly foo();
+23 |   $x->prop = 4;
+   |   ^^^^^^^^^^^^ [1]
+24 | 
+25 | }
+
+1 error found

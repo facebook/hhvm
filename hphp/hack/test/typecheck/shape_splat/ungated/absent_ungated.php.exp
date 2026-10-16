@@ -1,2 +1,9 @@
-ERROR: File "absent_ungated.php", line 4, characters 37-46:
-Cannot use unstable feature: `shape_splat_concrete` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `shape_splat_concrete` [1]
+
+absent_ungated.php:4:37
+2 | // No __EnableUnstableFeatures attribute — `absent` syntax should error.
+3 | 
+4 | type WithAbsent = shape('y' => int, absent 'x');
+  |                                     ^^^^^^^^^^ [1]
+
+1 error found

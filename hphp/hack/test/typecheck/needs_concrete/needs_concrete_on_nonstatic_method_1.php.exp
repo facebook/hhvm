@@ -1,2 +1,11 @@
-ERROR: File "needs_concrete_on_nonstatic_method_1.php", line 5, characters 19-20:
-The `__NeedsConcrete` attribute is not allowed on `A::m1` (a nonstatic method). The `__NeedsConcrete` attribute is only meaningful on static methods. (Typing[4506])
+error: Typing[4506] The `__NeedsConcrete` attribute is not allowed on `A::m1` (a nonstatic method). The `__NeedsConcrete` attribute is only meaningful on static methods. [1]
+
+needs_concrete_on_nonstatic_method_1.php:5:19
+3 | abstract class A {
+4 |   <<__NeedsConcrete>>
+5 |   public function m1(): void {
+  |                   ^^ [1]
+6 |   }
+7 | }
+
+1 error found

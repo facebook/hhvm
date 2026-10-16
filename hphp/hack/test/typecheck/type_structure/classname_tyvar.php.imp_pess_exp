@@ -1,13 +1,52 @@
-WARN: File "classname_tyvar.php", line 20, characters 61-63:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "classname.hhi", line 50, characters 73-80:
-  This expression has type `dynamic` because the type of this return is implicitly a like-type due to unenforced class pointer type
-ERROR: File "classname_tyvar.php", line 14, characters 68-78:
-The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-16:
-  This is where the field was declared as optional.
-ERROR: File "classname_tyvar.php", line 15, characters 19-45:
-The two arguments to `HH\type_structure_classname()` must be:
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` because the type of this return is implicitly a like-type due to unenforced class pointer type [2]
+
+classname_tyvar.php:20:61
+18 |     expect_string(HH\type_structure_classname(HH\classname_to_class($kls), 'T2'));
+19 | 
+20 |     expect_string(type_structure(HH\classname_to_class($d), 'T')['classname']);
+   |                                                             ^^^ [1]
+21 |     expect_string(HH\type_structure_classname(HH\classname_to_class($d), 'T'));
+22 |   }
+
+classname.hhi:50:73
+48 |    * to eliminate implicit coercions from strings e.g. `$cn::func()`
+49 |    */
+50 |   function classname_to_class<T>(readonly class_or_classname<T> $cn)[]: class<T>;
+   |                                                                         ^^^^^^^^ [2]
+51 | 
+52 |   /**
+
+error: Typing[4165] The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+classname_tyvar.php:14:68
+12 |     dynamic $d,
+13 |   ): void {
+14 |     expect_string(type_structure(HH\classname_to_class($kls), 'T')['classname']);
+   |                                                                    ^^^^^^^^^^^ [1]
+15 |     expect_string(HH\type_structure_classname(HH\classname_to_class($kls), 'T'));
+16 | 
+
+typestructure.hhi:64:6
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |      ^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+error: Typing[4150] The two arguments to `HH\type_structure_classname()` must be:
  - first: `ValidClassname::class` or an object of that class
  - second: a single-quoted string literal containing the name of a type constant of that class
-The type constant does not resolve to a classish type (Typing[4150])
+The type constant does not resolve to a classish type [1]
+
+classname_tyvar.php:15:19
+13 |   ): void {
+14 |     expect_string(type_structure(HH\classname_to_class($kls), 'T')['classname']);
+15 |     expect_string(HH\type_structure_classname(HH\classname_to_class($kls), 'T'));
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | 
+17 |     expect_string(type_structure(HH\classname_to_class($kls), 'T2')['classname']);
+
+3 errors found

@@ -1,10 +1,29 @@
-ERROR: File "make_inv_then_invoke.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-  File "make_inv_then_invoke.php", line 19, characters 14-14:
-  Expected `C`
-  File "make_inv_then_invoke.php", line 12, characters 33-33:
-    via this generic `T`
-  File "make_inv_then_invoke.php", line 19, characters 25-25:
-  But got `B`
-  File "make_inv_then_invoke.php", line 19, characters 25-25:
-  This type argument to `Inv` must match exactly (it is invariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `C` [2]
+->   via this generic `T` [3]
+-> But got `B` [4]
+-> This type argument to `Inv` must match exactly (it is invariant) [4]
+
+make_inv_then_invoke.php:25:10
+10 | }
+11 | 
+12 | function make_inv<T>(T $x): Inv<T> {
+   |                                 ^ [3]
+13 |   return new Inv($x);
+14 | }
+   :
+17 | }
+18 | 
+19 | function bar(C $c): Inv<B> {
+   |              ^ [2]
+   |                         ^ [4]
+20 |   // So: T=v, have C <: v and $x:Inv<v>
+21 |   $x = make_inv($c);
+22 |   // Here, how do we "guess" v?
+23 |   $x->item->foo();
+24 | //  setInvB($x);
+25 |   return $x;
+   |          ^^ [1]
+26 | }
+
+1 error found

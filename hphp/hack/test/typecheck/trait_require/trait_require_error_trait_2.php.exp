@@ -1,8 +1,34 @@
-ERROR: File "trait_require_error_trait_2.php", line 13, characters 12-14:
-Methods need to be marked `public`, `private`, `protected`, or `internal`. (Naming[2086])
-ERROR: File "trait_require_error_trait_2.php", line 20, characters 5-25:
-You cannot return a value (Typing[4084])
-  File "trait_require_error_trait_2.php", line 19, characters 26-29:
-  This is a `void` function
-ERROR: File "trait_require_error_trait_2.php", line 20, characters 12-17:
-You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class (Typing[4074])
+error: Naming[2086] Methods need to be marked `public`, `private`, `protected`, or `internal`. [1]
+
+trait_require_error_trait_2.php:13:12
+11 | 
+12 | interface I {
+13 |   function foo(): void;
+   |            ^^^ [1]
+14 | }
+15 | 
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+trait_require_error_trait_2.php:20:5
+17 |   require implements I;
+18 | 
+19 |   public function foo(): void {
+   |                          ^^^^ [2]
+20 |     return parent::foo();
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   }
+22 | }
+
+error: Typing[4074] You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class [1]
+
+trait_require_error_trait_2.php:20:12
+18 | 
+19 |   public function foo(): void {
+20 |     return parent::foo();
+   |            ^^^^^^ [1]
+21 |   }
+22 | }
+
+3 errors found

@@ -1,4 +1,16 @@
-ERROR: File "parent_05.bad.php", line 13, characters 12-17:
-parent is undefined (Typing[4076])
-  File "parent_05.bad.php", line 10, characters 17-17:
-  The class required here has no parent
+error: Typing[4076] parent is undefined [1]
+-> The class required here has no parent [2]
+
+parent_05.bad.php:13:12
+ 8 | 
+ 9 | trait T {
+10 |   require class D;
+   |                 ^ [2]
+11 | 
+12 |   public function foo(): int {
+13 |     return parent::bar();
+   |            ^^^^^^ [1]
+14 |   }
+15 | }
+
+1 error found

@@ -1,12 +1,60 @@
-ERROR: File "collection_literal.php", line 25, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "collection_literal.php", line 27, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "collection_literal.php", line 31, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "collection_literal.php", line 33, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "collection_literal.php", line 38, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "collection_literal.php", line 40, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+collection_literal.php:25:3
+23 |   $z = vec[readonly new Foo(), new Foo()];
+24 |   $a = $z[0];
+25 |   $a->prop = 4; // error $a is readonly
+   |   ^^^^^^^^^^^^ [1]
+26 |   $b = $z[1];
+27 |   $b->prop = 5; // error $b is readonly
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+collection_literal.php:27:3
+25 |   $a->prop = 4; // error $a is readonly
+26 |   $b = $z[1];
+27 |   $b->prop = 5; // error $b is readonly
+   |   ^^^^^^^^^^^^ [1]
+28 | 
+29 |   $w = Vector { readonly new Foo(), new Foo() };
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+collection_literal.php:31:3
+29 |   $w = Vector { readonly new Foo(), new Foo() };
+30 |   $a = $w[0];
+31 |   $a->prop = 4; // error $a is readonly
+   |   ^^^^^^^^^^^^ [1]
+32 |   $b = $w[1];
+33 |   $b->prop = 5; // error $b is readonly
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+collection_literal.php:33:3
+31 |   $a->prop = 4; // error $a is readonly
+32 |   $b = $w[1];
+33 |   $b->prop = 5; // error $b is readonly
+   |   ^^^^^^^^^^^^ [1]
+34 | 
+35 |   // Note that the key is aways an arraykey, which is primitive/mutable
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+collection_literal.php:38:3
+36 |   $m = Map { "a" => readonly new Foo(), "b" => new Foo() };
+37 |   $a = $m["a"];
+38 |   $a->prop = 4; // error $a is readonly
+   |   ^^^^^^^^^^^^ [1]
+39 |   $b = $m["b"];
+40 |   $b->prop = 5; // error $b is readonly
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+collection_literal.php:40:3
+38 |   $a->prop = 4; // error $a is readonly
+39 |   $b = $m["b"];
+40 |   $b->prop = 5; // error $b is readonly
+   |   ^^^^^^^^^^^^ [1]
+41 | }
+
+6 errors found

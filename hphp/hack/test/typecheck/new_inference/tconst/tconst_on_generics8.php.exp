@@ -1,16 +1,54 @@
-ERROR: File "tconst_on_generics8.php", line 50, characters 47-48:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics8.php", line 50, characters 44-45:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "tconst_on_generics8.php", line 42, characters 13-14:
-  This is where the parameter was declared as contravariant `-`
-  File "tconst_on_generics8.php", line 50, characters 44-45:
-  `where _ = _` constraints are invariant on the left and right
-ERROR: File "tconst_on_generics8.php", line 60, characters 21-30:
-Invalid argument (Typing[4110])
-  File "tconst_on_generics8.php", line 50, characters 47-51:
-  Expected `Box::T`
-  File "tconst_on_generics8.php", line 65, characters 35-37:
-  But got `int`
-  File "tconst_on_generics8.php", line 65, characters 35-37:
-  This type argument to `Contra` only allows supertypes (it is contravariant)
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics8.php:50:47
+48 |     $this->v = $x;
+49 |   }
+50 |   public function getK(): Contra<T2> where T2=T1::T {
+   |                                               ^^ [1]
+51 |     if ($this->v == null) { throw new Exception(); }
+52 |     return new Contra($this->v->getK());
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> `where _ = _` constraints are invariant on the left and right [1]
+
+tconst_on_generics8.php:50:44
+40 | }
+41 | 
+42 | class Test<-T1 as Box, T2> {
+   |             ^^ [2]
+43 |   private ?T1 $v;
+44 |   public function __construct() {
+   :
+48 |     $this->v = $x;
+49 |   }
+50 |   public function getK(): Contra<T2> where T2=T1::T {
+   |                                            ^^ [1]
+51 |     if ($this->v == null) { throw new Exception(); }
+52 |     return new Contra($this->v->getK());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Box::T` [2]
+-> But got `int` [3]
+-> This type argument to `Contra` only allows supertypes (it is contravariant) [3]
+
+tconst_on_generics8.php:60:21
+48 |     $this->v = $x;
+49 |   }
+50 |   public function getK(): Contra<T2> where T2=T1::T {
+   |                                               ^^^^^ [2]
+51 |     if ($this->v == null) { throw new Exception(); }
+52 |     return new Contra($this->v->getK());
+   :
+58 |   #1 is contravariant and get solved: #1 = Box */
+59 |   $x->put($i); // IntBox <: #1
+60 |   expect_contra_int($x->getK()); /* constraint T2=T1::T is being parsed so #2 = Box::T
+   |                     ^^^^^^^^^^ [1]
+61 |   -> error, but that's is an arguable error.
+62 |   Morally right thing: the `where` constraint should really be at the class level. */
+63 | }
+64 | 
+65 | function expect_contra_int(Contra<int> $_): void {}
+   |                                   ^^^ [3]
+
+3 errors found

@@ -1,20 +1,76 @@
-ERROR: File "prop.php", line 23, characters 12-13:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "prop.php", line 5, characters 19-21:
-  The property is defined here.
-ERROR: File "prop.php", line 28, characters 3-12:
-Invalid property assignment (Typing[4411])
-  File "prop.php", line 28, characters 16-33:
-  This expression is readonly
-  File "prop.php", line 6, characters 10-12:
-  But it's being assigned to a mutable property
-ERROR: File "prop.php", line 30, characters 16-17:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "prop.php", line 5, characters 19-21:
-  The property is defined here.
-ERROR: File "prop.php", line 34, characters 3-12:
-Invalid property assignment (Typing[4411])
-  File "prop.php", line 34, characters 16-33:
-  This expression is readonly
-  File "prop.php", line 6, characters 10-12:
-  But it's being assigned to a mutable property
+error: Typing[4412] This property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The property is defined here. [2]
+
+prop.php:23:12
+ 3 | class Foo {
+ 4 |   public int $prop;
+ 5 |   public readonly Bar $ro;
+   |                   ^^^ [2]
+ 6 |   public Bar $not_ro;
+ 7 |   public function __construct() {
+   :
+21 | 
+22 | function test(Foo $x): void {
+23 |   $y = $x->ro; // needs to be wrapped in a readonly
+   |            ^^ [1]
+24 |   $ro_prop = readonly $x->ro; // good
+25 |   $z = readonly new Foo();
+
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+prop.php:28:3
+ 4 |   public int $prop;
+ 5 |   public readonly Bar $ro;
+ 6 |   public Bar $not_ro;
+   |          ^^^ [3]
+ 7 |   public function __construct() {
+ 8 |     $this->prop = 1;
+   :
+26 |   $x->ro = readonly new Bar();
+27 |   // Error, readonly value assigned to mutable
+28 |   $x->not_ro = readonly new Bar();
+   |   ^^^^^^^^^^ [1]
+   |                ^^^^^^^^^^^^^^^^^^ [2]
+29 |   // Error, right side needs to be wrapped in readonly
+30 |   $x->ro = $x->ro;
+
+error: Typing[4412] This property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The property is defined here. [2]
+
+prop.php:30:16
+ 3 | class Foo {
+ 4 |   public int $prop;
+ 5 |   public readonly Bar $ro;
+   |                   ^^^ [2]
+ 6 |   public Bar $not_ro;
+ 7 |   public function __construct() {
+   :
+28 |   $x->not_ro = readonly new Bar();
+29 |   // Error, right side needs to be wrapped in readonly
+30 |   $x->ro = $x->ro;
+   |                ^^ [1]
+31 | }
+32 | 
+
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+prop.php:34:3
+ 4 |   public int $prop;
+ 5 |   public readonly Bar $ro;
+ 6 |   public Bar $not_ro;
+   |          ^^^ [3]
+ 7 |   public function __construct() {
+ 8 |     $this->prop = 1;
+   :
+32 | 
+33 | function generic<T as T2 as Foo, T2 as T>(T $x): void {
+34 |   $x->not_ro = readonly new Bar();
+   |   ^^^^^^^^^^ [1]
+   |                ^^^^^^^^^^^^^^^^^^ [2]
+35 | }
+
+4 errors found

@@ -1,6 +1,15 @@
-ERROR: File "union_subtype_bad.php", line 5, characters 10-20:
-Some elements in this collection are incompatible (Typing[4110])
-  File "union_subtype_bad.php", line 4, characters 39-41:
-  Expected `num`
-  File "union_subtype_bad.php", line 4, characters 23-28:
-  But got `string`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+union_subtype_bad.php:5:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(int $x, string $y): vec<num> {
+  |                       ^^^^^^ [3]
+  |                                       ^^^ [2]
+5 |   return vec[$x, $y];
+  |          ^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

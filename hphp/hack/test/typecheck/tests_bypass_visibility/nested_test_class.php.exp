@@ -1,4 +1,19 @@
-ERROR: File "nested_test_class.php", line 27, characters 9-14:
-You cannot access this member (Typing[4112])
-  File "nested_test_class.php", line 7, characters 20-25:
-  This member is private
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+nested_test_class.php:27:9
+ 5 | class Target {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private function secret(): void {}
+   |                    ^^^^^^ [2]
+ 8 | }
+ 9 | 
+   :
+25 | class TestHelper {
+26 |   public function help(Target $t): void {
+27 |     $t->secret(); // error: not a test class
+   |         ^^^^^^ [1]
+28 |   }
+29 | }
+
+1 error found

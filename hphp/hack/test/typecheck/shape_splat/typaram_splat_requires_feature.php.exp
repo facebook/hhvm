@@ -1,2 +1,11 @@
-ERROR: File "typaram_splat_requires_feature.php", line 15, characters 65-65:
-`T` requires the unstable feature `shape_splat_type_parameters`. Add `<<file: __EnableUnstableFeatures('shape_splat_type_parameters')>>` to use it. (Typing[4509])
+error: Typing[4509] `T` requires the unstable feature `shape_splat_type_parameters`. Add `<<file: __EnableUnstableFeatures('shape_splat_type_parameters')>>` to use it. [1]
+
+typaram_splat_requires_feature.php:15:65
+13 | }
+14 | 
+15 | function bad<<<__Explicit>> T as shape('a' => int)>(): shape(...T, ...shape()) {
+   |                                                                 ^ [1]
+16 |   throw new Exception();
+17 | }
+
+1 error found

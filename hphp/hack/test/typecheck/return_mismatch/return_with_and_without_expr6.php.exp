@@ -1,6 +1,26 @@
-ERROR: File "return_with_and_without_expr6.php", line 4, characters 11-104:
-This function can exit with and without returning a value (Typing[4421])
-  File "return_with_and_without_expr6.php", line 6, characters 9-17:
-  Returning a value here.
-  File "return_with_and_without_expr6.php", line 8, characters 9-15:
-  Returning without a value here
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+return_with_and_without_expr6.php:4:11
+ 2 | 
+ 3 | function test(int $x0): mixed {
+ 4 |   return  (int $i) ==> {
+   |           ^^^^^^^^^^^^^^ [1]
+ 5 |     if ($i == 1) {
+   |     ^^^^^^^^^^^^^^ [1]
+ 6 |         return 3;
+   |         ^^^^^^^^^ [1]
+   |         ^^^^^^^^^ [2]
+ 7 |       } else {
+   |       ^^^^^^^^ [1]
+ 8 |         return;
+   |         ^^^^^^^ [1]
+   |         ^^^^^^^ [3]
+ 9 |       }
+   |       ^ [1]
+10 |   };
+   |   ^ [1]
+11 | }
+
+1 error found

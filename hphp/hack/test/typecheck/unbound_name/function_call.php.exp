@@ -1,8 +1,39 @@
-ERROR: File "function_call.php", line 9, characters 3-11:
-Unbound name: `not_found` (a global function) (Naming[2049])
-ERROR: File "function_call.php", line 12, characters 7-9:
-Unbound name: `foo` (a global constant) (Naming[2049])
-ERROR: File "function_call.php", line 9, characters 3-11:
-Unbound name (typing): `not_found` (Typing[4107])
-ERROR: File "function_call.php", line 12, characters 7-9:
-Unbound global constant (Typing) (Typing[4106])
+error: Naming[2049] Unbound name: `not_found` (a global function) [1]
+
+function_call.php:9:3
+ 7 | 
+ 8 |   // Unbound name
+ 9 |   not_found();
+   |   ^^^^^^^^^ [1]
+10 | 
+11 |   // The inner foo should be an unbound global constant
+
+error: Naming[2049] Unbound name: `foo` (a global constant) [1]
+
+function_call.php:12:7
+10 | 
+11 |   // The inner foo should be an unbound global constant
+12 |   foo(foo);
+   |       ^^^ [1]
+13 | }
+
+error: Typing[4107] Unbound name (typing): `not_found` [1]
+
+function_call.php:9:3
+ 7 | 
+ 8 |   // Unbound name
+ 9 |   not_found();
+   |   ^^^^^^^^^ [1]
+10 | 
+11 |   // The inner foo should be an unbound global constant
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+function_call.php:12:7
+10 | 
+11 |   // The inner foo should be an unbound global constant
+12 |   foo(foo);
+   |       ^^^ [1]
+13 | }
+
+4 errors found

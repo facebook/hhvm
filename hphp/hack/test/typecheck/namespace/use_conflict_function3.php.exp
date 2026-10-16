@@ -1,2 +1,9 @@
-ERROR: File "use_conflict_function3.php", line 5, characters 10-12:
-Cannot declare `foo` because the name was explicitly used earlier via a `use` statement on line 3 (Parsing[1002])
+error: Parsing[1002] Cannot declare `foo` because the name was explicitly used earlier via a `use` statement on line 3 [1]
+
+use_conflict_function3.php:5:10
+3 | use function foo;
+4 | 
+5 | function foo(): void {}
+  |          ^^^ [1]
+
+1 error found

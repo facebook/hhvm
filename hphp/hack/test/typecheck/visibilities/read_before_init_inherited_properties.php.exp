@@ -1,14 +1,49 @@
-ERROR: File "read_before_init_inherited_properties.php", line 16, characters 12-25:
-Read access to `$this->defaultInChild` before initialization (Typing[4083])
-ERROR: File "read_before_init_inherited_properties.php", line 35, characters 5-9:
-Typing error (Typing[4053])
-  File "read_before_init_inherited_properties.php", line 35, characters 12-22:
-  No property `unknownProp` in `ChildCls`
-  File "read_before_init_inherited_properties.php", line 26, characters 13-15:
-  Did you mean `defaultInChild` instead?
-  File "read_before_init_inherited_properties.php", line 21, characters 7-14:
-  This is why I think it is an object of type ChildCls
-  File "read_before_init_inherited_properties.php", line 21, characters 7-14:
-  Declaration of `ChildCls` is here
-ERROR: File "read_before_init_inherited_properties.php", line 37, characters 12-25:
-Read access to `$this->withoutDefault` before initialization (Typing[4083])
+error: Typing[4083] Read access to `$this->defaultInChild` before initialization [1]
+
+read_before_init_inherited_properties.php:16:12
+14 |     $this->explicit = 13;
+15 |     // Should be an error: we are accessing before initialization in the parent
+16 |     $this->defaultInChild;
+   |            ^^^^^^^^^^^^^^ [1]
+17 |     $this->defaultInChild = 42;
+18 |   }
+
+error: Typing[4053] Typing error [1]
+-> No property `unknownProp` in `ChildCls` [2]
+-> Did you mean `defaultInChild` instead? [3]
+-> This is why I think it is an object of type ChildCls [4]
+-> Declaration of `ChildCls` is here [4]
+
+read_before_init_inherited_properties.php:35:5
+19 | }
+20 | 
+21 | class ChildCls extends ParentCls {
+   |       ^^^^^^^^ [4]
+22 | 
+23 |   protected int $inChildWithoutDefault;
+24 |   private ?int $implicitDefault;
+25 |   private int $explicit = 42;
+26 |   protected int $defaultInChild = 1;
+   |             ^^^ [3]
+27 | 
+28 |   public function __construct(private int $promoted) {
+   :
+33 |     $this->withDefault;
+34 |     // This should only error once
+35 |     $this->unknownProp;
+   |     ^^^^^ [1]
+   |            ^^^^^^^^^^^ [2]
+36 |     // Not OK, as it might be uninitialized.
+37 |     $this->withoutDefault;
+
+error: Typing[4083] Read access to `$this->withoutDefault` before initialization [1]
+
+read_before_init_inherited_properties.php:37:12
+35 |     $this->unknownProp;
+36 |     // Not OK, as it might be uninitialized.
+37 |     $this->withoutDefault;
+   |            ^^^^^^^^^^^^^^ [1]
+38 |     // Ok, as this has an implicit default
+39 |     $this->implicitDefault;
+
+3 errors found

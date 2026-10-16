@@ -1,14 +1,71 @@
-ERROR: File "named_params_variadic_with_name.php", line 8, characters 46-50:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
-ERROR: File "named_params_variadic_with_name.php", line 11, characters 55-59:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
-ERROR: File "named_params_variadic_with_name.php", line 14, characters 44-49:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
-ERROR: File "named_params_variadic_with_name.php", line 18, characters 36-40:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
-ERROR: File "named_params_variadic_with_name.php", line 22, characters 22-23:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
-ERROR: File "named_params_variadic_with_name.php", line 23, characters 30-31:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
-ERROR: File "named_params_variadic_with_name.php", line 27, characters 41-42:
-A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. (Parsing[1002])
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:8:46
+ 6 | // feature are enabled in this directory, so only the parse errors show up.
+ 7 | 
+ 8 | function with_name(int $x, named arraykey ...$rest): void {}
+   |                                              ^^^^^ [1]
+ 9 | 
+10 | // Same tokens, different spacing.
+
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:11:55
+ 9 | 
+10 | // Same tokens, different spacing.
+11 | function with_name_attached(int $x, named arraykey... $rest): void {}
+   |                                                       ^^^^^ [1]
+12 | 
+13 | abstract class C {
+
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:14:44
+12 | 
+13 | abstract class C {
+14 |   abstract public function m(named bool ...$flags): void;
+   |                                            ^^^^^^ [1]
+15 | }
+16 | 
+
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:18:36
+16 | 
+17 | interface I {
+18 |   public function j(named mixed ...$rest): void;
+   |                                    ^^^^^ [1]
+19 | }
+20 | 
+
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:22:22
+20 | 
+21 | function in_lambdas(): void {
+22 |   $_ = (named int ...$r) ==> 1;
+   |                      ^^ [1]
+23 |   $_ = function(named int ...$r): void {};
+24 | }
+
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:23:30
+21 | function in_lambdas(): void {
+22 |   $_ = (named int ...$r) ==> 1;
+23 |   $_ = function(named int ...$r): void {};
+   |                              ^^ [1]
+24 | }
+25 | 
+
+error: Parsing[1002] A variadic `named` parameter cannot have a name, since nothing can refer to the arguments it collects. For example: `named int...`. [1]
+
+named_params_variadic_with_name.php:27:41
+25 | 
+26 | // In a function type hint too.
+27 | function in_fn_type((function(named int $x...): void) $_): void {}
+   |                                         ^^ [1]
+28 | 
+29 | // The unnamed form is what this syntax looks like; no parse error here.
+
+7 errors found

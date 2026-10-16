@@ -1,36 +1,76 @@
-ERROR: File "cycle_corner_policies.php", line 25, characters 15-20:
-Invalid argument (Typing[4532])
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  Expected `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`
-ERROR: File "cycle_corner_policies.php", line 26, characters 14-24:
-Invalid argument (Typing[4532])
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 10, characters 4-49:
-  Expected `shape(...shape(?'before' => int), ...T1, ...shape(?'after' => int))`
-  File "cycle_corner_policies.php", line 10, characters 4-49:
-  But got `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
-ERROR: File "cycle_corner_policies.php", line 29, characters 10-15:
-Invalid return type (Typing[4532])
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 29, characters 3-16:
-  Expected `shape('x' => int, ?'y' => string)`
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`
+error: Typing[4532] Invalid argument [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [3]
+-> Expected `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))` [4]
+-> But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))` [4]
+
+cycle_corner_policies.php:25:15
+19 |   T1 as shape(...),
+20 |   T2 as shape(...),
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |                  ^^ [2]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [3]
+25 |   infer_super($value);
+   |               ^^^^^^ [1]
+26 |   accept<T1>(infer_sub());
+27 |   hh_expect_equivalent<int>($value['x']);
+
+error: Typing[4532] Invalid argument [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [3]
+-> Expected `shape(...shape(?'before' => int), ...T1, ...shape(?'after' => int))` [4]
+-> But got `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))` [4]
+
+cycle_corner_policies.php:26:14
+ 8 | function infer_sub<T as shape(...)>(
+ 9 |   ?T $_ = null,
+10 | ): shape(?'before' => int, ...T, ?'after' => int) {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+11 |   throw new Exception();
+12 | }
+   :
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |                  ^^ [2]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [3]
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+   |              ^^^^^^^^^^^ [1]
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+
+error: Typing[4532] Invalid return type [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [3]
+-> Expected `shape('x' => int, ?'y' => string)` [4]
+-> But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))` [5]
+
+cycle_corner_policies.php:29:10
+19 |   T1 as shape(...),
+20 |   T2 as shape(...),
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |                  ^^ [2]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [3]
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+29 |   return $value;
+   |   ^^^^^^^^^^^^^^ [4]
+   |          ^^^^^^ [1]
+30 | }
+
+3 errors found

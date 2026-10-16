@@ -1,40 +1,181 @@
-ERROR: File "intersection.bad.php", line 14, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "intersection.bad.php", line 14, characters 11-12:
-  The scrutinee has type `(E & F)`.
-ERROR: File "intersection.bad.php", line 14, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` (Typing[4019])
-  File "intersection.bad.php", line 14, characters 11-12:
-  The scrutinee has type `(E & F)`.
-ERROR: File "intersection.bad.php", line 21, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A`, `E::B` (Typing[4019])
-  File "intersection.bad.php", line 21, characters 11-12:
-  The scrutinee has type `(E & F)`.
-ERROR: File "intersection.bad.php", line 21, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::D` (Typing[4019])
-  File "intersection.bad.php", line 21, characters 11-12:
-  The scrutinee has type `(E & F)`.
-ERROR: File "intersection.bad.php", line 29, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "intersection.bad.php", line 29, characters 11-12:
-  The scrutinee has type `~(E & F)`.
-ERROR: File "intersection.bad.php", line 29, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` (Typing[4019])
-  File "intersection.bad.php", line 29, characters 11-12:
-  The scrutinee has type `~(E & F)`.
-ERROR: File "intersection.bad.php", line 37, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "intersection.bad.php", line 37, characters 11-12:
-  The scrutinee has type `(F & ~E)`.
-ERROR: File "intersection.bad.php", line 37, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` (Typing[4019])
-  File "intersection.bad.php", line 37, characters 11-12:
-  The scrutinee has type `(F & ~E)`.
-ERROR: File "intersection.bad.php", line 45, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "intersection.bad.php", line 45, characters 11-12:
-  The scrutinee has type `(E & ~F)`.
-ERROR: File "intersection.bad.php", line 45, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` (Typing[4019])
-  File "intersection.bad.php", line 45, characters 11-12:
-  The scrutinee has type `(E & ~F)`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `(E & F)`. [2]
+
+intersection.bad.php:14:3
+12 | 
+13 | function test_intersection1((E & F) $e): void {
+14 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+15 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+16 |       return;
+   |       ^^^^^^^ [1]
+17 |   }
+   |   ^ [1]
+18 | }
+19 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` [1]
+-> The scrutinee has type `(E & F)`. [2]
+
+intersection.bad.php:14:3
+12 | 
+13 | function test_intersection1((E & F) $e): void {
+14 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+15 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+16 |       return;
+   |       ^^^^^^^ [1]
+17 |   }
+   |   ^ [1]
+18 | }
+19 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A`, `E::B` [1]
+-> The scrutinee has type `(E & F)`. [2]
+
+intersection.bad.php:21:3
+19 | 
+20 | function test_intersection2((E & F) $e): void {
+21 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+22 |     case F::C:
+   |     ^^^^^^^^^^ [1]
+23 |       return;
+   |       ^^^^^^^ [1]
+24 |   }
+   |   ^ [1]
+25 | }
+26 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::D` [1]
+-> The scrutinee has type `(E & F)`. [2]
+
+intersection.bad.php:21:3
+19 | 
+20 | function test_intersection2((E & F) $e): void {
+21 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+22 |     case F::C:
+   |     ^^^^^^^^^^ [1]
+23 |       return;
+   |       ^^^^^^^ [1]
+24 |   }
+   |   ^ [1]
+25 | }
+26 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `~(E & F)`. [2]
+
+intersection.bad.php:29:3
+27 | function test_intersection3(~(E & F) $e): void {
+28 |   $e = id<~(E & F)>($e);
+29 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+30 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+31 |       return;
+   |       ^^^^^^^ [1]
+32 |   }
+   |   ^ [1]
+33 | }
+34 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` [1]
+-> The scrutinee has type `~(E & F)`. [2]
+
+intersection.bad.php:29:3
+27 | function test_intersection3(~(E & F) $e): void {
+28 |   $e = id<~(E & F)>($e);
+29 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+30 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+31 |       return;
+   |       ^^^^^^^ [1]
+32 |   }
+   |   ^ [1]
+33 | }
+34 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `(F & ~E)`. [2]
+
+intersection.bad.php:37:3
+35 | function test_intersection4((~E & F) $e): void {
+36 |   $e = id<(~E & F)>($e);
+37 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+38 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+39 |       return;
+   |       ^^^^^^^ [1]
+40 |   }
+   |   ^ [1]
+41 | }
+42 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` [1]
+-> The scrutinee has type `(F & ~E)`. [2]
+
+intersection.bad.php:37:3
+35 | function test_intersection4((~E & F) $e): void {
+36 |   $e = id<(~E & F)>($e);
+37 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+38 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+39 |       return;
+   |       ^^^^^^^ [1]
+40 |   }
+   |   ^ [1]
+41 | }
+42 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `(E & ~F)`. [2]
+
+intersection.bad.php:45:3
+43 | function test_intersection5((E & ~F) $e): void {
+44 |   $e = id<(E & ~F)>($e);
+45 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+46 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+47 |       return;
+   |       ^^^^^^^ [1]
+48 |   }
+   |   ^ [1]
+49 | }
+50 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::C`, `F::D` [1]
+-> The scrutinee has type `(E & ~F)`. [2]
+
+intersection.bad.php:45:3
+43 | function test_intersection5((E & ~F) $e): void {
+44 |   $e = id<(E & ~F)>($e);
+45 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+46 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+47 |       return;
+   |       ^^^^^^^ [1]
+48 |   }
+   |   ^ [1]
+49 | }
+50 | 
+
+10 errors found

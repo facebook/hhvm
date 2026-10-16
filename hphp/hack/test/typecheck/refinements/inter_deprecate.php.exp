@@ -1,4 +1,18 @@
-ERROR: File "inter_deprecate.php", line 17, characters 13-15:
-The method foo is deprecated: blah (Typing[4128])
-  File "inter_deprecate.php", line 6, characters 19-21:
-  Definition is here
+error: Typing[4128] The method foo is deprecated: blah [1]
+-> Definition is here [2]
+
+inter_deprecate.php:17:13
+ 4 | class B implements I {
+ 5 |   <<__Deprecated('blah', 25)>>
+ 6 |   public function foo(): string {
+   |                   ^^^ [2]
+ 7 |     return "a";
+ 8 |   }
+   :
+15 | function testit(I $i):void {
+16 |   invariant($i is B, "B");
+17 |   $s =  $i->foo();
+   |             ^^^ [1]
+18 | }
+
+1 error found

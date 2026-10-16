@@ -1,6 +1,30 @@
-ERROR: File "str_interp_space.php", line 5, characters 10-10:
-A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
-ERROR: File "str_interp_space.php", line 5, characters 10-14:
-The dollar sign `$` cannot be used as a unary operator (Parsing[1002])
-ERROR: File "str_interp_space.php", line 6, characters 10-15:
-The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
+error: Parsing[1002] A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores [1]
+
+str_interp_space.php:5:10
+3 | function main():void{
+4 |   $jam = "grape";
+5 |   $a = "{$ jam}s";
+  |          ^ [1]
+6 |   $a = "${ jam}s";
+7 | }
+
+error: Parsing[1002] The dollar sign `$` cannot be used as a unary operator [1]
+
+str_interp_space.php:5:10
+3 | function main():void{
+4 |   $jam = "grape";
+5 |   $a = "{$ jam}s";
+  |          ^^^^^ [1]
+6 |   $a = "${ jam}s";
+7 | }
+
+error: Parsing[1002] The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. [1]
+
+str_interp_space.php:6:10
+4 |   $jam = "grape";
+5 |   $a = "{$ jam}s";
+6 |   $a = "${ jam}s";
+  |          ^^^^^^ [1]
+7 | }
+
+3 errors found

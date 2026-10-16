@@ -1,10 +1,50 @@
-ERROR: File "as_mut_collections.php", line 24, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
-ERROR: File "as_mut_collections.php", line 36, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
-ERROR: File "as_mut_collections.php", line 76, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
-ERROR: File "as_mut_collections.php", line 80, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
-ERROR: File "as_mut_collections.php", line 84, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
+error: Typing[4434] Only value types and arrays can be converted to mutable. This value can never be a primitive. [1]
+
+as_mut_collections.php:24:3
+22 | 
+23 | function test_vec_objects(readonly vec<Foo> $y) : void {
+24 |   HH\Readonly\as_mut($y); // error
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+25 | }
+26 | 
+
+error: Typing[4434] Only value types and arrays can be converted to mutable. This value can never be a primitive. [1]
+
+as_mut_collections.php:36:3
+34 | 
+35 | function test_nullable(readonly ?Foo $y) : void {
+36 |   HH\Readonly\as_mut($y); // error
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Typing[4434] Only value types and arrays can be converted to mutable. This value can never be a primitive. [1]
+
+as_mut_collections.php:76:3
+74 | 
+75 | function test_shape_with_lambda(readonly shape("f" => (function(): void)) $y) : void {
+76 |   HH\Readonly\as_mut($y); // error
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+77 | }
+78 | 
+
+error: Typing[4434] Only value types and arrays can be converted to mutable. This value can never be a primitive. [1]
+
+as_mut_collections.php:80:3
+78 | 
+79 | function test_shape_with_like_lambda(readonly shape("f" => ~(function(): void)) $y) : void {
+80 |   HH\Readonly\as_mut($y); // error
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+81 | }
+82 | 
+
+error: Typing[4434] Only value types and arrays can be converted to mutable. This value can never be a primitive. [1]
+
+as_mut_collections.php:84:3
+82 | 
+83 | function test_plain_lambda(readonly (function(): void) $f) : void {
+84 |   HH\Readonly\as_mut($f); // error
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+85 | }
+
+5 errors found

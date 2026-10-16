@@ -1,18 +1,69 @@
-WARN: File "nullsafe-unresolved.php", line 5, characters 8-13:
-You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
-WARN: File "nullsafe-unresolved.php", line 7, characters 8-13:
-You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
-ERROR: File "nullsafe-unresolved.php", line 6, characters 18-19:
-Invalid argument (Typing[4110])
-  File "nullsafe-unresolved.php", line 15, characters 25-40:
-  Expected `Container<mixed>`
-  File "nullsafe-unresolved.php", line 5, characters 8-15:
-  But got `null` (use of `?->` operator)
-ERROR: File "nullsafe-unresolved.php", line 8, characters 18-19:
-Invalid argument (Typing[4110])
-  File "nullsafe-unresolved.php", line 15, characters 25-40:
-  Expected `Container<mixed>`
-  File "nullsafe-unresolved.php", line 7, characters 8-13:
-  But got `null` (use of `?->` operator)
-ERROR: File "nullsafe-unresolved.php", line 11, characters 35-35:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+warning: Warn[12030] You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. [1]
+
+nullsafe-unresolved.php:5:8
+3 | function test(): void {
+4 |   $a = make_nullable_unresolved();
+5 |   $f = $a?->f();
+  |        ^^^^^^ [1]
+6 |   expect_nonnull($f);
+7 |   $b = $a?->b;
+
+warning: Warn[12030] You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. [1]
+
+nullsafe-unresolved.php:7:8
+5 |   $f = $a?->f();
+6 |   expect_nonnull($f);
+7 |   $b = $a?->b;
+  |        ^^^^^^ [1]
+8 |   expect_nonnull($b);
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Container<mixed>` [2]
+-> But got `null` (use of `?->` operator) [3]
+
+nullsafe-unresolved.php:6:18
+ 3 | function test(): void {
+ 4 |   $a = make_nullable_unresolved();
+ 5 |   $f = $a?->f();
+   |        ^^^^^^^^ [3]
+ 6 |   expect_nonnull($f);
+   |                  ^^ [1]
+ 7 |   $b = $a?->b;
+ 8 |   expect_nonnull($b);
+   :
+13 | }
+14 | 
+15 | function expect_nonnull(Container<mixed> $container): void {}
+   |                         ^^^^^^^^^^^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Container<mixed>` [2]
+-> But got `null` (use of `?->` operator) [3]
+
+nullsafe-unresolved.php:8:18
+ 5 |   $f = $a?->f();
+ 6 |   expect_nonnull($f);
+ 7 |   $b = $a?->b;
+   |        ^^^^^^ [3]
+ 8 |   expect_nonnull($b);
+   |                  ^^ [1]
+ 9 | }
+10 | 
+   :
+13 | }
+14 | 
+15 | function expect_nonnull(Container<mixed> $container): void {}
+   |                         ^^^^^^^^^^^^^^^^ [2]
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+nullsafe-unresolved.php:11:35
+ 9 | }
+10 | 
+11 | function make_nullable_unresolved<T>(): ?T {
+   |                                   ^ [1]
+12 |   return null;
+13 | }
+
+5 errors found

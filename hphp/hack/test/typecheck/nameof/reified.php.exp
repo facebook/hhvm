@@ -1,2 +1,10 @@
-ERROR: File "reified.php", line 7, characters 24-24:
-`nameof` cannot be used with a generic type (Parsing[1002])
+error: Parsing[1002] `nameof` cannot be used with a generic type [1]
+
+reified.php:7:24
+5 | function f<reify T as C>(): void {
+6 |   expect_string(T::class);
+7 |   expect_string(nameof T);
+  |                        ^ [1]
+8 | }
+
+1 error found

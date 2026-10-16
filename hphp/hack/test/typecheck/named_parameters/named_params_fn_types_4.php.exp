@@ -1,72 +1,181 @@
-ERROR: File "named_params_fn_types_4.php", line 6, characters 13-33:
-Invalid argument (Typing[4040])
-  File "named_params_fn_types_4.php", line 6, characters 13-33:
-  Missing required named parameter: y
-  File "named_params_fn_types_4.php", line 4, characters 20-67:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 12, characters 13-50:
-Invalid argument (Typing[4041])
-  File "named_params_fn_types_4.php", line 12, characters 13-50:
-  Unexpected named parameter: y
-  File "named_params_fn_types_4.php", line 10, characters 20-50:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 18, characters 13-37:
-Invalid argument (Typing[4040])
-  File "named_params_fn_types_4.php", line 18, characters 13-37:
-  Missing required named parameter: x
-  File "named_params_fn_types_4.php", line 16, characters 20-50:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 18, characters 13-37:
-Invalid argument (Typing[4041])
-  File "named_params_fn_types_4.php", line 18, characters 13-37:
-  Unexpected named parameter: wrong
-  File "named_params_fn_types_4.php", line 16, characters 20-50:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 24, characters 13-54:
-Invalid argument (Typing[4040])
-  File "named_params_fn_types_4.php", line 24, characters 13-54:
-  Missing required named parameter: b
-  File "named_params_fn_types_4.php", line 22, characters 20-67:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 24, characters 13-54:
-Invalid argument (Typing[4041])
-  File "named_params_fn_types_4.php", line 24, characters 13-54:
-  Unexpected named parameter: wrong
-  File "named_params_fn_types_4.php", line 22, characters 20-67:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 30, characters 13-50:
-Invalid argument (Typing[4040])
-  File "named_params_fn_types_4.php", line 30, characters 13-50:
-  Missing required named parameters: y, x
-  File "named_params_fn_types_4.php", line 28, characters 20-67:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 30, characters 13-50:
-Invalid argument (Typing[4041])
-  File "named_params_fn_types_4.php", line 30, characters 13-50:
-  Unexpected named parameters: q, p
-  File "named_params_fn_types_4.php", line 28, characters 20-67:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 36, characters 13-49:
-Invalid argument (Typing[4040])
-  File "named_params_fn_types_4.php", line 36, characters 13-49:
-  Missing required named parameters: c, b
-  File "named_params_fn_types_4.php", line 34, characters 20-82:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 36, characters 13-49:
-Invalid argument (Typing[4041])
-  File "named_params_fn_types_4.php", line 36, characters 13-49:
-  Unexpected named parameter: d
-  File "named_params_fn_types_4.php", line 34, characters 20-82:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 42, characters 13-33:
-Invalid argument (Typing[4341])
-  File "named_params_fn_types_4.php", line 42, characters 13-33:
-  Named parameter x is required but expected to be optional
-  File "named_params_fn_types_4.php", line 40, characters 20-59:
-  Because of this definition
-ERROR: File "named_params_fn_types_4.php", line 47, characters 13-36:
-Invalid argument (Typing[4110])
-  File "named_params_fn_types_4.php", line 47, characters 20-25:
-  Expected `string`
-  File "named_params_fn_types_4.php", line 45, characters 37-39:
-  But got `int`
+error: Typing[4040] Invalid argument [1]
+-> Missing required named parameter: y [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:6:13
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | function take_err1((function (named int $x, named string $y): void) $_): void {}
+  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 | function test_err1(): void {
+6 |   take_err1((named int $x) ==> {}); // ERROR: Missing required named parameter: y
+  |             ^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Unexpected named parameter: y [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:12:13
+ 8 | 
+ 9 | 
+10 | function take_err2((function (named int $x): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+11 | function test_err2(): void {
+12 |   take_err2((named int $x, named string $y) ==> {}); // ERROR: Unexpected named parameter: y
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4040] Invalid argument [1]
+-> Missing required named parameter: x [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:18:13
+14 | 
+15 | 
+16 | function take_err3((function (named int $x): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+17 | function test_err3(): void {
+18 |   take_err3((named int $wrong) ==> {}); // ERROR: Missing x, Unexpected wrong
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+20 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Unexpected named parameter: wrong [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:18:13
+14 | 
+15 | 
+16 | function take_err3((function (named int $x): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+17 | function test_err3(): void {
+18 |   take_err3((named int $wrong) ==> {}); // ERROR: Missing x, Unexpected wrong
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+20 | 
+
+error: Typing[4040] Invalid argument [1]
+-> Missing required named parameter: b [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:24:13
+20 | 
+21 | 
+22 | function take_err4((function (named int $a, named string $b): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+23 | function test_err4(): void {
+24 |   take_err4((named int $a, named string $wrong) ==> {}); // ERROR: Missing b, Unexpected wrong
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 | }
+26 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Unexpected named parameter: wrong [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:24:13
+20 | 
+21 | 
+22 | function take_err4((function (named int $a, named string $b): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+23 | function test_err4(): void {
+24 |   take_err4((named int $a, named string $wrong) ==> {}); // ERROR: Missing b, Unexpected wrong
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 | }
+26 | 
+
+error: Typing[4040] Invalid argument [1]
+-> Missing required named parameters: y, x [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:30:13
+26 | 
+27 | 
+28 | function take_err5((function (named int $x, named string $y): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+29 | function test_err5(): void {
+30 |   take_err5((named int $p, named string $q) ==> {}); // ERROR: Missing x and y, Unexpected p and q
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Unexpected named parameters: q, p [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:30:13
+26 | 
+27 | 
+28 | function take_err5((function (named int $x, named string $y): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+29 | function test_err5(): void {
+30 |   take_err5((named int $p, named string $q) ==> {}); // ERROR: Missing x and y, Unexpected p and q
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4040] Invalid argument [1]
+-> Missing required named parameters: c, b [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:36:13
+32 | 
+33 | 
+34 | function take_err6((function (named int $a, named string $b, named bool $c): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+35 | function test_err6(): void {
+36 |   take_err6((named int $a, named float $d) ==> {}); // ERROR: Missing b and c, Unexpected d
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Unexpected named parameter: d [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:36:13
+32 | 
+33 | 
+34 | function take_err6((function (named int $a, named string $b, named bool $c): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+35 | function test_err6(): void {
+36 |   take_err6((named int $a, named float $d) ==> {}); // ERROR: Missing b and c, Unexpected d
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Typing[4341] Invalid argument [1]
+-> Named parameter x is required but expected to be optional [1]
+-> Because of this definition [2]
+
+named_params_fn_types_4.php:42:13
+38 | 
+39 | 
+40 | function take_err7((function (optional named int $x): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+41 | function test_err7(): void {
+42 |   take_err7((named int $x) ==> {}); // ERROR: Named parameter x is required but expected to be optional
+   |             ^^^^^^^^^^^^^^^^^^^^^ [1]
+43 | }
+44 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_params_fn_types_4.php:47:13
+43 | }
+44 | 
+45 | function take_err8((function (named int $x): void) $_): void {}
+   |                                     ^^^ [3]
+46 | function test_err8(): void {
+47 |   take_err8((named string $x) ==> {}); // ERROR: type mismatch
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                    ^^^^^^ [2]
+48 | }
+
+12 errors found

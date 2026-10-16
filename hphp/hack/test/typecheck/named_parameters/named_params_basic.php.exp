@@ -1,12 +1,54 @@
-ERROR: File "named_params_basic.php", line 12, characters 3-13:
-Missing required named argument: c (Typing[4499])
-  File "named_params_basic.php", line 4, characters 10-12:
-  Definition is here
-ERROR: File "named_params_basic.php", line 15, characters 3-13:
-Missing required named argument: b (Typing[4499])
-  File "named_params_basic.php", line 4, characters 10-12:
-  Definition is here
-ERROR: File "named_params_basic.php", line 18, characters 3-23:
-Unexpected named argument: d (Typing[4500])
-  File "named_params_basic.php", line 4, characters 10-12:
-  Definition is here
+error: Typing[4499] Missing required named argument: c [1]
+-> Definition is here [2]
+
+named_params_basic.php:12:3
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function foo(int $a, named int $b, named int $c): void {}
+   |          ^^^ [2]
+ 5 | 
+ 6 | function test_function_calls(): void {
+   :
+10 | 
+11 |   // Error: Missing required named parameter 'c'
+12 |   foo(1, b=2);
+   |   ^^^^^^^^^^^ [1]
+13 | 
+14 |   // Error: Missing required named parameter 'b'
+
+error: Typing[4499] Missing required named argument: b [1]
+-> Definition is here [2]
+
+named_params_basic.php:15:3
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function foo(int $a, named int $b, named int $c): void {}
+   |          ^^^ [2]
+ 5 | 
+ 6 | function test_function_calls(): void {
+   :
+13 | 
+14 |   // Error: Missing required named parameter 'b'
+15 |   foo(1, c=3);
+   |   ^^^^^^^^^^^ [1]
+16 | 
+17 |   // Error: Extra named parameter 'd' not defined in function
+
+error: Typing[4500] Unexpected named argument: d [1]
+-> Definition is here [2]
+
+named_params_basic.php:18:3
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function foo(int $a, named int $b, named int $c): void {}
+   |          ^^^ [2]
+ 5 | 
+ 6 | function test_function_calls(): void {
+   :
+16 | 
+17 |   // Error: Extra named parameter 'd' not defined in function
+18 |   foo(1, b=2, c=3, d=4);
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+3 errors found

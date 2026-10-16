@@ -1,12 +1,61 @@
-ERROR: File "tconst_on_generics.php", line 30, characters 68-69:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics.php", line 34, characters 77-78:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics.php", line 38, characters 80-81:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics.php", line 38, characters 86-87:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics.php", line 45, characters 18-19:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics.php", line 45, characters 24-25:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics.php:30:68
+28 | interface I {}
+29 | class Test {
+30 |   public static function get<T1 as Box, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                                    ^^ [1]
+31 |     return $x->getK();
+32 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics.php:34:77
+32 |   }
+33 | 
+34 |   public static function set<T1 as Box, T2>(T1 $x, T2 $y) : void where T2 = T1::T {
+   |                                                                             ^^ [1]
+35 |     $x->setK($y);
+36 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics.php:38:80
+36 |   }
+37 | 
+38 |   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : void where T1::T=T2::T {
+   |                                                                                ^^ [1]
+39 |     $z = $y->getK();
+40 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics.php:38:86
+36 |   }
+37 | 
+38 |   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : void where T1::T=T2::T {
+   |                                                                                      ^^ [1]
+39 |     $z = $y->getK();
+40 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics.php:45:18
+43 |     T1 $x,
+44 |     T2 $y,
+45 |   ) : void where T1::T=T2::T {
+   |                  ^^ [1]
+46 |     $z = $y->getK();
+47 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics.php:45:24
+43 |     T1 $x,
+44 |     T2 $y,
+45 |   ) : void where T1::T=T2::T {
+   |                        ^^ [1]
+46 |     $z = $y->getK();
+47 |   }
+
+6 errors found

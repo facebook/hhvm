@@ -1,8 +1,22 @@
-ERROR: File "invalid_access_root.php", line 5, characters 9-9:
-Type access is only valid for a class, `self`, or `this` (Naming[2061])
-ERROR: File "invalid_access_root.php", line 5, characters 9-16:
-Invalid type hint (Typing[4062])
-  File "invalid_access_root.php", line 5, characters 12-16:
-  You are trying to access the type constant `Const` but this is a value of generic type T
-  File "invalid_access_root.php", line 5, characters 9-16:
-  Definition is here
+error: Naming[2061] Type access is only valid for a class, `self`, or `this` [1]
+
+invalid_access_root.php:5:9
+3 | class C<T> {
+4 |   /* HH_FIXME[4124] */
+5 |   const T::Const x = 0;
+  |         ^ [1]
+6 | }
+
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `Const` but this is a value of generic type T [2]
+-> Definition is here [1]
+
+invalid_access_root.php:5:9
+3 | class C<T> {
+4 |   /* HH_FIXME[4124] */
+5 |   const T::Const x = 0;
+  |         ^^^^^^^^ [1]
+  |            ^^^^^ [2]
+6 | }
+
+2 errors found

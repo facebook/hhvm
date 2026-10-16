@@ -1,10 +1,51 @@
-ERROR: File "lambda_param.php", line 5, characters 11-15:
-Cannot re-assign `$this` (Parsing[1002])
-ERROR: File "lambda_param.php", line 6, characters 15-19:
-Cannot re-assign `$this` (Parsing[1002])
-ERROR: File "lambda_param.php", line 5, characters 11-15:
-Cannot use `$this` as lexical variable (Naming[2077])
-ERROR: File "lambda_param.php", line 6, characters 15-19:
-Cannot use `$this` as lexical variable (Naming[2077])
-ERROR: File "lambda_param.php", line 7, characters 11-15:
-Cannot use `$this` as lexical variable (Naming[2077])
+error: Parsing[1002] Cannot re-assign `$this` [1]
+
+lambda_param.php:5:11
+3 | class Foo {
+4 |   public function foo(): void {
+5 |     $f = ($this) ==> $this->foo();
+  |           ^^^^^ [1]
+6 |     $f2 = (...$this) ==> $this->foo();
+7 |     $f3 = $this ==> $this->foo();
+
+error: Parsing[1002] Cannot re-assign `$this` [1]
+
+lambda_param.php:6:15
+4 |   public function foo(): void {
+5 |     $f = ($this) ==> $this->foo();
+6 |     $f2 = (...$this) ==> $this->foo();
+  |               ^^^^^ [1]
+7 |     $f3 = $this ==> $this->foo();
+8 |   }
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+lambda_param.php:5:11
+3 | class Foo {
+4 |   public function foo(): void {
+5 |     $f = ($this) ==> $this->foo();
+  |           ^^^^^ [1]
+6 |     $f2 = (...$this) ==> $this->foo();
+7 |     $f3 = $this ==> $this->foo();
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+lambda_param.php:6:15
+4 |   public function foo(): void {
+5 |     $f = ($this) ==> $this->foo();
+6 |     $f2 = (...$this) ==> $this->foo();
+  |               ^^^^^ [1]
+7 |     $f3 = $this ==> $this->foo();
+8 |   }
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+lambda_param.php:7:11
+5 |     $f = ($this) ==> $this->foo();
+6 |     $f2 = (...$this) ==> $this->foo();
+7 |     $f3 = $this ==> $this->foo();
+  |           ^^^^^ [1]
+8 |   }
+9 | }
+
+5 errors found

@@ -1,26 +1,64 @@
-ERROR: File "type_splat_optional_then_splat.php", line 41, characters 9-23:
-Invalid argument (Typing[4110])
-  File "type_splat_optional_then_splat.php", line 17, characters 9-13:
-  Expected `(int, optional bool, ..._)`
-  File "type_splat_optional_then_splat.php", line 41, characters 9-23:
-  But got `()`
-ERROR: File "type_splat_optional_then_splat.php", line 51, characters 9-27:
-Invalid argument (Typing[4323])
-  File "type_splat_optional_then_splat.php", line 21, characters 30-30:
-  `T` is a constrained type parameter
-  File "type_splat_optional_then_splat.php", line 21, characters 35-49:
-  This type constraint is violated
-  File "type_splat_optional_then_splat.php", line 21, characters 35-49:
-  Expected `(int, mixed...)`
-  File "type_splat_optional_then_splat.php", line 51, characters 9-27:
-  But got `()`
-ERROR: File "type_splat_optional_then_splat.php", line 53, characters 9-27:
-Invalid argument (Typing[4323])
-  File "type_splat_optional_then_splat.php", line 21, characters 30-30:
-  `T` is a constrained type parameter
-  File "type_splat_optional_then_splat.php", line 21, characters 35-49:
-  This type constraint is violated
-  File "type_splat_optional_then_splat.php", line 21, characters 35-49:
-  Expected `(int, mixed...)`
-  File "type_splat_optional_then_splat.php", line 53, characters 9-27:
-  But got `()`
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, optional bool, ..._)` [2]
+-> But got `()` [1]
+
+type_splat_optional_then_splat.php:41:9
+15 |   int $x,
+16 |   bool $b = false,
+17 |   ... T $args,
+   |         ^^^^^ [2]
+18 | ): C<T> {
+19 |   return new C();
+   :
+39 |   hh_expect<C<(int, bool)>>($a3);
+40 |   // Should error
+41 |   $a4 = req1_opt1_splat();
+   |         ^^^^^^^^^^^^^^^ [1]
+42 | 
+43 |   $a5 = req1_opt1_splat(23);
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `(int, mixed...)` [3]
+-> But got `()` [1]
+
+type_splat_optional_then_splat.php:51:9
+19 |   return new C();
+20 | }
+21 | function req0_opt1_splat_opt<T as (int, mixed...)>(
+   |                              ^ [2]
+   |                                   ^^^^^^^^^^^^^^^ [3]
+22 |   ?string $s = null,
+23 |   ... T $args,
+   :
+49 | 
+50 |   // Illegal because there is a required parameter in the splat bound
+51 |   $a8 = req0_opt1_splat_opt();
+   |         ^^^^^^^^^^^^^^^^^^^ [1]
+52 |   // Illegal because there is a required parameter in the splat bound
+53 |   $a9 = req0_opt1_splat_opt("a");
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `(int, mixed...)` [3]
+-> But got `()` [1]
+
+type_splat_optional_then_splat.php:53:9
+19 |   return new C();
+20 | }
+21 | function req0_opt1_splat_opt<T as (int, mixed...)>(
+   |                              ^ [2]
+   |                                   ^^^^^^^^^^^^^^^ [3]
+22 |   ?string $s = null,
+23 |   ... T $args,
+   :
+51 |   $a8 = req0_opt1_splat_opt();
+52 |   // Illegal because there is a required parameter in the splat bound
+53 |   $a9 = req0_opt1_splat_opt("a");
+   |         ^^^^^^^^^^^^^^^^^^^ [1]
+54 |   // Legal because we have provided the parameter required for the splat bound
+55 |   $a10 = req0_opt1_splat_opt("A", 14);
+
+3 errors found

@@ -14,9 +14,29 @@ File "tuples.php", line 69, characters 3-13:
   ((float, int, bool) | (string, (A, bool)))
 File "tuples.php", line 76, characters 3-13:
   (int, A)
-ERROR: File "tuples.php", line 40, characters 36-37:
-Invalid argument (Typing[4110])
-  File "tuples.php", line 81, characters 43-65:
-  Expected `(mixed, arraykey, bool)`
-  File "tuples.php", line 35, characters 10-33:
-  But got `(int, int, bool, bool)`
+error: Typing[4110] Invalid argument [1]
+-> Expected `(mixed, arraykey, bool)` [2]
+-> But got `(int, int, bool, bool)` [3]
+
+tuples.php:40:36
+33 | 
+34 |   if ($b) {
+35 |     $x = tuple(1, 3, false, true);
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+36 |   } else {
+37 |     $x = tuple($c, "", false);
+38 |   }
+39 |   hh_show($x);
+40 |   expect_tuple_mixed_arraykey_bool($x); // error
+   |                                    ^^ [1]
+41 | 
+42 |   if ($b) {
+   :
+79 | function expect_tuple_int_string_bool((int, string, bool) $x): void {}
+80 | function expect_tuple_int_A((int, A) $x): void {}
+81 | function expect_tuple_mixed_arraykey_bool((mixed, arraykey, bool) $x): void {}
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+82 | function expect_bool(bool $x): void {}
+83 | function expect_nonnull(nonnull $x): void {}
+
+1 error found

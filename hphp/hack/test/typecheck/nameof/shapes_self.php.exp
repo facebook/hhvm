@@ -1,6 +1,31 @@
-ERROR: File "shapes_self.php", line 6, characters 25-32:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_self.php", line 10, characters 22-32:
-Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
-ERROR: File "shapes_self.php", line 12, characters 22-32:
-Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_self.php:6:25
+4 | class C {
+5 |   const type T1 = shape(nameof C => float);
+6 |   const type T2 = shape(C::class => float);
+  |                         ^^^^^^^^ [1]
+7 | 
+8 |   public function f(this::T1 $t1, this::T1 $t2): void {
+
+error: Typing[4482] Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` [1]
+
+shapes_self.php:10:22
+ 8 |   public function f(this::T1 $t1, this::T1 $t2): void {
+ 9 |     expect_float($t1[nameof self]);
+10 |     expect_float($t1[self::class]);
+   |                      ^^^^^^^^^^^ [1]
+11 |     expect_float($t2[nameof self]);
+12 |     expect_float($t2[self::class]);
+
+error: Typing[4482] Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` [1]
+
+shapes_self.php:12:22
+10 |     expect_float($t1[self::class]);
+11 |     expect_float($t2[nameof self]);
+12 |     expect_float($t2[self::class]);
+   |                      ^^^^^^^^^^^ [1]
+13 |   }
+14 | }
+
+3 errors found

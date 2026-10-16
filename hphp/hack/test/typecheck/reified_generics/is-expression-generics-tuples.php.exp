@@ -1,28 +1,100 @@
-WARN: File "is-expression-generics-tuples.php", line 9, characters 3-12:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, string)>`. (Warn[12009])
-WARN: File "is-expression-generics-tuples.php", line 12, characters 3-24:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, string)>`. (Warn[12009])
-WARN: File "is-expression-generics-tuples.php", line 13, characters 3-19:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, _)>`. (Warn[12009])
-WARN: File "is-expression-generics-tuples.php", line 14, characters 3-22:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(_, string)>`. (Warn[12009])
-WARN: File "is-expression-generics-tuples.php", line 15, characters 3-17:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(_, _)>`. (Warn[12009])
-ERROR: File "is-expression-generics-tuples.php", line 13, characters 9-19:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-tuples.php", line 13, characters 17-17:
-  The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "is-expression-generics-tuples.php", line 14, characters 9-22:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-tuples.php", line 14, characters 12-12:
-  The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "is-expression-generics-tuples.php", line 15, characters 9-17:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-tuples.php", line 15, characters 12-12:
-  The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
-  File "is-expression-generics-tuples.php", line 15, characters 15-15:
-  The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "is-expression-generics-tuples.php", line 16, characters 9-19:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-tuples.php", line 16, characters 12-12:
-  The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, string)>`. [1]
+
+is-expression-generics-tuples.php:9:3
+ 7 | 
+ 8 |   // just wildcard
+ 9 |   $c is C<_>;
+   |   ^^^^^^^^^^ [1]
+10 | 
+11 |   // tuple with wildcard
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, string)>`. [1]
+
+is-expression-generics-tuples.php:12:3
+10 | 
+11 |   // tuple with wildcard
+12 |   $c is C<(int, string)>;
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   $c is C<(int, _)>;
+14 |   $c is C<(_, string)>;
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, _)>`. [1]
+
+is-expression-generics-tuples.php:13:3
+11 |   // tuple with wildcard
+12 |   $c is C<(int, string)>;
+13 |   $c is C<(int, _)>;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+14 |   $c is C<(_, string)>;
+15 |   $c is C<(_, _)>;
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(_, string)>`. [1]
+
+is-expression-generics-tuples.php:14:3
+12 |   $c is C<(int, string)>;
+13 |   $c is C<(int, _)>;
+14 |   $c is C<(_, string)>;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   $c is C<(_, _)>;
+16 |   $c is C<(_, int)>;
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(_, _)>`. [1]
+
+is-expression-generics-tuples.php:15:3
+13 |   $c is C<(int, _)>;
+14 |   $c is C<(_, string)>;
+15 |   $c is C<(_, _)>;
+   |   ^^^^^^^^^^^^^^^ [1]
+16 |   $c is C<(_, int)>;
+17 | }
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+is-expression-generics-tuples.php:13:9
+11 |   // tuple with wildcard
+12 |   $c is C<(int, string)>;
+13 |   $c is C<(int, _)>;
+   |         ^^^^^^^^^^^ [1]
+   |                 ^ [2]
+14 |   $c is C<(_, string)>;
+15 |   $c is C<(_, _)>;
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+is-expression-generics-tuples.php:14:9
+12 |   $c is C<(int, string)>;
+13 |   $c is C<(int, _)>;
+14 |   $c is C<(_, string)>;
+   |         ^^^^^^^^^^^^^^ [1]
+   |            ^ [2]
+15 |   $c is C<(_, _)>;
+16 |   $c is C<(_, int)>;
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+-> The `is` operator cannot be used with _ in a tuple (use `mixed` instead) [3]
+
+is-expression-generics-tuples.php:15:9
+13 |   $c is C<(int, _)>;
+14 |   $c is C<(_, string)>;
+15 |   $c is C<(_, _)>;
+   |         ^^^^^^^^^ [1]
+   |            ^ [2]
+   |               ^ [3]
+16 |   $c is C<(_, int)>;
+17 | }
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+is-expression-generics-tuples.php:16:9
+14 |   $c is C<(_, string)>;
+15 |   $c is C<(_, _)>;
+16 |   $c is C<(_, int)>;
+   |         ^^^^^^^^^^^ [1]
+   |            ^ [2]
+17 | }
+
+9 errors found

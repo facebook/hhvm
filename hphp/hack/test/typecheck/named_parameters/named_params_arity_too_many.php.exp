@@ -1,28 +1,125 @@
-ERROR: File "named_params_arity_too_many.php", line 8, characters 3-19:
-Unexpected named argument: extra1 (Typing[4500])
-  File "named_params_arity_too_many.php", line 3, characters 10-11:
-  Definition is here
-ERROR: File "named_params_arity_too_many.php", line 9, characters 3-24:
-Unexpected named argument: extra1 (Typing[4500])
-  File "named_params_arity_too_many.php", line 3, characters 10-11:
-  Definition is here
-ERROR: File "named_params_arity_too_many.php", line 10, characters 3-46:
-Unexpected named arguments: extra1, extra2 (Typing[4500])
-  File "named_params_arity_too_many.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_too_many.php", line 11, characters 3-36:
-Unexpected named argument: extra1 (Typing[4500])
-  File "named_params_arity_too_many.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_too_many.php", line 12, characters 3-46:
-Unexpected named arguments: extra1, extra2 (Typing[4500])
-  File "named_params_arity_too_many.php", line 5, characters 10-16:
-  Definition is here
-ERROR: File "named_params_arity_too_many.php", line 16, characters 3-26:
-Too many positional arguments (expected 1 but got 3) (Typing[4105])
-  File "named_params_arity_too_many.php", line 3, characters 10-11:
-  Definition is here
-ERROR: File "named_params_arity_too_many.php", line 17, characters 3-30:
-Too many positional arguments (expected 1 but got 2) (Typing[4105])
-  File "named_params_arity_too_many.php", line 4, characters 10-14:
-  Definition is here
+error: Typing[4500] Unexpected named argument: extra1 [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:8:3
+ 1 | <?hh
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+   |          ^^ [2]
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function too_many_named(): void {
+ 8 |   fx(x=1, extra1=1);
+   |   ^^^^^^^^^^^^^^^^^ [1]
+ 9 |   fx(x=1, y=1, extra1=1);
+10 |   fxyz1(y=1, x=1, "", z=1, extra1=1, extra2=1);
+
+error: Typing[4500] Unexpected named argument: extra1 [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:9:3
+ 1 | <?hh
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+   |          ^^ [2]
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function too_many_named(): void {
+ 8 |   fx(x=1, extra1=1);
+ 9 |   fx(x=1, y=1, extra1=1);
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |   fxyz1(y=1, x=1, "", z=1, extra1=1, extra2=1);
+11 |   fxyz1(x=1, y=1, z=1, extra1=1, "");
+
+error: Typing[4500] Unexpected named arguments: extra1, extra2 [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:10:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function too_many_named(): void {
+ 8 |   fx(x=1, extra1=1);
+ 9 |   fx(x=1, y=1, extra1=1);
+10 |   fxyz1(y=1, x=1, "", z=1, extra1=1, extra2=1);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   fxyz1(x=1, y=1, z=1, extra1=1, "");
+12 |   fx_rest(x=1, "", "", "", extra1=1, extra2=1);
+
+error: Typing[4500] Unexpected named argument: extra1 [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:11:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+ 9 |   fx(x=1, y=1, extra1=1);
+10 |   fxyz1(y=1, x=1, "", z=1, extra1=1, extra2=1);
+11 |   fxyz1(x=1, y=1, z=1, extra1=1, "");
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   fx_rest(x=1, "", "", "", extra1=1, extra2=1);
+13 | }
+
+error: Typing[4500] Unexpected named arguments: extra1, extra2 [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:12:3
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+   |          ^^^^^^^ [2]
+ 6 | 
+ 7 | function too_many_named(): void {
+   :
+10 |   fxyz1(y=1, x=1, "", z=1, extra1=1, extra2=1);
+11 |   fxyz1(x=1, y=1, z=1, extra1=1, "");
+12 |   fx_rest(x=1, "", "", "", extra1=1, extra2=1);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 3) [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:16:3
+ 1 | <?hh
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+   |          ^^ [2]
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+   :
+14 | 
+15 | function too_many_positional(): void {
+16 |   fx("", y=1, "", "", x=1);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   fxyz1(x=1, y=1, z=1, "", "");
+18 | }
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+named_params_arity_too_many.php:17:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+15 | function too_many_positional(): void {
+16 |   fx("", y=1, "", "", x=1);
+17 |   fxyz1(x=1, y=1, z=1, "", "");
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | }
+
+7 errors found

@@ -1,4 +1,18 @@
-WARN: File "needs_concrete_4.php", line 14, characters 6-7:
-Dangerous call to `A::m1` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `A` is not concrete. (Warn[12024])
-  File "needs_concrete_4.php", line 5, characters 26-27:
-  Declaration is here
+warning: Warn[12024] Dangerous call to `A::m1` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `A` is not concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_4.php:14:6
+ 3 | abstract class A {
+ 4 |   <<__NeedsConcrete>>
+ 5 |   public static function m1(): void {
+   |                          ^^ [2]
+ 6 |     static::m2(); // ok: the attribute ensures `static` refers to a concrete class
+ 7 |   }
+   :
+12 | <<__EntryPoint>>
+13 | function main(): void {
+14 |   A::m1(); // hh error and runtime error
+   |      ^^ [1]
+15 | }
+
+1 error found

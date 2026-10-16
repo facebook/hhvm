@@ -1,8 +1,36 @@
-ERROR: File "abstract_method.php", line 25, characters 22-29:
-`abs_prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute (Typing[4516])
-  File "abstract_method.php", line 7, characters 31-38:
-  The parent method was declared with `<<__TestsBypassVisibility>>` here
-ERROR: File "abstract_method.php", line 30, characters 16-23:
-Cannot access this protected member, you don't extend AbstractParent (Typing[4112])
-  File "abstract_method.php", line 25, characters 22-29:
-  This member is protected. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member
+error: Typing[4516] `abs_prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute [1]
+-> The parent method was declared with `<<__TestsBypassVisibility>>` here [2]
+
+abstract_method.php:25:22
+ 5 | abstract class AbstractParent {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   abstract protected function abs_prot(): int;
+   |                               ^^^^^^^^ [2]
+ 8 | }
+ 9 | 
+   :
+23 | class ConcreteChild2 extends AbstractParent {
+24 |   <<__Override>>
+25 |   protected function abs_prot(): int { return 99; }
+   |                      ^^^^^^^^ [1]
+26 | }
+27 | 
+
+error: Typing[4112] Cannot access this protected member, you don't extend AbstractParent [1]
+-> This member is protected. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member [2]
+
+abstract_method.php:30:16
+23 | class ConcreteChild2 extends AbstractParent {
+24 |   <<__Override>>
+25 |   protected function abs_prot(): int { return 99; }
+   |                      ^^^^^^^^ [2]
+26 | }
+27 | 
+28 | class AbstractTest2 extends WWWTest {
+29 |   public function test(ConcreteChild2 $obj): void {
+30 |     $_ = $obj->abs_prot(); // error: child's override doesn't have the attribute
+   |                ^^^^^^^^ [1]
+31 |   }
+32 | }
+
+2 errors found

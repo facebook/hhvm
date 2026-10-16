@@ -1,34 +1,105 @@
-WARN: File "prop_access_lambda_nullsafe2.php", line 13, characters 31-36:
-You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
-ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe2.php", line 13, characters 23-28:
-  Expected `string`
-  File "prop_access_lambda_nullsafe2.php", line 9, characters 38-40:
-  But got `int`
-ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-32:
-  Expected `?_`
-  File "prop_access_lambda_nullsafe2.php", line 12, characters 14-15:
-  But got `<expr#2> as A`
-  File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-36:
-  Expected `?_`
-  File "prop_access_lambda_nullsafe2.php", line 5, characters 39-39:
-  But got `B`
-ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-36:
-  Expected `null` (use of `?->` operator)
-  File "prop_access_lambda_nullsafe2.php", line 12, characters 15-15:
-  But got `A`
-ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-40:
-  Expected `null` (use of `?->` operator)
-  File "prop_access_lambda_nullsafe2.php", line 5, characters 39-39:
-  But got `B`
+warning: Warn[12030] You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. [1]
+
+prop_access_lambda_nullsafe2.php:13:31
+11 | 
+12 | function foo(?A $a): void {
+13 |   $f = $x ==> expect<?string>($x?->x?->x);
+   |                               ^^^^^^ [1]
+14 |   $f($a);
+15 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+prop_access_lambda_nullsafe2.php:14:6
+ 7 | 
+ 8 | class B {
+ 9 |   public function __construct(public int $x) {}
+   |                                      ^^^ [3]
+10 | }
+11 | 
+12 | function foo(?A $a): void {
+13 |   $f = $x ==> expect<?string>($x?->x?->x);
+   |                       ^^^^^^ [2]
+14 |   $f($a);
+   |      ^^ [1]
+15 | }
+16 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `?_` [2]
+-> But got `<expr#2> as A` [3]
+->   where `<expr#2>` is a reference to this expression [1]
+
+prop_access_lambda_nullsafe2.php:14:6
+10 | }
+11 | 
+12 | function foo(?A $a): void {
+   |              ^^ [3]
+13 |   $f = $x ==> expect<?string>($x?->x?->x);
+   |                               ^^ [2]
+14 |   $f($a);
+   |      ^^ [1]
+15 | }
+16 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `?_` [2]
+-> But got `B` [3]
+
+prop_access_lambda_nullsafe2.php:14:6
+ 3 | 
+ 4 | class A {
+ 5 |   public function __construct(public ?B $x) {}
+   |                                       ^ [3]
+ 6 | }
+ 7 | 
+   :
+11 | 
+12 | function foo(?A $a): void {
+13 |   $f = $x ==> expect<?string>($x?->x?->x);
+   |                               ^^^^^^ [2]
+14 |   $f($a);
+   |      ^^ [1]
+15 | }
+16 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` (use of `?->` operator) [2]
+-> But got `A` [3]
+
+prop_access_lambda_nullsafe2.php:14:6
+10 | }
+11 | 
+12 | function foo(?A $a): void {
+   |               ^ [3]
+13 |   $f = $x ==> expect<?string>($x?->x?->x);
+   |                               ^^^^^^ [2]
+14 |   $f($a);
+   |      ^^ [1]
+15 | }
+16 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` (use of `?->` operator) [2]
+-> But got `B` [3]
+
+prop_access_lambda_nullsafe2.php:14:6
+ 3 | 
+ 4 | class A {
+ 5 |   public function __construct(public ?B $x) {}
+   |                                       ^ [3]
+ 6 | }
+ 7 | 
+   :
+11 | 
+12 | function foo(?A $a): void {
+13 |   $f = $x ==> expect<?string>($x?->x?->x);
+   |                               ^^^^^^^^^^ [2]
+14 |   $f($a);
+   |      ^^ [1]
+15 | }
+16 | 
+
+6 errors found

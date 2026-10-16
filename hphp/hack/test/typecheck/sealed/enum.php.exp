@@ -1,4 +1,19 @@
-ERROR: File "enum.php", line 11, characters 6-6:
-You cannot use sealed enum `A` (Typing[4238])
-  File "enum.php", line 5, characters 6-6:
-  Declaration is here
+error: Typing[4238] You cannot use sealed enum `A` [1]
+-> Declaration is here [2]
+
+enum.php:11:6
+ 3 | 
+ 4 | <<__Sealed(B::class)>>
+ 5 | enum A : int {}
+   |      ^ [2]
+ 6 | 
+ 7 | enum B : int {
+ 8 |   use A;
+ 9 | }
+10 | 
+11 | enum C : int {
+   |      ^ [1]
+12 |   use A;
+13 | }
+
+1 error found

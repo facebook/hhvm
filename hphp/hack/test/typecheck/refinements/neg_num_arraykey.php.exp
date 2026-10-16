@@ -1,90 +1,381 @@
-ERROR: File "neg_num_arraykey.php", line 8, characters 19-20:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 46, characters 24-29:
-  Expected `string`
-  File "neg_num_arraykey.php", line 3, characters 24-26:
-  But got `int`
-ERROR: File "neg_num_arraykey.php", line 9, characters 18-19:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 48, characters 23-27:
-  Expected `float`
-  File "neg_num_arraykey.php", line 3, characters 24-26:
-  But got `int`
-ERROR: File "neg_num_arraykey.php", line 9, characters 18-19:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 48, characters 23-27:
-  Expected `float`
-  File "neg_num_arraykey.php", line 5, characters 10-12:
-  But got `string`
-ERROR: File "neg_num_arraykey.php", line 10, characters 16-17:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 47, characters 21-23:
-  Expected `int`
-  File "neg_num_arraykey.php", line 5, characters 10-12:
-  But got `string`
-ERROR: File "neg_num_arraykey.php", line 11, characters 16-17:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 50, characters 21-23:
-  Expected `num`
-  File "neg_num_arraykey.php", line 5, characters 10-12:
-  But got `string`
-ERROR: File "neg_num_arraykey.php", line 15, characters 19-20:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 46, characters 24-29:
-  Expected `string`
-  File "neg_num_arraykey.php", line 3, characters 24-26:
-  But got `float`
-ERROR: File "neg_num_arraykey.php", line 17, characters 16-17:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 47, characters 21-23:
-  Expected `int`
-  File "neg_num_arraykey.php", line 3, characters 24-26:
-  But got `float`
-ERROR: File "neg_num_arraykey.php", line 19, characters 21-22:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 49, characters 26-33:
-  Expected `arraykey`
-  File "neg_num_arraykey.php", line 3, characters 24-26:
-  But got `float`
-ERROR: File "neg_num_arraykey.php", line 30, characters 19-20:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 46, characters 24-29:
-  Expected `string`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `num`
-ERROR: File "neg_num_arraykey.php", line 31, characters 18-19:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 48, characters 23-27:
-  Expected `float`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `num`
-ERROR: File "neg_num_arraykey.php", line 32, characters 16-17:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 47, characters 21-23:
-  Expected `int`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `num`
-ERROR: File "neg_num_arraykey.php", line 34, characters 21-22:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 49, characters 26-33:
-  Expected `arraykey`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `num`
-ERROR: File "neg_num_arraykey.php", line 38, characters 18-19:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 48, characters 23-27:
-  Expected `float`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `string`
-ERROR: File "neg_num_arraykey.php", line 39, characters 16-17:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 47, characters 21-23:
-  Expected `int`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `string`
-ERROR: File "neg_num_arraykey.php", line 40, characters 16-17:
-Invalid argument (Typing[4110])
-  File "neg_num_arraykey.php", line 50, characters 21-23:
-  Expected `num`
-  File "neg_num_arraykey.php", line 23, characters 25-32:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+neg_num_arraykey.php:8:19
+ 1 | <?hh
+ 2 | 
+ 3 | function test(bool $b, num $v): void {
+   |                        ^^^ [3]
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+ 6 |   }
+ 7 |   if ($v is arraykey) {
+ 8 |     expect_string($v); // error
+   |                   ^^ [1]
+ 9 |     expect_float($v); // error
+10 |     expect_int($v); // error
+   :
+44 | 
+45 | 
+46 | function expect_string(string $in): void {}
+   |                        ^^^^^^ [2]
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `int` [3]
+
+neg_num_arraykey.php:9:18
+ 1 | <?hh
+ 2 | 
+ 3 | function test(bool $b, num $v): void {
+   |                        ^^^ [3]
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+ 6 |   }
+ 7 |   if ($v is arraykey) {
+ 8 |     expect_string($v); // error
+ 9 |     expect_float($v); // error
+   |                  ^^ [1]
+10 |     expect_int($v); // error
+11 |     expect_num($v); // error
+   :
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+   |                       ^^^^^ [2]
+49 | function expect_arraykey(arraykey $in): void {}
+50 | function expect_num(num $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `string` [3]
+
+neg_num_arraykey.php:9:18
+ 3 | function test(bool $b, num $v): void {
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+   |          ^^^ [3]
+ 6 |   }
+ 7 |   if ($v is arraykey) {
+ 8 |     expect_string($v); // error
+ 9 |     expect_float($v); // error
+   |                  ^^ [1]
+10 |     expect_int($v); // error
+11 |     expect_num($v); // error
+   :
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+   |                       ^^^^^ [2]
+49 | function expect_arraykey(arraykey $in): void {}
+50 | function expect_num(num $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+neg_num_arraykey.php:10:16
+ 3 | function test(bool $b, num $v): void {
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+   |          ^^^ [3]
+ 6 |   }
+ 7 |   if ($v is arraykey) {
+ 8 |     expect_string($v); // error
+ 9 |     expect_float($v); // error
+10 |     expect_int($v); // error
+   |                ^^ [1]
+11 |     expect_num($v); // error
+12 |     expect_arraykey($v);
+   :
+45 | 
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+   |                     ^^^ [2]
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+neg_num_arraykey.php:11:16
+ 3 | function test(bool $b, num $v): void {
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+   |          ^^^ [3]
+ 6 |   }
+ 7 |   if ($v is arraykey) {
+ 8 |     expect_string($v); // error
+ 9 |     expect_float($v); // error
+10 |     expect_int($v); // error
+11 |     expect_num($v); // error
+   |                ^^ [1]
+12 |     expect_arraykey($v);
+13 |   }
+   :
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+50 | function expect_num(num $in): void {}
+   |                     ^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `float` [3]
+
+neg_num_arraykey.php:15:19
+ 1 | <?hh
+ 2 | 
+ 3 | function test(bool $b, num $v): void {
+   |                        ^^^ [3]
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+   :
+13 |   }
+14 |   else {
+15 |     expect_string($v); // error
+   |                   ^^ [1]
+16 |     expect_float($v);
+17 |     expect_int($v); // error
+   :
+44 | 
+45 | 
+46 | function expect_string(string $in): void {}
+   |                        ^^^^^^ [2]
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `float` [3]
+
+neg_num_arraykey.php:17:16
+ 1 | <?hh
+ 2 | 
+ 3 | function test(bool $b, num $v): void {
+   |                        ^^^ [3]
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+   :
+15 |     expect_string($v); // error
+16 |     expect_float($v);
+17 |     expect_int($v); // error
+   |                ^^ [1]
+18 |     expect_num($v);
+19 |     expect_arraykey($v); // error
+   :
+45 | 
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+   |                     ^^^ [2]
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `float` [3]
+
+neg_num_arraykey.php:19:21
+ 1 | <?hh
+ 2 | 
+ 3 | function test(bool $b, num $v): void {
+   |                        ^^^ [3]
+ 4 |   if ($b) {
+ 5 |     $v = 'a';
+   :
+17 |     expect_int($v); // error
+18 |     expect_num($v);
+19 |     expect_arraykey($v); // error
+   |                     ^^ [1]
+20 |   }
+21 | }
+   :
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+   |                          ^^^^^^^^ [2]
+50 | function expect_num(num $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `num` [3]
+
+neg_num_arraykey.php:30:19
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+28 | 
+29 |   if ($v is num) {
+30 |     expect_string($v); // error
+   |                   ^^ [1]
+31 |     expect_float($v); // error
+32 |     expect_int($v); // error
+   :
+44 | 
+45 | 
+46 | function expect_string(string $in): void {}
+   |                        ^^^^^^ [2]
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `num` [3]
+
+neg_num_arraykey.php:31:18
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+29 |   if ($v is num) {
+30 |     expect_string($v); // error
+31 |     expect_float($v); // error
+   |                  ^^ [1]
+32 |     expect_int($v); // error
+33 |     expect_num($v);
+   :
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+   |                       ^^^^^ [2]
+49 | function expect_arraykey(arraykey $in): void {}
+50 | function expect_num(num $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+
+neg_num_arraykey.php:32:16
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+30 |     expect_string($v); // error
+31 |     expect_float($v); // error
+32 |     expect_int($v); // error
+   |                ^^ [1]
+33 |     expect_num($v);
+34 |     expect_arraykey($v); // error
+   :
+45 | 
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+   |                     ^^^ [2]
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `num` [3]
+
+neg_num_arraykey.php:34:21
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+32 |     expect_int($v); // error
+33 |     expect_num($v);
+34 |     expect_arraykey($v); // error
+   |                     ^^ [1]
+35 |   }
+36 |   else {
+   :
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+   |                          ^^^^^^^^ [2]
+50 | function expect_num(num $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `string` [3]
+
+neg_num_arraykey.php:38:18
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+36 |   else {
+37 |     expect_string($v);
+38 |     expect_float($v); // error
+   |                  ^^ [1]
+39 |     expect_int($v); // error
+40 |     expect_num($v); // error
+   :
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+48 | function expect_float(float $in): void {}
+   |                       ^^^^^ [2]
+49 | function expect_arraykey(arraykey $in): void {}
+50 | function expect_num(num $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+neg_num_arraykey.php:39:16
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+37 |     expect_string($v);
+38 |     expect_float($v); // error
+39 |     expect_int($v); // error
+   |                ^^ [1]
+40 |     expect_num($v); // error
+41 |     expect_arraykey($v);
+   :
+45 | 
+46 | function expect_string(string $in): void {}
+47 | function expect_int(int $in): void {}
+   |                     ^^^ [2]
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+neg_num_arraykey.php:40:16
+21 | }
+22 | 
+23 | function test2(bool $b, arraykey $v): void {
+   |                         ^^^^^^^^ [3]
+24 |   if ($b) {
+25 |     $v = 1.0;
+   :
+38 |     expect_float($v); // error
+39 |     expect_int($v); // error
+40 |     expect_num($v); // error
+   |                ^^ [1]
+41 |     expect_arraykey($v);
+42 |   }
+   :
+48 | function expect_float(float $in): void {}
+49 | function expect_arraykey(arraykey $in): void {}
+50 | function expect_num(num $in): void {}
+   |                     ^^^ [2]
+
+15 errors found

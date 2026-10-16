@@ -1,2 +1,11 @@
-ERROR: File "readonly_xhp_interaction.php", line 11, characters 24-25:
-Readonly values cannot be written to xhp attributes at this time. (Parsing[1002])
+error: Parsing[1002] Readonly values cannot be written to xhp attributes at this time. [1]
+
+readonly_xhp_interaction.php:11:24
+ 9 | function test() : void {
+10 |   $y = readonly new Bar();
+11 |   $z = <xhp_ui myprop={$y} />;
+   |                        ^^ [1]
+12 | 
+13 | }
+
+1 error found

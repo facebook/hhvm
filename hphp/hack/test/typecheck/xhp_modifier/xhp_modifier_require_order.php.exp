@@ -1,4 +1,17 @@
-ERROR: File "xhp_modifier_require_order.php", line 4, characters 5-5:
-The `class` keyword is expected here. (Parsing[1002])
-ERROR: File "xhp_modifier_require_order.php", line 4, characters 5-5:
-Encountered unexpected text ``, was expecting a class kind. (Parsing[1002])
+error: Parsing[1002] The `class` keyword is expected here. [1]
+
+xhp_modifier_require_order.php:4:5
+2 | 
+3 | // Blow up if final comes after xhp.
+4 | xhp final class foo {}
+  |     ^ [1]
+
+error: Parsing[1002] Encountered unexpected text ``, was expecting a class kind. [1]
+
+xhp_modifier_require_order.php:4:5
+2 | 
+3 | // Blow up if final comes after xhp.
+4 | xhp final class foo {}
+  |     ^ [1]
+
+2 errors found

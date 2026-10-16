@@ -1,12 +1,41 @@
-WARN: File "prop_access.php", line 12, characters 29-29:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "prop_access.php", line 12, characters 22-26:
-  This expression has type `dynamic`
-ERROR: File "prop_access.php", line 15, characters 7-15:
-Invalid assignment (Typing[4110])
-  File "prop_access.php", line 12, characters 14-19:
-  Expected `string`
-  File "prop_access.php", line 20, characters 20-20:
-    via this generic `T`
-  File "prop_access.php", line 5, characters 38-40:
-  But got `int`
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+prop_access.php:12:29
+10 |   while (true) {
+11 |     if (!$x->isEmpty()) {
+12 |       expect<string>($x[0]->x);
+   |                      ^^^^^ [2]
+   |                             ^ [1]
+13 |       break;
+14 |     } else {
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `string` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+prop_access.php:15:7
+ 3 | 
+ 4 | class A {
+ 5 |   public function __construct(public int $x) {}
+   |                                      ^^^ [4]
+ 6 | }
+ 7 | 
+   :
+10 |   while (true) {
+11 |     if (!$x->isEmpty()) {
+12 |       expect<string>($x[0]->x);
+   |              ^^^^^^ [2]
+13 |       break;
+14 |     } else {
+15 |       $x[] = $a;
+   |       ^^^^^^^^^ [1]
+16 |     }
+17 |   }
+18 | }
+19 | 
+20 | function expect<T>(T $_): void {}
+   |                    ^ [3]
+
+2 errors found

@@ -1,32 +1,86 @@
-ERROR: File "tuple_open_is_as_test_bad.php", line 5, characters 9-20:
-Invalid `as` expression hint (Typing[4195])
-  File "tuple_open_is_as_test_bad.php", line 5, characters 9-20:
-  The `as` operator cannot be used with a tuple type with optional or variadic elements
-ERROR: File "tuple_open_is_as_test_bad.php", line 6, characters 13-34:
-Invalid `is` expression hint (Typing[4195])
-  File "tuple_open_is_as_test_bad.php", line 6, characters 13-34:
-  The `is` operator cannot be used with a tuple type with optional or variadic elements
-ERROR: File "tuple_open_is_as_test_bad.php", line 7, characters 12-29:
-Invalid return type (Typing[4110])
-  File "tuple_open_is_as_test_bad.php", line 4, characters 27-32:
-  Expected `string`
-  File "tuple_open_is_as_test_bad.php", line 7, characters 12-16:
-  But got `nonnull`
-  File "tuple_open_is_as_test_bad.php", line 4, characters 16-20:
-    from this definition
-ERROR: File "tuple_open_is_as_test_bad.php", line 9, characters 13-28:
-Invalid `is` expression hint (Typing[4195])
-  File "tuple_open_is_as_test_bad.php", line 9, characters 13-28:
-  The `is` operator cannot be used with a tuple type with optional or variadic elements
-ERROR: File "tuple_open_is_as_test_bad.php", line 10, characters 12-29:
-Invalid return type (Typing[4110])
-  File "tuple_open_is_as_test_bad.php", line 4, characters 27-32:
-  Expected `string`
-  File "tuple_open_is_as_test_bad.php", line 10, characters 12-16:
-  But got `nonnull`
-  File "tuple_open_is_as_test_bad.php", line 4, characters 16-20:
-    from this definition
-ERROR: File "tuple_open_is_as_test_bad.php", line 12, characters 9-37:
-Invalid `as` expression hint (Typing[4195])
-  File "tuple_open_is_as_test_bad.php", line 12, characters 9-37:
-  The `as` operator cannot be used with a tuple type with optional or variadic elements
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a tuple type with optional or variadic elements [1]
+
+tuple_open_is_as_test_bad.php:5:9
+3 | 
+4 | function test1(mixed $m): string {
+5 |   $m as (nonnull...);
+  |         ^^^^^^^^^^^^ [1]
+6 |   if ($m is (int, optional string)) {
+7 |     return $m[1] ?? "default";
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a tuple type with optional or variadic elements [1]
+
+tuple_open_is_as_test_bad.php:6:13
+4 | function test1(mixed $m): string {
+5 |   $m as (nonnull...);
+6 |   if ($m is (int, optional string)) {
+  |             ^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |     return $m[1] ?? "default";
+8 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `nonnull` [3]
+->   from this definition [4]
+
+tuple_open_is_as_test_bad.php:7:12
+2 | 
+3 | 
+4 | function test1(mixed $m): string {
+  |                ^^^^^ [4]
+  |                           ^^^^^^ [2]
+5 |   $m as (nonnull...);
+6 |   if ($m is (int, optional string)) {
+7 |     return $m[1] ?? "default";
+  |            ^^^^^^^^^^^^^^^^^^ [1]
+  |            ^^^^^ [3]
+8 |   }
+9 |   if ($m is (int, string...)) {
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a tuple type with optional or variadic elements [1]
+
+tuple_open_is_as_test_bad.php:9:13
+ 7 |     return $m[1] ?? "default";
+ 8 |   }
+ 9 |   if ($m is (int, string...)) {
+   |             ^^^^^^^^^^^^^^^^ [1]
+10 |     return $m[1] ?? "default";
+11 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `nonnull` [3]
+->   from this definition [4]
+
+tuple_open_is_as_test_bad.php:10:12
+ 2 | 
+ 3 | 
+ 4 | function test1(mixed $m): string {
+   |                ^^^^^ [4]
+   |                           ^^^^^^ [2]
+ 5 |   $m as (nonnull...);
+ 6 |   if ($m is (int, optional string)) {
+ 7 |     return $m[1] ?? "default";
+ 8 |   }
+ 9 |   if ($m is (int, string...)) {
+10 |     return $m[1] ?? "default";
+   |            ^^^^^^^^^^^^^^^^^^ [1]
+   |            ^^^^^ [3]
+11 |   }
+12 |   $m as (optional bool, optional int);
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a tuple type with optional or variadic elements [1]
+
+tuple_open_is_as_test_bad.php:12:9
+10 |     return $m[1] ?? "default";
+11 |   }
+12 |   $m as (optional bool, optional int);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   return "fail";
+14 | }
+
+6 errors found

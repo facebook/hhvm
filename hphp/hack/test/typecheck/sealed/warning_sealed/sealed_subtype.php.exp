@@ -1,2 +1,11 @@
-WARN: File "sealed_subtype.php", line 5, characters 3-10:
-Class `B` in sealed allowlist for `I`, but does not implement `I` (Warn[12035])
+warning: Warn[12035] Class `B` in sealed allowlist for `I`, but does not implement `I` [1]
+
+sealed_subtype.php:5:3
+3 | <<__Sealed(
+4 |   A::class,
+5 |   B::class // error, I is not a parent of B
+  |   ^^^^^^^^ [1]
+6 | )>>
+7 | interface I {}
+
+1 error found

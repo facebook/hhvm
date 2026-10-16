@@ -1,82 +1,254 @@
-ERROR: File "index_array_bad.php", line 8, characters 3-18:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "index_array_bad.php", line 8, characters 8-12:
-  But got `mixed`
-ERROR: File "index_array_bad.php", line 15, characters 11-13:
-Invalid index type for this dict (Typing[4449])
-  File "index_array_bad.php", line 6, characters 8-10:
-  This is an int
-  File "index_array_bad.php", line 15, characters 11-13:
-  It is incompatible with a string
-ERROR: File "index_array_bad.php", line 16, characters 12-14:
-Invalid index type for this dict (Typing[4449])
-  File "index_array_bad.php", line 7, characters 10-12:
-  This is an int
-  File "index_array_bad.php", line 16, characters 12-14:
-  It is incompatible with a string
-ERROR: File "index_array_bad.php", line 18, characters 9-18:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 18, characters 9-11:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 18, characters 13-17:
-  But got `bool`
-ERROR: File "index_array_bad.php", line 19, characters 13-15:
-Invalid index type for this KeyedContainer (Typing[4324])
-  File "index_array_bad.php", line 9, characters 18-20:
-  This is an int
-  File "index_array_bad.php", line 19, characters 13-15:
-  It is incompatible with a string
-ERROR: File "index_array_bad.php", line 20, characters 13-15:
-Invalid index type for this ConstMap (Typing[4324])
-  File "index_array_bad.php", line 10, characters 12-14:
-  This is an int
-  File "index_array_bad.php", line 20, characters 13-15:
-  It is incompatible with a string
-ERROR: File "index_array_bad.php", line 22, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 22, characters 8-10:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `nonnull`
-ERROR: File "index_array_bad.php", line 22, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 22, characters 8-10:
-  Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `mixed`
-ERROR: File "index_array_bad.php", line 23, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 23, characters 8-10:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `nonnull`
-ERROR: File "index_array_bad.php", line 23, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 23, characters 8-10:
-  Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `mixed`
-ERROR: File "index_array_bad.php", line 24, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 24, characters 8-10:
-  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `nonnull`
-ERROR: File "index_array_bad.php", line 24, characters 8-14:
-Typing error (Typing[4110])
-  File "index_array_bad.php", line 24, characters 8-10:
-  Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "index_array_bad.php", line 12, characters 3-7:
-  But got `mixed`
-ERROR: File "index_array_bad.php", line 32, characters 28-30:
-Invalid index type for this KeyedContainer (Typing[4324])
-  File "index_array_bad.php", line 9, characters 18-20:
-  This is an int
-  File "index_array_bad.php", line 32, characters 28-30:
-  It is incompatible with a string
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+index_array_bad.php:8:3
+ 6 |   dict<int,bool> $d,
+ 7 |   darray<int,bool> $da,
+ 8 |   dict<mixed,bool> $dm,
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^^ [4]
+ 9 |   KeyedContainer<int,string> $kc,
+10 |   ConstMap<int,bool> $cm,
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is an int [2]
+-> It is incompatible with a string [1]
+
+index_array_bad.php:15:11
+ 4 | function foo(
+ 5 |   darray<string,bool> $a,
+ 6 |   dict<int,bool> $d,
+   |        ^^^ [2]
+ 7 |   darray<int,bool> $da,
+ 8 |   dict<mixed,bool> $dm,
+   :
+13 | ):void {
+14 |   $x = $a["a"];
+15 |   $y = $d["a"];
+   |           ^^^ [1]
+16 |   $z = $da["a"];
+17 |   // Don't produce a second error here
+
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is an int [2]
+-> It is incompatible with a string [1]
+
+index_array_bad.php:16:12
+ 5 |   darray<string,bool> $a,
+ 6 |   dict<int,bool> $d,
+ 7 |   darray<int,bool> $da,
+   |          ^^^ [2]
+ 8 |   dict<mixed,bool> $dm,
+ 9 |   KeyedContainer<int,string> $kc,
+   :
+14 |   $x = $a["a"];
+15 |   $y = $d["a"];
+16 |   $z = $da["a"];
+   |            ^^^ [1]
+17 |   // Don't produce a second error here
+18 |   $zz = $dm[false];
+
+error: Typing[4110] Typing error [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `bool` [3]
+
+index_array_bad.php:18:9
+16 |   $z = $da["a"];
+17 |   // Don't produce a second error here
+18 |   $zz = $dm[false];
+   |         ^^^^^^^^^^ [1]
+   |         ^^^ [2]
+   |             ^^^^^ [3]
+19 |   $xx = $kc["a"];
+20 |   $yy = $cm["a"];
+
+error: Typing[4324] Invalid index type for this KeyedContainer [1]
+-> This is an int [2]
+-> It is incompatible with a string [1]
+
+index_array_bad.php:19:13
+ 7 |   darray<int,bool> $da,
+ 8 |   dict<mixed,bool> $dm,
+ 9 |   KeyedContainer<int,string> $kc,
+   |                  ^^^ [2]
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+   :
+17 |   // Don't produce a second error here
+18 |   $zz = $dm[false];
+19 |   $xx = $kc["a"];
+   |             ^^^ [1]
+20 |   $yy = $cm["a"];
+21 | 
+
+error: Typing[4324] Invalid index type for this ConstMap [1]
+-> This is an int [2]
+-> It is incompatible with a string [1]
+
+index_array_bad.php:20:13
+ 8 |   dict<mixed,bool> $dm,
+ 9 |   KeyedContainer<int,string> $kc,
+10 |   ConstMap<int,bool> $cm,
+   |            ^^^ [2]
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   :
+18 |   $zz = $dm[false];
+19 |   $xx = $kc["a"];
+20 |   $yy = $cm["a"];
+   |             ^^^ [1]
+21 | 
+22 |   $_ = $kc[$k];
+
+error: Typing[4110] Typing error [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `nonnull` [3]
+
+index_array_bad.php:22:8
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   |   ^^^^^ [3]
+13 | ):void {
+14 |   $x = $a["a"];
+   :
+20 |   $yy = $cm["a"];
+21 | 
+22 |   $_ = $kc[$k];
+   |        ^^^^^^^ [1]
+   |        ^^^ [2]
+23 |   $_ = $cm[$k];
+24 |   $_ = $im[$k];
+
+error: Typing[4110] Typing error [1]
+-> Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `mixed` [3]
+
+index_array_bad.php:22:8
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   |   ^^^^^ [3]
+13 | ):void {
+14 |   $x = $a["a"];
+   :
+20 |   $yy = $cm["a"];
+21 | 
+22 |   $_ = $kc[$k];
+   |        ^^^^^^^ [1]
+   |        ^^^ [2]
+23 |   $_ = $cm[$k];
+24 |   $_ = $im[$k];
+
+error: Typing[4110] Typing error [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `nonnull` [3]
+
+index_array_bad.php:23:8
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   |   ^^^^^ [3]
+13 | ):void {
+14 |   $x = $a["a"];
+   :
+21 | 
+22 |   $_ = $kc[$k];
+23 |   $_ = $cm[$k];
+   |        ^^^^^^^ [1]
+   |        ^^^ [2]
+24 |   $_ = $im[$k];
+25 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `mixed` [3]
+
+index_array_bad.php:23:8
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   |   ^^^^^ [3]
+13 | ):void {
+14 |   $x = $a["a"];
+   :
+21 | 
+22 |   $_ = $kc[$k];
+23 |   $_ = $cm[$k];
+   |        ^^^^^^^ [1]
+   |        ^^^ [2]
+24 |   $_ = $im[$k];
+25 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `nonnull` [3]
+
+index_array_bad.php:24:8
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   |   ^^^^^ [3]
+13 | ):void {
+14 |   $x = $a["a"];
+   :
+22 |   $_ = $kc[$k];
+23 |   $_ = $cm[$k];
+24 |   $_ = $im[$k];
+   |        ^^^^^^^ [1]
+   |        ^^^ [2]
+25 | 
+26 |   // These are legal because they're lvalues
+
+error: Typing[4110] Typing error [1]
+-> Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset` [2]
+-> But got `mixed` [3]
+
+index_array_bad.php:24:8
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+12 |   mixed $k,
+   |   ^^^^^ [3]
+13 | ):void {
+14 |   $x = $a["a"];
+   :
+22 |   $_ = $kc[$k];
+23 |   $_ = $cm[$k];
+24 |   $_ = $im[$k];
+   |        ^^^^^^^ [1]
+   |        ^^^ [2]
+25 | 
+26 |   // These are legal because they're lvalues
+
+error: Typing[4324] Invalid index type for this KeyedContainer [1]
+-> This is an int [2]
+-> It is incompatible with a string [1]
+
+index_array_bad.php:32:28
+ 7 |   darray<int,bool> $da,
+ 8 |   dict<mixed,bool> $dm,
+ 9 |   KeyedContainer<int,string> $kc,
+   |                  ^^^ [2]
+10 |   ConstMap<int,bool> $cm,
+11 |   ImmMap<int, mixed> $im,
+   :
+30 |     $da["b"] = true;
+31 |   } else {
+32 |     list($da['a'], $da[$kc['a']]) = tuple(1, 2);
+   |                            ^^^ [1]
+33 |   }
+34 | }
+
+13 errors found

@@ -1,12 +1,39 @@
-ERROR: File "method_abstractclass_04.php", line 20, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_abstractclass_04.php", line 20, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_abstractclass_04.php", line 5, characters 28-30:
-  Declaration is here
-ERROR: File "method_abstractclass_04.php", line 28, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_abstractclass_04.php", line 28, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_abstractclass_04.php", line 5, characters 28-30:
-  Declaration is here
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_abstractclass_04.php:20:19
+ 3 | abstract class C {
+ 4 |   <<__Sealed(T::class)>>
+ 5 |   abstract public function foo(): void;
+   |                            ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+18 |   // this should be rejected
+19 |   <<__Override>>
+20 |   public function foo(): void {
+   |                   ^^^ [1]
+21 |     echo "I am foo in D\n";
+22 |   }
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_abstractclass_04.php:28:19
+ 3 | abstract class C {
+ 4 |   <<__Sealed(T::class)>>
+ 5 |   abstract public function foo(): void;
+   |                            ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+26 |   // this should be rejected
+27 |   <<__Override>>
+28 |   public function foo(): void {
+   |                   ^^^ [1]
+29 |     echo "I am foo in E\n";
+30 |   }
+
+2 errors found

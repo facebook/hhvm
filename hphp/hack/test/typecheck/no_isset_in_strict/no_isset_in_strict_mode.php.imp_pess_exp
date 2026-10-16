@@ -1,14 +1,56 @@
-WARN: File "no_isset_in_strict_mode.php", line 14, characters 34-40:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "no_isset_in_strict_mode.php", line 14, characters 24-30:
-  This expression has type `dynamic`
-WARN: File "no_isset_in_strict_mode.php", line 19, characters 23-26:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "no_isset_in_strict_mode.php", line 18, characters 26-32:
-  This expression has type `dynamic`
-ERROR: File "no_isset_in_strict_mode.php", line 13, characters 8-27:
-`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
-ERROR: File "no_isset_in_strict_mode.php", line 15, characters 8-16:
-`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
-ERROR: File "no_isset_in_strict_mode.php", line 16, characters 8-30:
-`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+no_isset_in_strict_mode.php:14:34
+12 |   $b = isset($a[0][42]); // okay.
+13 |   $b = isset($a[0]->member); // nope.
+14 |   $b = isset(($a[0] as dynamic)->$member); // okay.
+   |                        ^^^^^^^ [2]
+   |                                  ^^^^^^^ [1]
+15 |   $c = isset($b); // nope.
+16 |   $d = isset((new Foo())->bar); // nope.
+
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+no_isset_in_strict_mode.php:19:23
+16 |   $d = isset((new Foo())->bar); // nope.
+17 |   $bar = "bar";
+18 |   $dynfoo = new Foo() as dynamic;
+   |                          ^^^^^^^ [2]
+19 |   $e = isset($dynfoo->$bar); // okay.
+   |                       ^^^^ [1]
+20 |   $baz = "baz";
+21 |   $g = isset(Foo::$baz); // okay.
+
+error: Typing[4016] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode [1]
+
+no_isset_in_strict_mode.php:13:8
+11 |   $b = isset($a[0]); // okay.
+12 |   $b = isset($a[0][42]); // okay.
+13 |   $b = isset($a[0]->member); // nope.
+   |        ^^^^^^^^^^^^^^^^^^^^ [1]
+14 |   $b = isset(($a[0] as dynamic)->$member); // okay.
+15 |   $c = isset($b); // nope.
+
+error: Typing[4016] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode [1]
+
+no_isset_in_strict_mode.php:15:8
+13 |   $b = isset($a[0]->member); // nope.
+14 |   $b = isset(($a[0] as dynamic)->$member); // okay.
+15 |   $c = isset($b); // nope.
+   |        ^^^^^^^^^ [1]
+16 |   $d = isset((new Foo())->bar); // nope.
+17 |   $bar = "bar";
+
+error: Typing[4016] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode [1]
+
+no_isset_in_strict_mode.php:16:8
+14 |   $b = isset(($a[0] as dynamic)->$member); // okay.
+15 |   $c = isset($b); // nope.
+16 |   $d = isset((new Foo())->bar); // nope.
+   |        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   $bar = "bar";
+18 |   $dynfoo = new Foo() as dynamic;
+
+5 errors found

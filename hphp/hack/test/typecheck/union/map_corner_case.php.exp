@@ -1,32 +1,134 @@
-WARN: File "map_corner_case.php", line 13, characters 10-32:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "collections/Map.hhi", line 444, characters 35-37:
-  The expression on the left has type `null` which is always `null`.
-WARN: File "map_corner_case.php", line 14, characters 10-32:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "collections/Map.hhi", line 444, characters 35-37:
-  The expression on the left has type `null` which is always `null`.
-ERROR: File "map_corner_case.php", line 24, characters 5-17:
-Invalid assignment (Typing[4110])
-  File "map_corner_case.php", line 13, characters 27-32:
-  Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 444, characters 36-37:
-    via this generic `Tv`
-  File "map_corner_case.php", line 14, characters 27-32:
-  But got `Map<(arraykey & _), _>`
-ERROR: File "map_corner_case.php", line 25, characters 5-17:
-Invalid assignment (Typing[4110])
-  File "map_corner_case.php", line 5, characters 14-19:
-  Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 444, characters 36-37:
-    via this generic `Tv`
-  File "map_corner_case.php", line 13, characters 27-32:
-  But got `Map<(arraykey & _), nothing>`
-ERROR: File "map_corner_case.php", line 25, characters 5-17:
-Invalid assignment (Typing[4110])
-  File "map_corner_case.php", line 12, characters 27-32:
-  Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 444, characters 36-37:
-    via this generic `Tv`
-  File "map_corner_case.php", line 13, characters 27-32:
-  But got `Map<(arraykey & _), nothing>`
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+map_corner_case.php:13:10
+ 11 |   while ($cond) {
+ 12 |     $a = $m->get($key) ?? Map {};
+ 13 |     $b = $a->get($key) ?? Map {};
+    |          ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 14 |     $c = $b->get($key) ?? Map {};
+ 15 | 
+
+collections/Map.hhi:444:35
+442 |      *           exist.
+443 |      */
+444 |     public function get(Tk $k)[]: ?Tv;
+    |                                   ^^^ [2]
+445 | 
+446 |     /**
+
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+map_corner_case.php:14:10
+ 12 |     $a = $m->get($key) ?? Map {};
+ 13 |     $b = $a->get($key) ?? Map {};
+ 14 |     $c = $b->get($key) ?? Map {};
+    |          ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 15 | 
+ 16 |     /* force typechecking the body of the loop multiple times with this charming
+
+collections/Map.hhi:444:35
+442 |      *           exist.
+443 |      */
+444 |     public function get(Tk $k)[]: ?Tv;
+    |                                   ^^^ [2]
+445 | 
+446 |     /**
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+->   via this generic `Tv` [3]
+-> But got `Map<(arraykey & _), _>` [4]
+
+map_corner_case.php:24:5
+ 11 |   while ($cond) {
+ 12 |     $a = $m->get($key) ?? Map {};
+ 13 |     $b = $a->get($key) ?? Map {};
+    |                           ^^^^^^ [2]
+ 14 |     $c = $b->get($key) ?? Map {};
+    |                           ^^^^^^ [4]
+ 15 | 
+ 16 |     /* force typechecking the body of the loop multiple times with this charming
+    :
+ 22 | 
+ 23 |     $c[$key] = 1;
+ 24 |     $b[$key] = $c;
+    |     ^^^^^^^^^^^^^ [1]
+ 25 |     $a[$key] = $b;
+ 26 |   }
+
+collections/Map.hhi:444:36
+442 |      *           exist.
+443 |      */
+444 |     public function get(Tk $k)[]: ?Tv;
+    |                                    ^^ [3]
+445 | 
+446 |     /**
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+->   via this generic `Tv` [3]
+-> But got `Map<(arraykey & _), nothing>` [4]
+
+map_corner_case.php:25:5
+  3 | function f(bool $cond, string $key): void {
+  4 |   $m = Map {};
+  5 |   $m[$key] = Map {};
+    |              ^^^^^^ [2]
+  6 |   $i = 1;
+  7 |   $j = 2;
+    :
+ 11 |   while ($cond) {
+ 12 |     $a = $m->get($key) ?? Map {};
+ 13 |     $b = $a->get($key) ?? Map {};
+    |                           ^^^^^^ [4]
+ 14 |     $c = $b->get($key) ?? Map {};
+ 15 | 
+    :
+ 23 |     $c[$key] = 1;
+ 24 |     $b[$key] = $c;
+ 25 |     $a[$key] = $b;
+    |     ^^^^^^^^^^^^^ [1]
+ 26 |   }
+ 27 | }
+
+collections/Map.hhi:444:36
+442 |      *           exist.
+443 |      */
+444 |     public function get(Tk $k)[]: ?Tv;
+    |                                    ^^ [3]
+445 | 
+446 |     /**
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `nothing` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+->   via this generic `Tv` [3]
+-> But got `Map<(arraykey & _), nothing>` [4]
+
+map_corner_case.php:25:5
+ 10 |   $n = 5;
+ 11 |   while ($cond) {
+ 12 |     $a = $m->get($key) ?? Map {};
+    |                           ^^^^^^ [2]
+ 13 |     $b = $a->get($key) ?? Map {};
+    |                           ^^^^^^ [4]
+ 14 |     $c = $b->get($key) ?? Map {};
+ 15 | 
+    :
+ 23 |     $c[$key] = 1;
+ 24 |     $b[$key] = $c;
+ 25 |     $a[$key] = $b;
+    |     ^^^^^^^^^^^^^ [1]
+ 26 |   }
+ 27 | }
+
+collections/Map.hhi:444:36
+442 |      *           exist.
+443 |      */
+444 |     public function get(Tk $k)[]: ?Tv;
+    |                                    ^^ [3]
+445 | 
+446 |     /**
+
+5 errors found

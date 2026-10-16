@@ -1,2 +1,11 @@
-ERROR: File "tconst_intersect_tyvar.php", line 12, characters 26-29:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_intersect_tyvar.php:12:26
+10 |   public function get<TVar as A, TNode>(
+11 |     TVar $var,
+12 |   ): TNode where TNode = TVar::TNode {
+   |                          ^^^^ [1]
+13 |     throw new Exception("A");
+14 |   }
+
+1 error found

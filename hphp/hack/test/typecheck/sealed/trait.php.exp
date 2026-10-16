@@ -1,4 +1,15 @@
-ERROR: File "trait.php", line 7, characters 7-7:
-You cannot implement sealed interface `A` (Typing[4238])
-  File "trait.php", line 5, characters 11-11:
-  Declaration is here
+error: Typing[4238] You cannot implement sealed interface `A` [1]
+-> Declaration is here [2]
+
+trait.php:7:7
+3 | 
+4 | <<__Sealed(B::class)>>
+5 | interface A {}
+  |           ^ [2]
+6 | 
+7 | trait T implements A {}
+  |       ^ [1]
+8 | 
+9 | final class B {
+
+1 error found

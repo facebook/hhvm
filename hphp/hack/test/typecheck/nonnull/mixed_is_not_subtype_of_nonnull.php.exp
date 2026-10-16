@@ -1,6 +1,15 @@
-ERROR: File "mixed_is_not_subtype_of_nonnull.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "mixed_is_not_subtype_of_nonnull.php", line 3, characters 23-29:
-  Expected `nonnull`
-  File "mixed_is_not_subtype_of_nonnull.php", line 3, characters 12-16:
-  But got `mixed`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `mixed` [3]
+
+mixed_is_not_subtype_of_nonnull.php:4:10
+1 | <?hh
+2 | 
+3 | function f(mixed $x): nonnull {
+  |            ^^^^^ [3]
+  |                       ^^^^^^^ [2]
+4 |   return $x;
+  |          ^^ [1]
+5 | }
+
+1 error found

@@ -1,12 +1,36 @@
-ERROR: File "valid_targ_tpenv_bounds_test.php", line 16, characters 5-9:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_tpenv_bounds_test.php", line 16, characters 5-9:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_tpenv_bounds_test.php", line 11, characters 9-16:
-  `Tassuper` is reified
-ERROR: File "valid_targ_tpenv_bounds_test.php", line 16, characters 12-16:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_tpenv_bounds_test.php", line 16, characters 12-16:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_tpenv_bounds_test.php", line 12, characters 9-11:
-  `Teq` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Tassuper` is reified [2]
+
+valid_targ_tpenv_bounds_test.php:16:5
+ 9 | 
+10 | function f<
+11 |   reify Tassuper as A super C,
+   |         ^^^^^^^^ [2]
+12 |   reify Teq
+13 | >(): void where Teq = B {}
+14 | 
+15 | function bad<Tbad1 as B super B, Tbad2>(): void where Tbad2 = B {
+16 |   f<Tbad1, Tbad2>();
+   |     ^^^^^ [1]
+17 | }
+18 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Teq` is reified [2]
+
+valid_targ_tpenv_bounds_test.php:16:12
+10 | function f<
+11 |   reify Tassuper as A super C,
+12 |   reify Teq
+   |         ^^^ [2]
+13 | >(): void where Teq = B {}
+14 | 
+15 | function bad<Tbad1 as B super B, Tbad2>(): void where Tbad2 = B {
+16 |   f<Tbad1, Tbad2>();
+   |            ^^^^^ [1]
+17 | }
+18 | 
+
+2 errors found

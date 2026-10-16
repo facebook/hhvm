@@ -1,8 +1,20 @@
-ERROR: File "this_type_attr.php", line 8, characters 22-23:
-Invalid xhp value for attribute `:me` in `:my-xhp` (Typing[4343])
-  File "this_type_attr.php", line 8, characters 11-16:
-  Expected exactly the type `:my-xhp`
-  File "this_type_attr.php", line 4, characters 13-16:
-    via this generic `this`
-  File "this_type_attr.php", line 7, characters 15-21:
-  But got the nonexact type `:my-xhp`
+error: Typing[4343] Invalid xhp value for attribute `:me` in `:my-xhp` [1]
+-> Expected exactly the type `:my-xhp` [2]
+->   via this generic `this` [3]
+-> But got the nonexact type `:my-xhp` [4]
+
+this_type_attr.php:8:22
+2 | 
+3 | class :my-xhp extends XHPTest {
+4 |   attribute this me;
+  |             ^^^^ [3]
+5 | }
+6 | 
+7 | function test(:my-xhp $y): :my-xhp {
+  |               ^^^^^^^ [4]
+8 |   return <my-xhp me={$y} />;
+  |           ^^^^^^ [2]
+  |                      ^^ [1]
+9 | }
+
+1 error found

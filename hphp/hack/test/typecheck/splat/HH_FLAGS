@@ -1,1 +1,2 @@
 --config enable_no_auto_dynamic=true
+--error-format plain_highlighted

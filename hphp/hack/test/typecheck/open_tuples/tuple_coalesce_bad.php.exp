@@ -1,8 +1,41 @@
-ERROR: File "tuple_coalesce_bad.php", line 6, characters 12-12:
-Tuple accessed with an index out of bounds (Typing[4116])
-ERROR: File "tuple_coalesce_bad.php", line 12, characters 12-12:
-Tuple accessed with an index out of bounds (Typing[4116])
-ERROR: File "tuple_coalesce_bad.php", line 14, characters 12-12:
-Tuple accessed with an index out of bounds (Typing[4116])
-ERROR: File "tuple_coalesce_bad.php", line 17, characters 12-12:
-Tuple accessed with an index out of bounds (Typing[4116])
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+tuple_coalesce_bad.php:6:12
+4 | 
+5 | function testNonVariadicTuple((int, optional string) $t): void {
+6 |   $x2 = $t[2] ?? false;
+  |            ^ [1]
+7 | }
+8 | function testTuple(
+
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+tuple_coalesce_bad.php:12:12
+10 | ): void {
+11 |   // Optional elements, expect an error here
+12 |   $x2 = $t[2];
+   |            ^ [1]
+13 |   hh_expect<bool>($x2); // Despite error
+14 |   $x4 = $t[3];
+
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+tuple_coalesce_bad.php:14:12
+12 |   $x2 = $t[2];
+13 |   hh_expect<bool>($x2); // Despite error
+14 |   $x4 = $t[3];
+   |            ^ [1]
+15 |   hh_expect<float>($x4);
+16 |   // Variadic elements
+
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+tuple_coalesce_bad.php:17:12
+15 |   hh_expect<float>($x4);
+16 |   // Variadic elements
+17 |   $x6 = $t[4];
+   |            ^ [1]
+18 |   hh_expect<int>($x6);
+19 | }
+
+4 errors found

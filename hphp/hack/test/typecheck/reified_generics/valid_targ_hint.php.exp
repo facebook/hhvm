@@ -1,6 +1,17 @@
-ERROR: File "valid_targ_hint.php", line 11, characters 19-22:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_hint.php", line 11, characters 19-22:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_hint.php", line 7, characters 9-12:
-  `Trex` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Trex` is reified [2]
+
+valid_targ_hint.php:11:19
+ 5 |   reify Tdog,
+ 6 |   Tcat,
+ 7 |   reify Trex,
+   |         ^^^^ [2]
+ 8 | > {
+ 9 |   public function f<
+10 |     reify Tfox
+11 |   >(C<Tfox, Tdog, Tcat> $c): void {}
+   |                   ^^^^ [1]
+12 | }
+
+1 error found

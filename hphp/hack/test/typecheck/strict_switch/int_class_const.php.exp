@@ -1,8 +1,29 @@
-WARN: File "int_class_const.php", line 36, characters 10-13:
-This switch case, `E::B`, occurred before. It will never be matched. (Warn[12019])
-  File "int_class_const.php", line 34, characters 10-13:
-  This is the original occurrence of the case.
-WARN: File "int_class_const.php", line 50, characters 10-13:
-This switch case, `E::A`, occurred before. It will never be matched. (Warn[12019])
-  File "int_class_const.php", line 48, characters 10-13:
-  This is the original occurrence of the case.
+warning: Warn[12019] This switch case, `E::B`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+int_class_const.php:36:10
+32 |     case E::A:
+33 |       return;
+34 |     case E::B:
+   |          ^^^^ [2]
+35 |       return;
+36 |     case E::B:
+   |          ^^^^ [1]
+37 |       return;
+38 |     default:
+
+warning: Warn[12019] This switch case, `E::A`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+int_class_const.php:50:10
+46 |     // We don't store enum values in the typed AST and so cannot see that
+47 |     // the cases are redundant
+48 |     case E::A:
+   |          ^^^^ [2]
+49 |       return;
+50 |     case E::A:
+   |          ^^^^ [1]
+51 |       return;
+52 |     case F::B:
+
+2 errors found

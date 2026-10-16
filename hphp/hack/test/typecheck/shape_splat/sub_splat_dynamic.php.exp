@@ -1,6 +1,17 @@
-ERROR: File "sub_splat_dynamic.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "sub_splat_dynamic.php", line 7, characters 4-10:
-  Expected `dynamic`
-  File "sub_splat_dynamic.php", line 6, characters 3-31:
-  Type `shape(...T, ...shape('name' => string))` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> Type `shape(...T, ...shape('name' => string))` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+sub_splat_dynamic.php:8:10
+ 4 | // Shape_splat <: dynamic
+ 5 | function to_dynamic<T as shape(...)>(
+ 6 |   shape(...T, 'name' => string) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+ 7 | ): dynamic {
+   |    ^^^^^^^ [2]
+ 8 |   return $s;
+   |          ^^ [1]
+ 9 | }
+10 | 
+
+1 error found

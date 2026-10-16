@@ -1,6 +1,20 @@
-ERROR: File "using_return_disposable.php", line 37, characters 17-26:
-Typing error (Typing[4207])
-  File "using_return_disposable.php", line 37, characters 17-26:
-  This is not marked `<<__ReturnDisposable>>`.
-  File "using_return_disposable.php", line 10, characters 19-22:
-  This is marked `<<__ReturnDisposable>>`.
+error: Typing[4207] Typing error [1]
+-> This is not marked `<<__ReturnDisposable>>`. [1]
+-> This is marked `<<__ReturnDisposable>>`. [2]
+
+using_return_disposable.php:37:17
+ 8 |   public function mescape(<<__AcceptDisposable>> IDisposable $x):void { }
+ 9 |   <<__ReturnDisposable>>
+10 |   public function make():Handle {
+   |                   ^^^^ [2]
+11 |     return make_handle(false);
+12 |   }
+   :
+35 |   }
+36 |   using ($y = Handle::smake()) {
+37 |     using ($z = $y->make()) {
+   |                 ^^^^^^^^^^ [1]
+38 |       $z->foo();
+39 |     }
+
+1 error found

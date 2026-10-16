@@ -1,12 +1,36 @@
-ERROR: File "splat_destructure_tuple.php", line 6, characters 8-15:
-Invalid argument (Typing[4104])
-  File "splat_destructure_tuple.php", line 6, characters 8-15:
-  Too few positional arguments (required 2 but got 1)
-  File "splat_destructure_tuple.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "splat_destructure_tuple.php", line 11, characters 8-45:
-Invalid argument (Typing[4110])
-  File "splat_destructure_tuple.php", line 3, characters 71-73:
-  Expected `int` (variadic argument)
-  File "splat_destructure_tuple.php", line 11, characters 37-41:
-  But got `bool`
+error: Typing[4104] Invalid argument [1]
+-> Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+splat_destructure_tuple.php:6:8
+1 | <?hh
+2 | 
+3 | function f(int $i, string $s, bool $b = true, float $f = 3.14, int ...$is): void {}
+  |          ^ [2]
+4 | 
+5 | function g(): void {
+6 |   f(...tuple(1)); // too few
+  |        ^^^^^^^^ [1]
+7 |   f(...tuple(1, "a"));
+8 |   f(...tuple(1, "a", false)); // Fully filled optional parameters
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `bool` [3]
+
+splat_destructure_tuple.php:11:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(int $i, string $s, bool $b = true, float $f = 3.14, int ...$is): void {}
+   |                                                                       ^^^ [2]
+ 4 | 
+ 5 | function g(): void {
+   :
+ 9 |   f(...tuple(1, "a", false, 2.0)); // fully filled optional parameters
+10 |   f(...tuple(1, "a", false, 2.0, 3, 4, 5));
+11 |   f(...tuple(1, "a", false, 2.0, 3, false, 5)); // incorrect type
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                     ^^^^^ [3]
+12 | }
+
+2 errors found

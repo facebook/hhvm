@@ -1,8 +1,22 @@
-ERROR: File "fully_opaque_newtype.php--file2.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "fully_opaque_newtype.php--file2.php", line 3, characters 19-25:
-  Expected `nonnull`
-  File "fully_opaque_newtype.php--file2.php", line 3, characters 12-12:
-  But got `mixed`
-  File "fully_opaque_newtype.php--file1.php", line 3, characters 9-9:
-    by the definition of `t` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `mixed` [3]
+->   by the definition of `t` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+fully_opaque_newtype.php--file2.php:4:10
+1 | <?hh
+2 | 
+3 | function f(t $x): nonnull {
+  |            ^ [3]
+  |                   ^^^^^^^ [2]
+4 |   return $x;
+  |          ^^ [1]
+5 | }
+
+fully_opaque_newtype.php--file1.php:3:9
+1 | <?hh
+2 | 
+3 | newtype t = string;
+  |         ^ [4]
+
+1 error found

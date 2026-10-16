@@ -1,4 +1,21 @@
-ERROR: File "awaitall_3.php", line 14, characters 5-6:
-This value is readonly, its properties cannot be modified (Typing[4409])
-ERROR: File "awaitall_3.php", line 15, characters 5-6:
-This value is readonly, its properties cannot be modified (Typing[4409])
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+awaitall_3.php:14:5
+12 |   // error, $x is not COW
+13 |   concurrent {
+14 |     $x[] = await readonly returns_5();
+   |     ^^ [1]
+15 |     $x[] = await readonly returns_5();
+16 |   }
+
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+awaitall_3.php:15:5
+13 |   concurrent {
+14 |     $x[] = await readonly returns_5();
+15 |     $x[] = await readonly returns_5();
+   |     ^^ [1]
+16 |   }
+17 |   var_dump($x);
+
+2 errors found

@@ -1,22 +1,61 @@
-ERROR: File "typeconst_default_selected_only_in_concrete_class.php", line 22, characters 12-12:
-Invalid return type (Typing[4110])
-  File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
-  Expected `this::T`
-  File "typeconst_default_selected_only_in_concrete_class.php", line 22, characters 12-12:
-  But got `int`
-ERROR: File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-17:
-Invalid return type (Typing[4110])
-  File "typeconst_default_selected_only_in_concrete_class.php", line 29, characters 20-22:
-  Expected `int`
-  File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
-  But got `B::T as nonnull`
-  File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-10:
-    where the class `B` was referenced here
-ERROR: File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-17:
-Invalid return type (Typing[4110])
-  File "typeconst_default_selected_only_in_concrete_class.php", line 29, characters 20-22:
-  Expected `int`
-  File "typeconst_default_selected_only_in_concrete_class.php", line 21, characters 33-39:
-  But got `nonnull`
-  File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-10:
-    where the class `B` was referenced here
+error: Typing[4110] Invalid return type [1]
+-> Expected `this::T` [2]
+-> But got `int` [1]
+
+typeconst_default_selected_only_in_concrete_class.php:22:12
+19 |   // in B (even though B is abstract) because of the require-extends A clause.
+20 |   // This caused the typechecker to fail to emit any errors in this file.
+21 |   public static function get(): this::T {
+   |                                 ^^^^^^^ [2]
+22 |     return 0; // error
+   |            ^ [1]
+23 |   }
+24 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `B::T as nonnull` [3]
+->   where the class `B` was referenced here [4]
+
+typeconst_default_selected_only_in_concrete_class.php:30:10
+19 |   // in B (even though B is abstract) because of the require-extends A clause.
+20 |   // This caused the typechecker to fail to emit any errors in this file.
+21 |   public static function get(): this::T {
+   |                                 ^^^^^^^ [3]
+22 |     return 0; // error
+23 |   }
+   :
+27 | }
+28 | 
+29 | function test_b(): int {
+   |                    ^^^ [2]
+30 |   return B::get(); // error
+   |          ^^^^^^^^ [1]
+   |          ^ [4]
+31 | }
+32 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `nonnull` [3]
+->   where the class `B` was referenced here [4]
+
+typeconst_default_selected_only_in_concrete_class.php:30:10
+19 |   // in B (even though B is abstract) because of the require-extends A clause.
+20 |   // This caused the typechecker to fail to emit any errors in this file.
+21 |   public static function get(): this::T {
+   |                                 ^^^^^^^ [3]
+22 |     return 0; // error
+23 |   }
+   :
+27 | }
+28 | 
+29 | function test_b(): int {
+   |                    ^^^ [2]
+30 |   return B::get(); // error
+   |          ^^^^^^^^ [1]
+   |          ^ [4]
+31 | }
+32 | 
+
+3 errors found

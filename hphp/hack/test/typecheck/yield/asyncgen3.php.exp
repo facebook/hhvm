@@ -1,8 +1,23 @@
-ERROR: File "asyncgen3.php", line 8, characters 8-18:
-`await` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "asyncgen3.php", line 7, characters 15-47:
-Invalid return type (Typing[4110])
-  File "asyncgen3.php", line 7, characters 15-47:
-  Expected `AsyncGenerator<int, string, void>`
-  File "asyncgen3.php", line 7, characters 15-47:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+asyncgen3.php:8:8
+ 6 | 
+ 7 | function f(): AsyncGenerator<int, string, void> {
+ 8 |   $x = await foo();
+   |        ^^^^^^^^^^^ [1]
+ 9 |   yield 42 => $x;
+10 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `AsyncGenerator<int, string, void>` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+asyncgen3.php:7:15
+5 | }
+6 | 
+7 | function f(): AsyncGenerator<int, string, void> {
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |   $x = await foo();
+9 |   yield 42 => $x;
+
+2 errors found

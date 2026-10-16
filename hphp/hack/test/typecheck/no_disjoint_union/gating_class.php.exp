@@ -1,2 +1,9 @@
-ERROR: File "gating_class.php", line 3, characters 11-27:
-Cannot use unstable feature: `no_disjoint_union` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `no_disjoint_union` [1]
+
+gating_class.php:3:11
+1 | <?hh
+2 | 
+3 | class C<<<__NoDisjointUnion>> T> {}
+  |           ^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

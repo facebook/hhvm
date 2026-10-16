@@ -1,2 +1,11 @@
-WARN: File "inter_member.php", line 20, characters 7-13:
-This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. [1]
+
+inter_member.php:20:7
+18 | 
+19 | function f(A $x): void {
+20 |   if ($x is B) {
+   |       ^^^^^^^ [1]
+21 |     expect<int>($x->x);
+22 |     expect<string>($x->x);
+
+1 error found

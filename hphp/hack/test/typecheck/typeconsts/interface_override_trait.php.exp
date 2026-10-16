@@ -1,14 +1,40 @@
-ERROR: File "interface_override_trait.php", line 11, characters 7-7:
-Constant T is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_override_trait.php", line 8, characters 14-14:
-  One conflicting definition is here
-  File "interface_override_trait.php", line 4, characters 14-14:
-  Another conflicting definition is here
-ERROR: File "interface_override_trait.php", line 11, characters 28-29:
-Some members in class `A` are incompatible with those declared in type `T1` (Typing[4374])
-  File "interface_override_trait.php", line 8, characters 14-14:
-  Concrete and abstract type constants with default values in an interface cannot conflict with inherited concrete or abstract type constants with default values.
-  File "interface_override_trait.php", line 4, characters 14-14:
-  `T` inherited from `T1`
-  File "interface_override_trait.php", line 8, characters 14-14:
-  conflicts with `concrete type constant` `T` inherited from `I`.
+error: Typing[4374] Constant T is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+interface_override_trait.php:11:7
+ 2 | 
+ 3 | trait T1 {
+ 4 |   const type T = int;
+   |              ^ [3]
+ 5 | }
+ 6 | 
+ 7 | interface I {
+ 8 |   const type T = int;
+   |              ^ [2]
+ 9 | }
+10 | 
+11 | class A implements I { use T1; }
+   |       ^ [1]
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `T1` [1]
+-> Concrete and abstract type constants with default values in an interface cannot conflict with inherited concrete or abstract type constants with default values. [2]
+-> `T` inherited from `T1` [3]
+-> conflicts with `concrete type constant` `T` inherited from `I`. [2]
+
+interface_override_trait.php:11:28
+ 2 | 
+ 3 | trait T1 {
+ 4 |   const type T = int;
+   |              ^ [3]
+ 5 | }
+ 6 | 
+ 7 | interface I {
+ 8 |   const type T = int;
+   |              ^ [2]
+ 9 | }
+10 | 
+11 | class A implements I { use T1; }
+   |                            ^^ [1]
+
+2 errors found

@@ -1,6 +1,25 @@
-ERROR: File "fst_then_invoke_bad.php", line 22, characters 7-9:
-No instance method `foo` in `D` (Typing[4053])
-  File "fst_then_invoke_bad.php", line 18, characters 20-20:
-  This is why I think it is an object of type D
-  File "fst_then_invoke_bad.php", line 8, characters 7-7:
-  Declaration of `D` is here
+error: Typing[4053] No instance method `foo` in `D` [1]
+-> This is why I think it is an object of type D [2]
+-> Declaration of `D` is here [3]
+
+fst_then_invoke_bad.php:22:7
+ 6 |   public function foo():void { }
+ 7 | }
+ 8 | class D extends B {
+   |       ^ [3]
+ 9 | }
+10 | class Inv<Tinv> {
+   :
+16 | }
+17 | 
+18 | function bar(C $c, D $d): Inv<B> {
+   |                    ^ [2]
+19 |   // Here, let $x:v and C<:v and D<:v
+20 |   $x = fst($c, $d);
+21 |   // Here, we find v:=C|D but should reject the call
+22 |   $x->foo();
+   |       ^^^ [1]
+23 |   // Here, we must instantiate Tinv=B
+24 |   return new Inv($x);
+
+1 error found

@@ -1,6 +1,22 @@
-ERROR: File "constructor_true_generic.php", line 27, characters 11-11:
-No instance method `f` in `A` (Typing[4053])
-  File "constructor_true_generic.php", line 25, characters 37-37:
-  This is why I think it is an object of type A
-  File "constructor_true_generic.php", line 5, characters 7-7:
-  Declaration of `A` is here
+error: Typing[4053] No instance method `f` in `A` [1]
+-> This is why I think it is an object of type A [2]
+-> Declaration of `A` is here [3]
+
+constructor_true_generic.php:27:11
+ 3 | 
+ 4 | <<__ConsistentConstruct>>
+ 5 | class A {
+   |       ^ [3]
+ 6 |   public function __construct(public int $i, public string $s) {}
+ 7 | }
+   :
+23 | }
+24 | 
+25 | function g<<<__Newable>> reify T as A>(): void {
+   |                                     ^ [2]
+26 |   $local = new T(42, "right");
+27 |   $local->f(); // error
+   |           ^ [1]
+28 | }
+
+1 error found

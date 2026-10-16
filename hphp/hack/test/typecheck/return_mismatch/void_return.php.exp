@@ -1,10 +1,26 @@
-ERROR: File "void_return.php", line 13, characters 3-14:
-You cannot return a value (Typing[4084])
-  File "void_return.php", line 12, characters 17-20:
-  This is a `void` function
-ERROR: File "void_return.php", line 13, characters 10-13:
-Invalid return type (Typing[4110])
-  File "void_return.php", line 12, characters 17-20:
-  Expected `void`
-  File "void_return.php", line 13, characters 10-13:
-  But got `null`
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+void_return.php:13:3
+10 |  */
+11 | 
+12 | function foo(): void {
+   |                 ^^^^ [2]
+13 |   return null;
+   |   ^^^^^^^^^^^^ [1]
+14 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `null` [1]
+
+void_return.php:13:10
+10 |  */
+11 | 
+12 | function foo(): void {
+   |                 ^^^^ [2]
+13 |   return null;
+   |          ^^^^ [1]
+14 | }
+
+2 errors found

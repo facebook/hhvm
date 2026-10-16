@@ -1,12 +1,33 @@
-ERROR: File "disjoint_attr_union.php", line 7, characters 9-11:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_union.php", line 10, characters 25-27:
-  Shape field `x` is defined here
-  File "disjoint_attr_union.php", line 10, characters 15-16:
-  Shape field `x` may also be provided by type parameter `TA`
-ERROR: File "disjoint_attr_union.php", line 14, characters 9-25:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_union.php", line 15, characters 37-39:
-  Shape field `x` is defined here
-  File "disjoint_attr_union.php", line 15, characters 19-21:
-  Shape field `x` may also be defined here
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` may also be provided by type parameter `TA` [3]
+
+disjoint_attr_union.php:7:9
+ 5 | // provably disjoint from the explicit field.
+ 6 | <<__DisjointShapeSplat>>
+ 7 | newtype Bad<
+   |         ^^^ [1]
+ 8 |   TA as shape('x' => int),
+ 9 |   TB as shape('b' => int),
+10 | > = shape(...(TA | TB), 'x' => bool);
+   |               ^^ [3]
+   |                         ^^^ [2]
+11 | 
+12 | // A concrete field in one union branch is a possible overlap.
+
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` may also be defined here [3]
+
+disjoint_attr_union.php:14:9
+12 | // A concrete field in one union branch is a possible overlap.
+13 | <<__DisjointShapeSplat>>
+14 | newtype BadConcreteBranch<T as shape('b' => int)> =
+   |         ^^^^^^^^^^^^^^^^^ [1]
+15 |   shape(...(shape('x' => int) | T), 'x' => bool);
+   |                   ^^^ [3]
+   |                                     ^^^ [2]
+16 | 
+17 | // SOUND ACCEPTANCE CONTROL: neither union branch can supply `x`.
+
+2 errors found

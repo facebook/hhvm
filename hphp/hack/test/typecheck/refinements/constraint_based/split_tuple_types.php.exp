@@ -1,4 +1,21 @@
-WARN: File "split_tuple_types.php", line 5, characters 9-29:
-This `is` check is always `false`. The expression on the left has type `(int, int)` which shares no values with `(int, int, int)`. (Warn[12010])
-WARN: File "split_tuple_types.php", line 13, characters 9-32:
-This `is` check is always `false`. The expression on the left has type `(int, int, int)` which shares no values with `(int, int, string)`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(int, int)` which shares no values with `(int, int, int)`. [1]
+
+split_tuple_types.php:5:9
+3 | function should_understand_disjoint_tuples_mismatched_arity(mixed $x): void {
+4 |   if ($x is (int, int)) {
+5 |     if ($x is (int, int, int)) {
+  |         ^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |       hh_expect<nothing>($x);
+7 |     }
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(int, int, int)` which shares no values with `(int, int, string)`. [1]
+
+split_tuple_types.php:13:9
+11 | function should_understand_disjoint_tuples_one_type_off(mixed $x): void {
+12 |   if ($x is (int, int, int)) {
+13 |     if ($x is (int, int, string)) {
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |       hh_expect<nothing>($x);
+15 |     }
+
+2 errors found

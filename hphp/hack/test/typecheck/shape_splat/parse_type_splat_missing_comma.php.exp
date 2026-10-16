@@ -1,10 +1,41 @@
-ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 23-23:
-A comma `,` is expected here. (Parsing[1002])
-ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 23-25:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 27-28:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 30-34:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "parse_type_splat_missing_comma.php", line 8, characters 12-21:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+error: Parsing[1002] A comma `,` is expected here. [1]
+
+parse_type_splat_missing_comma.php:8:23
+6 | // Missing comma after a shape splat element: must be rejected rather than
+7 | // silently parsed as `...A` followed by a `'y' => int` field.
+8 | type Bad = shape(...A 'y' => int);
+  |                       ^ [1]
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+parse_type_splat_missing_comma.php:8:23
+6 | // Missing comma after a shape splat element: must be rejected rather than
+7 | // silently parsed as `...A` followed by a `'y' => int` field.
+8 | type Bad = shape(...A 'y' => int);
+  |                       ^^^ [1]
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+parse_type_splat_missing_comma.php:8:27
+6 | // Missing comma after a shape splat element: must be rejected rather than
+7 | // silently parsed as `...A` followed by a `'y' => int` field.
+8 | type Bad = shape(...A 'y' => int);
+  |                           ^^ [1]
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+parse_type_splat_missing_comma.php:8:30
+6 | // Missing comma after a shape splat element: must be rejected rather than
+7 | // silently parsed as `...A` followed by a `'y' => int` field.
+8 | type Bad = shape(...A 'y' => int);
+  |                              ^^^^^ [1]
+
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+parse_type_splat_missing_comma.php:8:12
+6 | // Missing comma after a shape splat element: must be rejected rather than
+7 | // silently parsed as `...A` followed by a `'y' => int` field.
+8 | type Bad = shape(...A 'y' => int);
+  |            ^^^^^^^^^^ [1]
+
+5 errors found

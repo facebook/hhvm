@@ -1,18 +1,57 @@
-ERROR: File "named_params_traits.php", line 48, characters 3-38:
-Typing error (Typing[4041])
-  File "named_params_traits.php", line 5, characters 19-30:
-  Unexpected named parameter: label
-  File "named_params_traits.php", line 48, characters 3-38:
-  Because of this definition
-ERROR: File "named_params_traits.php", line 51, characters 3-50:
-Typing error (Typing[4040])
-  File "named_params_traits.php", line 5, characters 19-30:
-  Missing required named parameter: unknown
-  File "named_params_traits.php", line 51, characters 3-50:
-  Because of this definition
-ERROR: File "named_params_traits.php", line 54, characters 3-26:
-Typing error (Typing[4041])
-  File "named_params_traits.php", line 22, characters 19-33:
-  Unexpected named parameter: name
-  File "named_params_traits.php", line 54, characters 3-26:
-  Because of this definition
+error: Typing[4041] Typing error [1]
+-> Unexpected named parameter: label [2]
+-> Because of this definition [1]
+
+named_params_traits.php:48:3
+ 3 | 
+ 4 | trait TestTrait {
+ 5 |   public function trait_method(
+   |                   ^^^^^^^^^^^^ [2]
+ 6 |     int $a,
+ 7 |     named string $label,
+   :
+46 | 
+47 |   // Error: Missing required named parameter in trait method
+48 |   $obj->trait_method(1, enabled=false);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+49 | 
+50 |   // Error: Unexpected named parameter in trait method
+
+error: Typing[4040] Typing error [1]
+-> Missing required named parameter: unknown [2]
+-> Because of this definition [1]
+
+named_params_traits.php:51:3
+ 3 | 
+ 4 | trait TestTrait {
+ 5 |   public function trait_method(
+   |                   ^^^^^^^^^^^^ [2]
+ 6 |     int $a,
+ 7 |     named string $label,
+   :
+49 | 
+50 |   // Error: Unexpected named parameter in trait method
+51 |   $obj->trait_method(1, label="test", unknown=123);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 | 
+53 |   // Error: Missing required parameter in trait with requirements
+
+error: Typing[4041] Typing error [1]
+-> Unexpected named parameter: name [2]
+-> Because of this definition [1]
+
+named_params_traits.php:54:3
+20 |   require extends BaseClass;
+21 | 
+22 |   public function required_method(named string $name): void {}
+   |                   ^^^^^^^^^^^^^^^ [2]
+23 | }
+24 | 
+   :
+52 | 
+53 |   // Error: Missing required parameter in trait with requirements
+54 |   $obj2->required_method();
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+55 | }
+
+3 errors found

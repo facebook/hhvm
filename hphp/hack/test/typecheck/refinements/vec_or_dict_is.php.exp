@@ -6,9 +6,19 @@ File "vec_or_dict_is.php", line 13, characters 5-15:
   dict<string, bool>
 File "vec_or_dict_is.php", line 15, characters 5-15:
   vec<bool>
-ERROR: File "vec_or_dict_is.php", line 22, characters 10-11:
-Invalid return type (Typing[4110])
-  File "vec_or_dict_is.php", line 21, characters 16-21:
-  Expected `string`
-  File "vec_or_dict_is.php", line 20, characters 3-11:
-  But got `int` because only `int` can be used to index into a `Vector` or `vec`.
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` because only `int` can be used to index into a `Vector` or `vec`. [3]
+
+vec_or_dict_is.php:22:10
+18 | 
+19 | function is_vec_vec_or_dict_with_string_key(
+20 |   vec<bool> $x,
+   |   ^^^^^^^^^ [3]
+21 | ): vec_or_dict<string, bool> {
+   |                ^^^^^^ [2]
+22 |   return $x;
+   |          ^^ [1]
+23 | }
+
+1 error found

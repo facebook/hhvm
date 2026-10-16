@@ -1,6 +1,19 @@
-ERROR: File "asyncgen6.php", line 13, characters 3-11:
-`await` can only operate on an `Awaitable` (Typing[4110])
-  File "asyncgen6.php", line 13, characters 3-11:
-  Expected `Awaitable<nothing>`
-  File "asyncgen6.php", line 7, characters 21-53:
-  But got `AsyncGenerator<int, string, void>`
+error: Typing[4110] `await` can only operate on an `Awaitable` [1]
+-> Expected `Awaitable<nothing>` [1]
+-> But got `AsyncGenerator<int, string, void>` [2]
+
+asyncgen6.php:13:3
+ 5 | }
+ 6 | 
+ 7 | async function f(): AsyncGenerator<int, string, void> {
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 |   $x = await foo();
+ 9 |   yield 42 => $x;
+10 | }
+11 | 
+12 | async function g(): Awaitable<void> {
+13 |   await f();
+   |   ^^^^^^^^^ [1]
+14 | }
+
+1 error found

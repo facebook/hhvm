@@ -1,6 +1,18 @@
-ERROR: File "null_coalesce_assignment.php", line 26, characters 10-11:
-Invalid return type (Typing[4110])
-  File "null_coalesce_assignment.php", line 22, characters 23-25:
-  Expected `int`
-  File "null_coalesce_assignment.php", line 25, characters 10-24:
-  But got `vec<(int | string)>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `vec<(int | string)>` [3]
+
+null_coalesce_assignment.php:26:10
+20 | }
+21 | 
+22 | function f3(?int $x): int {
+   |                       ^^^ [2]
+23 |   $x ??= 0;
+24 |   $x = 42;
+25 |   $x ??= vec["hello", 4];
+   |          ^^^^^^^^^^^^^^^ [3]
+26 |   return $x;
+   |          ^^ [1]
+27 | }
+
+1 error found

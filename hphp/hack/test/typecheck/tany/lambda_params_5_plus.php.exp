@@ -1,6 +1,29 @@
-WARN: File "lambda_params_5_plus.php", line 19, characters 24-27:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "lambda_params_5_plus.php", line 16, characters 30-42:
-No type constant `TDoesNotExist` in `WithConcreteTypeconst` (Typing[4090])
-  File "lambda_params_5_plus.php", line 7, characters 13-33:
-  Declaration of `WithConcreteTypeconst` is here
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+lambda_params_5_plus.php:19:24
+17 |       int $e,
+18 |     ) ==> {
+19 |       give_me_a_banana($wtf);
+   |                        ^^^^ [1]
+20 |     };
+21 |   }
+
+error: Typing[4090] No type constant `TDoesNotExist` in `WithConcreteTypeconst` [1]
+-> Declaration of `WithConcreteTypeconst` is here [2]
+
+lambda_params_5_plus.php:16:30
+ 5 | }
+ 6 | 
+ 7 | final class WithConcreteTypeconst {}
+   |             ^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 | 
+ 9 | final class Ummm {
+   :
+14 |       int $c,
+15 |       int $d,
+16 |       WithConcreteTypeconst::TDoesNotExist $wtf,
+   |                              ^^^^^^^^^^^^^ [1]
+17 |       int $e,
+18 |     ) ==> {
+
+2 errors found

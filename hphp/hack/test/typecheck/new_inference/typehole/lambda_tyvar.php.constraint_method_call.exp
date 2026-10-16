@@ -1,6 +1,23 @@
-ERROR: File "lambda_tyvar.php", line 7, characters 35-60:
-No instance method `this_method_does_not_exist` in `string` (Typing[4053])
-  File "lambda_tyvar.php", line 9, characters 7-16:
-  This is why I think it is an object of type HH\string
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
+error: Typing[4053] No instance method `this_method_does_not_exist` in `string` [1]
+-> This is why I think it is an object of type HH\string [2]
+-> Declaration of `string` is here [3]
+
+lambda_tyvar.php:7:35
+ 5 | 
+ 6 | function break_it(string $ss):void {
+ 7 |   $g1 = just_return_it($y ==> $y->this_method_does_not_exist());
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 8 |   $g2 = just_return_it($y ==> { $z = $y; $z->this_method_also_does_not_exist(); });
+ 9 |   $g1("hahahaha");
+   |       ^^^^^^^^^^ [2]
+10 | }
+
+string.hhi:6:15
+ 4 | 
+ 5 |   <<__SupportDynamicType>>
+ 6 |   final class string {
+   |               ^^^^^^ [3]
+ 7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+ 8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+1 error found

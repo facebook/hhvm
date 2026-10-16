@@ -1,6 +1,16 @@
-ERROR: File "access_on_nothing.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "access_on_nothing.php", line 7, characters 58-59:
-  Expected `Tm`
-  File "access_on_nothing.php", line 7, characters 47-51:
-  But got `mixed`
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tm` [2]
+-> But got `mixed` [3]
+
+access_on_nothing.php:8:10
+ 5 | }
+ 6 | 
+ 7 | function f0<T as Cm with { type T = Tm }, Tm>(mixed $x): Tm {
+   |                                               ^^^^^ [3]
+   |                                                          ^^ [2]
+ 8 |   return $x;
+   |          ^^ [1]
+ 9 | }
+10 | 
+
+1 error found

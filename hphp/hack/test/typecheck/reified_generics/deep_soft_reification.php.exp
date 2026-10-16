@@ -1,32 +1,113 @@
-ERROR: File "deep_soft_reification.php", line 12, characters 14-24:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "deep_soft_reification.php", line 5, characters 7-17:
-  Definition is here
-ERROR: File "deep_soft_reification.php", line 15, characters 14-20:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "deep_soft_reification.php", line 6, characters 7-13:
-  Definition is here
-ERROR: File "deep_soft_reification.php", line 28, characters 26-31:
-Invalid reified hint (Typing[4305])
-  File "deep_soft_reification.php", line 28, characters 26-31:
-  This is not reified, it cannot be used as a reified type argument
-  File "deep_soft_reification.php", line 5, characters 36-36:
-  `T` is reified
-ERROR: File "deep_soft_reification.php", line 29, characters 26-30:
-Invalid reified hint (Typing[4305])
-  File "deep_soft_reification.php", line 29, characters 26-30:
-  This is soft reified, it cannot be used as a reified type argument
-  File "deep_soft_reification.php", line 5, characters 36-36:
-  `T` is reified
-ERROR: File "deep_soft_reification.php", line 32, characters 22-27:
-Invalid reified hint (Typing[4305])
-  File "deep_soft_reification.php", line 32, characters 22-27:
-  This is not reified, it cannot be used as a reified type argument
-  File "deep_soft_reification.php", line 6, characters 21-21:
-  `T` is reified
-ERROR: File "deep_soft_reification.php", line 33, characters 22-26:
-Invalid reified hint (Typing[4305])
-  File "deep_soft_reification.php", line 33, characters 22-26:
-  This is soft reified, it cannot be used as a reified type argument
-  File "deep_soft_reification.php", line 6, characters 21-21:
-  `T` is reified
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+deep_soft_reification.php:12:14
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class SoftReified<<<__Soft>> reify T> {}
+   |       ^^^^^^^^^^^ [2]
+ 6 | class Reified<reify T> {}
+ 7 | 
+   :
+10 |   new Erased<Erased<int>>();
+11 | 
+12 |   new Erased<SoftReified>(); // bad
+   |              ^^^^^^^^^^^ [1]
+13 |   new Erased<SoftReified<int>>();
+14 | 
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+deep_soft_reification.php:15:14
+ 4 | class Erased<T> {}
+ 5 | class SoftReified<<<__Soft>> reify T> {}
+ 6 | class Reified<reify T> {}
+   |       ^^^^^^^ [2]
+ 7 | 
+ 8 | function new_targCheck(): void {
+   :
+13 |   new Erased<SoftReified<int>>();
+14 | 
+15 |   new Erased<Reified>(); // bad
+   |              ^^^^^^^ [1]
+16 |   new Erased<Reified<int>>();
+17 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+deep_soft_reification.php:28:26
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class SoftReified<<<__Soft>> reify T> {}
+   |                                    ^ [2]
+ 6 | class Reified<reify T> {}
+ 7 | 
+   :
+26 |   new Erased<Erased<Thard>>();
+27 | 
+28 |   new Erased<SoftReified<Terase>>();
+   |                          ^^^^^^ [1]
+29 |   new Erased<SoftReified<Tsoft>>();
+30 |   new Erased<SoftReified<Thard>>();
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is soft reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+deep_soft_reification.php:29:26
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class SoftReified<<<__Soft>> reify T> {}
+   |                                    ^ [2]
+ 6 | class Reified<reify T> {}
+ 7 | 
+   :
+27 | 
+28 |   new Erased<SoftReified<Terase>>();
+29 |   new Erased<SoftReified<Tsoft>>();
+   |                          ^^^^^ [1]
+30 |   new Erased<SoftReified<Thard>>();
+31 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+deep_soft_reification.php:32:22
+ 4 | class Erased<T> {}
+ 5 | class SoftReified<<<__Soft>> reify T> {}
+ 6 | class Reified<reify T> {}
+   |                     ^ [2]
+ 7 | 
+ 8 | function new_targCheck(): void {
+   :
+30 |   new Erased<SoftReified<Thard>>();
+31 | 
+32 |   new Erased<Reified<Terase>>();
+   |                      ^^^^^^ [1]
+33 |   new Erased<Reified<Tsoft>>();
+34 |   new Erased<Reified<Thard>>();
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is soft reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+deep_soft_reification.php:33:22
+ 4 | class Erased<T> {}
+ 5 | class SoftReified<<<__Soft>> reify T> {}
+ 6 | class Reified<reify T> {}
+   |                     ^ [2]
+ 7 | 
+ 8 | function new_targCheck(): void {
+   :
+31 | 
+32 |   new Erased<Reified<Terase>>();
+33 |   new Erased<Reified<Tsoft>>();
+   |                      ^^^^^ [1]
+34 |   new Erased<Reified<Thard>>();
+35 | }
+
+6 errors found

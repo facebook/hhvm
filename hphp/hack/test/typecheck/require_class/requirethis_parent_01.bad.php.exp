@@ -1,4 +1,16 @@
-ERROR: File "requirethis_parent_01.bad.php", line 15, characters 9-14:
-parent is undefined (Typing[4076])
-  File "requirethis_parent_01.bad.php", line 12, characters 21-21:
-  The class required here has no parent
+error: Typing[4076] parent is undefined [1]
+-> The class required here has no parent [2]
+
+requirethis_parent_01.bad.php:15:9
+10 | 
+11 | trait T {
+12 |     require this as C;
+   |                     ^ [2]
+13 | 
+14 |     public function foo(): void {
+15 |         parent::bar();
+   |         ^^^^^^ [1]
+16 |     }
+17 | }
+
+1 error found

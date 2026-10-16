@@ -1,4 +1,15 @@
-ERROR: File "shape_structural_subtyping_disallows_indexing_for_optional_field.php", line 6, characters 10-12:
-The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "shape_structural_subtyping_disallows_indexing_for_optional_field.php", line 3, characters 38-40:
-  This is where the field was declared as optional.
+error: Typing[4165] The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+shape_structural_subtyping_disallows_indexing_for_optional_field.php:6:10
+1 | <?hh
+2 | 
+3 | type ShapeWithOptionalField = shape(?'a' => int);
+  |                                      ^^^ [2]
+4 | 
+5 | function foo(ShapeWithOptionalField $shape): void {
+6 |   $shape['a'];
+  |          ^^^ [1]
+7 | }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "no_shape_keys_generics.php", line 9, characters 5-5:
-Generics are not allowed in this position. (Typing[4306])
+error: Typing[4306] Generics are not allowed in this position. [1]
+
+no_shape_keys_generics.php:9:5
+ 7 | function f<reify T as C>(): void {
+ 8 |   $x = shape(
+ 9 |     T::A => 4
+   |     ^ [1]
+10 |   );
+11 | }
+
+1 error found

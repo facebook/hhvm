@@ -1,58 +1,241 @@
-ERROR: File "shapes_collide.php", line 3, characters 18-25:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 7, characters 26-33:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 7, characters 45-52:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 8, characters 26-33:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 9, characters 45-52:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 13, characters 25-32:
-Shape field name must not be a `B::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 13, characters 44-51:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 14, characters 25-32:
-Shape field name must not be a `B::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 15, characters 44-51:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_collide.php", line 7, characters 48-52:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 8, characters 52-52:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 9, characters 48-52:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 10, characters 52-52:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 13, characters 47-51:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 14, characters 51-51:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 15, characters 47-51:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 16, characters 51-51:
-Field name already bound (Naming[2015])
-ERROR: File "shapes_collide.php", line 3, characters 37-39:
-Shape uses literal string as field name (Typing[4050])
-  File "shapes_collide.php", line 3, characters 18-25:
-  But expected a class constant. Shape fields cannot be a mix of literals and constants.
-ERROR: File "shapes_collide.php", line 4, characters 37-39:
-Shape uses literal string as field name (Typing[4050])
-  File "shapes_collide.php", line 4, characters 25-25:
-  But expected a class constant. Shape fields cannot be a mix of literals and constants.
-ERROR: File "shapes_collide.php", line 13, characters 44-51:
-Shape field name is class constant from `C` (Typing[4085])
-  File "shapes_collide.php", line 13, characters 25-32:
-  But expected constant from `B`
-ERROR: File "shapes_collide.php", line 14, characters 51-51:
-Shape field name is class constant from `C` (Typing[4085])
-  File "shapes_collide.php", line 14, characters 25-32:
-  But expected constant from `B`
-ERROR: File "shapes_collide.php", line 15, characters 44-51:
-Shape field name is class constant from `C` (Typing[4085])
-  File "shapes_collide.php", line 15, characters 32-32:
-  But expected constant from `B`
-ERROR: File "shapes_collide.php", line 16, characters 51-51:
-Shape field name is class constant from `C` (Typing[4085])
-  File "shapes_collide.php", line 16, characters 32-32:
-  But expected constant from `B`
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:3:18
+1 | <?hh
+2 | 
+3 | type Ts1 = shape(C::class => float, 'C' => int);
+  |                  ^^^^^^^^ [1]
+4 | type Ts2 = shape(nameof C => float, 'C' => int);
+5 | 
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:7:26
+5 | 
+6 | class B {
+7 |   const type Tb1 = shape(C::class => float, C::class => int);
+  |                          ^^^^^^^^ [1]
+8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:7:45
+5 | 
+6 | class B {
+7 |   const type Tb1 = shape(C::class => float, C::class => int);
+  |                                             ^^^^^^^^ [1]
+8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:8:26
+ 6 | class B {
+ 7 |   const type Tb1 = shape(C::class => float, C::class => int);
+ 8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+   |                          ^^^^^^^^ [1]
+ 9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+10 |   const type Tb4 = shape(nameof C => float, nameof C => int);
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:9:45
+ 7 |   const type Tb1 = shape(C::class => float, C::class => int);
+ 8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+ 9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+   |                                             ^^^^^^^^ [1]
+10 |   const type Tb4 = shape(nameof C => float, nameof C => int);
+11 | }
+
+error: Parsing[1002] Shape field name must not be a `B::class` expression [1]
+
+shapes_collide.php:13:25
+11 | }
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+   |                         ^^^^^^^^ [1]
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:13:44
+11 | }
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+   |                                            ^^^^^^^^ [1]
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+
+error: Parsing[1002] Shape field name must not be a `B::class` expression [1]
+
+shapes_collide.php:14:25
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+   |                         ^^^^^^^^ [1]
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_collide.php:15:44
+13 |   const type T1 = shape(B::class => float, C::class => int);
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+   |                                            ^^^^^^^^ [1]
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+17 | }
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:7:48
+5 | 
+6 | class B {
+7 |   const type Tb1 = shape(C::class => float, C::class => int);
+  |                                                ^^^^^ [1]
+8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:8:52
+ 6 | class B {
+ 7 |   const type Tb1 = shape(C::class => float, C::class => int);
+ 8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+   |                                                    ^ [1]
+ 9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+10 |   const type Tb4 = shape(nameof C => float, nameof C => int);
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:9:48
+ 7 |   const type Tb1 = shape(C::class => float, C::class => int);
+ 8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+ 9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+   |                                                ^^^^^ [1]
+10 |   const type Tb4 = shape(nameof C => float, nameof C => int);
+11 | }
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:10:52
+ 8 |   const type Tb2 = shape(C::class => float, nameof C => int);
+ 9 |   const type Tb3 = shape(nameof C => float, C::class => int);
+10 |   const type Tb4 = shape(nameof C => float, nameof C => int);
+   |                                                    ^ [1]
+11 | }
+12 | class C extends B {
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:13:47
+11 | }
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+   |                                               ^^^^^ [1]
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:14:51
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+   |                                                   ^ [1]
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:15:47
+13 |   const type T1 = shape(B::class => float, C::class => int);
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+   |                                               ^^^^^ [1]
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+17 | }
+
+error: Naming[2015] Field name already bound [1]
+
+shapes_collide.php:16:51
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+   |                                                   ^ [1]
+17 | }
+
+error: Typing[4050] Shape uses literal string as field name [1]
+-> But expected a class constant. Shape fields cannot be a mix of literals and constants. [2]
+
+shapes_collide.php:3:37
+1 | <?hh
+2 | 
+3 | type Ts1 = shape(C::class => float, 'C' => int);
+  |                  ^^^^^^^^ [2]
+  |                                     ^^^ [1]
+4 | type Ts2 = shape(nameof C => float, 'C' => int);
+5 | 
+
+error: Typing[4050] Shape uses literal string as field name [1]
+-> But expected a class constant. Shape fields cannot be a mix of literals and constants. [2]
+
+shapes_collide.php:4:37
+2 | 
+3 | type Ts1 = shape(C::class => float, 'C' => int);
+4 | type Ts2 = shape(nameof C => float, 'C' => int);
+  |                         ^ [2]
+  |                                     ^^^ [1]
+5 | 
+6 | class B {
+
+error: Typing[4085] Shape field name is class constant from `C` [1]
+-> But expected constant from `B` [2]
+
+shapes_collide.php:13:44
+11 | }
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+   |                         ^^^^^^^^ [2]
+   |                                            ^^^^^^^^ [1]
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+
+error: Typing[4085] Shape field name is class constant from `C` [1]
+-> But expected constant from `B` [2]
+
+shapes_collide.php:14:51
+12 | class C extends B {
+13 |   const type T1 = shape(B::class => float, C::class => int);
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+   |                         ^^^^^^^^ [2]
+   |                                                   ^ [1]
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+
+error: Typing[4085] Shape field name is class constant from `C` [1]
+-> But expected constant from `B` [2]
+
+shapes_collide.php:15:44
+13 |   const type T1 = shape(B::class => float, C::class => int);
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+   |                                ^ [2]
+   |                                            ^^^^^^^^ [1]
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+17 | }
+
+error: Typing[4085] Shape field name is class constant from `C` [1]
+-> But expected constant from `B` [2]
+
+shapes_collide.php:16:51
+14 |   const type T2 = shape(B::class => float, nameof C => int);
+15 |   const type T3 = shape(nameof B => float, C::class => int);
+16 |   const type T4 = shape(nameof B => float, nameof C => int);
+   |                                ^ [2]
+   |                                                   ^ [1]
+17 | }
+
+23 errors found

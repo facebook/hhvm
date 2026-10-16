@@ -1,2 +1,10 @@
-WARN: File "nullsafe-call-6.php", line 9, characters 10-17:
-You are using the `?->` operator but this object is of type C which cannot be null. You can use the `->` operator instead. (Warn[12029])
+warning: Warn[12029] You are using the `?->` operator but this object is of type C which cannot be null. You can use the `->` operator instead. [1]
+
+nullsafe-call-6.php:9:10
+ 7 | class D {}
+ 8 | function test(C $c): D {
+ 9 |   return $c?->foo();
+   |          ^^^^^^^^ [1]
+10 | }
+
+1 error found

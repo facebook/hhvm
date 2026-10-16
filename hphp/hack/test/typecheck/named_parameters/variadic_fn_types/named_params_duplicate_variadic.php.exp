@@ -1,32 +1,161 @@
-ERROR: File "named_params_duplicate_variadic.php", line 13, characters 28-42:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 16, characters 59-73:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 19, characters 30-44:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 22, characters 45-56:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 26, characters 37-48:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 30, characters 23-37:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 31, characters 31-45:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 36, characters 45-59:
-A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. (Parsing[1002])
-ERROR: File "named_params_duplicate_variadic.php", line 13, characters 40-42:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 16, characters 71-73:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 19, characters 42-44:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 19, characters 57-59:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 22, characters 54-56:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 26, characters 46-48:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 30, characters 35-37:
-Argument already bound: `...` (Naming[2036])
-ERROR: File "named_params_duplicate_variadic.php", line 31, characters 43-45:
-Argument already bound: `...` (Naming[2036])
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:13:28
+11 | // duplicates collide. That is pre-existing and independent of the check here.
+12 | 
+13 | function two(named int..., named string...): void {}
+   |                            ^^^^^^^^^^^^^^^ [1]
+14 | 
+15 | // A positional variadic in front does not change that.
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:16:59
+14 | 
+15 | // A positional variadic in front does not change that.
+16 | function two_after_positional(int ...$rest, named int..., named string...): void {}
+   |                                                           ^^^^^^^^^^^^^^^ [1]
+17 | 
+18 | // Three reports once, on the second.
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:19:30
+17 | 
+18 | // Three reports once, on the second.
+19 | function three(named int..., named string..., named bool...): void {}
+   |                              ^^^^^^^^^^^^^^^ [1]
+20 | 
+21 | abstract class C {
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:22:45
+20 | 
+21 | abstract class C {
+22 |   abstract public function m(named bool..., named int...): void;
+   |                                             ^^^^^^^^^^^^ [1]
+23 | }
+24 | 
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:26:37
+24 | 
+25 | interface I {
+26 |   public function j(named mixed..., named int...): void;
+   |                                     ^^^^^^^^^^^^ [1]
+27 | }
+28 | 
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:30:23
+28 | 
+29 | function in_lambdas(): void {
+30 |   $_ = (named int..., named string...) ==> 1;
+   |                       ^^^^^^^^^^^^^^^ [1]
+31 |   $_ = function(named int..., named string...): void {};
+32 | }
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:31:31
+29 | function in_lambdas(): void {
+30 |   $_ = (named int..., named string...) ==> 1;
+31 |   $_ = function(named int..., named string...): void {};
+   |                               ^^^^^^^^^^^^^^^ [1]
+32 | }
+33 | 
+
+error: Parsing[1002] A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter. [1]
+
+named_params_duplicate_variadic.php:36:45
+34 | // In a function type hint too. This case was already rejected by the lowerer;
+35 | // it is now reported by the same check as the definitions above.
+36 | function in_fn_type((function(named int..., named string...): void) $_): void {}
+   |                                             ^^^^^^^^^^^^^^^ [1]
+37 | 
+38 | // One of each is fine.
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:13:40
+11 | // duplicates collide. That is pre-existing and independent of the check here.
+12 | 
+13 | function two(named int..., named string...): void {}
+   |                                        ^^^ [1]
+14 | 
+15 | // A positional variadic in front does not change that.
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:16:71
+14 | 
+15 | // A positional variadic in front does not change that.
+16 | function two_after_positional(int ...$rest, named int..., named string...): void {}
+   |                                                                       ^^^ [1]
+17 | 
+18 | // Three reports once, on the second.
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:19:42
+17 | 
+18 | // Three reports once, on the second.
+19 | function three(named int..., named string..., named bool...): void {}
+   |                                          ^^^ [1]
+20 | 
+21 | abstract class C {
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:19:57
+17 | 
+18 | // Three reports once, on the second.
+19 | function three(named int..., named string..., named bool...): void {}
+   |                                                         ^^^ [1]
+20 | 
+21 | abstract class C {
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:22:54
+20 | 
+21 | abstract class C {
+22 |   abstract public function m(named bool..., named int...): void;
+   |                                                      ^^^ [1]
+23 | }
+24 | 
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:26:46
+24 | 
+25 | interface I {
+26 |   public function j(named mixed..., named int...): void;
+   |                                              ^^^ [1]
+27 | }
+28 | 
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:30:35
+28 | 
+29 | function in_lambdas(): void {
+30 |   $_ = (named int..., named string...) ==> 1;
+   |                                   ^^^ [1]
+31 |   $_ = function(named int..., named string...): void {};
+32 | }
+
+error: Naming[2036] Argument already bound: `...` [1]
+
+named_params_duplicate_variadic.php:31:43
+29 | function in_lambdas(): void {
+30 |   $_ = (named int..., named string...) ==> 1;
+31 |   $_ = function(named int..., named string...): void {};
+   |                                           ^^^ [1]
+32 | }
+33 | 
+
+16 errors found

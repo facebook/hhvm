@@ -1,10 +1,21 @@
-WARN: File "pairwise_disjoint.bad.php", line 8, characters 3-27:
-Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "pairwise_disjoint.bad.php", line 8, characters 7-10:
-  `bool` is one of the disjoint types
-  File "pairwise_disjoint.bad.php", line 8, characters 17-18:
-  `int` is one of the disjoint types
-  File "pairwise_disjoint.bad.php", line 8, characters 21-25:
-  `string` is one of the disjoint types
-  File "pairwise_disjoint.bad.php", line 5, characters 36-36:
-  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
+warning: Warn[12017] Invalid type argument due to disjoint types in a union [1]
+-> `bool` is one of the disjoint types [2]
+-> `int` is one of the disjoint types [3]
+-> `string` is one of the disjoint types [4]
+-> This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors [5]
+
+pairwise_disjoint.bad.php:8:3
+3 | <<file: __EnableUnstableFeatures('no_disjoint_union')>>
+4 | 
+5 | function foo<<<__NoDisjointUnion>> T>(T $_, vec<T> $_): void {}
+  |                                    ^ [5]
+6 | 
+7 | function main(): void {
+8 |   foo(true, vec[42, 'foo']);
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |       ^^^^ [2]
+  |                 ^^ [3]
+  |                     ^^^^^ [4]
+9 | }
+
+1 error found

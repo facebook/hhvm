@@ -1,12 +1,32 @@
-ERROR: File "sub_splat_open_tail_closed_bad.php", line 7, characters 10-11:
-Invalid return type (Typing[4138])
-  File "sub_splat_open_tail_closed_bad.php", line 4, characters 35-44:
-  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
-  File "sub_splat_open_tail_closed_bad.php", line 6, characters 4-10:
-  It is incompatible with a shape that does not allow unknown fields.
-ERROR: File "sub_splat_open_tail_closed_bad.php", line 7, characters 10-11:
-Invalid return type (Typing[4110])
-  File "sub_splat_open_tail_closed_bad.php", line 6, characters 4-10:
-  Expected `shape()`
-  File "sub_splat_open_tail_closed_bad.php", line 5, characters 3-3:
-  But got `T as shape(...)`
+error: Typing[4138] Invalid return type [1]
+-> This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration. [2]
+-> It is incompatible with a shape that does not allow unknown fields. [3]
+
+sub_splat_open_tail_closed_bad.php:7:10
+2 | <<file:__EnableUnstableFeatures('shape_splat_concrete', 'shape_splat_type_parameters')>>
+3 | 
+4 | function open_tail_to_closed<T as shape(...)>(
+  |                                   ^^^^^^^^^^ [2]
+5 |   T $s,
+6 | ): shape() {
+  |    ^^^^^^^ [3]
+7 |   return $s;
+  |          ^^ [1]
+8 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `shape()` [2]
+-> But got `T as shape(...)` [3]
+
+sub_splat_open_tail_closed_bad.php:7:10
+3 | 
+4 | function open_tail_to_closed<T as shape(...)>(
+5 |   T $s,
+  |   ^ [3]
+6 | ): shape() {
+  |    ^^^^^^^ [2]
+7 |   return $s;
+  |          ^^ [1]
+8 | }
+
+2 errors found

@@ -1,22 +1,92 @@
-WARN: File "duplicate.bad.php", line 7, characters 10-13:
-This switch case, `true`, occurred before. It will never be matched. (Warn[12019])
-  File "duplicate.bad.php", line 5, characters 10-13:
-  This is the original occurrence of the case.
-WARN: File "duplicate.bad.php", line 16, characters 10-10:
-Invalid case: This case will never match.
-A value of type `vec<nothing>` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "duplicate.bad.php", line 18, characters 10-10:
-Invalid case: This case will never match.
-A value of type `vec<nothing>` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "duplicate.bad.php", line 18, characters 10-10:
-This switch case, `1`, occurred before. It will never be matched. (Warn[12019])
-  File "duplicate.bad.php", line 16, characters 10-10:
-  This is the original occurrence of the case.
-WARN: File "duplicate.bad.php", line 26, characters 3-109:
-This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
-  File "duplicate.bad.php", line 31, characters 10-13:
-  The case is redundant.
-WARN: File "duplicate.bad.php", line 31, characters 10-13:
-This switch case, `true`, occurred before. It will never be matched. (Warn[12019])
-  File "duplicate.bad.php", line 27, characters 10-13:
-  This is the original occurrence of the case.
+warning: Warn[12019] This switch case, `true`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+duplicate.bad.php:7:10
+3 | function duplicate_with_default(): void {
+4 |   switch (true) {
+5 |     case true:
+  |          ^^^^ [2]
+6 |       return;
+7 |     case true:
+  |          ^^^^ [1]
+8 |       return;
+9 |     default:
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `vec<nothing>` can never be equal to a value of type `int` [1]
+
+duplicate.bad.php:16:10
+14 | function duplicate_on_unrecognised(): void {
+15 |   switch (vec[]) {
+16 |     case 1:
+   |          ^ [1]
+17 |       return;
+18 |     case 1:
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `vec<nothing>` can never be equal to a value of type `int` [1]
+
+duplicate.bad.php:18:10
+16 |     case 1:
+17 |       return;
+18 |     case 1:
+   |          ^ [1]
+19 |       return;
+20 |     default:
+
+warning: Warn[12019] This switch case, `1`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+duplicate.bad.php:18:10
+14 | function duplicate_on_unrecognised(): void {
+15 |   switch (vec[]) {
+16 |     case 1:
+   |          ^ [2]
+17 |       return;
+18 |     case 1:
+   |          ^ [1]
+19 |       return;
+20 |     default:
+
+warning: Warn[12019] This switch statement contains redundant cases. There are 1 redundant cases. [1]
+-> The case is redundant. [2]
+
+duplicate.bad.php:26:3
+24 | 
+25 | function duplicate_distant(): void {
+26 |   switch (true) {
+   |   ^^^^^^^^^^^^^^^ [1]
+27 |     case true:
+   |     ^^^^^^^^^^ [1]
+28 |       return;
+   |       ^^^^^^^ [1]
+29 |     case false:
+   |     ^^^^^^^^^^^ [1]
+30 |       return;
+   |       ^^^^^^^ [1]
+31 |     case true:
+   |     ^^^^^^^^^^ [1]
+   |          ^^^^ [2]
+32 |       return;
+   |       ^^^^^^^ [1]
+33 |   }
+   |   ^ [1]
+34 | }
+
+warning: Warn[12019] This switch case, `true`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+duplicate.bad.php:31:10
+25 | function duplicate_distant(): void {
+26 |   switch (true) {
+27 |     case true:
+   |          ^^^^ [2]
+28 |       return;
+29 |     case false:
+30 |       return;
+31 |     case true:
+   |          ^^^^ [1]
+32 |       return;
+33 |   }
+
+6 errors found

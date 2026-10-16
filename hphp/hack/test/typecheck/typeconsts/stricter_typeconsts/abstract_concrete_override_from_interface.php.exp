@@ -1,16 +1,70 @@
-ERROR: File "abstract_concrete_override_from_interface.php", line 7, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
-  Previously defined here
-ERROR: File "abstract_concrete_override_from_interface.php", line 11, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
-  Previously defined here
-ERROR: File "abstract_concrete_override_from_interface.php", line 15, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
-  Previously defined here
-ERROR: File "abstract_concrete_override_from_interface.php", line 20, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_interface.php", line 3, characters 26-26:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_interface.php:7:23
+1 | <?hh
+2 | 
+3 | interface I { const type T = int; }
+  |                          ^ [2]
+4 | 
+5 | abstract class A implements I {
+6 |   // error, abstract cannot override concrete
+7 |   abstract const type T = string;
+  |                       ^ [1]
+8 | }
+9 | 
+
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_interface.php:11:23
+ 1 | <?hh
+ 2 | 
+ 3 | interface I { const type T = int; }
+   |                          ^ [2]
+ 4 | 
+ 5 | abstract class A implements I {
+   :
+ 9 | 
+10 | interface I1 extends I { // same error
+11 |   abstract const type T = bool;
+   |                       ^ [1]
+12 | }
+13 | 
+
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_interface.php:15:23
+ 1 | <?hh
+ 2 | 
+ 3 | interface I { const type T = int; }
+   |                          ^ [2]
+ 4 | 
+ 5 | abstract class A implements I {
+   :
+13 | 
+14 | trait T1 implements I { // same error
+15 |   abstract const type T = float;
+   |                       ^ [1]
+16 | }
+17 | 
+
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_interface.php:20:23
+ 1 | <?hh
+ 2 | 
+ 3 | interface I { const type T = int; }
+   |                          ^ [2]
+ 4 | 
+ 5 | abstract class A implements I {
+   :
+18 | trait T2 { // same error
+19 |   require implements I;
+20 |   abstract const type T = float;
+   |                       ^ [1]
+21 | }
+
+4 errors found

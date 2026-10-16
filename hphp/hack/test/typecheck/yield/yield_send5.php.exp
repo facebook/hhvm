@@ -1,6 +1,19 @@
-ERROR: File "yield_send5.php", line 7, characters 5-6:
-Invalid argument (Typing[4110])
-  File "yield_send5.php", line 3, characters 12-14:
-  Expected `int`
-  File "yield_send5.php", line 6, characters 8-27:
-  But got `?int` (`$generator->send()` can always send a `null` back to a `yield`)
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` (`$generator->send()` can always send a `null` back to a `yield`) [3]
+
+yield_send5.php:7:5
+1 | <?hh
+2 | 
+3 | function i(int $x): void {}
+  |            ^^^ [2]
+4 | 
+5 | function f(): Generator<bool, string, int> {
+6 |   $x = yield true => 'troo';
+  |        ^^^^^^^^^^^^^^^^^^^^ [3]
+7 |   i($x);
+  |     ^^ [1]
+8 | }
+9 | 
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "toplevel.php", line 4, characters 18-25:
-Primitive type annotations are always available and may no longer be referred to in the toplevel namespace. (Naming[2039])
-ERROR: File "toplevel.php", line 4, characters 18-25:
-Unbound name: `nothing` (Naming[2049])
+error: Naming[2039] Primitive type annotations are always available and may no longer be referred to in the toplevel namespace. [1]
+
+toplevel.php:4:18
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(): \nothing {
+  |                  ^^^^^^^^ [1]
+5 |   return test();
+6 | }
+
+error: Naming[2049] Unbound name: `nothing` [1]
+
+toplevel.php:4:18
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(): \nothing {
+  |                  ^^^^^^^^ [1]
+5 |   return test();
+6 | }
+
+2 errors found

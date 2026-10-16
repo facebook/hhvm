@@ -1,10 +1,46 @@
-ERROR: File "ellipsis_lambda.php", line 4, characters 12-12:
-An expression is expected here. (Parsing[1002])
-ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
-Unbound name: `...` (a global constant) (Naming[2049])
-ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
-Unbound name: `==>` (a global constant) (Naming[2049])
-ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] An expression is expected here. [1]
+
+ellipsis_lambda.php:4:12
+2 | 
+3 | function test(): void {
+4 |   $f = (...) ==> {};
+  |            ^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `...` (a global constant) [1]
+
+ellipsis_lambda.php:4:9
+2 | 
+3 | function test(): void {
+4 |   $f = (...) ==> {};
+  |         ^^^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `==>` (a global constant) [1]
+
+ellipsis_lambda.php:4:14
+2 | 
+3 | function test(): void {
+4 |   $f = (...) ==> {};
+  |              ^^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+ellipsis_lambda.php:4:9
+2 | 
+3 | function test(): void {
+4 |   $f = (...) ==> {};
+  |         ^^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+ellipsis_lambda.php:4:14
+2 | 
+3 | function test(): void {
+4 |   $f = (...) ==> {};
+  |              ^^^ [1]
+5 | }
+
+5 errors found

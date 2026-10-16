@@ -1,12 +1,24 @@
-ERROR: File "disjoint_attr_bad_multiple_fields.php", line 9, characters 6-8:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_multiple_fields.php", line 4, characters 16-18:
-  Shape field `x` is defined here
-  File "disjoint_attr_bad_multiple_fields.php", line 5, characters 16-18:
-  Shape field `x` is also defined here
-  File "disjoint_attr_bad_multiple_fields.php", line 6, characters 16-18:
-  Shape field `x` is also defined here
-  File "disjoint_attr_bad_multiple_fields.php", line 4, characters 28-30:
-  Shape field `y` is defined here
-  File "disjoint_attr_bad_multiple_fields.php", line 5, characters 31-33:
-  Shape field `y` is also defined here
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` is also defined here [3]
+-> Shape field `x` is also defined here [4]
+-> Shape field `y` is defined here [5]
+-> Shape field `y` is also defined here [6]
+
+disjoint_attr_bad_multiple_fields.php:9:6
+2 | <<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+3 | 
+4 | type A = shape('x' => int, 'y' => int);
+  |                ^^^ [2]
+  |                            ^^^ [5]
+5 | type B = shape('x' => string, 'y' => string);
+  |                ^^^ [3]
+  |                               ^^^ [6]
+6 | type C = shape('x' => bool);
+  |                ^^^ [4]
+7 | 
+8 | <<__DisjointShapeSplat>>
+9 | type Bad = shape(...A, ...B, ...C);
+  |      ^^^ [1]
+
+1 error found

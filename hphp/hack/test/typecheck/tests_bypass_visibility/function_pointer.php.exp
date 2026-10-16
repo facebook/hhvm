@@ -1,12 +1,55 @@
-ERROR: File "function_pointer.php", line 27, characters 21-31:
-You cannot access this member (Typing[4112])
-  File "function_pointer.php", line 7, characters 27-37:
-  This member is private
-ERROR: File "function_pointer.php", line 30, characters 40-50:
-You cannot access this member (Typing[4112])
-  File "function_pointer.php", line 10, characters 20-28:
-  This member is private
-ERROR: File "function_pointer.php", line 30, characters 40-50:
-You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4431])
-  File "function_pointer.php", line 10, characters 20-28:
-  It is declared as `private` here
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+function_pointer.php:27:21
+ 5 | class FpTarget {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private static function priv_static(int $x): int { return $x; }
+   |                           ^^^^^^^^^^^ [2]
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+   :
+25 | class FpNonTest {
+26 |   public function test(FpTarget $obj): void {
+27 |     $fp = FpTarget::priv_static<>; // error: not in test context
+   |                     ^^^^^^^^^^^ [1]
+28 |     $_ = $fp(42);
+29 | 
+
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+function_pointer.php:30:40
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   private function priv_inst(int $x): int { return $x; }
+   |                    ^^^^^^^^^ [2]
+11 | }
+12 | 
+   :
+28 |     $_ = $fp(42);
+29 | 
+30 |     $mc = meth_caller(FpTarget::class, 'priv_inst'); // error: not in test context
+   |                                        ^^^^^^^^^^^ [1]
+31 |     $_ = $mc($obj, 42);
+32 |   }
+
+error: Typing[4431] You cannot access this method with `meth_caller` (even from the same class hierarchy) [1]
+-> It is declared as `private` here [2]
+
+function_pointer.php:30:40
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   private function priv_inst(int $x): int { return $x; }
+   |                    ^^^^^^^^^ [2]
+11 | }
+12 | 
+   :
+28 |     $_ = $fp(42);
+29 | 
+30 |     $mc = meth_caller(FpTarget::class, 'priv_inst'); // error: not in test context
+   |                                        ^^^^^^^^^^^ [1]
+31 |     $_ = $mc($obj, 42);
+32 |   }
+
+3 errors found

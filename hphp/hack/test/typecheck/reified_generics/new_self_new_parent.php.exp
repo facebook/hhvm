@@ -2,7 +2,24 @@ File "new_self_new_parent.php", line 8, characters 5-15:
   C<_>
 File "new_self_new_parent.php", line 10, characters 5-15:
   A<_>
-ERROR: File "new_self_new_parent.php", line 7, characters 10-19:
-Cannot call `new self` because the current class has reified generics. Try `new C` instead. (Typing[4310])
-ERROR: File "new_self_new_parent.php", line 9, characters 10-21:
-Cannot call `new parent` because the current class has reified generics. Try `new A` instead. (Typing[4310])
+error: Typing[4310] Cannot call `new self` because the current class has reified generics. Try `new C` instead. [1]
+
+new_self_new_parent.php:7:10
+5 | class C<reify Tb> extends A<Tb> {
+6 |   public function f(): void {
+7 |     $c = new self();
+  |          ^^^^^^^^^^ [1]
+8 |     hh_show($c); // C<[unresolved]>
+9 |     $a = new parent();
+
+error: Typing[4310] Cannot call `new parent` because the current class has reified generics. Try `new A` instead. [1]
+
+new_self_new_parent.php:9:10
+ 7 |     $c = new self();
+ 8 |     hh_show($c); // C<[unresolved]>
+ 9 |     $a = new parent();
+   |          ^^^^^^^^^^^^ [1]
+10 |     hh_show($a); // A<[unresolved]>
+11 |   }
+
+2 errors found

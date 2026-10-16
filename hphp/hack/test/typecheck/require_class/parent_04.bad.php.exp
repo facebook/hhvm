@@ -1,4 +1,21 @@
-ERROR: File "parent_04.bad.php", line 4, characters 19-19:
-Unbound name: `D` (an object type) (Naming[2049])
-ERROR: File "parent_04.bad.php", line 7, characters 12-17:
-You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class (Typing[4074])
+error: Naming[2049] Unbound name: `D` (an object type) [1]
+
+parent_04.bad.php:4:19
+2 | 
+3 | trait T {
+4 |   require extends D;
+  |                   ^ [1]
+5 | 
+6 |   public function foo(): int {
+
+error: Typing[4074] You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class [1]
+
+parent_04.bad.php:7:12
+5 | 
+6 |   public function foo(): int {
+7 |     return parent::bar();
+  |            ^^^^^^ [1]
+8 |   }
+9 | }
+
+2 errors found

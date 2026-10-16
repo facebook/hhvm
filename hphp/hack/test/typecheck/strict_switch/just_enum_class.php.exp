@@ -1,14 +1,59 @@
-WARN: File "just_enum_class.php", line 27, characters 10-31:
-Invalid case: This case will never match.
-A value of type `MixedEnumClass` can never be equal to a value of type `HH\MemberOf<MixedEnumClass, IntEnumCD>` (Warn[12007])
-WARN: File "just_enum_class.php", line 62, characters 10-33:
-Invalid case: This case will never match.
-A value of type `HH\MemberOf<MixedEnumClass, string>` can never be equal to a value of type `HH\MemberOf<MixedEnumClass, int>` (Warn[12007])
-ERROR: File "just_enum_class.php", line 61, characters 3-68:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `MixedEnumClass::LabelString1` (Typing[4019])
-  File "just_enum_class.php", line 61, characters 11-12:
-  The scrutinee has type `HH\MemberOf<MixedEnumClass, string>`.
-ERROR: File "just_enum_class.php", line 86, characters 3-66:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `MixedEnumClass::LabelC` (Typing[4019])
-  File "just_enum_class.php", line 86, characters 11-12:
-  The scrutinee has type `HH\MemberOf<MixedEnumClass, (IntEnumAB | IntEnumCD)>`.
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `MixedEnumClass` can never be equal to a value of type `HH\MemberOf<MixedEnumClass, IntEnumCD>` [1]
+
+just_enum_class.php:27:10
+25 | function enum_class(MixedEnumClass $x): void {
+26 |   switch ($x) {
+27 |     case MixedEnumClass::LabelC:
+   |          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 |       return;
+29 |     default:
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `HH\MemberOf<MixedEnumClass, string>` can never be equal to a value of type `HH\MemberOf<MixedEnumClass, int>` [1]
+
+just_enum_class.php:62:10
+60 | ): void {
+61 |   switch ($x) {
+62 |     case MixedEnumClass::LabelInt:
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+63 |       return;
+64 |   }
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `MixedEnumClass::LabelString1` [1]
+-> The scrutinee has type `HH\MemberOf<MixedEnumClass, string>`. [2]
+
+just_enum_class.php:61:3
+59 |   \HH\MemberOf<MixedEnumClass, string> $x,
+60 | ): void {
+61 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+62 |     case MixedEnumClass::LabelInt:
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+63 |       return;
+   |       ^^^^^^^ [1]
+64 |   }
+   |   ^ [1]
+65 | }
+66 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `MixedEnumClass::LabelC` [1]
+-> The scrutinee has type `HH\MemberOf<MixedEnumClass, (IntEnumAB | IntEnumCD)>`. [2]
+
+just_enum_class.php:86:3
+84 |   ) $x,
+85 | ): void {
+86 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+87 |     case MixedEnumClass::LabelA:
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+88 |       return;
+   |       ^^^^^^^ [1]
+89 |   }
+   |   ^ [1]
+90 | }
+91 | 
+
+4 errors found

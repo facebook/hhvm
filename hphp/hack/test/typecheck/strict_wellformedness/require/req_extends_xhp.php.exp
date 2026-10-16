@@ -1,12 +1,29 @@
-ERROR: File "req_extends_xhp.php", line 6, characters 23-23:
-A name is expected here. (Parsing[1002])
-ERROR: File "req_extends_xhp.php", line 6, characters 13-22:
-Some type arguments violate their constraints (Typing[4323])
-  File "req_extends_xhp.php", line 3, characters 10-10:
-  `T` is a constrained type parameter
-  File "req_extends_xhp.php", line 3, characters 15-17:
-  This type constraint is violated
-  File "req_extends_xhp.php", line 3, characters 15-17:
-  Expected `int`
-  File "req_extends_xhp.php", line 6, characters 16-21:
-  But got `string`
+error: Parsing[1002] A name is expected here. [1]
+
+req_extends_xhp.php:6:23
+4 | 
+5 | class :b {
+6 |   attribute :a<string>;
+  |                       ^ [1]
+7 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `int` [3]
+-> But got `string` [4]
+
+req_extends_xhp.php:6:13
+1 | <?hh
+2 | 
+3 | class :a<T as int> {}
+  |          ^ [2]
+  |               ^^^ [3]
+4 | 
+5 | class :b {
+6 |   attribute :a<string>;
+  |             ^^^^^^^^^^ [1]
+  |                ^^^^^^ [4]
+7 | }
+
+2 errors found

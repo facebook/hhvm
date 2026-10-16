@@ -1,2 +1,11 @@
-WARN: File "union_empty_enum.php", line 16, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+union_empty_enum.php:16:5
+14 | function just_zero(Zero $x): void {
+15 |   switch ($x) {
+16 |     default:
+   |     ^^^^^^^^ [1]
+17 |       break;
+18 |   }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "potential_blowup_tvar_toption.php", line 3, characters 23-23:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+potential_blowup_tvar_toption.php:3:23
+1 | <?hh
+2 | 
+3 | function make_tvaropt<T>(): ?T {
+  |                       ^ [1]
+4 |   return null;
+5 | }
+
+1 error found

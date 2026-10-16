@@ -1,4 +1,17 @@
-ERROR: File "self_constants.php", line 10, characters 26-39:
-Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "self_constants.php", line 6, characters 16-23:
-  The class constant is declared here
+error: Typing[4533] Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+self_constants.php:10:26
+ 4 |   <<__ShapeKey>>
+ 5 |   const string KEY = 'inherited';
+ 6 |   const string UNMARKED = 'unmarked';
+   |                ^^^^^^^^ [2]
+ 7 | 
+ 8 |   public static function shape_accesses(shape(...) $s): void {
+ 9 |     $_ = Shapes::idx($s, self::KEY);
+10 |     $_ = Shapes::idx($s, self::UNMARKED);
+   |                          ^^^^^^^^^^^^^^ [1]
+11 |     $_ = Shapes::idx($s, nameof self);
+12 |   }
+
+1 error found

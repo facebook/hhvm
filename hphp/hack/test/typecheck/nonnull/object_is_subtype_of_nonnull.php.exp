@@ -1,18 +1,55 @@
-ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
-Invalid return type (Typing[4110])
-  File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
-  Expected `nonnull`
-  File "object_is_subtype_of_nonnull.php", line 6, characters 24-30:
-  But got `C::T super this::T`
-ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
-Invalid return type (Typing[4110])
-  File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
-  Expected `nonnull`
-  File "object_is_subtype_of_nonnull.php", line 6, characters 24-30:
-  But got `mixed`
-ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
-Invalid return type (Typing[4110])
-  File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
-  Expected `nonnull`
-  File "object_is_subtype_of_nonnull.php", line 6, characters 24-30:
-  But got `this::T as C::T`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `C::T super this::T` [3]
+
+object_is_subtype_of_nonnull.php:10:12
+ 4 |   abstract const type T;
+ 5 | 
+ 6 |   abstract const class<this::T> C;
+   |                        ^^^^^^^ [3]
+ 7 | 
+ 8 |   public function f(): nonnull {
+   |                        ^^^^^^^ [2]
+ 9 |     $c = static::C;
+10 |     return new $c();
+   |            ^^^^^^^^ [1]
+11 |   }
+12 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `mixed` [3]
+
+object_is_subtype_of_nonnull.php:10:12
+ 4 |   abstract const type T;
+ 5 | 
+ 6 |   abstract const class<this::T> C;
+   |                        ^^^^^^^ [3]
+ 7 | 
+ 8 |   public function f(): nonnull {
+   |                        ^^^^^^^ [2]
+ 9 |     $c = static::C;
+10 |     return new $c();
+   |            ^^^^^^^^ [1]
+11 |   }
+12 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `this::T as C::T` [3]
+
+object_is_subtype_of_nonnull.php:10:12
+ 4 |   abstract const type T;
+ 5 | 
+ 6 |   abstract const class<this::T> C;
+   |                        ^^^^^^^ [3]
+ 7 | 
+ 8 |   public function f(): nonnull {
+   |                        ^^^^^^^ [2]
+ 9 |     $c = static::C;
+10 |     return new $c();
+   |            ^^^^^^^^ [1]
+11 |   }
+12 | }
+
+3 errors found

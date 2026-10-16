@@ -1,44 +1,139 @@
-ERROR: File "tconst_on_generics2.php", line 30, characters 66-67:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics2.php", line 36, characters 75-76:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics2.php", line 40, characters 78-79:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics2.php", line 40, characters 84-85:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics2.php", line 11, characters 19-22:
-Invalid return type (Typing[4336])
-  File "tconst_on_generics2.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics2.php", line 11, characters 28-34:
-    resulting from expanding the type constant `this::T`
-  File "tconst_on_generics2.php", line 11, characters 19-22:
-  But got `void` because this function does not always return a value
-ERROR: File "tconst_on_generics2.php", line 50, characters 18-19:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics2.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics2.php", line 40, characters 88-88:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics2.php", line 49, characters 12-17:
-    on an object of exactly the class IntBox
-  File "tconst_on_generics2.php", line 19, characters 18-23:
-  But got `string`
-  File "tconst_on_generics2.php", line 40, characters 82-82:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics2.php", line 48, characters 12-20:
-    on an object of exactly the class StringBox
-ERROR: File "tconst_on_generics2.php", line 50, characters 18-19:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics2.php", line 19, characters 18-23:
-  Expected `string`
-  File "tconst_on_generics2.php", line 40, characters 82-82:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics2.php", line 48, characters 12-20:
-    on an object of exactly the class StringBox
-  File "tconst_on_generics2.php", line 10, characters 18-20:
-  But got `int`
-  File "tconst_on_generics2.php", line 40, characters 88-88:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics2.php", line 49, characters 12-17:
-    on an object of exactly the class IntBox
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics2.php:30:66
+28 | 
+29 | class Test {
+30 |   public static function get<T1 as Box, T2>(T1 $x) : T2 where T2=T1::T {
+   |                                                                  ^^ [1]
+31 |     $z = $x->getK();
+32 | 
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics2.php:36:75
+34 |   }
+35 | 
+36 |   public static function set<T1 as Box, T2>(T1 $x, T2 $y) : void where T2=T1::T {
+   |                                                                           ^^ [1]
+37 |     $x->setK($y);
+38 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics2.php:40:78
+38 |   }
+39 | 
+40 |   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : T1 where T1::T=T2::T {
+   |                                                                              ^^ [1]
+41 |     $x->setK($y->getK());
+42 |     return $x;
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics2.php:40:84
+38 |   }
+39 | 
+40 |   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : T1 where T1::T=T2::T {
+   |                                                                                    ^^ [1]
+41 |     $x->setK($y->getK());
+42 |     return $x;
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+->   resulting from expanding the type constant `this::T` [3]
+-> But got `void` because this function does not always return a value [1]
+
+tconst_on_generics2.php:11:19
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [2]
+11 |   public function getK() : this::T {
+   |                   ^^^^ [1]
+   |                            ^^^^^^^ [3]
+12 |     // UNSAFE
+13 |   }
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of exactly the class IntBox [4]
+-> But got `string` [5]
+->   resulting from accessing the type constant 'T' [6]
+->   on an object of exactly the class StringBox [7]
+
+tconst_on_generics2.php:50:18
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [2]
+11 |   public function getK() : this::T {
+12 |     // UNSAFE
+   :
+17 | 
+18 | class StringBox extends Box {
+19 |   const type T = string;
+   |                  ^^^^^^ [5]
+20 | public function getK() : this::T {
+21 |   return "5";
+   :
+38 |   }
+39 | 
+40 |   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : T1 where T1::T=T2::T {
+   |                                                                                  ^ [6]
+   |                                                                                        ^ [3]
+41 |     $x->setK($y->getK());
+42 |     return $x;
+   :
+46 | 
+47 | function t(StringBox $s, Box $t) : void {
+48 |   $x = new StringBox(); // T1::T = (string)
+   |            ^^^^^^^^^ [7]
+49 |   $y = new IntBox(); // (int)
+   |            ^^^^^^ [4]
+50 |   Test::swap($x, $y);
+   |                  ^^ [1]
+51 | }
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of exactly the class StringBox [4]
+-> But got `int` [5]
+->   resulting from accessing the type constant 'T' [6]
+->   on an object of exactly the class IntBox [7]
+
+tconst_on_generics2.php:50:18
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [5]
+11 |   public function getK() : this::T {
+12 |     // UNSAFE
+   :
+17 | 
+18 | class StringBox extends Box {
+19 |   const type T = string;
+   |                  ^^^^^^ [2]
+20 | public function getK() : this::T {
+21 |   return "5";
+   :
+38 |   }
+39 | 
+40 |   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : T1 where T1::T=T2::T {
+   |                                                                                  ^ [3]
+   |                                                                                        ^ [6]
+41 |     $x->setK($y->getK());
+42 |     return $x;
+   :
+46 | 
+47 | function t(StringBox $s, Box $t) : void {
+48 |   $x = new StringBox(); // T1::T = (string)
+   |            ^^^^^^^^^ [4]
+49 |   $y = new IntBox(); // (int)
+   |            ^^^^^^ [7]
+50 |   Test::swap($x, $y);
+   |                  ^^ [1]
+51 | }
+
+7 errors found

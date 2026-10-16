@@ -1,2 +1,11 @@
-WARN: File "inter_array_ops.php", line 6, characters 13-24:
-This `is` check is always `false`. The expression on the left has type `null` which shares no values with `vec<T#1>`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `null` which shares no values with `vec<T#1>`. [1]
+
+inter_array_ops.php:6:13
+4 | function test(): void {
+5 |   $x = null;
+6 |   invariant($x is vec<_>, "");
+  |             ^^^^^^^^^^^^ [1]
+7 |   $x[] = 0;
+8 |   $x[0];
+
+1 error found

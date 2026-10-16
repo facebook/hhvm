@@ -1,4 +1,13 @@
-ERROR: File "typing_type_structure5.php", line 5, characters 29-29:
-`C` is uninstantiable (Typing[4002])
-  File "typing_type_structure5.php", line 3, characters 22-22:
-  Declaration is here
+error: Typing[4002] `C` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_type_structure5.php:5:29
+1 | <?hh
+2 | 
+3 | abstract final class C {}
+  |                      ^ [2]
+4 | 
+5 | function test(TypeStructure<C> $x): void {}
+  |                             ^ [1]
+
+1 error found

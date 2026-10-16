@@ -1,10 +1,27 @@
-ERROR: File "trait_diamond_property_2.bad.php", line 17, characters 7-13:
-Class `MyClass` inherits generic trait property `myprop` via multiple paths at different types. (Typing[4462])
-  File "trait_diamond_property_2.bad.php", line 10, characters 10-11:
-  Trait property is defined here
-  File "trait_diamond_property_2.bad.php", line 19, characters 7-14:
-  `MyClass` uses `MyTrait2`
-  File "trait_diamond_property_2.bad.php", line 14, characters 7-19:
-  `MyTrait2` uses `MyTrait1`
-  File "trait_diamond_property_2.bad.php", line 18, characters 7-22:
-  `MyClass` uses `MyTrait1`
+error: Typing[4462] Class `MyClass` inherits generic trait property `myprop` via multiple paths at different types. [1]
+-> Trait property is defined here [2]
+-> `MyClass` uses `MyTrait2` [3]
+-> `MyTrait2` uses `MyTrait1` [4]
+-> `MyClass` uses `MyTrait1` [5]
+
+trait_diamond_property_2.bad.php:17:7
+ 8 | 
+ 9 | trait MyTrait1<T> {
+10 |   public ?T $myprop = null;
+   |          ^^ [2]
+11 | }
+12 | 
+13 | trait MyTrait2 {
+14 |   use MyTrait1<int>;
+   |       ^^^^^^^^^^^^^ [4]
+15 | }
+16 | 
+17 | class MyClass {
+   |       ^^^^^^^ [1]
+18 |   use MyTrait1<string>;
+   |       ^^^^^^^^^^^^^^^^ [5]
+19 |   use MyTrait2;
+   |       ^^^^^^^^ [3]
+20 | }
+
+1 error found

@@ -1,6 +1,16 @@
-ERROR: File "disallow_access_on_nullable.php", line 6, characters 18-24:
-Invalid type hint (Typing[4062])
-  File "disallow_access_on_nullable.php", line 6, characters 24-24:
-  You are trying to access the type constant `B` but this is a nullable type
-  File "disallow_access_on_nullable.php", line 4, characters 18-19:
-  Definition is here
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `B` but this is a nullable type [2]
+-> Definition is here [3]
+
+disallow_access_on_nullable.php:6:18
+2 | 
+3 | class X {
+4 |   const type A = ?X;
+  |                  ^^ [3]
+5 |   const type B = X;
+6 |   const type C = X::A::B;
+  |                  ^^^^^^^ [1]
+  |                        ^ [2]
+7 | }
+
+1 error found

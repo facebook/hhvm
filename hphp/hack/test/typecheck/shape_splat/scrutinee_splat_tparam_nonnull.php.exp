@@ -1,2 +1,11 @@
-WARN: File "scrutinee_splat_tparam_nonnull.php", line 7, characters 7-19:
-This `is` check is always `true`. The expression on the left has type `shape(...T, ...shape('a' => int))` which is a subtype of `nonnull`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `shape(...T, ...shape('a' => int))` which is a subtype of `nonnull`. [1]
+
+scrutinee_splat_tparam_nonnull.php:7:7
+5 | // abstract splat `...T` is preserved exactly (T is not refined away).
+6 | function f<T as shape(...)>(shape(...T, 'a' => int) $x): void {
+7 |   if ($x is nonnull) {
+  |       ^^^^^^^^^^^^^ [1]
+8 |     hh_expect_equivalent<shape(...T, 'a' => int)>($x);
+9 |   }
+
+1 error found

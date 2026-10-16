@@ -1,40 +1,118 @@
-ERROR: File "spread_element_kinds.php", line 33, characters 12-13:
-Invalid return type (Typing[4110])
-  File "spread_element_kinds.php", line 32, characters 34-39:
-  Expected `string`
-  File "spread_element_kinds.php", line 13, characters 44-46:
-  But got `int`
-ERROR: File "spread_element_kinds.php", line 64, characters 10-11:
-Invalid return type (Typing[4110])
-  File "spread_element_kinds.php", line 63, characters 25-30:
-  Expected `string`
-  File "spread_element_kinds.php", line 10, characters 54-56:
-  But got `int`
-ERROR: File "spread_element_kinds.php", line 77, characters 34-34:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "spread_element_kinds.php", line 80, characters 10-11:
-Invalid return type (Typing[4523])
-  File "spread_element_kinds.php", line 78, characters 3-27:
-  The field `a` here is not compatible with every instantiation of `T`
-  File "spread_element_kinds.php", line 79, characters 13-13:
-  `T` may provide `a` with a type of its own
-  File "spread_element_kinds.php", line 80, characters 3-12:
-  Expected `nothing`
-  File "spread_element_kinds.php", line 10, characters 54-56:
-  But got `int`
-ERROR: File "spread_element_kinds.php", line 80, characters 10-11:
-Invalid return type (Typing[4523])
-  File "spread_element_kinds.php", line 78, characters 3-27:
-  The field `extra` here is not compatible with every instantiation of `T`
-  File "spread_element_kinds.php", line 79, characters 13-13:
-  `T` may provide `extra` with a type of its own
-  File "spread_element_kinds.php", line 80, characters 3-12:
-  Expected `nothing`
-  File "spread_element_kinds.php", line 10, characters 70-75:
-  But got `string`
-ERROR: File "spread_element_kinds.php", line 80, characters 10-11:
-Invalid return type (Typing[4522])
-  File "spread_element_kinds.php", line 78, characters 3-27:
-  This shape is not guaranteed to have the fields required here
-  File "spread_element_kinds.php", line 79, characters 13-13:
-  `T` may have required fields of its own
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+spread_element_kinds.php:33:12
+11 | 
+12 | abstract class C {
+13 |   abstract const type TRow as shape('a' => int, ...);
+   |                                            ^^^ [3]
+14 | 
+15 |   // -- Type constant as the spread element ---------------------------------
+   :
+30 |   public function tconst_field(
+31 |     shape(...this::TRow, ...shape()) $s,
+32 |   ): shape(...this::TRow, 'a' => string) {
+   |                                  ^^^^^^ [2]
+33 |     return $s;
+   |            ^^ [1]
+34 |   }
+35 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+spread_element_kinds.php:64:10
+ 8 | // the other two need real declarations. So they are covered here.
+ 9 | 
+10 | newtype Row as shape('a' => int, ...) = shape('a' => int, 'extra' => string);
+   |                                                      ^^^ [3]
+11 | 
+12 | abstract class C {
+   :
+61 | function newtype_field(
+62 |   shape(...Row, ...shape()) $s,
+63 | ): shape(...Row, 'a' => string) {
+   |                         ^^^^^^ [2]
+64 |   return $s;
+   |          ^^ [1]
+65 | }
+66 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+spread_element_kinds.php:77:34
+75 | 
+76 | // REJECT: nothing says a newtype row is below a parameter's row.
+77 | function newtype_not_below_param<T as shape(...)>(
+   |                                  ^ [1]
+78 |   shape(...Row, 'q' => int) $s,
+79 | ): shape(...T, 'q' => int) {
+
+error: Typing[4523] Invalid return type [1]
+-> The field `a` here is not compatible with every instantiation of `T` [2]
+-> `T` may provide `a` with a type of its own [3]
+-> Expected `nothing` [4]
+-> But got `int` [5]
+
+spread_element_kinds.php:80:10
+ 8 | // the other two need real declarations. So they are covered here.
+ 9 | 
+10 | newtype Row as shape('a' => int, ...) = shape('a' => int, 'extra' => string);
+   |                                                      ^^^ [5]
+11 | 
+12 | abstract class C {
+   :
+76 | // REJECT: nothing says a newtype row is below a parameter's row.
+77 | function newtype_not_below_param<T as shape(...)>(
+78 |   shape(...Row, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+79 | ): shape(...T, 'q' => int) {
+   |             ^ [3]
+80 |   return $s;
+   |   ^^^^^^^^^^ [4]
+   |          ^^ [1]
+81 | }
+
+error: Typing[4523] Invalid return type [1]
+-> The field `extra` here is not compatible with every instantiation of `T` [2]
+-> `T` may provide `extra` with a type of its own [3]
+-> Expected `nothing` [4]
+-> But got `string` [5]
+
+spread_element_kinds.php:80:10
+ 8 | // the other two need real declarations. So they are covered here.
+ 9 | 
+10 | newtype Row as shape('a' => int, ...) = shape('a' => int, 'extra' => string);
+   |                                                                      ^^^^^^ [5]
+11 | 
+12 | abstract class C {
+   :
+76 | // REJECT: nothing says a newtype row is below a parameter's row.
+77 | function newtype_not_below_param<T as shape(...)>(
+78 |   shape(...Row, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+79 | ): shape(...T, 'q' => int) {
+   |             ^ [3]
+80 |   return $s;
+   |   ^^^^^^^^^^ [4]
+   |          ^^ [1]
+81 | }
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T` may have required fields of its own [3]
+
+spread_element_kinds.php:80:10
+76 | // REJECT: nothing says a newtype row is below a parameter's row.
+77 | function newtype_not_below_param<T as shape(...)>(
+78 |   shape(...Row, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+79 | ): shape(...T, 'q' => int) {
+   |             ^ [3]
+80 |   return $s;
+   |          ^^ [1]
+81 | }
+
+6 errors found

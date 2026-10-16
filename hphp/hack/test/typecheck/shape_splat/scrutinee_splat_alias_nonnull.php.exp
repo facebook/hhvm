@@ -1,2 +1,11 @@
-WARN: File "scrutinee_splat_alias_nonnull.php", line 9, characters 7-19:
-This `is` check is always `true`. The expression on the left has type `shape('a' => int, 'b' => string)` which is a subtype of `nonnull`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `shape('a' => int, 'b' => string)` which is a subtype of `nonnull`. [1]
+
+scrutinee_splat_alias_nonnull.php:9:7
+ 7 | 
+ 8 | function f(shape(...MyRow, 'a' => int) $x): void {
+ 9 |   if ($x is nonnull) {
+   |       ^^^^^^^^^^^^^ [1]
+10 |     hh_expect_equivalent<shape('a' => int, 'b' => string)>($x);
+11 |   }
+
+1 error found

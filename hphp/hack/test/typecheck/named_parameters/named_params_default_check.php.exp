@@ -1,8 +1,23 @@
-ERROR: File "named_params_default_check.php", line 10, characters 47-49:
-A previous parameter has a default value.
+error: Typing[4077] A previous parameter has a default value.
 Remove all the default values for the preceding parameters,
-or add a default value to this one. (Typing[4077])
-ERROR: File "named_params_default_check.php", line 13, characters 51-53:
-A previous parameter has a default value.
+or add a default value to this one. [1]
+
+named_params_default_check.php:10:47
+ 8 | 
+ 9 | // Error on $x3
+10 | function bad1(int $x1 = 1, named int $x2, int $x3): void {}
+   |                                               ^^^ [1]
+11 | 
+12 | // Error on $x3
+
+error: Typing[4077] A previous parameter has a default value.
 Remove all the default values for the preceding parameters,
-or add a default value to this one. (Typing[4077])
+or add a default value to this one. [1]
+
+named_params_default_check.php:13:51
+11 | 
+12 | // Error on $x3
+13 | function bad2(named int $x1 = 1, int $x2 = 1, int $x3): void {}
+   |                                                   ^^^ [1]
+
+2 errors found

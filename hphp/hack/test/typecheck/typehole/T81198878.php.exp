@@ -1,4 +1,16 @@
-WARN: File "T81198878.php", line 7, characters 8-10:
-Static method call on a trait: `T::foo` (Warn[12020])
-  File "T81198878.php", line 4, characters 7-7:
-  `T` is defined here
+warning: Warn[12020] Static method call on a trait: `T::foo` [1]
+-> `T` is defined here [2]
+
+T81198878.php:7:8
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | trait T {
+  |       ^ [2]
+5 |   private static function foo(): void {}
+6 |   public static function bar(): void {
+7 |     T::foo();
+  |        ^^^ [1]
+8 |   }
+9 | }
+
+1 error found

@@ -1,24 +1,93 @@
-WARN: File "tconst_on_generics5.php", line 38, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tconst_on_generics5.php", line 38, characters 3-21:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tconst_on_generics5.php", line 38, characters 8-21:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tconst_on_generics5.php", line 41, characters 10-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "tconst_on_generics5.php", line 22, characters 74-75:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics5.php", line 25, characters 77-78:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics5.php", line 28, characters 77-78:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics5.php", line 39, characters 14-17:
-Some type arguments violate their constraints (Typing[4323])
-  File "tconst_on_generics5.php", line 25, characters 31-32:
-  `T1` is a constrained type parameter
-  File "tconst_on_generics5.php", line 25, characters 37-39:
-  This type constraint is violated
-  File "tconst_on_generics5.php", line 25, characters 37-39:
-  Expected `Box`
-  File "tconst_on_generics5.php", line 25, characters 47-47:
-  But got `B`
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tconst_on_generics5.php:38:3
+36 |   // foo is type function(T1 $x) : T1::T
+37 |   // foo($x) should therefore be type StringBox::T = string
+38 |   $y = Test::geta($x); // ok
+   |   ^^ [1]
+39 |   $t = Test::getb($x); // nok, B must have a T
+40 |   $z = Test::getc($x); // ok, C as a T
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tconst_on_generics5.php:38:3
+36 |   // foo is type function(T1 $x) : T1::T
+37 |   // foo($x) should therefore be type StringBox::T = string
+38 |   $y = Test::geta($x); // ok
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+39 |   $t = Test::getb($x); // nok, B must have a T
+40 |   $z = Test::getc($x); // ok, C as a T
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tconst_on_generics5.php:38:8
+36 |   // foo is type function(T1 $x) : T1::T
+37 |   // foo($x) should therefore be type StringBox::T = string
+38 |   $y = Test::geta($x); // ok
+   |        ^^^^^^^^^^^^^^ [1]
+39 |   $t = Test::getb($x); // nok, B must have a T
+40 |   $z = Test::getc($x); // ok, C as a T
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tconst_on_generics5.php:41:10
+39 |   $t = Test::getb($x); // nok, B must have a T
+40 |   $z = Test::getc($x); // ok, C as a T
+41 |   return $y . "world"; // v2 <: string -> ok
+   |          ^^ [1]
+42 | }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics5.php:22:74
+20 | 
+21 | class Test {
+22 |   public static function geta<T1 as Box as A, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                                          ^^ [1]
+23 |     return $x->getK();
+24 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics5.php:25:77
+23 |     return $x->getK();
+24 |   }
+25 |   public static function getb<T1 as Box super B, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                                             ^^ [1]
+26 |     return $x->getK();
+27 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics5.php:28:77
+26 |     return $x->getK();
+27 |   }
+28 |   public static function getc<T1 as Box super C, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                                             ^^ [1]
+29 |     return $x->getK();
+30 |   }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T1` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `Box` [3]
+-> But got `B` [4]
+
+tconst_on_generics5.php:39:14
+23 |     return $x->getK();
+24 |   }
+25 |   public static function getb<T1 as Box super B, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                               ^^ [2]
+   |                                     ^^^ [3]
+   |                                               ^ [4]
+26 |     return $x->getK();
+27 |   }
+   :
+37 |   // foo($x) should therefore be type StringBox::T = string
+38 |   $y = Test::geta($x); // ok
+39 |   $t = Test::getb($x); // nok, B must have a T
+   |              ^^^^ [1]
+40 |   $z = Test::getc($x); // ok, C as a T
+41 |   return $y . "world"; // v2 <: string -> ok
+
+8 errors found

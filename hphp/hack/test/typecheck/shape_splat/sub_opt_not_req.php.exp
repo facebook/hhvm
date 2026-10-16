@@ -1,8 +1,17 @@
-ERROR: File "sub_opt_not_req.php", line 5, characters 10-13:
-Invalid return type (Typing[4163])
-  File "sub_opt_not_req.php", line 4, characters 27-44:
-  The field `x` is **optional**
-  File "sub_opt_not_req.php", line 4, characters 53-69:
-  The field `x` is defined as **required**
-  File "sub_opt_not_req.php", line 4, characters 66-68:
-  `x` is defined here
+error: Typing[4163] Invalid return type [1]
+-> The field `x` is **optional** [2]
+-> The field `x` is defined as **required** [3]
+-> `x` is defined here [4]
+
+sub_opt_not_req.php:5:10
+2 | <<file:__EnableUnstableFeatures('shape_splat_concrete', 'shape_splat_type_parameters', 'shape_splat_expression')>>
+3 | 
+4 | function test_opt_not_req(shape(?'x' => int) $opt): shape('x' => int) {
+  |                           ^^^^^^^^^^^^^^^^^^ [2]
+  |                                                     ^^^^^^^^^^^^^^^^^ [3]
+  |                                                                  ^^^ [4]
+5 |   return $opt;
+  |          ^^^^ [1]
+6 | }
+
+1 error found

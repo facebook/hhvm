@@ -1,28 +1,78 @@
-ERROR: File "is_hint_with_multiple_generics.php", line 10, characters 14-37:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 10, characters 14-37:
-  The `is` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_hint_with_multiple_generics.php", line 12, characters 14-35:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 12, characters 14-35:
-  The `is` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_hint_with_multiple_generics.php", line 15, characters 14-38:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 15, characters 14-38:
-  The `is` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_hint_with_multiple_generics.php", line 16, characters 14-36:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 16, characters 14-36:
-  The `is` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_hint_with_multiple_generics.php", line 20, characters 14-37:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 20, characters 14-37:
-  The `is` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_hint_with_multiple_generics.php", line 21, characters 14-35:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 21, characters 14-35:
-  The `is` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_hint_with_multiple_generics.php", line 22, characters 14-35:
-Invalid `is` expression hint (Typing[4195])
-  File "is_hint_with_multiple_generics.php", line 22, characters 14-35:
-  The `is` operator cannot be used with a type with an erased generic type argument
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:10:14
+ 8 | function test(mixed $x): void {
+ 9 |   $_ = $x is FirstIsReified<_, _>;
+10 |   $_ = $x is FirstIsReified<int, int>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   $_ = $x is FirstIsReified<int, _>;
+12 |   $_ = $x is FirstIsReified<_, int>; // should error
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:12:14
+10 |   $_ = $x is FirstIsReified<int, int>; // should error
+11 |   $_ = $x is FirstIsReified<int, _>;
+12 |   $_ = $x is FirstIsReified<_, int>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | 
+14 |   $_ = $x is SecondIsReified<_, _>;
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:15:14
+13 | 
+14 |   $_ = $x is SecondIsReified<_, _>;
+15 |   $_ = $x is SecondIsReified<int, int>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   $_ = $x is SecondIsReified<int, _>; // should error
+17 |   $_ = $x is SecondIsReified<_, int>;
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:16:14
+14 |   $_ = $x is SecondIsReified<_, _>;
+15 |   $_ = $x is SecondIsReified<int, int>; // should error
+16 |   $_ = $x is SecondIsReified<int, _>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   $_ = $x is SecondIsReified<_, int>;
+18 | 
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:20:14
+18 | 
+19 |   $_ = $x is NeitherReified<_, _>;
+20 |   $_ = $x is NeitherReified<int, int>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   $_ = $x is NeitherReified<int, _>; // should error
+22 |   $_ = $x is NeitherReified<_, int>; // should error
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:21:14
+19 |   $_ = $x is NeitherReified<_, _>;
+20 |   $_ = $x is NeitherReified<int, int>; // should error
+21 |   $_ = $x is NeitherReified<int, _>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 |   $_ = $x is NeitherReified<_, int>; // should error
+23 | 
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with a type with an erased generic type argument [1]
+
+is_hint_with_multiple_generics.php:22:14
+20 |   $_ = $x is NeitherReified<int, int>; // should error
+21 |   $_ = $x is NeitherReified<int, _>; // should error
+22 |   $_ = $x is NeitherReified<_, int>; // should error
+   |              ^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 | 
+24 |   $_ = $x is BothReified<_, _>;
+
+7 errors found

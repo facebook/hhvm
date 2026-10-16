@@ -1,2 +1,9 @@
-ERROR: File "named_params_fn_types_missing_name_2.php", line 5, characters 34-38:
-Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. (Parsing[1002])
+error: Parsing[1002] Each `named` parameter in a function type must have a parameter name. For example: `(function(named int $x, named int $y): void)`. [1]
+
+named_params_fn_types_missing_name_2.php:5:34
+3 | 
+4 | // A `named` parameter in a function type must have a name, even with `optional`.
+5 | function bad3((function(optional named int): void) $_): void {} // Error
+  |                                  ^^^^^ [1]
+
+1 error found

@@ -1,8 +1,30 @@
-ERROR: File "T153338497.php", line 15, characters 91-94:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "T153338497.php", line 23, characters 12-18:
-Invalid argument (Typing[4110])
-  File "T153338497.php", line 15, characters 91-102:
-  Expected `TBox::TInner`
-  File "T153338497.php", line 23, characters 12-18:
-  But got `string`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+T153338497.php:15:91
+13 | }
+14 | 
+15 |   function set_a_box<TBox as nonnull as MyBox, TVal>(TBox $b, TVal $v): void where TVal = TBox::TInner {
+   |                                                                                           ^^^^ [1]
+16 |   $b->set($v);
+17 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `TBox::TInner` [2]
+-> But got `string` [1]
+
+T153338497.php:23:12
+13 | }
+14 | 
+15 |   function set_a_box<TBox as nonnull as MyBox, TVal>(TBox $b, TVal $v): void where TVal = TBox::TInner {
+   |                                                                                           ^^^^^^^^^^^^ [2]
+16 |   $b->set($v);
+17 | }
+   :
+21 |   $fun = set_a_box<>;
+22 |   $x = new IntBox();
+23 |   $fun($x, "hello");
+   |            ^^^^^^^ [1]
+24 |   $x->get();
+25 | }
+
+2 errors found

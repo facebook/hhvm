@@ -18,7 +18,23 @@ File "typing_type_structure1.php", line 26, characters 5-30:
   (TypeStructure<Vector<C<int>>>)
 File "typing_type_structure1.php", line 27, characters 5-28:
   classname<this> where this as D
-ERROR: File "typing_type_structure1.php", line 24, characters 33-42:
-The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 61, characters 6-15:
-  This is where the field was declared as optional.
+error: Typing[4165] The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+typing_type_structure1.php:24:33
+22 |     hh_show($c['generic_types']);
+23 |     hh_show($d['elem_types']);
+24 |     hh_show($d['elem_types'][1]['nullable']);
+   |                                 ^^^^^^^^^^ [1]
+25 |     hh_show($e['param_types']);
+26 |     hh_show($e['return_type']);
+
+typestructure.hhi:61:6
+59 |   // additional fields other than those specified here.
+60 |   newtype TypeStructure<T> as shape(
+61 |     ?'nullable' => bool,
+   |      ^^^^^^^^^^ [2]
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+
+1 error found

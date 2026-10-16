@@ -1,12 +1,57 @@
-ERROR: File "internal.php--non_test.php", line 5, characters 9-18:
-Cannot access an internal element from module `foo` in the default module (Typing[4444])
-  File "internal.php--foo.php", line 7, characters 21-30:
-  This is from module `foo`
-ERROR: File "internal.php--non_test.php", line 6, characters 18-27:
-Cannot access an internal element from module `foo` in the default module (Typing[4444])
-  File "internal.php--foo.php", line 10, characters 28-37:
-  This is from module `foo`
-ERROR: File "internal.php--test.php", line 9, characters 9-15:
-Cannot access an internal element from module `foo` in the default module (Typing[4444])
-  File "internal.php--foo.php", line 12, characters 21-27:
-  This is from module `foo`. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this class
+error: Typing[4444] Cannot access an internal element from module `foo` in the default module [1]
+-> This is from module `foo` [2]
+
+internal.php--non_test.php:5:9
+3 | class InternalNonTest {
+4 |   public function test(InternalFoo $f): void {
+5 |     $f->int_method(); // error: not in test context
+  |         ^^^^^^^^^^ [1]
+6 |     InternalFoo::int_static(); // error: not in test context
+7 |   }
+
+internal.php--foo.php:7:21
+5 | class InternalFoo {
+6 |   <<__TestsBypassVisibility>>
+7 |   internal function int_method(): void {}
+  |                     ^^^^^^^^^^ [2]
+8 | 
+9 |   <<__TestsBypassVisibility>>
+
+error: Typing[4444] Cannot access an internal element from module `foo` in the default module [1]
+-> This is from module `foo` [2]
+
+internal.php--non_test.php:6:18
+ 4 |   public function test(InternalFoo $f): void {
+ 5 |     $f->int_method(); // error: not in test context
+ 6 |     InternalFoo::int_static(); // error: not in test context
+   |                  ^^^^^^^^^^ [1]
+ 7 |   }
+ 8 | }
+
+internal.php--foo.php:10:28
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   internal static function int_static(): void {}
+   |                            ^^^^^^^^^^ [2]
+11 | 
+12 |   internal function no_attr(): void {}
+
+error: Typing[4444] Cannot access an internal element from module `foo` in the default module [1]
+-> This is from module `foo`. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this class [2]
+
+internal.php--test.php:9:9
+ 7 |     $f->int_method(); // ok: bypasses internal
+ 8 |     InternalFoo::int_static(); // ok: bypasses internal static
+ 9 |     $f->no_attr(); // error: no attribute
+   |         ^^^^^^^ [1]
+10 |   }
+11 | }
+
+internal.php--foo.php:12:21
+10 |   internal static function int_static(): void {}
+11 | 
+12 |   internal function no_attr(): void {}
+   |                     ^^^^^^^ [2]
+13 | }
+
+3 errors found

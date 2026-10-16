@@ -1,6 +1,13 @@
-ERROR: File "disjoint_attr_bad_dynamic.php", line 5, characters 6-8:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_dynamic.php", line 5, characters 30-34:
-  Shape field `dyn` is defined here
-  File "disjoint_attr_bad_dynamic.php", line 5, characters 21-27:
-  Shape field `dyn` may also be provided by `dynamic`
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `dyn` is defined here [2]
+-> Shape field `dyn` may also be provided by `dynamic` [3]
+
+disjoint_attr_bad_dynamic.php:5:6
+3 | 
+4 | <<__DisjointShapeSplat>>
+5 | type Bad = shape(...dynamic, 'dyn' => int);
+  |      ^^^ [1]
+  |                     ^^^^^^^ [3]
+  |                              ^^^^^ [2]
+
+1 error found

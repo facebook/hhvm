@@ -1,6 +1,22 @@
-ERROR: File "reifiable.php", line 11, characters 21-30:
-Invalid reified hint (Typing[4305])
-  File "reifiable.php", line 8, characters 23-26:
-  This is an abstract type constant without the __Reifiable attribute, it cannot be used as a reified type argument
-  File "reifiable.php", line 3, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is an abstract type constant without the __Reifiable attribute, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+reifiable.php:11:21
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [3]
+ 4 | 
+ 5 | abstract class X {
+ 6 |   <<__Reifiable>>
+ 7 |   abstract const type TFoo;
+ 8 |   abstract const type TBar;
+   |                       ^^^^ [2]
+ 9 | 
+10 |   const type X2 = C<this::TFoo>;
+11 |   const type X3 = C<this::TBar>;
+   |                     ^^^^^^^^^^ [1]
+12 | }
+
+1 error found

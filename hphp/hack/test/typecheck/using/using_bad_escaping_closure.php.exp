@@ -1,4 +1,21 @@
-ERROR: File "using_bad_escaping_closure.php", line 11, characters 17-18:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
-ERROR: File "using_bad_escaping_closure.php", line 12, characters 30-31:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping_closure.php:11:17
+ 9 | function test_it():void {
+10 |   using ($v = new Handle()) {
+11 |     $f = () ==> $v->foo();
+   |                 ^^ [1]
+12 |     $g = function():void use($v) { $v->foo(); };
+13 |   }
+
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping_closure.php:12:30
+10 |   using ($v = new Handle()) {
+11 |     $f = () ==> $v->foo();
+12 |     $g = function():void use($v) { $v->foo(); };
+   |                              ^^ [1]
+13 |   }
+14 |   // Bad news
+
+2 errors found

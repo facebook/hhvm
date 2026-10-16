@@ -1,12 +1,25 @@
-ERROR: File "yield_lambda_async.php", line 13, characters 12-42:
-Invalid return type (Typing[4110])
-  File "yield_lambda_async.php", line 13, characters 12-42:
-  Expected `AsyncGenerator<null, int, void>`
-  File "yield_lambda_async.php", line 13, characters 12-42:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
-ERROR: File "yield_lambda_async.php", line 20, characters 18-43:
-Invalid return type (Typing[4110])
-  File "yield_lambda_async.php", line 20, characters 18-43:
-  Expected `Generator<null, int, void>`
-  File "yield_lambda_async.php", line 20, characters 18-43:
-  But got `AsyncGenerator<_, _, _>` (result of `async function` containing a `yield`)
+error: Typing[4110] Invalid return type [1]
+-> Expected `AsyncGenerator<null, int, void>` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+yield_lambda_async.php:13:12
+11 | // error
+12 | function f2(): void {
+13 |   $f = (): AsyncGenerator<null, int, void> ==> {
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     yield 5;
+15 |   };
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Generator<null, int, void>` [1]
+-> But got `AsyncGenerator<_, _, _>` (result of `async function` containing a `yield`) [1]
+
+yield_lambda_async.php:20:18
+18 | // error
+19 | function f3(): void {
+20 |   $f = async (): Generator<null, int, void> ==> {
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |     yield 5;
+22 |   };
+
+2 errors found

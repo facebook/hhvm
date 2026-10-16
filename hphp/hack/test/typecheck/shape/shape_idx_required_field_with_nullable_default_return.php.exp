@@ -1,6 +1,16 @@
-ERROR: File "shape_idx_required_field_with_nullable_default_return.php", line 8, characters 31-38:
-Invalid argument (Typing[4110])
-  File "shape_idx_required_field_with_nullable_default_return.php", line 7, characters 4-6:
-  Expected `int`
-  File "shape_idx_required_field_with_nullable_default_return.php", line 6, characters 3-6:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+shape_idx_required_field_with_nullable_default_return.php:8:31
+4 | function shape_idx_required_field_with_nullable_default_return(
+5 |   shape('x' => int) $s,
+6 |   ?int $default,
+  |   ^^^^ [3]
+7 | ): int {
+  |    ^^^ [2]
+8 |   return Shapes::idx($s, 'x', $default);
+  |                               ^^^^^^^^ [1]
+9 | }
+
+1 error found

@@ -1,12 +1,41 @@
-ERROR: File "property.php", line 27, characters 10-13:
-Typing error (Typing[4112])
-  File "property.php", line 27, characters 16-24:
-  You cannot access this member
-  File "property.php", line 7, characters 11-13:
-  This member is private
-ERROR: File "property.php", line 28, characters 10-13:
-Typing error (Typing[4112])
-  File "property.php", line 28, characters 16-24:
-  Cannot access this protected member, you don't extend WithProps
-  File "property.php", line 10, characters 13-18:
-  This member is protected
+error: Typing[4112] Typing error [1]
+-> You cannot access this member [2]
+-> This member is private [3]
+
+property.php:27:10
+ 5 | class WithProps {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private int $priv_prop = 0;
+   |           ^^^ [3]
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+   :
+25 | class PropNonTest {
+26 |   public function test(WithProps $obj): void {
+27 |     $_ = $obj->priv_prop; // error
+   |          ^^^^ [1]
+   |                ^^^^^^^^^ [2]
+28 |     $_ = $obj->prot_prop; // error
+29 |   }
+
+error: Typing[4112] Typing error [1]
+-> Cannot access this protected member, you don't extend WithProps [2]
+-> This member is protected [3]
+
+property.php:28:10
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   protected string $prot_prop = "hello";
+   |             ^^^^^^ [3]
+11 | 
+12 |   <<__TestsBypassVisibility>>
+   :
+26 |   public function test(WithProps $obj): void {
+27 |     $_ = $obj->priv_prop; // error
+28 |     $_ = $obj->prot_prop; // error
+   |          ^^^^ [1]
+   |                ^^^^^^^^^ [2]
+29 |   }
+30 | }
+
+2 errors found

@@ -1,8 +1,29 @@
-ERROR: File "str_interp_backslash.php", line 4, characters 10-30:
-The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
-ERROR: File "str_interp_backslash.php", line 4, characters 10-30:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "str_interp_backslash.php", line 4, characters 10-30:
-  Expected `string` or `int`
-  File "functions.hhi", line 57, characters 49-52:
-  But got `bool`
+error: Parsing[1002] The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. [1]
+
+str_interp_backslash.php:4:10
+2 | 
+3 | function main():void{
+4 |   $a = "${HH\is_any_array('')}";
+  |          ^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [2]
+
+str_interp_backslash.php:4:10
+ 2 | 
+ 3 | function main():void{
+ 4 |   $a = "${HH\is_any_array('')}";
+   |          ^^^^^^^^^^^^^^^^^^^^^ [1]
+ 5 | }
+
+functions.hhi:57:49
+55 |    * Otherwise returns false.
+56 |    */
+57 |   function is_any_array(readonly mixed $arg)[]: bool;
+   |                                                 ^^^^ [2]
+58 | }
+59 | 
+
+2 errors found

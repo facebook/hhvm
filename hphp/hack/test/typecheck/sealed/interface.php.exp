@@ -1,4 +1,14 @@
-ERROR: File "interface.php", line 8, characters 11-11:
-You cannot extend sealed interface `A` (Typing[4238])
-  File "interface.php", line 5, characters 11-11:
-  Declaration is here
+error: Typing[4238] You cannot extend sealed interface `A` [1]
+-> Declaration is here [2]
+
+interface.php:8:11
+3 | 
+4 | <<__Sealed(B::class)>>
+5 | interface A {}
+  |           ^ [2]
+6 | 
+7 | interface B extends A {}
+8 | interface C extends A {}
+  |           ^ [1]
+
+1 error found

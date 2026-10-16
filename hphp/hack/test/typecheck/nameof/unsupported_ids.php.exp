@@ -1,4 +1,20 @@
-ERROR: File "unsupported_ids.php", line 7, characters 10-10:
-Unbound name: `C` (an object type) (Naming[2049])
-ERROR: File "unsupported_ids.php", line 8, characters 10-10:
-Unbound name: `d` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `C` (an object type) [1]
+
+unsupported_ids.php:7:10
+5 | 
+6 | function f(): void {
+7 |   nameof C;
+  |          ^ [1]
+8 |   nameof d;
+9 | }
+
+error: Naming[2049] Unbound name: `d` (an object type) [1]
+
+unsupported_ids.php:8:10
+6 | function f(): void {
+7 |   nameof C;
+8 |   nameof d;
+  |          ^ [1]
+9 | }
+
+2 errors found

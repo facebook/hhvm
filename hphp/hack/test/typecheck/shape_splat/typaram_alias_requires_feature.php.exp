@@ -1,2 +1,11 @@
-ERROR: File "typaram_alias_requires_feature.php", line 8, characters 31-31:
-`T` requires the unstable feature `shape_splat_type_parameters`. Add `<<file: __EnableUnstableFeatures('shape_splat_type_parameters')>>` to use it. (Typing[4509])
+error: Typing[4509] `T` requires the unstable feature `shape_splat_type_parameters`. Add `<<file: __EnableUnstableFeatures('shape_splat_type_parameters')>>` to use it. [1]
+
+typaram_alias_requires_feature.php:8:31
+ 6 | // `shape_splat_concrete`. This should error. (Splatting a concrete alias or
+ 7 | // inline shape, by contrast, is fine under `shape_splat_concrete` alone.)
+ 8 | type WithTParam<T> = shape(...T, 'foo' => int);
+   |                               ^ [1]
+ 9 | 
+10 | type Concrete = shape('a' => int);
+
+1 error found

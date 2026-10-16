@@ -1,12 +1,44 @@
-ERROR: File "representable_as_basic.php", line 19, characters 30-31:
-Invalid argument (Typing[4110])
-  File "representable_as_basic.php", line 4, characters 65-67:
-  Expected `int`
-  File "representable_as_basic.php", line 17, characters 50-52:
-  But got `num`
-ERROR: File "representable_as_basic.php", line 24, characters 30-31:
-Invalid argument (Typing[4110])
-  File "representable_as_basic.php", line 4, characters 65-67:
-  Expected `int`
-  File "representable_as_basic.php", line 22, characters 53-58:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+
+representable_as_basic.php:19:30
+ 2 | <<file: __EnableUnstableFeatures('representable_as')>>
+ 3 | 
+ 4 | function takes_representable_as_int(\HH\Runtime\RepresentableAs<int> $c): void {}
+   |                                                                 ^^^ [2]
+ 5 | function takes_representable_as_num(\HH\Runtime\RepresentableAs<num> $c): void {}
+ 6 | 
+   :
+15 | }
+16 | 
+17 | function test_num_sub_representable_as_int_fails(num $n): void {
+   |                                                  ^^^ [3]
+18 |   // num <: RepresentableAs<int> — should FAIL
+19 |   takes_representable_as_int($n);
+   |                              ^^ [1]
+20 | }
+21 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_basic.php:24:30
+ 2 | <<file: __EnableUnstableFeatures('representable_as')>>
+ 3 | 
+ 4 | function takes_representable_as_int(\HH\Runtime\RepresentableAs<int> $c): void {}
+   |                                                                 ^^^ [2]
+ 5 | function takes_representable_as_num(\HH\Runtime\RepresentableAs<num> $c): void {}
+ 6 | 
+   :
+20 | }
+21 | 
+22 | function test_string_sub_representable_as_int_fails(string $s): void {
+   |                                                     ^^^^^^ [3]
+23 |   // string <: RepresentableAs<int> — should FAIL
+24 |   takes_representable_as_int($s);
+   |                              ^^ [1]
+25 | }
+
+2 errors found

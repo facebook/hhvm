@@ -1,2 +1,11 @@
-ERROR: File "map_any.php", line 11, characters 26-27:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+map_any.php:11:26
+ 9 | }
+10 | 
+11 | function test(/* TAny */ $v): void {
+   |                          ^^ [1]
+12 |   my_map(
+13 |     $v,
+
+1 error found

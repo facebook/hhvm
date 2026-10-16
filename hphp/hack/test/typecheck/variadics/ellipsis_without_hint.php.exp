@@ -1,2 +1,9 @@
-ERROR: File "ellipsis_without_hint.php", line 3, characters 20-22:
-Cannot use ... without a typehint (Parsing[1002])
+error: Parsing[1002] Cannot use ... without a typehint [1]
+
+ellipsis_without_hint.php:3:20
+1 | <?hh
+2 | 
+3 | type T = (function(...): int);
+  |                    ^^^ [1]
+
+1 error found

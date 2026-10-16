@@ -1,8 +1,32 @@
-ERROR: File "requireclass_syntax_01.bad.php", line 10, characters 17-17:
-Only traits may use `require class` (Naming[2119])
-ERROR: File "requireclass_syntax_01.bad.php", line 14, characters 17-17:
-Only traits may use `require class` (Naming[2119])
-ERROR: File "requireclass_syntax_01.bad.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requireclass_syntax_01.bad.php", line 14, characters 17-17:
-  This requires to be exactly C
+error: Naming[2119] Only traits may use `require class` [1]
+
+requireclass_syntax_01.bad.php:10:17
+ 8 | 
+ 9 | interface IT {
+10 |   require class C;
+   |                 ^ [1]
+11 | }
+12 | 
+
+error: Naming[2119] Only traits may use `require class` [1]
+
+requireclass_syntax_01.bad.php:14:17
+12 | 
+13 | class D {
+14 |   require class C;
+   |                 ^ [1]
+15 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to be exactly C [2]
+
+requireclass_syntax_01.bad.php:13:7
+11 | }
+12 | 
+13 | class D {
+   |       ^ [1]
+14 |   require class C;
+   |                 ^ [2]
+15 | }
+
+3 errors found

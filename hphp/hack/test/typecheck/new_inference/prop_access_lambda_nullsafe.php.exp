@@ -1,22 +1,63 @@
-WARN: File "prop_access_lambda_nullsafe.php", line 9, characters 31-36:
-You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
-ERROR: File "prop_access_lambda_nullsafe.php", line 10, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe.php", line 9, characters 23-28:
-  Expected `string`
-  File "prop_access_lambda_nullsafe.php", line 5, characters 38-40:
-  But got `int`
-ERROR: File "prop_access_lambda_nullsafe.php", line 10, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe.php", line 9, characters 31-32:
-  Expected `?_`
-  File "prop_access_lambda_nullsafe.php", line 8, characters 14-15:
-  But got `<expr#2> as A`
-  File "prop_access_lambda_nullsafe.php", line 10, characters 6-7:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "prop_access_lambda_nullsafe.php", line 10, characters 6-7:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda_nullsafe.php", line 9, characters 31-36:
-  Expected `null` (use of `?->` operator)
-  File "prop_access_lambda_nullsafe.php", line 8, characters 15-15:
-  But got `A`
+warning: Warn[12030] You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. [1]
+
+prop_access_lambda_nullsafe.php:9:31
+ 7 | 
+ 8 | function foo(?A $a): void {
+ 9 |   $f = $x ==> expect<?string>($x?->x);
+   |                               ^^^^^^ [1]
+10 |   $f($a);
+11 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+prop_access_lambda_nullsafe.php:10:6
+ 3 | 
+ 4 | class A {
+ 5 |   public function __construct(public int $x) {}
+   |                                      ^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | function foo(?A $a): void {
+ 9 |   $f = $x ==> expect<?string>($x?->x);
+   |                       ^^^^^^ [2]
+10 |   $f($a);
+   |      ^^ [1]
+11 | }
+12 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `?_` [2]
+-> But got `<expr#2> as A` [3]
+->   where `<expr#2>` is a reference to this expression [1]
+
+prop_access_lambda_nullsafe.php:10:6
+ 6 | }
+ 7 | 
+ 8 | function foo(?A $a): void {
+   |              ^^ [3]
+ 9 |   $f = $x ==> expect<?string>($x?->x);
+   |                               ^^ [2]
+10 |   $f($a);
+   |      ^^ [1]
+11 | }
+12 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` (use of `?->` operator) [2]
+-> But got `A` [3]
+
+prop_access_lambda_nullsafe.php:10:6
+ 6 | }
+ 7 | 
+ 8 | function foo(?A $a): void {
+   |               ^ [3]
+ 9 |   $f = $x ==> expect<?string>($x?->x);
+   |                               ^^^^^^ [2]
+10 |   $f($a);
+   |      ^^ [1]
+11 | }
+12 | 
+
+4 errors found

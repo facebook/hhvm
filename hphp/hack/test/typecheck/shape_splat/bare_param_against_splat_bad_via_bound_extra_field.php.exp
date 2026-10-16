@@ -1,10 +1,20 @@
-ERROR: File "bare_param_against_splat_bad_via_bound_extra_field.php", line 10, characters 10-11:
-Invalid return type (Typing[4523])
-  File "bare_param_against_splat_bad_via_bound_extra_field.php", line 8, characters 3-26:
-  The field `z` here is not compatible with every instantiation of `T1`
-  File "bare_param_against_splat_bad_via_bound_extra_field.php", line 9, characters 4-5:
-  `T1` may provide `z` with a type of its own
-  File "bare_param_against_splat_bad_via_bound_extra_field.php", line 10, characters 3-12:
-  Expected `nothing`
-  File "bare_param_against_splat_bad_via_bound_extra_field.php", line 8, characters 23-25:
-  But got `int`
+error: Typing[4523] Invalid return type [1]
+-> The field `z` here is not compatible with every instantiation of `T1` [2]
+-> `T1` may provide `z` with a type of its own [3]
+-> Expected `nothing` [4]
+-> But got `int` [5]
+
+bare_param_against_splat_bad_via_bound_extra_field.php:10:10
+ 6 | // does not admit.
+ 7 | function via_bound_rev<T1 as shape(...), <<__Explicit>> T2 as T1>(
+ 8 |   shape(...T2, 'z' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                       ^^^ [5]
+ 9 | ): T1 {
+   |    ^^ [3]
+10 |   return $s;
+   |   ^^^^^^^^^^ [4]
+   |          ^^ [1]
+11 | }
+
+1 error found

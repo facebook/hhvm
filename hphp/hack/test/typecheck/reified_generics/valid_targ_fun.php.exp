@@ -1,12 +1,29 @@
-ERROR: File "valid_targ_fun.php", line 5, characters 13-42:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_fun.php", line 5, characters 13-42:
-  This is a function type, it cannot be used as a reified type argument
-  File "valid_targ_fun.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "valid_targ_fun.php", line 6, characters 13-52:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_fun.php", line 6, characters 13-52:
-  This is a function type, it cannot be used as a reified type argument
-  File "valid_targ_fun.php", line 3, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is a function type, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+valid_targ_fun.php:5:13
+1 | <?hh
+2 | 
+3 | class C<reify T> {}
+  |               ^ [2]
+4 | 
+5 | type Ta = C<(function (int, bool): string)>;
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | type Tc = C<(function (int, bool, float...): string)>;
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a function type, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+valid_targ_fun.php:6:13
+1 | <?hh
+2 | 
+3 | class C<reify T> {}
+  |               ^ [2]
+4 | 
+5 | type Ta = C<(function (int, bool): string)>;
+6 | type Tc = C<(function (int, bool, float...): string)>;
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+2 errors found

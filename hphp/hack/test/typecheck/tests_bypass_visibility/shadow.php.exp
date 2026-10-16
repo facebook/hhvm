@@ -1,4 +1,17 @@
-ERROR: File "shadow.php", line 11, characters 20-23:
-Cannot override or shadow `priv` (Typing[4514])
-  File "shadow.php", line 7, characters 20-23:
-  This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>`
+error: Typing[4514] Cannot override or shadow `priv` [1]
+-> This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>` [2]
+
+shadow.php:11:20
+ 5 | class Parent2 {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private function priv(): void {}
+   |                    ^^^^ [2]
+ 8 | }
+ 9 | 
+10 | class ChildShadow extends Parent2 {
+11 |   private function priv(): void {} // error: cannot shadow __TestsBypassVisibility
+   |                    ^^^^ [1]
+12 | }
+13 | 
+
+1 error found

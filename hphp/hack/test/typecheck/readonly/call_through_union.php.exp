@@ -1,4 +1,18 @@
-ERROR: File "call_through_union.php", line 16, characters 10-11:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "call_through_union.php", line 11, characters 39-69:
-  The function call is defined here.
+error: Typing[4412] This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The function call is defined here. [2]
+
+call_through_union.php:16:10
+ 9 | 
+10 | final class MyFoo implements I {
+11 |   public function __construct(private (function(num): readonly MyBar) $getter, private (function(int):MyFoo) $getter2) {}
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 | 
+13 |   public function getBar(bool $b): I {
+14 |     $f = $this->getter;
+15 |     if ($b) $f = $this->getter2;
+16 |     $z = $f(3);
+   |          ^^ [1]
+17 |     return $z;
+18 |   }
+
+1 error found

@@ -1,8 +1,20 @@
-ERROR: File "key_exists_refines_bad1.php", line 7, characters 19-25:
-Invalid argument (Typing[4110])
-  File "key_exists_refines_bad1.php", line 3, characters 24-29:
-  Expected `string`
-  File "key_exists_refines_bad1.php", line 7, characters 19-25:
-  But got `int`
-  File "key_exists_refines_bad1.php", line 5, characters 29-31:
-    from this definition
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+->   from this definition [3]
+
+key_exists_refines_bad1.php:7:19
+1 | <?hh
+2 | 
+3 | function expect_string(string $_): void {}
+  |                        ^^^^^^ [2]
+4 | 
+5 | function test(shape(?'x' => int) $s): void {
+  |                             ^^^ [3]
+6 |   if (Shapes::keyExists($s, 'x')) {
+7 |     expect_string($s['x']);
+  |                   ^^^^^^^ [1]
+8 |   }
+9 | }
+
+1 error found

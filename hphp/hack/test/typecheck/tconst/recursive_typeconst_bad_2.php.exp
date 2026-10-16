@@ -1,20 +1,88 @@
-WARN: File "recursive_typeconst_bad_2.php", line 32, characters 10-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "recursive_typeconst_bad_2.php", line 25, characters 25-47:
-Type aliases to type constants are not supported (Parsing[1002])
-ERROR: File "recursive_typeconst_bad_2.php", line 26, characters 24-44:
-Type aliases to type constants are not supported (Parsing[1002])
-ERROR: File "recursive_typeconst_bad_2.php", line 6, characters 14-26:
-Cyclic type constant:
-  `MyParent::MyParentShape` -> `MyParentShapeFix` -> `MyParent::MyParentShape` (Typing[4131])
-ERROR: File "recursive_typeconst_bad_2.php", line 15, characters 14-25:
-Cyclic type constant:
-  `MyChild::MyChildShape` -> `MyChildShapeFix` -> `MyChild::MyChildShape` (Typing[4131])
-ERROR: File "recursive_typeconst_bad_2.php", line 25, characters 6-21:
-Cyclic type definition (Typing[4014])
-  File "recursive_typeconst_bad_2.php", line 8, characters 14-29:
-  Cyclic use is here
-ERROR: File "recursive_typeconst_bad_2.php", line 26, characters 6-20:
-Cyclic type definition (Typing[4014])
-  File "recursive_typeconst_bad_2.php", line 18, characters 14-28:
-  Cyclic use is here
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+recursive_typeconst_bad_2.php:32:10
+30 |   // MyChildShape isn't a subtype of MyParentShape (it's the other way around)
+31 |   // return $x; // this is an error, (expected)
+32 |   return $x['inner']; // this should also be an error but isn't
+   |          ^^^^^^^^^^^ [1]
+33 | }
+
+error: Parsing[1002] Type aliases to type constants are not supported [1]
+
+recursive_typeconst_bad_2.php:25:25
+23 | 
+24 | // sprinkle in a bit of indirection
+25 | type MyParentShapeFix = MyParent::MyParentShape;
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 | type MyChildShapeFix = MyChild::MyChildShape;
+27 | 
+
+error: Parsing[1002] Type aliases to type constants are not supported [1]
+
+recursive_typeconst_bad_2.php:26:24
+24 | // sprinkle in a bit of indirection
+25 | type MyParentShapeFix = MyParent::MyParentShape;
+26 | type MyChildShapeFix = MyChild::MyChildShape;
+   |                        ^^^^^^^^^^^^^^^^^^^^^ [1]
+27 | 
+28 | // Demo how MyParentShape and MyChildShape are broken
+
+error: Typing[4131] Cyclic type constant:
+  `MyParent::MyParentShape` -> `MyParentShapeFix` -> `MyParent::MyParentShape` [1]
+
+recursive_typeconst_bad_2.php:6:14
+4 | class MyParent {
+5 | 
+6 |   const type MyParentShape = shape(
+  |              ^^^^^^^^^^^^^ [1]
+7 |   'value1' => int,
+8 |   'inner' => MyParentShapeFix, // for some reason this is fine?!
+
+error: Typing[4131] Cyclic type constant:
+  `MyChild::MyChildShape` -> `MyChildShapeFix` -> `MyChild::MyChildShape` [1]
+
+recursive_typeconst_bad_2.php:15:14
+13 | 
+14 | class MyChild {
+15 |   const type MyChildShape = shape(
+   |              ^^^^^^^^^^^^ [1]
+16 |   'value1' => int,
+17 |   'value2' => string,
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_typeconst_bad_2.php:25:6
+ 6 |   const type MyParentShape = shape(
+ 7 |   'value1' => int,
+ 8 |   'inner' => MyParentShapeFix, // for some reason this is fine?!
+   |              ^^^^^^^^^^^^^^^^ [2]
+ 9 |   // 'inner' => MyParentShape, // is an recursive error
+10 |   ...
+   :
+23 | 
+24 | // sprinkle in a bit of indirection
+25 | type MyParentShapeFix = MyParent::MyParentShape;
+   |      ^^^^^^^^^^^^^^^^ [1]
+26 | type MyChildShapeFix = MyChild::MyChildShape;
+27 | 
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_typeconst_bad_2.php:26:6
+16 |   'value1' => int,
+17 |   'value2' => string,
+18 |   'inner' => MyChildShapeFix, // for some reason this is fine?!
+   |              ^^^^^^^^^^^^^^^ [2]
+19 |   // 'inner' => MyChildShape, // is an recursive error
+20 | );
+   :
+24 | // sprinkle in a bit of indirection
+25 | type MyParentShapeFix = MyParent::MyParentShape;
+26 | type MyChildShapeFix = MyChild::MyChildShape;
+   |      ^^^^^^^^^^^^^^^ [1]
+27 | 
+28 | // Demo how MyParentShape and MyChildShape are broken
+
+7 errors found

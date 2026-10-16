@@ -1,2 +1,10 @@
-ERROR: File "static_access_04.bad.php", line 14, characters 6-8:
-Invoking static methods on traits is dangerous and must be avoided. Since trait T has a `require class C` constraint, replace `T::foo(...)` with `C::foo(...)`. (Typing[4476])
+error: Typing[4476] Invoking static methods on traits is dangerous and must be avoided. Since trait T has a `require class C` constraint, replace `T::foo(...)` with `C::foo(...)`. [1]
+
+static_access_04.bad.php:14:6
+12 | <<__EntryPoint>>
+13 | function main(): void {
+14 |   T::foo();
+   |      ^^^ [1]
+15 | }
+
+1 error found

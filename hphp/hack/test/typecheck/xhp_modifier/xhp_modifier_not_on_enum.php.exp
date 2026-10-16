@@ -1,4 +1,17 @@
-ERROR: File "xhp_modifier_not_on_enum.php", line 4, characters 5-5:
-The `class` keyword is expected here. (Parsing[1002])
-ERROR: File "xhp_modifier_not_on_enum.php", line 4, characters 5-5:
-Encountered unexpected text ``, was expecting a class kind. (Parsing[1002])
+error: Parsing[1002] The `class` keyword is expected here. [1]
+
+xhp_modifier_not_on_enum.php:4:5
+2 | 
+3 | // XHP keyword is not allowed for enums
+4 | xhp enum Foo {}
+  |     ^ [1]
+
+error: Parsing[1002] Encountered unexpected text ``, was expecting a class kind. [1]
+
+xhp_modifier_not_on_enum.php:4:5
+2 | 
+3 | // XHP keyword is not allowed for enums
+4 | xhp enum Foo {}
+  |     ^ [1]
+
+2 errors found

@@ -1,8 +1,29 @@
-WARN: File "t76864299.php", line 9, characters 8-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(T & J)` which is a subtype of `J`. (Warn[12011])
-ERROR: File "t76864299.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-  File "t76864299.php", line 6, characters 30-30:
-  Expected `T`
-  File "t76864299.php", line 6, characters 23-23:
-  But got `J`
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(T & J)` which is a subtype of `J`. [1]
+
+t76864299.php:9:8
+ 7 |   invariant($q is J, 'haha');
+ 8 | 
+ 9 |   $q = $q as J;
+   |        ^^^^^^^ [1]
+10 |   return $j;
+11 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `J` [3]
+
+t76864299.php:10:10
+ 4 | interface J {  }
+ 5 | 
+ 6 | function bar<T>(T $q, J $j): T {
+   |                       ^ [3]
+   |                              ^ [2]
+ 7 |   invariant($q is J, 'haha');
+ 8 | 
+ 9 |   $q = $q as J;
+10 |   return $j;
+   |          ^^ [1]
+11 | }
+12 | 
+
+2 errors found

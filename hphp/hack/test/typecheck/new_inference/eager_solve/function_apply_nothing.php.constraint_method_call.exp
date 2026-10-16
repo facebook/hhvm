@@ -1,12 +1,44 @@
-ERROR: File "function_apply_nothing.php", line 12, characters 43-45:
-No instance method `foo` in `string` (Typing[4053])
-  File "function_apply_nothing.php", line 14, characters 19-21:
-  This is why I think it is an object of type HH\string
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "function_apply_nothing.php", line 14, characters 19-21:
-Invalid argument (Typing[4110])
-  File "function_apply_nothing.php", line 5, characters 51-54:
-  Expected `bool`
-  File "function_apply_nothing.php", line 12, characters 51-55:
-  But got `string`
+error: Typing[4053] No instance method `foo` in `string` [1]
+-> This is why I think it is an object of type HH\string [2]
+-> Declaration of `string` is here [3]
+
+function_apply_nothing.php:12:43
+10 | function expectBool(bool $ak):void { }
+11 | function testit(bool $b):void {
+12 |   $obj = new Inv($x ==> { return $b ? $x->foo() : $x[0]; });
+   |                                           ^^^ [1]
+13 |   $r = $obj->item;
+14 |   expectBool(($r)("a"));
+   |                   ^^^ [2]
+15 | }
+
+string.hhi:6:15
+ 4 | 
+ 5 |   <<__SupportDynamicType>>
+ 6 |   final class string {
+   |               ^^^^^^ [3]
+ 7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+ 8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `string` [3]
+
+function_apply_nothing.php:14:19
+ 3 | 
+ 4 | class Inv<T> {
+ 5 |   public function __construct(public (function(T):bool) $item) { }
+   |                                                   ^^^^ [2]
+ 6 | }
+ 7 | function newInv<T>((function(T):bool) $f):Inv<T> {
+   :
+10 | function expectBool(bool $ak):void { }
+11 | function testit(bool $b):void {
+12 |   $obj = new Inv($x ==> { return $b ? $x->foo() : $x[0]; });
+   |                                                   ^^^^^ [3]
+13 |   $r = $obj->item;
+14 |   expectBool(($r)("a"));
+   |                   ^^^ [1]
+15 | }
+
+2 errors found

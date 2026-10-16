@@ -1,4 +1,19 @@
-ERROR: File "extends.php", line 3, characters 1-24:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "extends.php", line 7, characters 19-21:
-Unbound name: `Bar` (an object type) (Naming[2049])
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+extends.php:3:1
+1 | <?hh
+2 | 
+3 | require_once('Bar.php');
+  | ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+4 | 
+5 | // Moving the require to an <<__EntryPoint>> function leads to a runtime fatal
+
+error: Naming[2049] Unbound name: `Bar` (an object type) [1]
+
+extends.php:7:19
+5 | // Moving the require to an <<__EntryPoint>> function leads to a runtime fatal
+6 | // at the class definition, before the __EntryPoint function is invoked
+7 | class Foo extends Bar {}
+  |                   ^^^ [1]
+
+2 errors found

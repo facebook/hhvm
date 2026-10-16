@@ -1,4 +1,17 @@
-ERROR: File "new_using_shape_typedef.php", line 8, characters 12-12:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "new_using_shape_typedef.php", line 3, characters 6-6:
-  Alias definition is here.
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+new_using_shape_typedef.php:8:12
+1 | <?hh
+2 | 
+3 | type S = shape(
+  |      ^ [2]
+4 |   'a' => int,
+5 | );
+6 | 
+7 | function f(): void {
+8 |   $f = new S(42);
+  |            ^ [1]
+9 | }
+
+1 error found

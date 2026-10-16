@@ -1,12 +1,54 @@
-ERROR: File "named_params_traits.php", line 48, characters 9-38:
-Missing required named argument: label (Typing[4499])
-  File "named_params_traits.php", line 5, characters 19-30:
-  Definition is here
-ERROR: File "named_params_traits.php", line 51, characters 9-50:
-Unexpected named argument: unknown (Typing[4500])
-  File "named_params_traits.php", line 5, characters 19-30:
-  Definition is here
-ERROR: File "named_params_traits.php", line 54, characters 10-26:
-Missing required named argument: name (Typing[4499])
-  File "named_params_traits.php", line 22, characters 19-33:
-  Definition is here
+error: Typing[4499] Missing required named argument: label [1]
+-> Definition is here [2]
+
+named_params_traits.php:48:9
+ 3 | 
+ 4 | trait TestTrait {
+ 5 |   public function trait_method(
+   |                   ^^^^^^^^^^^^ [2]
+ 6 |     int $a,
+ 7 |     named string $label,
+   :
+46 | 
+47 |   // Error: Missing required named parameter in trait method
+48 |   $obj->trait_method(1, enabled=false);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+49 | 
+50 |   // Error: Unexpected named parameter in trait method
+
+error: Typing[4500] Unexpected named argument: unknown [1]
+-> Definition is here [2]
+
+named_params_traits.php:51:9
+ 3 | 
+ 4 | trait TestTrait {
+ 5 |   public function trait_method(
+   |                   ^^^^^^^^^^^^ [2]
+ 6 |     int $a,
+ 7 |     named string $label,
+   :
+49 | 
+50 |   // Error: Unexpected named parameter in trait method
+51 |   $obj->trait_method(1, label="test", unknown=123);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 | 
+53 |   // Error: Missing required parameter in trait with requirements
+
+error: Typing[4499] Missing required named argument: name [1]
+-> Definition is here [2]
+
+named_params_traits.php:54:10
+20 |   require extends BaseClass;
+21 | 
+22 |   public function required_method(named string $name): void {}
+   |                   ^^^^^^^^^^^^^^^ [2]
+23 | }
+24 | 
+   :
+52 | 
+53 |   // Error: Missing required parameter in trait with requirements
+54 |   $obj2->required_method();
+   |          ^^^^^^^^^^^^^^^^^ [1]
+55 | }
+
+3 errors found

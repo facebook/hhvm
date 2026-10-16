@@ -1,6 +1,23 @@
-ERROR: File "namespace_aliasing4.php", line 18, characters 16-26:
-Invalid argument (Typing[4110])
-  File "namespace_aliasing4.php", line 21, characters 23-25:
-  Expected `int`
-  File "namespace_aliasing4.php", line 4, characters 19-24:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+namespace_aliasing4.php:18:16
+ 2 | 
+ 3 | namespace Dict {
+ 4 |   function foo(): string {
+   |                   ^^^^^^ [3]
+ 5 |     return 'foo';
+ 6 |   }
+   :
+16 |   function main(): void {
+17 |     expect_int(Dict\foo()); // ok
+18 |     expect_int(\Dict\foo()); // error
+   |                ^^^^^^^^^^^ [1]
+19 |   }
+20 | 
+21 |   function expect_int(int $x): void {}
+   |                       ^^^ [2]
+22 | }
+
+1 error found

@@ -1,20 +1,68 @@
-ERROR: File "unresolved_errors.php", line 16, characters 3-7:
-Was expecting an object but type is unknown (Typing[4297])
-  File "unresolved_errors.php", line 15, characters 8-13:
-  It is unknown because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-ERROR: File "unresolved_errors.php", line 19, characters 3-7:
-Was expecting an object but type is unknown (Typing[4297])
-  File "unresolved_errors.php", line 18, characters 8-16:
-  It is unknown because type parameter `T` of `HH\Vector` could not be determined. Please add explicit type parameters to the invocation of `HH\Vector`
-ERROR: File "unresolved_errors.php", line 22, characters 3-7:
-Was expecting an object but type is unknown (Typing[4297])
-  File "unresolved_errors.php", line 21, characters 8-23:
-  It is unknown because type parameter `T` of `generic_function` could not be determined. Please add explicit type parameters to the invocation of `generic_function`
-  File "unresolved_errors.php", line 4, characters 40-40:
-    via this generic `T`
-ERROR: File "unresolved_errors.php", line 28, characters 3-11:
-Was expecting an object but type is unknown (Typing[4297])
-  File "unresolved_errors.php", line 27, characters 12-14:
-  It is unknown because type parameter `Ti` of `Inv` could not be determined. Please add explicit type parameters to the invocation of `Inv`
-  File "unresolved_errors.php", line 11, characters 25-26:
-    via this generic `Ti`
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+
+unresolved_errors.php:16:3
+13 | 
+14 | function foo():void {
+15 |   $m = Map {};
+   |        ^^^^^^ [2]
+16 |   $m[0]->foo();
+   |   ^^^^^ [1]
+17 | 
+18 |   $v = Vector {};
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `HH\Vector` could not be determined. Please add explicit type parameters to the invocation of `HH\Vector` [2]
+
+unresolved_errors.php:19:3
+16 |   $m[0]->foo();
+17 | 
+18 |   $v = Vector {};
+   |        ^^^^^^^^^ [2]
+19 |   $v[0]->foo();
+   |   ^^^^^ [1]
+20 | 
+21 |   $x = generic_function();
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `generic_function` could not be determined. Please add explicit type parameters to the invocation of `generic_function` [2]
+->   via this generic `T` [3]
+
+unresolved_errors.php:22:3
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function generic_function<T>():Map<int,T> {
+   |                                        ^ [3]
+ 5 |   return Map{};
+ 6 | }
+   :
+19 |   $v[0]->foo();
+20 | 
+21 |   $x = generic_function();
+   |        ^^^^^^^^^^^^^^^^ [2]
+22 |   $x[0]->foo();
+   |   ^^^^^ [1]
+23 | 
+24 |   $a = vec[];
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `Ti` of `Inv` could not be determined. Please add explicit type parameters to the invocation of `Inv` [2]
+->   via this generic `Ti` [3]
+
+unresolved_errors.php:28:3
+ 9 |   private vec<Ti> $arr = vec[];
+10 |   public function __construct() { }
+11 |   public function get():Ti { return $this->arr[0]; }
+   |                         ^^ [3]
+12 | }
+13 | 
+   :
+25 |   $a[0]->foo();
+26 | 
+27 |   $x = new Inv();
+   |            ^^^ [2]
+28 |   $x->get()->foo();
+   |   ^^^^^^^^^ [1]
+29 | }
+
+4 errors found

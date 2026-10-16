@@ -1,14 +1,39 @@
-ERROR: File "error_union_subtype_missing_field.php", line 17, characters 13-14:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_missing_field.php", line 12, characters 20-41:
-  Expected `shape('x' => int, ...)`
-  File "error_union_subtype_missing_field.php", line 15, characters 18-19:
-  But got `T2 as shape(...)`
-ERROR: File "error_union_subtype_missing_field.php", line 17, characters 13-14:
-Invalid argument (Typing[4163])
-  File "error_union_subtype_missing_field.php", line 14, characters 55-64:
-  The field `x` is **optional**
-  File "error_union_subtype_missing_field.php", line 12, characters 20-41:
-  The field `x` is defined as **required**
-  File "error_union_subtype_missing_field.php", line 12, characters 33-35:
-  `x` is defined here
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => int, ...)` [2]
+-> But got `T2 as shape(...)` [3]
+
+error_union_subtype_missing_field.php:17:13
+10 | // fails and the union is rejected.
+11 | 
+12 | function sink_open(shape('x' => int, ...) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 | 
+14 | function missing_field<T1 as shape('x' => int), T2 as shape(...)>(
+15 |   shape(...(T1 | T2), ...shape()) $s,
+   |                  ^^ [3]
+16 | ): void {
+17 |   sink_open($s);
+   |             ^^ [1]
+18 | }
+
+error: Typing[4163] Invalid argument [1]
+-> The field `x` is **optional** [2]
+-> The field `x` is defined as **required** [3]
+-> `x` is defined here [4]
+
+error_union_subtype_missing_field.php:17:13
+10 | // fails and the union is rejected.
+11 | 
+12 | function sink_open(shape('x' => int, ...) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                 ^^^ [4]
+13 | 
+14 | function missing_field<T1 as shape('x' => int), T2 as shape(...)>(
+   |                                                       ^^^^^^^^^^ [2]
+15 |   shape(...(T1 | T2), ...shape()) $s,
+16 | ): void {
+17 |   sink_open($s);
+   |             ^^ [1]
+18 | }
+
+2 errors found

@@ -1,12 +1,35 @@
-ERROR: File "invoke_on_nothing.php", line 4, characters 22-22:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "invoke_on_nothing.php", line 15, characters 5-45:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "invoke_on_nothing.php", line 15, characters 13-14:
-  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "invoke_on_nothing.php", line 15, characters 37-42:
-Invalid return type (Typing[4110])
-  File "invoke_on_nothing.php", line 14, characters 32-50:
-  Expected `Awaitable<vec<int>>`
-  File "invoke_on_nothing.php", line 15, characters 37-42:
-  But got `vec<int>`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+invoke_on_nothing.php:4:22
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | function makeNothing<T>():T {
+  |                      ^ [1]
+5 |   throw new Exception("a");
+6 | }
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+invoke_on_nothing.php:15:5
+13 |   $x = makeNothing();
+14 |   $x->foo(function(string $x): Awaitable<vec<int>> {
+15 |     switch ($x) { case "A" : return vec[2]; } });
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |             ^^ [2]
+16 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Awaitable<vec<int>>` [2]
+-> But got `vec<int>` [1]
+
+invoke_on_nothing.php:15:37
+12 | function testit():void {
+13 |   $x = makeNothing();
+14 |   $x->foo(function(string $x): Awaitable<vec<int>> {
+   |                                ^^^^^^^^^^^^^^^^^^^ [2]
+15 |     switch ($x) { case "A" : return vec[2]; } });
+   |                                     ^^^^^^ [1]
+16 | }
+
+3 errors found

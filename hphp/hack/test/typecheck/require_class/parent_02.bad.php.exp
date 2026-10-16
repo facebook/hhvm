@@ -1,6 +1,26 @@
-ERROR: File "parent_02.bad.php", line 12, characters 16-28:
-Invalid argument (Typing[4110])
-  File "parent_02.bad.php", line 6, characters 21-23:
-  Expected `int`
-  File "parent_02.bad.php", line 17, characters 33-40:
-  But got `arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+parent_02.bad.php:12:16
+ 4 | // not an int
+ 5 | 
+ 6 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+ 7 | 
+ 8 | trait T {
+ 9 |   require class D;
+10 | 
+11 |   public function foo(): void {
+12 |     expect_int(parent::bar());
+   |                ^^^^^^^^^^^^^ [1]
+13 |   }
+14 | }
+15 | 
+16 | class C {
+17 |   public static function bar(): arraykey {
+   |                                 ^^^^^^^^ [3]
+18 |     return "hello";
+19 |   }
+
+1 error found

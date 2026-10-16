@@ -1,6 +1,17 @@
 File "type_structure_abstract2.php", line 17, characters 5-58:
   classname<IChild>
-ERROR: File "type_structure_abstract2.php", line 10, characters 33-35:
-Cannot reference abstract constant `C::T` directly (Typing[4129])
-  File "type_structure_abstract2.php", line 8, characters 23-23:
-  Declaration is here
+error: Typing[4129] Cannot reference abstract constant `C::T` directly [1]
+-> Declaration is here [2]
+
+type_structure_abstract2.php:10:33
+ 6 | 
+ 7 | abstract class C {
+ 8 |   abstract const type T as IBase;
+   |                       ^ [2]
+ 9 |   public static function foo(): void {
+10 |     type_structure(self::class, 'T');
+   |                                 ^^^ [1]
+11 |   }
+12 | }
+
+1 error found

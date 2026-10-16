@@ -1,6 +1,15 @@
-ERROR: File "subtype.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-  File "subtype.php", line 4, characters 24-30:
-  Expected `nothing`
-  File "subtype.php", line 4, characters 15-17:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `int` [3]
+
+subtype.php:5:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(int $x): nothing {
+  |               ^^^ [3]
+  |                        ^^^^^^^ [2]
+5 |   return $x;
+  |          ^^ [1]
+6 | }
+
+1 error found

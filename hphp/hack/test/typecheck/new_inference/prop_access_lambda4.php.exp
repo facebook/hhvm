@@ -1,8 +1,23 @@
-ERROR: File "prop_access_lambda4.php", line 11, characters 20-21:
-Typing error (Typing[4053])
-  File "prop_access_lambda4.php", line 11, characters 24-24:
-  No property `x` in `A`
-  File "prop_access_lambda4.php", line 10, characters 15-15:
-  This is why I think it is an object of type A
-  File "prop_access_lambda4.php", line 4, characters 7-7:
-  Declaration of `A` is here
+error: Typing[4053] Typing error [1]
+-> No property `x` in `A` [2]
+-> This is why I think it is an object of type A [3]
+-> Declaration of `A` is here [4]
+
+prop_access_lambda4.php:11:20
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class A {}
+   |       ^ [4]
+ 5 | 
+ 6 | function apply<Tv1, Tv2>(Tv1 $x, (function(Tv1): Tv2) $f): Tv2 {
+ 7 |   return $f($x);
+ 8 | }
+ 9 | 
+10 | function test(A $a): void {
+   |               ^ [3]
+11 |   apply($a, $x ==> $x->x);
+   |                    ^^ [1]
+   |                        ^ [2]
+12 | }
+
+1 error found

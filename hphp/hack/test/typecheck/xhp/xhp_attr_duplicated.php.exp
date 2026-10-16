@@ -1,2 +1,14 @@
-ERROR: File "xhp_attr_duplicated.php", line 4, characters 3-41:
-Cannot redeclare `:c::width` (Parsing[1002])
+error: Parsing[1002] Cannot redeclare `:c::width` [1]
+
+xhp_attr_duplicated.php:4:3
+2 | 
+3 | final class :c {
+4 |   attribute
+  |   ^^^^^^^^^ [1]
+5 |     num width,
+  |     ^^^^^^^^^^ [1]
+6 |     num width;
+  |     ^^^^^^^^^^ [1]
+7 | }
+
+1 error found

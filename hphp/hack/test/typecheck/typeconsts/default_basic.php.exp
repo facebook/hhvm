@@ -1,8 +1,27 @@
-ERROR: File "default_basic.php", line 22, characters 9-9:
-Invalid argument (Typing[4110])
-  File "default_basic.php", line 14, characters 18-23:
-  Expected `string`
-  File "default_basic.php", line 6, characters 21-27:
-    resulting from expanding the type constant `B::T`
-  File "default_basic.php", line 22, characters 9-9:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from expanding the type constant `B::T` [3]
+-> But got `int` [1]
+
+default_basic.php:22:9
+ 4 |   abstract const type T as arraykey = int;
+ 5 | 
+ 6 |   public function f(this::T $a): this::T {
+   |                     ^^^^^^^ [3]
+ 7 |     return $a;
+ 8 |   }
+   :
+12 | 
+13 | class B extends AA {
+14 |   const type T = string;
+   |                  ^^^^^^ [2]
+15 | }
+16 | 
+   :
+20 | 
+21 |   $b = new B();
+22 |   $b->f(1);
+   |         ^ [1]
+23 | }
+
+1 error found

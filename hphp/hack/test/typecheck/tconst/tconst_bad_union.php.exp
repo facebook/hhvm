@@ -1,16 +1,58 @@
-ERROR: File "tconst_bad_union.php", line 35, characters 17-18:
-Invalid argument (Typing[4110])
-  File "tconst_bad_union.php", line 19, characters 18-19:
-  Expected `A1`
-  File "tconst_bad_union.php", line 20, characters 31-37:
-    resulting from expanding the type constant `C1::T`
-  File "tconst_bad_union.php", line 28, characters 13-14:
-  But got `A2` from this `is` expression test
-ERROR: File "tconst_bad_union.php", line 35, characters 17-18:
-Invalid argument (Typing[4110])
-  File "tconst_bad_union.php", line 23, characters 18-19:
-  Expected `A2`
-  File "tconst_bad_union.php", line 24, characters 31-37:
-    resulting from expanding the type constant `C2::T`
-  File "tconst_bad_union.php", line 30, characters 20-21:
-  But got `A1` from this `is` expression test
+error: Typing[4110] Invalid argument [1]
+-> Expected `A1` [2]
+->   resulting from expanding the type constant `C1::T` [3]
+-> But got `A2` from this `is` expression test [4]
+
+tconst_bad_union.php:35:17
+17 | 
+18 | final class C1 extends C {
+19 |   const type T = A1;
+   |                  ^^ [2]
+20 |   public function __construct(this::T $x) { $x->makeme(); }
+   |                               ^^^^^^^ [3]
+21 | }
+22 | final class C2 extends C {
+   :
+26 | 
+27 | function test(A $x): C {
+28 |   if ($x is A2) {
+   |             ^^ [4]
+29 |     $c = C1::class;
+30 |   } else if ($x is A1) {
+   :
+33 |     while (true) {}
+34 |   }
+35 |   return new $c($x);
+   |                 ^^ [1]
+36 | }
+37 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A2` [2]
+->   resulting from expanding the type constant `C2::T` [3]
+-> But got `A1` from this `is` expression test [4]
+
+tconst_bad_union.php:35:17
+21 | }
+22 | final class C2 extends C {
+23 |   const type T = A2;
+   |                  ^^ [2]
+24 |   public function __construct(this::T $x) { $x->fatal(); }
+   |                               ^^^^^^^ [3]
+25 | }
+26 | 
+27 | function test(A $x): C {
+28 |   if ($x is A2) {
+29 |     $c = C1::class;
+30 |   } else if ($x is A1) {
+   |                    ^^ [4]
+31 |     $c = C2::class;
+32 |   } else {
+33 |     while (true) {}
+34 |   }
+35 |   return new $c($x);
+   |                 ^^ [1]
+36 | }
+37 | 
+
+2 errors found

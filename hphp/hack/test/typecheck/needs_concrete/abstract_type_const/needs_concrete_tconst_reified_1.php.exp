@@ -1,4 +1,19 @@
-ERROR: File "needs_concrete_tconst_reified_1.php", line 11, characters 51-66:
-Dangerous access of abstract member `THasAccessors::TAccessors`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_tconst_reified_1.php", line 4, characters 23-32:
-  Declaration is here
+error: Typing[4529] Dangerous access of abstract member `THasAccessors::TAccessors`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_tconst_reified_1.php:11:51
+ 2 | 
+ 3 | interface IHasAccessors {
+ 4 |   abstract const type TAccessors;
+   |                       ^^^^^^^^^^ [2]
+ 5 | }
+ 6 | 
+   :
+ 9 |     // error: abstract type constant resolved through `this` in a plain static
+10 |     // method, where `static` might refer to an abstract class at runtime
+11 |     return HH\ReifiedGenerics\get_class_from_type<this::TAccessors>();
+   |                                                   ^^^^^^^^^^^^^^^^ [1]
+12 |   }
+13 | 
+
+1 error found

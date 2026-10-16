@@ -1,4 +1,18 @@
-ERROR: File "missing_enum_value.php", line 10, characters 13-23:
-No class constant `Nonexistent` in `Foo` (Typing[4090])
-  File "missing_enum_value.php", line 4, characters 6-8:
-  Declaration of `Foo` is here
+error: Typing[4090] No class constant `Nonexistent` in `Foo` [1]
+-> Declaration of `Foo` is here [2]
+
+missing_enum_value.php:10:13
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | enum Foo : int {
+   |      ^^^ [2]
+ 5 |   X = 3;
+ 6 | }
+ 7 | 
+ 8 | <<__EntryPoint>>
+ 9 | function main(): void {
+10 |   $a = Foo::Nonexistent;
+   |             ^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

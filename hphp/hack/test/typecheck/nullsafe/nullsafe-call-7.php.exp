@@ -1,6 +1,19 @@
-ERROR: File "nullsafe-call-7.php", line 9, characters 10-19:
-Invalid return type (Typing[4110])
-  File "nullsafe-call-7.php", line 8, characters 29-35:
-  Expected `nonnull`
-  File "nullsafe-call-7.php", line 5, characters 30-34:
-  But got `mixed`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `mixed` [3]
+
+nullsafe-call-7.php:9:10
+ 3 | 
+ 4 | class C {
+ 5 |   public function foo(): vec<mixed> { return vec[null]; }
+   |                              ^^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | function testit(?C $s):?vec<nonnull> {
+   |                             ^^^^^^^ [2]
+ 9 |   return $s?->foo();
+   |          ^^^^^^^^^^ [1]
+10 | }
+11 | 
+
+1 error found

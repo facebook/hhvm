@@ -1,4 +1,14 @@
-ERROR: File "non_denotable_field_union_newtype.php", line 7, characters 9-11:
-Shape splat produces fields with non-denotable types (Typing[4419])
-  File "non_denotable_field_union_newtype.php", line 4, characters 19-25:
-  Shape field `field` has non-denotable type `(bool | string)`
+error: Typing[4419] Shape splat produces fields with non-denotable types [1]
+-> Shape field `field` has non-denotable type `(bool | string)` [2]
+
+non_denotable_field_union_newtype.php:7:9
+2 | <<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+3 | 
+4 | type Left = shape('field' => bool);
+  |                   ^^^^^^^ [2]
+5 | type Right = shape(?'field' => string);
+6 | 
+7 | newtype Bad = shape(...Left, ...Right);
+  |         ^^^ [1]
+
+1 error found

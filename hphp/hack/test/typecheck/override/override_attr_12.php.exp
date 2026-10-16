@@ -1,8 +1,32 @@
-ERROR: File "override_attr_12.php", line 17, characters 7-8:
-`ATr::foo` is marked `__Override` but `C1` does not define or inherit a `foo` method. (Typing[4071])
-  File "override_attr_12.php", line 14, characters 19-21:
-  Declaration of `foo` is here
-ERROR: File "override_attr_12.php", line 21, characters 7-8:
-`ATr::foo` is marked `__Override` but `C2` does not define or inherit a `foo` method. (Typing[4071])
-  File "override_attr_12.php", line 14, characters 19-21:
-  Declaration of `foo` is here
+error: Typing[4071] `ATr::foo` is marked `__Override` but `C1` does not define or inherit a `foo` method. [1]
+-> Declaration of `foo` is here [2]
+
+override_attr_12.php:17:7
+12 | trait ATr {
+13 |   <<__Override>> // enforced onto C1
+14 |   public function foo(): void {}
+   |                   ^^^ [2]
+15 | }
+16 | 
+17 | class C1 {
+   |       ^^ [1]
+18 |   use ATr;
+19 | }
+
+error: Typing[4071] `ATr::foo` is marked `__Override` but `C2` does not define or inherit a `foo` method. [1]
+-> Declaration of `foo` is here [2]
+
+override_attr_12.php:21:7
+12 | trait ATr {
+13 |   <<__Override>> // enforced onto C1
+14 |   public function foo(): void {}
+   |                   ^^^ [2]
+15 | }
+16 | 
+   :
+19 | }
+20 | 
+21 | class C2 extends C1 { }
+   |       ^^ [1]
+
+2 errors found

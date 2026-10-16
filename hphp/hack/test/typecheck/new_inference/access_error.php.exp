@@ -1,6 +1,18 @@
-ERROR: File "access_error.php", line 11, characters 15-22:
-Invalid argument (Typing[4110])
-  File "access_error.php", line 14, characters 22-27:
-  Expected `string`
-  File "access_error.php", line 9, characters 14-14:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+access_error.php:11:15
+ 7 | function test(): void {
+ 8 |   $a = dict[];
+ 9 |   $a['k1'] = 4;
+   |              ^ [3]
+10 |   $a['k2'] = 'aaa';
+11 |   take_string($a['k1']);
+   |               ^^^^^^^^ [1]
+12 | }
+13 | 
+14 | function take_string(string $_): void {}
+   |                      ^^^^^^ [2]
+
+1 error found

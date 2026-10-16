@@ -1,12 +1,53 @@
-ERROR: File "needs_concrete_override_final_1.php", line 32, characters 7-7:
-Method `m` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) (Typing[4526])
-  File "needs_concrete_override_final_1.php", line 13, characters 26-26:
-  It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method
-  File "needs_concrete_override_final_1.php", line 4, characters 26-26:
-  Previously defined here
-ERROR: File "needs_concrete_override_final_1.php", line 42, characters 22-22:
-Method `m` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) (Typing[4526])
-  File "needs_concrete_override_final_1.php", line 13, characters 26-26:
-  It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method
-  File "needs_concrete_override_final_1.php", line 4, characters 26-26:
-  Previously defined here
+error: Typing[4526] Method `m` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) [1]
+-> It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method [2]
+-> Previously defined here [3]
+
+needs_concrete_override_final_1.php:32:7
+ 2 | 
+ 3 | abstract class Base {
+ 4 |   public static function m(): int {
+   |                          ^ [3]
+ 5 |     return 0;
+ 6 |   }
+   :
+11 | 
+12 |   <<__NeedsConcrete>>
+13 |   public static function m(): int {
+   |                          ^ [2]
+14 |     return static::hook();
+15 |   }
+   :
+30 | }
+31 | 
+32 | class E extends Base { // error: not final
+   |       ^ [1]
+33 |   use T;
+34 |   public static function hook(): int {
+
+error: Typing[4526] Method `m` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) [1]
+-> It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method [2]
+-> Previously defined here [3]
+
+needs_concrete_override_final_1.php:42:22
+ 2 | 
+ 3 | abstract class Base {
+ 4 |   public static function m(): int {
+   |                          ^ [3]
+ 5 |     return 0;
+ 6 |   }
+   :
+11 | 
+12 |   <<__NeedsConcrete>>
+13 |   public static function m(): int {
+   |                          ^ [2]
+14 |     return static::hook();
+15 |   }
+   :
+40 | interface ICC {}
+41 | 
+42 | abstract final class F extends Base implements ICC { // error: not concrete
+   |                      ^ [1]
+43 |   use T;
+44 |   public static function hook(): int {
+
+2 errors found

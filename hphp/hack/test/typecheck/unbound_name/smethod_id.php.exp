@@ -1,4 +1,20 @@
-ERROR: File "smethod_id.php", line 13, characters 3-10:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "smethod_id.php", line 16, characters 3-10:
-Unbound name: `NotFound` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+smethod_id.php:13:3
+11 | 
+12 |   // Should error
+13 |   NotFound::bar<>;
+   |   ^^^^^^^^ [1]
+14 | 
+15 |   // Should error
+
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+smethod_id.php:16:3
+14 | 
+15 |   // Should error
+16 |   NotFound::bar<>;
+   |   ^^^^^^^^ [1]
+17 | }
+
+2 errors found

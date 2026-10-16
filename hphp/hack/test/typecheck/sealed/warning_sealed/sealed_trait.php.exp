@@ -1,2 +1,11 @@
-WARN: File "sealed_trait.php", line 5, characters 3-10:
-Class `B` in sealed allowlist for `T`, but does not extend `T` (Warn[12035])
+warning: Warn[12035] Class `B` in sealed allowlist for `T`, but does not extend `T` [1]
+
+sealed_trait.php:5:3
+3 | <<__Sealed(
+4 |   A::class,
+5 |   B::class // error, T is not a parent of B
+  |   ^^^^^^^^ [1]
+6 | )>>
+7 | trait T {}
+
+1 error found

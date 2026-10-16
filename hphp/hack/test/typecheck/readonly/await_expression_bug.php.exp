@@ -1,4 +1,18 @@
-ERROR: File "await_expression_bug.php", line 16, characters 15-16:
-This expression is readonly, so it can only call readonly methods (Typing[4413])
-  File "await_expression_bug.php", line 5, characters 25-27:
-  This method is not readonly
+error: Typing[4413] This expression is readonly, so it can only call readonly methods [1]
+-> This method is not readonly [2]
+
+await_expression_bug.php:16:15
+ 3 | class T {
+ 4 |   public int $prop = 0;
+ 5 |   public async function set(): Awaitable<int> {
+   |                         ^^^ [2]
+ 6 | 
+ 7 |     $this->prop = 5;
+   :
+14 |   async function test(): Awaitable<void> {
+15 |   $y = readonly new T();
+16 |   $z = (await $y->set()) + 5;
+   |               ^^ [1]
+17 | }
+
+1 error found

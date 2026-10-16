@@ -1,30 +1,85 @@
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 70, characters 13-20:
-Invalid argument (Typing[4040])
-  File "named_params_variadic_fn_types_subtyping.php", line 68, characters 10-15:
-  Missing required named parameter: ...
-  File "named_params_variadic_fn_types_subtyping.php", line 67, characters 20-49:
-  Because of this definition
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 70, characters 13-20:
-Invalid argument (Typing[4041])
-  File "named_params_variadic_fn_types_subtyping.php", line 68, characters 10-15:
-  Unexpected named parameter: x
-  File "named_params_variadic_fn_types_subtyping.php", line 67, characters 20-49:
-  Because of this definition
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 79, characters 13-20:
-Invalid argument (Typing[4110])
-  File "named_params_variadic_fn_types_subtyping.php", line 77, characters 29-31:
-  Expected `string`
-  File "named_params_variadic_fn_types_subtyping.php", line 76, characters 36-38:
-  But got `int`
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 88, characters 13-20:
-Invalid argument (Typing[4110])
-  File "named_params_variadic_fn_types_subtyping.php", line 86, characters 29-31:
-  Expected `string`
-  File "named_params_variadic_fn_types_subtyping.php", line 85, characters 36-38:
-  But got `int`
-ERROR: File "named_params_variadic_fn_types_subtyping.php", line 96, characters 13-20:
-Invalid argument (Typing[4110])
-  File "named_params_variadic_fn_types_subtyping.php", line 94, characters 23-28:
-  Expected `string`
-  File "named_params_variadic_fn_types_subtyping.php", line 93, characters 36-38:
-  But got `int`
+error: Typing[4040] Invalid argument [1]
+-> Missing required named parameter: ... [2]
+-> Because of this definition [3]
+
+named_params_variadic_fn_types_subtyping.php:70:13
+65 | // super may pass any named arg. Consumer might send `y` (unexpected) or
+66 | // no args at all (missing `x`).
+67 | function take_err1((function(named int...): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+68 | function f_err1(named int $x): void {}
+   |          ^^^^^^ [2]
+69 | function test_err1(): void {
+70 |   take_err1(f_err1<>);
+   |             ^^^^^^^^ [1]
+71 | }
+72 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Unexpected named parameter: x [2]
+-> Because of this definition [3]
+
+named_params_variadic_fn_types_subtyping.php:70:13
+65 | // super may pass any named arg. Consumer might send `y` (unexpected) or
+66 | // no args at all (missing `x`).
+67 | function take_err1((function(named int...): void) $_): void {}
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+68 | function f_err1(named int $x): void {}
+   |          ^^^^^^ [2]
+69 | function test_err1(): void {
+70 |   take_err1(f_err1<>);
+   |             ^^^^^^^^ [1]
+71 | }
+72 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_params_variadic_fn_types_subtyping.php:79:13
+74 | // accepts named strings, super promises named ints, so a caller of the
+75 | // super type sending an int arg would fail.
+76 | function take_err2((function(named int...): void) $_): void {}
+   |                                    ^^^ [3]
+77 | function f_err2(named string...): void {}
+   |                             ^^^ [2]
+78 | function test_err2(): void {
+79 |   take_err2(f_err2<>);
+   |             ^^^^^^^^ [1]
+80 | }
+81 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_params_variadic_fn_types_subtyping.php:88:13
+83 | // it via a variadic whose element type is string — int is not a subtype
+84 | // of string.
+85 | function take_err3((function(named int $x): void) $_): void {}
+   |                                    ^^^ [3]
+86 | function f_err3(named string...): void {}
+   |                             ^^^ [2]
+87 | function test_err3(): void {
+88 |   take_err3(f_err3<>);
+   |             ^^^^^^^^ [1]
+89 | }
+90 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_params_variadic_fn_types_subtyping.php:96:13
+91 | // ERROR: super's variadic allows x=int, but sub's explicit x parameter
+92 | // shadows its arraykey variadic and accepts only strings.
+93 | function take_err4((function(named int...): void) $_): void {}
+   |                                    ^^^ [3]
+94 | function f_err4(named string $x = "", named arraykey...): void {}
+   |                       ^^^^^^ [2]
+95 | function test_err4(): void {
+96 |   take_err4(f_err4<>);
+   |             ^^^^^^^^ [1]
+97 | }
+
+5 errors found

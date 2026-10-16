@@ -1,8 +1,30 @@
-ERROR: File "hint.php", line 11, characters 7-16:
-Expected a `trait` but got a type alias. (Naming[2052])
-  File "hint.php", line 7, characters 6-15:
-  Alias definition is here.
-ERROR: File "hint.php", line 7, characters 19-19:
-`T` is uninstantiable (Typing[4002])
-  File "hint.php", line 6, characters 7-7:
-  Declaration is here
+error: Naming[2052] Expected a `trait` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+hint.php:11:7
+ 5 | 
+ 6 | trait T {}
+ 7 | type TraitAlias = T;
+   |      ^^^^^^^^^^ [2]
+ 8 | 
+ 9 | // Do not allow typedefs for extends, use traits or record extends
+10 | final class Test extends Bar {
+11 |   use TraitAlias;
+   |       ^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4002] `T` is uninstantiable [1]
+-> Declaration is here [2]
+
+hint.php:7:19
+4 | type Alias = Bar;
+5 | 
+6 | trait T {}
+  |       ^ [2]
+7 | type TraitAlias = T;
+  |                   ^ [1]
+8 | 
+9 | // Do not allow typedefs for extends, use traits or record extends
+
+2 errors found

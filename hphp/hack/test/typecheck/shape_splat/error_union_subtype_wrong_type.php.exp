@@ -1,24 +1,73 @@
-ERROR: File "error_union_subtype_wrong_type.php", line 17, characters 17-18:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_wrong_type.php", line 12, characters 24-48:
-  Expected `shape('x' => string, ...)`
-  File "error_union_subtype_wrong_type.php", line 15, characters 13-14:
-  But got `T1 as shape('x' => int)`
-ERROR: File "error_union_subtype_wrong_type.php", line 17, characters 17-18:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_wrong_type.php", line 12, characters 24-48:
-  Expected `shape('x' => string, ...)`
-  File "error_union_subtype_wrong_type.php", line 15, characters 18-19:
-  But got `T2 as shape('x' => int)`
-ERROR: File "error_union_subtype_wrong_type.php", line 17, characters 17-18:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_wrong_type.php", line 12, characters 37-42:
-  Expected `string`
-  File "error_union_subtype_wrong_type.php", line 14, characters 40-42:
-  But got `int`
-ERROR: File "error_union_subtype_wrong_type.php", line 17, characters 17-18:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_wrong_type.php", line 12, characters 37-42:
-  Expected `string`
-  File "error_union_subtype_wrong_type.php", line 14, characters 65-67:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => string, ...)` [2]
+-> But got `T1 as shape('x' => int)` [3]
+
+error_union_subtype_wrong_type.php:17:17
+10 | // is rejected.
+11 | 
+12 | function sink_x_string(shape('x' => string, ...) $_): void {}
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 | 
+14 | function wrong_type<T1 as shape('x' => int), T2 as shape('x' => int)>(
+15 |   shape(...(T1 | T2), ...shape()) $s,
+   |             ^^ [3]
+16 | ): void {
+17 |   sink_x_string($s);
+   |                 ^^ [1]
+18 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => string, ...)` [2]
+-> But got `T2 as shape('x' => int)` [3]
+
+error_union_subtype_wrong_type.php:17:17
+10 | // is rejected.
+11 | 
+12 | function sink_x_string(shape('x' => string, ...) $_): void {}
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 | 
+14 | function wrong_type<T1 as shape('x' => int), T2 as shape('x' => int)>(
+15 |   shape(...(T1 | T2), ...shape()) $s,
+   |                  ^^ [3]
+16 | ): void {
+17 |   sink_x_string($s);
+   |                 ^^ [1]
+18 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+error_union_subtype_wrong_type.php:17:17
+10 | // is rejected.
+11 | 
+12 | function sink_x_string(shape('x' => string, ...) $_): void {}
+   |                                     ^^^^^^ [2]
+13 | 
+14 | function wrong_type<T1 as shape('x' => int), T2 as shape('x' => int)>(
+   |                                        ^^^ [3]
+15 |   shape(...(T1 | T2), ...shape()) $s,
+16 | ): void {
+17 |   sink_x_string($s);
+   |                 ^^ [1]
+18 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+error_union_subtype_wrong_type.php:17:17
+10 | // is rejected.
+11 | 
+12 | function sink_x_string(shape('x' => string, ...) $_): void {}
+   |                                     ^^^^^^ [2]
+13 | 
+14 | function wrong_type<T1 as shape('x' => int), T2 as shape('x' => int)>(
+   |                                                                 ^^^ [3]
+15 |   shape(...(T1 | T2), ...shape()) $s,
+16 | ): void {
+17 |   sink_x_string($s);
+   |                 ^^ [1]
+18 | }
+
+4 errors found

@@ -1,6 +1,16 @@
-ERROR: File "tparam_constraints.php", line 5, characters 34-35:
-Invalid argument (Typing[4110])
-  File "tparam_constraints.php", line 4, characters 56-58:
-  Expected `int`
-  File "tparam_constraints.php", line 4, characters 46-49:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+tparam_constraints.php:5:34
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function dictCoalesce2(dict<string, int> $d, ?int $b): int {
+  |                                              ^^^^ [3]
+  |                                                        ^^^ [2]
+5 |   return coalesce2(idx($d, 'a'), $b);
+  |                                  ^^ [1]
+6 | }
+7 | 
+
+1 error found

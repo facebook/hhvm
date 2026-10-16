@@ -1,4 +1,19 @@
-ERROR: File "mixed_not_class.php", line 12, characters 3-48:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "mixed_not_class.php", line 12, characters 11-12:
-  The scrutinee has type `?not C` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `?not C` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+mixed_not_class.php:12:3
+10 |   }
+11 | 
+12 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+13 |     case null:
+   |     ^^^^^^^^^^ [1]
+14 |       return;
+   |       ^^^^^^^ [1]
+15 |   }
+   |   ^ [1]
+16 | }
+17 | 
+
+1 error found

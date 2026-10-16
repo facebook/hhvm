@@ -1,4 +1,16 @@
-ERROR: File "null_coalesce_optional_in_abstract.php", line 24, characters 13-18:
-It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. (Typing[4482])
-  File "null_coalesce_optional_in_abstract.php", line 21, characters 13-26:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. [1]
+-> Definition is here [2]
+
+null_coalesce_optional_in_abstract.php:24:13
+19 | 
+20 | class Baz {
+21 |   const vec<classname<Foo>> FOOS = vec[nameof Bar];
+   |             ^^^^^^^^^^^^^^ [2]
+22 |   public static function bazzy(): void {
+23 |     $class = self::FOOS[0];
+24 |     $test = $class::getFoo();
+   |             ^^^^^^ [1]
+25 |     $foo = $test['foo'] ?? null;
+26 |   }
+
+1 error found

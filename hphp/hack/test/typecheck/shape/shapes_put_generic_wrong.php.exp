@@ -1,6 +1,15 @@
-ERROR: File "shapes_put_generic_wrong.php", line 6, characters 10-39:
-Invalid return type (Typing[4110])
-  File "shapes_put_generic_wrong.php", line 5, characters 29-31:
-  Expected `int`
-  File "shapes_put_generic_wrong.php", line 6, characters 33-38:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+shapes_put_generic_wrong.php:6:10
+3 | function foo<T as shape('x' => int, ...)>(
+4 |   T $arg,
+5 | ): shape('x' => int, 'y' => int, ...) {
+  |                             ^^^ [2]
+6 |   return Shapes::put($arg, 'y', 'test');
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                 ^^^^^^ [3]
+7 | }
+
+1 error found

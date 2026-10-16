@@ -1,6 +1,24 @@
-ERROR: File "infer_sub_right_multi_tvar_missing_field.php", line 14, characters 8-40:
-Invalid argument (Typing[4057])
-  File "infer_sub_right_multi_tvar_missing_field.php", line 9, characters 4-22:
-  The field `y` is missing
-  File "infer_sub_right_multi_tvar_missing_field.php", line 4, characters 33-35:
-  The field `y` is required here
+error: Typing[4057] Invalid argument [1]
+-> The field `y` is missing [2]
+-> The field `y` is required here [3]
+
+infer_sub_right_multi_tvar_missing_field.php:14:8
+ 2 | <<file:__EnableUnstableFeatures('shape_splat_concrete', 'shape_splat_type_parameters', 'shape_splat_expression')>>
+ 3 | 
+ 4 | function sink(shape('x' => int, 'y' => string) $_): void {}
+   |                                 ^^^ [3]
+ 5 | 
+ 6 | function combine<T1 as shape(...), T2 as shape(...)>(
+ 7 |   T1 $a,
+ 8 |   T2 $b,
+ 9 | ): shape(...T1, ...T2) {
+   |    ^^^^^^^^^^^^^^^^^^^ [2]
+10 |   throw new Exception();
+11 | }
+12 | 
+13 | function test(): void {
+14 |   sink(combine(shape('x' => 1), shape()));
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+
+1 error found

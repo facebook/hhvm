@@ -1,2 +1,10 @@
-ERROR: File "simplihack_not_enabled.php", line 2, characters 3-76:
-Cannot use unstable feature: `simpli_hack` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `simpli_hack` [1]
+
+simplihack_not_enabled.php:2:3
+1 | <?hh
+2 | <<__SimpliHack(DeriveGetters::onClass(), '3aab93f88e7f141f09f6d0f8dd40e097')>>
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+3 | class SomeOtherClass {
+4 |   public function foo(): void {}
+
+1 error found

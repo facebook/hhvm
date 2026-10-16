@@ -1,10 +1,51 @@
-ERROR: File "tparam_with_targ_in_new.php", line 13, characters 12-12:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "tparam_with_targ_in_new.php", line 14, characters 4-6:
-Type arguments are not allowed in this position (Parsing[1002])
-ERROR: File "tparam_with_targ_in_new.php", line 9, characters 3-6:
-`T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) (Naming[2047])
-ERROR: File "tparam_with_targ_in_new.php", line 10, characters 4-7:
-`T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) (Naming[2047])
-ERROR: File "tparam_with_targ_in_new.php", line 11, characters 5-8:
-`T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) (Naming[2047])
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+tparam_with_targ_in_new.php:13:12
+11 |   f<T<T>>($t); // already an error
+12 | 
+13 |   new T<T>(); // new error
+   |            ^ [1]
+14 |   T<T>::m(); // new error
+15 |   return $t;
+
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+tparam_with_targ_in_new.php:14:4
+12 | 
+13 |   new T<T>(); // new error
+14 |   T<T>::m(); // new error
+   |    ^^^ [1]
+15 |   return $t;
+16 | }
+
+error: Naming[2047] `T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) [1]
+
+tparam_with_targ_in_new.php:9:3
+ 7 | 
+ 8 | function f<<<__Newable>> reify T as C<mixed>>(
+ 9 |   T<T> $t // already an error
+   |   ^^^^ [1]
+10 | ): T<T> { // already an error
+11 |   f<T<T>>($t); // already an error
+
+error: Naming[2047] `T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) [1]
+
+tparam_with_targ_in_new.php:10:4
+ 8 | function f<<<__Newable>> reify T as C<mixed>>(
+ 9 |   T<T> $t // already an error
+10 | ): T<T> { // already an error
+   |    ^^^^ [1]
+11 |   f<T<T>>($t); // already an error
+12 | 
+
+error: Naming[2047] `T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) [1]
+
+tparam_with_targ_in_new.php:11:5
+ 9 |   T<T> $t // already an error
+10 | ): T<T> { // already an error
+11 |   f<T<T>>($t); // already an error
+   |     ^^^^ [1]
+12 | 
+13 |   new T<T>(); // new error
+
+5 errors found

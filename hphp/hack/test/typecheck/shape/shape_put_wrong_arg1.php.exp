@@ -1,16 +1,44 @@
-ERROR: File "shape_put_wrong_arg1.php", line 4, characters 10-36:
-Invalid return type (Typing[4110])
-  File "shape_put_wrong_arg1.php", line 3, characters 32-38:
-  Expected `shape()`
-  File "shape_put_wrong_arg1.php", line 4, characters 22-22:
-  But got `int`
-ERROR: File "shape_put_wrong_arg1.php", line 4, characters 22-22:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 109, characters 7-16:
-  Expected `shape(...)`
-  File "shape_put_wrong_arg1.php", line 4, characters 22-22:
-  But got `int`
-ERROR: File "shape_put_wrong_arg1.php", line 4, characters 22-22:
-This is not an object of type `KeyedContainer`, this is an int (Typing[4370])
-  File "shape_put_wrong_arg1.php", line 4, characters 22-22:
-  Definition is here
+error: Typing[4110] Invalid return type [1]
+-> Expected `shape()` [2]
+-> But got `int` [3]
+
+shape_put_wrong_arg1.php:4:10
+1 | <?hh
+2 | 
+3 | function test(shape() $shape): shape() {
+  |                                ^^^^^^^ [2]
+4 |   return Shapes::put(3, 'x', 'test');
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                      ^ [3]
+5 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape(...)` [2]
+-> But got `int` [1]
+
+shape_put_wrong_arg1.php:4:22
+  2 | 
+  3 | function test(shape() $shape): shape() {
+  4 |   return Shapes::put(3, 'x', 'test');
+    |                      ^ [1]
+  5 | }
+
+Shapes.hhi:109:7
+107 |     <<__NoAutoDynamic, __SupportDynamicType>>
+108 |     public static function put(
+109 |       shape(...) $shape,
+    |       ^^^^^^^^^^ [2]
+110 |       arraykey $index,
+111 |       mixed $value,
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is an int [1]
+-> Definition is here [1]
+
+shape_put_wrong_arg1.php:4:22
+2 | 
+3 | function test(shape() $shape): shape() {
+4 |   return Shapes::put(3, 'x', 'test');
+  |                      ^ [1]
+5 | }
+
+3 errors found

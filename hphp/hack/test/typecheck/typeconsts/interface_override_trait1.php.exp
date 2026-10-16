@@ -1,6 +1,22 @@
-ERROR: File "interface_override_trait1.php", line 13, characters 7-7:
-Constant T is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_override_trait1.php", line 10, characters 14-14:
-  One conflicting definition is here
-  File "interface_override_trait1.php", line 4, characters 14-14:
-  Another conflicting definition is here, inherited through T1
+error: Typing[4374] Constant T is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here, inherited through T1 [3]
+
+interface_override_trait1.php:13:7
+ 2 | 
+ 3 | interface I1 {
+ 4 |   const type T = int;
+   |              ^ [3]
+ 5 | }
+ 6 | 
+ 7 | trait T1 implements I1 {}
+ 8 | 
+ 9 | interface I {
+10 |   const type T = int;
+   |              ^ [2]
+11 | }
+12 | 
+13 | class A implements I { use T1; }
+   |       ^ [1]
+
+1 error found

@@ -1,4 +1,28 @@
-ERROR: File "nullable_bool_not_null.php", line 27, characters 3-210:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
-  File "nullable_bool_not_null.php", line 27, characters 11-12:
-  The scrutinee has type `?bool`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `null` [1]
+-> The scrutinee has type `?bool`. [2]
+
+nullable_bool_not_null.php:27:3
+25 |   }
+26 | 
+27 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+28 |     // Because of control flow, null is redundant case
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 |     // However, type inference misses this
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |     // Hence is expected to error
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |     case true:
+   |     ^^^^^^^^^^ [1]
+32 |       return;
+   |       ^^^^^^^ [1]
+33 |     case false:
+   |     ^^^^^^^^^^^ [1]
+34 |       return;
+   |       ^^^^^^^ [1]
+35 |   }
+   |   ^ [1]
+36 | }
+
+1 error found

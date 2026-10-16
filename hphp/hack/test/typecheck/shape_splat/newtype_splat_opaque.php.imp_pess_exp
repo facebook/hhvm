@@ -1,28 +1,72 @@
-ERROR: File "newtype_splat_opaque.php--file2.php", line 22, characters 25-32:
-This shape doesn't have a field `secret` (Typing[4108])
-  File "newtype_splat_opaque.php--file2.php", line 21, characters 22-50:
-  The shape is defined here
-ERROR: File "newtype_splat_opaque.php--file2.php", line 26, characters 33-39:
-Some type arguments violate their constraints (Typing[4323])
-  File "newtype_splat_opaque.php--file2.php", line 26, characters 24-52:
-  Expected `shape(...)`
-  File "newtype_splat_opaque.php--file2.php", line 26, characters 33-39:
-  But got `mixed`
-  File "newtype_splat_opaque.php--file1.php", line 10, characters 9-15:
-    by the definition of `NTPlain`
-ERROR: File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "newtype_splat_opaque.php--file2.php", line 38, characters 3-25:
-  Expected `shape(...)`
-  File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
-  But got `T`
-ERROR: File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "newtype_splat_opaque.php--file2.php", line 38, characters 3-25:
-  Expected `shape(...)`
-  File "newtype_splat_opaque.php--file2.php", line 38, characters 12-12:
-  But got `mixed`
-  File "newtype_splat_opaque.php--file2.php", line 37, characters 39-45:
-    by the definition of `T`
-  File "newtype_splat_opaque.php--file1.php", line 10, characters 9-15:
-    by the definition of `NTPlain`
+error: Typing[4108] This shape doesn't have a field `secret` [1]
+-> The shape is defined here [2]
+
+newtype_splat_opaque.php--file2.php:22:25
+19 | 
+20 | // ...but the definition is not visible, so 'secret' is not.
+21 | function read_secret(shape(...NTBound, 'x' => int) $s): void {
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+22 |   hh_expect<nothing>($s['secret']);
+   |                         ^^^^^^^^ [1]
+23 | }
+24 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `mixed` [1]
+->   by the definition of `NTPlain` [3]
+
+newtype_splat_opaque.php--file2.php:26:33
+24 | 
+25 | // REJECT: no `as` clause, so the bound is `mixed`, which cannot be spread.
+26 | function outside_plain(shape(...NTPlain, ...shape()) $s): void {}
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                 ^^^^^^^ [1]
+27 | 
+28 | // A type parameter bounded BY a newtype is spreadable exactly when the newtype
+
+newtype_splat_opaque.php--file1.php:10:9
+ 8 | newtype NTBound as shape('a' => int, ...) = shape('a' => int, 'secret' => bool);
+ 9 | 
+10 | newtype NTPlain = shape('a' => int);
+   |         ^^^^^^^ [3]
+11 | 
+12 | // Transparent here, so both expand to their definitions and merge away.
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `T` [1]
+
+newtype_splat_opaque.php--file2.php:38:12
+36 | // REJECT: transitively, `NTPlain`'s bound is `mixed`.
+37 | function tparam_bounded_by_plain<T as NTPlain>(
+38 |   shape(...T, ...shape()) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |            ^ [1]
+39 | ): void {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `mixed` [1]
+->   by the definition of `T` [3]
+->   by the definition of `NTPlain` [4]
+
+newtype_splat_opaque.php--file2.php:38:12
+35 | 
+36 | // REJECT: transitively, `NTPlain`'s bound is `mixed`.
+37 | function tparam_bounded_by_plain<T as NTPlain>(
+   |                                       ^^^^^^^ [3]
+38 |   shape(...T, ...shape()) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |            ^ [1]
+39 | ): void {}
+
+newtype_splat_opaque.php--file1.php:10:9
+ 8 | newtype NTBound as shape('a' => int, ...) = shape('a' => int, 'secret' => bool);
+ 9 | 
+10 | newtype NTPlain = shape('a' => int);
+   |         ^^^^^^^ [4]
+11 | 
+12 | // Transparent here, so both expand to their definitions and merge away.
+
+4 errors found

@@ -1,8 +1,34 @@
-ERROR: File "map_any.php", line 11, characters 26-27:
-Was expecting a type hint (Typing[4032])
-ERROR: File "map_any.php", line 15, characters 7-8:
-Was expecting an object but type is unknown (Typing[4297])
-  File "map_any.php", line 12, characters 3-8:
-  It is unknown because type parameter `T1` of `my_map` could not be determined. Please add explicit type parameters to the invocation of `my_map`
-  File "map_any.php", line 6, characters 14-15:
-    via this generic `T1`
+error: Typing[4032] Was expecting a type hint [1]
+
+map_any.php:11:26
+ 9 | }
+10 | 
+11 | function test(/* TAny */ $v): void {
+   |                          ^^ [1]
+12 |   my_map(
+13 |     $v,
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T1` of `my_map` could not be determined. Please add explicit type parameters to the invocation of `my_map` [2]
+->   via this generic `T1` [3]
+
+map_any.php:15:7
+ 4 | function my_map<T1, T2>(
+ 5 |   Traversable<T1> $v,
+ 6 |   (function (T1): T2) $f,
+   |              ^^ [3]
+ 7 | ): Traversable<T2> {
+ 8 |   return vec[];
+ 9 | }
+10 | 
+11 | function test(/* TAny */ $v): void {
+12 |   my_map(
+   |   ^^^^^^ [2]
+13 |     $v,
+14 |     $x ==> {
+15 |       $x->foo();
+   |       ^^ [1]
+16 |     }
+17 |   );
+
+2 errors found

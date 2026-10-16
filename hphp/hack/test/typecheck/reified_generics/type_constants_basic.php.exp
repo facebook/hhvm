@@ -1,14 +1,65 @@
-WARN: File "type_constants_basic.php", line 10, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta`. (Warn[12012])
-WARN: File "type_constants_basic.php", line 11, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `B`. (Warn[12012])
-WARN: File "type_constants_basic.php", line 12, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<int>`. (Warn[12012])
-ERROR: File "type_constants_basic.php", line 10, characters 10-17:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_basic.php", line 5, characters 23-24:
-  The `as` operator cannot be used with the abstract type constant Ta because it is not marked `<<__Enforceable>>`
-ERROR: File "type_constants_basic.php", line 12, characters 10-17:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_basic.php", line 7, characters 19-24:
-  The `as` operator cannot be used with a type with an erased generic type argument
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta`. [1]
+
+type_constants_basic.php:10:5
+ 8 | 
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+   |     ^^^^^^^^^^^^^ [1]
+11 |     4 as this::Tb;
+12 |     5 as this::Tc;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `B`. [1]
+
+type_constants_basic.php:11:5
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+11 |     4 as this::Tb;
+   |     ^^^^^^^^^^^^^ [1]
+12 |     5 as this::Tc;
+13 |   }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<int>`. [1]
+
+type_constants_basic.php:12:5
+10 |     3 as this::Ta;
+11 |     4 as this::Tb;
+12 |     5 as this::Tc;
+   |     ^^^^^^^^^^^^^ [1]
+13 |   }
+14 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant Ta because it is not marked `<<__Enforceable>>` [2]
+
+type_constants_basic.php:10:10
+ 3 | 
+ 4 | abstract class Test {
+ 5 |   abstract const type Ta as A;
+   |                       ^^ [2]
+ 6 |   const type Tb = B;
+ 7 |   const type Tc = C<int>;
+ 8 | 
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+   |          ^^^^^^^^ [1]
+11 |     4 as this::Tb;
+12 |     5 as this::Tc;
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with an erased generic type argument [2]
+
+type_constants_basic.php:12:10
+ 5 |   abstract const type Ta as A;
+ 6 |   const type Tb = B;
+ 7 |   const type Tc = C<int>;
+   |                   ^^^^^^ [2]
+ 8 | 
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+11 |     4 as this::Tb;
+12 |     5 as this::Tc;
+   |          ^^^^^^^^ [1]
+13 |   }
+14 | }
+
+5 errors found

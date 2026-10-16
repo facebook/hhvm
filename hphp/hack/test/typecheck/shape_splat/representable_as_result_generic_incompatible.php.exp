@@ -1,12 +1,40 @@
-ERROR: File "representable_as_result_generic_incompatible.php", line 17, characters 21-26:
-Invalid argument (Typing[4110])
-  File "representable_as_result_generic_incompatible.php", line 9, characters 36-41:
-  Expected `string`
-  File "representable_as_result_generic_incompatible.php", line 16, characters 32-54:
-  But got `arraykey`
-ERROR: File "representable_as_result_generic_incompatible.php", line 18, characters 20-25:
-Invalid argument (Typing[4110])
-  File "representable_as_result_generic_incompatible.php", line 13, characters 46-48:
-  Expected `int`
-  File "representable_as_result_generic_incompatible.php", line 16, characters 20-29:
-  But got `mixed`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+representable_as_result_generic_incompatible.php:17:21
+ 7 | 
+ 8 | function takes_string_keys(
+ 9 |   \HH\Runtime\RepresentableAs<dict<string, mixed>> $_,
+   |                                    ^^^^^^ [2]
+10 | ): void {}
+11 | 
+   :
+14 | ): void {}
+15 | 
+16 | function test<T as shape(...)>(shape(...T, 'x' => int) $shape): void {
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+17 |   takes_string_keys($shape);
+   |                     ^^^^^^ [1]
+18 |   takes_int_values($shape);
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+representable_as_result_generic_incompatible.php:18:20
+11 | 
+12 | function takes_int_values(
+13 |   \HH\Runtime\RepresentableAs<dict<arraykey, int>> $_,
+   |                                              ^^^ [2]
+14 | ): void {}
+15 | 
+16 | function test<T as shape(...)>(shape(...T, 'x' => int) $shape): void {
+   |                    ^^^^^^^^^^ [3]
+17 |   takes_string_keys($shape);
+18 |   takes_int_values($shape);
+   |                    ^^^^^^ [1]
+19 | }
+
+2 errors found

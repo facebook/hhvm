@@ -1,4 +1,13 @@
-ERROR: File "append_to_nonnull.php", line 4, characters 3-14:
-a nonnull value does not allow array append (Typing[4006])
-  File "append_to_nonnull.php", line 3, characters 12-18:
-  Definition is here
+error: Typing[4006] a nonnull value does not allow array append [1]
+-> Definition is here [2]
+
+append_to_nonnull.php:4:3
+1 | <?hh
+2 | 
+3 | function f(nonnull $x): void {
+  |            ^^^^^^^ [2]
+4 |   $x[] = 'foo';
+  |   ^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

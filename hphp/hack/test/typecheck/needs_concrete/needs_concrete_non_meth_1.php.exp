@@ -1,8 +1,35 @@
-ERROR: File "needs_concrete_non_meth_1.php", line 11, characters 13-15:
-Dangerous access of abstract member `A::abs`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_non_meth_1.php", line 7, characters 35-37:
-  Declaration is here
-ERROR: File "needs_concrete_non_meth_1.php", line 12, characters 9-14:
-Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4530])
-  File "needs_concrete_non_meth_1.php", line 5, characters 16-16:
-  Declaration is here
+error: Typing[4529] Dangerous access of abstract member `A::abs`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_non_meth_1.php:11:13
+ 5 | abstract class A {
+ 6 |   abstract const int X;
+ 7 |   public static abstract function abs(): void;
+   |                                   ^^^ [2]
+ 8 | 
+ 9 |   public static function error(): void {
+10 |     static::X; // error
+11 |     static::abs<>; // error
+   |             ^^^ [1]
+12 |     new static(); // error
+13 |   }
+
+error: Typing[4530] Dangerous instantiation via `static`: `static` might refer to a non-concrete class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_non_meth_1.php:12:9
+ 3 | 
+ 4 | <<__ConsistentConstruct>>
+ 5 | abstract class A {
+   |                ^ [2]
+ 6 |   abstract const int X;
+ 7 |   public static abstract function abs(): void;
+   :
+10 |     static::X; // error
+11 |     static::abs<>; // error
+12 |     new static(); // error
+   |         ^^^^^^ [1]
+13 |   }
+14 | }
+
+2 errors found

@@ -1,6 +1,22 @@
-ERROR: File "infer_tvar_leftmost_super.php", line 16, characters 9-10:
-Invalid argument (Typing[4110])
-  File "infer_tvar_leftmost_super.php", line 8, characters 22-24:
-  Expected `int`
-  File "infer_tvar_leftmost_super.php", line 15, characters 21-27:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+infer_tvar_leftmost_super.php:16:9
+ 6 | // No fresh vars needed for overlapping fields — concrete wins
+ 7 | function set_x<T as shape(...)>(
+ 8 |   shape(...T, 'x' => int) $s,
+   |                      ^^^ [2]
+ 9 | ): shape(...T, 'x' => int) {
+10 |   return $s;
+   :
+13 | function test_leftmost_super(): void {
+14 |   // 'x' is string in input but int in the concrete part — should error
+15 |   $s = shape('x' => 'wrong', 'y' => true);
+   |                     ^^^^^^^ [3]
+16 |   set_x($s);
+   |         ^^ [1]
+17 | }
+18 | 
+
+1 error found

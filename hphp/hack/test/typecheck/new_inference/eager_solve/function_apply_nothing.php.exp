@@ -1,12 +1,42 @@
-ERROR: File "function_apply_nothing.php", line 12, characters 39-40:
-Was expecting an object but type is unknown (Typing[4297])
-  File "function_apply_nothing.php", line 12, characters 14-16:
-  It is unknown because type parameter `T` of `Inv` could not be determined. Please add explicit type parameters to the invocation of `Inv`
-  File "function_apply_nothing.php", line 5, characters 48-48:
-    via this generic `T`
-ERROR: File "function_apply_nothing.php", line 14, characters 19-21:
-Invalid argument (Typing[4110])
-  File "function_apply_nothing.php", line 5, characters 51-54:
-  Expected `bool`
-  File "function_apply_nothing.php", line 12, characters 51-55:
-  But got `string`
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `Inv` could not be determined. Please add explicit type parameters to the invocation of `Inv` [2]
+->   via this generic `T` [3]
+
+function_apply_nothing.php:12:39
+ 3 | 
+ 4 | class Inv<T> {
+ 5 |   public function __construct(public (function(T):bool) $item) { }
+   |                                                ^ [3]
+ 6 | }
+ 7 | function newInv<T>((function(T):bool) $f):Inv<T> {
+   :
+10 | function expectBool(bool $ak):void { }
+11 | function testit(bool $b):void {
+12 |   $obj = new Inv($x ==> { return $b ? $x->foo() : $x[0]; });
+   |              ^^^ [2]
+   |                                       ^^ [1]
+13 |   $r = $obj->item;
+14 |   expectBool(($r)("a"));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `string` [3]
+
+function_apply_nothing.php:14:19
+ 3 | 
+ 4 | class Inv<T> {
+ 5 |   public function __construct(public (function(T):bool) $item) { }
+   |                                                   ^^^^ [2]
+ 6 | }
+ 7 | function newInv<T>((function(T):bool) $f):Inv<T> {
+   :
+10 | function expectBool(bool $ak):void { }
+11 | function testit(bool $b):void {
+12 |   $obj = new Inv($x ==> { return $b ? $x->foo() : $x[0]; });
+   |                                                   ^^^^^ [3]
+13 |   $r = $obj->item;
+14 |   expectBool(($r)("a"));
+   |                   ^^^ [1]
+15 | }
+
+2 errors found

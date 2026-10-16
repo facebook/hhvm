@@ -1,4 +1,19 @@
-ERROR: File "fun_id.php", line 9, characters 3-11:
-Unbound name: `not_found` (a global function) (Naming[2049])
-ERROR: File "fun_id.php", line 9, characters 3-11:
-Unbound name (typing): `not_found` (Typing[4107])
+error: Naming[2049] Unbound name: `not_found` (a global function) [1]
+
+fun_id.php:9:3
+ 7 | 
+ 8 |   // Should error
+ 9 |   not_found<>;
+   |   ^^^^^^^^^ [1]
+10 | }
+
+error: Typing[4107] Unbound name (typing): `not_found` [1]
+
+fun_id.php:9:3
+ 7 | 
+ 8 |   // Should error
+ 9 |   not_found<>;
+   |   ^^^^^^^^^ [1]
+10 | }
+
+2 errors found

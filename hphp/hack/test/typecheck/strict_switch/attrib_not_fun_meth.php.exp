@@ -1,2 +1,11 @@
-ERROR: File "attrib_not_fun_meth.php", line 5, characters 3-16:
-The `__StrictSwitch` attribute cannot be used on a class. (Typing[4231])
+error: Typing[4231] The `__StrictSwitch` attribute cannot be used on a class. [1]
+
+attrib_not_fun_meth.php:5:3
+3 | // <<file: __EnableUnstableFeatures('strict_switch')>>
+4 | 
+5 | <<__StrictSwitch>>
+  |   ^^^^^^^^^^^^^^ [1]
+6 | class A {
+7 | }
+
+1 error found

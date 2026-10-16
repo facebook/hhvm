@@ -1,2 +1,10 @@
-ERROR: File "clone.php", line 15, characters 3-19:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+clone.php:15:3
+13 |   $z = clone $y;
+14 |   // should error
+15 |   $z->prop->val = 5;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+16 | }
+
+1 error found

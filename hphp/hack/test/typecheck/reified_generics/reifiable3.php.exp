@@ -1,6 +1,18 @@
-ERROR: File "reifiable3.php", line 17, characters 14-15:
-Invalid type (Typing[4322])
-  File "reifiable3.php", line 16, characters 5-15:
-  This type constant has the `__Reifiable` attribute
-  File "reifiable3.php", line 14, characters 23-24:
-  It cannot contain an abstract type constant without the __Reifiable attribute
+error: Typing[4322] Invalid type [1]
+-> This type constant has the `__Reifiable` attribute [2]
+-> It cannot contain an abstract type constant without the __Reifiable attribute [3]
+
+reifiable3.php:17:14
+12 |   const type Tc = this::Ta;
+13 | 
+14 |   abstract const type Td;
+   |                       ^^ [3]
+15 | 
+16 |   <<__Reifiable>>
+   |     ^^^^^^^^^^^ [2]
+17 |   const type Te = this::Td;
+   |              ^^ [1]
+18 | }
+19 | 
+
+1 error found

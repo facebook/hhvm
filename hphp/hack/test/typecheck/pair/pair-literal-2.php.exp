@@ -1,12 +1,27 @@
-ERROR: File "pair-literal-2.php", line 12, characters 17-17:
-Incompatible pair values (Typing[4110])
-  File "pair-literal-2.php", line 11, characters 20-25:
-  Expected `string`
-  File "pair-literal-2.php", line 12, characters 17-17:
-  But got `int`
-ERROR: File "pair-literal-2.php", line 12, characters 20-24:
-Incompatible pair values (Typing[4110])
-  File "pair-literal-2.php", line 11, characters 28-30:
-  Expected `int`
-  File "pair-literal-2.php", line 12, characters 20-24:
-  But got `string`
+error: Typing[4110] Incompatible pair values [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+pair-literal-2.php:12:17
+ 9 |  *
+10 |  */
+11 | function f(): Pair<string, int> {
+   |                    ^^^^^^ [2]
+12 |   return Pair { 1, 'foo' };
+   |                 ^ [1]
+13 | }
+
+error: Typing[4110] Incompatible pair values [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+pair-literal-2.php:12:20
+ 9 |  *
+10 |  */
+11 | function f(): Pair<string, int> {
+   |                            ^^^ [2]
+12 |   return Pair { 1, 'foo' };
+   |                    ^^^^^ [1]
+13 | }
+
+2 errors found

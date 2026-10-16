@@ -1,16 +1,66 @@
-WARN: File "nullsafe-any.php", line 16, characters 11-13:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "nullsafe-any.php", line 16, characters 11-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "nullsafe-any.php", line 16, characters 17-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "nullsafe-any.php", line 17, characters 9-17:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "nullsafe-any.php", line 17, characters 15-17:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "nullsafe-any.php", line 18, characters 8-9:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "nullsafe-any.php", line 18, characters 8-9:
-  Expected `string` or `int`
-  File "nullsafe-any.php", line 15, characters 8-18:
-  But got `?int` (use of `?->` operator)
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+nullsafe-any.php:16:11
+14 |   $c->foo();
+15 |   $z = $co?->foo();
+16 |   if ($b) $co = makeAny();
+   |           ^^^ [1]
+17 |   $z2 = $co?->foo();
+18 |   $w = $z . "a";
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+nullsafe-any.php:16:11
+14 |   $c->foo();
+15 |   $z = $co?->foo();
+16 |   if ($b) $co = makeAny();
+   |           ^^^^^^^^^^^^^^^ [1]
+17 |   $z2 = $co?->foo();
+18 |   $w = $z . "a";
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+nullsafe-any.php:16:17
+14 |   $c->foo();
+15 |   $z = $co?->foo();
+16 |   if ($b) $co = makeAny();
+   |                 ^^^^^^^^^ [1]
+17 |   $z2 = $co?->foo();
+18 |   $w = $z . "a";
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+nullsafe-any.php:17:9
+15 |   $z = $co?->foo();
+16 |   if ($b) $co = makeAny();
+17 |   $z2 = $co?->foo();
+   |         ^^^^^^^^^ [1]
+18 |   $w = $z . "a";
+19 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+nullsafe-any.php:17:15
+15 |   $z = $co?->foo();
+16 |   if ($b) $co = makeAny();
+17 |   $z2 = $co?->foo();
+   |               ^^^ [1]
+18 |   $w = $z . "a";
+19 | }
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `?int` (use of `?->` operator) [2]
+
+nullsafe-any.php:18:8
+13 | function testit(?C $co, bool $b, C $c):void {
+14 |   $c->foo();
+15 |   $z = $co?->foo();
+   |        ^^^^^^^^^^^ [2]
+16 |   if ($b) $co = makeAny();
+17 |   $z2 = $co?->foo();
+18 |   $w = $z . "a";
+   |        ^^ [1]
+19 | }
+
+6 errors found

@@ -1,16 +1,47 @@
-ERROR: File "yield_send3.php", line 7, characters 5-6:
-Invalid argument (Typing[4110])
-  File "yield_send3.php", line 3, characters 13-15:
-  Expected `int`
-  File "yield_send3.php", line 5, characters 39-44:
-  But got `string`
-  File "yield_send3.php", line 5, characters 39-44:
-  This type argument to `Generator` only allows supertypes (it is contravariant)
-ERROR: File "yield_send3.php", line 12, characters 14-14:
-Invalid argument (Typing[4110])
-  File "yield_send3.php", line 5, characters 39-44:
-  Expected `string`
-  File "classes.hhi", line 26, characters 27-28:
-    via this generic `Ts`
-  File "yield_send3.php", line 12, characters 14-14:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+-> This type argument to `Generator` only allows supertypes (it is contravariant) [3]
+
+yield_send3.php:7:5
+1 | <?hh
+2 | 
+3 | function i(?int $x): void {}
+  |             ^^^ [2]
+4 | 
+5 | function f(): Generator<bool, string, string> {
+  |                                       ^^^^^^ [3]
+6 |   $x = yield true => 'troo';
+7 |   i($x);
+  |     ^^ [1]
+8 | }
+9 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   via this generic `Ts` [3]
+-> But got `int` [1]
+
+yield_send3.php:12:14
+ 3 | function i(?int $x): void {}
+ 4 | 
+ 5 | function f(): Generator<bool, string, string> {
+   |                                       ^^^^^^ [2]
+ 6 |   $x = yield true => 'troo';
+ 7 |   i($x);
+   :
+10 | function g(): void {
+11 |   $gen = f();
+12 |   $gen->send(1);
+   |              ^ [1]
+13 | }
+
+classes.hhi:26:27
+24 |     public function valid(): bool {}
+25 |     public function next(): void {}
+26 |     public function send(?Ts $v): void {}
+   |                           ^^ [3]
+27 |     public function raise(Exception $e): void {}
+28 |     public function rewind(): void {}
+
+2 errors found

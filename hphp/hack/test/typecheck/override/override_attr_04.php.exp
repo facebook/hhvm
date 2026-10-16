@@ -1,2 +1,10 @@
-ERROR: File "override_attr_04.php", line 18, characters 19-21:
-`C` has no parent class with a method `bar` to override (Typing[4087])
+error: Typing[4087] `C` has no parent class with a method `bar` to override [1]
+
+override_attr_04.php:18:19
+16 | class C extends A {
+17 |   <<__Override>>
+18 |   public function bar(): void {}
+   |                   ^^^ [1]
+19 | }
+
+1 error found

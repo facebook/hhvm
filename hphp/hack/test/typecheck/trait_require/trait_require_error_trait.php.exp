@@ -1,8 +1,34 @@
-ERROR: File "trait_require_error_trait.php", line 15, characters 19-21:
-`TR1` is not a class. It is a trait. (NastCheck[3017])
-ERROR: File "trait_require_error_trait.php", line 18, characters 5-25:
-You cannot return a value (Typing[4084])
-  File "trait_require_error_trait.php", line 17, characters 26-29:
-  This is a `void` function
-ERROR: File "trait_require_error_trait.php", line 18, characters 12-17:
-You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class (Typing[4074])
+error: NastCheck[3017] `TR1` is not a class. It is a trait. [1]
+
+trait_require_error_trait.php:15:19
+13 | 
+14 | trait TR2 {
+15 |   require extends TR1;
+   |                   ^^^ [1]
+16 | 
+17 |   public function foo(): void {
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+trait_require_error_trait.php:18:5
+15 |   require extends TR1;
+16 | 
+17 |   public function foo(): void {
+   |                          ^^^^ [2]
+18 |     return parent::foo();
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4074] You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class [1]
+
+trait_require_error_trait.php:18:12
+16 | 
+17 |   public function foo(): void {
+18 |     return parent::foo();
+   |            ^^^^^^ [1]
+19 |   }
+20 | }
+
+3 errors found

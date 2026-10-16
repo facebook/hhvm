@@ -1,6 +1,16 @@
-ERROR: File "abstract_type_in_concrete_class.php", line 7, characters 7-27:
-This class must be declared `abstract`, or provide an implementation for the abstract type constant `abstract_type` (Typing[4047])
-  File "abstract_type_in_concrete_class.php", line 7, characters 37-61:
-  `ClassWithAbstractType` uses `AbstractClassWithAbstract`
-  File "abstract_type_in_concrete_class.php", line 4, characters 23-35:
-  The type constant is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract type constant `abstract_type` [1]
+-> `ClassWithAbstractType` uses `AbstractClassWithAbstract` [2]
+-> The type constant is defined here [3]
+
+abstract_type_in_concrete_class.php:7:7
+2 | 
+3 | abstract class AbstractClassWithAbstract {
+4 |   abstract const type abstract_type as int;
+  |                       ^^^^^^^^^^^^^ [3]
+5 | }
+6 | 
+7 | class ClassWithAbstractType extends AbstractClassWithAbstract {}
+  |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+
+1 error found

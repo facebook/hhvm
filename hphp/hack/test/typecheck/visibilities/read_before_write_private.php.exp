@@ -1,2 +1,11 @@
-ERROR: File "read_before_write_private.php", line 7, characters 32-32:
-Read access to `$this->a` before initialization (Typing[4083])
+error: Typing[4083] Read access to `$this->a` before initialization [1]
+
+read_before_write_private.php:7:32
+5 |   private string $a;
+6 |   public function __construct() {
+7 |     $this->takes_string($this->a);
+  |                                ^ [1]
+8 |     $this->a = '';
+9 |   }
+
+1 error found

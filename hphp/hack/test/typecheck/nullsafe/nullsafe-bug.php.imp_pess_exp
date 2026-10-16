@@ -1,6 +1,23 @@
-WARN: File "nullsafe-bug.php", line 9, characters 10-39:
-Returning a value of type `dynamic` through a non-fully-enforced return type `?Awaitable<?IFoo>` (Warn[12044])
-  File "nullsafe-bug.php", line 8, characters 32-48:
-  This return type is not fully enforced at runtime
-ERROR: File "nullsafe-bug.php", line 8, characters 25-28:
-Was expecting a type hint (Typing[4032])
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `?Awaitable<?IFoo>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+nullsafe-bug.php:9:10
+ 6 |   throw new Exception("foo");
+ 7 | }
+ 8 | function bar(/* TAny */ $foo): ?Awaitable<?IFoo> {
+   |                                ^^^^^^^^^^^^^^^^^ [2]
+ 9 |   return foo($foo->genFoo())?->genFoo();
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 | }
+
+error: Typing[4032] Was expecting a type hint [1]
+
+nullsafe-bug.php:8:25
+ 6 |   throw new Exception("foo");
+ 7 | }
+ 8 | function bar(/* TAny */ $foo): ?Awaitable<?IFoo> {
+   |                         ^^^^ [1]
+ 9 |   return foo($foo->genFoo())?->genFoo();
+10 | }
+
+2 errors found

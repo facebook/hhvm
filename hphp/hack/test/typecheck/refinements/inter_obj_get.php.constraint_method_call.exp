@@ -1,16 +1,51 @@
-ERROR: File "inter_obj_get.php", line 22, characters 17-18:
-Invalid argument (Typing[4110])
-  File "inter_obj_get.php", line 22, characters 12-14:
-  Expected `int`
-  File "inter_obj_get.php", line 30, characters 20-20:
-    via this generic `T`
-  File "inter_obj_get.php", line 6, characters 36-41:
-  But got `string`
-ERROR: File "inter_obj_get.php", line 26, characters 17-18:
-Invalid argument (Typing[4110])
-  File "inter_obj_get.php", line 26, characters 12-14:
-  Expected `int`
-  File "inter_obj_get.php", line 30, characters 20-20:
-    via this generic `T`
-  File "inter_obj_get.php", line 6, characters 36-41:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `string` [4]
+
+inter_obj_get.php:22:17
+ 4 | interface I {
+ 5 |   public function f2(): void;
+ 6 |   public function f3(arraykey $x): string;
+   |                                    ^^^^^^ [4]
+ 7 | }
+ 8 | class A {
+   :
+20 |     $c->f2(1);
+21 |     $x = $c->f3(0);
+22 |     expect<int>($x);
+   |            ^^^ [2]
+   |                 ^^ [1]
+23 |     expect<string>($x);
+24 |     $y = $c->f3("");
+   :
+28 | }
+29 | 
+30 | function expect<T>(T $x): void {}
+   |                    ^ [3]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `string` [4]
+
+inter_obj_get.php:26:17
+ 4 | interface I {
+ 5 |   public function f2(): void;
+ 6 |   public function f3(arraykey $x): string;
+   |                                    ^^^^^^ [4]
+ 7 | }
+ 8 | class A {
+   :
+24 |     $y = $c->f3("");
+25 |     expect<string>($y);
+26 |     expect<int>($y); // error
+   |            ^^^ [2]
+   |                 ^^ [1]
+27 |   }
+28 | }
+29 | 
+30 | function expect<T>(T $x): void {}
+   |                    ^ [3]
+
+2 errors found

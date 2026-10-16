@@ -1,8 +1,29 @@
-WARN: File "method_class_03.php", line 4, characters 14-21:
-Class `D` in sealed allowlist for method `foo` in `C`, but does not override method `foo` (Warn[12041])
-ERROR: File "method_class_03.php", line 15, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_class_03.php", line 15, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_class_03.php", line 5, characters 19-21:
-  Declaration is here
+warning: Warn[12041] Class `D` in sealed allowlist for method `foo` in `C`, but does not override method `foo` [1]
+
+method_class_03.php:4:14
+2 | 
+3 | class C {
+4 |   <<__Sealed(D::class)>>
+  |              ^^^^^^^^ [1]
+5 |   public function foo(): void {}
+6 | }
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_class_03.php:15:19
+ 3 | class C {
+ 4 |   <<__Sealed(D::class)>>
+ 5 |   public function foo(): void {}
+   |                   ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+13 |   // this should be rejected
+14 |   <<__Override>>
+15 |   public function foo(): void {}
+   |                   ^^^ [1]
+16 | }
+
+2 errors found

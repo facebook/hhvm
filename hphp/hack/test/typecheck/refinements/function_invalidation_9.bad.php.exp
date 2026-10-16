@@ -1,9 +1,28 @@
-ERROR: File "function_invalidation_9.bad.php", line 14, characters 15-19:
-Invalid argument (Typing[4110])
-  File "function_invalidation_9.bad.php", line 9, characters 20-22:
-  Expected `int`
-  File "function_invalidation_9.bad.php", line 4, characters 10-13:
-  But got `?int`
-  File "function_invalidation_9.bad.php", line 13, characters 5-22:
-  All the local information about `$c->i` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$c->i` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+function_invalidation_9.bad.php:14:15
+ 2 | 
+ 3 | class C {
+ 4 |   public ?int $i = null;
+   |          ^^^^ [3]
+ 5 | 
+ 6 |   public static function staticHarmful()[write_props]: void {}
+ 7 | }
+ 8 | 
+ 9 | function takes_int(int $i)[]: void {}
+   |                    ^^^ [2]
+10 | 
+11 | function refine_ko(C $c): void {
+12 |   if ($c->i is nonnull) {
+13 |     C::staticHarmful();
+   |     ^^^^^^^^^^^^^^^^^^ [4]
+14 |     takes_int($c->i);
+   |               ^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

@@ -1,6 +1,14 @@
-ERROR: File "lambda_regular.php", line 5, characters 9-10:
-Invalid argument (Typing[4105])
-  File "lambda_regular.php", line 5, characters 9-10:
-  Too many positional arguments (expected 2 but got 3)
-  File "lambda_regular.php", line 4, characters 8-46:
-  Definition is here
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+
+lambda_regular.php:5:9
+2 | 
+3 | function f((int, float, string) $t): void {
+4 |   $f = ($a, $b) ==> { throw new Exception(); };
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 |   $f(...$t);
+  |         ^^ [1]
+6 | }
+
+1 error found

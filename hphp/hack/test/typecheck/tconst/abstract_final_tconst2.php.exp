@@ -1,6 +1,16 @@
-ERROR: File "abstract_final_tconst2.php", line 10, characters 22-22:
-This class was declared as `final`. It must provide an implementation for the abstract type constant `T` (Typing[4047])
-  File "abstract_final_tconst2.php", line 10, characters 35-35:
-  `C` uses `I`
-  File "abstract_final_tconst2.php", line 7, characters 23-23:
-  The type constant is defined here
+error: Typing[4047] This class was declared as `final`. It must provide an implementation for the abstract type constant `T` [1]
+-> `C` uses `I` [2]
+-> The type constant is defined here [3]
+
+abstract_final_tconst2.php:10:22
+ 5 | 
+ 6 | interface I {
+ 7 |   abstract const type T;
+   |                       ^ [3]
+ 8 | }
+ 9 | 
+10 | abstract final class C implements I {}
+   |                      ^ [1]
+   |                                   ^ [2]
+
+1 error found

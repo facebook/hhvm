@@ -1,2 +1,10 @@
-WARN: File "redundant_nullsafe2.php", line 18, characters 10-16:
-You are using the `?->` operator but this object is of type (A | B) which cannot be null. You can use the `->` operator instead. (Warn[12029])
+warning: Warn[12029] You are using the `?->` operator but this object is of type (A | B) which cannot be null. You can use the `->` operator instead. [1]
+
+redundant_nullsafe2.php:18:10
+16 |     $ab = $b;
+17 |   }
+18 |   return $ab?->x;
+   |          ^^^^^^^ [1]
+19 | }
+
+1 error found

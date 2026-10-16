@@ -1,4 +1,16 @@
-ERROR: File "subsume_tconst5.php", line 9, characters 23-24:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "subsume_tconst5.php", line 5, characters 14-15:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+subsume_tconst5.php:9:23
+ 3 | abstract class HasConcrete {
+ 4 |   abstract const type T1;
+ 5 |   const type T2  = mixed;
+   |              ^^ [2]
+ 6 | }
+ 7 | 
+ 8 | abstract class FullyAbstract extends HasConcrete {
+ 9 |   abstract const type T2;
+   |                       ^^ [1]
+10 | }
+
+1 error found

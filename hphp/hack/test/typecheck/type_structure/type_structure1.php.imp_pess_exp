@@ -28,11 +28,42 @@ File "type_structure1.php", line 43, characters 5-24:
   TypeStructure<D>
 File "type_structure1.php", line 44, characters 5-56:
   TypeStructure<num>
-ERROR: File "type_structure1.php", line 38, characters 36-46:
-The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-16:
-  This is where the field was declared as optional.
-ERROR: File "type_structure1.php", line 39, characters 36-50:
-The field `generic_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 70, characters 6-20:
-  This is where the field was declared as optional.
+error: Typing[4165] The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure1.php:38:36
+36 |     hh_show($tc5['param_types'][0]['elem_types'][1]['generic_types'][0]);
+37 |     hh_show($tc5['return_type']);
+38 |     hh_show($tc5['return_type'][0]['classname']);
+   |                                    ^^^^^^^^^^^ [1]
+39 |     hh_show($tc5['return_type'][0]['generic_types'][0]['classname']);
+40 | 
+
+typestructure.hhi:64:6
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |      ^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+error: Typing[4165] The field `generic_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+type_structure1.php:39:36
+37 |     hh_show($tc5['return_type']);
+38 |     hh_show($tc5['return_type'][0]['classname']);
+39 |     hh_show($tc5['return_type'][0]['generic_types'][0]['classname']);
+   |                                    ^^^^^^^^^^^^^^^ [1]
+40 | 
+41 |     $tc6 = type_structure(D::class, 'TC6')['fields'];
+
+typestructure.hhi:70:6
+68 |     ?'return_type' => mixed,
+69 |     ?'param_types' => varray<mixed>,
+70 |     ?'generic_types' => varray<mixed>,
+   |      ^^^^^^^^^^^^^^^ [2]
+71 |     ?'root_name' => string,
+72 |     ?'access_list' => varray<string>,
+
+2 errors found

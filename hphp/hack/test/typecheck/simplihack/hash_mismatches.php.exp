@@ -1,2 +1,10 @@
-ERROR: File "hash_mismatches.php", line 4, characters 16-25:
-The prompt has changed (digest: b15fa40e3b80f36c757c32444a1ff655, expected: faceb00c). Please re-run the AI Code Action. (Typing[4493])
+error: Typing[4493] The prompt has changed (digest: b15fa40e3b80f36c757c32444a1ff655, expected: faceb00c). Please re-run the AI Code Action. [1]
+
+hash_mismatches.php:4:16
+2 | <<file: __EnableUnstableFeatures('simpli_hack')>>
+3 | 
+4 | <<__SimpliHack('A prompt', 'faceb00c')>>
+  |                ^^^^^^^^^^ [1]
+5 | class C {}
+
+1 error found

@@ -1,6 +1,14 @@
-ERROR: File "null_not_subtype_nonnull.php", line 5, characters 10-13:
-Invalid return type (Typing[4110])
-  File "null_not_subtype_nonnull.php", line 4, characters 18-24:
-  Expected `nonnull`
-  File "null_not_subtype_nonnull.php", line 5, characters 10-13:
-  But got `null`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `null` [1]
+
+null_not_subtype_nonnull.php:5:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(): nonnull {
+  |                  ^^^^^^^ [2]
+5 |   return null;
+  |          ^^^^ [1]
+6 | }
+
+1 error found

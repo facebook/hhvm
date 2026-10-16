@@ -1,58 +1,192 @@
 File "stack_overflow_array.php", line 25, characters 3-13:
   ~dict<int, ~(bool | dict<string, dict<nothing, nothing>>)>
-ERROR: File "stack_overflow_array.php", line 15, characters 3-13:
-Typing error (Typing[4110])
-  File "stack_overflow_array.php", line 15, characters 3-13:
-  Expected an array that can be indexed
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  But got `bool`
-  File "stack_overflow_array.php", line 6, characters 15-16:
-    via this generic `Tv`
-ERROR: File "stack_overflow_array.php", line 15, characters 3-24:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4370])
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  Definition is here
-ERROR: File "stack_overflow_array.php", line 16, characters 3-13:
-Typing error (Typing[4110])
-  File "stack_overflow_array.php", line 16, characters 3-13:
-  Expected an array that can be indexed
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  But got `bool`
-  File "stack_overflow_array.php", line 6, characters 15-16:
-    via this generic `Tv`
-ERROR: File "stack_overflow_array.php", line 17, characters 3-13:
-Typing error (Typing[4110])
-  File "stack_overflow_array.php", line 17, characters 3-13:
-  Expected an array that can be indexed
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  But got `bool`
-  File "stack_overflow_array.php", line 6, characters 15-16:
-    via this generic `Tv`
-ERROR: File "stack_overflow_array.php", line 20, characters 3-13:
-Typing error (Typing[4110])
-  File "stack_overflow_array.php", line 20, characters 3-13:
-  Expected an array that can be indexed
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  But got `bool`
-  File "stack_overflow_array.php", line 6, characters 15-16:
-    via this generic `Tv`
-ERROR: File "stack_overflow_array.php", line 20, characters 3-24:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4370])
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  Definition is here
-ERROR: File "stack_overflow_array.php", line 21, characters 3-13:
-Typing error (Typing[4110])
-  File "stack_overflow_array.php", line 21, characters 3-13:
-  Expected an array that can be indexed
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  But got `bool`
-  File "stack_overflow_array.php", line 6, characters 15-16:
-    via this generic `Tv`
-ERROR: File "stack_overflow_array.php", line 22, characters 3-13:
-Typing error (Typing[4110])
-  File "stack_overflow_array.php", line 22, characters 3-13:
-  Expected an array that can be indexed
-  File "stack_overflow_array.php", line 12, characters 17-21:
-  But got `bool`
-  File "stack_overflow_array.php", line 6, characters 15-16:
-    via this generic `Tv`
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `bool` [2]
+->   via this generic `Tv` [3]
+
+stack_overflow_array.php:15:3
+ 4 |   Container<Tk> $keys,
+ 5 |   Tv $value,
+ 6 | ): darray<Tk, Tv> {
+   |               ^^ [3]
+ 7 |   return dict[];
+ 8 | }
+ 9 | 
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+15 |   $v[$a]['a'] ??= dict[];
+   |   ^^^^^^^^^^^ [1]
+16 |   $v[$a]['a'][$b] ??= dict[];
+17 |   $v[$a]['a'][$b]['b'] ??= dict[];
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is a bool [1]
+-> Definition is here [2]
+
+stack_overflow_array.php:15:3
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+15 |   $v[$a]['a'] ??= dict[];
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   $v[$a]['a'][$b] ??= dict[];
+17 |   $v[$a]['a'][$b]['b'] ??= dict[];
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `bool` [2]
+->   via this generic `Tv` [3]
+
+stack_overflow_array.php:16:3
+ 4 |   Container<Tk> $keys,
+ 5 |   Tv $value,
+ 6 | ): darray<Tk, Tv> {
+   |               ^^ [3]
+ 7 |   return dict[];
+ 8 | }
+ 9 | 
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+15 |   $v[$a]['a'] ??= dict[];
+16 |   $v[$a]['a'][$b] ??= dict[];
+   |   ^^^^^^^^^^^ [1]
+17 |   $v[$a]['a'][$b]['b'] ??= dict[];
+18 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `bool` [2]
+->   via this generic `Tv` [3]
+
+stack_overflow_array.php:17:3
+ 4 |   Container<Tk> $keys,
+ 5 |   Tv $value,
+ 6 | ): darray<Tk, Tv> {
+   |               ^^ [3]
+ 7 |   return dict[];
+ 8 | }
+ 9 | 
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+15 |   $v[$a]['a'] ??= dict[];
+16 |   $v[$a]['a'][$b] ??= dict[];
+17 |   $v[$a]['a'][$b]['b'] ??= dict[];
+   |   ^^^^^^^^^^^ [1]
+18 | 
+19 |   $v[$a] ??= dict[];
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `bool` [2]
+->   via this generic `Tv` [3]
+
+stack_overflow_array.php:20:3
+ 4 |   Container<Tk> $keys,
+ 5 |   Tv $value,
+ 6 | ): darray<Tk, Tv> {
+   |               ^^ [3]
+ 7 |   return dict[];
+ 8 | }
+ 9 | 
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+   :
+18 | 
+19 |   $v[$a] ??= dict[];
+20 |   $v[$a]['a'] ??= dict[];
+   |   ^^^^^^^^^^^ [1]
+21 |   $v[$a]['a'][$b] ??= dict[];
+22 |   $v[$a]['a'][$b]['b'] ??= dict[];
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is a bool [1]
+-> Definition is here [2]
+
+stack_overflow_array.php:20:3
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+   :
+18 | 
+19 |   $v[$a] ??= dict[];
+20 |   $v[$a]['a'] ??= dict[];
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   $v[$a]['a'][$b] ??= dict[];
+22 |   $v[$a]['a'][$b]['b'] ??= dict[];
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `bool` [2]
+->   via this generic `Tv` [3]
+
+stack_overflow_array.php:21:3
+ 4 |   Container<Tk> $keys,
+ 5 |   Tv $value,
+ 6 | ): darray<Tk, Tv> {
+   |               ^^ [3]
+ 7 |   return dict[];
+ 8 | }
+ 9 | 
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+   :
+19 |   $v[$a] ??= dict[];
+20 |   $v[$a]['a'] ??= dict[];
+21 |   $v[$a]['a'][$b] ??= dict[];
+   |   ^^^^^^^^^^^ [1]
+22 |   $v[$a]['a'][$b]['b'] ??= dict[];
+23 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `bool` [2]
+->   via this generic `Tv` [3]
+
+stack_overflow_array.php:22:3
+ 4 |   Container<Tk> $keys,
+ 5 |   Tv $value,
+ 6 | ): darray<Tk, Tv> {
+   |               ^^ [3]
+ 7 |   return dict[];
+ 8 | }
+ 9 | 
+10 | function test(int $a, int $b): void {
+11 |   $u = vec[];
+12 |   $v = fill($u, false);
+   |                 ^^^^^ [2]
+13 | 
+14 |   $v[$a] ??= dict[];
+   :
+20 |   $v[$a]['a'] ??= dict[];
+21 |   $v[$a]['a'][$b] ??= dict[];
+22 |   $v[$a]['a'][$b]['b'] ??= dict[];
+   |   ^^^^^^^^^^^ [1]
+23 | 
+24 |   // make sure the type of $v hasn't grown out of control
+
+8 errors found

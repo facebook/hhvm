@@ -1,18 +1,64 @@
-ERROR: File "function_invalidation.good.php", line 57, characters 15-19:
-Invalid argument (Typing[4110])
-  File "function_invalidation.good.php", line 19, characters 20-22:
-  Expected `int`
-  File "function_invalidation.good.php", line 10, characters 10-13:
-  But got `?int`
-  File "function_invalidation.good.php", line 56, characters 5-18:
-  All the local information about `$c->i` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
-ERROR: File "function_invalidation.good.php", line 60, characters 15-19:
-Invalid argument (Typing[4110])
-  File "function_invalidation.good.php", line 19, characters 20-22:
-  Expected `int`
-  File "function_invalidation.good.php", line 10, characters 10-13:
-  But got `?int`
-  File "function_invalidation.good.php", line 56, characters 5-18:
-  All the local information about `$c->i` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$c->i` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+function_invalidation.good.php:57:15
+ 8 | 
+ 9 | class C {
+10 |   public ?int $i = null;
+   |          ^^^^ [3]
+11 | 
+12 |   public function harmless()[]: void {}
+   :
+17 | function harmless2(C $c)[globals]: void {}
+18 | 
+19 | function takes_int(int $i)[]: void {}
+   |                    ^^^ [2]
+20 | 
+21 | function refine_ok(
+   :
+54 |     takes_int($c->i);
+55 | 
+56 |     $c->harmless();
+   |     ^^^^^^^^^^^^^^ [4]
+57 |     takes_int($c->i);
+   |               ^^^^^ [1]
+58 | 
+59 |     C::staticHarmless();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$c->i` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+function_invalidation.good.php:60:15
+ 8 | 
+ 9 | class C {
+10 |   public ?int $i = null;
+   |          ^^^^ [3]
+11 | 
+12 |   public function harmless()[]: void {}
+   :
+17 | function harmless2(C $c)[globals]: void {}
+18 | 
+19 | function takes_int(int $i)[]: void {}
+   |                    ^^^ [2]
+20 | 
+21 | function refine_ok(
+   :
+54 |     takes_int($c->i);
+55 | 
+56 |     $c->harmless();
+   |     ^^^^^^^^^^^^^^ [4]
+57 |     takes_int($c->i);
+58 | 
+59 |     C::staticHarmless();
+60 |     takes_int($c->i);
+   |               ^^^^^ [1]
+61 |   }
+62 | }
+
+2 errors found

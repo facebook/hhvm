@@ -1,2 +1,11 @@
-WARN: File "bool_nested_lambdas.php", line 6, characters 11-20:
-This `is` check is always `false`. The expression on the left has type `string` which shares no values with `bool`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `string` which shares no values with `bool`. [1]
+
+bool_nested_lambdas.php:6:11
+4 |   return \HH\Lib\Vec\map($encoded_data, $encoded_line ==> $encoded_line)
+5 |     |> \HH\Lib\Vec\map($$, $v ==> {
+6 |       if ($v is bool) {
+  |           ^^^^^^^^^^ [1]
+7 |         return $v;
+8 |       } else if ($v === "1" || $v === "true") {
+
+1 error found

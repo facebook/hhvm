@@ -1,2 +1,10 @@
-ERROR: File "readonly_idx_3.php", line 9, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_idx_3.php:9:3
+ 7 | function foo(readonly dict<int, Foo> $v) : void {
+ 8 |   $y = readonly idx_readonly($v, 5, new Foo());
+ 9 |   $y->prop = 5;
+   |   ^^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

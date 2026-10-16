@@ -1,4 +1,19 @@
-ERROR: File "shapes_self_subclass.php", line 17, characters 15-25:
-This shape doesn't have a field `\B::class` (Typing[4108])
-  File "shapes_self_subclass.php", line 4, characters 18-39:
-  The shape is defined here
+error: Typing[4108] This shape doesn't have a field `\B::class` [1]
+-> The shape is defined here [2]
+
+shapes_self_subclass.php:17:15
+ 2 | 
+ 3 | class A {
+ 4 |   const type T = shape(nameof A => int);
+   |                  ^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 5 | 
+ 6 |   public static function read(shape(nameof A => int) $s): int {
+   :
+15 | 
+16 |   public static function inherited_type(this::T $s): int {
+17 |     return $s[nameof self];
+   |               ^^^^^^^^^^^ [1]
+18 |   }
+19 | }
+
+1 error found

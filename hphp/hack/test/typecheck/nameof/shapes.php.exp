@@ -1,28 +1,101 @@
 File "shapes.php", line 11, characters 3-14:
   shape(C::class => float)
-ERROR: File "shapes.php", line 5, characters 17-24:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes.php", line 14, characters 20-27:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "shapes.php", line 15, characters 14-26:
-Invalid argument (Typing[4110])
-  File "shapes.php", line 8, characters 21-23:
-  Expected `int`
-  File "shapes.php", line 15, characters 14-26:
-  But got `float`
-  File "shapes.php", line 4, characters 29-33:
-    from this definition
-ERROR: File "shapes.php", line 16, characters 18-25:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "shapes.php", line 19, characters 20-27:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "shapes.php", line 20, characters 14-26:
-Invalid argument (Typing[4110])
-  File "shapes.php", line 8, characters 21-23:
-  Expected `int`
-  File "shapes.php", line 20, characters 14-26:
-  But got `float`
-  File "shapes.php", line 5, characters 29-33:
-    from this definition
-ERROR: File "shapes.php", line 21, characters 18-25:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes.php:5:17
+3 | class C {}
+4 | type T1 = shape(nameof C => float);
+5 | type T2 = shape(C::class => float);
+  |                 ^^^^^^^^ [1]
+6 | 
+7 | function expect_float(float $f): void {}
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+shapes.php:14:20
+12 | 
+13 |   expect_float($t1[nameof C]);
+14 |   expect_float($t1[C::class]);
+   |                    ^^^^^^^^ [1]
+15 |   expect_int($t1[nameof C]);
+16 |   expect_int($t1[C::class]);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `float` [1]
+->   from this definition [3]
+
+shapes.php:15:14
+ 2 | 
+ 3 | class C {}
+ 4 | type T1 = shape(nameof C => float);
+   |                             ^^^^^ [3]
+ 5 | type T2 = shape(C::class => float);
+ 6 | 
+ 7 | function expect_float(float $f): void {}
+ 8 | function expect_int(int $f): void {}
+   |                     ^^^ [2]
+ 9 | 
+10 | function f(T1 $t1, T2 $t2): void {
+   :
+13 |   expect_float($t1[nameof C]);
+14 |   expect_float($t1[C::class]);
+15 |   expect_int($t1[nameof C]);
+   |              ^^^^^^^^^^^^^ [1]
+16 |   expect_int($t1[C::class]);
+17 | 
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+shapes.php:16:18
+14 |   expect_float($t1[C::class]);
+15 |   expect_int($t1[nameof C]);
+16 |   expect_int($t1[C::class]);
+   |                  ^^^^^^^^ [1]
+17 | 
+18 |   expect_float($t2[nameof C]);
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+shapes.php:19:20
+17 | 
+18 |   expect_float($t2[nameof C]);
+19 |   expect_float($t2[C::class]);
+   |                    ^^^^^^^^ [1]
+20 |   expect_int($t2[nameof C]);
+21 |   expect_int($t2[C::class]);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `float` [1]
+->   from this definition [3]
+
+shapes.php:20:14
+ 3 | class C {}
+ 4 | type T1 = shape(nameof C => float);
+ 5 | type T2 = shape(C::class => float);
+   |                             ^^^^^ [3]
+ 6 | 
+ 7 | function expect_float(float $f): void {}
+ 8 | function expect_int(int $f): void {}
+   |                     ^^^ [2]
+ 9 | 
+10 | function f(T1 $t1, T2 $t2): void {
+   :
+18 |   expect_float($t2[nameof C]);
+19 |   expect_float($t2[C::class]);
+20 |   expect_int($t2[nameof C]);
+   |              ^^^^^^^^^^^^^ [1]
+21 |   expect_int($t2[C::class]);
+22 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+shapes.php:21:18
+19 |   expect_float($t2[C::class]);
+20 |   expect_int($t2[nameof C]);
+21 |   expect_int($t2[C::class]);
+   |                  ^^^^^^^^ [1]
+22 | }
+
+7 errors found

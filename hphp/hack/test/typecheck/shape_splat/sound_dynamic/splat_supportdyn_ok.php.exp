@@ -1,2 +1,11 @@
-ERROR: File "splat_supportdyn_ok.php", line 18, characters 14-52:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+splat_supportdyn_ok.php:18:14
+16 | 
+17 | function distributed_union<T1 as shape(...), T2 as shape(...)>(
+18 |   supportdyn<shape(...(shape(...T1) | shape(...T2)))> $s,
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | ): supportdyn<shape(...)> {
+20 |   return $s;
+
+1 error found

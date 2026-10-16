@@ -1,48 +1,197 @@
-ERROR: File "type_splat_bad.php", line 7, characters 13-20:
-A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 8, characters 3-19:
-A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 15, characters 13-20:
-A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 16, characters 3-19:
-A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 23, characters 13-20:
-A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 24, characters 3-19:
-A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 31, characters 13-18:
-A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 32, characters 3-14:
-A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 39, characters 3-33:
-A splat parameter `...` must not have a default value. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 46, characters 20-36:
-A splat parameter cannot also be optional. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 47, characters 5-30:
-A splat parameter cannot also be optional. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 51, characters 20-30:
-A splat parameter cannot also be variadic. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 52, characters 5-24:
-A splat parameter cannot also be variadic. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 58, characters 18-31:
-A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 59, characters 3-23:
-A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 64, characters 18-34:
-Splat parameters cannot be marked readonly (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 65, characters 3-26:
-Splat parameters cannot be marked readonly (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 39, characters 7-11:
-Some type arguments violate their constraints (Typing[4323])
-  File "type_splat_bad.php", line 39, characters 13-19:
-  Expected `(mixed...)`
-  File "type_splat_bad.php", line 39, characters 7-11:
-  But got `Targs super (int, int, mixed...)`
-ERROR: File "type_splat_bad.php", line 39, characters 7-11:
-Some type arguments violate their constraints (Typing[4323])
-  File "type_splat_bad.php", line 39, characters 13-19:
-  Expected `(mixed...)`
-  File "type_splat_bad.php", line 39, characters 7-11:
-  But got `mixed`
-  File "type_splat_bad.php", line 39, characters 7-11:
-    by the definition of `Targs` arising from an implicit `as mixed` constraint on this type
+error: Parsing[1002] A splat parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:7:13
+5 | // Illegal because splat is followed by another parameter (two errors)
+6 | function bad1<Targs as (mixed...)>(
+7 |   (function(...Targs, int): void) $f,
+  |             ^^^^^^^^ [1]
+8 |   ... Targs $params,
+9 |   int $arg,
+
+error: Parsing[1002] A splat parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:8:3
+ 6 | function bad1<Targs as (mixed...)>(
+ 7 |   (function(...Targs, int): void) $f,
+ 8 |   ... Targs $params,
+   |   ^^^^^^^^^^^^^^^^^ [1]
+ 9 |   int $arg,
+10 | ): void {
+
+error: Parsing[1002] A splat parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:15:13
+13 | // Illegal because splat is followed by a variadic (two errors)
+14 | function bad2<Targs as (mixed...)>(
+15 |   (function(...Targs, int...): void) $f,
+   |             ^^^^^^^^ [1]
+16 |   ... Targs $params,
+17 |   int ...$args
+
+error: Parsing[1002] A splat parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:16:3
+14 | function bad2<Targs as (mixed...)>(
+15 |   (function(...Targs, int...): void) $f,
+16 |   ... Targs $params,
+   |   ^^^^^^^^^^^^^^^^^ [1]
+17 |   int ...$args
+18 | ): void {
+
+error: Parsing[1002] A splat parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:23:13
+21 | // Illegal because splat is followed by an optional (two errors)
+22 | function bad3<Targs as (mixed...)>(
+23 |   (function(...Targs, optional int): void) $f,
+   |             ^^^^^^^^ [1]
+24 |   ... Targs $params,
+25 |   int $arg = 3,
+
+error: Parsing[1002] A splat parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:24:3
+22 | function bad3<Targs as (mixed...)>(
+23 |   (function(...Targs, optional int): void) $f,
+24 |   ... Targs $params,
+   |   ^^^^^^^^^^^^^^^^^ [1]
+25 |   int $arg = 3,
+26 | ): void {
+
+error: Parsing[1002] A variadic parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:31:13
+29 | // Illegal because splat is preceded by a variadic (two errors)
+30 | function bad5<Targs as (mixed...)>(
+31 |   (function(int..., ...Targs): void) $f,
+   |             ^^^^^^ [1]
+32 |   int ...$args,
+33 |   ... Targs $params,
+
+error: Parsing[1002] A variadic parameter `...` may only appear at the end of a parameter list. [1]
+
+type_splat_bad.php:32:3
+30 | function bad5<Targs as (mixed...)>(
+31 |   (function(int..., ...Targs): void) $f,
+32 |   int ...$args,
+   |   ^^^^^^^^^^^^ [1]
+33 |   ... Targs $params,
+34 | ): void {
+
+error: Parsing[1002] A splat parameter `...` must not have a default value. [1]
+
+type_splat_bad.php:39:3
+37 | // Illegal because splat has default value (one error)
+38 | function bad6<Targs super (int, int, mixed...)>(
+39 |   ... Targs $params = tuple(1, 2),
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+40 | ): void {
+41 | }
+
+error: Parsing[1002] A splat parameter cannot also be optional. [1]
+
+type_splat_bad.php:46:20
+44 |   // Illegal because splat is optional (two errors)
+45 |   public function bad7<Targs as (mixed...)>(
+46 |     (function(int, optional ...Targs): void) $f,
+   |                    ^^^^^^^^^^^^^^^^^ [1]
+47 |     optional ... Targs $params,
+48 |   ): void;
+
+error: Parsing[1002] A splat parameter cannot also be optional. [1]
+
+type_splat_bad.php:47:5
+45 |   public function bad7<Targs as (mixed...)>(
+46 |     (function(int, optional ...Targs): void) $f,
+47 |     optional ... Targs $params,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+48 |   ): void;
+49 |   // Illegal because splat is variadic (two errors)
+
+error: Parsing[1002] A splat parameter cannot also be variadic. [1]
+
+type_splat_bad.php:51:20
+49 |   // Illegal because splat is variadic (two errors)
+50 |   public function bad8<Targs as (mixed...)>(
+51 |     (function(int, ...Targs...): void) $f,
+   |                    ^^^^^^^^^^^ [1]
+52 |     ... Targs ...$params
+53 |   ): void;
+
+error: Parsing[1002] A splat parameter cannot also be variadic. [1]
+
+type_splat_bad.php:52:5
+50 |   public function bad8<Targs as (mixed...)>(
+51 |     (function(int, ...Targs...): void) $f,
+52 |     ... Targs ...$params
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+53 |   ): void;
+54 | }
+
+error: Parsing[1002] A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. [1]
+
+type_splat_bad.php:58:18
+56 | // Illegal because splat has inout (two errors)
+57 | function bad9<Targs as (mixed...)>(
+58 |   (function(int, inout ...Targs): void) $f,
+   |                  ^^^^^^^^^^^^^^ [1]
+59 |   inout ... Targs $args,
+60 | ): void {}
+
+error: Parsing[1002] A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. [1]
+
+type_splat_bad.php:59:3
+57 | function bad9<Targs as (mixed...)>(
+58 |   (function(int, inout ...Targs): void) $f,
+59 |   inout ... Targs $args,
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+60 | ): void {}
+61 | 
+
+error: Parsing[1002] Splat parameters cannot be marked readonly [1]
+
+type_splat_bad.php:64:18
+62 | // Illegal because splat has readonly (two errors)
+63 | function bad10<Targs as (mixed...)>(
+64 |   (function(int, readonly ...Targs): void) $f,
+   |                  ^^^^^^^^^^^^^^^^^ [1]
+65 |   readonly ... Targs $args,
+66 | ): void {}
+
+error: Parsing[1002] Splat parameters cannot be marked readonly [1]
+
+type_splat_bad.php:65:3
+63 | function bad10<Targs as (mixed...)>(
+64 |   (function(int, readonly ...Targs): void) $f,
+65 |   readonly ... Targs $args,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+66 | ): void {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `(mixed...)` [2]
+-> But got `Targs super (int, int, mixed...)` [1]
+
+type_splat_bad.php:39:7
+37 | // Illegal because splat has default value (one error)
+38 | function bad6<Targs super (int, int, mixed...)>(
+39 |   ... Targs $params = tuple(1, 2),
+   |       ^^^^^ [1]
+   |             ^^^^^^^ [2]
+40 | ): void {
+41 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `(mixed...)` [2]
+-> But got `mixed` [1]
+->   by the definition of `Targs` arising from an implicit `as mixed` constraint on this type [1]
+
+type_splat_bad.php:39:7
+37 | // Illegal because splat has default value (one error)
+38 | function bad6<Targs super (int, int, mixed...)>(
+39 |   ... Targs $params = tuple(1, 2),
+   |       ^^^^^ [1]
+   |             ^^^^^^^ [2]
+40 | ): void {
+41 | }
+
+19 errors found

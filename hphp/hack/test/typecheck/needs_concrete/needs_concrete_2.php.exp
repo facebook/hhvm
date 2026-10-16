@@ -1,4 +1,17 @@
-ERROR: File "needs_concrete_2.php", line 6, characters 11-12:
-Dangerous call to `A::m2` (a `<<__NeedsConcrete>>` method) via `self`. It requires `static` to refer to a concrete class, but `self` sets `static` to a class that may not be concrete. (Typing[4528])
-  File "needs_concrete_2.php", line 10, characters 26-27:
-  Declaration is here
+error: Typing[4528] Dangerous call to `A::m2` (a `<<__NeedsConcrete>>` method) via `self`. It requires `static` to refer to a concrete class, but `self` sets `static` to a class that may not be concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_2.php:6:11
+ 4 |   public static function m1(): void {
+ 5 |     // hh error: unsafe because `static` might not refer to a concrete class.
+ 6 |     self::m2();
+   |           ^^ [1]
+ 7 |   }
+ 8 | 
+ 9 |   <<__NeedsConcrete>>
+10 |   public static function m2(): void {
+   |                          ^^ [2]
+11 |     static::m3(); // ok: the attribute ensures `static` refers to a concrete class
+12 |   }
+
+1 error found

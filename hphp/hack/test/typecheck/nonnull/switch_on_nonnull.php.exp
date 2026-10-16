@@ -1,4 +1,22 @@
-ERROR: File "switch_on_nonnull.php", line 4, characters 3-74:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_on_nonnull.php", line 4, characters 11-12:
-  The scrutinee has type `nonnull` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `nonnull` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_on_nonnull.php:4:3
+ 2 | 
+ 3 | function f(nonnull $x): void {
+ 4 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 5 |     case 42:
+   |     ^^^^^^^^ [1]
+ 6 |       break;
+   |       ^^^^^^ [1]
+ 7 |     case 'foo':
+   |     ^^^^^^^^^^^ [1]
+ 8 |       break;
+   |       ^^^^^^ [1]
+ 9 |   }
+   |   ^ [1]
+10 | }
+
+1 error found

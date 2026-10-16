@@ -1,10 +1,39 @@
 File "any_as_lower_bound.php", line 5, characters 3-87:
   (function(): ~(void | _))
-ERROR: File "any_as_lower_bound.php", line 4, characters 32-33:
-Was expecting a type hint (Typing[4032])
-ERROR: File "any_as_lower_bound.php", line 5, characters 11-86:
-This function can exit with and without returning a value (Typing[4421])
-  File "any_as_lower_bound.php", line 9, characters 7-16:
-  Returning a value here.
-  File "any_as_lower_bound.php", line 7, characters 7-13:
-  Returning without a value here
+error: Typing[4032] Was expecting a type hint [1]
+
+any_as_lower_bound.php:4:32
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function f(bool $b, /* TAny */ $a): void {
+  |                                ^^ [1]
+5 |   hh_show(() ==> {
+6 |     if ($b) {
+
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+any_as_lower_bound.php:5:11
+ 3 | 
+ 4 | function f(bool $b, /* TAny */ $a): void {
+ 5 |   hh_show(() ==> {
+   |           ^^^^^^^^ [1]
+ 6 |     if ($b) {
+   |     ^^^^^^^^^ [1]
+ 7 |       return;
+   |       ^^^^^^^ [1]
+   |       ^^^^^^^ [3]
+ 8 |     } else {
+   |     ^^^^^^^^ [1]
+ 9 |       return $a;
+   |       ^^^^^^^^^^ [1]
+   |       ^^^^^^^^^^ [2]
+10 |     }
+   |     ^ [1]
+11 |   });
+   |   ^ [1]
+12 | }
+13 | 
+
+2 errors found

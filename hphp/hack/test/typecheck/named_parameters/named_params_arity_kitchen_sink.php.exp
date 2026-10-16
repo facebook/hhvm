@@ -1,36 +1,156 @@
-ERROR: File "named_params_arity_kitchen_sink.php", line 8, characters 3-9:
-Missing required named arguments: x, y, z (Typing[4499])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 8, characters 3-9:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 9, characters 3-6:
-Missing required named argument: x (Typing[4499])
-  File "named_params_arity_kitchen_sink.php", line 3, characters 10-11:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 10, characters 3-27:
-Missing required named arguments: x, y, z (Typing[4499])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 10, characters 3-27:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 10, characters 3-27:
-Unexpected named arguments: extra1, extra2 (Typing[4500])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 11, characters 3-35:
-Missing required named arguments: x, y, z (Typing[4499])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 11, characters 3-35:
-Too many positional arguments (expected 1 but got 2) (Typing[4105])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_kitchen_sink.php", line 11, characters 3-35:
-Unexpected named arguments: extra1, extra2 (Typing[4500])
-  File "named_params_arity_kitchen_sink.php", line 4, characters 10-14:
-  Definition is here
+error: Typing[4499] Missing required named arguments: x, y, z [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:8:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function kitchen_sink(): void {
+ 8 |   fxyz1();
+   |   ^^^^^^^ [1]
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:8:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function kitchen_sink(): void {
+ 8 |   fxyz1();
+   |   ^^^^^^^ [1]
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+
+error: Typing[4499] Missing required named argument: x [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:9:3
+ 1 | <?hh
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+   |          ^^ [2]
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function kitchen_sink(): void {
+ 8 |   fxyz1();
+ 9 |   fx();
+   |   ^^^^ [1]
+10 |   fxyz1(extra1=1, extra2=2);
+11 |   fxyz1("", extra1=1, "", extra2=2);
+
+error: Typing[4499] Missing required named arguments: x, y, z [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:10:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function kitchen_sink(): void {
+ 8 |   fxyz1();
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   fxyz1("", extra1=1, "", extra2=2);
+12 | }
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:10:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function kitchen_sink(): void {
+ 8 |   fxyz1();
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   fxyz1("", extra1=1, "", extra2=2);
+12 | }
+
+error: Typing[4500] Unexpected named arguments: extra1, extra2 [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:10:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | function kitchen_sink(): void {
+ 8 |   fxyz1();
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   fxyz1("", extra1=1, "", extra2=2);
+12 | }
+
+error: Typing[4499] Missing required named arguments: x, y, z [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:11:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+11 |   fxyz1("", extra1=1, "", extra2=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 | }
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:11:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+11 |   fxyz1("", extra1=1, "", extra2=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 | }
+
+error: Typing[4500] Unexpected named arguments: extra1, extra2 [1]
+-> Definition is here [2]
+
+named_params_arity_kitchen_sink.php:11:3
+ 2 | //
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+ 9 |   fx();
+10 |   fxyz1(extra1=1, extra2=2);
+11 |   fxyz1("", extra1=1, "", extra2=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 | }
+
+9 errors found

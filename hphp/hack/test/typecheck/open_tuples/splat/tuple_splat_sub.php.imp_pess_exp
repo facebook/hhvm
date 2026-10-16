@@ -1,4 +1,21 @@
-ERROR: File "tuple_splat_sub.php", line 42, characters 25-26:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tuple_splat_sub.php", line 45, characters 23-23:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `(string, mixed...)` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tuple_splat_sub.php:42:25
+40 | // r' <: r
+41 | // and (u1, _, un, ...T) <: T'
+42 | function expectSplatFun<Ts as (mixed...)>(
+   |                         ^^ [1]
+43 |   (function(int, string, ...Ts): void) $_,
+44 | ): void {}
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `(string, mixed...)` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tuple_splat_sub.php:45:23
+43 |   (function(int, string, ...Ts): void) $_,
+44 | ): void {}
+45 | function testSplatFun<T super (string, mixed...) as (mixed...)>(
+   |                       ^ [1]
+46 |   (function(int, ...T): void) $f,
+47 | ): void {
+
+2 errors found

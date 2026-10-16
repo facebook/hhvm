@@ -1,6 +1,22 @@
-WARN: File "accessing_static_method_of_nonnull.php", line 4, characters 3-9:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "accessing_static_method_of_nonnull.php", line 3, characters 12-18:
-  This expression has type `dynamic`
-ERROR: File "accessing_static_method_of_nonnull.php", line 4, characters 3-4:
-Was expecting a class, but got a nonnull value (Typing[4026])
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+accessing_static_method_of_nonnull.php:4:3
+1 | <?hh
+2 | 
+3 | function f(nonnull $x): void {
+  |            ^^^^^^^ [2]
+4 |   $x::foo();
+  |   ^^^^^^^ [1]
+5 | }
+
+error: Typing[4026] Was expecting a class, but got a nonnull value [1]
+
+accessing_static_method_of_nonnull.php:4:3
+2 | 
+3 | function f(nonnull $x): void {
+4 |   $x::foo();
+  |   ^^ [1]
+5 | }
+
+2 errors found

@@ -1,4 +1,17 @@
-ERROR: File "new_self_trait.php", line 10, characters 9-12:
-`MyTrait` is uninstantiable (Typing[4002])
-  File "new_self_trait.php", line 6, characters 7-13:
-  Declaration is here
+error: Typing[4002] `MyTrait` is uninstantiable [1]
+-> Declaration is here [2]
+
+new_self_trait.php:10:9
+ 4 | 
+ 5 | <<__ConsistentConstruct>>
+ 6 | trait MyTrait {
+   |       ^^^^^^^ [2]
+ 7 |   require extends BaseClass<int>;
+ 8 | 
+ 9 |   public function test(): void {
+10 |     new self();
+   |         ^^^^ [1]
+11 |   }
+12 | }
+
+1 error found

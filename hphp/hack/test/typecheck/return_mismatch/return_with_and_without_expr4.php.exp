@@ -1,16 +1,54 @@
-ERROR: File "return_with_and_without_expr4.php", line 4, characters 1-86:
-This function can exit with and without returning a value (Typing[4421])
-  File "return_with_and_without_expr4.php", line 6, characters 5-14:
-  Returning a value here.
-  File "return_with_and_without_expr4.php", line 8, characters 5-11:
-  Returning without a value here
-ERROR: File "return_with_and_without_expr4.php", line 6, characters 5-14:
-You cannot return a value (Typing[4084])
-  File "return_with_and_without_expr4.php", line 4, characters 25-28:
-  This is a `void` function
-ERROR: File "return_with_and_without_expr4.php", line 6, characters 12-13:
-Invalid return type (Typing[4110])
-  File "return_with_and_without_expr4.php", line 4, characters 25-28:
-  Expected `void`
-  File "return_with_and_without_expr4.php", line 6, characters 12-13:
-  But got `int`
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+return_with_and_without_expr4.php:4:1
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function test(bool $b): void {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 5 |   if ($b) {
+   |   ^^^^^^^^^ [1]
+ 6 |     return 42;
+   |     ^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^ [2]
+ 7 |   } else {
+   |   ^^^^^^^^ [1]
+ 8 |     return;
+   |     ^^^^^^^ [1]
+   |     ^^^^^^^ [3]
+ 9 |   }
+   |   ^ [1]
+10 | }
+   | ^ [1]
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+return_with_and_without_expr4.php:6:5
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(bool $b): void {
+  |                         ^^^^ [2]
+5 |   if ($b) {
+6 |     return 42;
+  |     ^^^^^^^^^^ [1]
+7 |   } else {
+8 |     return;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `int` [1]
+
+return_with_and_without_expr4.php:6:12
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(bool $b): void {
+  |                         ^^^^ [2]
+5 |   if ($b) {
+6 |     return 42;
+  |            ^^ [1]
+7 |   } else {
+8 |     return;
+
+3 errors found

@@ -1,10 +1,26 @@
-ERROR: File "trait_diamond_no_attr_1.bad.php", line 13, characters 7-13:
-Class `MyClass` inherits trait method `testFun` via multiple traits.  Add the __EnableMethodTraitDiamond attribute to `MyClass`, remove the multiple paths, or override the method (Typing[4439])
-  File "trait_diamond_no_attr_1.bad.php", line 7, characters 19-25:
-  Trait method is defined here
-  File "trait_diamond_no_attr_1.bad.php", line 15, characters 7-14:
-  `MyClass` uses `MyTrait2`
-  File "trait_diamond_no_attr_1.bad.php", line 10, characters 7-14:
-  `MyTrait2` uses `MyTrait1`
-  File "trait_diamond_no_attr_1.bad.php", line 14, characters 7-14:
-  `MyClass` uses `MyTrait1`
+error: Typing[4439] Class `MyClass` inherits trait method `testFun` via multiple traits.  Add the __EnableMethodTraitDiamond attribute to `MyClass`, remove the multiple paths, or override the method [1]
+-> Trait method is defined here [2]
+-> `MyClass` uses `MyTrait2` [3]
+-> `MyTrait2` uses `MyTrait1` [4]
+-> `MyClass` uses `MyTrait1` [5]
+
+trait_diamond_no_attr_1.bad.php:13:7
+ 5 | 
+ 6 | trait MyTrait1 {
+ 7 |   public function testFun(): void {}
+   |                   ^^^^^^^ [2]
+ 8 | }
+ 9 | trait MyTrait2 {
+10 |   use MyTrait1;
+   |       ^^^^^^^^ [4]
+11 | }
+12 | 
+13 | class MyClass {
+   |       ^^^^^^^ [1]
+14 |   use MyTrait1;
+   |       ^^^^^^^^ [5]
+15 |   use MyTrait2;
+   |       ^^^^^^^^ [3]
+16 | }
+
+1 error found

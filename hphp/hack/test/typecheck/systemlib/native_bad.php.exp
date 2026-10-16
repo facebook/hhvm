@@ -1,4 +1,12 @@
-ERROR: File "native_bad.php", line 11, characters 19-29:
-You are extending a class that needs to be initialized
+error: NastCheck[3012] You are extending a class that needs to be initialized
 Make sure you call `parent::__construct`.
- (NastCheck[3012])
+ [1]
+
+native_bad.php:11:19
+ 9 | <<__NativeData>>
+10 | class B extends A {
+11 |   public function __construct(): void {}
+   |                   ^^^^^^^^^^^ [1]
+12 | }
+
+1 error found

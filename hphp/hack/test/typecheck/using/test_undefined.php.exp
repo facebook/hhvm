@@ -1,2 +1,9 @@
-ERROR: File "test_undefined.php", line 3, characters 15-15:
-Unbound name: `C` (Naming[2049])
+error: Naming[2049] Unbound name: `C` [1]
+
+test_undefined.php:3:15
+1 | <?hh
+2 | 
+3 | function test(C $c): void {}
+  |               ^ [1]
+
+1 error found

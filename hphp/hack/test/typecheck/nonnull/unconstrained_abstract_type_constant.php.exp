@@ -1,18 +1,46 @@
-ERROR: File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
-Invalid return type (Typing[4110])
-  File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
-  Expected `nonnull`
-  File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-  But got `C::T super this::T`
-ERROR: File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
-Invalid return type (Typing[4110])
-  File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
-  Expected `nonnull`
-  File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-  But got `mixed`
-ERROR: File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
-Invalid return type (Typing[4110])
-  File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
-  Expected `nonnull`
-  File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-  But got `this::T as C::T`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `C::T super this::T` [3]
+
+unconstrained_abstract_type_constant.php:7:12
+4 |   abstract const type T;
+5 | 
+6 |   public function f(this::T $x): nonnull {
+  |                     ^^^^^^^ [3]
+  |                                  ^^^^^^^ [2]
+7 |     return $x;
+  |            ^^ [1]
+8 |   }
+9 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `mixed` [3]
+
+unconstrained_abstract_type_constant.php:7:12
+4 |   abstract const type T;
+5 | 
+6 |   public function f(this::T $x): nonnull {
+  |                     ^^^^^^^ [3]
+  |                                  ^^^^^^^ [2]
+7 |     return $x;
+  |            ^^ [1]
+8 |   }
+9 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `this::T as C::T` [3]
+
+unconstrained_abstract_type_constant.php:7:12
+4 |   abstract const type T;
+5 | 
+6 |   public function f(this::T $x): nonnull {
+  |                     ^^^^^^^ [3]
+  |                                  ^^^^^^^ [2]
+7 |     return $x;
+  |            ^^ [1]
+8 |   }
+9 | }
+
+3 errors found

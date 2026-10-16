@@ -1,2 +1,11 @@
-ERROR: File "object_is_subtype_of_nonnull.php", line 10, characters 16-17:
-Was expecting a class, but got a mixed value (Typing[4026])
+error: Typing[4026] Was expecting a class, but got a mixed value [1]
+
+object_is_subtype_of_nonnull.php:10:16
+ 8 |   public function f(): nonnull {
+ 9 |     $c = static::C;
+10 |     return new $c();
+   |                ^^ [1]
+11 |   }
+12 | }
+
+1 error found

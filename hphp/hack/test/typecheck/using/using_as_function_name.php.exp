@@ -1,4 +1,17 @@
-ERROR: File "using_as_function_name.php", line 4, characters 15-15:
-A name or `__construct` keyword is expected here. (Parsing[1002])
-ERROR: File "using_as_function_name.php", line 4, characters 10-14:
-Illegal function name: `using` (NastCheck[3025])
+error: Parsing[1002] A name or `__construct` keyword is expected here. [1]
+
+using_as_function_name.php:4:15
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function using(int $x): void {}
+  |               ^ [1]
+
+error: NastCheck[3025] Illegal function name: `using` [1]
+
+using_as_function_name.php:4:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function using(int $x): void {}
+  |          ^^^^^ [1]
+
+2 errors found

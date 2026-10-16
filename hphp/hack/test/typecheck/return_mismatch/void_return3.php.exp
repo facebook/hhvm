@@ -1,4 +1,14 @@
-ERROR: File "void_return3.php", line 17, characters 5-25:
-You cannot return a value (Typing[4084])
-  File "void_return3.php", line 16, characters 16-19:
-  This is a `void` function
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+void_return3.php:17:5
+14 | 
+15 |   // not accepted
+16 |   $lam2 = () : void ==> {
+   |                ^^^^ [2]
+17 |     return returnsvoid();
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   };
+19 | }
+
+1 error found

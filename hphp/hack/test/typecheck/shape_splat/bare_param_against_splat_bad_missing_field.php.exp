@@ -1,8 +1,16 @@
-ERROR: File "bare_param_against_splat_bad_missing_field.php", line 6, characters 10-11:
-Invalid return type (Typing[4163])
-  File "bare_param_against_splat_bad_missing_field.php", line 5, characters 35-35:
-  The field `a` is **optional**
-  File "bare_param_against_splat_bad_missing_field.php", line 5, characters 35-35:
-  The field `a` is defined as **required**
-  File "bare_param_against_splat_bad_missing_field.php", line 5, characters 61-63:
-  `a` is defined here
+error: Typing[4163] Invalid return type [1]
+-> The field `a` is **optional** [2]
+-> The field `a` is defined as **required** [2]
+-> `a` is defined here [3]
+
+bare_param_against_splat_bad_missing_field.php:6:10
+3 | 
+4 | // The bare parameter need not supply the row's inline field.
+5 | function missing<T as shape(...)>(T $s): shape(...T, 'a' => int) {
+  |                                   ^ [2]
+  |                                                             ^^^ [3]
+6 |   return $s;
+  |          ^^ [1]
+7 | }
+
+1 error found

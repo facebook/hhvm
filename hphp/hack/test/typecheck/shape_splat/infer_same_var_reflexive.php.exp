@@ -1,2 +1,11 @@
-ERROR: File "infer_same_var_reflexive.php", line 22, characters 39-49:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+infer_same_var_reflexive.php:22:39
+20 |   ShapeSplatReflexivePrefixer<TPrefix> $prefixer,
+21 | ): void {
+22 |   $identity = (ShapeSplatReflexiveBox<shape(..._)> $box) ==>
+   |                                       ^^^^^^^^^^^ [1]
+23 |     $prefixer->prepend($box->get());
+24 |   accept_shape_splat_identity(shape(), $identity);
+
+1 error found

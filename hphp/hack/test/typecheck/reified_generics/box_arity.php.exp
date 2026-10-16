@@ -1,28 +1,124 @@
-ERROR: File "box_arity.php", line 8, characters 7-12:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "box_arity.php", line 4, characters 7-12:
-  Definition is here
-ERROR: File "box_arity.php", line 11, characters 14-32:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "box_arity.php", line 4, characters 7-12:
-  Definition is here
-ERROR: File "box_arity.php", line 14, characters 14-33:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "box_arity.php", line 5, characters 7-13:
-  Definition is here
-ERROR: File "box_arity.php", line 18, characters 15-20:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_arity.php", line 4, characters 7-12:
-  Definition is here
-ERROR: File "box_arity.php", line 20, characters 15-33:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "box_arity.php", line 4, characters 7-12:
-  Definition is here
-ERROR: File "box_arity.php", line 22, characters 15-21:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_arity.php", line 5, characters 7-13:
-  Definition is here
-ERROR: File "box_arity.php", line 24, characters 15-34:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "box_arity.php", line 5, characters 7-13:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+box_arity.php:8:7
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+ 7 | function Erased_arityCheck(): void {
+ 8 |   new Erased<int, string>(); // already an error for this
+   |       ^^^^^^ [1]
+ 9 | 
+10 |   new Erased<Erased<int>>();
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+box_arity.php:11:14
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+   :
+ 9 | 
+10 |   new Erased<Erased<int>>();
+11 |   new Erased<Erased<int, string>>(); // bad
+   |              ^^^^^^^^^^^^^^^^^^^ [1]
+12 | 
+13 |   new Erased<Reified<int>>();
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+box_arity.php:14:14
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 6 | 
+ 7 | function Erased_arityCheck(): void {
+   :
+12 | 
+13 |   new Erased<Reified<int>>();
+14 |   new Erased<Reified<int, string>>(); // bad
+   |              ^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+16 | 
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_arity.php:18:15
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+   :
+16 | 
+17 | function Reified_arityCheck(): void {
+18 |   new Reified<Erased>(); // bad : Erased requires argument
+   |               ^^^^^^ [1]
+19 |   new Reified<Erased<int>>();
+20 |   new Reified<Erased<int, string>>(); // bad
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+box_arity.php:20:15
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+   :
+18 |   new Reified<Erased>(); // bad : Erased requires argument
+19 |   new Reified<Erased<int>>();
+20 |   new Reified<Erased<int, string>>(); // bad
+   |               ^^^^^^^^^^^^^^^^^^^ [1]
+21 | 
+22 |   new Reified<Reified>(); // bad, inner Reified requires argument
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_arity.php:22:15
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 6 | 
+ 7 | function Erased_arityCheck(): void {
+   :
+20 |   new Reified<Erased<int, string>>(); // bad
+21 | 
+22 |   new Reified<Reified>(); // bad, inner Reified requires argument
+   |               ^^^^^^^ [1]
+23 |   new Reified<Reified<int>>();
+24 |   new Reified<Reified<int, string>>(); // bad
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+box_arity.php:24:15
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 6 | 
+ 7 | function Erased_arityCheck(): void {
+   :
+22 |   new Reified<Reified>(); // bad, inner Reified requires argument
+23 |   new Reified<Reified<int>>();
+24 |   new Reified<Reified<int, string>>(); // bad
+   |               ^^^^^^^^^^^^^^^^^^^^ [1]
+25 | }
+
+7 errors found

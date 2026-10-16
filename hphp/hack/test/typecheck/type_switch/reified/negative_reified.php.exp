@@ -1,18 +1,61 @@
-ERROR: File "negative_reified.php", line 11, characters 7-13:
-Invalid return type (Typing[4110])
-  File "negative_reified.php", line 5, characters 54-56:
-  Expected `int`
-  File "negative_reified.php", line 5, characters 24-33:
-  But got `Reified<T>`
-ERROR: File "negative_reified.php", line 11, characters 7-13:
-Invalid return type (Typing[4110])
-  File "negative_reified.php", line 5, characters 54-56:
-  Expected `int`
-  File "negative_reified.php", line 7, characters 18-29:
-  But got `(Reified<T> & not Reified<int>)` from this `is` expression test
-ERROR: File "negative_reified.php", line 11, characters 7-13:
-Invalid return type (Typing[4110])
-  File "negative_reified.php", line 5, characters 54-56:
-  Expected `int`
-  File "negative_reified.php", line 7, characters 18-29:
-  But got `not Reified<int>` from this `is` expression test
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `Reified<T>` [3]
+
+negative_reified.php:11:7
+ 3 | final class Reified<reify T> {}
+ 4 | 
+ 5 | function test<reify T>(Reified<T> $x, int $y, T $t): int {
+   |                        ^^^^^^^^^^ [3]
+   |                                                      ^^^ [2]
+ 6 |   $x_or_y = $y > 0 ? $x : $y;
+ 7 |   if ($x_or_y is Reified<int>) {
+ 8 |     return $t; // we should know T = int
+ 9 |   } else {
+10 |     return
+11 |       $x_or_y; // should error because $x_or_y could be e.g. Reified<string>
+   |       ^^^^^^^ [1]
+12 |   }
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `(Reified<T> & not Reified<int>)` from this `is` expression test [3]
+
+negative_reified.php:11:7
+ 3 | final class Reified<reify T> {}
+ 4 | 
+ 5 | function test<reify T>(Reified<T> $x, int $y, T $t): int {
+   |                                                      ^^^ [2]
+ 6 |   $x_or_y = $y > 0 ? $x : $y;
+ 7 |   if ($x_or_y is Reified<int>) {
+   |                  ^^^^^^^^^^^^ [3]
+ 8 |     return $t; // we should know T = int
+ 9 |   } else {
+10 |     return
+11 |       $x_or_y; // should error because $x_or_y could be e.g. Reified<string>
+   |       ^^^^^^^ [1]
+12 |   }
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `not Reified<int>` from this `is` expression test [3]
+
+negative_reified.php:11:7
+ 3 | final class Reified<reify T> {}
+ 4 | 
+ 5 | function test<reify T>(Reified<T> $x, int $y, T $t): int {
+   |                                                      ^^^ [2]
+ 6 |   $x_or_y = $y > 0 ? $x : $y;
+ 7 |   if ($x_or_y is Reified<int>) {
+   |                  ^^^^^^^^^^^^ [3]
+ 8 |     return $t; // we should know T = int
+ 9 |   } else {
+10 |     return
+11 |       $x_or_y; // should error because $x_or_y could be e.g. Reified<string>
+   |       ^^^^^^^ [1]
+12 |   }
+13 | }
+
+3 errors found

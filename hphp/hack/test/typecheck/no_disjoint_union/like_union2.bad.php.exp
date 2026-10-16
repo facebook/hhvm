@@ -1,8 +1,19 @@
-WARN: File "like_union2.bad.php", line 15, characters 3-28:
-Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "like_union2.bad.php", line 14, characters 16-18:
-  `int` is one of the disjoint types
-  File "like_union2.bad.php", line 14, characters 30-35:
-  `string` is one of the disjoint types
-  File "like_union2.bad.php", line 12, characters 36-36:
-  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
+warning: Warn[12017] Invalid type argument due to disjoint types in a union [1]
+-> `int` is one of the disjoint types [2]
+-> `string` is one of the disjoint types [3]
+-> This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors [4]
+
+like_union2.bad.php:15:3
+10 | }
+11 | 
+12 | function foo<<<__NoDisjointUnion>> T>(T $_, T $_): void {}
+   |                                    ^ [4]
+13 | 
+14 | function main(~int $like_i, ~string $like_string): void {
+   |                ^^^ [2]
+   |                              ^^^^^^ [3]
+15 |   foo($like_i, $like_string);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+
+1 error found

@@ -1,18 +1,89 @@
-ERROR: File "constexpr.php", line 9, characters 21-33:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "constexpr.php", line 10, characters 21-33:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "constexpr.php", line 11, characters 24-36:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "constexpr.php", line 12, characters 24-36:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "constexpr.php", line 11, characters 24-36:
-Illegal constant value (Naming[2023])
-ERROR: File "constexpr.php", line 12, characters 24-36:
-Illegal constant value (Naming[2023])
-ERROR: File "constexpr.php", line 6, characters 21-28:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "constexpr.php", line 8, characters 21-31:
-Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
-ERROR: File "constexpr.php", line 10, characters 21-33:
-Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` (Typing[4482])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+constexpr.php:9:21
+ 7 |   const string Sn = nameof self;
+ 8 |   const string Sc = self::class;
+ 9 |   const string Pn = nameof parent;
+   |                     ^^^^^^^^^^^^^ [1]
+10 |   const string Pc = parent::class;
+11 |   const string Statn = nameof static;
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+constexpr.php:10:21
+ 8 |   const string Sc = self::class;
+ 9 |   const string Pn = nameof parent;
+10 |   const string Pc = parent::class;
+   |                     ^^^^^^^^^^^^^ [1]
+11 |   const string Statn = nameof static;
+12 |   const string Statc = static::class;
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+constexpr.php:11:24
+ 9 |   const string Pn = nameof parent;
+10 |   const string Pc = parent::class;
+11 |   const string Statn = nameof static;
+   |                        ^^^^^^^^^^^^^ [1]
+12 |   const string Statc = static::class;
+13 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+constexpr.php:12:24
+10 |   const string Pc = parent::class;
+11 |   const string Statn = nameof static;
+12 |   const string Statc = static::class;
+   |                        ^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Naming[2023] Illegal constant value [1]
+
+constexpr.php:11:24
+ 9 |   const string Pn = nameof parent;
+10 |   const string Pc = parent::class;
+11 |   const string Statn = nameof static;
+   |                        ^^^^^^^^^^^^^ [1]
+12 |   const string Statc = static::class;
+13 | }
+
+error: Naming[2023] Illegal constant value [1]
+
+constexpr.php:12:24
+10 |   const string Pc = parent::class;
+11 |   const string Statn = nameof static;
+12 |   const string Statc = static::class;
+   |                        ^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+constexpr.php:6:21
+4 | class C extends A {
+5 |   const string Cn = nameof C;
+6 |   const string Cc = C::class;
+  |                     ^^^^^^^^ [1]
+7 |   const string Sn = nameof self;
+8 |   const string Sc = self::class;
+
+error: Typing[4482] Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` [1]
+
+constexpr.php:8:21
+ 6 |   const string Cc = C::class;
+ 7 |   const string Sn = nameof self;
+ 8 |   const string Sc = self::class;
+   |                     ^^^^^^^^^^^ [1]
+ 9 |   const string Pn = nameof parent;
+10 |   const string Pc = parent::class;
+
+error: Typing[4482] Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` [1]
+
+constexpr.php:10:21
+ 8 |   const string Sc = self::class;
+ 9 |   const string Pn = nameof parent;
+10 |   const string Pc = parent::class;
+   |                     ^^^^^^^^^^^^^ [1]
+11 |   const string Statn = nameof static;
+12 |   const string Statc = static::class;
+
+9 errors found

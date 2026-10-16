@@ -1,2 +1,11 @@
-ERROR: File "instance_method_then_invoke.php", line 7, characters 25-25:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+instance_method_then_invoke.php:7:25
+5 |   public function foo():void { }
+6 |   public function id<T>(T $x):T { return $x; }
+7 |   public function empty<T>():vec<T> { return vec[]; }
+  |                         ^ [1]
+8 | }
+9 | class D {
+
+1 error found

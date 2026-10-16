@@ -1,6 +1,18 @@
-ERROR: File "reified_this.php", line 7, characters 11-14:
-Invalid reified hint (Typing[4305])
-  File "reified_this.php", line 7, characters 11-14:
-  This is the late static bound `this` type, it cannot be used as a reified type argument
-  File "reified_this.php", line 2, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is the late static bound `this` type, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+reified_this.php:7:11
+1 | <?hh
+2 | class R<reify T> {}
+  |               ^ [2]
+3 | 
+4 | class C {
+5 |     const type T = int;
+6 |     public function f(
+7 |         R<this> $r,
+  |           ^^^^ [1]
+8 |         R<this::T>$rt
+9 |     ): void {}
+
+1 error found

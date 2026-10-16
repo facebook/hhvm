@@ -1,4 +1,16 @@
-ERROR: File "static_property_01.bad.php", line 8, characters 42-43:
-No class variable `$x` in `C` (Typing[4090])
-  File "static_property_01.bad.php", line 11, characters 13-13:
-  Declaration of `C` is here
+error: Typing[4090] No class variable `$x` in `C` [1]
+-> Declaration of `C` is here [2]
+
+static_property_01.bad.php:8:42
+ 6 |   require class C;
+ 7 | 
+ 8 |   public function foo(): int { return C::$x; }
+   |                                          ^^ [1]
+ 9 | }
+10 | 
+11 | final class C  {
+   |             ^ [2]
+12 |   use T;
+13 | }
+
+1 error found

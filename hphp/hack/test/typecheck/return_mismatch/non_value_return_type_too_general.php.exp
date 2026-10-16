@@ -1,10 +1,33 @@
-ERROR: File "non_value_return_type_too_general.php", line 4, characters 21-25:
-Functions that do not return a value must have a type of void (Typing[4422])
-ERROR: File "non_value_return_type_too_general.php", line 9, characters 21-25:
-Functions that do not return a value must have a type of void (Typing[4422])
-ERROR: File "non_value_return_type_too_general.php", line 13, characters 10-15:
-Invalid return type (Typing[4336])
-  File "non_value_return_type_too_general.php", line 13, characters 21-23:
-  Expected `int`
-  File "non_value_return_type_too_general.php", line 13, characters 10-15:
-  But got `void` because this function does not always return a value
+error: Typing[4422] Functions that do not return a value must have a type of void [1]
+
+non_value_return_type_too_general.php:4:21
+2 | 
+3 | // special message about annotation here
+4 | function voids1() : mixed {
+  |                     ^^^^^ [1]
+5 |   return;
+6 | }
+
+error: Typing[4422] Functions that do not return a value must have a type of void [1]
+
+non_value_return_type_too_general.php:9:21
+ 7 | 
+ 8 | // special message about annotation here
+ 9 | function voids2() : mixed {
+   |                     ^^^^^ [1]
+10 | }
+11 | 
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+non_value_return_type_too_general.php:13:10
+11 | 
+12 | // only general type mismatch error here
+13 | function voids3() : int {
+   |          ^^^^^^ [1]
+   |                     ^^^ [2]
+14 | }
+
+3 errors found

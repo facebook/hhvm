@@ -1,8 +1,37 @@
-WARN: File "enforceable_type_const_as.php", line 13, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::TE`. (Warn[12012])
-WARN: File "enforceable_type_const_as.php", line 14, characters 5-20:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::TNotE`. (Warn[12012])
-ERROR: File "enforceable_type_const_as.php", line 14, characters 10-20:
-Invalid `as` expression hint (Typing[4195])
-  File "enforceable_type_const_as.php", line 10, characters 23-27:
-  The `as` operator cannot be used with the abstract type constant TNotE because it is not marked `<<__Enforceable>>`
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::TE`. [1]
+
+enforceable_type_const_as.php:13:5
+11 | 
+12 |   public function f(): void {
+13 |     3 as this::TE;
+   |     ^^^^^^^^^^^^^ [1]
+14 |     4 as this::TNotE;
+15 |   }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::TNotE`. [1]
+
+enforceable_type_const_as.php:14:5
+12 |   public function f(): void {
+13 |     3 as this::TE;
+14 |     4 as this::TNotE;
+   |     ^^^^^^^^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant TNotE because it is not marked `<<__Enforceable>>` [2]
+
+enforceable_type_const_as.php:14:10
+ 8 |   abstract const type TE as Base;
+ 9 | 
+10 |   abstract const type TNotE as Base;
+   |                       ^^^^^ [2]
+11 | 
+12 |   public function f(): void {
+13 |     3 as this::TE;
+14 |     4 as this::TNotE;
+   |          ^^^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+3 errors found

@@ -1,8 +1,25 @@
-WARN: File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-ERROR: File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
-Invalid return type (Typing[4110])
-  File "as_expression_mutable_prim_nullable.php", line 4, characters 38-40:
-  Expected `~int`
-  File "as_expression_mutable_prim_nullable.php", line 5, characters 12-27:
-  But got `?int`
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+as_expression_mutable_prim_nullable.php:5:12
+3 |   public int $x = 4;
+4 |   public readonly function getInt(): int {
+5 |     return $this->x ?as int;
+  |            ^^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~int` [2]
+-> But got `?int` [1]
+
+as_expression_mutable_prim_nullable.php:5:12
+2 | class Foo {
+3 |   public int $x = 4;
+4 |   public readonly function getInt(): int {
+  |                                      ^^^ [2]
+5 |     return $this->x ?as int;
+  |            ^^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+2 errors found

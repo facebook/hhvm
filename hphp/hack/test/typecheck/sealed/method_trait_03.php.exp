@@ -1,10 +1,40 @@
-WARN: File "method_trait_03.php", line 4, characters 14-21:
-Class `C` in sealed allowlist for method `foo` in `T1`, but does not use `T1` (Warn[12035])
-WARN: File "method_trait_03.php", line 4, characters 24-32:
-Trait `T2` in sealed allowlist for method `foo` in `T1`, but does not use `T1` (Warn[12035])
-ERROR: File "method_trait_03.php", line 24, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_trait_03.php", line 24, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_trait_03.php", line 5, characters 19-21:
-  Declaration is here
+warning: Warn[12035] Class `C` in sealed allowlist for method `foo` in `T1`, but does not use `T1` [1]
+
+method_trait_03.php:4:14
+2 | 
+3 | trait T1 {
+4 |   <<__Sealed(C::class, T2::class)>>
+  |              ^^^^^^^^ [1]
+5 |   public function foo(): void {
+6 |     echo "I am foo in T1\n";
+
+warning: Warn[12035] Trait `T2` in sealed allowlist for method `foo` in `T1`, but does not use `T1` [1]
+
+method_trait_03.php:4:24
+2 | 
+3 | trait T1 {
+4 |   <<__Sealed(C::class, T2::class)>>
+  |                        ^^^^^^^^^ [1]
+5 |   public function foo(): void {
+6 |     echo "I am foo in T1\n";
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_trait_03.php:24:19
+ 3 | trait T1 {
+ 4 |   <<__Sealed(C::class, T2::class)>>
+ 5 |   public function foo(): void {
+   |                   ^^^ [2]
+ 6 |     echo "I am foo in T1\n";
+ 7 |   }
+   :
+22 |   // this is rejected
+23 |   <<__Override>>
+24 |   public function foo(): void {
+   |                   ^^^ [1]
+25 |     echo "I am foo in E2\n";
+26 |   }
+
+3 errors found

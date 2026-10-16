@@ -1,22 +1,60 @@
-ERROR: File "trait_reuse_cyclic_class.php", line 9, characters 24-31:
-Cyclic class definition : `MyParent` `BadClass`  (Typing[4013])
-ERROR: File "trait_reuse_cyclic_class.php", line 10, characters 7-17:
-Traits with final methods cannot be reused, and `ReusedTrait` is already used by `BadClass`. (Typing[4186])
-  File "trait_reuse_cyclic_class.php", line 13, characters 7-14:
-  `BadClass` is defined here
-  File "trait_reuse_cyclic_class.php", line 9, characters 24-31:
-  `BadClass` uses `BadClass`
-  File "trait_reuse_cyclic_class.php", line 10, characters 7-17:
-  `BadClass` uses `ReusedTrait`
-  File "trait_reuse_cyclic_class.php", line 6, characters 25-27:
-  `ReusedTrait` has a final method `foo`
-ERROR: File "trait_reuse_cyclic_class.php", line 14, characters 7-17:
-Traits with final methods cannot be reused, and `ReusedTrait` is already used by `BadClass`. (Typing[4186])
-  File "trait_reuse_cyclic_class.php", line 13, characters 7-14:
-  `BadClass` is defined here
-  File "trait_reuse_cyclic_class.php", line 9, characters 24-31:
-  `BadClass` uses `BadClass`
-  File "trait_reuse_cyclic_class.php", line 10, characters 7-17:
-  `BadClass` uses `ReusedTrait`
-  File "trait_reuse_cyclic_class.php", line 6, characters 25-27:
-  `ReusedTrait` has a final method `foo`
+error: Typing[4013] Cyclic class definition : `MyParent` `BadClass`  [1]
+
+trait_reuse_cyclic_class.php:9:24
+ 7 | }
+ 8 | 
+ 9 | class MyParent extends BadClass {
+   |                        ^^^^^^^^ [1]
+10 |   use ReusedTrait;
+11 | }
+
+error: Typing[4186] Traits with final methods cannot be reused, and `ReusedTrait` is already used by `BadClass`. [1]
+-> `BadClass` is defined here [2]
+-> `BadClass` uses `BadClass` [3]
+-> `BadClass` uses `ReusedTrait` [1]
+-> `ReusedTrait` has a final method `foo` [4]
+
+trait_reuse_cyclic_class.php:10:7
+ 4 | // loop in the trait reuse check.
+ 5 | trait ReusedTrait {
+ 6 |   public final function foo(): void {}
+   |                         ^^^ [4]
+ 7 | }
+ 8 | 
+ 9 | class MyParent extends BadClass {
+   |                        ^^^^^^^^ [3]
+10 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+11 | }
+12 | 
+13 | class BadClass extends MyParent {
+   |       ^^^^^^^^ [2]
+14 |   use ReusedTrait;
+15 | }
+
+error: Typing[4186] Traits with final methods cannot be reused, and `ReusedTrait` is already used by `BadClass`. [1]
+-> `BadClass` is defined here [2]
+-> `BadClass` uses `BadClass` [3]
+-> `BadClass` uses `ReusedTrait` [4]
+-> `ReusedTrait` has a final method `foo` [5]
+
+trait_reuse_cyclic_class.php:14:7
+ 4 | // loop in the trait reuse check.
+ 5 | trait ReusedTrait {
+ 6 |   public final function foo(): void {}
+   |                         ^^^ [5]
+ 7 | }
+ 8 | 
+ 9 | class MyParent extends BadClass {
+   |                        ^^^^^^^^ [3]
+10 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [4]
+11 | }
+12 | 
+13 | class BadClass extends MyParent {
+   |       ^^^^^^^^ [2]
+14 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+15 | }
+
+3 errors found

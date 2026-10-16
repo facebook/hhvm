@@ -1,3 +1,12 @@
-ERROR: File "circular_type_in_reified_call.php", line 6, characters 14-20:
-Cyclic type constant:
-  `Foo::TFilter` -> `Foo::TFilter` (Typing[4131])
+error: Typing[4131] Cyclic type constant:
+  `Foo::TFilter` -> `Foo::TFilter` [1]
+
+circular_type_in_reified_call.php:6:14
+4 | 
+5 | final class Foo {
+6 |   const type TFilter = vec<self::TFilter>;
+  |              ^^^^^^^ [1]
+7 | 
+8 |   public function demo(): void {
+
+1 error found

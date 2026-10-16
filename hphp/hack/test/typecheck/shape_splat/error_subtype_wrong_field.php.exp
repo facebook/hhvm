@@ -1,6 +1,21 @@
-ERROR: File "error_subtype_wrong_field.php", line 11, characters 15-16:
-Invalid argument (Typing[4110])
-  File "error_subtype_wrong_field.php", line 8, characters 35-40:
-  Expected `string`
-  File "error_subtype_wrong_field.php", line 4, characters 27-29:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+error_subtype_wrong_field.php:11:15
+ 2 | <<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+ 3 | 
+ 4 | type TBase = shape('x' => int, 'y' => string);
+   |                           ^^^ [3]
+ 5 | type TExtended = shape(...TBase, 'z' => bool);
+ 6 | 
+ 7 | // Subtyping should fail: TExtended has 'x' => int but target expects 'x' => string
+ 8 | function takes_wrong(shape('x' => string, 'y' => string, 'z' => bool) $s): void {}
+   |                                   ^^^^^^ [2]
+ 9 | 
+10 | function test(TExtended $s): void {
+11 |   takes_wrong($s);
+   |               ^^ [1]
+12 | }
+
+1 error found

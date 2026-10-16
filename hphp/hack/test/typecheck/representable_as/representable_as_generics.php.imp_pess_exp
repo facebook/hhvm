@@ -1,14 +1,40 @@
-ERROR: File "representable_as_generics.php", line 11, characters 10-11:
-Invalid return type (Typing[4110])
-  File "representable_as_generics.php", line 9, characters 77-77:
-  Expected `T`
-  File "representable_as_generics.php", line 9, characters 41-70:
-  But got `HH\Runtime\RepresentableAs<T>`
-ERROR: File "representable_as_generics.php", line 11, characters 10-11:
-Invalid return type (Typing[4110])
-  File "representable_as_generics.php", line 9, characters 77-77:
-  Expected `T`
-  File "representable_as_generics.php", line 9, characters 41-70:
-  But got `mixed`
-  File "representable_as.hhi", line 7, characters 11-25:
-    by the definition of `HH\Runtime\RepresentableAs`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `HH\Runtime\RepresentableAs<T>` [3]
+
+representable_as_generics.php:11:10
+ 7 | }
+ 8 | 
+ 9 | function try_unwrap_representable_as<T>(\HH\Runtime\RepresentableAs<T> $c): T {
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                                             ^ [2]
+10 |   // RepresentableAs<T> <: T — should FAIL
+11 |   return $c;
+   |          ^^ [1]
+12 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `mixed` [3]
+->   by the definition of `HH\Runtime\RepresentableAs` [4]
+
+representable_as_generics.php:11:10
+ 7 | }
+ 8 | 
+ 9 | function try_unwrap_representable_as<T>(\HH\Runtime\RepresentableAs<T> $c): T {
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                                             ^ [2]
+10 |   // RepresentableAs<T> <: T — should FAIL
+11 |   return $c;
+   |          ^^ [1]
+12 | }
+
+representable_as.hhi:7:11
+ 5 | namespace HH\Runtime {
+ 6 |   <<__GatedByFeatureFlag('representable_as')>>
+ 7 |   newtype RepresentableAs<+T> = T;
+   |           ^^^^^^^^^^^^^^^ [4]
+ 8 | 
+ 9 |   <<__GatedByFeatureFlag('representable_as')>>
+
+2 errors found

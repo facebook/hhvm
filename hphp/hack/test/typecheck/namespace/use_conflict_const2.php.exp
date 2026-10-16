@@ -1,2 +1,9 @@
-ERROR: File "use_conflict_const2.php", line 5, characters 11-13:
-Cannot declare `FOO` because the name was explicitly used earlier via a `use` statement on line 3 (Parsing[1002])
+error: Parsing[1002] Cannot declare `FOO` because the name was explicitly used earlier via a `use` statement on line 3 [1]
+
+use_conflict_const2.php:5:11
+3 | use const UseNS\FOO;
+4 | 
+5 | const int FOO = 0;
+  |           ^^^ [1]
+
+1 error found

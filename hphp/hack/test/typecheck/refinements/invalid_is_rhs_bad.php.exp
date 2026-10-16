@@ -1,24 +1,80 @@
-ERROR: File "invalid_is_rhs_bad.php", line 10, characters 8-19:
-Invalid type hint (Typing[4062])
-  File "invalid_is_rhs_bad.php", line 10, characters 16-19:
-  You are trying to access the type constant `ZERO` but this is an int
-  File "invalid_is_rhs_bad.php", line 3, characters 21-23:
-  Definition is here
-ERROR: File "invalid_is_rhs_bad.php", line 11, characters 9-20:
-Invalid type hint (Typing[4062])
-  File "invalid_is_rhs_bad.php", line 11, characters 17-20:
-  You are trying to access the type constant `ZERO` but this is an int
-  File "invalid_is_rhs_bad.php", line 3, characters 21-23:
-  Definition is here
-ERROR: File "invalid_is_rhs_bad.php", line 12, characters 9-22:
-Invalid type hint (Typing[4090])
-  File "invalid_is_rhs_bad.php", line 12, characters 18-22:
-  No type constant `class` in `MyClass`
-  File "invalid_is_rhs_bad.php", line 7, characters 13-19:
-  Declaration of `MyClass` is here
-ERROR: File "invalid_is_rhs_bad.php", line 13, characters 18-29:
-Invalid type hint (Typing[4062])
-  File "invalid_is_rhs_bad.php", line 13, characters 26-29:
-  You are trying to access the type constant `ZERO` but this is an int
-  File "invalid_is_rhs_bad.php", line 3, characters 21-23:
-  Definition is here
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `ZERO` but this is an int [2]
+-> Definition is here [3]
+
+invalid_is_rhs_bad.php:10:8
+ 1 | <?hh
+ 2 | 
+ 3 | enum MyEnum: int as int {
+   |                     ^^^ [3]
+ 4 |   ZERO = 0;
+ 5 | }
+   :
+ 8 | 
+ 9 | function foo(mixed $x, dict<string, mixed> $d): void {
+10 |   0 is MyEnum::ZERO;
+   |        ^^^^^^^^^^^^ [1]
+   |                ^^^^ [2]
+11 |   $x is MyEnum::ZERO;
+12 |   $x is MyClass::class;
+
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `ZERO` but this is an int [2]
+-> Definition is here [3]
+
+invalid_is_rhs_bad.php:11:9
+ 1 | <?hh
+ 2 | 
+ 3 | enum MyEnum: int as int {
+   |                     ^^^ [3]
+ 4 |   ZERO = 0;
+ 5 | }
+   :
+ 9 | function foo(mixed $x, dict<string, mixed> $d): void {
+10 |   0 is MyEnum::ZERO;
+11 |   $x is MyEnum::ZERO;
+   |         ^^^^^^^^^^^^ [1]
+   |                 ^^^^ [2]
+12 |   $x is MyClass::class;
+13 |   if ($d['x'] is MyEnum::ZERO) {
+
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `class` in `MyClass` [2]
+-> Declaration of `MyClass` is here [3]
+
+invalid_is_rhs_bad.php:12:9
+ 5 | }
+ 6 | 
+ 7 | final class MyClass {}
+   |             ^^^^^^^ [3]
+ 8 | 
+ 9 | function foo(mixed $x, dict<string, mixed> $d): void {
+10 |   0 is MyEnum::ZERO;
+11 |   $x is MyEnum::ZERO;
+12 |   $x is MyClass::class;
+   |         ^^^^^^^^^^^^^^ [1]
+   |                  ^^^^^ [2]
+13 |   if ($d['x'] is MyEnum::ZERO) {
+14 |   }
+
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `ZERO` but this is an int [2]
+-> Definition is here [3]
+
+invalid_is_rhs_bad.php:13:18
+ 1 | <?hh
+ 2 | 
+ 3 | enum MyEnum: int as int {
+   |                     ^^^ [3]
+ 4 |   ZERO = 0;
+ 5 | }
+   :
+11 |   $x is MyEnum::ZERO;
+12 |   $x is MyClass::class;
+13 |   if ($d['x'] is MyEnum::ZERO) {
+   |                  ^^^^^^^^^^^^ [1]
+   |                          ^^^^ [2]
+14 |   }
+15 | }
+
+4 errors found

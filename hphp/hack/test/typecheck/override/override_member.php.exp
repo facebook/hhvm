@@ -1,16 +1,35 @@
-ERROR: File "override_member.php", line 17, characters 10-13:
-The property `x` has the wrong type (Typing[4341])
-  File "override_member.php", line 17, characters 10-13:
-  Typing error
-  File "override_member.php", line 13, characters 10-12:
-  Expected `int`
-  File "override_member.php", line 17, characters 10-13:
-  But got `bool`
-ERROR: File "override_member.php", line 17, characters 10-13:
-The property `x` has the wrong type (Typing[4341])
-  File "override_member.php", line 17, characters 10-13:
-  Typing error
-  File "override_member.php", line 17, characters 10-13:
-  Expected `bool`
-  File "override_member.php", line 13, characters 10-12:
-  But got `int`
+error: Typing[4341] The property `x` has the wrong type [1]
+-> Typing error [1]
+-> Expected `int` [2]
+-> But got `bool` [1]
+
+override_member.php:17:10
+11 | 
+12 | class X {
+13 |   public int $x = 0;
+   |          ^^^ [2]
+14 | }
+15 | 
+16 | class Y extends X {
+17 |   public bool $x = false;
+   |          ^^^^ [1]
+18 | }
+
+error: Typing[4341] The property `x` has the wrong type [1]
+-> Typing error [1]
+-> Expected `bool` [1]
+-> But got `int` [2]
+
+override_member.php:17:10
+11 | 
+12 | class X {
+13 |   public int $x = 0;
+   |          ^^^ [2]
+14 | }
+15 | 
+16 | class Y extends X {
+17 |   public bool $x = false;
+   |          ^^^^ [1]
+18 | }
+
+2 errors found

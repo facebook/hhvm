@@ -1,1 +1,2 @@
 --extra-builtin ../../../hhi/XHPTest.hhi
+--error-format plain_highlighted

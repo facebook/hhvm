@@ -1,12 +1,42 @@
-ERROR: File "return_with_and_without_expr3.php", line 4, characters 1-89:
-This function can exit with and without returning a value (Typing[4421])
-  File "return_with_and_without_expr3.php", line 6, characters 5-14:
-  Returning a value here.
-  File "return_with_and_without_expr3.php", line 8, characters 5-11:
-  Returning without a value here
-ERROR: File "return_with_and_without_expr3.php", line 8, characters 5-11:
-Invalid return type (Typing[4336])
-  File "return_with_and_without_expr3.php", line 4, characters 25-31:
-  Expected `dynamic`
-  File "return_with_and_without_expr3.php", line 8, characters 5-11:
-  But got `void`
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+return_with_and_without_expr3.php:4:1
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function test(bool $b): dynamic {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 5 |   if ($b) {
+   |   ^^^^^^^^^ [1]
+ 6 |     return 42;
+   |     ^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^ [2]
+ 7 |   } else {
+   |   ^^^^^^^^ [1]
+ 8 |     return;
+   |     ^^^^^^^ [1]
+   |     ^^^^^^^ [3]
+ 9 |   }
+   |   ^ [1]
+10 | }
+   | ^ [1]
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `void` [1]
+
+return_with_and_without_expr3.php:8:5
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function test(bool $b): dynamic {
+   |                         ^^^^^^^ [2]
+ 5 |   if ($b) {
+ 6 |     return 42;
+ 7 |   } else {
+ 8 |     return;
+   |     ^^^^^^^ [1]
+ 9 |   }
+10 | }
+
+2 errors found

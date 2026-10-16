@@ -1,12 +1,27 @@
-ERROR: File "vec_key_must_be_int.php", line 4, characters 10-18:
-Typing error (Typing[4110])
-  File "vec_key_must_be_int.php", line 4, characters 10-13:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "vec_key_must_be_int.php", line 4, characters 15-17:
-  But got `string`
-ERROR: File "vec_key_must_be_int.php", line 4, characters 15-17:
-Invalid index type for this vec (Typing[4449])
-  File "vec_key_must_be_int.php", line 3, characters 14-16:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "vec_key_must_be_int.php", line 4, characters 15-17:
-  It is incompatible with a string
+error: Typing[4110] Typing error [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+vec_key_must_be_int.php:4:10
+2 | 
+3 | function foo(vec<string> $arg): string {
+4 |   return $arg["x"];
+  |          ^^^^^^^^^ [1]
+  |          ^^^^ [2]
+  |               ^^^ [3]
+5 | }
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+vec_key_must_be_int.php:4:15
+1 | <?hh
+2 | 
+3 | function foo(vec<string> $arg): string {
+  |              ^^^ [2]
+4 |   return $arg["x"];
+  |               ^^^ [1]
+5 | }
+
+2 errors found

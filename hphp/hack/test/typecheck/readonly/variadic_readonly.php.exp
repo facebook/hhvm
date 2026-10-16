@@ -1,12 +1,35 @@
-ERROR: File "variadic_readonly.php", line 7, characters 17-20:
-Invalid argument (Typing[4411])
-  File "variadic_readonly.php", line 7, characters 17-20:
-  This expression is readonly
-  File "variadic_readonly.php", line 2, characters 34-35:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "variadic_readonly.php", line 8, characters 22-25:
-Invalid argument (Typing[4411])
-  File "variadic_readonly.php", line 8, characters 22-25:
-  This expression is readonly
-  File "variadic_readonly.php", line 2, characters 34-35:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+variadic_readonly.php:7:17
+1 | <?hh
+2 | function takes_varargs(string ...$x): string {
+  |                                  ^^ [2]
+3 |   return "";
+4 | }
+5 | 
+6 | function bar(readonly string $ref): void {
+7 |   takes_varargs($ref); // error
+  |                 ^^^^ [1]
+8 |   takes_varargs("a", $ref); // error
+9 | }
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+variadic_readonly.php:8:22
+1 | <?hh
+2 | function takes_varargs(string ...$x): string {
+  |                                  ^^ [2]
+3 |   return "";
+4 | }
+5 | 
+6 | function bar(readonly string $ref): void {
+7 |   takes_varargs($ref); // error
+8 |   takes_varargs("a", $ref); // error
+  |                      ^^^^ [1]
+9 | }
+
+2 errors found

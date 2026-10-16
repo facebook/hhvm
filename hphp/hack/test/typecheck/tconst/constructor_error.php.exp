@@ -1,4 +1,19 @@
-ERROR: File "constructor_error.php", line 15, characters 19-24:
-Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-  File "constructor_error.php", line 3, characters 7-7:
-  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+error: Typing[4060] Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes [1]
+-> This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute [2]
+
+constructor_error.php:15:19
+ 1 | <?hh
+ 2 | 
+ 3 | class X {
+   |       ^ [2]
+ 4 |   const type T = string;
+ 5 | 
+   :
+13 |   public static function test(this::T $t): void {
+14 |     // Valid because T cannot be overridden
+15 |     $static = new static('');
+   |                   ^^^^^^ [1]
+16 |   }
+17 | }
+
+1 error found

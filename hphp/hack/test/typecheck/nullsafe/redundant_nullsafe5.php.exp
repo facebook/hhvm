@@ -1,2 +1,10 @@
-WARN: File "redundant_nullsafe5.php", line 8, characters 3-24:
-You are using the `?->` operator but this object is of type A which cannot be null. You can use the `->` operator instead. (Warn[12029])
+warning: Warn[12029] You are using the `?->` operator but this object is of type A which cannot be null. You can use the `->` operator instead. [1]
+
+redundant_nullsafe5.php:8:3
+6 | 
+7 | function main(?A $a): void {
+8 |   ($a ?? new A()) ?->foo();
+  |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

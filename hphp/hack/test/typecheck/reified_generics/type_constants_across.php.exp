@@ -1,20 +1,87 @@
-WARN: File "type_constants_across.php", line 10, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A::Tx`. (Warn[12012])
-WARN: File "type_constants_across.php", line 11, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
-WARN: File "type_constants_across.php", line 12, characters 5-18:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `YY<int>`. (Warn[12012])
-ERROR: File "type_constants_across.php", line 5, characters 19-23:
-Invalid type hint (Typing[4352])
-  File "type_constants_across.php", line 5, characters 22-23:
-  An abstract type constant is not allowed in this position. Did you mean `this::Tx`?
-  File "type_constants_across.php", line 17, characters 23-24:
-  `Tx` is abstract here.
-ERROR: File "type_constants_across.php", line 10, characters 10-17:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_across.php", line 17, characters 23-24:
-  The `as` operator cannot be used with the abstract type constant Tx because it is not marked `<<__Enforceable>>`
-ERROR: File "type_constants_across.php", line 12, characters 10-18:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_across.php", line 23, characters 20-26:
-  The `as` operator cannot be used with a type with an erased generic type argument
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A::Tx`. [1]
+
+type_constants_across.php:10:5
+ 8 | 
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+   |     ^^^^^^^^^^^^^ [1]
+11 |     4 as this::Tb;
+12 |     6 as this::Tcc;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. [1]
+
+type_constants_across.php:11:5
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+11 |     4 as this::Tb;
+   |     ^^^^^^^^^^^^^ [1]
+12 |     6 as this::Tcc;
+13 |   }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `YY<int>`. [1]
+
+type_constants_across.php:12:5
+10 |     3 as this::Ta;
+11 |     4 as this::Tb;
+12 |     6 as this::Tcc;
+   |     ^^^^^^^^^^^^^^ [1]
+13 |   }
+14 | }
+
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::Tx`? [2]
+-> `Tx` is abstract here. [3]
+
+type_constants_across.php:5:19
+ 3 | 
+ 4 | class Test {
+ 5 |   const type Ta = A::Tx;
+   |                   ^^^^^ [1]
+   |                      ^^ [2]
+ 6 |   const type Tb = A::Ty;
+ 7 |   const type Tcc = B::Tyy;
+   :
+15 | 
+16 | abstract class A {
+17 |   abstract const type Tx as X;
+   |                       ^^ [3]
+18 |   const type Ty = Y;
+19 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant Tx because it is not marked `<<__Enforceable>>` [2]
+
+type_constants_across.php:10:10
+ 8 | 
+ 9 |   public function f(): void {
+10 |     3 as this::Ta;
+   |          ^^^^^^^^ [1]
+11 |     4 as this::Tb;
+12 |     6 as this::Tcc;
+   :
+15 | 
+16 | abstract class A {
+17 |   abstract const type Tx as X;
+   |                       ^^ [2]
+18 |   const type Ty = Y;
+19 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with an erased generic type argument [2]
+
+type_constants_across.php:12:10
+10 |     3 as this::Ta;
+11 |     4 as this::Tb;
+12 |     6 as this::Tcc;
+   |          ^^^^^^^^^ [1]
+13 |   }
+14 | }
+   :
+21 | class B extends A {
+22 |   const type Tx = Y;
+23 |   const type Tyy = YY<int>;
+   |                    ^^^^^^^ [2]
+24 | }
+25 | 
+
+6 errors found

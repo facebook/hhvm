@@ -1,14 +1,33 @@
-ERROR: File "valid_targ_fun2.php", line 6, characters 5-27:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_fun2.php", line 6, characters 5-27:
-  This is a function type, it cannot be used as a reified type argument
-  File "valid_targ_fun2.php", line 3, characters 18-18:
-  `T` is reified
-ERROR: File "valid_targ_fun2.php", line 6, characters 30-30:
-Invalid argument (Typing[4110])
-  File "valid_targ_fun2.php", line 6, characters 5-27:
-  Expected `(function(mixed): mixed)`
-  File "valid_targ_fun2.php", line 3, characters 21-21:
-    via this generic `T`
-  File "valid_targ_fun2.php", line 6, characters 30-30:
-  But got `int`
+error: Typing[4305] Invalid reified hint [1]
+-> This is a function type, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+valid_targ_fun2.php:6:5
+1 | <?hh
+2 | 
+3 | function f<reify T>(T $x): void {}
+  |                  ^ [2]
+4 | 
+5 | function main(): void {
+6 |   f<(function(mixed):mixed)>(1);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(function(mixed): mixed)` [2]
+->   via this generic `T` [3]
+-> But got `int` [1]
+
+valid_targ_fun2.php:6:30
+1 | <?hh
+2 | 
+3 | function f<reify T>(T $x): void {}
+  |                     ^ [3]
+4 | 
+5 | function main(): void {
+6 |   f<(function(mixed):mixed)>(1);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+  |                              ^ [1]
+7 | }
+
+2 errors found

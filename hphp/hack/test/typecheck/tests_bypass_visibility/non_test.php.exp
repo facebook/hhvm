@@ -1,8 +1,37 @@
-ERROR: File "non_test.php", line 15, characters 9-12:
-You cannot access this member (Typing[4112])
-  File "non_test.php", line 7, characters 20-23:
-  This member is private
-ERROR: File "non_test.php", line 16, characters 9-12:
-Cannot access this protected member, you don't extend Foo2 (Typing[4112])
-  File "non_test.php", line 10, characters 22-25:
-  This member is protected
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+non_test.php:15:9
+ 5 | class Foo2 {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private function priv(): void {}
+   |                    ^^^^ [2]
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+   :
+13 | class NotATest {
+14 |   public function test(Foo2 $f): void {
+15 |     $f->priv(); // error: not in test context
+   |         ^^^^ [1]
+16 |     $f->prot(); // error: not in test context
+17 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend Foo2 [1]
+-> This member is protected [2]
+
+non_test.php:16:9
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   protected function prot(): void {}
+   |                      ^^^^ [2]
+11 | }
+12 | 
+13 | class NotATest {
+14 |   public function test(Foo2 $f): void {
+15 |     $f->priv(); // error: not in test context
+16 |     $f->prot(); // error: not in test context
+   |         ^^^^ [1]
+17 |   }
+18 | }
+
+2 errors found

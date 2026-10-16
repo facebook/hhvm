@@ -1,2 +1,9 @@
-ERROR: File "use_conflict_const4.php", line 5, characters 11-16:
-Cannot use const `NS\FOO` as `FOO` because the name is already in use (Parsing[1002])
+error: Parsing[1002] Cannot use const `NS\FOO` as `FOO` because the name is already in use [1]
+
+use_conflict_const4.php:5:11
+3 | const int FOO = 0;
+4 | 
+5 | use const NS\FOO;
+  |           ^^^^^^ [1]
+
+1 error found

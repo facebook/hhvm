@@ -1,12 +1,37 @@
-WARN: File "unresolved_errors.php", line 16, characters 10-12:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "unresolved_errors.php", line 16, characters 3-7:
-  This expression has type `dynamic`
-WARN: File "unresolved_errors.php", line 19, characters 10-12:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "unresolved_errors.php", line 19, characters 3-7:
-  This expression has type `dynamic`
-WARN: File "unresolved_errors.php", line 22, characters 10-12:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "unresolved_errors.php", line 22, characters 3-7:
-  This expression has type `dynamic`
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+unresolved_errors.php:16:10
+14 | function foo():void {
+15 |   $m = Map {};
+16 |   $m[0]->foo();
+   |   ^^^^^ [2]
+   |          ^^^ [1]
+17 | 
+18 |   $v = Vector {};
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+unresolved_errors.php:19:10
+17 | 
+18 |   $v = Vector {};
+19 |   $v[0]->foo();
+   |   ^^^^^ [2]
+   |          ^^^ [1]
+20 | 
+21 |   $x = generic_function();
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+unresolved_errors.php:22:10
+20 | 
+21 |   $x = generic_function();
+22 |   $x[0]->foo();
+   |   ^^^^^ [2]
+   |          ^^^ [1]
+23 | 
+24 |   $a = vec[];
+
+3 errors found

@@ -1,18 +1,62 @@
-ERROR: File "shape_unknown_tail_subtyping.php", line 8, characters 29-36:
-Invalid argument (Typing[4110])
-  File "shape_unknown_tail_subtyping.php", line 5, characters 53-55:
-  Expected `int`
-  File "shape_unknown_tail_subtyping.php", line 7, characters 40-45:
-  But got `string`
-ERROR: File "shape_unknown_tail_subtyping.php", line 14, characters 18-25:
-Invalid argument (Typing[4110])
-  File "shape_unknown_tail_subtyping.php", line 3, characters 31-33:
-  Expected `int`
-  File "shape_unknown_tail_subtyping.php", line 12, characters 20-25:
-  But got `string`
-ERROR: File "shape_unknown_tail_subtyping.php", line 20, characters 29-36:
-Invalid argument (Typing[4110])
-  File "shape_unknown_tail_subtyping.php", line 5, characters 53-55:
-  Expected `int`
-  File "shape_unknown_tail_subtyping.php", line 18, characters 20-25:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+shape_unknown_tail_subtyping.php:8:29
+ 3 | function takes_int_tail(shape(int...) $_): void {}
+ 4 | 
+ 5 | function takes_supportdyn_int_tail(supportdyn<shape(int...)> $_): void {}
+   |                                                     ^^^ [2]
+ 6 | 
+ 7 | function plain_to_supportdyn_bad(shape(string...) $strings): void {
+   |                                        ^^^^^^ [3]
+ 8 |   takes_supportdyn_int_tail($strings);
+   |                             ^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+shape_unknown_tail_subtyping.php:14:18
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_int_tail(shape(int...) $_): void {}
+   |                               ^^^ [2]
+ 4 | 
+ 5 | function takes_supportdyn_int_tail(supportdyn<shape(int...)> $_): void {}
+   :
+10 | 
+11 | function supportdyn_to_plain_bad(
+12 |   supportdyn<shape(string...)> $strings,
+   |                    ^^^^^^ [3]
+13 | ): void {
+14 |   takes_int_tail($strings);
+   |                  ^^^^^^^^ [1]
+15 | }
+16 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+shape_unknown_tail_subtyping.php:20:29
+ 3 | function takes_int_tail(shape(int...) $_): void {}
+ 4 | 
+ 5 | function takes_supportdyn_int_tail(supportdyn<shape(int...)> $_): void {}
+   |                                                     ^^^ [2]
+ 6 | 
+ 7 | function plain_to_supportdyn_bad(shape(string...) $strings): void {
+   :
+16 | 
+17 | function supportdyn_to_supportdyn_bad(
+18 |   supportdyn<shape(string...)> $strings,
+   |                    ^^^^^^ [3]
+19 | ): void {
+20 |   takes_supportdyn_int_tail($strings);
+   |                             ^^^^^^^^ [1]
+21 | }
+22 | 
+
+3 errors found

@@ -1,4 +1,16 @@
-ERROR: File "key_exists_abstract_shape.php", line 7, characters 9-34:
-This `Shapes::keyExists()` check is always false (Typing[4250])
-  File "key_exists_abstract_shape.php", line 4, characters 29-60:
-  The field `c` is not defined in this shape
+error: Typing[4250] This `Shapes::keyExists()` check is always false [1]
+-> The field `c` is not defined in this shape [2]
+
+key_exists_abstract_shape.php:7:9
+2 | 
+3 | abstract class AC {
+4 |   abstract const type TC as shape('a' => int, 'b' => string);
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 | 
+6 |   public function foo(this::TC $s): void {
+7 |     if (Shapes::keyExists($s, 'c')) { // 'c' does not exist in TC
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |       // stuff
+9 |     }
+
+1 error found

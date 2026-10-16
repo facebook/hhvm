@@ -1,4 +1,21 @@
-ERROR: File "elvis.php", line 4, characters 10-28:
-This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])
-ERROR: File "elvis.php", line 8, characters 10-41:
-This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])
+error: Parsing[1002] This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. [1]
+
+elvis.php:4:10
+2 | 
+3 | function get_value_from_ref_via_elvis(readonly HH\Lib\Ref<bool> $ref): ?bool {
+4 |   return $ref->value ?: null; // expect readonly error
+  |          ^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+6 | 
+
+error: Parsing[1002] This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. [1]
+
+elvis.php:8:10
+ 6 | 
+ 7 | function get_value_from_ref_via_ternary(readonly HH\Lib\Ref<bool> $ref): ?bool {
+ 8 |   return $ref->value ? $ref->value : null; // expect readonly error
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+2 errors found

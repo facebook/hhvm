@@ -1,4 +1,18 @@
-WARN: File "T87162020.php", line 18, characters 12-14:
-Static method call on a trait: `MyTrait::bar` (Warn[12020])
-  File "T87162020.php", line 8, characters 7-13:
-  `MyTrait` is defined here
+warning: Warn[12020] Static method call on a trait: `MyTrait::bar` [1]
+-> `MyTrait` is defined here [2]
+
+T87162020.php:18:12
+ 6 | }
+ 7 | 
+ 8 | trait MyTrait {
+   |       ^^^^^^^ [2]
+ 9 |   require implements MyInterface;
+10 | 
+   :
+16 | <<__EntryPoint>>
+17 | function mymain(): void {
+18 |   MyTrait::bar();
+   |            ^^^ [1]
+19 | }
+
+1 error found

@@ -1,4 +1,12 @@
-ERROR: File "nullable_shape_disallows_indexing.php", line 4, characters 10-42:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "nullable_shape_disallows_indexing.php", line 4, characters 33-36:
-  This is what makes me believe it can be `null`
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+nullable_shape_disallows_indexing.php:4:10
+2 | 
+3 | function foo(bool $b): void {
+4 |   $bar = ($b ? dict['a' => 5] : null)['a'];
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                 ^^^^ [2]
+5 | }
+
+1 error found

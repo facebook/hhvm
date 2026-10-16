@@ -1,12 +1,30 @@
-ERROR: File "valid_targ_tpenv_bounds_test3.php", line 7, characters 39-40:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_tpenv_bounds_test3.php", line 7, characters 39-40:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_tpenv_bounds_test3.php", line 6, characters 18-19:
-  `Tc` is reified
-ERROR: File "valid_targ_tpenv_bounds_test3.php", line 8, characters 21-22:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_tpenv_bounds_test3.php", line 8, characters 21-22:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_tpenv_bounds_test3.php", line 6, characters 18-19:
-  `Tc` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+valid_targ_tpenv_bounds_test3.php:7:39
+4 | class A {}
+5 | 
+6 | class Test<reify Tc as A> {
+  |                  ^^ [2]
+7 |   public function f<Tf as Tc>(): Test<Tf> {
+  |                                       ^^ [1]
+8 |     return new Test<Tf>();
+9 |   }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+valid_targ_tpenv_bounds_test3.php:8:21
+ 4 | class A {}
+ 5 | 
+ 6 | class Test<reify Tc as A> {
+   |                  ^^ [2]
+ 7 |   public function f<Tf as Tc>(): Test<Tf> {
+ 8 |     return new Test<Tf>();
+   |                     ^^ [1]
+ 9 |   }
+10 | 
+
+2 errors found

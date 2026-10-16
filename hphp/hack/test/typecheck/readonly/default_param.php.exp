@@ -1,4 +1,21 @@
-ERROR: File "default_param.php", line 7, characters 47-57:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "default_param.php", line 7, characters 47-57:
-This expression is readonly, but we expected a mutable value because this parameter is not marked readonly (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+default_param.php:7:47
+5 | }
+6 | 
+7 | function un_readonly<T>(readonly T $x, T $y = readonly $x): T {
+  |                                               ^^^^^^^^^^^ [1]
+8 |     return $y;
+9 | }
+
+error: Parsing[1002] This expression is readonly, but we expected a mutable value because this parameter is not marked readonly [1]
+
+default_param.php:7:47
+5 | }
+6 | 
+7 | function un_readonly<T>(readonly T $x, T $y = readonly $x): T {
+  |                                               ^^^^^^^^^^^ [1]
+8 |     return $y;
+9 | }
+
+2 errors found

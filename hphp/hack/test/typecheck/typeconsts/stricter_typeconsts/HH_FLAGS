@@ -1,2 +1,3 @@
 --config typeconst_concrete_concrete_error=true
 --config require_extends_implements_ancestors=true
+--error-format plain_highlighted

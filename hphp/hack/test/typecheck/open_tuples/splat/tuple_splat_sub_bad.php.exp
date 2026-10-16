@@ -1,36 +1,88 @@
-ERROR: File "tuple_splat_sub_bad.php", line 10, characters 20-26:
-Invalid argument (Typing[4110])
-  File "tuple_splat_sub_bad.php", line 5, characters 55-65:
-  Expected `(int, ..._)`
-  File "tuple_splat_sub_bad.php", line 10, characters 20-26:
-  But got `()`
-ERROR: File "tuple_splat_sub_bad.php", line 12, characters 20-27:
-Invalid argument (Typing[4323])
-  File "tuple_splat_sub_bad.php", line 5, characters 27-27:
-  `T` is a constrained type parameter
-  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
-  This type constraint is violated
-  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
-  Expected `(string, arraykey...)`
-  File "tuple_splat_sub_bad.php", line 12, characters 20-27:
-  But got `()`
-ERROR: File "tuple_splat_sub_bad.php", line 14, characters 20-32:
-Invalid argument (Typing[4323])
-  File "tuple_splat_sub_bad.php", line 5, characters 27-27:
-  `T` is a constrained type parameter
-  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
-  This type constraint is violated
-  File "tuple_splat_sub_bad.php", line 5, characters 33-38:
-  Expected `string`
-  File "tuple_splat_sub_bad.php", line 14, characters 29-31:
-  But got `float`
-ERROR: File "tuple_splat_sub_bad.php", line 16, characters 20-39:
-Invalid argument (Typing[4323])
-  File "tuple_splat_sub_bad.php", line 5, characters 27-27:
-  `T` is a constrained type parameter
-  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
-  This type constraint is violated
-  File "tuple_splat_sub_bad.php", line 5, characters 41-48:
-  Expected `arraykey`
-  File "tuple_splat_sub_bad.php", line 16, characters 34-38:
-  But got `bool`
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, ..._)` [2]
+-> But got `()` [1]
+
+tuple_splat_sub_bad.php:10:20
+ 3 | 
+ 4 | 
+ 5 | function expectSplatTuple<T as (string, arraykey...)>((int, ...T) $tup): void {
+   |                                                       ^^^^^^^^^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | function test1(): void {
+ 9 |   // Too few
+10 |   expectSplatTuple(tuple());
+   |                    ^^^^^^^ [1]
+11 |   // Too few
+12 |   expectSplatTuple(tuple(3));
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `(string, arraykey...)` [3]
+-> But got `()` [1]
+
+tuple_splat_sub_bad.php:12:20
+ 3 | 
+ 4 | 
+ 5 | function expectSplatTuple<T as (string, arraykey...)>((int, ...T) $tup): void {
+   |                           ^ [2]
+   |                                ^^^^^^^^^^^^^^^^^^^^^ [3]
+ 6 | }
+ 7 | 
+   :
+10 |   expectSplatTuple(tuple());
+11 |   // Too few
+12 |   expectSplatTuple(tuple(3));
+   |                    ^^^^^^^^ [1]
+13 |   // Wrong types
+14 |   expectSplatTuple(tuple(2, 4.5));
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [4]
+-> But got `float` [5]
+
+tuple_splat_sub_bad.php:14:20
+ 3 | 
+ 4 | 
+ 5 | function expectSplatTuple<T as (string, arraykey...)>((int, ...T) $tup): void {
+   |                           ^ [2]
+   |                                ^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                 ^^^^^^ [4]
+ 6 | }
+ 7 | 
+   :
+12 |   expectSplatTuple(tuple(3));
+13 |   // Wrong types
+14 |   expectSplatTuple(tuple(2, 4.5));
+   |                    ^^^^^^^^^^^^^ [1]
+   |                             ^^^ [5]
+15 |   // Wrong types
+16 |   expectSplatTuple(tuple(2, "A", false));
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [4]
+-> But got `bool` [5]
+
+tuple_splat_sub_bad.php:16:20
+ 3 | 
+ 4 | 
+ 5 | function expectSplatTuple<T as (string, arraykey...)>((int, ...T) $tup): void {
+   |                           ^ [2]
+   |                                ^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                         ^^^^^^^^ [4]
+ 6 | }
+ 7 | 
+   :
+14 |   expectSplatTuple(tuple(2, 4.5));
+15 |   // Wrong types
+16 |   expectSplatTuple(tuple(2, "A", false));
+   |                    ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                  ^^^^^ [5]
+17 | }
+
+4 errors found

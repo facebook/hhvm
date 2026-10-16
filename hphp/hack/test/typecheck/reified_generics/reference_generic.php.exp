@@ -1,4 +1,20 @@
-ERROR: File "reference_generic.php", line 5, characters 7-7:
-Erased generics can only be used in type hints because they do not exist at runtime (Parsing[1002])
-ERROR: File "reference_generic.php", line 9, characters 3-9:
-`T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute (Typing[4309])
+error: Parsing[1002] Erased generics can only be used in type hints because they do not exist at runtime [1]
+
+reference_generic.php:5:7
+3 | 
+4 | function ferased<T>(): void {
+5 |   new T();
+  |       ^ [1]
+6 | }
+7 | 
+
+error: Typing[4309] `T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute [1]
+
+reference_generic.php:9:3
+ 7 | 
+ 8 | function freified<reify T>(): void {
+ 9 |   new T();
+   |   ^^^^^^^ [1]
+10 | }
+
+2 errors found

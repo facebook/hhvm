@@ -1,6 +1,21 @@
-WARN: File "nullsafe-call-3.php", line 19, characters 10-35:
-You are using the `?->` operator but this object is of type E which cannot be null. You can use the `->` operator instead. (Warn[12029])
-ERROR: File "nullsafe-call-3.php", line 19, characters 25-27:
-You are trying to access the method `bar` but this object can be null. (Typing[4064])
-  File "nullsafe-call-3.php", line 19, characters 10-22:
-  This can be null (use of `?->` operator)
+warning: Warn[12029] You are using the `?->` operator but this object is of type E which cannot be null. You can use the `->` operator instead. [1]
+
+nullsafe-call-3.php:19:10
+17 | class F {}
+18 | function test(?C $c, bool $b): ?F {
+19 |   return $c?->blah($b)->bar()?->baz();
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+20 | }
+
+error: Typing[4064] You are trying to access the method `bar` but this object can be null. [1]
+-> This can be null (use of `?->` operator) [2]
+
+nullsafe-call-3.php:19:25
+17 | class F {}
+18 | function test(?C $c, bool $b): ?F {
+19 |   return $c?->blah($b)->bar()?->baz();
+   |          ^^^^^^^^^^^^^ [2]
+   |                         ^^^ [1]
+20 | }
+
+2 errors found

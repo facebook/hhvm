@@ -1,8 +1,37 @@
-ERROR: File "parent_test.php", line 22, characters 13-23:
-No static method `__construct` in `X` (Typing[4090])
-  File "parent_test.php", line 3, characters 16-16:
-  Declaration of `X` is here
-ERROR: File "parent_test.php", line 26, characters 13-23:
-No static method `__construct` in `X` (Typing[4090])
-  File "parent_test.php", line 3, characters 16-16:
-  Declaration of `X` is here
+error: Typing[4090] No static method `__construct` in `X` [1]
+-> Declaration of `X` is here [2]
+
+parent_test.php:22:13
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class X {
+   |                ^ [2]
+ 4 |   abstract const type T as arraykey = arraykey;
+ 5 | 
+   :
+20 |   public static function test(this::T $t): void {
+21 |     /* HH_FIXME[3011] */
+22 |     parent::__construct($t);
+   |             ^^^^^^^^^^^ [1]
+23 | 
+24 |     /* This should be an error, because parent */
+
+error: Typing[4090] No static method `__construct` in `X` [1]
+-> Declaration of `X` is here [2]
+
+parent_test.php:26:13
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class X {
+   |                ^ [2]
+ 4 |   abstract const type T as arraykey = arraykey;
+ 5 | 
+   :
+24 |     /* This should be an error, because parent */
+25 |     /* HH_FIXME[3011] */
+26 |     parent::__construct('');
+   |             ^^^^^^^^^^^ [1]
+27 |   }
+28 | }
+
+2 errors found

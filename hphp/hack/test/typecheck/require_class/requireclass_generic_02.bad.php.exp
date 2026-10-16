@@ -1,10 +1,33 @@
-ERROR: File "requireclass_generic_02.bad.php", line 6, characters 17-17:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "requireclass_generic_02.bad.php", line 9, characters 13-13:
-  Definition is here
-ERROR: File "requireclass_generic_02.bad.php", line 9, characters 13-13:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requireclass_generic_02.bad.php", line 10, characters 7-13:
-  This requires to be exactly C
-  File "requireclass_generic_02.bad.php", line 6, characters 17-17:
-  Required here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+requireclass_generic_02.bad.php:6:17
+ 4 | 
+ 5 | trait MyTrait {
+ 6 |   require class C;
+   |                 ^ [1]
+ 7 | }
+ 8 | 
+ 9 | final class C<T> {
+   |             ^ [2]
+10 |   use MyTrait;
+11 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to be exactly C [2]
+-> Required here [3]
+
+requireclass_generic_02.bad.php:9:13
+ 4 | 
+ 5 | trait MyTrait {
+ 6 |   require class C;
+   |                 ^ [3]
+ 7 | }
+ 8 | 
+ 9 | final class C<T> {
+   |             ^ [1]
+10 |   use MyTrait;
+   |       ^^^^^^^ [2]
+11 | }
+
+2 errors found

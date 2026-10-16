@@ -1,6 +1,24 @@
-ERROR: File "readonly_globals.php", line 5, characters 8-20:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "readonly_globals.php", line 3, characters 43-47:
-  From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "stdlib/builtins_globals_pseudofunctions.hhi", line 17, characters 36-42:
-  But the function being called requires the capability AccessGlobals
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty} [2]
+-> But the function being called requires the capability AccessGlobals [3]
+
+readonly_globals.php:5:8
+ 1 | <?hh
+ 2 | 
+ 3 | function get_readonly_global(string $key)[zoned]: void {
+   |                                           ^^^^^ [2]
+ 4 |   // can't call from zoned context
+ 5 |   $y = HH\global_get($key);
+   |        ^^^^^^^^^^^^^ [1]
+ 6 |   // ok
+ 7 |   $x = readonly HH\global_readonly_get($key);
+
+stdlib/builtins_globals_pseudofunctions.hhi:17:36
+15 | namespace HH {
+16 | 
+17 |   function global_get(string $key)[globals]: mixed;
+   |                                    ^^^^^^^ [3]
+18 |   function global_readonly_get(string $key)[read_globals]: readonly mixed;
+19 |   function global_isset(string $key)[read_globals]: bool;
+
+1 error found

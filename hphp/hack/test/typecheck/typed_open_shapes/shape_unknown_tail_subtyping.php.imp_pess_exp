@@ -1,6 +1,21 @@
-ERROR: File "shape_unknown_tail_subtyping.php", line 14, characters 7-11:
-Invalid argument (Typing[4110])
-  File "shape_unknown_tail_subtyping.php", line 8, characters 20-23:
-  Expected `Nope`
-  File "shape_unknown_tail_subtyping.php", line 13, characters 20-22:
-  But got `Yep`
+error: Typing[4110] Invalid argument [1]
+-> Expected `Nope` [2]
+-> But got `Yep` [3]
+
+shape_unknown_tail_subtyping.php:14:7
+ 6 | function eek(?Nope $_):void {}
+ 7 | 
+ 8 | function hmm(shape(Nope...) $nopes): void {
+   |                    ^^^^ [2]
+ 9 |    $x = Shapes::idx($nopes, 'x');
+10 |    eek($x);
+11 | }
+12 | 
+13 | function wut(shape(Yep...) $yeps): void {
+   |                    ^^^ [3]
+14 |   hmm($yeps);
+   |       ^^^^^ [1]
+15 | }
+16 | 
+
+1 error found

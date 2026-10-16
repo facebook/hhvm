@@ -1,6 +1,28 @@
-ERROR: File "infer_sub_right_multi_tvar_incompatible_shared_bounds.php", line 15, characters 8-98:
-Invalid argument (Typing[4110])
-  File "infer_sub_right_multi_tvar_incompatible_shared_bounds.php", line 4, characters 28-30:
-  Expected `num`
-  File "infer_sub_right_multi_tvar_incompatible_shared_bounds.php", line 17, characters 18-31:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+infer_sub_right_multi_tvar_incompatible_shared_bounds.php:15:8
+ 2 | <<file:__EnableUnstableFeatures('shape_splat_concrete', 'shape_splat_type_parameters', 'shape_splat_expression')>>
+ 3 | 
+ 4 | function sink(shape('x' => num, 'y' => string) $_): void {}
+   |                            ^^^ [2]
+ 5 | 
+ 6 | function combine<T1 as shape(...), T2 as shape(...)>(
+   :
+13 | 
+14 | function test(): void {
+15 |   sink(combine(
+   |        ^^^^^^^^ [1]
+16 |     shape('x' => 1),
+   |     ^^^^^^^^^^^^^^^^ [1]
+17 |     shape('x' => 'not a number'),
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                  ^^^^^^^^^^^^^^ [3]
+18 |     shape('y' => 'hi'),
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+19 |   ));
+   |   ^ [1]
+20 | }
+
+1 error found

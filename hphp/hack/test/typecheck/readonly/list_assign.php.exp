@@ -1,4 +1,20 @@
-ERROR: File "list_assign.php", line 24, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "list_assign.php", line 25, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+list_assign.php:24:3
+22 | function test(readonly (Foo, Foo) $x): void {
+23 |   list($a, $b) = $x;
+24 |   $a->prop = 4; // error $a is readonly
+   |   ^^^^^^^^^^^^ [1]
+25 |   $b->prop = 4; // error $b is readonly
+26 | }
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+list_assign.php:25:3
+23 |   list($a, $b) = $x;
+24 |   $a->prop = 4; // error $a is readonly
+25 |   $b->prop = 4; // error $b is readonly
+   |   ^^^^^^^^^^^^ [1]
+26 | }
+
+2 errors found

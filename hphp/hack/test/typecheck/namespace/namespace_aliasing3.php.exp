@@ -1,8 +1,41 @@
-ERROR: File "namespace_aliasing3.php", line 12, characters 16-24:
-Unbound name: `Dict\foo` (a global function) (Naming[2049])
-ERROR: File "namespace_aliasing3.php", line 13, characters 16-30:
-Unbound name: `Main\HH\Lib\Dict\foo` (a global function) (Naming[2049])
-ERROR: File "namespace_aliasing3.php", line 12, characters 16-24:
-Unbound name (typing): `Dict\foo` (Typing[4107])
-ERROR: File "namespace_aliasing3.php", line 13, characters 16-30:
-Unbound name (typing): `Main\HH\Lib\Dict\foo` (Typing[4107])
+error: Naming[2049] Unbound name: `Dict\foo` (a global function) [1]
+
+namespace_aliasing3.php:12:16
+10 |   function main(): void {
+11 |     expect_int(Dict\foo()); // ok
+12 |     expect_int(\Dict\foo()); // error
+   |                ^^^^^^^^^ [1]
+13 |     expect_int(HH\Lib\Dict\foo()); // error
+14 |     expect_int(\HH\Lib\Dict\foo()); // ok
+
+error: Naming[2049] Unbound name: `Main\HH\Lib\Dict\foo` (a global function) [1]
+
+namespace_aliasing3.php:13:16
+11 |     expect_int(Dict\foo()); // ok
+12 |     expect_int(\Dict\foo()); // error
+13 |     expect_int(HH\Lib\Dict\foo()); // error
+   |                ^^^^^^^^^^^^^^^ [1]
+14 |     expect_int(\HH\Lib\Dict\foo()); // ok
+15 |   }
+
+error: Typing[4107] Unbound name (typing): `Dict\foo` [1]
+
+namespace_aliasing3.php:12:16
+10 |   function main(): void {
+11 |     expect_int(Dict\foo()); // ok
+12 |     expect_int(\Dict\foo()); // error
+   |                ^^^^^^^^^ [1]
+13 |     expect_int(HH\Lib\Dict\foo()); // error
+14 |     expect_int(\HH\Lib\Dict\foo()); // ok
+
+error: Typing[4107] Unbound name (typing): `Main\HH\Lib\Dict\foo` [1]
+
+namespace_aliasing3.php:13:16
+11 |     expect_int(Dict\foo()); // ok
+12 |     expect_int(\Dict\foo()); // error
+13 |     expect_int(HH\Lib\Dict\foo()); // error
+   |                ^^^^^^^^^^^^^^^ [1]
+14 |     expect_int(\HH\Lib\Dict\foo()); // ok
+15 |   }
+
+4 errors found

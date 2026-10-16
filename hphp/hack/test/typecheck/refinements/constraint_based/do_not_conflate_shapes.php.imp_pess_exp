@@ -1,14 +1,40 @@
-ERROR: File "do_not_conflate_shapes.php", line 7, characters 5-26:
-hh_expect type mismatch (Typing[4453])
-  File "do_not_conflate_shapes.php", line 7, characters 15-21:
-  Expected `nothing`
-  File "do_not_conflate_shapes.php", line 6, characters 20-39:
-  But got `shape('x' => string)` from this `is` expression test
-ERROR: File "do_not_conflate_shapes.php", line 7, characters 24-25:
-Invalid argument (Typing[4110])
-  File "do_not_conflate_shapes.php", line 7, characters 15-21:
-  Expected `nothing`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "do_not_conflate_shapes.php", line 6, characters 20-39:
-  But got `shape('x' => string)` from this `is` expression test
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `nothing` [2]
+-> But got `shape('x' => string)` from this `is` expression test [3]
+
+do_not_conflate_shapes.php:7:5
+4 |   if ($x is shape('x' => int)) {
+5 |     return;
+6 |   } else if ($x is shape('x' => string)) {
+  |                    ^^^^^^^^^^^^^^^^^^^^ [3]
+7 |     hh_expect<nothing>($x);  // should erro
+  |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |               ^^^^^^^ [2]
+8 |   }
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `nothing` [2]
+->   via this generic `T` [3]
+-> But got `shape('x' => string)` from this `is` expression test [4]
+
+do_not_conflate_shapes.php:7:24
+4 |   if ($x is shape('x' => int)) {
+5 |     return;
+6 |   } else if ($x is shape('x' => string)) {
+  |                    ^^^^^^^^^^^^^^^^^^^^ [4]
+7 |     hh_expect<nothing>($x);  // should erro
+  |               ^^^^^^^ [2]
+  |                        ^^ [1]
+8 |   }
+9 | }
+
+hh_single_type_check_magic.hhi:4:97
+2 | namespace {
+3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  |                                                                                                 ^ [3]
+5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+2 errors found

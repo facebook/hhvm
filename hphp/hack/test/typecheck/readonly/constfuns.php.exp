@@ -1,12 +1,51 @@
-ERROR: File "constfuns.php", line 24, characters 5-16:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "constfuns.php", line 29, characters 5-16:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "constfuns.php", line 39, characters 23-24:
-Invalid argument (Typing[4411])
-  File "constfuns.php", line 33, characters 8-70:
-  Function readonly mismatch
-  File "constfuns.php", line 33, characters 8-70:
-  This function is not marked readonly
-  File "constfuns.php", line 14, characters 33-65:
-  This function is marked readonly
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+constfuns.php:24:5
+22 | 
+23 |   $y = readonly () : readonly Foo  ==> {
+24 |     $x->prop = 4; // error $x is readonly here
+   |     ^^^^^^^^^^^^ [1]
+25 |     return $x;
+26 |   };
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+constfuns.php:29:5
+27 | 
+28 |   $w = readonly function() : readonly Foo use($x) {
+29 |     $x->prop = 5; // error, $x is readonly here
+   |     ^^^^^^^^^^^^ [1]
+30 |     return $x;
+31 |   };
+
+error: Typing[4411] Invalid argument [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [3]
+
+constfuns.php:39:23
+12 | }
+13 | // TODO: the first readonly in front of function typehint should be optional
+14 | function const_eval<T>(readonly (readonly function(): readonly T) $f) : readonly T {
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+15 |     return readonly $f();
+16 | }
+   :
+31 |   };
+32 | 
+33 |   $z = () : Foo ==> {
+   |        ^^^^^^^^^^^^^^ [2]
+34 |     $x->prop = 4; // no error
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+35 |     return $x;
+   |     ^^^^^^^^^^ [2]
+36 |   };
+   |   ^ [2]
+37 |   readonly const_eval($w);
+38 |   readonly const_eval($y);
+39 |   readonly const_eval($z); // $z is not a constfun, error
+   |                       ^^ [1]
+40 | 
+41 | 
+
+3 errors found

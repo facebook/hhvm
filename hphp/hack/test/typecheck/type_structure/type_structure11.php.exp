@@ -1,2 +1,11 @@
-WARN: File "type_structure11.php", line 14, characters 10-58:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<TQ>` which is a subtype of `nonnull`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<TQ>` which is a subtype of `nonnull`. [1]
+
+type_structure11.php:14:10
+12 | class C<TSE as IEB with { type TQ = TQ }, TQ as IEQ> {
+13 |   public function test(class<TSE> $cn): void {
+14 |     $x = type_structure($cn, 'TQ')['classname'] as nonnull;
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |     //    $y = type_structure($x, 'TUQ')['classname'] as nonnull;
+16 |   }
+
+1 error found

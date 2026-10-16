@@ -1,24 +1,112 @@
-ERROR: File "class_id.php", line 20, characters 3-10:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "class_id.php", line 21, characters 3-10:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "class_id.php", line 28, characters 3-7:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "class_id.php", line 13, characters 6-10:
-  Alias definition is here.
-ERROR: File "class_id.php", line 29, characters 3-7:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "class_id.php", line 13, characters 6-10:
-  Alias definition is here.
-ERROR: File "class_id.php", line 36, characters 3-10:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "class_id.php", line 39, characters 3-7:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "class_id.php", line 13, characters 6-10:
-  Alias definition is here.
-ERROR: File "class_id.php", line 46, characters 7-14:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "class_id.php", line 52, characters 7-11:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "class_id.php", line 13, characters 6-10:
-  Alias definition is here.
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+class_id.php:20:3
+18 | 
+19 |   // Unbound
+20 |   NotFound::BAR;
+   |   ^^^^^^^^ [1]
+21 |   NotFound::raz();
+22 | 
+
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+class_id.php:21:3
+19 |   // Unbound
+20 |   NotFound::BAR;
+21 |   NotFound::raz();
+   |   ^^^^^^^^ [1]
+22 | 
+23 |   // Allow generics
+
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+class_id.php:28:3
+11 | }
+12 | 
+13 | type Alias = Foo;
+   |      ^^^^^ [2]
+14 | 
+15 | function test_class_const<reify T as Foo>(): void {
+   :
+26 | 
+27 |   // Do not allow typedefs
+28 |   Alias::BAR;
+   |   ^^^^^ [1]
+29 |   Alias::raz();
+30 | }
+
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+class_id.php:29:3
+11 | }
+12 | 
+13 | type Alias = Foo;
+   |      ^^^^^ [2]
+14 | 
+15 | function test_class_const<reify T as Foo>(): void {
+   :
+27 |   // Do not allow typedefs
+28 |   Alias::BAR;
+29 |   Alias::raz();
+   |   ^^^^^ [1]
+30 | }
+31 | 
+
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+class_id.php:36:3
+34 | 
+35 |   // Unbound
+36 |   NotFound::$baz;
+   |   ^^^^^^^^ [1]
+37 | 
+38 |   // Do not allow typedefs
+
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+class_id.php:39:3
+11 | }
+12 | 
+13 | type Alias = Foo;
+   |      ^^^^^ [2]
+14 | 
+15 | function test_class_const<reify T as Foo>(): void {
+   :
+37 | 
+38 |   // Do not allow typedefs
+39 |   Alias::$baz;
+   |   ^^^^^ [1]
+40 | }
+41 | 
+
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+class_id.php:46:7
+44 | 
+45 |   // Unbound
+46 |   new NotFound();
+   |       ^^^^^^^^ [1]
+47 | 
+48 |   // Allow generics
+
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+class_id.php:52:7
+11 | }
+12 | 
+13 | type Alias = Foo;
+   |      ^^^^^ [2]
+14 | 
+15 | function test_class_const<reify T as Foo>(): void {
+   :
+50 | 
+51 |   // Do not allow typedefs
+52 |   new Alias();
+   |       ^^^^^ [1]
+53 | }
+
+8 errors found

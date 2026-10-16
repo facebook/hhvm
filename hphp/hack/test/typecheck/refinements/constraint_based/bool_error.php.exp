@@ -1,28 +1,85 @@
-ERROR: File "bool_error.php", line 11, characters 12-13:
-Invalid return type (Typing[4110])
-  File "bool_error.php", line 6, characters 28-30:
-  Expected `int`
-  File "bool_error.php", line 4, characters 23-27:
-  But got `float`
-ERROR: File "bool_error.php", line 11, characters 12-13:
-Invalid return type (Typing[4110])
-  File "bool_error.php", line 6, characters 28-30:
-  Expected `int`
-  File "bool_error.php", line 6, characters 21-21:
-  But got `T as CT`
-ERROR: File "bool_error.php", line 11, characters 12-13:
-Invalid return type (Typing[4110])
-  File "bool_error.php", line 6, characters 28-30:
-  Expected `int`
-  File "bool_error.php", line 6, characters 21-21:
-  But got `mixed`
-  File "bool_error.php", line 6, characters 17-18:
-    by the definition of `T`
-  File "bool_error.php", line 4, characters 11-12:
-    by the definition of `CT` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "bool_error.php", line 11, characters 12-13:
-Invalid return type (Typing[4110])
-  File "bool_error.php", line 6, characters 28-30:
-  Expected `int`
-  File "bool_error.php", line 7, characters 13-16:
-  But got `(float & T) where T as CT` from this `is` expression test
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `float` [3]
+
+bool_error.php:11:12
+ 2 | <<file: __EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT = bool | float;
+   |                       ^^^^^ [3]
+ 5 | 
+ 6 | function g<T as CT>(T $n): int {
+   |                            ^^^ [2]
+ 7 |   if ($n is bool) {
+ 8 |     return (int)$n;
+ 9 |   } else {
+10 |     // $n: T & float
+11 |     return $n; // Errors
+   |            ^^ [1]
+12 |   }
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `T as CT` [3]
+
+bool_error.php:11:12
+ 4 | case type CT = bool | float;
+ 5 | 
+ 6 | function g<T as CT>(T $n): int {
+   |                     ^ [3]
+   |                            ^^^ [2]
+ 7 |   if ($n is bool) {
+ 8 |     return (int)$n;
+ 9 |   } else {
+10 |     // $n: T & float
+11 |     return $n; // Errors
+   |            ^^ [1]
+12 |   }
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+->   by the definition of `T` [4]
+->   by the definition of `CT` arising from an implicit `as ?nonnull` constraint on this type [5]
+
+bool_error.php:11:12
+ 2 | <<file: __EnableUnstableFeatures('case_types')>>
+ 3 | 
+ 4 | case type CT = bool | float;
+   |           ^^ [5]
+ 5 | 
+ 6 | function g<T as CT>(T $n): int {
+   |                 ^^ [4]
+   |                     ^ [3]
+   |                            ^^^ [2]
+ 7 |   if ($n is bool) {
+ 8 |     return (int)$n;
+ 9 |   } else {
+10 |     // $n: T & float
+11 |     return $n; // Errors
+   |            ^^ [1]
+12 |   }
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `(float & T) where T as CT` from this `is` expression test [3]
+
+bool_error.php:11:12
+ 4 | case type CT = bool | float;
+ 5 | 
+ 6 | function g<T as CT>(T $n): int {
+   |                            ^^^ [2]
+ 7 |   if ($n is bool) {
+   |             ^^^^ [3]
+ 8 |     return (int)$n;
+ 9 |   } else {
+10 |     // $n: T & float
+11 |     return $n; // Errors
+   |            ^^ [1]
+12 |   }
+13 | }
+
+4 errors found

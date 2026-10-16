@@ -1,18 +1,49 @@
-ERROR: File "disjoint_attr_bad_concrete.php", line 8, characters 6-8:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_concrete.php", line 4, characters 16-18:
-  Shape field `x` is defined here
-  File "disjoint_attr_bad_concrete.php", line 5, characters 16-18:
-  Shape field `x` is also defined here
-ERROR: File "disjoint_attr_bad_concrete.php", line 11, characters 6-24:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_concrete.php", line 12, characters 41-43:
-  Shape field `x` is defined here
-  File "disjoint_attr_bad_concrete.php", line 12, characters 19-21:
-  Shape field `x` may also be defined here
-ERROR: File "disjoint_attr_bad_concrete.php", line 15, characters 6-24:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_concrete.php", line 16, characters 19-21:
-  Shape field `x` may be present here
-  File "disjoint_attr_bad_concrete.php", line 16, characters 42-44:
-  Shape field `x` may be present here
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` is also defined here [3]
+
+disjoint_attr_bad_concrete.php:8:6
+ 2 | <<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+ 3 | 
+ 4 | type A = shape('x' => int);
+   |                ^^^ [2]
+ 5 | type B = shape('x' => string);
+   |                ^^^ [3]
+ 6 | 
+ 7 | <<__DisjointShapeSplat>>
+ 8 | type Bad = shape(...A, ...B);
+   |      ^^^ [1]
+ 9 | 
+10 | <<__DisjointShapeSplat>>
+
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` may also be defined here [3]
+
+disjoint_attr_bad_concrete.php:11:6
+ 9 | 
+10 | <<__DisjointShapeSplat>>
+11 | type BadOptionalRequired =
+   |      ^^^^^^^^^^^^^^^^^^^ [1]
+12 |   shape(...shape(?'x' => int), ...shape('x' => string));
+   |                   ^^^ [3]
+   |                                         ^^^ [2]
+13 | 
+14 | <<__DisjointShapeSplat>>
+
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` may be present here [2]
+-> Shape field `x` may be present here [3]
+
+disjoint_attr_bad_concrete.php:15:6
+13 | 
+14 | <<__DisjointShapeSplat>>
+15 | type BadOptionalOptional =
+   |      ^^^^^^^^^^^^^^^^^^^ [1]
+16 |   shape(...shape(?'x' => int), ...shape(?'x' => string));
+   |                   ^^^ [2]
+   |                                          ^^^ [3]
+17 | 
+18 | <<__DisjointShapeSplat>>
+
+3 errors found

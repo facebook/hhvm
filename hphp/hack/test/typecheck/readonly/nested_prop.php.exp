@@ -1,2 +1,10 @@
-ERROR: File "nested_prop.php", line 17, characters 3-9:
-This value is readonly, its properties cannot be modified (Typing[4409])
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+nested_prop.php:17:3
+15 | 
+16 | function test(Bar $b) : void {
+17 |   $b->foo->prop = 4;
+   |   ^^^^^^^ [1]
+18 | }
+
+1 error found

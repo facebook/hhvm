@@ -1,30 +1,95 @@
-ERROR: File "generics_variance.php", line 12, characters 32-32:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "generics_variance.php", line 6, characters 18-18:
-  This is where the parameter was declared as covariant `+`
-  File "generics_variance.php", line 12, characters 32-32:
-  Function parameters are contravariant
-ERROR: File "generics_variance.php", line 15, characters 27-27:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "generics_variance.php", line 6, characters 18-18:
-  This is where the parameter was declared as covariant `+`
-  File "generics_variance.php", line 15, characters 27-27:
-  Function parameters are contravariant
-ERROR: File "generics_variance.php", line 27, characters 35-35:
-Illegal usage of a contravariant type parameter (Typing[4121])
-  File "generics_variance.php", line 19, characters 21-21:
-  This is where the parameter was declared as contravariant `-`
-  File "generics_variance.php", line 27, characters 35-35:
-  Function return types are covariant
-ERROR: File "generics_variance.php", line 39, characters 11-12:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "generics_variance.php", line 33, characters 16-16:
-  This is where the parameter was declared as covariant `+`
-  File "generics_variance.php", line 39, characters 11-12:
-  A non private class property is always invariant
-ERROR: File "generics_variance.php", line 42, characters 13-14:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "generics_variance.php", line 33, characters 16-16:
-  This is where the parameter was declared as covariant `+`
-  File "generics_variance.php", line 42, characters 13-14:
-  A non private class property is always invariant
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> Function parameters are contravariant [1]
+
+generics_variance.php:12:32
+ 4 | 
+ 5 | // Covariant: T can appear in return position but not parameter position
+ 6 | class CovMethod<+T> {
+   |                  ^ [2]
+ 7 |   // Normal private: relaxed, covariant T allowed in contravariant position (no error)
+ 8 |   private function normal_priv(T $x): void {}
+ 9 | 
+10 |   // With attribute: enforced, covariant T in contravariant position is an error
+11 |   <<__TestsBypassVisibility>>
+12 |   private function bypass_priv(T $x): void {}
+   |                                ^ [1]
+13 | 
+14 |   // Protected: always enforced (error)
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> Function parameters are contravariant [1]
+
+generics_variance.php:15:27
+ 4 | 
+ 5 | // Covariant: T can appear in return position but not parameter position
+ 6 | class CovMethod<+T> {
+   |                  ^ [2]
+ 7 |   // Normal private: relaxed, covariant T allowed in contravariant position (no error)
+ 8 |   private function normal_priv(T $x): void {}
+   :
+13 | 
+14 |   // Protected: always enforced (error)
+15 |   protected function prot(T $x): void {}
+   |                           ^ [1]
+16 | }
+17 | 
+
+error: Typing[4121] Illegal usage of a contravariant type parameter [1]
+-> This is where the parameter was declared as contravariant `-` [2]
+-> Function return types are covariant [1]
+
+generics_variance.php:27:35
+17 | 
+18 | // Contravariant: T can appear in parameter position but not return position
+19 | class ContraMethod<-T> {
+   |                     ^ [2]
+20 |   // Normal private: relaxed, contravariant T allowed in covariant position (no error)
+21 |   private function normal_priv(): T {
+   :
+25 |   // With attribute: enforced, contravariant T in covariant position is an error
+26 |   <<__TestsBypassVisibility>>
+27 |   private function bypass_priv(): T {
+   |                                   ^ [1]
+28 |     throw new \Exception("");
+29 |   }
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> A non private class property is always invariant [1]
+
+generics_variance.php:39:11
+31 | 
+32 | // Property variance
+33 | class CovProp<+T> {
+   |                ^ [2]
+34 |   // Normal private: relaxed (no error)
+35 |   private ?T $normal_prop = null;
+36 | 
+37 |   // With attribute: enforced, covariant T in invariant position is an error
+38 |   <<__TestsBypassVisibility>>
+39 |   private ?T $bypass_prop = null;
+   |           ^^ [1]
+40 | 
+41 |   // Protected: always enforced (error)
+
+error: Typing[4120] Illegal usage of a covariant type parameter [1]
+-> This is where the parameter was declared as covariant `+` [2]
+-> A non private class property is always invariant [1]
+
+generics_variance.php:42:13
+31 | 
+32 | // Property variance
+33 | class CovProp<+T> {
+   |                ^ [2]
+34 |   // Normal private: relaxed (no error)
+35 |   private ?T $normal_prop = null;
+   :
+40 | 
+41 |   // Protected: always enforced (error)
+42 |   protected ?T $prot_prop = null;
+   |             ^^ [1]
+43 | }
+
+5 errors found

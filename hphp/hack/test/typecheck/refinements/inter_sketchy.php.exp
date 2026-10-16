@@ -1,2 +1,10 @@
-WARN: File "inter_sketchy.php", line 7, characters 3-12:
-This `is` check is always `false`. The expression on the left has type `(int | string)` which shares no values with `bool`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(int | string)` which shares no values with `bool`. [1]
+
+inter_sketchy.php:7:3
+5 |   $b = true;
+6 |   $x = ($b ? 0 : "");
+7 |   $x is bool ? ($x ? '' : '') : '';
+  |   ^^^^^^^^^^ [1]
+8 | }
+
+1 error found

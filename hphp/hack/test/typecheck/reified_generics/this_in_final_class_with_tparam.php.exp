@@ -1,6 +1,20 @@
-ERROR: File "this_in_final_class_with_tparam.php", line 17, characters 16-20:
-Invalid reified hint (Typing[4305])
-  File "this_in_final_class_with_tparam.php", line 11, characters 29-32:
-  This is the late static bound `this` type of a class with type parameters, it cannot be used as a reified type argument
-  File "this_in_final_class_with_tparam.php", line 14, characters 29-29:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is the late static bound `this` type of a class with type parameters, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+this_in_final_class_with_tparam.php:17:16
+ 9 |       // const type Tc = Id_of<C<T>> since type parameters
+10 |       // are not allowed in type constants
+11 |       const type Tc = Id_of<this>;
+   |                             ^^^^ [2]
+12 | }
+13 | 
+14 | function take_reified<reify T>(): void {}
+   |                             ^ [3]
+15 | 
+16 | function test(): void {
+17 |   take_reified<C::Tc>(); // Error
+   |                ^^^^^ [1]
+18 | }
+
+1 error found

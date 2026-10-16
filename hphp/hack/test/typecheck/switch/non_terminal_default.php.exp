@@ -1,6 +1,38 @@
-ERROR: File "non_terminal_default.php", line 6, characters 5-12:
-Default case in `switch` must be terminal (Parsing[1002])
-ERROR: File "non_terminal_default.php", line 5, characters 3-121:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "non_terminal_default.php", line 5, characters 11-12:
-  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Parsing[1002] Default case in `switch` must be terminal [1]
+
+non_terminal_default.php:6:5
+4 | function foo(string $s) : int {
+5 |   switch ($s) {
+6 |     default:
+  |     ^^^^^^^^ [1]
+7 |       return 0;
+8 |       break;
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+non_terminal_default.php:5:3
+ 3 | 
+ 4 | function foo(string $s) : int {
+ 5 |   switch ($s) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 6 |     default:
+   |     ^^^^^^^^ [1]
+ 7 |       return 0;
+   |       ^^^^^^^^^ [1]
+ 8 |       break;
+   |       ^^^^^^ [1]
+ 9 |     case '1':
+   |     ^^^^^^^^^ [1]
+10 |       return 1;
+   |       ^^^^^^^^^ [1]
+11 |     case '2':
+   |     ^^^^^^^^^ [1]
+12 |       return 2;
+   |       ^^^^^^^^^ [1]
+13 |   }
+   |   ^ [1]
+14 | }
+
+2 errors found

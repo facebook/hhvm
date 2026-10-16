@@ -1,12 +1,33 @@
-ERROR: File "error_dynamic_splat_closed_super.php", line 14, characters 15-16:
-Invalid argument (Typing[4110])
-  File "error_dynamic_splat_closed_super.php", line 11, characters 22-38:
-  Expected `shape('x' => int)`
-  File "error_dynamic_splat_closed_super.php", line 13, characters 57-57:
-  But got `T as shape('x' => int, dynamic...)`
-ERROR: File "error_dynamic_splat_closed_super.php", line 14, characters 15-16:
-Invalid argument (Typing[4138])
-  File "error_dynamic_splat_closed_super.php", line 13, characters 26-54:
-  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
-  File "error_dynamic_splat_closed_super.php", line 11, characters 22-38:
-  It is incompatible with a shape that does not allow unknown fields.
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => int)` [2]
+-> But got `T as shape('x' => int, dynamic...)` [3]
+
+error_dynamic_splat_closed_super.php:14:15
+ 9 | // super (unknown tail `nothing`).
+10 | 
+11 | function sink_closed(shape('x' => int) $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+12 | 
+13 | function dyn_closed<T as shape(...dynamic, 'x' => int)>(T $s): void {
+   |                                                         ^ [3]
+14 |   sink_closed($s);
+   |               ^^ [1]
+15 | }
+
+error: Typing[4138] Invalid argument [1]
+-> This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration. [2]
+-> It is incompatible with a shape that does not allow unknown fields. [3]
+
+error_dynamic_splat_closed_super.php:14:15
+ 9 | // super (unknown tail `nothing`).
+10 | 
+11 | function sink_closed(shape('x' => int) $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [3]
+12 | 
+13 | function dyn_closed<T as shape(...dynamic, 'x' => int)>(T $s): void {
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 |   sink_closed($s);
+   |               ^^ [1]
+15 | }
+
+2 errors found

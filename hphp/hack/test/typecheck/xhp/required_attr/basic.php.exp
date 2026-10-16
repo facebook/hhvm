@@ -1,12 +1,54 @@
-ERROR: File "basic.php", line 24, characters 8-12:
-Required attribute `a` is missing. (Typing[4314])
-  File "basic.php", line 4, characters 38-40:
-  The attribute `a` is declared here.
-ERROR: File "basic.php", line 25, characters 8-12:
-Required attribute `a` is missing. (Typing[4314])
-  File "basic.php", line 9, characters 5-7:
-  The attribute `a` is declared here.
-ERROR: File "basic.php", line 26, characters 8-12:
-Required attribute `a` is missing. (Typing[4314])
-  File "basic.php", line 4, characters 38-40:
-  The attribute `a` is declared here.
+error: Typing[4314] Required attribute `a` is missing. [1]
+-> The attribute `a` is declared here. [2]
+
+basic.php:24:8
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class :a extends XHPTest { attribute int a @required;}
+   |                                      ^^^ [2]
+ 5 | class :b extends XHPTest { attribute int a @lateinit;}
+ 6 | class :c extends XHPTest { attribute int a;}
+   :
+22 | 
+23 |   // Error
+24 |   $a = <a />;
+   |        ^^^^^ [1]
+25 |   $a = <d />;
+26 |   $a = <e />;
+
+error: Typing[4314] Required attribute `a` is missing. [1]
+-> The attribute `a` is declared here. [2]
+
+basic.php:25:8
+ 7 | class :d extends XHPTest {
+ 8 |   attribute
+ 9 |     int a @required,
+   |     ^^^ [2]
+10 |     int b @lateinit,
+11 |     int c;
+   :
+23 |   // Error
+24 |   $a = <a />;
+25 |   $a = <d />;
+   |        ^^^^^ [1]
+26 |   $a = <e />;
+27 | }
+
+error: Typing[4314] Required attribute `a` is missing. [1]
+-> The attribute `a` is declared here. [2]
+
+basic.php:26:8
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class :a extends XHPTest { attribute int a @required;}
+   |                                      ^^^ [2]
+ 5 | class :b extends XHPTest { attribute int a @lateinit;}
+ 6 | class :c extends XHPTest { attribute int a;}
+   :
+24 |   $a = <a />;
+25 |   $a = <d />;
+26 |   $a = <e />;
+   |        ^^^^^ [1]
+27 | }
+
+3 errors found

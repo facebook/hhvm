@@ -1,132 +1,424 @@
-ERROR: File "type_splat_sub_bad.php", line 20, characters 26-35:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 11, characters 10-13:
-  Expected `()` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 20, characters 26-35:
-  But got `(float)`
-ERROR: File "type_splat_sub_bad.php", line 22, characters 26-27:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 11, characters 10-13:
-  Expected `()` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 22, characters 26-27:
-  But got `int`
-ERROR: File "type_splat_sub_bad.php", line 24, characters 25-31:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 12, characters 22-27:
-  Expected `(num)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 24, characters 25-31:
-  But got `()`
-ERROR: File "type_splat_sub_bad.php", line 26, characters 25-39:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 12, characters 22-27:
-  Expected `(num)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 26, characters 25-39:
-  But got `(float, float)`
-ERROR: File "type_splat_sub_bad.php", line 28, characters 25-34:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 13, characters 22-41:
-  Expected `(arraykey, bool)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 28, characters 25-34:
-  But got `(string)`
-ERROR: File "type_splat_sub_bad.php", line 30, characters 25-44:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 13, characters 22-41:
-  Expected `(arraykey, bool)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 30, characters 25-44:
-  But got `(string, bool, int)`
-ERROR: File "type_splat_sub_bad.php", line 32, characters 25-37:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 13, characters 35-38:
-  Expected `bool`
-  File "type_splat_sub_bad.php", line 32, characters 36-36:
-  But got `int`
-ERROR: File "type_splat_sub_bad.php", line 34, characters 30-52:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 14, characters 27-52:
-  Expected `(optional arraykey, optional bool)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 34, characters 30-52:
-  But got `(int, string, bool, int)`
-ERROR: File "type_splat_sub_bad.php", line 36, characters 30-42:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 14, characters 46-49:
-  Expected `bool`
-  File "type_splat_sub_bad.php", line 36, characters 39-41:
-  But got `float`
-ERROR: File "type_splat_sub_bad.php", line 38, characters 33-39:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 15, characters 30-54:
-  Expected `(arraykey, num...)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 38, characters 33-39:
-  But got `()`
-ERROR: File "type_splat_sub_bad.php", line 40, characters 33-46:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 15, characters 50-54:
-  Expected `num` (variadic argument)
-  File "type_splat_sub_bad.php", line 40, characters 43-45:
-  But got `string`
-ERROR: File "type_splat_sub_bad.php", line 52, characters 25-34:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 45, characters 3-23:
-  Expected `()` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 52, characters 25-34:
-  But got `(float)`
-ERROR: File "type_splat_sub_bad.php", line 54, characters 25-26:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 45, characters 3-23:
-  Expected `()` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 54, characters 25-26:
-  But got `int`
-ERROR: File "type_splat_sub_bad.php", line 56, characters 24-30:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 46, characters 18-20:
-  Expected `(num)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 56, characters 24-30:
-  But got `()`
-ERROR: File "type_splat_sub_bad.php", line 58, characters 24-38:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 46, characters 18-20:
-  Expected `(num)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 58, characters 24-38:
-  But got `(float, float)`
-ERROR: File "type_splat_sub_bad.php", line 60, characters 24-33:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 47, characters 18-31:
-  Expected `(arraykey, bool)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 60, characters 24-33:
-  But got `(string)`
-ERROR: File "type_splat_sub_bad.php", line 62, characters 24-43:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 47, characters 18-31:
-  Expected `(arraykey, bool)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 62, characters 24-43:
-  But got `(string, bool, int)`
-ERROR: File "type_splat_sub_bad.php", line 64, characters 24-36:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 47, characters 28-31:
-  Expected `bool`
-  File "type_splat_sub_bad.php", line 64, characters 35-35:
-  But got `int`
-ERROR: File "type_splat_sub_bad.php", line 66, characters 29-51:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 48, characters 27-49:
-  Expected `(optional arraykey, optional bool)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 66, characters 29-51:
-  But got `(int, string, bool, int)`
-ERROR: File "type_splat_sub_bad.php", line 68, characters 29-41:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 48, characters 46-49:
-  Expected `bool`
-  File "type_splat_sub_bad.php", line 68, characters 38-40:
-  But got `float`
-ERROR: File "type_splat_sub_bad.php", line 70, characters 32-38:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 49, characters 18-30:
-  Expected `(arraykey, num...)` (tuple from parameters)
-  File "type_splat_sub_bad.php", line 70, characters 32-38:
-  But got `()`
-ERROR: File "type_splat_sub_bad.php", line 72, characters 32-45:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 49, characters 28-30:
-  Expected `num`
-  File "type_splat_sub_bad.php", line 72, characters 42-44:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `()` (tuple from parameters) [2]
+-> But got `(float)` [1]
+
+type_splat_sub_bad.php:20:26
+ 9 | }
+10 | 
+11 | function none(int $i): void {}
+   |          ^^^^ [2]
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+   :
+18 | function test1(): void {
+19 |   // Too many
+20 |   expectSplatFun(none<>, tuple(3.2));
+   |                          ^^^^^^^^^^ [1]
+21 |   // Not a tuple
+22 |   expectSplatFun(none<>, 59);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `()` (tuple from parameters) [2]
+-> But got `int` [1]
+
+type_splat_sub_bad.php:22:26
+ 9 | }
+10 | 
+11 | function none(int $i): void {}
+   |          ^^^^ [2]
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+   :
+20 |   expectSplatFun(none<>, tuple(3.2));
+21 |   // Not a tuple
+22 |   expectSplatFun(none<>, 59);
+   |                          ^^ [1]
+23 |   // Too few
+24 |   expectSplatFun(one<>, tuple());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(num)` (tuple from parameters) [2]
+-> But got `()` [1]
+
+type_splat_sub_bad.php:24:25
+10 | 
+11 | function none(int $i): void {}
+12 | function one(int $i, num $f): void {}
+   |                      ^^^^^^ [2]
+13 | function two(int $i, arraykey $s, bool $b): void {}
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+   :
+22 |   expectSplatFun(none<>, 59);
+23 |   // Too few
+24 |   expectSplatFun(one<>, tuple());
+   |                         ^^^^^^^ [1]
+25 |   // Too many
+26 |   expectSplatFun(one<>, tuple(2.3, 4.5));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(num)` (tuple from parameters) [2]
+-> But got `(float, float)` [1]
+
+type_splat_sub_bad.php:26:25
+10 | 
+11 | function none(int $i): void {}
+12 | function one(int $i, num $f): void {}
+   |                      ^^^^^^ [2]
+13 | function two(int $i, arraykey $s, bool $b): void {}
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+   :
+24 |   expectSplatFun(one<>, tuple());
+25 |   // Too many
+26 |   expectSplatFun(one<>, tuple(2.3, 4.5));
+   |                         ^^^^^^^^^^^^^^^ [1]
+27 |   // Too few
+28 |   expectSplatFun(two<>, tuple("A"));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(arraykey, bool)` (tuple from parameters) [2]
+-> But got `(string)` [1]
+
+type_splat_sub_bad.php:28:25
+11 | function none(int $i): void {}
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+   |                      ^^^^^^^^^^^^^^^^^^^^ [2]
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+   :
+26 |   expectSplatFun(one<>, tuple(2.3, 4.5));
+27 |   // Too few
+28 |   expectSplatFun(two<>, tuple("A"));
+   |                         ^^^^^^^^^^ [1]
+29 |   // To many
+30 |   expectSplatFun(two<>, tuple("A", false, 5));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(arraykey, bool)` (tuple from parameters) [2]
+-> But got `(string, bool, int)` [1]
+
+type_splat_sub_bad.php:30:25
+11 | function none(int $i): void {}
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+   |                      ^^^^^^^^^^^^^^^^^^^^ [2]
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+   :
+28 |   expectSplatFun(two<>, tuple("A"));
+29 |   // To many
+30 |   expectSplatFun(two<>, tuple("A", false, 5));
+   |                         ^^^^^^^^^^^^^^^^^^^^ [1]
+31 |   // Wrong type in tuple
+32 |   expectSplatFun(two<>, tuple("A", 5));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+type_splat_sub_bad.php:32:25
+11 | function none(int $i): void {}
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+   |                                   ^^^^ [2]
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+   :
+30 |   expectSplatFun(two<>, tuple("A", false, 5));
+31 |   // Wrong type in tuple
+32 |   expectSplatFun(two<>, tuple("A", 5));
+   |                         ^^^^^^^^^^^^^ [1]
+   |                                    ^ [3]
+33 |   // Too many
+34 |   expectSplatFun(upto_two<>, tuple(2, 'a', true, 45));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(optional arraykey, optional bool)` (tuple from parameters) [2]
+-> But got `(int, string, bool, int)` [1]
+
+type_splat_sub_bad.php:34:30
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+16 | 
+   :
+32 |   expectSplatFun(two<>, tuple("A", 5));
+33 |   // Too many
+34 |   expectSplatFun(upto_two<>, tuple(2, 'a', true, 45));
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+35 |   // Wrong type in tuple
+36 |   expectSplatFun(upto_two<>, tuple(5, 2.0));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `float` [3]
+
+type_splat_sub_bad.php:36:30
+12 | function one(int $i, num $f): void {}
+13 | function two(int $i, arraykey $s, bool $b): void {}
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+   |                                              ^^^^ [2]
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+16 | 
+   :
+34 |   expectSplatFun(upto_two<>, tuple(2, 'a', true, 45));
+35 |   // Wrong type in tuple
+36 |   expectSplatFun(upto_two<>, tuple(5, 2.0));
+   |                              ^^^^^^^^^^^^^ [1]
+   |                                       ^^^ [3]
+37 |   // Too few
+38 |   expectSplatFun(atleast_one<>, tuple());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(arraykey, num...)` (tuple from parameters) [2]
+-> But got `()` [1]
+
+type_splat_sub_bad.php:38:33
+13 | function two(int $i, arraykey $s, bool $b): void {}
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+16 | 
+17 | // First test with function pointers
+   :
+36 |   expectSplatFun(upto_two<>, tuple(5, 2.0));
+37 |   // Too few
+38 |   expectSplatFun(atleast_one<>, tuple());
+   |                                 ^^^^^^^ [1]
+39 |   // Wrong type in tuple
+40 |   expectSplatFun(atleast_one<>, tuple(45, 'a'));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` (variadic argument) [2]
+-> But got `string` [3]
+
+type_splat_sub_bad.php:40:33
+13 | function two(int $i, arraykey $s, bool $b): void {}
+14 | function upto_two(int $i, arraykey $s = 'a', bool $b = false): void {}
+15 | function atleast_one(int $i, arraykey $s, num ...$lots): void {}
+   |                                                  ^^^^^ [2]
+16 | 
+17 | // First test with function pointers
+   :
+38 |   expectSplatFun(atleast_one<>, tuple());
+39 |   // Wrong type in tuple
+40 |   expectSplatFun(atleast_one<>, tuple(45, 'a'));
+   |                                 ^^^^^^^^^^^^^^ [1]
+   |                                           ^^^ [3]
+41 | }
+42 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `()` (tuple from parameters) [2]
+-> But got `(float)` [1]
+
+type_splat_sub_bad.php:52:25
+43 | // Now do the same with function types
+44 | function test2(
+45 |   (function(int): void) $none,
+   |   ^^^^^^^^^^^^^^^^^^^^^ [2]
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+   :
+50 | ): void {
+51 |   // Too many
+52 |   expectSplatFun($none, tuple(3.2));
+   |                         ^^^^^^^^^^ [1]
+53 |   // Not a tuple
+54 |   expectSplatFun($none, 59);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `()` (tuple from parameters) [2]
+-> But got `int` [1]
+
+type_splat_sub_bad.php:54:25
+43 | // Now do the same with function types
+44 | function test2(
+45 |   (function(int): void) $none,
+   |   ^^^^^^^^^^^^^^^^^^^^^ [2]
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+   :
+52 |   expectSplatFun($none, tuple(3.2));
+53 |   // Not a tuple
+54 |   expectSplatFun($none, 59);
+   |                         ^^ [1]
+55 |   // Too few
+56 |   expectSplatFun($one, tuple());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(num)` (tuple from parameters) [2]
+-> But got `()` [1]
+
+type_splat_sub_bad.php:56:24
+44 | function test2(
+45 |   (function(int): void) $none,
+46 |   (function(int, num): void) $one,
+   |                  ^^^ [2]
+47 |   (function(int, arraykey, bool): void) $two,
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+   :
+54 |   expectSplatFun($none, 59);
+55 |   // Too few
+56 |   expectSplatFun($one, tuple());
+   |                        ^^^^^^^ [1]
+57 |   // Too many
+58 |   expectSplatFun($one, tuple(2.3, 4.5));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(num)` (tuple from parameters) [2]
+-> But got `(float, float)` [1]
+
+type_splat_sub_bad.php:58:24
+44 | function test2(
+45 |   (function(int): void) $none,
+46 |   (function(int, num): void) $one,
+   |                  ^^^ [2]
+47 |   (function(int, arraykey, bool): void) $two,
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+   :
+56 |   expectSplatFun($one, tuple());
+57 |   // Too many
+58 |   expectSplatFun($one, tuple(2.3, 4.5));
+   |                        ^^^^^^^^^^^^^^^ [1]
+59 |   // Too few
+60 |   expectSplatFun($two, tuple("A"));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(arraykey, bool)` (tuple from parameters) [2]
+-> But got `(string)` [1]
+
+type_splat_sub_bad.php:60:24
+45 |   (function(int): void) $none,
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+   |                  ^^^^^^^^^^^^^^ [2]
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+   :
+58 |   expectSplatFun($one, tuple(2.3, 4.5));
+59 |   // Too few
+60 |   expectSplatFun($two, tuple("A"));
+   |                        ^^^^^^^^^^ [1]
+61 |   // To many
+62 |   expectSplatFun($two, tuple("A", false, 5));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(arraykey, bool)` (tuple from parameters) [2]
+-> But got `(string, bool, int)` [1]
+
+type_splat_sub_bad.php:62:24
+45 |   (function(int): void) $none,
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+   |                  ^^^^^^^^^^^^^^ [2]
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+   :
+60 |   expectSplatFun($two, tuple("A"));
+61 |   // To many
+62 |   expectSplatFun($two, tuple("A", false, 5));
+   |                        ^^^^^^^^^^^^^^^^^^^^ [1]
+63 |   // Wrong type in tuple
+64 |   expectSplatFun($two, tuple("A", 5));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+type_splat_sub_bad.php:64:24
+45 |   (function(int): void) $none,
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+   |                            ^^^^ [2]
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+   :
+62 |   expectSplatFun($two, tuple("A", false, 5));
+63 |   // Wrong type in tuple
+64 |   expectSplatFun($two, tuple("A", 5));
+   |                        ^^^^^^^^^^^^^ [1]
+   |                                   ^ [3]
+65 |   // Too many
+66 |   expectSplatFun($upto_two, tuple(2, 'a', true, 45));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(optional arraykey, optional bool)` (tuple from parameters) [2]
+-> But got `(int, string, bool, int)` [1]
+
+type_splat_sub_bad.php:66:29
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+50 | ): void {
+   :
+64 |   expectSplatFun($two, tuple("A", 5));
+65 |   // Too many
+66 |   expectSplatFun($upto_two, tuple(2, 'a', true, 45));
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+67 |   // Wrong type in tuple
+68 |   expectSplatFun($upto_two, tuple(5, 2.0));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `float` [3]
+
+type_splat_sub_bad.php:68:29
+46 |   (function(int, num): void) $one,
+47 |   (function(int, arraykey, bool): void) $two,
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+   |                                              ^^^^ [2]
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+50 | ): void {
+   :
+66 |   expectSplatFun($upto_two, tuple(2, 'a', true, 45));
+67 |   // Wrong type in tuple
+68 |   expectSplatFun($upto_two, tuple(5, 2.0));
+   |                             ^^^^^^^^^^^^^ [1]
+   |                                      ^^^ [3]
+69 |   // Too few
+70 |   expectSplatFun($atleast_one, tuple());
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(arraykey, num...)` (tuple from parameters) [2]
+-> But got `()` [1]
+
+type_splat_sub_bad.php:70:32
+47 |   (function(int, arraykey, bool): void) $two,
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+   |                  ^^^^^^^^^^^^^ [2]
+50 | ): void {
+51 |   // Too many
+   :
+68 |   expectSplatFun($upto_two, tuple(5, 2.0));
+69 |   // Too few
+70 |   expectSplatFun($atleast_one, tuple());
+   |                                ^^^^^^^ [1]
+71 |   // Wrong type in tuple
+72 |   expectSplatFun($atleast_one, tuple(45, 'a'));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+type_splat_sub_bad.php:72:32
+47 |   (function(int, arraykey, bool): void) $two,
+48 |   (function(int, optional arraykey, optional bool): void) $upto_two,
+49 |   (function(int, arraykey, num...): void) $atleast_one,
+   |                            ^^^ [2]
+50 | ): void {
+51 |   // Too many
+   :
+70 |   expectSplatFun($atleast_one, tuple());
+71 |   // Wrong type in tuple
+72 |   expectSplatFun($atleast_one, tuple(45, 'a'));
+   |                                ^^^^^^^^^^^^^^ [1]
+   |                                          ^^^ [3]
+73 | }
+
+22 errors found

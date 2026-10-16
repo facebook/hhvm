@@ -1,6 +1,28 @@
-ERROR: File "cast_to_typedef.php", line 6, characters 14-15:
-Encountered unexpected token `$x`. (Parsing[1002])
-ERROR: File "cast_to_typedef.php", line 6, characters 4-12:
-Unbound name: `MyTypedef` (a global constant) (Naming[2049])
-ERROR: File "cast_to_typedef.php", line 6, characters 4-12:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Encountered unexpected token `$x`. [1]
+
+cast_to_typedef.php:6:14
+4 | 
+5 | function test(dynamic $x): void {
+6 |   (MyTypedef)$x;
+  |              ^^ [1]
+7 | }
+
+error: Naming[2049] Unbound name: `MyTypedef` (a global constant) [1]
+
+cast_to_typedef.php:6:4
+4 | 
+5 | function test(dynamic $x): void {
+6 |   (MyTypedef)$x;
+  |    ^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+cast_to_typedef.php:6:4
+4 | 
+5 | function test(dynamic $x): void {
+6 |   (MyTypedef)$x;
+  |    ^^^^^^^^^ [1]
+7 | }
+
+3 errors found

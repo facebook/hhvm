@@ -1,2 +1,11 @@
-ERROR: File "nameof_int.php", line 5, characters 12-12:
-`nameof` can only be used with a class (Parsing[1002])
+error: Parsing[1002] `nameof` can only be used with a class [1]
+
+nameof_int.php:5:12
+3 | class C {
+4 |   public static function f(): void {
+5 |     nameof 3;
+  |            ^ [1]
+6 |   }
+7 | }
+
+1 error found

@@ -1,78 +1,193 @@
-ERROR: File "optional_parameters_bad.php", line 22, characters 40-63:
-Optional keyword not required for initializer (Parsing[1002])
-ERROR: File "optional_parameters_bad.php", line 40, characters 32-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "optional_parameters_bad.php", line 42, characters 32-50:
-Cannot use `optional` on variadic or splat parameters (Parsing[1002])
-ERROR: File "optional_parameters_bad.php", line 8, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "optional_parameters_bad.php", line 8, characters 19-21:
-  Method `foo` has type `(function(int $x, bool $y, string $z): void)` in `J`
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I`
-  File "optional_parameters_bad.php", line 8, characters 19-21:
-  Type `(function(int $x, bool $y, string $z): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)`
-  File "optional_parameters_bad.php", line 8, characters 19-21:
-  Too many mandatory arguments (expected 1 but got 3)
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "optional_parameters_bad.php", line 15, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "optional_parameters_bad.php", line 15, characters 19-21:
-  Method `foo` has type `(function(int $x, bool $y, optional string $z): void)` in `D`
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I`
-  File "optional_parameters_bad.php", line 15, characters 19-21:
-  Type `(function(int $x, bool $y, optional string $z): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)`
-  File "optional_parameters_bad.php", line 15, characters 19-21:
-  Too many mandatory arguments (expected 1 but got 2)
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "optional_parameters_bad.php", line 18, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "optional_parameters_bad.php", line 18, characters 19-21:
-  Method `foo` has type `(function(int $x): void)` in `E`
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I`
-  File "optional_parameters_bad.php", line 18, characters 19-21:
-  Type `(function(int $x): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)`
-  File "optional_parameters_bad.php", line 18, characters 19-21:
-  Too few positional arguments (required 3 but got 1)
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "optional_parameters_bad.php", line 22, characters 28-30:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "optional_parameters_bad.php", line 22, characters 28-30:
-  Method `foo` has type `(function(int $x, optional bool $y): void)` in `F`
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I`
-  File "optional_parameters_bad.php", line 22, characters 28-30:
-  Type `(function(int $x, optional bool $y): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)`
-  File "optional_parameters_bad.php", line 22, characters 28-30:
-  Too few positional arguments (required 3 but got 2)
-  File "optional_parameters_bad.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "optional_parameters_bad.php", line 24, characters 37-38:
-Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.
- (Typing[4484])
-ERROR: File "optional_parameters_bad.php", line 29, characters 11-15:
-Invalid argument (Typing[4110])
-  File "optional_parameters_bad.php", line 4, characters 23-25:
-  Expected `int`
-  File "optional_parameters_bad.php", line 29, characters 11-15:
-  But got `bool`
-ERROR: File "optional_parameters_bad.php", line 36, characters 57-58:
-A previous parameter has a default value or is optional.
+error: Parsing[1002] Optional keyword not required for initializer [1]
+
+optional_parameters_bad.php:22:40
+20 | abstract class F implements I {
+21 |   // Illegal: can't specify a default *and* declare it optional
+22 |   abstract public function foo(int $x, optional bool $y = false):void;
+   |                                        ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 |   // Illegal: method is not abstract
+24 |   public function bar(optional bool $z):void { }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+optional_parameters_bad.php:40:32
+38 |   public function bad2(int $x, optional bool $y, optional float $z, string $w):void;
+39 |   // Optional inout parameter
+40 |   public function bad3(int $x, optional inout bool $y):void;
+   |                                ^^^^^^^^^^^^^^^^^^^^^^ [1]
+41 |   // Optional variadic parameter
+42 |   public function bad4(int $x, optional bool... $y):void;
+
+error: Parsing[1002] Cannot use `optional` on variadic or splat parameters [1]
+
+optional_parameters_bad.php:42:32
+40 |   public function bad3(int $x, optional inout bool $y):void;
+41 |   // Optional variadic parameter
+42 |   public function bad4(int $x, optional bool... $y):void;
+   |                                ^^^^^^^^^^^^^^^^^^^ [1]
+43 |   // Optional parameter with default
+44 |   public function bad5(int $x, bool $y = false, string $z):void;
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(int $x, bool $y, string $z): void)` in `J` [1]
+-> But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I` [2]
+-> Type `(function(int $x, bool $y, string $z): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)` [1]
+-> Too many mandatory arguments (expected 1 but got 3) [1]
+-> Because of this definition [2]
+
+optional_parameters_bad.php:8:19
+ 2 | 
+ 3 | interface I {
+ 4 |   public function foo(int $x, optional bool $y, optional string $z):void;
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | interface J extends I {
+ 8 |   public function foo(int $x, bool $y, string $z):void;
+   |                   ^^^ [1]
+ 9 | }
+10 | 
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(int $x, bool $y, optional string $z): void)` in `D` [1]
+-> But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I` [2]
+-> Type `(function(int $x, bool $y, optional string $z): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)` [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+optional_parameters_bad.php:15:19
+ 2 | 
+ 3 | interface I {
+ 4 |   public function foo(int $x, optional bool $y, optional string $z):void;
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+13 | }
+14 | class D implements I {
+15 |   public function foo(int $x, bool $y, string $z = 'a'):void { }
+   |                   ^^^ [1]
+16 | }
+17 | class E implements I {
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(int $x): void)` in `E` [1]
+-> But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I` [2]
+-> Type `(function(int $x): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)` [1]
+-> Too few positional arguments (required 3 but got 1) [1]
+-> Because of this definition [2]
+
+optional_parameters_bad.php:18:19
+ 2 | 
+ 3 | interface I {
+ 4 |   public function foo(int $x, optional bool $y, optional string $z):void;
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+16 | }
+17 | class E implements I {
+18 |   public function foo(int $x):void { }
+   |                   ^^^ [1]
+19 | }
+20 | abstract class F implements I {
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(int $x, optional bool $y): void)` in `F` [1]
+-> But it has type `(function(int $x, optional bool $y, optional string $z): void)` in parent `I` [2]
+-> Type `(function(int $x, optional bool $y): void)` is not a subtype of `(function(int $x, optional bool $y, optional string $z): void)` [1]
+-> Too few positional arguments (required 3 but got 2) [1]
+-> Because of this definition [2]
+
+optional_parameters_bad.php:22:28
+ 2 | 
+ 3 | interface I {
+ 4 |   public function foo(int $x, optional bool $y, optional string $z):void;
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+20 | abstract class F implements I {
+21 |   // Illegal: can't specify a default *and* declare it optional
+22 |   abstract public function foo(int $x, optional bool $y = false):void;
+   |                            ^^^ [1]
+23 |   // Illegal: method is not abstract
+24 |   public function bar(optional bool $z):void { }
+
+error: Typing[4484] Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.
+ [1]
+
+optional_parameters_bad.php:24:37
+22 |   abstract public function foo(int $x, optional bool $y = false):void;
+23 |   // Illegal: method is not abstract
+24 |   public function bar(optional bool $z):void { }
+   |                                     ^^ [1]
+25 | }
+26 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [1]
+
+optional_parameters_bad.php:29:11
+ 2 | 
+ 3 | interface I {
+ 4 |   public function foo(int $x, optional bool $y, optional string $z):void;
+   |                       ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+27 | function testit(I $i):void {
+28 |   $i->foo(3);
+29 |   $i->foo(false);
+   |           ^^^^^ [1]
+30 |   $i->foo(4,true,"A");
+31 | }
+
+error: Typing[4077] A previous parameter has a default value or is optional.
 Remove all the optional or default values for the preceding parameters,
-or add a default value or optional to this one. (Typing[4077])
-ERROR: File "optional_parameters_bad.php", line 38, characters 76-77:
-A previous parameter has a default value or is optional.
+or add a default value or optional to this one. [1]
+
+optional_parameters_bad.php:36:57
+34 | interface K {
+35 |   // Optional parameter precedes non-optional one
+36 |   public function bad1(int $x, optional bool $y, string $z):void;
+   |                                                         ^^ [1]
+37 |   // Optional parameter precedes non-optional one
+38 |   public function bad2(int $x, optional bool $y, optional float $z, string $w):void;
+
+error: Typing[4077] A previous parameter has a default value or is optional.
 Remove all the optional or default values for the preceding parameters,
-or add a default value or optional to this one. (Typing[4077])
-ERROR: File "optional_parameters_bad.php", line 44, characters 56-57:
-A previous parameter has a default value or is optional.
+or add a default value or optional to this one. [1]
+
+optional_parameters_bad.php:38:76
+36 |   public function bad1(int $x, optional bool $y, string $z):void;
+37 |   // Optional parameter precedes non-optional one
+38 |   public function bad2(int $x, optional bool $y, optional float $z, string $w):void;
+   |                                                                            ^^ [1]
+39 |   // Optional inout parameter
+40 |   public function bad3(int $x, optional inout bool $y):void;
+
+error: Typing[4077] A previous parameter has a default value or is optional.
 Remove all the optional or default values for the preceding parameters,
-or add a default value or optional to this one. (Typing[4077])
-ERROR: File "optional_parameters_bad.php", line 48, characters 27-28:
-Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.
- (Typing[4484])
+or add a default value or optional to this one. [1]
+
+optional_parameters_bad.php:44:56
+42 |   public function bad4(int $x, optional bool... $y):void;
+43 |   // Optional parameter with default
+44 |   public function bad5(int $x, bool $y = false, string $z):void;
+   |                                                        ^^ [1]
+45 | }
+46 | 
+
+error: Typing[4484] Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.
+ [1]
+
+optional_parameters_bad.php:48:27
+46 | 
+47 | // Illegal: can't specify optional on a top-level function parameter
+48 | function top(optional int $x):void { }
+   |                           ^^ [1]
+49 | // Optional and inout are incompatible.
+
+13 errors found

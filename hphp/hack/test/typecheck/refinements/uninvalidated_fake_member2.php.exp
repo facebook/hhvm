@@ -1,7 +1,23 @@
-ERROR: File "uninvalidated_fake_member2.php", line 16, characters 13-15:
-You are trying to access the method `foo` but this object can be null. (Typing[4064])
-  File "uninvalidated_fake_member2.php", line 8, characters 10-11:
-  This can be null
-  File "uninvalidated_fake_member2.php", line 15, characters 5-13:
-  All the local information about `$c1->d` has been invalidated by this assignment.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4064] You are trying to access the method `foo` but this object can be null. [1]
+-> This can be null [2]
+-> All the local information about `$c1->d` has been invalidated by this assignment.
+This is a limitation of the type-checker; use a local if that's the problem. [3]
+
+uninvalidated_fake_member2.php:16:13
+ 6 | }
+ 7 | class C {
+ 8 |   public ?D $d;
+   |          ^^ [2]
+ 9 |   public function __construct() { }
+10 | }
+   :
+13 |   $c2 = new C();
+14 |   if ($c1->d is nonnull) {
+15 |     $c1 = $c2;
+   |     ^^^^^^^^^ [3]
+16 |     $c1->d->foo();
+   |             ^^^ [1]
+17 |   }
+18 | }
+
+1 error found

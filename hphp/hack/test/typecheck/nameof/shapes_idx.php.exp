@@ -1,6 +1,30 @@
-ERROR: File "shapes_idx.php", line 5, characters 18-25:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_idx.php", line 11, characters 34-41:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
-ERROR: File "shapes_idx.php", line 13, characters 34-41:
-Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_idx.php:5:18
+3 | class C {}
+4 | type T1 = shape(?nameof C => float);
+5 | type T2 = shape(?C::class => float);
+  |                  ^^^^^^^^ [1]
+6 | 
+7 | function expect_nfloat(?float $f): void {}
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+shapes_idx.php:11:34
+ 9 | function f(T1 $t1, T2 $t2): void {
+10 |   expect_nfloat(Shapes::idx($t1, nameof C));
+11 |   expect_nfloat(Shapes::idx($t1, C::class));
+   |                                  ^^^^^^^^ [1]
+12 |   expect_nfloat(Shapes::idx($t2, nameof C));
+13 |   expect_nfloat(Shapes::idx($t2, C::class));
+
+error: Typing[4482] Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` [1]
+
+shapes_idx.php:13:34
+11 |   expect_nfloat(Shapes::idx($t1, C::class));
+12 |   expect_nfloat(Shapes::idx($t2, nameof C));
+13 |   expect_nfloat(Shapes::idx($t2, C::class));
+   |                                  ^^^^^^^^ [1]
+14 | }
+
+3 errors found

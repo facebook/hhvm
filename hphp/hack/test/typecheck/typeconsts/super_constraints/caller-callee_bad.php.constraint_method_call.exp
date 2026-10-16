@@ -1,150 +1,477 @@
-ERROR: File "caller-callee_bad.php", line 24, characters 15-18:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 15, characters 32-36:
-  Expected `CanIO`
-  File "caller-callee_bad.php", line 22, characters 19-25:
-  But got `CanRead`
-  File "caller-callee_bad.php", line 23, characters 50-57:
-    resulting from expanding the type constant `this::TC`
-ERROR: File "caller-callee_bad.php", line 24, characters 15-18:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 17, characters 22-29:
-  Expected `<expr#3>::TC`
-  File "caller-callee_bad.php", line 24, characters 5-9:
-    where `<expr#3>` is a reference to this expression
-  File "caller-callee_bad.php", line 22, characters 19-25:
-  But got `<expr#4> as CanRead`
-  File "caller-callee_bad.php", line 23, characters 50-57:
-    resulting from expanding the type constant `this::TC`
-  File "caller-callee_bad.php", line 24, characters 15-18:
-    where `<expr#4>` is a reference to this expression
-ERROR: File "caller-callee_bad.php", line 24, characters 15-18:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 17, characters 22-29:
-  Expected `<expr#3>::TC`
-  File "caller-callee_bad.php", line 24, characters 5-9:
-    where `<expr#3>` is a reference to this expression
-  File "caller-callee_bad.php", line 22, characters 19-25:
-  But got `CanRead`
-  File "caller-callee_bad.php", line 23, characters 50-57:
-    resulting from expanding the type constant `this::TC`
-ERROR: File "caller-callee_bad.php", line 35, characters 15-18:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 33, characters 32-39:
-  Expected `CanWrite`
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  But got `CanAppend`
-ERROR: File "caller-callee_bad.php", line 35, characters 15-18:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `this::TC`
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  But got `<expr#3> as CanAppend`
-  File "caller-callee_bad.php", line 35, characters 15-18:
-    where `<expr#3>` is a reference to this expression
-ERROR: File "caller-callee_bad.php", line 35, characters 15-18:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `this::TC`
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  But got `CanAppend`
-ERROR: File "caller-callee_bad.php", line 36, characters 33-76:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 33, characters 32-39:
-  Expected `CanWrite`
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `CanAppend`
-  File "caller-callee_bad.php", line 57, characters 37-44:
-    resulting from expanding the type constant `AppendOnly::TC`
-ERROR: File "caller-callee_bad.php", line 36, characters 33-76:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `this::TC`
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `CanAppend`
-  File "caller-callee_bad.php", line 57, characters 37-44:
-    resulting from expanding the type constant `AppendOnly::TC`
-ERROR: File "caller-callee_bad.php", line 39, characters 20-84:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 17, characters 22-29:
-    resulting from expanding the type constant `AppendOnly::TC`
-  File "caller-callee_bad.php", line 18, characters 46-53:
-  But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite`
-ERROR: File "caller-callee_bad.php", line 39, characters 20-84:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 17, characters 22-29:
-    resulting from expanding the type constant `AppendOnly::TC`
-  File "caller-callee_bad.php", line 18, characters 46-53:
-  But got `mixed`
-ERROR: File "caller-callee_bad.php", line 39, characters 20-84:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 17, characters 22-29:
-    resulting from expanding the type constant `AppendOnly::TC`
-  File "caller-callee_bad.php", line 18, characters 46-53:
-  But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC`
-ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite`
-ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  But got `mixed`
-ERROR: File "caller-callee_bad.php", line 44, characters 42-45:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 34, characters 49-57:
-  Expected `CanAppend`
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC`
-ERROR: File "caller-callee_bad.php", line 55, characters 20-61:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 33, characters 32-39:
-  Expected `CanWrite`
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `CanAppend`
-  File "caller-callee_bad.php", line 57, characters 37-44:
-    resulting from expanding the type constant `this::TC`
-ERROR: File "caller-callee_bad.php", line 55, characters 20-61:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `<expr#10>::TC`
-  File "caller-callee_bad.php", line 55, characters 39-41:
-    where `<expr#10>` is a reference to this expression
-  File "caller-callee_bad.php", line 49, characters 19-27:
-  But got `CanAppend`
-  File "caller-callee_bad.php", line 57, characters 37-44:
-    resulting from expanding the type constant `this::TC`
-ERROR: File "caller-callee_bad.php", line 64, characters 11-14:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 33, characters 32-39:
-  Expected `CanWrite`
-  File "caller-callee_bad.php", line 63, characters 66-74:
-  But got `CanAppend`
-ERROR: File "caller-callee_bad.php", line 64, characters 11-14:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `<expr#2>::TC`
-  File "caller-callee_bad.php", line 64, characters 3-5:
-    where `<expr#2>` is a reference to this expression
-  File "caller-callee_bad.php", line 63, characters 66-74:
-  But got `<expr#3> as CanAppend`
-  File "caller-callee_bad.php", line 64, characters 11-14:
-    where `<expr#3>` is a reference to this expression
-ERROR: File "caller-callee_bad.php", line 64, characters 11-14:
-Invalid argument (Typing[4110])
-  File "caller-callee_bad.php", line 43, characters 22-29:
-  Expected `<expr#2>::TC`
-  File "caller-callee_bad.php", line 64, characters 3-5:
-    where `<expr#2>` is a reference to this expression
-  File "caller-callee_bad.php", line 63, characters 66-74:
-  But got `CanAppend`
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanIO` [2]
+-> But got `CanRead` [3]
+->   resulting from expanding the type constant `this::TC` [4]
+
+caller-callee_bad.php:24:15
+13 | 
+14 | abstract class Base {
+15 |   abstract const type TC super CanIO;
+   |                                ^^^^^ [2]
+16 | 
+17 |   public function do(this::TC $cap): void {}
+   :
+20 | 
+21 | class ReadOnly extends Base {
+22 |   const type TC = CanRead;
+   |                   ^^^^^^^ [3]
+23 |   public function uncallable_on_base(Base $base, this::TC $cap): void {
+   |                                                  ^^^^^^^^ [4]
+24 |     $base->do($cap); // ERROR
+   |               ^^^^ [1]
+25 |   }
+26 |   public function withCap((function(this::TC): void) $do): void {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#3>::TC` [2]
+->   where `<expr#3>` is a reference to this expression [3]
+-> But got `<expr#4> as CanRead` [4]
+->   resulting from expanding the type constant `this::TC` [5]
+->   where `<expr#4>` is a reference to this expression [1]
+
+caller-callee_bad.php:24:15
+15 |   abstract const type TC super CanIO;
+16 | 
+17 |   public function do(this::TC $cap): void {}
+   |                      ^^^^^^^^ [2]
+18 |   public abstract function withCap((function(this::TC): void) $do): void;
+19 | }
+20 | 
+21 | class ReadOnly extends Base {
+22 |   const type TC = CanRead;
+   |                   ^^^^^^^ [4]
+23 |   public function uncallable_on_base(Base $base, this::TC $cap): void {
+   |                                                  ^^^^^^^^ [5]
+24 |     $base->do($cap); // ERROR
+   |     ^^^^^ [3]
+   |               ^^^^ [1]
+25 |   }
+26 |   public function withCap((function(this::TC): void) $do): void {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#3>::TC` [2]
+->   where `<expr#3>` is a reference to this expression [3]
+-> But got `CanRead` [4]
+->   resulting from expanding the type constant `this::TC` [5]
+
+caller-callee_bad.php:24:15
+15 |   abstract const type TC super CanIO;
+16 | 
+17 |   public function do(this::TC $cap): void {}
+   |                      ^^^^^^^^ [2]
+18 |   public abstract function withCap((function(this::TC): void) $do): void;
+19 | }
+20 | 
+21 | class ReadOnly extends Base {
+22 |   const type TC = CanRead;
+   |                   ^^^^^^^ [4]
+23 |   public function uncallable_on_base(Base $base, this::TC $cap): void {
+   |                                                  ^^^^^^^^ [5]
+24 |     $base->do($cap); // ERROR
+   |     ^^^^^ [3]
+   |               ^^^^ [1]
+25 |   }
+26 |   public function withCap((function(this::TC): void) $do): void {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanWrite` [2]
+-> But got `CanAppend` [3]
+
+caller-callee_bad.php:35:15
+31 | 
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+   |                                ^^^^^^^^ [2]
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+   |                                                 ^^^^^^^^^ [3]
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+   |               ^^^^ [1]
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::TC` [2]
+-> But got `<expr#3> as CanAppend` [3]
+->   where `<expr#3>` is a reference to this expression [1]
+
+caller-callee_bad.php:35:15
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+   |                                                 ^^^^^^^^^ [3]
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+   |               ^^^^ [1]
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+   :
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [2]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+45 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::TC` [2]
+-> But got `CanAppend` [3]
+
+caller-callee_bad.php:35:15
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+   |                                                 ^^^^^^^^^ [3]
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+   |               ^^^^ [1]
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+   :
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [2]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+45 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanWrite` [2]
+-> But got `CanAppend` [3]
+->   resulting from expanding the type constant `AppendOnly::TC` [4]
+
+caller-callee_bad.php:36:33
+31 | 
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+   |                                ^^^^^^^^ [2]
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+38 | 
+   :
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [3]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+   :
+55 |     $this->withCap($canAppendOnly ==> $wa->do($canAppendOnly));  // ERROR
+56 |   }
+57 |   public function withCap((function(this::TC): void) $do): void {
+   |                                     ^^^^^^^^ [4]
+58 |     $do(new CanAppendImpl());
+59 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::TC` [2]
+-> But got `CanAppend` [3]
+->   resulting from expanding the type constant `AppendOnly::TC` [4]
+
+caller-callee_bad.php:36:33
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+38 | 
+   :
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [2]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+45 |   }
+46 | }
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [3]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+   :
+55 |     $this->withCap($canAppendOnly ==> $wa->do($canAppendOnly));  // ERROR
+56 |   }
+57 |   public function withCap((function(this::TC): void) $do): void {
+   |                                     ^^^^^^^^ [4]
+58 |     $do(new CanAppendImpl());
+59 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanAppend` [2]
+->   resulting from expanding the type constant `AppendOnly::TC` [3]
+-> But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite` [4]
+
+caller-callee_bad.php:39:20
+15 |   abstract const type TC super CanIO;
+16 | 
+17 |   public function do(this::TC $cap): void {}
+   |                      ^^^^^^^^ [3]
+18 |   public abstract function withCap((function(this::TC): void) $do): void;
+   |                                              ^^^^^^^^ [4]
+19 | }
+20 | 
+   :
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+38 | 
+39 |     $this->withCap($canWriteAndAppend ==> (new AppendOnly())->do($canWriteAndAppend)); // ERROR
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+40 |     // >CanWrite  </:  >CanAppend
+41 |   }
+   :
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [2]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanAppend` [2]
+->   resulting from expanding the type constant `AppendOnly::TC` [3]
+-> But got `mixed` [4]
+
+caller-callee_bad.php:39:20
+15 |   abstract const type TC super CanIO;
+16 | 
+17 |   public function do(this::TC $cap): void {}
+   |                      ^^^^^^^^ [3]
+18 |   public abstract function withCap((function(this::TC): void) $do): void;
+   |                                              ^^^^^^^^ [4]
+19 | }
+20 | 
+   :
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+38 | 
+39 |     $this->withCap($canWriteAndAppend ==> (new AppendOnly())->do($canWriteAndAppend)); // ERROR
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+40 |     // >CanWrite  </:  >CanAppend
+41 |   }
+   :
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [2]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanAppend` [2]
+->   resulting from expanding the type constant `AppendOnly::TC` [3]
+-> But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC` [4]
+
+caller-callee_bad.php:39:20
+15 |   abstract const type TC super CanIO;
+16 | 
+17 |   public function do(this::TC $cap): void {}
+   |                      ^^^^^^^^ [3]
+18 |   public abstract function withCap((function(this::TC): void) $do): void;
+   |                                              ^^^^^^^^ [4]
+19 | }
+20 | 
+   :
+37 |     // >CanAppend  </:  >:CanWrite  (>CanAppend may be a supertype that isn't CanWrite)
+38 | 
+39 |     $this->withCap($canWriteAndAppend ==> (new AppendOnly())->do($canWriteAndAppend)); // ERROR
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+40 |     // >CanWrite  </:  >CanAppend
+41 |   }
+   :
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [2]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanAppend` [2]
+-> But got `WriteAndAppend::TC where \WriteAndAppend::TC super this::TC, \WriteAndAppend::TC super CanWrite` [3]
+
+caller-callee_bad.php:44:42
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+   |                                                 ^^^^^^^^^ [2]
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+   :
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [3]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+   |                                          ^^^^ [1]
+45 |   }
+46 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanAppend` [2]
+-> But got `mixed` [3]
+
+caller-callee_bad.php:44:42
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+   |                                                 ^^^^^^^^^ [2]
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+   :
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [3]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+   |                                          ^^^^ [1]
+45 |   }
+46 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanAppend` [2]
+-> But got `this::TC where this::TC super CanWrite, this::TC as WriteAndAppend::TC` [3]
+
+caller-callee_bad.php:44:42
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+   |                                                 ^^^^^^^^^ [2]
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+36 |     (new AppendOnly())->withCap($canAppendOnly ==> $this->do($canAppendOnly));  // ERROR
+   :
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [3]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+   |                                          ^^^^ [1]
+45 |   }
+46 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanWrite` [2]
+-> But got `CanAppend` [3]
+->   resulting from expanding the type constant `this::TC` [4]
+
+caller-callee_bad.php:55:20
+31 | 
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+   |                                ^^^^^^^^ [2]
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+   :
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [3]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+52 |     // >CanAppend  <:  >CanAppend
+53 |   }
+54 |   public function cannot_write_with_append_super_sub(WriteAndAppend $wa): void {
+55 |     $this->withCap($canAppendOnly ==> $wa->do($canAppendOnly));  // ERROR
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+56 |   }
+57 |   public function withCap((function(this::TC): void) $do): void {
+   |                                     ^^^^^^^^ [4]
+58 |     $do(new CanAppendImpl());
+59 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#10>::TC` [2]
+->   where `<expr#10>` is a reference to this expression [3]
+-> But got `CanAppend` [4]
+->   resulting from expanding the type constant `this::TC` [5]
+
+caller-callee_bad.php:55:20
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [2]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+45 |   }
+46 | }
+47 | 
+48 | class AppendOnly extends Base {
+49 |   const type TC = CanAppend;
+   |                   ^^^^^^^^^ [4]
+50 |   public function cannot_append_with_append_super_sub(): void {
+51 |     $this->withCap($canAppendOnly ==> $this->do($canAppendOnly));
+52 |     // >CanAppend  <:  >CanAppend
+53 |   }
+54 |   public function cannot_write_with_append_super_sub(WriteAndAppend $wa): void {
+55 |     $this->withCap($canAppendOnly ==> $wa->do($canAppendOnly));  // ERROR
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                       ^^^ [3]
+56 |   }
+57 |   public function withCap((function(this::TC): void) $do): void {
+   |                                     ^^^^^^^^ [5]
+58 |     $do(new CanAppendImpl());
+59 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `CanWrite` [2]
+-> But got `CanAppend` [3]
+
+caller-callee_bad.php:64:11
+31 | 
+32 | abstract class WriteAndAppend extends Base {
+33 |   abstract const type TC super CanWrite;
+   |                                ^^^^^^^^ [2]
+34 |   public function cannot_write_with_append_only(CanAppend $cap): void {
+35 |     $this->do($cap);  // ERROR: CanAppend  <:/  >CanWrite
+   :
+61 | class CanAppendImpl implements CanAppend {}
+62 | 
+63 | function cannot_write_with_append_only_fixed(WriteAndAppend $wa, CanAppend $cap): void {
+   |                                                                  ^^^^^^^^^ [3]
+64 |   $wa->do($cap);  // ERROR: CanAppend  </: >CanWrite  (a type between them may exist)
+   |           ^^^^ [1]
+65 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2>::TC` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+-> But got `<expr#3> as CanAppend` [4]
+->   where `<expr#3>` is a reference to this expression [1]
+
+caller-callee_bad.php:64:11
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [2]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+45 |   }
+   :
+61 | class CanAppendImpl implements CanAppend {}
+62 | 
+63 | function cannot_write_with_append_only_fixed(WriteAndAppend $wa, CanAppend $cap): void {
+   |                                                                  ^^^^^^^^^ [4]
+64 |   $wa->do($cap);  // ERROR: CanAppend  </: >CanWrite  (a type between them may exist)
+   |   ^^^ [3]
+   |           ^^^^ [1]
+65 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2>::TC` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+-> But got `CanAppend` [4]
+
+caller-callee_bad.php:64:11
+41 |   }
+42 |   <<__Override>>
+43 |   public function do(this::TC $cap): void {
+   |                      ^^^^^^^^ [2]
+44 |     $this->cannot_write_with_append_only($cap);  // ERROR: >CanWrite  </:  CanAppend
+45 |   }
+   :
+61 | class CanAppendImpl implements CanAppend {}
+62 | 
+63 | function cannot_write_with_append_only_fixed(WriteAndAppend $wa, CanAppend $cap): void {
+   |                                                                  ^^^^^^^^^ [4]
+64 |   $wa->do($cap);  // ERROR: CanAppend  </: >CanWrite  (a type between them may exist)
+   |   ^^^ [3]
+   |           ^^^^ [1]
+65 | }
+
+19 errors found

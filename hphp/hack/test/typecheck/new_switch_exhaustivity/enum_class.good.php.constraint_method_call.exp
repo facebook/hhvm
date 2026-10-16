@@ -1,4 +1,21 @@
-ERROR: File "enum_class.good.php", line 52, characters 33-33:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "enum_class.good.php", line 79, characters 39-39:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+enum_class.good.php:52:33
+50 | }
+51 | 
+52 | function test_enum_class_label3<T>(HH\EnumClass\Label<E, T> $e): void {
+   |                                 ^ [1]
+53 |   switch ($e) {
+54 |     case E#Int1:
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+enum_class.good.php:79:39
+77 | }
+78 | 
+79 | function test_enum_class_short_label3<T>(HH\EnumClass\Label<E, T> $e): void {
+   |                                       ^ [1]
+80 |   switch ($e) {
+81 |     case #Int1:
+
+2 errors found

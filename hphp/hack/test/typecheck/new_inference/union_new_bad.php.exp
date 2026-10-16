@@ -1,6 +1,20 @@
-ERROR: File "union_new_bad.php", line 19, characters 15-15:
-Invalid argument (Typing[4110])
-  File "union_new_bad.php", line 9, characters 31-36:
-  Expected `string`
-  File "union_new_bad.php", line 19, characters 15-15:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+union_new_bad.php:19:15
+ 7 | }
+ 8 | final class D {
+ 9 |   public function __construct(string $f) {}
+   |                               ^^^^^^ [2]
+10 | }
+11 | interface I {}
+   :
+17 |     $t = D::class;
+18 |   }
+19 |   $x = new $t(2);
+   |               ^ [1]
+20 | }
+21 | 
+
+1 error found

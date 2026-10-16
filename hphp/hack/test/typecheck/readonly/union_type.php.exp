@@ -1,12 +1,40 @@
-ERROR: File "union_type.php", line 33, characters 3-9:
-Invalid property assignment (Typing[4411])
-  File "union_type.php", line 33, characters 13-30:
-  This expression is readonly
-  File "union_type.php", line 7, characters 10-12:
-  But it's being assigned to a mutable property
-ERROR: File "union_type.php", line 40, characters 3-9:
-Invalid property assignment (Typing[4411])
-  File "union_type.php", line 40, characters 13-30:
-  This expression is readonly
-  File "union_type.php", line 7, characters 10-12:
-  But it's being assigned to a mutable property
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+union_type.php:33:3
+ 5 | class Foo {
+ 6 |   public int $prop;
+ 7 |   public Baz $baz;
+   |          ^^^ [3]
+ 8 |   public readonly Baz $ro_baz;
+ 9 |   public function __construct() {
+   :
+31 |   }
+32 |   // $z is a union type here
+33 |   $z->baz = readonly new Baz();
+   |   ^^^^^^^ [1]
+   |             ^^^^^^^^^^^^^^^^^^ [2]
+34 |   // This is ok because the prop is always readonly
+35 |   $z->ro_baz = readonly new Baz();
+
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+union_type.php:40:3
+ 5 | class Foo {
+ 6 |   public int $prop;
+ 7 |   public Baz $baz;
+   |          ^^^ [3]
+ 8 |   public readonly Baz $ro_baz;
+ 9 |   public function __construct() {
+   :
+38 | function test2<T as Foo>(T $x)  : void {
+39 |   // error, $x is Foo
+40 |   $x->baz = readonly new Baz();
+   |   ^^^^^^^ [1]
+   |             ^^^^^^^^^^^^^^^^^^ [2]
+41 | }
+
+2 errors found

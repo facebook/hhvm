@@ -1,24 +1,86 @@
-ERROR: File "wildcard_invalid_in_type_argument.php", line 20, characters 26-26:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid_in_type_argument.php", line 21, characters 28-28:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid_in_type_argument.php", line 14, characters 26-26:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "wildcard_invalid_in_type_argument.php", line 9, characters 43-43:
-  Definition is here
-ERROR: File "wildcard_invalid_in_type_argument.php", line 15, characters 30-30:
-Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "wildcard_invalid_in_type_argument.php", line 9, characters 43-43:
-  Definition is here
-ERROR: File "wildcard_invalid_in_type_argument.php", line 16, characters 19-19:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_in_type_argument.php", line 16, characters 19-19:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_in_type_argument.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "wildcard_invalid_in_type_argument.php", line 21, characters 19-20:
-Invalid return type (Typing[4336])
-  File "wildcard_invalid_in_type_argument.php", line 21, characters 24-29:
-  Expected `vec<_>`
-  File "wildcard_invalid_in_type_argument.php", line 21, characters 19-20:
-  But got `void` because this function does not always return a value
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid_in_type_argument.php:20:26
+18 | 
+19 | class D {
+20 |   public function m1(vec<_> $x):void { }
+   |                          ^ [1]
+21 |   public function m2():vec<_> { }
+22 | }
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid_in_type_argument.php:21:28
+19 | class D {
+20 |   public function m1(vec<_> $x):void { }
+21 |   public function m2():vec<_> { }
+   |                            ^ [1]
+22 | }
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+wildcard_invalid_in_type_argument.php:14:26
+ 7 | }
+ 8 | 
+ 9 | function identity_explicit<<<__Explicit>> T>(T $x): T {
+   |                                           ^ [2]
+10 |   return $x;
+11 | }
+12 | 
+13 | function test1():void {
+14 |   $x = identity_explicit<_>(3);
+   |                          ^ [1]
+15 |   $y = identity_explicit<vec<_>>(vec[3]);
+16 |   $z = identity<C<_>>(new C<int>());
+
+error: Typing[4347] Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly [1]
+-> Definition is here [2]
+
+wildcard_invalid_in_type_argument.php:15:30
+ 7 | }
+ 8 | 
+ 9 | function identity_explicit<<<__Explicit>> T>(T $x): T {
+   |                                           ^ [2]
+10 |   return $x;
+11 | }
+12 | 
+13 | function test1():void {
+14 |   $x = identity_explicit<_>(3);
+15 |   $y = identity_explicit<vec<_>>(vec[3]);
+   |                              ^ [1]
+16 |   $z = identity<C<_>>(new C<int>());
+17 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+wildcard_invalid_in_type_argument.php:16:19
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> { }
+   |               ^ [2]
+ 4 | 
+ 5 | function identity<T>(T $x): T {
+   :
+14 |   $x = identity_explicit<_>(3);
+15 |   $y = identity_explicit<vec<_>>(vec[3]);
+16 |   $z = identity<C<_>>(new C<int>());
+   |                   ^ [1]
+17 | }
+18 | 
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `vec<_>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+wildcard_invalid_in_type_argument.php:21:19
+19 | class D {
+20 |   public function m1(vec<_> $x):void { }
+21 |   public function m2():vec<_> { }
+   |                   ^^ [1]
+   |                        ^^^^^^ [2]
+22 | }
+
+6 errors found

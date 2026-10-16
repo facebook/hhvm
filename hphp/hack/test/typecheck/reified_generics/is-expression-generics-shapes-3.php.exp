@@ -1,16 +1,56 @@
-WARN: File "is-expression-generics-shapes-3.php", line 9, characters 3-12:
-This `is` check is always `true`. The expression on the left has type `C<shape('a' => int, 'b' => string, ...)>` which is a subtype of `C<shape('a' => int, 'b' => string, ...)>`. (Warn[12009])
-WARN: File "is-expression-generics-shapes-3.php", line 29, characters 3-48:
-This `is` check is always `true`. The expression on the left has type `C<shape('a' => int, 'b' => string, ...)>` which is a subtype of `C<shape('a' => int, 'b' => string, ...)>`. (Warn[12009])
-ERROR: File "is-expression-generics-shapes-3.php", line 14, characters 9-41:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-shapes-3.php", line 14, characters 24-24:
-  The `is` operator cannot be used with _ in a shape (use `mixed` instead)
-ERROR: File "is-expression-generics-shapes-3.php", line 15, characters 9-38:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-shapes-3.php", line 15, characters 36-36:
-  The `is` operator cannot be used with _ in a shape (use `mixed` instead)
-ERROR: File "is-expression-generics-shapes-3.php", line 16, characters 9-41:
-Invalid `is` expression hint (Typing[4195])
-  File "is-expression-generics-shapes-3.php", line 16, characters 39-39:
-  The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<shape('a' => int, 'b' => string, ...)>` which is a subtype of `C<shape('a' => int, 'b' => string, ...)>`. [1]
+
+is-expression-generics-shapes-3.php:9:3
+ 7 | 
+ 8 |   // just wildcard
+ 9 |   $c is C<_>;
+   |   ^^^^^^^^^^ [1]
+10 | 
+11 |   // shape with wildcard
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `C<shape('a' => int, 'b' => string, ...)>` which is a subtype of `C<shape('a' => int, 'b' => string, ...)>`. [1]
+
+is-expression-generics-shapes-3.php:29:3
+27 | 
+28 |   // unknown fields
+29 |   $c is C<shape('a' => int, 'b' => string, ...)>;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 | }
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a shape (use `mixed` instead) [2]
+
+is-expression-generics-shapes-3.php:14:9
+12 |   $c is C<shape('a' => int, 'b' => string)>;
+13 |   $c is C<shape('b' => string, 'a' => int)>;
+14 |   $c is C<shape('a' => _, 'b' => string)>;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                        ^ [2]
+15 |   $c is C<shape('a' => int, 'b' => _)>;
+16 |   $c is C<shape('a' => string, 'b' => _)>;
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a shape (use `mixed` instead) [2]
+
+is-expression-generics-shapes-3.php:15:9
+13 |   $c is C<shape('b' => string, 'a' => int)>;
+14 |   $c is C<shape('a' => _, 'b' => string)>;
+15 |   $c is C<shape('a' => int, 'b' => _)>;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                    ^ [2]
+16 |   $c is C<shape('a' => string, 'b' => _)>;
+17 | 
+
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with _ in a shape (use `mixed` instead) [2]
+
+is-expression-generics-shapes-3.php:16:9
+14 |   $c is C<shape('a' => _, 'b' => string)>;
+15 |   $c is C<shape('a' => int, 'b' => _)>;
+16 |   $c is C<shape('a' => string, 'b' => _)>;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                       ^ [2]
+17 | 
+18 |   // missing
+
+5 errors found

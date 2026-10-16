@@ -1,84 +1,235 @@
-ERROR: File "self_bound.php", line 6, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "self_bound.php", line 6, characters 15-17:
-  Expected `int`
-  File "self_bound.php", line 5, characters 24-33:
-  But got `Foo::TFoo super this::TFoo`
-ERROR: File "self_bound.php", line 6, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "self_bound.php", line 6, characters 15-17:
-  Expected `int`
-  File "self_bound.php", line 5, characters 24-33:
-  But got `mixed`
-ERROR: File "self_bound.php", line 6, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "self_bound.php", line 6, characters 15-17:
-  Expected `int`
-  File "self_bound.php", line 5, characters 24-33:
-  But got `this::TFoo as Foo::TFoo`
-ERROR: File "self_bound.php", line 6, characters 20-21:
-Invalid argument (Typing[4110])
-  File "self_bound.php", line 6, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "self_bound.php", line 5, characters 24-33:
-  But got `Foo::TFoo super this::TFoo`
-ERROR: File "self_bound.php", line 6, characters 20-21:
-Invalid argument (Typing[4110])
-  File "self_bound.php", line 6, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "self_bound.php", line 5, characters 24-33:
-  But got `mixed`
-ERROR: File "self_bound.php", line 6, characters 20-21:
-Invalid argument (Typing[4110])
-  File "self_bound.php", line 6, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "self_bound.php", line 5, characters 24-33:
-  But got `this::TFoo as Foo::TFoo`
-ERROR: File "self_bound.php", line 14, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "self_bound.php", line 14, characters 15-17:
-  Expected `int`
-  File "self_bound.php", line 13, characters 24-34:
-  But got `Bar::TBar1 super this::TBar1`
-ERROR: File "self_bound.php", line 14, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "self_bound.php", line 14, characters 15-17:
-  Expected `int`
-  File "self_bound.php", line 13, characters 24-34:
-  But got `mixed`
-ERROR: File "self_bound.php", line 14, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "self_bound.php", line 14, characters 15-17:
-  Expected `int`
-  File "self_bound.php", line 13, characters 24-34:
-  But got `this::TBar1 as Bar::TBar1`
-ERROR: File "self_bound.php", line 14, characters 20-21:
-Invalid argument (Typing[4110])
-  File "self_bound.php", line 14, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "self_bound.php", line 13, characters 24-34:
-  But got `Bar::TBar1 super this::TBar1`
-ERROR: File "self_bound.php", line 14, characters 20-21:
-Invalid argument (Typing[4110])
-  File "self_bound.php", line 14, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "self_bound.php", line 13, characters 24-34:
-  But got `mixed`
-ERROR: File "self_bound.php", line 14, characters 20-21:
-Invalid argument (Typing[4110])
-  File "self_bound.php", line 14, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "self_bound.php", line 13, characters 24-34:
-  But got `this::TBar1 as Bar::TBar1`
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `Foo::TFoo super this::TFoo` [3]
+
+self_bound.php:6:5
+3 | abstract class Foo {
+4 |   abstract const type TFoo as this::TFoo;
+5 |   public function test(this::TFoo $x): void {
+  |                        ^^^^^^^^^^ [3]
+6 |     hh_expect<int>($x);
+  |     ^^^^^^^^^^^^^^^^^^ [1]
+  |               ^^^ [2]
+7 |   }
+8 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+self_bound.php:6:5
+3 | abstract class Foo {
+4 |   abstract const type TFoo as this::TFoo;
+5 |   public function test(this::TFoo $x): void {
+  |                        ^^^^^^^^^^ [3]
+6 |     hh_expect<int>($x);
+  |     ^^^^^^^^^^^^^^^^^^ [1]
+  |               ^^^ [2]
+7 |   }
+8 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `this::TFoo as Foo::TFoo` [3]
+
+self_bound.php:6:5
+3 | abstract class Foo {
+4 |   abstract const type TFoo as this::TFoo;
+5 |   public function test(this::TFoo $x): void {
+  |                        ^^^^^^^^^^ [3]
+6 |     hh_expect<int>($x);
+  |     ^^^^^^^^^^^^^^^^^^ [1]
+  |               ^^^ [2]
+7 |   }
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `Foo::TFoo super this::TFoo` [4]
+
+self_bound.php:6:20
+3 | abstract class Foo {
+4 |   abstract const type TFoo as this::TFoo;
+5 |   public function test(this::TFoo $x): void {
+  |                        ^^^^^^^^^^ [4]
+6 |     hh_expect<int>($x);
+  |               ^^^ [2]
+  |                    ^^ [1]
+7 |   }
+8 | }
+
+hh_single_type_check_magic.hhi:4:97
+2 | namespace {
+3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  |                                                                                                 ^ [3]
+5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+
+self_bound.php:6:20
+3 | abstract class Foo {
+4 |   abstract const type TFoo as this::TFoo;
+5 |   public function test(this::TFoo $x): void {
+  |                        ^^^^^^^^^^ [4]
+6 |     hh_expect<int>($x);
+  |               ^^^ [2]
+  |                    ^^ [1]
+7 |   }
+8 | }
+
+hh_single_type_check_magic.hhi:4:97
+2 | namespace {
+3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  |                                                                                                 ^ [3]
+5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `this::TFoo as Foo::TFoo` [4]
+
+self_bound.php:6:20
+3 | abstract class Foo {
+4 |   abstract const type TFoo as this::TFoo;
+5 |   public function test(this::TFoo $x): void {
+  |                        ^^^^^^^^^^ [4]
+6 |     hh_expect<int>($x);
+  |               ^^^ [2]
+  |                    ^^ [1]
+7 |   }
+8 | }
+
+hh_single_type_check_magic.hhi:4:97
+2 | namespace {
+3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  |                                                                                                 ^ [3]
+5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `Bar::TBar1 super this::TBar1` [3]
+
+self_bound.php:14:5
+11 |   abstract const type TBar1 as this::TBar2::TBar1;
+12 |   abstract const type TBar2 as Qux with { type TBar1 = this::TBar1; };
+13 |   public function test(this::TBar1 $x): void {
+   |                        ^^^^^^^^^^^ [3]
+14 |     hh_expect<int>($x);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+   |               ^^^ [2]
+15 |   }
+16 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+self_bound.php:14:5
+11 |   abstract const type TBar1 as this::TBar2::TBar1;
+12 |   abstract const type TBar2 as Qux with { type TBar1 = this::TBar1; };
+13 |   public function test(this::TBar1 $x): void {
+   |                        ^^^^^^^^^^^ [3]
+14 |     hh_expect<int>($x);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+   |               ^^^ [2]
+15 |   }
+16 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `this::TBar1 as Bar::TBar1` [3]
+
+self_bound.php:14:5
+11 |   abstract const type TBar1 as this::TBar2::TBar1;
+12 |   abstract const type TBar2 as Qux with { type TBar1 = this::TBar1; };
+13 |   public function test(this::TBar1 $x): void {
+   |                        ^^^^^^^^^^^ [3]
+14 |     hh_expect<int>($x);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+   |               ^^^ [2]
+15 |   }
+16 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `Bar::TBar1 super this::TBar1` [4]
+
+self_bound.php:14:20
+11 |   abstract const type TBar1 as this::TBar2::TBar1;
+12 |   abstract const type TBar2 as Qux with { type TBar1 = this::TBar1; };
+13 |   public function test(this::TBar1 $x): void {
+   |                        ^^^^^^^^^^^ [4]
+14 |     hh_expect<int>($x);
+   |               ^^^ [2]
+   |                    ^^ [1]
+15 |   }
+16 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+
+self_bound.php:14:20
+11 |   abstract const type TBar1 as this::TBar2::TBar1;
+12 |   abstract const type TBar2 as Qux with { type TBar1 = this::TBar1; };
+13 |   public function test(this::TBar1 $x): void {
+   |                        ^^^^^^^^^^^ [4]
+14 |     hh_expect<int>($x);
+   |               ^^^ [2]
+   |                    ^^ [1]
+15 |   }
+16 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `this::TBar1 as Bar::TBar1` [4]
+
+self_bound.php:14:20
+11 |   abstract const type TBar1 as this::TBar2::TBar1;
+12 |   abstract const type TBar2 as Qux with { type TBar1 = this::TBar1; };
+13 |   public function test(this::TBar1 $x): void {
+   |                        ^^^^^^^^^^^ [4]
+14 |     hh_expect<int>($x);
+   |               ^^^ [2]
+   |                    ^^ [1]
+15 |   }
+16 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+12 errors found

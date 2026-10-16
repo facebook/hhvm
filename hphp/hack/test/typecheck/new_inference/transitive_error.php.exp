@@ -1,6 +1,23 @@
-ERROR: File "transitive_error.php", line 28, characters 11-12:
-Invalid argument (Typing[4110])
-  File "transitive_error.php", line 18, characters 18-18:
-  Expected `D`
-  File "transitive_error.php", line 21, characters 17-17:
-  But got `C`
+error: Typing[4110] Invalid argument [1]
+-> Expected `D` [2]
+-> But got `C` [3]
+
+transitive_error.php:28:11
+16 | }
+17 | 
+18 | function expectD(D $d):void {
+   |                  ^ [2]
+19 | }
+20 | 
+21 | function testit(C $c): void {
+   |                 ^ [3]
+22 |   // So C <: v
+23 |   // $z : Inv<v>
+   :
+26 |   // Now we will require v <: D
+27 |   // Even though we haven't "solved" for v, transitivity will require that C <: D
+28 |   expectD($a);
+   |           ^^ [1]
+29 | }
+
+1 error found

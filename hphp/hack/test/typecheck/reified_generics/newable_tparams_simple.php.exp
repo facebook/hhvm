@@ -1,6 +1,30 @@
-ERROR: File "newable_tparams_simple.php", line 16, characters 23-25:
-The type parameter `Tc1` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. The constraints Y, YY are valid newable classes (Typing[4308])
-ERROR: File "newable_tparams_simple.php", line 17, characters 23-25:
-The type parameter `Tc2` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes (Typing[4308])
-ERROR: File "newable_tparams_simple.php", line 19, characters 23-25:
-The type parameter `Tc3` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes (Typing[4308])
+error: Typing[4308] The type parameter `Tc1` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. The constraints Y, YY are valid newable classes [1]
+
+newable_tparams_simple.php:16:23
+14 | class C<
+15 |   // Bounds are collaped to `as Y as YY`
+16 |   <<__Newable>> reify Tc1 as X as Y as XX as YY,
+   |                       ^^^ [1]
+17 |   <<__Newable>> reify Tc2 as Z,
+18 |   // consistent constraint must be an upper bound, not lower
+
+error: Typing[4308] The type parameter `Tc2` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes [1]
+
+newable_tparams_simple.php:17:23
+15 |   // Bounds are collaped to `as Y as YY`
+16 |   <<__Newable>> reify Tc1 as X as Y as XX as YY,
+17 |   <<__Newable>> reify Tc2 as Z,
+   |                       ^^^ [1]
+18 |   // consistent constraint must be an upper bound, not lower
+19 |   <<__Newable>> reify Tc3 super X,
+
+error: Typing[4308] The type parameter `Tc3` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes [1]
+
+newable_tparams_simple.php:19:23
+17 |   <<__Newable>> reify Tc2 as Z,
+18 |   // consistent constraint must be an upper bound, not lower
+19 |   <<__Newable>> reify Tc3 super X,
+   |                       ^^^ [1]
+20 | > {}
+
+3 errors found

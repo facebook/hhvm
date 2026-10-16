@@ -1,60 +1,195 @@
-ERROR: File "invalid_constant_types.php", line 4, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 5, characters 9-16:
-  Not an object of type vec<int>
-ERROR: File "invalid_constant_types.php", line 7, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 8, characters 9-25:
-  Not an object of type dict<string, int>
-ERROR: File "invalid_constant_types.php", line 10, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 11, characters 9-22:
-  Not an object of type keyset<string>
-ERROR: File "invalid_constant_types.php", line 13, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 14, characters 9-13:
-  Not a float
-ERROR: File "invalid_constant_types.php", line 16, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 17, characters 9-12:
-  Not a bool
-ERROR: File "invalid_constant_types.php", line 19, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 20, characters 9-12:
-  Not null
-ERROR: File "invalid_constant_types.php", line 22, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 23, characters 9-15:
-  Not a nullable type
-ERROR: File "invalid_constant_types.php", line 25, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 26, characters 9-11:
-  Not a num (int | float)
-ERROR: File "invalid_constant_types.php", line 28, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 29, characters 9-13:
-  Not a mixed value
-ERROR: File "invalid_constant_types.php", line 31, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 32, characters 9-15:
-  Not a dynamic value
-ERROR: File "invalid_constant_types.php", line 34, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 35, characters 26-28:
-  Not a float
-ERROR: File "invalid_constant_types.php", line 37, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 38, characters 25-28:
-  Not a bool
-ERROR: File "invalid_constant_types.php", line 40, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 41, characters 25-28:
-  Not null
-ERROR: File "invalid_constant_types.php", line 45, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 46, characters 9-13:
-  Not a float
-ERROR: File "invalid_constant_types.php", line 50, characters 5-14:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "invalid_constant_types.php", line 51, characters 9-12:
-  Not a bool
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not an object of type vec<int> [2]
+
+invalid_constant_types.php:4:5
+2 | 
+3 | class InvalidShapeKeyTypes {
+4 |   <<__ShapeKey>>
+  |     ^^^^^^^^^^ [1]
+5 |   const vec<int> VEC = vec[1];
+  |         ^^^^^^^^ [2]
+6 | 
+7 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not an object of type dict<string, int> [2]
+
+invalid_constant_types.php:7:5
+ 5 |   const vec<int> VEC = vec[1];
+ 6 | 
+ 7 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+ 8 |   const dict<string, int> DICT = dict['key' => 1];
+   |         ^^^^^^^^^^^^^^^^^ [2]
+ 9 | 
+10 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not an object of type keyset<string> [2]
+
+invalid_constant_types.php:10:5
+ 8 |   const dict<string, int> DICT = dict['key' => 1];
+ 9 | 
+10 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+11 |   const keyset<string> KEYSET = keyset['key'];
+   |         ^^^^^^^^^^^^^^ [2]
+12 | 
+13 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a float [2]
+
+invalid_constant_types.php:13:5
+11 |   const keyset<string> KEYSET = keyset['key'];
+12 | 
+13 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+14 |   const float FLOAT = 1.5;
+   |         ^^^^^ [2]
+15 | 
+16 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a bool [2]
+
+invalid_constant_types.php:16:5
+14 |   const float FLOAT = 1.5;
+15 | 
+16 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+17 |   const bool BOOL = true;
+   |         ^^^^ [2]
+18 | 
+19 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not null [2]
+
+invalid_constant_types.php:19:5
+17 |   const bool BOOL = true;
+18 | 
+19 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+20 |   const null NULL_KEY = null;
+   |         ^^^^ [2]
+21 | 
+22 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a nullable type [2]
+
+invalid_constant_types.php:22:5
+20 |   const null NULL_KEY = null;
+21 | 
+22 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+23 |   const ?string NULLABLE = 'key';
+   |         ^^^^^^^ [2]
+24 | 
+25 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a num (int | float) [2]
+
+invalid_constant_types.php:25:5
+23 |   const ?string NULLABLE = 'key';
+24 | 
+25 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+26 |   const num NUM = 1;
+   |         ^^^ [2]
+27 | 
+28 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a mixed value [2]
+
+invalid_constant_types.php:28:5
+26 |   const num NUM = 1;
+27 | 
+28 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+29 |   const mixed MIXED = 'key';
+   |         ^^^^^ [2]
+30 | 
+31 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a dynamic value [2]
+
+invalid_constant_types.php:31:5
+29 |   const mixed MIXED = 'key';
+30 | 
+31 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+32 |   const dynamic DYNAMIC = 'key';
+   |         ^^^^^^^ [2]
+33 | 
+34 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a float [2]
+
+invalid_constant_types.php:34:5
+32 |   const dynamic DYNAMIC = 'key';
+33 | 
+34 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+35 |   const INFERRED_FLOAT = 1.5;
+   |                          ^^^ [2]
+36 | 
+37 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a bool [2]
+
+invalid_constant_types.php:37:5
+35 |   const INFERRED_FLOAT = 1.5;
+36 | 
+37 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+38 |   const INFERRED_BOOL = true;
+   |                         ^^^^ [2]
+39 | 
+40 |   <<__ShapeKey>>
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not null [2]
+
+invalid_constant_types.php:40:5
+38 |   const INFERRED_BOOL = true;
+39 | 
+40 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+41 |   const INFERRED_NULL = null;
+   |                         ^^^^ [2]
+42 | }
+43 | 
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a float [2]
+
+invalid_constant_types.php:45:5
+43 | 
+44 | interface InvalidInterfaceShapeKeyTypes {
+45 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+46 |   const float FLOAT = 1.5;
+   |         ^^^^^ [2]
+47 | }
+48 | 
+
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a bool [2]
+
+invalid_constant_types.php:50:5
+48 | 
+49 | trait InvalidTraitShapeKeyTypes {
+50 |   <<__ShapeKey>>
+   |     ^^^^^^^^^^ [1]
+51 |   const bool BOOL = false;
+   |         ^^^^ [2]
+52 | }
+
+15 errors found

@@ -1,4 +1,21 @@
-ERROR: File "xhp_modifier_no_colon.php", line 4, characters 11-11:
-A name is expected here. (Parsing[1002])
-ERROR: File "xhp_modifier_no_colon.php", line 4, characters 11-11:
-Encountered unexpected text `:`, was expecting a class element. (Parsing[1002])
+error: Parsing[1002] A name is expected here. [1]
+
+xhp_modifier_no_colon.php:4:11
+2 | 
+3 | // XHP classes do no allow leading colons in class names.
+4 | xhp class :foo {}
+  |           ^ [1]
+5 | 
+6 | // Colons elsewhere are fine.
+
+error: Parsing[1002] Encountered unexpected text `:`, was expecting a class element. [1]
+
+xhp_modifier_no_colon.php:4:11
+2 | 
+3 | // XHP classes do no allow leading colons in class names.
+4 | xhp class :foo {}
+  |           ^ [1]
+5 | 
+6 | // Colons elsewhere are fine.
+
+2 errors found

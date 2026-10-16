@@ -1,2 +1,9 @@
-ERROR: File "nonnull_type_alias.php", line 3, characters 6-12:
-Cannot use `NonNull` as a type name as it is reserved (Parsing[1002])
+error: Parsing[1002] Cannot use `NonNull` as a type name as it is reserved [1]
+
+nonnull_type_alias.php:3:6
+1 | <?hh
+2 | 
+3 | type NonNull = nonnull;
+  |      ^^^^^^^ [1]
+
+1 error found

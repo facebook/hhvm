@@ -1,4 +1,29 @@
-WARN: File "sealed_subtype2.php", line 6, characters 3-10:
-Class `B` in sealed allowlist for `I`, but does not implement `I` (Warn[12035])
-ERROR: File "sealed_subtype2.php", line 3, characters 1-101:
-Values in sealed allowlist must be classname constants. (Parsing[1002])
+warning: Warn[12035] Class `B` in sealed allowlist for `I`, but does not implement `I` [1]
+
+sealed_subtype2.php:6:3
+4 |   A::class,
+5 |   2, // this is a parse error
+6 |   B::class // error, I is not a parent of B
+  |   ^^^^^^^^ [1]
+7 | )>>
+8 | interface I {}
+
+error: Parsing[1002] Values in sealed allowlist must be classname constants. [1]
+
+sealed_subtype2.php:3:1
+1 | <?hh
+2 | 
+3 | <<__Sealed(
+  | ^^^^^^^^^^^ [1]
+4 |   A::class,
+  |   ^^^^^^^^^ [1]
+5 |   2, // this is a parse error
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   B::class // error, I is not a parent of B
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | )>>
+  | ^^^ [1]
+8 | interface I {}
+9 | 
+
+2 errors found

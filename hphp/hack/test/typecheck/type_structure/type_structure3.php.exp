@@ -1,4 +1,19 @@
-ERROR: File "type_structure3.php", line 8, characters 3-38:
-Too many positional arguments (expected 2 but got 3) (Typing[4105])
-  File "typestructure.hhi", line 123, characters 12-25:
-  Definition is here
+error: Typing[4105] Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+
+type_structure3.php:8:3
+  6 | 
+  7 | function test(): void {
+  8 |   type_structure(C::class, 'T', 'foo');
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  9 | }
+
+typestructure.hhi:123:12
+121 |    * returns the shape associated with the type constant.
+122 |    */
+123 |   function type_structure(
+    |            ^^^^^^^^^^^^^^ [2]
+124 |     mixed $cls_or_obj,
+125 |     string $cns_name,
+
+1 error found

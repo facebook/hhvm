@@ -1,6 +1,18 @@
-ERROR: File "cannot_override_tconst.php", line 8, characters 14-15:
-The assigned type of this type constant is inconsistent with its parent (Typing[4110])
-  File "cannot_override_tconst.php", line 8, characters 19-21:
-  Expected `int`
-  File "cannot_override_tconst.php", line 4, characters 19-26:
-  But got `arraykey`
+error: Typing[4110] The assigned type of this type constant is inconsistent with its parent [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+cannot_override_tconst.php:8:14
+2 | 
+3 | class ParentClass {
+4 |   const type ID = arraykey;
+  |                   ^^^^^^^^ [3]
+5 | }
+6 | 
+7 | class Child extends ParentClass {
+8 |   const type ID = int;
+  |              ^^ [1]
+  |                   ^^^ [2]
+9 | }
+
+1 error found

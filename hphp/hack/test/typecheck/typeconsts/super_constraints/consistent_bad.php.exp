@@ -1,6 +1,18 @@
-ERROR: File "consistent_bad.php", line 11, characters 23-24:
-The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "consistent_bad.php", line 11, characters 39-41:
-  Expected `Two`
-  File "consistent_bad.php", line 15, characters 39-41:
-  But got `One`
+error: Typing[4110] The constraint on this type constant is inconsistent with its parent [1]
+-> Expected `Two` [2]
+-> But got `One` [3]
+
+consistent_bad.php:11:23
+ 9 | 
+10 | abstract class Foo extends Bar {
+11 |   abstract const type Ta as AAA super Two;
+   |                       ^^ [1]
+   |                                       ^^^ [2]
+12 | }
+13 | 
+14 | abstract class Bar {
+15 |   abstract const type Ta as AAA super One;
+   |                                       ^^^ [3]
+16 | }
+
+1 error found

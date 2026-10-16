@@ -1,6 +1,24 @@
-ERROR: File "synthesized_const_bug.php", line 29, characters 13-17:
-Constant T is defined concretely in multiple ancestors (Typing[4374])
-  File "synthesized_const_bug.php", line 5, characters 14-14:
-  One conflicting definition is here, inherited through Parentt
-  File "synthesized_const_bug.php", line 26, characters 14-14:
-  Another conflicting definition is here
+error: Typing[4374] Constant T is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through Parentt [2]
+-> Another conflicting definition is here [3]
+
+synthesized_const_bug.php:29:13
+ 3 | 
+ 4 | interface ISource {
+ 5 |   const type T = int;
+   |              ^ [2]
+ 6 | }
+ 7 | 
+   :
+24 | trait TParent {
+25 |   require extends Parentt;
+26 |   const type T = int;
+   |              ^ [3]
+27 | }
+28 | 
+29 | final class Child extends Parentt {
+   |             ^^^^^ [1]
+30 |   use TParent;
+31 | }
+
+1 error found

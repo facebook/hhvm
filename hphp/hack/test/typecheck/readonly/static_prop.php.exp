@@ -1,14 +1,51 @@
-ERROR: File "static_prop.php", line 30, characters 5-16:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "static_prop.php", line 15, characters 5-21:
-Invalid property assignment (Typing[4411])
-  File "static_prop.php", line 15, characters 25-42:
-  This expression is readonly
-  File "static_prop.php", line 8, characters 17-20:
-  But it's being assigned to a mutable property
-ERROR: File "static_prop.php", line 21, characters 3-18:
-Invalid property assignment (Typing[4411])
-  File "static_prop.php", line 21, characters 22-39:
-  This expression is readonly
-  File "static_prop.php", line 8, characters 17-20:
-  But it's being assigned to a mutable property
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+static_prop.php:30:5
+28 |   Foo::$baz_static = new Baz();
+29 |   if ($a is nonnull) {
+30 |     $a->prop = 4;
+   |     ^^^^^^^^^^^^ [1]
+31 |   }
+32 | }
+
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+static_prop.php:15:5
+ 6 |   public int $prop;
+ 7 |   public Baz $baz;
+ 8 |   public static ?Baz $baz_static = null;
+   |                 ^^^^ [3]
+ 9 |   public static readonly ?Baz $baz_ro_static = null;
+10 |   public function __construct() {
+   :
+13 |   }
+14 |   public function test(): void {
+15 |     self::$baz_static = readonly new Baz();
+   |     ^^^^^^^^^^^^^^^^^ [1]
+   |                         ^^^^^^^^^^^^^^^^^^ [2]
+16 |   }
+17 | 
+
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+static_prop.php:21:3
+ 6 |   public int $prop;
+ 7 |   public Baz $baz;
+ 8 |   public static ?Baz $baz_static = null;
+   |                 ^^^^ [3]
+ 9 |   public static readonly ?Baz $baz_ro_static = null;
+10 |   public function __construct() {
+   :
+19 | 
+20 | function test() : void {
+21 |   Foo::$baz_static = readonly new Baz();
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |                      ^^^^^^^^^^^^^^^^^^ [2]
+22 |   $a = readonly Foo::$baz_ro_static;
+23 |   // ok
+
+3 errors found

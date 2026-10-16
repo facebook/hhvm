@@ -1,18 +1,69 @@
-ERROR: File "map_corner_case.php", line 24, characters 5-17:
-Invalid assignment (Typing[4110])
-  File "map_corner_case.php", line 13, characters 27-32:
-  Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "map_corner_case.php", line 14, characters 27-32:
-  But got `Map<(arraykey & _), _>`
-ERROR: File "map_corner_case.php", line 25, characters 5-17:
-Invalid assignment (Typing[4110])
-  File "map_corner_case.php", line 5, characters 14-19:
-  Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "map_corner_case.php", line 13, characters 27-32:
-  But got `Map<(arraykey & _), nothing>`
-ERROR: File "map_corner_case.php", line 25, characters 5-17:
-Invalid assignment (Typing[4110])
-  File "map_corner_case.php", line 12, characters 27-32:
-  Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "map_corner_case.php", line 13, characters 27-32:
-  But got `Map<(arraykey & _), nothing>`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+-> But got `Map<(arraykey & _), _>` [3]
+
+map_corner_case.php:24:5
+11 |   while ($cond) {
+12 |     $a = $m->get($key) ?? Map {};
+13 |     $b = $a->get($key) ?? Map {};
+   |                           ^^^^^^ [2]
+14 |     $c = $b->get($key) ?? Map {};
+   |                           ^^^^^^ [3]
+15 | 
+16 |     /* force typechecking the body of the loop multiple times with this charming
+   :
+22 | 
+23 |     $c[$key] = 1;
+24 |     $b[$key] = $c;
+   |     ^^^^^^^^^^^^^ [1]
+25 |     $a[$key] = $b;
+26 |   }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+-> But got `Map<(arraykey & _), nothing>` [3]
+
+map_corner_case.php:25:5
+ 3 | function f(bool $cond, string $key): void {
+ 4 |   $m = Map {};
+ 5 |   $m[$key] = Map {};
+   |              ^^^^^^ [2]
+ 6 |   $i = 1;
+ 7 |   $j = 2;
+   :
+11 |   while ($cond) {
+12 |     $a = $m->get($key) ?? Map {};
+13 |     $b = $a->get($key) ?? Map {};
+   |                           ^^^^^^ [3]
+14 |     $c = $b->get($key) ?? Map {};
+15 | 
+   :
+23 |     $c[$key] = 1;
+24 |     $b[$key] = $c;
+25 |     $a[$key] = $b;
+   |     ^^^^^^^^^^^^^ [1]
+26 |   }
+27 | }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `dynamic` because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+-> But got `Map<(arraykey & _), nothing>` [3]
+
+map_corner_case.php:25:5
+10 |   $n = 5;
+11 |   while ($cond) {
+12 |     $a = $m->get($key) ?? Map {};
+   |                           ^^^^^^ [2]
+13 |     $b = $a->get($key) ?? Map {};
+   |                           ^^^^^^ [3]
+14 |     $c = $b->get($key) ?? Map {};
+15 | 
+   :
+23 |     $c[$key] = 1;
+24 |     $b[$key] = $c;
+25 |     $a[$key] = $b;
+   |     ^^^^^^^^^^^^^ [1]
+26 |   }
+27 | }
+
+3 errors found

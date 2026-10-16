@@ -1,24 +1,73 @@
-ERROR: File "transitive_error_4.php", line 17, characters 6-7:
-Invalid argument (Typing[4110])
-  File "transitive_error_4.php", line 6, characters 35-38:
-  Expected `dynamic`
-  File "transitive_error_4.php", line 12, characters 15-20:
-  But got `C<int>`
-ERROR: File "transitive_error_4.php", line 17, characters 6-7:
-Invalid argument (Typing[4110])
-  File "transitive_error_4.php", line 6, characters 35-38:
-  Expected `~C<_>`
-  File "transitive_error_4.php", line 12, characters 15-20:
-  But got `<expr#2> as C<int>`
-  File "transitive_error_4.php", line 17, characters 6-7:
-    where `<expr#2>` is a reference to this expression
-ERROR: File "transitive_error_4.php", line 17, characters 6-7:
-Invalid argument (Typing[4323])
-  File "transitive_error_4.php", line 10, characters 12-12:
-  `T` is a constrained type parameter
-  File "transitive_error_4.php", line 10, characters 17-22:
-  This type constraint is violated
-  File "transitive_error_4.php", line 10, characters 17-22:
-  Expected `string`
-  File "transitive_error_4.php", line 12, characters 17-19:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> But got `C<int>` [3]
+
+transitive_error_4.php:17:6
+ 4 | class C<+T> {}
+ 5 | 
+ 6 | function f<T>(): (C<T>, (function(C<T>): void)) {
+   |                                   ^^^^ [2]
+ 7 |   return tuple(new C(), $_ ==> {});
+ 8 | }
+ 9 | 
+10 | function g<T as string>(C<T> $_): void {}
+11 | 
+12 | function test(C<int> $z): void {
+   |               ^^^^^^ [3]
+13 |   $p = f();
+14 |   $x = $p[0];
+15 |   $f = $p[1];
+16 |   g($x);
+17 |   $f($z);
+   |      ^^ [1]
+18 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~C<_>` [2]
+-> But got `<expr#2> as C<int>` [3]
+->   where `<expr#2>` is a reference to this expression [1]
+
+transitive_error_4.php:17:6
+ 4 | class C<+T> {}
+ 5 | 
+ 6 | function f<T>(): (C<T>, (function(C<T>): void)) {
+   |                                   ^^^^ [2]
+ 7 |   return tuple(new C(), $_ ==> {});
+ 8 | }
+ 9 | 
+10 | function g<T as string>(C<T> $_): void {}
+11 | 
+12 | function test(C<int> $z): void {
+   |               ^^^^^^ [3]
+13 |   $p = f();
+14 |   $x = $p[0];
+15 |   $f = $p[1];
+16 |   g($x);
+17 |   $f($z);
+   |      ^^ [1]
+18 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+transitive_error_4.php:17:6
+ 8 | }
+ 9 | 
+10 | function g<T as string>(C<T> $_): void {}
+   |            ^ [2]
+   |                 ^^^^^^ [3]
+11 | 
+12 | function test(C<int> $z): void {
+   |                 ^^^ [4]
+13 |   $p = f();
+14 |   $x = $p[0];
+15 |   $f = $p[1];
+16 |   g($x);
+17 |   $f($z);
+   |      ^^ [1]
+18 | }
+
+3 errors found

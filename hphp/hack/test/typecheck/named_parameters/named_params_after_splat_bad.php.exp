@@ -1,12 +1,39 @@
-ERROR: File "named_params_after_splat_bad.php", line 17, characters 19-24:
-Invalid argument (Typing[4105])
-  File "named_params_after_splat_bad.php", line 17, characters 19-24:
-  Too many positional arguments (expected 3 but got 4)
-  File "named_params_after_splat_bad.php", line 4, characters 10-18:
-  Definition is here
-ERROR: File "named_params_after_splat_bad.php", line 19, characters 16-21:
-Invalid argument (Typing[4105])
-  File "named_params_after_splat_bad.php", line 19, characters 16-21:
-  Too many positional arguments (expected 3 but got 4)
-  File "named_params_after_splat_bad.php", line 4, characters 10-18:
-  Definition is here
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 3 but got 4) [1]
+-> Definition is here [2]
+
+named_params_after_splat_bad.php:17:19
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function take_many(named int $n, int $x1, int $x2, int $x3): void {}
+   |          ^^^^^^^^^ [2]
+ 5 | 
+ 6 | function test_splat_before_named(): void {
+   :
+15 | 
+16 |   // Error: too many arguments
+17 |   take_many(1, ...$ints3, n=1);
+   |                   ^^^^^^ [1]
+18 |   // Error: too many arguments
+19 |   take_many(...$ints4, n=1);
+
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 3 but got 4) [1]
+-> Definition is here [2]
+
+named_params_after_splat_bad.php:19:16
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function take_many(named int $n, int $x1, int $x2, int $x3): void {}
+   |          ^^^^^^^^^ [2]
+ 5 | 
+ 6 | function test_splat_before_named(): void {
+   :
+17 |   take_many(1, ...$ints3, n=1);
+18 |   // Error: too many arguments
+19 |   take_many(...$ints4, n=1);
+   |                ^^^^^^ [1]
+20 | }
+21 | //
+
+2 errors found

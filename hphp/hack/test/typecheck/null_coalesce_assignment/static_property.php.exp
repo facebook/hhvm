@@ -1,2 +1,10 @@
-ERROR: File "static_property.php", line 8, characters 3-15:
-Cannot use experimental feature: null coalesce assignment operator with static properties (Other[0000])
+error: Other[0000] Cannot use experimental feature: null coalesce assignment operator with static properties [1]
+
+static_property.php:8:3
+6 | 
+7 | function g(): void {
+8 |   C::$foo ??= 0;
+  |   ^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

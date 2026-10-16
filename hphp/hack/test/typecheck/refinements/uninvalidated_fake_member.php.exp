@@ -1,4 +1,19 @@
-ERROR: File "uninvalidated_fake_member.php", line 15, characters 18-20:
-You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "uninvalidated_fake_member.php", line 8, characters 38-42:
-  Definition is here
+error: Typing[4064] You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+uninvalidated_fake_member.php:15:18
+ 6 | }
+ 7 | class C {
+ 8 |   public function __construct(public mixed $m) { }
+   |                                      ^^^^^ [2]
+ 9 | }
+10 | function testit():void {
+   :
+13 |   if ($cfooish->m is Fooish) {
+14 |     $cfooish = $cstring;
+15 |     $cfooish->m->foo();
+   |                  ^^^ [1]
+16 |   }
+17 | }
+
+1 error found

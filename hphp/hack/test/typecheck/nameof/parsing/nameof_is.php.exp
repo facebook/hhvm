@@ -1,2 +1,11 @@
-WARN: File "nameof_is.php", line 5, characters 5-22:
-This `is` check is always `true`. The expression on the left has type `classname<C>` which is a subtype of `string`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `classname<C>` which is a subtype of `string`. [1]
+
+nameof_is.php:5:5
+3 | class C {
+4 |   public static function f(): void {
+5 |     nameof C is string;
+  |     ^^^^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

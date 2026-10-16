@@ -1,48 +1,153 @@
-ERROR: File "unmagic_stringish1.php", line 31, characters 4-8:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "unmagic_stringish1.php", line 31, characters 4-8:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 20, characters 11-14:
-  But got `bool`
-ERROR: File "unmagic_stringish1.php", line 32, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "unmagic_stringish1.php", line 32, characters 6-10:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 20, characters 11-14:
-  But got `bool`
-ERROR: File "unmagic_stringish1.php", line 37, characters 4-9:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "unmagic_stringish1.php", line 37, characters 4-9:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 22, characters 12-17:
-  But got `float`
-ERROR: File "unmagic_stringish1.php", line 38, characters 6-11:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "unmagic_stringish1.php", line 38, characters 6-11:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 22, characters 12-17:
-  But got `float`
-ERROR: File "unmagic_stringish1.php", line 43, characters 4-8:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "unmagic_stringish1.php", line 43, characters 4-8:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 24, characters 11-14:
-  But got `null`
-ERROR: File "unmagic_stringish1.php", line 44, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "unmagic_stringish1.php", line 44, characters 6-10:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 24, characters 11-14:
-  But got `null`
-ERROR: File "unmagic_stringish1.php", line 46, characters 4-7:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "unmagic_stringish1.php", line 46, characters 4-7:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 3, characters 22-24:
-  But got `num`
-ERROR: File "unmagic_stringish1.php", line 47, characters 6-9:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "unmagic_stringish1.php", line 47, characters 6-9:
-  Expected `string` or `int`
-  File "unmagic_stringish1.php", line 3, characters 22-24:
-  But got `num`
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [2]
+
+unmagic_stringish1.php:31:4
+18 | 
+19 | function test(): void {
+20 |   $bool = true;
+   |           ^^^^ [2]
+21 |   $int = 10101;
+22 |   $float = 10.101;
+   :
+29 |   $nonnull = make_nonnull();
+30 | 
+31 |   "$bool";
+   |    ^^^^^ [1]
+32 |   ''.$bool;
+33 | 
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [2]
+
+unmagic_stringish1.php:32:6
+18 | 
+19 | function test(): void {
+20 |   $bool = true;
+   |           ^^^^ [2]
+21 |   $int = 10101;
+22 |   $float = 10.101;
+   :
+30 | 
+31 |   "$bool";
+32 |   ''.$bool;
+   |      ^^^^^ [1]
+33 | 
+34 |   "$int";
+
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `float` [2]
+
+unmagic_stringish1.php:37:4
+20 |   $bool = true;
+21 |   $int = 10101;
+22 |   $float = 10.101;
+   |            ^^^^^^ [2]
+23 |   $string = '10101';
+24 |   $null = null;
+   :
+35 |   ''.$int;
+36 | 
+37 |   "$float";
+   |    ^^^^^^ [1]
+38 |   ''.$float;
+39 | 
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `float` [2]
+
+unmagic_stringish1.php:38:6
+20 |   $bool = true;
+21 |   $int = 10101;
+22 |   $float = 10.101;
+   |            ^^^^^^ [2]
+23 |   $string = '10101';
+24 |   $null = null;
+   :
+36 | 
+37 |   "$float";
+38 |   ''.$float;
+   |      ^^^^^^ [1]
+39 | 
+40 |   "$string";
+
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [2]
+
+unmagic_stringish1.php:43:4
+22 |   $float = 10.101;
+23 |   $string = '10101';
+24 |   $null = null;
+   |           ^^^^ [2]
+25 |   $num = make_num();
+26 |   $arraykey = make_arraykey();
+   :
+41 |   ''.$string;
+42 | 
+43 |   "$null";
+   |    ^^^^^ [1]
+44 |   ''.$null;
+45 | 
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [2]
+
+unmagic_stringish1.php:44:6
+22 |   $float = 10.101;
+23 |   $string = '10101';
+24 |   $null = null;
+   |           ^^^^ [2]
+25 |   $num = make_num();
+26 |   $arraykey = make_arraykey();
+   :
+42 | 
+43 |   "$null";
+44 |   ''.$null;
+   |      ^^^^^ [1]
+45 | 
+46 |   "$num";
+
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `num` [2]
+
+unmagic_stringish1.php:46:4
+ 1 | <?hh
+ 2 | 
+ 3 | function make_num(): num {
+   |                      ^^^ [2]
+ 4 |   return 10101;
+ 5 | }
+   :
+44 |   ''.$null;
+45 | 
+46 |   "$num";
+   |    ^^^^ [1]
+47 |   ''.$num;
+48 | 
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `num` [2]
+
+unmagic_stringish1.php:47:6
+ 1 | <?hh
+ 2 | 
+ 3 | function make_num(): num {
+   |                      ^^^ [2]
+ 4 |   return 10101;
+ 5 | }
+   :
+45 | 
+46 |   "$num";
+47 |   ''.$num;
+   |      ^^^^ [1]
+48 | 
+49 |   "$arraykey";
+
+8 errors found

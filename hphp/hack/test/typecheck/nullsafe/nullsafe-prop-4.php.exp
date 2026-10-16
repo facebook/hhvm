@@ -1,8 +1,22 @@
-ERROR: File "nullsafe-prop-4.php", line 8, characters 3-8:
-`?->` operator is not allowed in write context (Parsing[1002])
-ERROR: File "nullsafe-prop-4.php", line 8, characters 3-10:
-Typing error (Typing[4427])
-  File "nullsafe-prop-4.php", line 8, characters 3-10:
-  Expected `num` because this is used in an arithmetic operation
-  File "nullsafe-prop-4.php", line 8, characters 3-8:
-  But got `?int` (use of `?->` operator)
+error: Parsing[1002] `?->` operator is not allowed in write context [1]
+
+nullsafe-prop-4.php:8:3
+6 | 
+7 | function test(?C $c): void {
+8 |   $c?->x++;
+  |   ^^^^^^ [1]
+9 | }
+
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `?int` (use of `?->` operator) [2]
+
+nullsafe-prop-4.php:8:3
+6 | 
+7 | function test(?C $c): void {
+8 |   $c?->x++;
+  |   ^^^^^^^^ [1]
+  |   ^^^^^^ [2]
+9 | }
+
+2 errors found

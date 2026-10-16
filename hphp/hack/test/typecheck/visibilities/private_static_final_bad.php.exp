@@ -1,4 +1,17 @@
-ERROR: File "private_static_final_bad.php", line 8, characters 9-11:
-Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
-  File "private_static_final_bad.php", line 12, characters 27-29:
-  This member is private
+error: Typing[4112] Private members cannot be accessed dynamically. Did you mean to use 'self::'? [1]
+-> This member is private [2]
+
+private_static_final_bad.php:8:9
+ 6 |   }
+ 7 |   public function testit(D $d): void {
+ 8 |     $d::foo();
+   |         ^^^ [1]
+ 9 |   }
+10 | }
+11 | final class D extends C {
+12 |   private static function foo(): void {
+   |                           ^^^ [2]
+13 |     echo("D::foo\n");
+14 |   }
+
+1 error found

@@ -1,8 +1,39 @@
-ERROR: File "method_param.php", line 4, characters 27-31:
-Cannot re-assign `$this` (Parsing[1002])
-ERROR: File "method_param.php", line 5, characters 34-38:
-Cannot re-assign `$this` (Parsing[1002])
-ERROR: File "method_param.php", line 4, characters 27-31:
-Cannot use `$this` as lexical variable (Naming[2077])
-ERROR: File "method_param.php", line 5, characters 34-38:
-Cannot use `$this` as lexical variable (Naming[2077])
+error: Parsing[1002] Cannot re-assign `$this` [1]
+
+method_param.php:4:27
+2 | 
+3 | class Foo {
+4 |   public function foo(int $this): void {}
+  |                           ^^^^^ [1]
+5 |   public static function bar(int $this): void {}
+6 | }
+
+error: Parsing[1002] Cannot re-assign `$this` [1]
+
+method_param.php:5:34
+3 | class Foo {
+4 |   public function foo(int $this): void {}
+5 |   public static function bar(int $this): void {}
+  |                                  ^^^^^ [1]
+6 | }
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+method_param.php:4:27
+2 | 
+3 | class Foo {
+4 |   public function foo(int $this): void {}
+  |                           ^^^^^ [1]
+5 |   public static function bar(int $this): void {}
+6 | }
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+method_param.php:5:34
+3 | class Foo {
+4 |   public function foo(int $this): void {}
+5 |   public static function bar(int $this): void {}
+  |                                  ^^^^^ [1]
+6 | }
+
+4 errors found

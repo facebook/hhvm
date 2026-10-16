@@ -1,12 +1,55 @@
-ERROR: File "missing_attr.php", line 15, characters 14-17:
-You cannot access this member (Typing[4112])
-  File "missing_attr.php", line 6, characters 20-23:
-  This member is private. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member
-ERROR: File "missing_attr.php", line 16, characters 14-17:
-Cannot access this protected member, you don't extend MissingAttrTarget (Typing[4112])
-  File "missing_attr.php", line 8, characters 22-25:
-  This member is protected. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member
-ERROR: File "missing_attr.php", line 17, characters 24-28:
-You cannot access this member (Typing[4112])
-  File "missing_attr.php", line 10, characters 27-31:
-  This member is private. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member
+error: Typing[4112] You cannot access this member [1]
+-> This member is private. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member [2]
+
+missing_attr.php:15:14
+ 4 | 
+ 5 | class MissingAttrTarget {
+ 6 |   private function priv(): void {}
+   |                    ^^^^ [2]
+ 7 | 
+ 8 |   protected function prot(): void {}
+   :
+13 | class MissingAttrTest extends WWWTest {
+14 |   public function test(MissingAttrTarget $target): void {
+15 |     $target->priv(); // error: missing attribute
+   |              ^^^^ [1]
+16 |     $target->prot(); // error: missing attribute
+17 |     MissingAttrTarget::spriv(); // error: missing attribute
+
+error: Typing[4112] Cannot access this protected member, you don't extend MissingAttrTarget [1]
+-> This member is protected. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member [2]
+
+missing_attr.php:16:14
+ 6 |   private function priv(): void {}
+ 7 | 
+ 8 |   protected function prot(): void {}
+   |                      ^^^^ [2]
+ 9 | 
+10 |   private static function spriv(): void {}
+   :
+14 |   public function test(MissingAttrTarget $target): void {
+15 |     $target->priv(); // error: missing attribute
+16 |     $target->prot(); // error: missing attribute
+   |              ^^^^ [1]
+17 |     MissingAttrTarget::spriv(); // error: missing attribute
+18 |   }
+
+error: Typing[4112] You cannot access this member [1]
+-> This member is private. To allow access from test contexts, add `<<__TestsBypassVisibility>>` to this member [2]
+
+missing_attr.php:17:24
+ 8 |   protected function prot(): void {}
+ 9 | 
+10 |   private static function spriv(): void {}
+   |                           ^^^^^ [2]
+11 | }
+12 | 
+   :
+15 |     $target->priv(); // error: missing attribute
+16 |     $target->prot(); // error: missing attribute
+17 |     MissingAttrTarget::spriv(); // error: missing attribute
+   |                        ^^^^^ [1]
+18 |   }
+19 | }
+
+3 errors found

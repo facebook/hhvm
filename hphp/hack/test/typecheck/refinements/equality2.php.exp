@@ -1,6 +1,19 @@
-ERROR: File "equality2.php", line 7, characters 15-16:
-Invalid argument (Typing[4110])
-  File "equality2.php", line 3, characters 20-22:
-  Expected `int`
-  File "equality2.php", line 5, characters 15-18:
-  But got `?int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+
+equality2.php:7:15
+1 | <?hh
+2 | 
+3 | function takes_int(int $_): void {}
+  |                    ^^^ [2]
+4 | 
+5 | function main(?int $i): void {
+  |               ^^^^ [3]
+6 |   if ($i !== 42 || $i !== 43) {
+7 |     takes_int($i);
+  |               ^^ [1]
+8 |     return;
+9 |   }
+
+1 error found

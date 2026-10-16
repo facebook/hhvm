@@ -1,86 +1,202 @@
-ERROR: File "cycle_corner_policies.php", line 25, characters 15-20:
-Invalid argument (Typing[4532])
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  Expected `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`
-ERROR: File "cycle_corner_policies.php", line 26, characters 3-8:
-Some type arguments violate their constraints (Typing[4323])
-  File "cycle_corner_policies.php", line 14, characters 10-15:
-  Expected `dynamic`
-  File "cycle_corner_policies.php", line 26, characters 10-11:
-  Type `T1` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "cycle_corner_policies.php", line 26, characters 3-8:
-Some type arguments violate their constraints (Typing[4323])
-  File "cycle_corner_policies.php", line 14, characters 17-17:
-  `T` is a constrained type parameter
-  File "cycle_corner_policies.php", line 14, characters 22-31:
-  This type constraint is violated
-  File "cycle_corner_policies.php", line 14, characters 22-31:
-  Expected `shape(...)`
-  File "cycle_corner_policies.php", line 26, characters 10-11:
-  But got `T1 as shape(...T2, ...shape(?'left' => int))`
-ERROR: File "cycle_corner_policies.php", line 26, characters 3-8:
-Some type arguments violate their constraints (Typing[4323])
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 14, characters 17-17:
-  `T` is a constrained type parameter
-  File "cycle_corner_policies.php", line 14, characters 22-31:
-  This type constraint is violated
-  File "cycle_corner_policies.php", line 26, characters 10-11:
-  Expected `shape(...)`
-  File "cycle_corner_policies.php", line 23, characters 9-36:
-    by the definition of `T1`
-  File "cycle_corner_policies.php", line 26, characters 10-11:
-  But got `shape(...T2, ...shape(?'left' => int)) where T2 as shape(...T1, ...shape(?'right' => int))`
-  File "cycle_corner_policies.php", line 23, characters 9-36:
-    by the definition of `T1`
-ERROR: File "cycle_corner_policies.php", line 26, characters 14-24:
-Invalid argument (Typing[4532])
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 10, characters 4-49:
-  Expected `shape(...shape(?'before' => int), ...T1, ...shape(?'after' => int))`
-  File "cycle_corner_policies.php", line 10, characters 4-49:
-  But got `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))`
-ERROR: File "cycle_corner_policies.php", line 28, characters 3-45:
-hh_expect_equivalent type mismatch (Typing[4110])
-  File "cycle_corner_policies.php", line 28, characters 24-28:
-  Expected `dynamic`
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "cycle_corner_policies.php", line 28, characters 31-44:
-Invalid argument (Typing[4110])
-  File "cycle_corner_policies.php", line 28, characters 24-28:
-  Expected `dynamic`
-  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
-    via this generic `T`
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "cycle_corner_policies.php", line 29, characters 10-15:
-Invalid return type (Typing[4532])
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cycle_corner_policies.php", line 23, characters 18-19:
-  The upper bound of `T1` contains the shape spread `...T2` here
-  File "cycle_corner_policies.php", line 24, characters 18-19:
-  The upper bound of `T2` contains the shape spread `...T1` here
-  File "cycle_corner_policies.php", line 29, characters 3-16:
-  Expected `shape('x' => int, ?'y' => string)`
-  File "cycle_corner_policies.php", line 21, characters 3-41:
-  But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))`
+error: Typing[4532] Invalid argument [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [3]
+-> Expected `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))` [4]
+-> But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))` [4]
+
+cycle_corner_policies.php:25:15
+19 |   T1 as shape(...),
+20 |   T2 as shape(...),
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |                  ^^ [2]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [3]
+25 |   infer_super($value);
+   |               ^^^^^^ [1]
+26 |   accept<T1>(infer_sub());
+27 |   hh_expect_equivalent<int>($value['x']);
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `T1` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+cycle_corner_policies.php:26:3
+12 | }
+13 | 
+14 | function accept<T as shape(...)>(
+   |          ^^^^^^ [2]
+15 |   shape(?'before' => int, ...T, ?'after' => int) $_,
+16 | ): void {}
+   :
+24 |   T2 as shape(...T1, ?'right' => int) {
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+   |   ^^^^^^ [1]
+   |          ^^ [3]
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `shape(...)` [3]
+-> But got `T1 as shape(...T2, ...shape(?'left' => int))` [4]
+
+cycle_corner_policies.php:26:3
+12 | }
+13 | 
+14 | function accept<T as shape(...)>(
+   |                 ^ [2]
+   |                      ^^^^^^^^^^ [3]
+15 |   shape(?'before' => int, ...T, ?'after' => int) $_,
+16 | ): void {}
+   :
+24 |   T2 as shape(...T1, ?'right' => int) {
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+   |   ^^^^^^ [1]
+   |          ^^ [4]
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [3]
+-> `T` is a constrained type parameter [4]
+-> This type constraint is violated [5]
+-> Expected `shape(...)` [6]
+->   by the definition of `T1` [7]
+-> But got `shape(...T2, ...shape(?'left' => int)) where T2 as shape(...T1, ...shape(?'right' => int))` [6]
+->   by the definition of `T1` [7]
+
+cycle_corner_policies.php:26:3
+12 | }
+13 | 
+14 | function accept<T as shape(...)>(
+   |                 ^ [4]
+   |                      ^^^^^^^^^^ [5]
+15 |   shape(?'before' => int, ...T, ?'after' => int) $_,
+16 | ): void {}
+   :
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [7]
+   |                  ^^ [3]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [2]
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+   |   ^^^^^^ [1]
+   |          ^^ [6]
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+
+error: Typing[4532] Invalid argument [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [3]
+-> Expected `shape(...shape(?'before' => int), ...T1, ...shape(?'after' => int))` [4]
+-> But got `shape(...shape(?'before' => int), ..._, ...shape(?'after' => int))` [4]
+
+cycle_corner_policies.php:26:14
+ 8 | function infer_sub<T as shape(...)>(
+ 9 |   ?T $_ = null,
+10 | ): shape(?'before' => int, ...T, ?'after' => int) {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+11 |   throw new Exception();
+12 | }
+   :
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |                  ^^ [2]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [3]
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+   |              ^^^^^^^^^^^ [1]
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+
+error: Typing[4110] hh_expect_equivalent type mismatch [1]
+-> Expected `dynamic` [2]
+-> Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+cycle_corner_policies.php:28:3
+19 |   T1 as shape(...),
+20 |   T2 as shape(...),
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   :
+26 |   accept<T1>(infer_sub());
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                        ^^^^^ [2]
+29 |   return $value;
+30 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+->   via this generic `T` [3]
+-> Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping [4]
+
+cycle_corner_policies.php:28:31
+19 |   T1 as shape(...),
+20 |   T2 as shape(...),
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   :
+26 |   accept<T1>(infer_sub());
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+   |                        ^^^^^ [2]
+   |                               ^^^^^^^^^^^^^^ [1]
+29 |   return $value;
+30 | }
+
+hh_single_type_check_magic.hhi:5:108
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                            ^ [3]
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+ 7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+error: Typing[4532] Invalid return type [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `T1` contains the shape spread `...T2` here [2]
+-> The upper bound of `T2` contains the shape spread `...T1` here [3]
+-> Expected `shape('x' => int, ?'y' => string)` [4]
+-> But got `shape(...shape('left' => int), ...T1, ...shape('x' => int)) where T1 as shape(...T2, ...shape(?'left' => int))` [5]
+
+cycle_corner_policies.php:29:10
+19 |   T1 as shape(...),
+20 |   T2 as shape(...),
+21 | >(shape('left' => int, ...T1, 'x' => int) $value): shape(?'y' => string, 'x' => int)
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+22 | where
+23 |   T1 as shape(...T2, ?'left' => int),
+   |                  ^^ [2]
+24 |   T2 as shape(...T1, ?'right' => int) {
+   |                  ^^ [3]
+25 |   infer_super($value);
+26 |   accept<T1>(infer_sub());
+27 |   hh_expect_equivalent<int>($value['x']);
+28 |   hh_expect_equivalent<mixed>($value['left']);
+29 |   return $value;
+   |   ^^^^^^^^^^^^^^ [4]
+   |          ^^^^^^ [1]
+30 | }
+
+8 errors found

@@ -1,2 +1,11 @@
-WARN: File "dict_is_constmap.php", line 7, characters 7-30:
-This `is` check is always `false`. The expression on the left has type `dict<int, dict<int, int>>` which shares no values with `ConstMap<Tk#1, Tv#1>`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `dict<int, dict<int, int>>` which shares no values with `ConstMap<Tk#1, Tv#1>`. [1]
+
+dict_is_constmap.php:7:7
+5 | ): void {
+6 |   $edges = $rdictofdict->value;
+7 |   if ($edges is ConstMap<_, _>) {
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |     $edges = dict($edges);
+9 |   }
+
+1 error found

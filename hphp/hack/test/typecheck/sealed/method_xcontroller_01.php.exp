@@ -1,20 +1,74 @@
-ERROR: File "method_xcontroller_01.php", line 17, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_xcontroller_01.php", line 17, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_xcontroller_01.php", line 5, characters 19-21:
-  Declaration is here
-ERROR: File "method_xcontroller_01.php", line 30, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_xcontroller_01.php", line 30, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_xcontroller_01.php", line 5, characters 19-21:
-  Declaration is here
-ERROR: File "method_xcontroller_01.php", line 30, characters 19-21:
-You cannot override this method (Typing[4070])
-  File "method_xcontroller_01.php", line 11, characters 25-27:
-  It was declared as final
-ERROR: File "method_xcontroller_01.php", line 36, characters 19-21:
-You cannot override this method (Typing[4070])
-  File "method_xcontroller_01.php", line 11, characters 25-27:
-  It was declared as final
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_xcontroller_01.php:17:19
+ 3 | class C {
+ 4 |   <<__Sealed(C_Async::class)>>
+ 5 |   public function foo(): void {}
+   |                   ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+15 |   // should be an error
+16 |   <<__Override>>
+17 |   public function foo(): void {}
+   |                   ^^^ [1]
+18 | }
+19 | 
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_xcontroller_01.php:30:19
+ 3 | class C {
+ 4 |   <<__Sealed(C_Async::class)>>
+ 5 |   public function foo(): void {}
+   |                   ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+28 |   // should be an error
+29 |   <<__Override>>
+30 |   public function foo(): void {}
+   |                   ^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4070] You cannot override this method [1]
+-> It was declared as final [2]
+
+method_xcontroller_01.php:30:19
+ 9 |   require extends C;
+10 | 
+11 |   public final function foo(): void {}
+   |                         ^^^ [2]
+12 | }
+13 | 
+   :
+28 |   // should be an error
+29 |   <<__Override>>
+30 |   public function foo(): void {}
+   |                   ^^^ [1]
+31 | }
+32 | 
+
+error: Typing[4070] You cannot override this method [1]
+-> It was declared as final [2]
+
+method_xcontroller_01.php:36:19
+ 9 |   require extends C;
+10 | 
+11 |   public final function foo(): void {}
+   |                         ^^^ [2]
+12 | }
+13 | 
+   :
+34 |   // should be an error
+35 |   <<__Override>>
+36 |   public function foo(): void {}
+   |                   ^^^ [1]
+37 | }
+
+4 errors found

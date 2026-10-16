@@ -1,44 +1,141 @@
-ERROR: File "readonly_named_variadics_bad.php", line 15, characters 25-27:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 15, characters 25-27:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 5, characters 43-45:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 16, characters 40-42:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 16, characters 40-42:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 5, characters 43-45:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 18, characters 39-41:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 18, characters 39-41:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 12, characters 32-42:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 19, characters 25-27:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 19, characters 25-27:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 12, characters 32-42:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 21, characters 41-43:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 21, characters 41-43:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 9, characters 66-68:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 22, characters 46-48:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 22, characters 46-48:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 9, characters 66-68:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 30, characters 45-47:
-Invalid argument (Typing[4411])
-  File "readonly_named_variadics_bad.php", line 30, characters 45-47:
-  This expression is readonly
-  File "readonly_named_variadics_bad.php", line 26, characters 72-74:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_variadics_bad.php", line 32, characters 7-23:
-Duplicate named argument: head (Typing[4501])
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:15:25
+ 3 | //
+ 4 | class NamedTail {
+ 5 |   public function __construct(named string...) {}
+   |                                           ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+13 | 
+14 | function test_readonly_named_variadics_bad(readonly string $ro): void {
+15 |   new NamedTail(first = $ro);
+   |                         ^^^ [1]
+16 |   new NamedTail(first = "ok", second = $ro);
+17 | 
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:16:40
+ 3 | //
+ 4 | class NamedTail {
+ 5 |   public function __construct(named string...) {}
+   |                                           ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+14 | function test_readonly_named_variadics_bad(readonly string $ro): void {
+15 |   new NamedTail(first = $ro);
+16 |   new NamedTail(first = "ok", second = $ro);
+   |                                        ^^^ [1]
+17 | 
+18 |   mixed_tails(first = "ok", "a", "b", $ro);
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:18:39
+10 | }
+11 | 
+12 | function mixed_tails(string ...$positional, named string...): void {}
+   |                                ^^^^^^^^^^^ [2]
+13 | 
+14 | function test_readonly_named_variadics_bad(readonly string $ro): void {
+15 |   new NamedTail(first = $ro);
+16 |   new NamedTail(first = "ok", second = $ro);
+17 | 
+18 |   mixed_tails(first = "ok", "a", "b", $ro);
+   |                                       ^^^ [1]
+19 |   mixed_tails("a", "b", $ro, first = "ok");
+20 | 
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:19:25
+10 | }
+11 | 
+12 | function mixed_tails(string ...$positional, named string...): void {}
+   |                                ^^^^^^^^^^^ [2]
+13 | 
+14 | function test_readonly_named_variadics_bad(readonly string $ro): void {
+   :
+17 | 
+18 |   mixed_tails(first = "ok", "a", "b", $ro);
+19 |   mixed_tails("a", "b", $ro, first = "ok");
+   |                         ^^^ [1]
+20 | 
+21 |   new MixedTails(first = "ok", second = $ro, "a");
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:21:41
+ 7 | 
+ 8 | class MixedTails {
+ 9 |   public function __construct(string ...$positional, named string...) {}
+   |                                                                  ^^^ [2]
+10 | }
+11 | 
+   :
+19 |   mixed_tails("a", "b", $ro, first = "ok");
+20 | 
+21 |   new MixedTails(first = "ok", second = $ro, "a");
+   |                                         ^^^ [1]
+22 |   new MixedTails("a", first = "ok", second = $ro);
+23 | }
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:22:46
+ 7 | 
+ 8 | class MixedTails {
+ 9 |   public function __construct(string ...$positional, named string...) {}
+   |                                                                  ^^^ [2]
+10 | }
+11 | 
+   :
+20 | 
+21 |   new MixedTails(first = "ok", second = $ro, "a");
+22 |   new MixedTails("a", first = "ok", second = $ro);
+   |                                              ^^^ [1]
+23 | }
+24 | 
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_variadics_bad.php:30:45
+24 | 
+25 | class ReadonlyNamedHead {
+26 |   public function __construct(named readonly string $head, named string...) {}
+   |                                                                        ^^^ [2]
+27 | }
+28 | 
+29 | function test_readonly_declared_named_param_bad(readonly string $ro): void {
+30 |   new ReadonlyNamedHead(head = $ro, extra = $ro);
+   |                                             ^^^ [1]
+31 |   // Repeating a declared name must not bind it to the mutable variadic.
+32 |   new ReadonlyNamedHead(head = $ro, head = $ro);
+
+error: Typing[4501] Duplicate named argument: head [1]
+
+readonly_named_variadics_bad.php:32:7
+30 |   new ReadonlyNamedHead(head = $ro, extra = $ro);
+31 |   // Repeating a declared name must not bind it to the mutable variadic.
+32 |   new ReadonlyNamedHead(head = $ro, head = $ro);
+   |       ^^^^^^^^^^^^^^^^^ [1]
+33 | }
+
+8 errors found

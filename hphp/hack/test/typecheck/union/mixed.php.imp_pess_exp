@@ -24,53 +24,213 @@ File "mixed.php", line 88, characters 3-13:
   (int | B)
 File "mixed.php", line 91, characters 3-13:
   (B | A)
-ERROR: File "mixed.php", line 11, characters 24-31:
-Was expecting a type hint (Typing[4032])
-ERROR: File "mixed.php", line 27, characters 12-13:
-Invalid argument (Typing[4110])
-  File "mixed.php", line 102, characters 19-19:
-  Expected `A`
-  File "mixed.php", line 11, characters 48-54:
-  But got `nonnull`
-ERROR: File "mixed.php", line 36, characters 12-13:
-Invalid argument (Typing[4110])
-  File "mixed.php", line 102, characters 19-19:
-  Expected `A`
-  File "mixed.php", line 11, characters 34-38:
-  But got `mixed`
-ERROR: File "mixed.php", line 44, characters 17-18:
-Invalid argument (Typing[4110])
-  File "mixed.php", line 101, characters 24-29:
-  Expected `Object`
-  File "mixed.php", line 41, characters 14-14:
-  But got `A`
-ERROR: File "mixed.php", line 45, characters 12-13:
-Invalid argument (Typing[4110])
-  File "mixed.php", line 102, characters 19-19:
-  Expected `A`
-  File "mixed.php", line 39, characters 14-19:
-  But got `Object`
-ERROR: File "mixed.php", line 56, characters 18-19:
-Invalid argument (Typing[4110])
-  File "mixed.php", line 96, characters 52-54:
-  Expected `int`
-  File "mixed.php", line 52, characters 36-41:
-  But got `string`
-ERROR: File "mixed.php", line 65, characters 28-29:
-Invalid argument (Typing[4041])
-  File "mixed.php", line 59, characters 10-31:
-  Too many mandatory arguments (expected 1 but got 2)
-  File "mixed.php", line 94, characters 35-60:
-  Because of this definition
-ERROR: File "mixed.php", line 65, characters 28-29:
-Invalid argument (Typing[4041])
-  File "mixed.php", line 61, characters 10-51:
-  Too many mandatory arguments (expected 1 but got 2)
-  File "mixed.php", line 94, characters 35-60:
-  Because of this definition
-ERROR: File "mixed.php", line 65, characters 28-29:
-Invalid argument (Typing[4110])
-  File "mixed.php", line 94, characters 54-59:
-  Expected `string`
-  File "mixed.php", line 61, characters 25-51:
-  But got `int` because this is the result of an integer arithmetic operation
+error: Typing[4032] Was expecting a type hint [1]
+
+mixed.php:11:24
+ 9 | // TODO actually add hh_show's here as we actually care not to have odd things
+10 | // like (A | A) ??
+11 | function test(bool $b, $untyped, mixed $mixed, nonnull $nonnull, A $a): void {
+   |                        ^^^^^^^^ [1]
+12 |   if ($b) {
+13 |     $x = new A();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `nonnull` [3]
+
+mixed.php:27:12
+  9 | // TODO actually add hh_show's here as we actually care not to have odd things
+ 10 | // like (A | A) ??
+ 11 | function test(bool $b, $untyped, mixed $mixed, nonnull $nonnull, A $a): void {
+    |                                                ^^^^^^^ [3]
+ 12 |   if ($b) {
+ 13 |     $x = new A();
+    :
+ 25 |   hh_show($x);
+ 26 |   expect_nonnull($x);
+ 27 |   expect_A($x); // error
+    |            ^^ [1]
+ 28 | 
+ 29 |   if ($b) {
+    :
+100 | function expect_nonnull(nonnull $x): void {}
+101 | function expect_object(Object $x): void {}
+102 | function expect_A(A $a): void {}
+    |                   ^ [2]
+103 | function expect_mixed(mixed $a): void {}
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `mixed` [3]
+
+mixed.php:36:12
+  9 | // TODO actually add hh_show's here as we actually care not to have odd things
+ 10 | // like (A | A) ??
+ 11 | function test(bool $b, $untyped, mixed $mixed, nonnull $nonnull, A $a): void {
+    |                                  ^^^^^ [3]
+ 12 |   if ($b) {
+ 13 |     $x = new A();
+    :
+ 34 |   hh_show($x);
+ 35 |   expect_mixed($x);
+ 36 |   expect_A($x); // error
+    |            ^^ [1]
+ 37 | 
+ 38 |   if ($b) {
+    :
+100 | function expect_nonnull(nonnull $x): void {}
+101 | function expect_object(Object $x): void {}
+102 | function expect_A(A $a): void {}
+    |                   ^ [2]
+103 | function expect_mixed(mixed $a): void {}
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Object` [2]
+-> But got `A` [3]
+
+mixed.php:44:17
+ 39 |     $x = new Object();
+ 40 |   } else {
+ 41 |     $x = new A();
+    |              ^ [3]
+ 42 |   }
+ 43 |   hh_show($x);
+ 44 |   expect_object($x);
+    |                 ^^ [1]
+ 45 |   expect_A($x); // error
+ 46 | 
+    :
+ 99 | function expect_bool(bool $x): void {}
+100 | function expect_nonnull(nonnull $x): void {}
+101 | function expect_object(Object $x): void {}
+    |                        ^^^^^^ [2]
+102 | function expect_A(A $a): void {}
+103 | function expect_mixed(mixed $a): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `Object` [3]
+
+mixed.php:45:12
+ 37 | 
+ 38 |   if ($b) {
+ 39 |     $x = new Object();
+    |              ^^^^^^ [3]
+ 40 |   } else {
+ 41 |     $x = new A();
+ 42 |   }
+ 43 |   hh_show($x);
+ 44 |   expect_object($x);
+ 45 |   expect_A($x); // error
+    |            ^^ [1]
+ 46 | 
+ 47 |   if ($b) {
+    :
+100 | function expect_nonnull(nonnull $x): void {}
+101 | function expect_object(Object $x): void {}
+102 | function expect_A(A $a): void {}
+    |                   ^ [2]
+103 | function expect_mixed(mixed $a): void {}
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+mixed.php:56:18
+50 |     };
+51 |   } else {
+52 |     $x = (string $s1, string $s2): string ==> $s1.$s2;
+   |                                    ^^^^^^ [3]
+53 |   }
+54 |   hh_show($x);
+55 |   expect_fun_arraykey($x);
+56 |   expect_fun_int($x); // error
+   |                  ^^ [1]
+57 | 
+58 |   if ($b) {
+   :
+94 | function expect_fun_string_string((function(string): string) $x): void {}
+95 | function expect_fun_arraykey((function(string, string): arraykey) $x): void {}
+96 | function expect_fun_int((function(string, string): int) $x): void {}
+   |                                                    ^^^ [2]
+97 | function expect_shape_ab(shape('a' => nonnull, 'b' => bool, ...) $x): void {}
+98 | function expect_shape_a(shape('a' => nonnull, ...) $x): void {}
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [2]
+-> Because of this definition [3]
+
+mixed.php:65:28
+57 | 
+58 |   if ($b) {
+59 |     $x = ($s1, $s2) ==> $s1.$s2;
+   |          ^^^^^^^^^^^^^^^^^^^^^^ [2]
+60 |   } else {
+61 |     $x = ($s1, $s2) ==> \strlen($s1) + \strlen($s2);
+62 |   }
+63 |   hh_show($x);
+64 |   expect_fun_arraykey($x);
+65 |   expect_fun_string_string($x);
+   |                            ^^ [1]
+66 | 
+67 |   if ($b) {
+   :
+92 | }
+93 | 
+94 | function expect_fun_string_string((function(string): string) $x): void {}
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+95 | function expect_fun_arraykey((function(string, string): arraykey) $x): void {}
+96 | function expect_fun_int((function(string, string): int) $x): void {}
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [2]
+-> Because of this definition [3]
+
+mixed.php:65:28
+59 |     $x = ($s1, $s2) ==> $s1.$s2;
+60 |   } else {
+61 |     $x = ($s1, $s2) ==> \strlen($s1) + \strlen($s2);
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+62 |   }
+63 |   hh_show($x);
+64 |   expect_fun_arraykey($x);
+65 |   expect_fun_string_string($x);
+   |                            ^^ [1]
+66 | 
+67 |   if ($b) {
+   :
+92 | }
+93 | 
+94 | function expect_fun_string_string((function(string): string) $x): void {}
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+95 | function expect_fun_arraykey((function(string, string): arraykey) $x): void {}
+96 | function expect_fun_int((function(string, string): int) $x): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` because this is the result of an integer arithmetic operation [3]
+
+mixed.php:65:28
+59 |     $x = ($s1, $s2) ==> $s1.$s2;
+60 |   } else {
+61 |     $x = ($s1, $s2) ==> \strlen($s1) + \strlen($s2);
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+62 |   }
+63 |   hh_show($x);
+64 |   expect_fun_arraykey($x);
+65 |   expect_fun_string_string($x);
+   |                            ^^ [1]
+66 | 
+67 |   if ($b) {
+   :
+92 | }
+93 | 
+94 | function expect_fun_string_string((function(string): string) $x): void {}
+   |                                                      ^^^^^^ [2]
+95 | function expect_fun_arraykey((function(string, string): arraykey) $x): void {}
+96 | function expect_fun_int((function(string, string): int) $x): void {}
+
+9 errors found

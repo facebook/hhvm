@@ -1,6 +1,23 @@
-ERROR: File "needs_concrete_override_traits_1.php", line 12, characters 16-17:
-Method `m1` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) (Typing[4526])
-  File "needs_concrete_override_traits_1.php", line 9, characters 26-27:
-  It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method
-  File "needs_concrete_override_traits_1.php", line 4, characters 26-27:
-  Previously defined here
+error: Typing[4526] Method `m1` is declared as `__NeedsConcrete` but overrides a non-`__NeedsConcrete` method. Please add `__NeedsConcrete` to the overridden method or remove it from the current method. (The `__NeedsConcrete` attribute indicates that a method requires `static` to point to a concrete class) [1]
+-> It is unsafe to declare this method as `__NeedsConcrete`, since it overrides a non-`__NeedsConcrete` method [2]
+-> Previously defined here [3]
+
+needs_concrete_override_traits_1.php:12:16
+ 2 | //
+ 3 | abstract class C1 {
+ 4 |   public static function m1(): void {}
+   |                          ^^ [3]
+ 5 | }
+ 6 | 
+ 7 | trait Tr {
+ 8 |   <<__NeedsConcrete>>
+ 9 |   public static function m1(): void {}
+   |                          ^^ [2]
+10 | }
+11 | 
+12 | abstract class C2 extends C1 {
+   |                ^^ [1]
+13 |   use Tr;
+14 | }
+
+1 error found

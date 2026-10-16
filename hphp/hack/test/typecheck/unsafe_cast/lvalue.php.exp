@@ -1,2 +1,10 @@
-ERROR: File "lvalue.php", line 4, characters 3-54:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+lvalue.php:4:3
+2 | 
+3 | function f(dynamic $m): void {
+4 |   HH\FIXME\UNSAFE_CAST<dynamic, dict<int, string>>($m)[0] = "lvalue";
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

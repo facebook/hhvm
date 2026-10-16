@@ -1,2 +1,10 @@
-ERROR: File "regex_flags.php", line 5, characters 13-26:
-Bad regex pattern; character value in \x{} or \o{} is too large [9]. (Typing[4275])
+error: Typing[4275] Bad regex pattern; character value in \x{} or \o{} is too large [9]. [1]
+
+regex_flags.php:5:13
+3 | function f(): void {
+4 |   $good0 = re"/\x{10FFFF}/u";
+5 |   $bad0 = re"/\x{10FFFF}/";
+  |             ^^^^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

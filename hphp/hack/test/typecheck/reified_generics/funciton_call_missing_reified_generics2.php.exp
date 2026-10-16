@@ -1,12 +1,57 @@
-ERROR: File "funciton_call_missing_reified_generics2.php", line 11, characters 16-18:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Definition is here
-ERROR: File "funciton_call_missing_reified_generics2.php", line 12, characters 12-14:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Definition is here
-ERROR: File "funciton_call_missing_reified_generics2.php", line 13, characters 11-13:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "hackarray.hhi", line 52, characters 24-26:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+funciton_call_missing_reified_generics2.php:11:16
+ 9 | 
+10 | function main() : void {
+11 |   $f = new Foo<vec>();
+   |                ^^^ [1]
+12 |   Foo::bar<vec>();
+13 |   $f->baz<vec>();
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+funciton_call_missing_reified_generics2.php:12:12
+10 | function main() : void {
+11 |   $f = new Foo<vec>();
+12 |   Foo::bar<vec>();
+   |            ^^^ [1]
+13 |   $f->baz<vec>();
+14 | }
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+funciton_call_missing_reified_generics2.php:13:11
+11 |   $f = new Foo<vec>();
+12 |   Foo::bar<vec>();
+13 |   $f->baz<vec>();
+   |           ^^^ [1]
+14 | }
+
+hackarray.hhi:52:24
+50 |    */
+51 |   <<__SupportDynamicType>>
+52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+   |                        ^^^ [2]
+53 | 
+54 | } // namespace HH
+
+3 errors found

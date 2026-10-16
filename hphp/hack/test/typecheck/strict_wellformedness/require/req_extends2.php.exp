@@ -1,6 +1,15 @@
-ERROR: File "req_extends2.php", line 6, characters 19-37:
-Invalid type hint (Typing[4090])
-  File "req_extends2.php", line 6, characters 27-36:
-  No type constant `TUndefined` in `I`
-  File "req_extends2.php", line 5, characters 11-11:
-  Declaration of `I` is here
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `TUndefined` in `I` [2]
+-> Declaration of `I` is here [3]
+
+req_extends2.php:6:19
+3 | class C<T> {}
+4 | 
+5 | interface I {
+  |           ^ [3]
+6 |   require extends C<this::TUndefined>;
+  |                   ^^^^^^^^^^^^^^^^^^^ [1]
+  |                           ^^^^^^^^^^ [2]
+7 | }
+
+1 error found

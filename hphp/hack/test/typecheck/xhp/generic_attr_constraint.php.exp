@@ -1,10 +1,21 @@
-ERROR: File "generic_attr_constraint.php", line 8, characters 15-17:
-Invalid xhp value for attribute `:foo` in `:my-xhp` (Typing[4323])
-  File "generic_attr_constraint.php", line 3, characters 15-15:
-  `T` is a constrained type parameter
-  File "generic_attr_constraint.php", line 3, characters 20-22:
-  This type constraint is violated
-  File "generic_attr_constraint.php", line 3, characters 20-22:
-  Expected `num`
-  File "generic_attr_constraint.php", line 8, characters 15-17:
-  But got `string`
+error: Typing[4323] Invalid xhp value for attribute `:foo` in `:my-xhp` [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `string` [1]
+
+generic_attr_constraint.php:8:15
+1 | <?hh
+2 | 
+3 | class :my-xhp<T as num> extends XHPTest {
+  |               ^ [2]
+  |                    ^^^ [3]
+4 |   attribute T foo @required;
+5 | }
+6 | 
+7 | function test(): void {
+8 |   <my-xhp foo="1" />;
+  |               ^^^ [1]
+9 | }
+
+1 error found

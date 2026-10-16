@@ -1,28 +1,126 @@
-ERROR: File "shapes_functions.php", line 13, characters 35-54:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
-ERROR: File "shapes_functions.php", line 20, characters 31-50:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
-ERROR: File "shapes_functions.php", line 28, characters 31-50:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
-ERROR: File "shapes_functions.php", line 36, characters 30-49:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
-ERROR: File "shapes_functions.php", line 44, characters 37-56:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
-ERROR: File "shapes_functions.php", line 52, characters 31-50:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
-ERROR: File "shapes_functions.php", line 60, characters 38-57:
-Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "shapes_functions.php", line 4, characters 16-18:
-  The class constant is declared here
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:13:35
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+11 | 
+12 | type AnnotatedType = shape(AnnotatedShapeKey::KEY => int);
+13 | type MissingAttributeType = shape(MissingShapeKey::KEY => int);
+   |                                   ^^^^^^^^^^^^^^^^^^^^ [1]
+14 | 
+15 | function shape_key_idx(
+
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:20:31
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+18 | ): void {
+19 |   $_ = Shapes::idx($marked, AnnotatedShapeKey::KEY);
+20 |   $_ = Shapes::idx($unmarked, MissingShapeKey::KEY);
+   |                               ^^^^^^^^^^^^^^^^^^^^ [1]
+21 | }
+22 | 
+
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:28:31
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+26 | ): void {
+27 |   $_ = Shapes::idx($marked, AnnotatedShapeKey::KEY, 0);
+28 |   $_ = Shapes::idx($unmarked, MissingShapeKey::KEY, 0);
+   |                               ^^^^^^^^^^^^^^^^^^^^ [1]
+29 | }
+30 | 
+
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:36:30
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+34 | ): void {
+35 |   $_ = Shapes::at($marked, AnnotatedShapeKey::KEY);
+36 |   $_ = Shapes::at($unmarked, MissingShapeKey::KEY);
+   |                              ^^^^^^^^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:44:37
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+42 | ): void {
+43 |   $_ = Shapes::keyExists($marked, AnnotatedShapeKey::KEY);
+44 |   $_ = Shapes::keyExists($unmarked, MissingShapeKey::KEY);
+   |                                     ^^^^^^^^^^^^^^^^^^^^ [1]
+45 | }
+46 | 
+
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:52:31
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+50 | ): void {
+51 |   $_ = Shapes::put($marked, AnnotatedShapeKey::KEY, 1);
+52 |   $_ = Shapes::put($unmarked, MissingShapeKey::KEY, 1);
+   |                               ^^^^^^^^^^^^^^^^^^^^ [1]
+53 | }
+54 | 
+
+error: Typing[4533] Class constant `MissingShapeKey::KEY` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+shapes_functions.php:60:38
+ 2 | 
+ 3 | class MissingShapeKey {
+ 4 |   const string KEY = 'missing';
+   |                ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+58 | ): void {
+59 |   Shapes::removeKey(inout $marked, AnnotatedShapeKey::KEY);
+60 |   Shapes::removeKey(inout $unmarked, MissingShapeKey::KEY);
+   |                                      ^^^^^^^^^^^^^^^^^^^^ [1]
+61 | }
+
+7 errors found

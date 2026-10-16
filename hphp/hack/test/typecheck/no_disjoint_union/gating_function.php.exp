@@ -1,2 +1,11 @@
-ERROR: File "gating_function.php", line 3, characters 39-55:
-Cannot use unstable feature: `no_disjoint_union` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `no_disjoint_union` [1]
+
+gating_function.php:3:39
+1 | <?hh
+2 | 
+3 | function no_disjoint_union_identity<<<__NoDisjointUnion>> T>(T $t): T {
+  |                                       ^^^^^^^^^^^^^^^^^ [1]
+4 |   return $t;
+5 | }
+
+1 error found

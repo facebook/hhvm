@@ -1,16 +1,65 @@
-WARN: File "just_string.php", line 19, characters 10-13:
-This switch case, `"`, occurred before. It will never be matched. (Warn[12019])
-  File "just_string.php", line 17, characters 10-12:
-  This is the original occurrence of the case.
-WARN: File "just_string.php", line 53, characters 10-11:
-This switch case, ``, occurred before. It will never be matched. (Warn[12019])
-  File "just_string.php", line 49, characters 10-11:
-  This is the original occurrence of the case.
-WARN: File "just_string.php", line 55, characters 10-12:
-This switch case, `.`, occurred before. It will never be matched. (Warn[12019])
-  File "just_string.php", line 51, characters 10-12:
-  This is the original occurrence of the case.
-ERROR: File "just_string.php", line 40, characters 3-46:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "just_string.php", line 40, characters 11-12:
-  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+warning: Warn[12019] This switch case, `"`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+just_string.php:19:10
+15 | function redundant_special_string(string $x): void {
+16 |   switch ($x) {
+17 |     case '"':
+   |          ^^^ [2]
+18 |       return;
+19 |     case "\"":
+   |          ^^^^ [1]
+20 |       return;
+21 |     default:
+
+warning: Warn[12019] This switch case, ``, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+just_string.php:53:10
+47 | function redundant_literal(string $x): void {
+48 |   switch ($x) {
+49 |     case "":
+   |          ^^ [2]
+50 |       return;
+51 |     case ".":
+52 |       return;
+53 |     case "":
+   |          ^^ [1]
+54 |       return;
+55 |     case ".":
+
+warning: Warn[12019] This switch case, `.`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+just_string.php:55:10
+49 |     case "":
+50 |       return;
+51 |     case ".":
+   |          ^^^ [2]
+52 |       return;
+53 |     case "":
+54 |       return;
+55 |     case ".":
+   |          ^^^ [1]
+56 |       return;
+57 |     default:
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+just_string.php:40:3
+38 | // <<__StrictSwitch>>
+39 | function missing_default(string $x): void {
+40 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+41 |     case "":
+   |     ^^^^^^^^ [1]
+42 |       return;
+   |       ^^^^^^^ [1]
+43 |   }
+   |   ^ [1]
+44 | }
+45 | 
+
+4 errors found

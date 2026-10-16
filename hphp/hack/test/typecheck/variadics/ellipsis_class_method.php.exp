@@ -1,4 +1,19 @@
-ERROR: File "ellipsis_class_method.php", line 6, characters 27-27:
-A variable name is expected here. (Parsing[1002])
-ERROR: File "ellipsis_class_method.php", line 6, characters 24-26:
-Was expecting a type hint on this variadic parameter (Typing[4033])
+error: Parsing[1002] A variable name is expected here. [1]
+
+ellipsis_class_method.php:6:27
+4 | 
+5 | class MyClass {
+6 |   public function foo2(...): void {}
+  |                           ^ [1]
+7 | }
+
+error: Typing[4033] Was expecting a type hint on this variadic parameter [1]
+
+ellipsis_class_method.php:6:24
+4 | 
+5 | class MyClass {
+6 |   public function foo2(...): void {}
+  |                        ^^^ [1]
+7 | }
+
+2 errors found

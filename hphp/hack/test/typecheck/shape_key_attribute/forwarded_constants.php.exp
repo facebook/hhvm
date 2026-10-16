@@ -1,8 +1,35 @@
-ERROR: File "forwarded_constants.php", line 16, characters 9-45:
-Class constant `ForwardedResolvableShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "forwarded_constants.php", line 11, characters 16-23:
-  The class constant is declared here
-ERROR: File "forwarded_constants.php", line 20, characters 14-50:
-Class constant `ForwardedResolvableShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "forwarded_constants.php", line 11, characters 16-23:
-  The class constant is declared here
+error: Typing[4533] Class constant `ForwardedResolvableShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+forwarded_constants.php:16:9
+ 9 |   <<__ShapeKey>>
+10 |   const string KEY = AnnotatedShapeKey::KEY;
+11 |   const string UNMARKED = AnnotatedShapeKey::KEY;
+   |                ^^^^^^^^ [2]
+12 | }
+13 | 
+14 | type ForwardedType = shape(ForwardedResolvableShapeKey::KEY => int);
+15 | type ForwardedMissingType =
+16 |   shape(ForwardedResolvableShapeKey::UNMARKED => int);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | 
+18 | function shape_key_expressions(): void {
+
+error: Typing[4533] Class constant `ForwardedResolvableShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+forwarded_constants.php:20:14
+ 9 |   <<__ShapeKey>>
+10 |   const string KEY = AnnotatedShapeKey::KEY;
+11 |   const string UNMARKED = AnnotatedShapeKey::KEY;
+   |                ^^^^^^^^ [2]
+12 | }
+13 | 
+   :
+18 | function shape_key_expressions(): void {
+19 |   $_ = shape(ForwardedResolvableShapeKey::KEY => 1);
+20 |   $_ = shape(ForwardedResolvableShapeKey::UNMARKED => 1);
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 | }
+
+2 errors found

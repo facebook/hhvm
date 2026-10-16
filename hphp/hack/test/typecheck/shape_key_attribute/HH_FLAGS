@@ -1,1 +1,2 @@
 --config require_shape_key_attribute=true
+--error-format plain_highlighted

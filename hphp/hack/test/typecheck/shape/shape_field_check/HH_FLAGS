@@ -1,2 +1,3 @@
 --allowed-fixme-codes-strict 4050
 --allowed-decl-fixme-codes 4050
+--error-format plain_highlighted

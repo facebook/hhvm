@@ -1,4 +1,16 @@
-ERROR: File "coalesce_doesnt_exist_abstract_shape.php", line 7, characters 5-19:
-You are accessing a field known to not exist (Typing[4321])
-  File "coalesce_doesnt_exist_abstract_shape.php", line 4, characters 29-60:
-  The field `c` is not defined in this shape
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `c` is not defined in this shape [2]
+
+coalesce_doesnt_exist_abstract_shape.php:7:5
+2 | 
+3 | abstract class AC {
+4 |   abstract const type TC as shape('a' => int, 'b' => string);
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 | 
+6 |   public function foo(this::TC $s): void {
+7 |     $s['c'] ?? true; // 'c' does not exist in TC
+  |     ^^^^^^^^^^^^^^^ [1]
+8 |   }
+9 | }
+
+1 error found

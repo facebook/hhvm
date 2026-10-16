@@ -1,8 +1,19 @@
-WARN: File "nullable_union.bad.php", line 8, characters 3-12:
-Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "nullable_union.bad.php", line 8, characters 6-6:
-  `int` is one of the disjoint types
-  File "nullable_union.bad.php", line 8, characters 9-11:
-  `string` is one of the disjoint types
-  File "nullable_union.bad.php", line 5, characters 35-35:
-  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
+warning: Warn[12017] Invalid type argument due to disjoint types in a union [1]
+-> `int` is one of the disjoint types [2]
+-> `string` is one of the disjoint types [3]
+-> This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors [4]
+
+nullable_union.bad.php:8:3
+3 | <<file: __EnableUnstableFeatures('no_disjoint_union')>>
+4 | 
+5 | function eq<<<__NoDisjointUnion>> T>(T $x, T $y): void {}
+  |                                   ^ [4]
+6 | 
+7 | function main(): void {
+8 |   eq(1, 'a');
+  |   ^^^^^^^^^^ [1]
+  |      ^ [2]
+  |         ^^^ [3]
+9 | }
+
+1 error found

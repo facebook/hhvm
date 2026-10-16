@@ -1,4 +1,19 @@
-ERROR: File "basics.php", line 35, characters 45-60:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "basics.php", line 10, characters 16-31:
-  The function call is defined here.
+error: Typing[4412] This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The function call is defined here. [2]
+
+basics.php:35:45
+ 8 | }
+ 9 | 
+10 | async function returns_readonly() : readonly Awaitable<Foo> {
+   |                ^^^^^^^^^^^^^^^^ [2]
+11 |   return new Foo();
+12 | }
+   :
+33 |   // because returns_readonly returns a readonly value, it must be explicitly
+34 |   // cast to readonly
+35 |   $readonly_first_readonly = readonly await returns_readonly();
+   |                                             ^^^^^^^^^^^^^^^^ [1]
+36 | 
+37 |   // like below
+
+1 error found

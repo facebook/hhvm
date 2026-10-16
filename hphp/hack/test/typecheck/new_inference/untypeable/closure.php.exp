@@ -1,6 +1,21 @@
-ERROR: File "closure.php", line 25, characters 17-18:
-Invalid argument (Typing[4110])
-  File "closure.php", line 18, characters 24-29:
-  Expected `string`
-  File "closure.php", line 20, characters 15-17:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+closure.php:25:17
+16 | }
+17 | 
+18 | function expect_string(string $_): void {}
+   |                        ^^^^^^ [2]
+19 | 
+20 | function test(int $a, string $b): void {
+   |               ^^^ [3]
+21 |   $r = new Ref();
+22 |   $f = getter($r);
+23 |   $c = $f($b);
+24 |   $r->set($a);
+25 |   expect_string($c);
+   |                 ^^ [1]
+26 | }
+
+1 error found

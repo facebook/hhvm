@@ -1,4 +1,12 @@
-ERROR: File "nullsafe-call-5.php", line 14, characters 25-27:
-You are trying to access the method `bar` but this object can be null. (Typing[4064])
-  File "nullsafe-call-5.php", line 14, characters 10-22:
-  This can be null (use of `?->` operator)
+error: Typing[4064] You are trying to access the method `bar` but this object can be null. [1]
+-> This can be null (use of `?->` operator) [2]
+
+nullsafe-call-5.php:14:25
+12 | class E {}
+13 | function test(?C $c, bool $b): ?E {
+14 |   return $c?->blah($b)->bar();
+   |          ^^^^^^^^^^^^^ [2]
+   |                         ^^^ [1]
+15 | }
+
+1 error found

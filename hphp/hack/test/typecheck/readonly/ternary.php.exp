@@ -1,2 +1,10 @@
-ERROR: File "ternary.php", line 24, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+ternary.php:24:3
+22 | function test(bool $b): void {
+23 |   $x = $b ? new Foo() : (readonly new Foo());
+24 |   $x->prop = 3; // error $x is readonly
+   |   ^^^^^^^^^^^^ [1]
+25 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "partially-abstract_bad.php", line 10, characters 14-14:
-`super` constraints are only legal on abstract type constants (NastCheck[3093])
+error: NastCheck[3093] `super` constraints are only legal on abstract type constants [1]
+
+partially-abstract_bad.php:10:14
+ 8 | 
+ 9 | abstract class A {
+10 |   const type T super int = arraykey;  // ERROR: no `abstract`
+   |              ^ [1]
+11 | }
+
+1 error found

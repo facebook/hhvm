@@ -1,2 +1,11 @@
-ERROR: File "chain_of_generic_bounds.php", line 7, characters 5-6:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+chain_of_generic_bounds.php:7:5
+5 | 
+6 |   public function nasty<
+7 |     T1,
+  |     ^^ [1]
+8 |     T2,
+9 |     T3,
+
+1 error found

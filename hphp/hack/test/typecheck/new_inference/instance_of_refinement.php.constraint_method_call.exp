@@ -1,56 +1,209 @@
-WARN: File "instance_of_refinement.php", line 22, characters 7-20:
-This `is` check is always `true`. The expression on the left has type `string` which is a subtype of `arraykey`. (Warn[12009])
-WARN: File "instance_of_refinement.php", line 35, characters 7-13:
-This `is` check is always `false`. The expression on the left has type `(string | string)` which shares no values with `B`. (Warn[12010])
-WARN: File "instance_of_refinement.php", line 50, characters 7-16:
-This `is` check is always `true`. The expression on the left has type `A<string>` which is a subtype of `A<string>`. (Warn[12009])
-WARN: File "instance_of_refinement.php", line 63, characters 14-25:
-This `is` check is always `true`. The expression on the left has type `string` which is a subtype of `string`. (Warn[12009])
-ERROR: File "instance_of_refinement.php", line 25, characters 16-17:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `(int | not arraykey)`
-  File "instance_of_refinement.php", line 20, characters 14-15:
-  But got `string`
-ERROR: File "instance_of_refinement.php", line 25, characters 16-17:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `int`
-  File "instance_of_refinement.php", line 20, characters 14-15:
-  But got `string`
-ERROR: File "instance_of_refinement.php", line 25, characters 16-17:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 22, characters 13-20:
-  Expected `nothing` from this `is` expression test
-  File "instance_of_refinement.php", line 20, characters 14-15:
-  But got `string`
-ERROR: File "instance_of_refinement.php", line 43, characters 13-14:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 42, characters 13-16:
-  Expected `T#3` from this `is` expression test
-  File "instance_of_refinement.php", line 10, characters 23-23:
-    via this generic `T`
-  File "instance_of_refinement.php", line 43, characters 13-14:
-  But got `string`
-ERROR: File "instance_of_refinement.php", line 44, characters 16-24:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `int`
-  File "instance_of_refinement.php", line 42, characters 13-16:
-  But got `T#3` from this `is` expression test
-  File "instance_of_refinement.php", line 7, characters 26-26:
-    via this generic `T`
-ERROR: File "instance_of_refinement.php", line 44, characters 16-24:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `int`
-  File "instance_of_refinement.php", line 42, characters 13-16:
-  But got `mixed` from this `is` expression test
-  File "instance_of_refinement.php", line 7, characters 26-26:
-    via this generic `T`
-ERROR: File "instance_of_refinement.php", line 52, characters 16-24:
-Invalid argument (Typing[4110])
-  File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `int`
-  File "instance_of_refinement.php", line 49, characters 14-15:
-  But got `string`
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `string` which is a subtype of `arraykey`. [1]
+
+instance_of_refinement.php:22:7
+20 |   $x = new A("");
+21 |   $y = $x->get();
+22 |   if ($y is arraykey) {
+   |       ^^^^^^^^^^^^^^ [1]
+23 |     // hh_show($y); // legacy: string, new infer: #28389
+24 |     expect_arraykey($y);
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(string | string)` which shares no values with `B`. [1]
+
+instance_of_refinement.php:35:7
+33 |   $x = new A("");
+34 |   $y = $x->get();
+35 |   if ($y is B) {}
+   |       ^^^^^^^ [1]
+36 |   // hh_show($y); // legacy: (string | B), new infer: (#28401 | B)
+37 |   return $y;
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `A<string>` which is a subtype of `A<string>`. [1]
+
+instance_of_refinement.php:50:7
+48 | function test4(): void {
+49 |   $x = new A("");
+50 |   if ($x is A<_>) {
+   |       ^^^^^^^^^^ [1]
+51 |     expect_string($x->get());
+52 |     expect_int($x->get()); // legacy and new inference: error int incompatible with T#1
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `string` which is a subtype of `string`. [1]
+
+instance_of_refinement.php:63:14
+61 |   if ($y is int) {
+62 |     expect_int($y);
+63 |   } else if ($y is string) {
+   |              ^^^^^^^^^^^^ [1]
+64 |     expect_string($y);
+65 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int | not arraykey)` [2]
+-> But got `string` [3]
+
+instance_of_refinement.php:25:16
+15 | 
+16 | function expect_arraykey(arraykey $_): void {}
+17 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+18 | 
+19 | function test1(arraykey $k): arraykey {
+20 |   $x = new A("");
+   |              ^^ [3]
+21 |   $y = $x->get();
+22 |   if ($y is arraykey) {
+23 |     // hh_show($y); // legacy: string, new infer: #28389
+24 |     expect_arraykey($y);
+25 |     expect_int($y); // legacy and new inf: error int incompatible with string
+   |                ^^ [1]
+26 |   } else {
+27 |     $y = $k;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+instance_of_refinement.php:25:16
+15 | 
+16 | function expect_arraykey(arraykey $_): void {}
+17 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+18 | 
+19 | function test1(arraykey $k): arraykey {
+20 |   $x = new A("");
+   |              ^^ [3]
+21 |   $y = $x->get();
+22 |   if ($y is arraykey) {
+23 |     // hh_show($y); // legacy: string, new infer: #28389
+24 |     expect_arraykey($y);
+25 |     expect_int($y); // legacy and new inf: error int incompatible with string
+   |                ^^ [1]
+26 |   } else {
+27 |     $y = $k;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `nothing` from this `is` expression test [2]
+-> But got `string` [3]
+
+instance_of_refinement.php:25:16
+18 | 
+19 | function test1(arraykey $k): arraykey {
+20 |   $x = new A("");
+   |              ^^ [3]
+21 |   $y = $x->get();
+22 |   if ($y is arraykey) {
+   |             ^^^^^^^^ [2]
+23 |     // hh_show($y); // legacy: string, new infer: #28389
+24 |     expect_arraykey($y);
+25 |     expect_int($y); // legacy and new inf: error int incompatible with string
+   |                ^^ [1]
+26 |   } else {
+27 |     $y = $k;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T#3` from this `is` expression test [2]
+->   via this generic `T` [3]
+-> But got `string` [1]
+
+instance_of_refinement.php:43:13
+ 8 |     return $this->x;
+ 9 |   }
+10 |   public function set(T $x): void {
+   |                       ^ [3]
+11 |     $this->x = $x;
+12 |   }
+   :
+40 | function test3(): void {
+41 |   $x = new C();
+42 |   if ($x is A<_>) {
+   |             ^^^^ [2]
+43 |     $x->set(""); // legacy and new inference: error string incompatible with T#1
+   |             ^^ [1]
+44 |     expect_int($x->get()); // legacy and new inference: error T#1 incompatible with int
+45 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `T#3` from this `is` expression test [3]
+->   via this generic `T` [4]
+
+instance_of_refinement.php:44:16
+ 5 | class A<T> extends C {
+ 6 |   public function __construct(private T $x) {}
+ 7 |   public function get(): T {
+   |                          ^ [4]
+ 8 |     return $this->x;
+ 9 |   }
+   :
+15 | 
+16 | function expect_arraykey(arraykey $_): void {}
+17 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+18 | 
+19 | function test1(arraykey $k): arraykey {
+   :
+40 | function test3(): void {
+41 |   $x = new C();
+42 |   if ($x is A<_>) {
+   |             ^^^^ [3]
+43 |     $x->set(""); // legacy and new inference: error string incompatible with T#1
+44 |     expect_int($x->get()); // legacy and new inference: error T#1 incompatible with int
+   |                ^^^^^^^^^ [1]
+45 |   }
+46 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` from this `is` expression test [3]
+->   via this generic `T` [4]
+
+instance_of_refinement.php:44:16
+ 5 | class A<T> extends C {
+ 6 |   public function __construct(private T $x) {}
+ 7 |   public function get(): T {
+   |                          ^ [4]
+ 8 |     return $this->x;
+ 9 |   }
+   :
+15 | 
+16 | function expect_arraykey(arraykey $_): void {}
+17 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+18 | 
+19 | function test1(arraykey $k): arraykey {
+   :
+40 | function test3(): void {
+41 |   $x = new C();
+42 |   if ($x is A<_>) {
+   |             ^^^^ [3]
+43 |     $x->set(""); // legacy and new inference: error string incompatible with T#1
+44 |     expect_int($x->get()); // legacy and new inference: error T#1 incompatible with int
+   |                ^^^^^^^^^ [1]
+45 |   }
+46 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+instance_of_refinement.php:52:16
+15 | 
+16 | function expect_arraykey(arraykey $_): void {}
+17 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+18 | 
+19 | function test1(arraykey $k): arraykey {
+   :
+47 | 
+48 | function test4(): void {
+49 |   $x = new A("");
+   |              ^^ [3]
+50 |   if ($x is A<_>) {
+51 |     expect_string($x->get());
+52 |     expect_int($x->get()); // legacy and new inference: error int incompatible with T#1
+   |                ^^^^^^^^^ [1]
+53 |   }
+54 | }
+
+11 errors found

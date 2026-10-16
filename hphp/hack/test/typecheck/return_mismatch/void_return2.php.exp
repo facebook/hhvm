@@ -1,14 +1,63 @@
-WARN: File "void_return2.php", line 8, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "void_return2.php", line 8, characters 3-10:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "void_return2.php", line 8, characters 8-10:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "void_return2.php", line 9, characters 10-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "void_return2.php", line 3, characters 10-10:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "void_return2.php", line 9, characters 3-12:
-You cannot return a value (Typing[4084])
-  File "void_return2.php", line 7, characters 15-18:
-  This is a `void` function
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+void_return2.php:8:3
+ 6 | 
+ 7 | function g(): void {
+ 8 |   $x = f();
+   |   ^^ [1]
+ 9 |   return $x;
+10 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+void_return2.php:8:3
+ 6 | 
+ 7 | function g(): void {
+ 8 |   $x = f();
+   |   ^^^^^^^^ [1]
+ 9 |   return $x;
+10 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+void_return2.php:8:8
+ 6 | 
+ 7 | function g(): void {
+ 8 |   $x = f();
+   |        ^^^ [1]
+ 9 |   return $x;
+10 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+void_return2.php:9:10
+ 7 | function g(): void {
+ 8 |   $x = f();
+ 9 |   return $x;
+   |          ^^ [1]
+10 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+void_return2.php:3:10
+1 | <?hh
+2 | 
+3 | function f() {
+  |          ^ [1]
+4 |   return 1;
+5 | }
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+void_return2.php:9:3
+ 5 | }
+ 6 | 
+ 7 | function g(): void {
+   |               ^^^^ [2]
+ 8 |   $x = f();
+ 9 |   return $x;
+   |   ^^^^^^^^^^ [1]
+10 | }
+
+6 errors found

@@ -1,12 +1,37 @@
-ERROR: File "alias_typename.php", line 12, characters 10-17:
-Invalid argument (Typing[4110])
-  File "alias_typename.php", line 8, characters 26-26:
-  Expected `C`
-  File "alias_typename.php", line 12, characters 10-10:
-  But got `D`
-ERROR: File "alias_typename.php", line 13, characters 10-17:
-Invalid argument (Typing[4110])
-  File "alias_typename.php", line 8, characters 26-26:
-  Expected `C`
-  File "alias_typename.php", line 13, characters 17-17:
-  But got `D`
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+-> But got `D` [3]
+
+alias_typename.php:12:10
+ 6 | type Y = D;
+ 7 | 
+ 8 | function expect(typename<C> $t): void {}
+   |                          ^ [2]
+ 9 | function f(): void {
+10 |   expect(X::class);
+11 |   expect(nameof X);
+12 |   expect(Y::class);
+   |          ^^^^^^^^ [1]
+   |          ^ [3]
+13 |   expect(nameof Y);
+14 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `C` [2]
+-> But got `D` [3]
+
+alias_typename.php:13:10
+ 6 | type Y = D;
+ 7 | 
+ 8 | function expect(typename<C> $t): void {}
+   |                          ^ [2]
+ 9 | function f(): void {
+10 |   expect(X::class);
+11 |   expect(nameof X);
+12 |   expect(Y::class);
+13 |   expect(nameof Y);
+   |          ^^^^^^^^ [1]
+   |                 ^ [3]
+14 | }
+
+2 errors found

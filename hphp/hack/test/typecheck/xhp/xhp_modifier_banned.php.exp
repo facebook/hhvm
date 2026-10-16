@@ -1,2 +1,9 @@
-ERROR: File "xhp_modifier_banned.php", line 4, characters 5-5:
-Encountered unexpected token `XHP`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `XHP`. [1]
+
+xhp_modifier_banned.php:4:5
+2 | 
+3 | // If the xhp keyword is not enabled by a flag this should be an error.
+4 | xhp class foo {}
+  |     ^ [1]
+
+1 error found

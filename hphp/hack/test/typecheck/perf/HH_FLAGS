@@ -1,1 +1,2 @@
 --timeout 8
+--error-format plain_highlighted

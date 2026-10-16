@@ -1,24 +1,91 @@
-ERROR: File "or.php", line 6, characters 16-17:
-Invalid argument (Typing[4110])
-  File "or.php", line 25, characters 21-23:
-  Expected `int`
-  File "or.php", line 4, characters 13-18:
-  But got `string` from this `is` expression test
-ERROR: File "or.php", line 7, characters 19-20:
-Invalid argument (Typing[4110])
-  File "or.php", line 26, characters 24-29:
-  Expected `string`
-  File "or.php", line 4, characters 29-31:
-  But got `int` from this `is` expression test
-ERROR: File "or.php", line 13, characters 19-20:
-Invalid argument (Typing[4110])
-  File "or.php", line 26, characters 24-29:
-  Expected `string`
-  File "or.php", line 11, characters 12-16:
-  But got `?nonnull`
-ERROR: File "or.php", line 14, characters 19-20:
-Invalid argument (Typing[4110])
-  File "or.php", line 26, characters 24-29:
-  Expected `string`
-  File "or.php", line 11, characters 22-26:
-  But got `mixed`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` from this `is` expression test [3]
+
+or.php:6:16
+ 2 | 
+ 3 | function f(mixed $x): void {
+ 4 |   if ($x is string || $x is int) {
+   |             ^^^^^^ [3]
+ 5 |     expect_arraykey($x);
+ 6 |     expect_int($x); // error
+   |                ^^ [1]
+ 7 |     expect_string($x); // error
+ 8 |   }
+   :
+23 | 
+24 | function expect_arraykey(arraykey $x): void {}
+25 | function expect_int(int $x): void {}
+   |                     ^^^ [2]
+26 | function expect_string(string $x): void {}
+27 | function is_zero(int $x): bool {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` from this `is` expression test [3]
+
+or.php:7:19
+ 2 | 
+ 3 | function f(mixed $x): void {
+ 4 |   if ($x is string || $x is int) {
+   |                             ^^^ [3]
+ 5 |     expect_arraykey($x);
+ 6 |     expect_int($x); // error
+ 7 |     expect_string($x); // error
+   |                   ^^ [1]
+ 8 |   }
+ 9 | }
+   :
+24 | function expect_arraykey(arraykey $x): void {}
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+27 | function is_zero(int $x): bool {
+28 |   return $x === 0;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `?nonnull` [3]
+
+or.php:13:19
+ 9 | }
+10 | 
+11 | function g(mixed $x, mixed $y): void {
+   |            ^^^^^ [3]
+12 |   if ($x is string || $y is string) {
+13 |     expect_string($x); // error
+   |                   ^^ [1]
+14 |     expect_string($y); // error
+15 |   }
+   :
+24 | function expect_arraykey(arraykey $x): void {}
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+27 | function is_zero(int $x): bool {
+28 |   return $x === 0;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+
+or.php:14:19
+ 9 | }
+10 | 
+11 | function g(mixed $x, mixed $y): void {
+   |                      ^^^^^ [3]
+12 |   if ($x is string || $y is string) {
+13 |     expect_string($x); // error
+14 |     expect_string($y); // error
+   |                   ^^ [1]
+15 |   }
+16 | }
+   :
+24 | function expect_arraykey(arraykey $x): void {}
+25 | function expect_int(int $x): void {}
+26 | function expect_string(string $x): void {}
+   |                        ^^^^^^ [2]
+27 | function is_zero(int $x): bool {
+28 |   return $x === 0;
+
+4 errors found

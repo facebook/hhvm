@@ -1,2 +1,10 @@
-ERROR: File "splat_multiple.php", line 7, characters 12-16:
-Too many splat operators `...`. An argument list can have at most one splat operator. (Parsing[1002])
+error: Parsing[1002] Too many splat operators `...`. An argument list can have at most one splat operator. [1]
+
+splat_multiple.php:7:12
+5 | function test(): void {
+6 |   $v = vec[];
+7 |   f(...$v, ...$v);
+  |            ^^^^^ [1]
+8 | }
+
+1 error found

@@ -1,30 +1,62 @@
-ERROR: File "concat.php", line 7, characters 12-16:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat.php", line 7, characters 12-16:
-  Expected `string` or `int`
-  File "concat.php", line 7, characters 12-16:
-  But got `bool`
-ERROR: File "concat.php", line 8, characters 3-6:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat.php", line 8, characters 3-6:
-  Expected `string` or `int`
-  File "concat.php", line 8, characters 3-6:
-  But got `null`
-ERROR: File "concat.php", line 9, characters 12-16:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat.php", line 9, characters 12-16:
-  Expected `string` or `int`
-  File "concat.php", line 9, characters 12-16:
-  But got `float`
-ERROR: File "concat.php", line 10, characters 12-20:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat.php", line 10, characters 12-20:
-  Expected `string` or `int`
-  File "concat.php", line 10, characters 16-18:
-  But got `Foo`
-ERROR: File "concat.php", line 11, characters 8-11:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat.php", line 11, characters 8-11:
-  Expected `string` or `int`
-  File "concat.php", line 11, characters 8-11:
-  But got `null`
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [1]
+
+concat.php:7:12
+5 | // These should all have typing errors with the stricter rules.
+6 | function bad_concat(dynamic $a): void {
+7 |   "test" . false;
+  |            ^^^^^ [1]
+8 |   null . "test";
+9 |   "test" . 123.0;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [1]
+
+concat.php:8:3
+ 6 | function bad_concat(dynamic $a): void {
+ 7 |   "test" . false;
+ 8 |   null . "test";
+   |   ^^^^ [1]
+ 9 |   "test" . 123.0;
+10 |   "test" . new Foo();
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `float` [1]
+
+concat.php:9:12
+ 7 |   "test" . false;
+ 8 |   null . "test";
+ 9 |   "test" . 123.0;
+   |            ^^^^^ [1]
+10 |   "test" . new Foo();
+11 |   $a . null;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `Foo` [2]
+
+concat.php:10:12
+ 8 |   null . "test";
+ 9 |   "test" . 123.0;
+10 |   "test" . new Foo();
+   |            ^^^^^^^^^ [1]
+   |                ^^^ [2]
+11 |   $a . null;
+12 | }
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [1]
+
+concat.php:11:8
+ 9 |   "test" . 123.0;
+10 |   "test" . new Foo();
+11 |   $a . null;
+   |        ^^^^ [1]
+12 | }
+13 | 
+
+5 errors found

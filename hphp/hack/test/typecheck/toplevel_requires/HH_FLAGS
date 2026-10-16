@@ -1,1 +1,2 @@
 --config disallow_toplevel_requires=false
+--error-format plain_highlighted

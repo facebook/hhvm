@@ -1,8 +1,32 @@
-ERROR: File "classname.php", line 23, characters 3-3:
-Erased generics can only be used in type hints because they do not exist at runtime (Parsing[1002])
-ERROR: File "classname.php", line 18, characters 3-10:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "classname.php", line 12, characters 6-10:
-You are trying to access the static property `class` but this is a value of generic type T (Typing[4252])
-  File "classname.php", line 12, characters 3-3:
-  Definition is here
+error: Parsing[1002] Erased generics can only be used in type hints because they do not exist at runtime [1]
+
+classname.php:23:3
+21 | function test2<T>(): void {
+22 |   // Do not allow erased generics
+23 |   T::class;
+   |   ^ [1]
+24 | }
+
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+classname.php:18:3
+16 | 
+17 |   // Should error
+18 |   NotFound::class;
+   |   ^^^^^^^^ [1]
+19 | }
+20 | 
+
+error: Typing[4252] You are trying to access the static property `class` but this is a value of generic type T [1]
+-> Definition is here [2]
+
+classname.php:12:6
+10 |   // Allow reified classes
+11 |   // TODO: Why is this a typing error but not a naming error?
+12 |   T::class;
+   |   ^ [2]
+   |      ^^^^^ [1]
+13 | 
+14 |   // Allow typedefs
+
+3 errors found

@@ -1,48 +1,131 @@
-ERROR: File "constraint_forms_bad_converse.php", line 9, characters 10-11:
-Invalid return type (Typing[4522])
-  File "constraint_forms_bad_converse.php", line 7, characters 3-26:
-  This shape is not guaranteed to have the fields required here
-  File "constraint_forms_bad_converse.php", line 8, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "constraint_forms_bad_converse.php", line 9, characters 10-11:
-Invalid return type (Typing[4110])
-  File "constraint_forms_bad_converse.php", line 9, characters 3-12:
-  Expected `nothing`
-  File "constraint_forms_bad_converse.php", line 6, characters 25-34:
-  But got `mixed`
-ERROR: File "constraint_forms_bad_converse.php", line 15, characters 10-11:
-Invalid return type (Typing[4522])
-  File "constraint_forms_bad_converse.php", line 13, characters 3-26:
-  This shape is not guaranteed to have the fields required here
-  File "constraint_forms_bad_converse.php", line 14, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "constraint_forms_bad_converse.php", line 15, characters 10-11:
-Invalid return type (Typing[4110])
-  File "constraint_forms_bad_converse.php", line 15, characters 3-12:
-  Expected `nothing`
-  File "constraint_forms_bad_converse.php", line 12, characters 55-64:
-  But got `mixed`
-ERROR: File "constraint_forms_bad_converse.php", line 21, characters 10-11:
-Invalid return type (Typing[4522])
-  File "constraint_forms_bad_converse.php", line 19, characters 3-26:
-  This shape is not guaranteed to have the fields required here
-  File "constraint_forms_bad_converse.php", line 20, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "constraint_forms_bad_converse.php", line 21, characters 10-11:
-Invalid return type (Typing[4110])
-  File "constraint_forms_bad_converse.php", line 21, characters 3-12:
-  Expected `nothing`
-  File "constraint_forms_bad_converse.php", line 18, characters 31-40:
-  But got `mixed`
-ERROR: File "constraint_forms_bad_converse.php", line 27, characters 10-11:
-Invalid return type (Typing[4522])
-  File "constraint_forms_bad_converse.php", line 25, characters 3-26:
-  This shape is not guaranteed to have the fields required here
-  File "constraint_forms_bad_converse.php", line 26, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "constraint_forms_bad_converse.php", line 27, characters 10-11:
-Invalid return type (Typing[4110])
-  File "constraint_forms_bad_converse.php", line 27, characters 3-12:
-  Expected `nothing`
-  File "constraint_forms_bad_converse.php", line 24, characters 34-43:
-  But got `mixed`
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+constraint_forms_bad_converse.php:9:10
+ 5 | // cannot be returned as the same row over `T2`.
+ 6 | function above_as<T1 as shape(...), <<__Explicit>> T2 as T1>(
+ 7 |   shape(...T1, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 | ): shape(...T2, 'q' => int) {
+   |             ^^ [3]
+ 9 |   return $s;
+   |          ^^ [1]
+10 | }
+11 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+constraint_forms_bad_converse.php:9:10
+ 4 | // None of these constraint forms establishes `T1 <: T2`, so a row over `T1`
+ 5 | // cannot be returned as the same row over `T2`.
+ 6 | function above_as<T1 as shape(...), <<__Explicit>> T2 as T1>(
+   |                         ^^^^^^^^^^ [3]
+ 7 |   shape(...T1, 'q' => int) $s,
+ 8 | ): shape(...T2, 'q' => int) {
+ 9 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+10 | }
+11 | 
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+constraint_forms_bad_converse.php:15:10
+11 | 
+12 | function above_super<T2 as shape(...), T1 super T2 as shape(...)>(
+13 |   shape(...T1, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | ): shape(...T2, 'q' => int) {
+   |             ^^ [3]
+15 |   return $s;
+   |          ^^ [1]
+16 | }
+17 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+constraint_forms_bad_converse.php:15:10
+10 | }
+11 | 
+12 | function above_super<T2 as shape(...), T1 super T2 as shape(...)>(
+   |                                                       ^^^^^^^^^^ [3]
+13 |   shape(...T1, 'q' => int) $s,
+14 | ): shape(...T2, 'q' => int) {
+15 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+16 | }
+17 | 
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+constraint_forms_bad_converse.php:21:10
+17 | 
+18 | function above_where_as<T1 as shape(...), <<__Explicit>> T2 as shape(...)>(
+19 |   shape(...T1, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+20 | ): shape(...T2, 'q' => int) where T2 as T1 {
+   |             ^^ [3]
+21 |   return $s;
+   |          ^^ [1]
+22 | }
+23 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+constraint_forms_bad_converse.php:21:10
+16 | }
+17 | 
+18 | function above_where_as<T1 as shape(...), <<__Explicit>> T2 as shape(...)>(
+   |                               ^^^^^^^^^^ [3]
+19 |   shape(...T1, 'q' => int) $s,
+20 | ): shape(...T2, 'q' => int) where T2 as T1 {
+21 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+22 | }
+23 | 
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+constraint_forms_bad_converse.php:27:10
+23 | 
+24 | function above_where_super<T1 as shape(...), <<__Explicit>> T2 as shape(...)>(
+25 |   shape(...T1, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+26 | ): shape(...T2, 'q' => int) where T1 super T2 {
+   |             ^^ [3]
+27 |   return $s;
+   |          ^^ [1]
+28 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+constraint_forms_bad_converse.php:27:10
+22 | }
+23 | 
+24 | function above_where_super<T1 as shape(...), <<__Explicit>> T2 as shape(...)>(
+   |                                  ^^^^^^^^^^ [3]
+25 |   shape(...T1, 'q' => int) $s,
+26 | ): shape(...T2, 'q' => int) where T1 super T2 {
+27 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+28 | }
+
+8 errors found

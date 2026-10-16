@@ -1,9 +1,32 @@
-WARN: File "union_polyvariant.php", line 17, characters 27-41:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "union_polyvariant.php", line 17, characters 27-41:
-This expression is likely always `false` (Warn[12001])
-  File "union_polyvariant.php", line 8, characters 25-30:
-  This is a string
-  File "union_polyvariant.php", line 17, characters 41-41:
-  This is an int
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `int` [1]
+
+union_polyvariant.php:17:27
+15 | function foo1(Vector<C> $v1, Vector<B> $v2, bool $b):void {
+16 |   $v = $b ? $v1 : $v2;
+17 |   $xs = $v->filter($x ==> $x->bar() === 5);
+   |                           ^^^^^^^^^^^^^^^ [1]
+18 | }
+19 | 
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is a string [2]
+-> This is an int [3]
+
+union_polyvariant.php:17:27
+ 6 | }
+ 7 | class B {
+ 8 |   public function bar():string { return "a"; }
+   |                         ^^^^^^ [2]
+ 9 | }
+10 | class D {
+   :
+15 | function foo1(Vector<C> $v1, Vector<B> $v2, bool $b):void {
+16 |   $v = $b ? $v1 : $v2;
+17 |   $xs = $v->filter($x ==> $x->bar() === 5);
+   |                           ^^^^^^^^^^^^^^^ [1]
+   |                                         ^ [3]
+18 | }
+19 | 
+
+2 errors found

@@ -1,18 +1,44 @@
-ERROR: File "t22199694.php", line 12, characters 15-38:
-Invalid argument (Typing[4323])
-  File "t22199694.php", line 5, characters 30-30:
-  `T` is a constrained type parameter
-  File "t22199694.php", line 5, characters 35-37:
-  This type constraint is violated
-  File "t22199694.php", line 5, characters 35-37:
-  Expected `num`
-  File "t22199694.php", line 12, characters 15-38:
-  But got `vec<int>`
-ERROR: File "t22199694.php", line 12, characters 15-38:
-Invalid argument (Typing[4110])
-  File "t22199694.php", line 12, characters 11-13:
-  Expected `~_` because type parameter `T` of `max` could not be determined. Please add explicit type parameters to the invocation of `max`
-  File "t22199694.php", line 5, characters 40-40:
-    via this generic `T`
-  File "t22199694.php", line 12, characters 15-38:
-  But got `vec<(int | (nonnull & dynamic))>`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `num` [3]
+-> But got `vec<int>` [1]
+
+t22199694.php:12:15
+ 3 | 
+ 4 | abstract final class A1 {
+ 5 |   public static function max<T as num>(T $first_number): T {
+   |                              ^ [2]
+   |                                   ^^^ [3]
+ 6 |     return $first_number;
+ 7 |   }
+   :
+10 |   }
+11 |   public static function funny(varray<int> $v): void {
+12 |     self::max(vec[self::last($v) ?? 0]);
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   }
+14 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~_` because type parameter `T` of `max` could not be determined. Please add explicit type parameters to the invocation of `max` [2]
+->   via this generic `T` [3]
+-> But got `vec<(int | (nonnull & dynamic))>` [1]
+
+t22199694.php:12:15
+ 3 | 
+ 4 | abstract final class A1 {
+ 5 |   public static function max<T as num>(T $first_number): T {
+   |                                        ^ [3]
+ 6 |     return $first_number;
+ 7 |   }
+   :
+10 |   }
+11 |   public static function funny(varray<int> $v): void {
+12 |     self::max(vec[self::last($v) ?? 0]);
+   |           ^^^ [2]
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   }
+14 | }
+
+2 errors found

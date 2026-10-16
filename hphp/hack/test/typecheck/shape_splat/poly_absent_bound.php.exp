@@ -1,6 +1,21 @@
-ERROR: File "poly_absent_bound.php", line 22, characters 12-13:
-Invalid argument (Typing[4057])
-  File "poly_absent_bound.php", line 5, characters 24-53:
-  The field `name` is missing
-  File "poly_absent_bound.php", line 21, characters 26-31:
-  The field `name` is required here
+error: Typing[4057] Invalid argument [1]
+-> The field `name` is missing [2]
+-> The field `name` is required here [3]
+
+poly_absent_bound.php:22:12
+ 3 | 
+ 4 | // T is bounded to exclude 'name' via absent
+ 5 | function add_name<T as shape(?'name' => nothing, ...)>(
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 6 |   T $s,
+ 7 |   string $name,
+   :
+19 | function test_absent_bound_conflict(): void {
+20 |   // Error: input already has 'name' => int, violates absent bound
+21 |   $s = shape('id' => 42, 'name' => 123);
+   |                          ^^^^^^ [3]
+22 |   add_name($s, 'Alice');
+   |            ^^ [1]
+23 | }
+
+1 error found

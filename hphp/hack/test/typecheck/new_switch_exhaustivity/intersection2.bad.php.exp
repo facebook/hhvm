@@ -1,7 +1,29 @@
-WARN: File "intersection2.bad.php", line 8, characters 10-13:
-Invalid case: This case will never match.
-A value of type `(I & J)` can never be equal to a value of type `null` (Warn[12007])
-ERROR: File "intersection2.bad.php", line 7, characters 3-47:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "intersection2.bad.php", line 7, characters 11-12:
-  The scrutinee has type `(I & J)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `(I & J)` can never be equal to a value of type `null` [1]
+
+intersection2.bad.php:8:10
+ 6 | function main((I & J) $x): void {
+ 7 |   switch ($x) {
+ 8 |     case null:
+   |          ^^^^ [1]
+ 9 |       break;
+10 |   }
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `(I & J)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+intersection2.bad.php:7:3
+ 5 | 
+ 6 | function main((I & J) $x): void {
+ 7 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 8 |     case null:
+   |     ^^^^^^^^^^ [1]
+ 9 |       break;
+   |       ^^^^^^ [1]
+10 |   }
+   |   ^ [1]
+11 | }
+
+2 errors found

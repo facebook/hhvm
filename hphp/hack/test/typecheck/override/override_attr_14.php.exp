@@ -1,2 +1,10 @@
-ERROR: File "override_attr_14.php", line 5, characters 19-21:
-`IFoo` has no parent class with a method `bar` to override (Typing[4087])
+error: Typing[4087] `IFoo` has no parent class with a method `bar` to override [1]
+
+override_attr_14.php:5:19
+3 | interface IFoo {
+4 |   <<__Override>>
+5 |   public function bar(): void;
+  |                   ^^^ [1]
+6 | }
+
+1 error found

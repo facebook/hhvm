@@ -1,6 +1,17 @@
-ERROR: File "enforceable_targ_new.php", line 10, characters 9-19:
-Invalid type (Typing[4302])
-  File "enforceable_targ_new.php", line 7, characters 27-28:
-  Type parameter `Tc` was declared `__Enforceable` here
-  File "enforceable_targ_new.php", line 10, characters 9-19:
-  This type is not enforceable because it has a type with an erased generic type argument
+error: Typing[4302] Invalid type [1]
+-> Type parameter `Tc` was declared `__Enforceable` here [2]
+-> This type is not enforceable because it has a type with an erased generic type argument [1]
+
+enforceable_targ_new.php:10:9
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+ 7 | class C<<<__Enforceable>> Tc> {}
+   |                           ^^ [2]
+ 8 | 
+ 9 | function test(): void {
+10 |   new C<Erased<int>>();
+   |         ^^^^^^^^^^^ [1]
+11 |   new C<Reified<int>>();
+12 |   new C<Reified<Erased<int>>>();
+
+1 error found

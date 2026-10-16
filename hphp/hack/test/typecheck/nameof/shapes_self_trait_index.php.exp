@@ -1,4 +1,21 @@
-ERROR: File "shapes_self_trait_index.php", line 5, characters 15-25:
-`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "shapes_self_trait_index.php", line 9, characters 8-18:
-`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+error: Naming[2137] `nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+shapes_self_trait_index.php:5:15
+3 | trait T {
+4 |   public function read(shape(nameof T => int) $s): int {
+5 |     return $s[nameof self];
+  |               ^^^^^^^^^^^ [1]
+6 |   }
+7 | 
+
+error: Naming[2137] `nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+shapes_self_trait_index.php:9:8
+ 7 | 
+ 8 |   public function write(shape(...) $s): void {
+ 9 |     $s[nameof self] = 42;
+   |        ^^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+2 errors found

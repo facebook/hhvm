@@ -1,2 +1,11 @@
-ERROR: File "infer_same_var_fallback_cycle.php", line 23, characters 35-45:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+infer_same_var_fallback_cycle.php:23:35
+21 |   TPrefix $prefix,
+22 | ): void {
+23 |   $identity = (ShapeSplatCycleBox<shape(..._)> $box) ==> $box->get();
+   |                                   ^^^^^^^^^^^ [1]
+24 |   $inferred = infer_prefixed_identity($prefix, $identity);
+25 |   hh_expect<shape('x' => int)>($inferred);
+
+1 error found

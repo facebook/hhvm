@@ -1,4 +1,20 @@
-ERROR: File "internal_class.php--non_test.php", line 5, characters 14-24:
-Cannot access an internal element from module `foo` in the default module (Typing[4444])
-  File "internal_class.php--foo.php", line 6, characters 16-26:
-  This is from module `foo`
+error: Typing[4444] Cannot access an internal element from module `foo` in the default module [1]
+-> This is from module `foo` [2]
+
+internal_class.php--non_test.php:5:14
+3 | class NotATest2 {
+4 |   public function test(): void {
+5 |     $f = new InternalFoo(); // error: not in test context
+  |              ^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+internal_class.php--foo.php:6:16
+4 | 
+5 | <<__TestsBypassVisibility>>
+6 | internal class InternalFoo {
+  |                ^^^^^^^^^^^ [2]
+7 |   <<__TestsBypassVisibility>>
+8 |   internal function secret(): int { return 42; }
+
+1 error found

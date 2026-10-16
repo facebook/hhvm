@@ -1,8 +1,40 @@
-ERROR: File "modify.php", line 11, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "modify.php", line 17, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "modify.php", line 26, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "modify.php", line 27, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+modify.php:11:3
+ 9 |   $x = readonly new Foo();
+10 |   // Error $x is readonly
+11 |   $x->prop = 4;
+   |   ^^^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+modify.php:17:3
+15 |   $x = new Foo();
+16 |   $x = readonly new Foo();
+17 |   $x->prop = 4;
+   |   ^^^^^^^^^^^^ [1]
+18 |   $x = new Foo();
+19 |   $x->prop = 4; // ok
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+modify.php:26:3
+24 |     $y = new Foo();
+25 |   }
+26 |   $y->prop = 4; //error, $y (can be) readonly from branch 1
+   |   ^^^^^^^^^^^^ [1]
+27 |   $x->prop = 4; // error, $x (can be) readonly from branch 1
+28 | }
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+modify.php:27:3
+25 |   }
+26 |   $y->prop = 4; //error, $y (can be) readonly from branch 1
+27 |   $x->prop = 4; // error, $x (can be) readonly from branch 1
+   |   ^^^^^^^^^^^^ [1]
+28 | }
+
+4 errors found

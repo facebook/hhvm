@@ -1,6 +1,16 @@
-ERROR: File "valid_targ_funcall.php", line 7, characters 5-5:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_funcall.php", line 7, characters 5-5:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_funcall.php", line 4, characters 18-22:
-  `Tpain` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Tpain` is reified [2]
+
+valid_targ_funcall.php:7:5
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function f<reify Tpain>(): void {}
+  |                  ^^^^^ [2]
+5 | 
+6 | function g<T>(): void {
+7 |   f<T>();
+  |     ^ [1]
+8 | }
+
+1 error found

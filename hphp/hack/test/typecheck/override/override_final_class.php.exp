@@ -1,4 +1,12 @@
-ERROR: File "override_final_class.php", line 13, characters 7-7:
-You cannot extend final class `A` (Typing[4035])
-  File "override_final_class.php", line 12, characters 13-13:
-  Declaration is here
+error: Typing[4035] You cannot extend final class `A` [1]
+-> Declaration is here [2]
+
+override_final_class.php:13:7
+10 |  */
+11 | 
+12 | final class A {}
+   |             ^ [2]
+13 | class B extends A {}
+   |       ^ [1]
+
+1 error found

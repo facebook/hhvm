@@ -1,28 +1,126 @@
-ERROR: File "named_params_arity_too_few.php", line 9, characters 3-13:
-Missing required named argument: x (Typing[4499])
-  File "named_params_arity_too_few.php", line 3, characters 10-11:
-  Definition is here
-ERROR: File "named_params_arity_too_few.php", line 10, characters 3-13:
-Missing required named argument: x (Typing[4499])
-  File "named_params_arity_too_few.php", line 3, characters 10-11:
-  Definition is here
-ERROR: File "named_params_arity_too_few.php", line 11, characters 3-11:
-Missing required named arguments: x, y, z (Typing[4499])
-  File "named_params_arity_too_few.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_too_few.php", line 12, characters 3-21:
-Missing required named argument: z (Typing[4499])
-  File "named_params_arity_too_few.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_too_few.php", line 13, characters 3-21:
-Missing required named argument: z (Typing[4499])
-  File "named_params_arity_too_few.php", line 4, characters 10-14:
-  Definition is here
-ERROR: File "named_params_arity_too_few.php", line 14, characters 3-29:
-Missing required named argument: x (Typing[4499])
-  File "named_params_arity_too_few.php", line 5, characters 10-16:
-  Definition is here
-ERROR: File "named_params_arity_too_few.php", line 18, characters 3-22:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_arity_too_few.php", line 4, characters 10-14:
-  Definition is here
+error: Typing[4499] Missing required named argument: x [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:9:3
+ 1 | <?hh
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+   |          ^^ [2]
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+ 7 | 
+ 8 | function too_few_named(): void {
+ 9 |   fx("", y=1);
+   |   ^^^^^^^^^^^ [1]
+10 |   fx(y=1, "");
+11 |   fxyz1("");
+
+error: Typing[4499] Missing required named argument: x [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:10:3
+ 1 | <?hh
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+   |          ^^ [2]
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+   :
+ 8 | function too_few_named(): void {
+ 9 |   fx("", y=1);
+10 |   fx(y=1, "");
+   |   ^^^^^^^^^^^ [1]
+11 |   fxyz1("");
+12 |   fxyz1(y=1, x=1, "");
+
+error: Typing[4499] Missing required named arguments: x, y, z [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:11:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+ 9 |   fx("", y=1);
+10 |   fx(y=1, "");
+11 |   fxyz1("");
+   |   ^^^^^^^^^ [1]
+12 |   fxyz1(y=1, x=1, "");
+13 |   fxyz1(x=1, y=1, "");
+
+error: Typing[4499] Missing required named argument: z [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:12:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+10 |   fx(y=1, "");
+11 |   fxyz1("");
+12 |   fxyz1(y=1, x=1, "");
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+13 |   fxyz1(x=1, y=1, "");
+14 |   fx_rest("", "", "", "", "");
+
+error: Typing[4499] Missing required named argument: z [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:13:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+11 |   fxyz1("");
+12 |   fxyz1(y=1, x=1, "");
+13 |   fxyz1(x=1, y=1, "");
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+14 |   fx_rest("", "", "", "", "");
+15 | }
+
+error: Typing[4499] Missing required named argument: x [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:14:3
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+   |          ^^^^^^^ [2]
+ 6 | 
+ 7 | 
+   :
+12 |   fxyz1(y=1, x=1, "");
+13 |   fxyz1(x=1, y=1, "");
+14 |   fx_rest("", "", "", "", "");
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+16 | 
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+named_params_arity_too_few.php:18:3
+ 2 | 
+ 3 | function fx(named int $x, named int $y = 1, string $z = ""): void {}
+ 4 | function fxyz1(named int $x, named int $y, named int $z, string $t): void {}
+   |          ^^^^^ [2]
+ 5 | function fx_rest(named int $x, string ...$rest): void {}
+ 6 | 
+   :
+16 | 
+17 | function too_few_positional(): void {
+18 |   fxyz1(y=1, x=1, z=1);
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+7 errors found

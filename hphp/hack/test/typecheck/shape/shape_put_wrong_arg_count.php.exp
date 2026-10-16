@@ -1,10 +1,40 @@
-ERROR: File "shape_put_wrong_arg_count.php", line 4, characters 10-22:
-Invalid return type (Typing[4138])
-  File "Shapes.hhi", line 112, characters 10-19:
-  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
-  File "shape_put_wrong_arg_count.php", line 3, characters 32-38:
-  It is incompatible with a shape that does not allow unknown fields.
-ERROR: File "shape_put_wrong_arg_count.php", line 4, characters 18-22:
-Too few positional arguments (required 3 but got 0) (Typing[4104])
-  File "Shapes.hhi", line 108, characters 28-30:
-  Definition is here
+error: Typing[4138] Invalid return type [1]
+-> This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration. [2]
+-> It is incompatible with a shape that does not allow unknown fields. [3]
+
+shape_put_wrong_arg_count.php:4:10
+  1 | <?hh
+  2 | 
+  3 | function test(shape() $shape): shape() {
+    |                                ^^^^^^^ [3]
+  4 |   return Shapes::put();
+    |          ^^^^^^^^^^^^^ [1]
+  5 | }
+
+Shapes.hhi:112:10
+110 |       arraykey $index,
+111 |       mixed $value,
+112 |     )[]: shape(...);
+    |          ^^^^^^^^^^ [2]
+113 |   }
+114 | 
+
+error: Typing[4104] Too few positional arguments (required 3 but got 0) [1]
+-> Definition is here [2]
+
+shape_put_wrong_arg_count.php:4:18
+  2 | 
+  3 | function test(shape() $shape): shape() {
+  4 |   return Shapes::put();
+    |                  ^^^^^ [1]
+  5 | }
+
+Shapes.hhi:108:28
+106 |      */
+107 |     <<__NoAutoDynamic, __SupportDynamicType>>
+108 |     public static function put(
+    |                            ^^^ [2]
+109 |       shape(...) $shape,
+110 |       arraykey $index,
+
+2 errors found

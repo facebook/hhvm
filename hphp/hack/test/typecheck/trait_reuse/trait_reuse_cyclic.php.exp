@@ -1,18 +1,59 @@
-ERROR: File "trait_reuse_cyclic.php", line 11, characters 7-17:
-Cyclic class definition : `ReusedTrait` `OtherTrait` `MyParent` `BadClass`  (Typing[4013])
-ERROR: File "trait_reuse_cyclic.php", line 11, characters 7-17:
-This interface is not properly implemented (Typing[4054])
-  File "trait_reuse_cyclic.php", line 6, characters 25-27:
-  Method `foo` does not have an implementation
-ERROR: File "trait_reuse_cyclic.php", line 19, characters 7-17:
-Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyParent`. (Typing[4186])
-  File "trait_reuse_cyclic.php", line 14, characters 7-14:
-  `MyParent` is defined here
-  File "trait_reuse_cyclic.php", line 15, characters 7-17:
-  `MyParent` uses `ReusedTrait`
-  File "trait_reuse_cyclic.php", line 11, characters 7-17:
-  `ReusedTrait` uses `ReusedTrait`
-  File "trait_reuse_cyclic.php", line 11, characters 7-17:
-  `ReusedTrait` uses `ReusedTrait`
-  File "trait_reuse_cyclic.php", line 6, characters 25-27:
-  `ReusedTrait` has a final method `foo`
+error: Typing[4013] Cyclic class definition : `ReusedTrait` `OtherTrait` `MyParent` `BadClass`  [1]
+
+trait_reuse_cyclic.php:11:7
+ 9 | 
+10 | trait OtherTrait {
+11 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4054] This interface is not properly implemented [1]
+-> Method `foo` does not have an implementation [2]
+
+trait_reuse_cyclic.php:11:7
+ 4 | // loop in the trait reuse check.
+ 5 | trait ReusedTrait {
+ 6 |   public final function foo(): void {}
+   |                         ^^^ [2]
+ 7 |   use OtherTrait;
+ 8 | }
+ 9 | 
+10 | trait OtherTrait {
+11 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4186] Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyParent`. [1]
+-> `MyParent` is defined here [2]
+-> `MyParent` uses `ReusedTrait` [3]
+-> `ReusedTrait` uses `ReusedTrait` [4]
+-> `ReusedTrait` uses `ReusedTrait` [4]
+-> `ReusedTrait` has a final method `foo` [5]
+
+trait_reuse_cyclic.php:19:7
+ 4 | // loop in the trait reuse check.
+ 5 | trait ReusedTrait {
+ 6 |   public final function foo(): void {}
+   |                         ^^^ [5]
+ 7 |   use OtherTrait;
+ 8 | }
+ 9 | 
+10 | trait OtherTrait {
+11 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [4]
+12 | }
+13 | 
+14 | class MyParent {
+   |       ^^^^^^^^ [2]
+15 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [3]
+16 | }
+17 | 
+18 | class BadClass extends MyParent {
+19 |   use ReusedTrait;
+   |       ^^^^^^^^^^^ [1]
+20 | }
+
+3 errors found

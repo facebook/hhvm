@@ -1,14 +1,71 @@
-ERROR: File "using_bad_escaping.php", line 16, characters 16-17:
-Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
-ERROR: File "using_bad_escaping.php", line 22, characters 10-11:
-Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
-ERROR: File "using_bad_escaping.php", line 27, characters 10-11:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
-ERROR: File "using_bad_escaping.php", line 30, characters 18-19:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
-ERROR: File "using_bad_escaping.php", line 33, characters 12-13:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
-ERROR: File "using_bad_escaping.php", line 36, characters 17-18:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
-ERROR: File "using_bad_escaping.php", line 43, characters 12-13:
-Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])
+error: Typing[4188] Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:16:16
+14 | function expect_handle(<<__AcceptDisposable>> Handle $h):void {
+15 |   // Illegal because it escapes to a function not marked with the attribute
+16 |   expect_mixed($h);
+   |                ^^ [1]
+17 | }
+18 | function expect_handle_good(<<__AcceptDisposable>> Handle $h):void {
+
+error: Typing[4188] Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:22:10
+20 | }
+21 | function expect_handle_bad(<<__AcceptDisposable>> Handle $h):mixed {
+22 |   return $h;
+   |          ^^ [1]
+23 | }
+24 | 
+
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:27:10
+25 | function test_it():mixed {
+26 |   using ($x = new Handle()) {
+27 |     $y = $x;
+   |          ^^ [1]
+28 |   }
+29 |   using ($z = new Handle()) {
+
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:30:18
+28 |   }
+29 |   using ($z = new Handle()) {
+30 |     expect_mixed($z);
+   |                  ^^ [1]
+31 |   }
+32 |   using ($q = new Handle()) {
+
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:33:12
+31 |   }
+32 |   using ($q = new Handle()) {
+33 |     using ($q) { }
+   |            ^^ [1]
+34 |   }
+35 |   using ($r = new Handle()) {
+
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:36:17
+34 |   }
+35 |   using ($r = new Handle()) {
+36 |     using ($m = $r) { }
+   |                 ^^ [1]
+37 |   }
+38 |   using ($s = new Handle()) {
+
+error: Typing[4180] Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute [1]
+
+using_bad_escaping.php:43:12
+41 |   }
+42 |   using ($w = new Handle()) {
+43 |     return $w;
+   |            ^^ [1]
+44 |   }
+45 | }
+
+7 errors found

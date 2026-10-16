@@ -1,2 +1,10 @@
-ERROR: File "erased_generic.php", line 5, characters 10-10:
-`nameof` cannot be used with a generic type (Parsing[1002])
+error: Parsing[1002] `nameof` cannot be used with a generic type [1]
+
+erased_generic.php:5:10
+3 | class C {}
+4 | function f<T as C>(): void {
+5 |   nameof T;
+  |          ^ [1]
+6 | }
+
+1 error found

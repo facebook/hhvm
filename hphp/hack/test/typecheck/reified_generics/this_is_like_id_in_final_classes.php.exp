@@ -1,6 +1,23 @@
-ERROR: File "this_is_like_id_in_final_classes.php", line 19, characters 15-19:
-Invalid reified hint (Typing[4305])
-  File "this_is_like_id_in_final_classes.php", line 10, characters 24-27:
-  This is the late static bound `this` type of a non-final class, it cannot be used as a reified type argument
-  File "this_is_like_id_in_final_classes.php", line 13, characters 28-28:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is the late static bound `this` type of a non-final class, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+this_is_like_id_in_final_classes.php:19:15
+ 8 | 
+ 9 | class C2 {
+10 |   const type T = Id_of<this>;
+   |                        ^^^^ [2]
+11 | }
+12 | 
+13 | function take_refied<reify T>(): void {}
+   |                            ^ [3]
+14 | 
+15 | function test(): void {
+16 |   // OK
+17 |   take_refied<C1::T>();
+18 |   // error
+19 |   take_refied<C2::T>();
+   |               ^^^^^ [1]
+20 | }
+
+1 error found

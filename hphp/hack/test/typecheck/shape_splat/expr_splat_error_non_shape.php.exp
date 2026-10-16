@@ -1,4 +1,11 @@
-ERROR: File "expr_splat_error_non_shape.php", line 5, characters 17-18:
-Invalid type hint (Typing[4419])
-  File "expr_splat_error_non_shape.php", line 5, characters 17-18:
-  Only shapes can be unpacked with `...` inside a shape type
+error: Typing[4419] Invalid type hint [1]
+-> Only shapes can be unpacked with `...` inside a shape type [1]
+
+expr_splat_error_non_shape.php:5:17
+3 | 
+4 | function test_non_shape_splat(int $x): void {
+5 |   $s = shape(...$x, 'y' => 1);
+  |                 ^^ [1]
+6 | }
+
+1 error found

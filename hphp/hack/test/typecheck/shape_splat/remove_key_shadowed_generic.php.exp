@@ -1,2 +1,10 @@
-ERROR: File "remove_key_shadowed_generic.php", line 10, characters 3-34:
-Cannot remove field `a`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?a => nothing` (Typing[4116])
+error: Typing[4116] Cannot remove field `a`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?a => nothing` [1]
+
+remove_key_shadowed_generic.php:10:3
+ 8 | // is therefore rejected rather than silently dropped.
+ 9 | function shadowed<T as shape('a' => int)>(shape('a' => string, ...T) $s): void {
+10 |   Shapes::removeKey(inout $s, 'a');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

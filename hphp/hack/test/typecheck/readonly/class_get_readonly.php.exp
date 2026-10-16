@@ -1,4 +1,18 @@
-ERROR: File "class_get_readonly.php", line 33, characters 8-22:
-This static property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "class_get_readonly.php", line 6, characters 26-29:
-  The static property is defined here.
+error: Typing[4412] This static property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The static property is defined here. [2]
+
+class_get_readonly.php:33:8
+ 4 | }
+ 5 | class Foo {
+ 6 |   public static readonly ?Bar $ro_static = null;
+   |                          ^^^^ [2]
+ 7 |   public int $prop;
+ 8 |   public readonly Bar $ro;
+   :
+31 | <<__EntryPoint>>
+32 | function test() : void {
+33 |   $y = Foo::$ro_static;
+   |        ^^^^^^^^^^^^^^^ [1]
+34 | }
+
+1 error found

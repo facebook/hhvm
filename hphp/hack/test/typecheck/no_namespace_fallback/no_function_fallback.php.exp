@@ -1,4 +1,21 @@
-ERROR: File "no_function_fallback.php", line 19, characters 5-7:
-Unbound name: `NS\foo` (a global function) (Naming[2049])
-ERROR: File "no_function_fallback.php", line 19, characters 5-7:
-Unbound name (typing): `NS\foo` (Typing[4107])
+error: Naming[2049] Unbound name: `NS\foo` (a global function) [1]
+
+no_function_fallback.php:19:5
+17 | namespace NS {
+18 |   function bar(): void {
+19 |     foo();
+   |     ^^^ [1]
+20 |   }
+21 | }
+
+error: Typing[4107] Unbound name (typing): `NS\foo` [1]
+
+no_function_fallback.php:19:5
+17 | namespace NS {
+18 |   function bar(): void {
+19 |     foo();
+   |     ^^^ [1]
+20 |   }
+21 | }
+
+2 errors found

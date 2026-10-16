@@ -1,4 +1,19 @@
-ERROR: File "trait4.php", line 10, characters 7-8:
-You cannot use sealed trait `T` (Typing[4238])
-  File "trait4.php", line 4, characters 7-7:
-  Declaration is here
+error: Typing[4238] You cannot use sealed trait `T` [1]
+-> Declaration is here [2]
+
+trait4.php:10:7
+ 2 | 
+ 3 | <<__Sealed(T2::class)>>
+ 4 | trait T {}
+   |       ^ [2]
+ 5 | 
+ 6 | trait T2 {
+ 7 |   use T; // ok
+ 8 | }
+ 9 | 
+10 | trait T3 {
+   |       ^^ [1]
+11 |   use T; // error
+12 | }
+
+1 error found

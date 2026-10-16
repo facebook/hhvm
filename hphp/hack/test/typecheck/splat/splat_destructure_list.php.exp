@@ -1,18 +1,49 @@
-ERROR: File "splat_destructure_list.php", line 6, characters 8-12:
-Invalid argument (Typing[4359])
-  File "splat_destructure_list.php", line 6, characters 8-12:
-  An array cannot be unpacked into the required arguments of a function
-  File "splat_destructure_list.php", line 3, characters 10-10:
-  Definition is here
-ERROR: File "splat_destructure_list.php", line 13, characters 9-13:
-Invalid argument (Typing[4359])
-  File "splat_destructure_list.php", line 13, characters 9-13:
-  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-  File "splat_destructure_list.php", line 10, characters 10-11:
-  Definition is here
-ERROR: File "splat_destructure_list.php", line 14, characters 9-16:
-Invalid argument (Typing[4359])
-  File "splat_destructure_list.php", line 14, characters 9-16:
-  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-  File "splat_destructure_list.php", line 10, characters 10-11:
-  Definition is here
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+splat_destructure_list.php:6:8
+1 | <?hh
+2 | 
+3 | function f(int $i1, int $i2 = 4, int ...$is): void {}
+  |          ^ [2]
+4 | 
+5 | function g(): void {
+6 |   f(...vec[]); // can't splat array when there are required arguments
+  |        ^^^^^ [1]
+7 |   f(3, ...vec[]); // ok
+8 | }
+
+error: Typing[4359] Invalid argument [1]
+-> A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array [1]
+-> Definition is here [2]
+
+splat_destructure_list.php:13:9
+ 8 | }
+ 9 | 
+10 | function ff(int $i2 = 4): void {}
+   |          ^^ [2]
+11 | 
+12 | function gg(): void {
+13 |   ff(...vec[]); // error. Ok at runtime but not safe
+   |         ^^^^^ [1]
+14 |   ff(...vec[2,3]); // because the list could look like this
+15 | }
+
+error: Typing[4359] Invalid argument [1]
+-> A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array [1]
+-> Definition is here [2]
+
+splat_destructure_list.php:14:9
+ 8 | }
+ 9 | 
+10 | function ff(int $i2 = 4): void {}
+   |          ^^ [2]
+11 | 
+12 | function gg(): void {
+13 |   ff(...vec[]); // error. Ok at runtime but not safe
+14 |   ff(...vec[2,3]); // because the list could look like this
+   |         ^^^^^^^^ [1]
+15 | }
+
+3 errors found

@@ -1,16 +1,50 @@
-ERROR: File "named_params_variadic_fn_types_call.php", line 31, characters 8-19:
-Invalid argument (Typing[4110])
-  File "named_params_variadic_fn_types_call.php", line 30, characters 36-38:
-  Expected `int`
-  File "named_params_variadic_fn_types_call.php", line 31, characters 8-19:
-  But got `string`
-ERROR: File "named_params_variadic_fn_types_call.php", line 36, characters 3-15:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_variadic_fn_types_call.php", line 35, characters 20-57:
-  Definition is here
-ERROR: File "named_params_variadic_fn_types_call.php", line 41, characters 3-13:
-Missing required named argument: x (Typing[4499])
-  File "named_params_variadic_fn_types_call.php", line 40, characters 20-64:
-  Definition is here
-ERROR: File "named_params_variadic_fn_types_call.php", line 46, characters 3-14:
-Duplicate named argument: a (Typing[4501])
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+named_params_variadic_fn_types_call.php:31:8
+28 | 
+29 | // Element type is enforced on named-variadic arguments.
+30 | function call_err1((function(named int...): void) $f): void {
+   |                                    ^^^ [2]
+31 |   $f(a="not an int"); // ERROR: string is not int
+   |        ^^^^^^^^^^^^ [1]
+32 | }
+33 | 
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+named_params_variadic_fn_types_call.php:36:3
+33 | 
+34 | // Missing required positional still errors even with named variadic.
+35 | function call_err2((function(int, named string...): void) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+36 |   $f(label="x"); // ERROR: missing positional
+   |   ^^^^^^^^^^^^^ [1]
+37 | }
+38 | 
+
+error: Typing[4499] Missing required named argument: x [1]
+-> Definition is here [2]
+
+named_params_variadic_fn_types_call.php:41:3
+38 | 
+39 | // Missing required named still errors even with named variadic.
+40 | function call_err3((function(named int $x, named bool...): void) $f): void {
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+41 |   $f(on=true); // ERROR: missing required named x
+   |   ^^^^^^^^^^^ [1]
+42 | }
+43 | 
+
+error: Typing[4501] Duplicate named argument: a [1]
+
+named_params_variadic_fn_types_call.php:46:3
+44 | // Duplicate named argument is still an error.
+45 | function call_err4((function(named int...): void) $f): void {
+46 |   $f(a=1, a=2); // ERROR: duplicate a
+   |   ^^^^^^^^^^^^ [1]
+47 | }
+
+4 errors found

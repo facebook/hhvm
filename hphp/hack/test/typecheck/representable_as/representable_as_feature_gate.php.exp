@@ -1,2 +1,10 @@
-ERROR: File "representable_as_feature_gate.php", line 4, characters 3-34:
-`HH\Runtime\RepresentableAs` requires the unstable feature `representable_as`. Add `<<file: __EnableUnstableFeatures('representable_as')>>` to use it. (Typing[4509])
+error: Typing[4509] `HH\Runtime\RepresentableAs` requires the unstable feature `representable_as`. Add `<<file: __EnableUnstableFeatures('representable_as')>>` to use it. [1]
+
+representable_as_feature_gate.php:4:3
+2 | 
+3 | function test_representable_as_requires_feature(
+4 |   \HH\Runtime\RepresentableAs<int> $_,
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | ): void {}
+
+1 error found

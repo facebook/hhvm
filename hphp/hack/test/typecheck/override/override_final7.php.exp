@@ -1,6 +1,26 @@
-ERROR: File "override_final7.php", line 26, characters 24-25:
-Some members in class `C1` are incompatible with those declared in type `P2` (Typing[4070])
-  File "override_final7.php", line 21, characters 25-37:
-  You cannot override this method
-  File "override_final7.php", line 13, characters 25-37:
-  It was declared as final
+error: Typing[4070] Some members in class `C1` are incompatible with those declared in type `P2` [1]
+-> You cannot override this method [2]
+-> It was declared as final [3]
+
+override_final7.php:26:24
+11 | 
+12 | abstract class P1 {
+13 |   final public function getTargetFBID(): int {
+   |                         ^^^^^^^^^^^^^ [3]
+14 |     return 0;
+15 |   }
+   :
+19 | 
+20 | trait T1 {
+21 |   final public function getTargetFBID(): int {
+   |                         ^^^^^^^^^^^^^ [2]
+22 |     return 0;
+23 |   }
+24 | }
+25 | 
+26 | final class C1 extends P2 {
+   |                        ^^ [1]
+27 |   use T1;
+28 | }
+
+1 error found

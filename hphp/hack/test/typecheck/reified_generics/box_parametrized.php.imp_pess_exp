@@ -1,90 +1,328 @@
-ERROR: File "box_parametrized.php", line 13, characters 7-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 13, characters 14-20:
-  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 13, characters 14-20:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Definition is here
-ERROR: File "box_parametrized.php", line 18, characters 7-13:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Expected `dynamic`
-  File "box_parametrized.php", line 18, characters 15-20:
-  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 18, characters 15-20:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Definition is here
-ERROR: File "box_parametrized.php", line 20, characters 7-13:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Expected `dynamic`
-  File "box_parametrized.php", line 20, characters 15-21:
-  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 20, characters 15-21:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Definition is here
-ERROR: File "box_parametrized.php", line 26, characters 7-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 26, characters 14-27:
-  Type `Erased<Erased>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 26, characters 14-27:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 26, characters 21-26:
-  Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 26, characters 21-26:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Definition is here
-ERROR: File "box_parametrized.php", line 27, characters 7-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 27, characters 14-36:
-  Type `Erased<Erased<Reified>>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 27, characters 14-36:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 27, characters 21-35:
-  Type `Erased<Reified>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 27, characters 21-35:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 27, characters 28-34:
-  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 27, characters 28-34:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Definition is here
-ERROR: File "box_parametrized.php", line 31, characters 7-13:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Expected `dynamic`
-  File "box_parametrized.php", line 31, characters 15-37:
-  Type `Erased<Erased<Reified>>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 31, characters 15-37:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 31, characters 22-36:
-  Type `Erased<Reified>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 31, characters 22-36:
-Some type arguments violate their constraints (Typing[4323])
-  File "box_parametrized.php", line 7, characters 7-12:
-  Expected `dynamic`
-  File "box_parametrized.php", line 31, characters 29-35:
-  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "box_parametrized.php", line 31, characters 29-35:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_parametrized.php", line 8, characters 7-13:
-  Definition is here
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:13:7
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+11 |   new Erased<Erased<_>>();
+12 | 
+13 |   new Erased<Reified>(); // bad
+   |       ^^^^^^ [1]
+   |              ^^^^^^^ [3]
+14 |   new Erased<Reified<int>>();
+15 | }
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_parametrized.php:13:14
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+11 |   new Erased<Erased<_>>();
+12 | 
+13 |   new Erased<Reified>(); // bad
+   |              ^^^^^^^ [1]
+14 |   new Erased<Reified<int>>();
+15 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:18:7
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+   :
+16 | 
+17 | function Reified_parametrizedCheck(): void {
+18 |   new Reified<Erased>();  // bad
+   |       ^^^^^^^ [1]
+   |               ^^^^^^ [3]
+19 | 
+20 |   new Reified<Reified>(); // bad
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_parametrized.php:18:15
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+16 | 
+17 | function Reified_parametrizedCheck(): void {
+18 |   new Reified<Erased>();  // bad
+   |               ^^^^^^ [1]
+19 | 
+20 |   new Reified<Reified>(); // bad
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:20:7
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+   :
+18 |   new Reified<Erased>();  // bad
+19 | 
+20 |   new Reified<Reified>(); // bad
+   |       ^^^^^^^ [1]
+   |               ^^^^^^^ [3]
+21 |   new Reified<Reified<int>>();
+22 | }
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_parametrized.php:20:15
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+   :
+18 |   new Reified<Erased>();  // bad
+19 | 
+20 |   new Reified<Reified>(); // bad
+   |               ^^^^^^^ [1]
+21 |   new Reified<Reified<int>>();
+22 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased<Erased>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:26:7
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+24 | // just some sanity checks
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+   |       ^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^ [3]
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:26:14
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+24 | // just some sanity checks
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+   |              ^^^^^^^^^^^^^^ [1]
+   |                     ^^^^^^ [3]
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_parametrized.php:26:21
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+24 | // just some sanity checks
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+   |                     ^^^^^^ [1]
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased<Erased<Reified>>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:27:7
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+   |       ^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+29 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased<Reified>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:27:14
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+   |              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                     ^^^^^^^^^^^^^^^ [3]
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+29 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:27:21
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+   |                     ^^^^^^^^^^^^^^^ [1]
+   |                            ^^^^^^^ [3]
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+29 | 
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_parametrized.php:27:28
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+   :
+25 | function deepChecks(): void {
+26 |   new Erased<Erased<Erased>>(); // bad
+27 |   new Erased<Erased<Erased<Reified>>>(); // bad
+   |                            ^^^^^^^ [1]
+28 |   new Erased<Erased<Erased<Reified<int>>>>();
+29 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased<Erased<Reified>>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:31:7
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+   :
+29 | 
+30 |   new Reified<Erased<Reified<int>>>();
+31 |   new Reified<Erased<Erased<Reified>>>(); // bad
+   |       ^^^^^^^ [1]
+   |               ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+32 |   new Reified<Erased<Erased<Reified<int>>>>();
+33 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Erased<Reified>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:31:15
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+29 | 
+30 |   new Reified<Erased<Reified<int>>>();
+31 |   new Reified<Erased<Erased<Reified>>>(); // bad
+   |               ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                      ^^^^^^^^^^^^^^^ [3]
+32 |   new Reified<Erased<Erased<Reified<int>>>>();
+33 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+box_parametrized.php:31:22
+ 5 |  * present must be parameterized */
+ 6 | 
+ 7 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 8 | class Reified<reify Tr> {}
+ 9 | 
+   :
+29 | 
+30 |   new Reified<Erased<Reified<int>>>();
+31 |   new Reified<Erased<Erased<Reified>>>(); // bad
+   |                      ^^^^^^^^^^^^^^^ [1]
+   |                             ^^^^^^^ [3]
+32 |   new Reified<Erased<Erased<Reified<int>>>>();
+33 | }
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_parametrized.php:31:29
+ 6 | 
+ 7 | class Erased<T> {}
+ 8 | class Reified<reify Tr> {}
+   |       ^^^^^^^ [2]
+ 9 | 
+10 | function Erased_parametrizedCheck(): void {
+   :
+29 | 
+30 |   new Reified<Erased<Reified<int>>>();
+31 |   new Reified<Erased<Erased<Reified>>>(); // bad
+   |                             ^^^^^^^ [1]
+32 |   new Reified<Erased<Erased<Reified<int>>>>();
+33 | }
+
+17 errors found

@@ -1,2 +1,11 @@
-ERROR: File "constexpr_namespace.php", line 7, characters 16-18:
-Unbound name: `N\N\E` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `N\N\E` (an object type) [1]
+
+constexpr_namespace.php:7:16
+5 |     A = nameof E;
+6 |     B = nameof \E;
+7 |     C = nameof N\E;
+  |                ^^^ [1]
+8 |   }
+9 | }
+
+1 error found

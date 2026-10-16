@@ -1,22 +1,54 @@
-ERROR: File "shapes_toarray.php", line 19, characters 4-17:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "shapes_toarray.php", line 19, characters 11-12:
-  But got `Tk`
-ERROR: File "shapes_toarray.php", line 19, characters 4-17:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "shapes_toarray.php", line 19, characters 11-12:
-  But got `mixed`
-  File "shapes_toarray.php", line 16, characters 21-22:
-    by the definition of `Tk`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `Tk` [4]
+
+shapes_toarray.php:19:4
+17 | KeyedTraversable<Tk, Ta> $collection,
+18 | (function(Tk, Ta): Tb) $mapping_function,
+19 | ): darray<Tk, Tb>
+   |    ^^^^^^^^^^^^^^ [1]
+   |           ^^ [4]
+20 | {
+21 |   return dict[];
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   by the definition of `Tk` [5]
+
+shapes_toarray.php:19:4
+14 |   return Map{};
+15 | }
+16 | function mapWithKey<Tk, Ta, Tb>(
+   |                     ^^ [5]
+17 | KeyedTraversable<Tk, Ta> $collection,
+18 | (function(Tk, Ta): Tb) $mapping_function,
+19 | ): darray<Tk, Tb>
+   |    ^^^^^^^^^^^^^^ [1]
+   |           ^^ [4]
+20 | {
+21 |   return dict[];
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+2 errors found

@@ -1,72 +1,274 @@
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 24, characters 14-22:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
-  Expected `int`
-  File "newtype_sub_nullable_tvar.php--file2.php", line 21, characters 16-16:
-  But got `?N`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
-    by the definition of `M`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
-  Expected `M`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 15-15:
-  But got `B`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
-  Expected `M`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
-  But got `?<expr#2> as B`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-    by the definition of `N`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 33, characters 12-20:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
-  Expected `B`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
-  But got `?<expr#2> as B`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-    by the definition of `N`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 43, characters 12-20:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
-  Expected `B`
-  File "newtype_sub_nullable_tvar.php--file2.php", line 37, characters 16-16:
-  But got `?N`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
-    by the definition of `M`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 9, characters 23-24:
-  Expected `null` or something of type `~int`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
-  But got `N`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 9, characters 23-24:
-  Expected `null` or something of type `~int`
-  File "newtype_sub_nullable_tvar.php--file2.php", line 46, characters 16-16:
-  But got `M`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
-  Expected `int`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 15-15:
-  But got `B`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
-  Expected `int`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
-  But got `?<expr#2> as B`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
-    by the definition of `N`
-ERROR: File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
-  Expected `int`
-  File "newtype_sub_nullable_tvar.php--file2.php", line 46, characters 16-16:
-  But got `?N`
-  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
-    by the definition of `M`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?N` [3]
+->   by the definition of `M` [4]
+
+newtype_sub_nullable_tvar.php--file2.php:24:14
+17 | function expect_N(N $_): void {}
+18 | function expect_M(M $_): void {}
+19 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+20 | 
+21 | function test1(M $n): void {
+   |                ^ [3]
+22 |   $x = new A();
+23 |   $x->set($n);
+24 |   expect_int($x->get()); // error
+   |              ^^^^^^^^^ [1]
+25 | }
+26 | 
+
+newtype_sub_nullable_tvar.php--file1.php:4:14
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+ 4 | newtype M as ?N = ?N;
+   |              ^^ [4]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `M` [2]
+-> But got `B` [3]
+
+newtype_sub_nullable_tvar.php--file2.php:32:12
+16 | function expect_nullB(?B $_): void {}
+17 | function expect_N(N $_): void {}
+18 | function expect_M(M $_): void {}
+   |                   ^ [2]
+19 | function expect_int(int $_): void {}
+20 | 
+   :
+30 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+31 |   We take the first that works, i.e. N <: #0, and discard the others */
+32 |   expect_M($x->get()); // error N incompatible with M
+   |            ^^^^^^^^^ [1]
+33 |   expect_B($x->get()); // error N incompatible with B
+34 |   expect_nullB($x->get()); // ok
+
+newtype_sub_nullable_tvar.php--file1.php:3:15
+ 1 | <?hh
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+   |               ^ [3]
+ 4 | newtype M as ?N = ?N;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `M` [2]
+-> But got `?<expr#2> as B` [3]
+->   by the definition of `N` [4]
+
+newtype_sub_nullable_tvar.php--file2.php:32:12
+16 | function expect_nullB(?B $_): void {}
+17 | function expect_N(N $_): void {}
+18 | function expect_M(M $_): void {}
+   |                   ^ [2]
+19 | function expect_int(int $_): void {}
+20 | 
+   :
+30 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+31 |   We take the first that works, i.e. N <: #0, and discard the others */
+32 |   expect_M($x->get()); // error N incompatible with M
+   |            ^^^^^^^^^ [1]
+33 |   expect_B($x->get()); // error N incompatible with B
+34 |   expect_nullB($x->get()); // ok
+
+newtype_sub_nullable_tvar.php--file1.php:4:15
+ 1 | <?hh
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+   |              ^^ [4]
+ 4 | newtype M as ?N = ?N;
+   |               ^ [3]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `?<expr#2> as B` [3]
+->   by the definition of `N` [4]
+
+newtype_sub_nullable_tvar.php--file2.php:33:12
+13 | class B {}
+14 | 
+15 | function expect_B(B $_): void {}
+   |                   ^ [2]
+16 | function expect_nullB(?B $_): void {}
+17 | function expect_N(N $_): void {}
+   :
+31 |   We take the first that works, i.e. N <: #0, and discard the others */
+32 |   expect_M($x->get()); // error N incompatible with M
+33 |   expect_B($x->get()); // error N incompatible with B
+   |            ^^^^^^^^^ [1]
+34 |   expect_nullB($x->get()); // ok
+35 | }
+
+newtype_sub_nullable_tvar.php--file1.php:4:15
+ 1 | <?hh
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+   |              ^^ [4]
+ 4 | newtype M as ?N = ?N;
+   |               ^ [3]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+-> But got `?N` [3]
+->   by the definition of `M` [4]
+
+newtype_sub_nullable_tvar.php--file2.php:43:12
+13 | class B {}
+14 | 
+15 | function expect_B(B $_): void {}
+   |                   ^ [2]
+16 | function expect_nullB(?B $_): void {}
+17 | function expect_N(N $_): void {}
+   :
+35 | }
+36 | 
+37 | function test3(M $n): void {
+   |                ^ [3]
+38 |   $x = new A(); // $x : A<#0>
+39 |   expect_nullB($x->get()); // #0 <: N
+40 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+41 |   We take the first that works, i.e. M <: #0, and discard the others */
+42 |   expect_M($x->get()); // ok
+43 |   expect_B($x->get()); // error ?B incompatible with B
+   |            ^^^^^^^^^ [1]
+44 | }
+45 | 
+
+newtype_sub_nullable_tvar.php--file1.php:4:14
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+ 4 | newtype M as ?N = ?N;
+   |              ^^ [4]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` or something of type `~int` [2]
+-> But got `N` [3]
+
+newtype_sub_nullable_tvar.php--file2.php:49:11
+ 7 |     return $this->x;
+ 8 |   }
+ 9 |   public function set(?T $x): void {
+   |                       ^^ [2]
+10 |     $this->x = $x;
+11 |   }
+   :
+47 |   $x = new A(); // $x : A<#0>
+48 |   expect_int($x->get()); // #0 <: N
+49 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+   |           ^^ [1]
+50 |   We take the first that works, i.e. none, so we error. */
+51 | }
+
+newtype_sub_nullable_tvar.php--file1.php:4:15
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+ 4 | newtype M as ?N = ?N;
+   |               ^ [3]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` or something of type `~int` [2]
+-> But got `M` [3]
+
+newtype_sub_nullable_tvar.php--file2.php:49:11
+ 7 |     return $this->x;
+ 8 |   }
+ 9 |   public function set(?T $x): void {
+   |                       ^^ [2]
+10 |     $this->x = $x;
+11 |   }
+   :
+44 | }
+45 | 
+46 | function test4(M $n): void {
+   |                ^ [3]
+47 |   $x = new A(); // $x : A<#0>
+48 |   expect_int($x->get()); // #0 <: N
+49 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+   |           ^^ [1]
+50 |   We take the first that works, i.e. none, so we error. */
+51 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `B` [3]
+
+newtype_sub_nullable_tvar.php--file2.php:49:11
+17 | function expect_N(N $_): void {}
+18 | function expect_M(M $_): void {}
+19 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+20 | 
+21 | function test1(M $n): void {
+   :
+47 |   $x = new A(); // $x : A<#0>
+48 |   expect_int($x->get()); // #0 <: N
+49 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+   |           ^^ [1]
+50 |   We take the first that works, i.e. none, so we error. */
+51 | }
+
+newtype_sub_nullable_tvar.php--file1.php:3:15
+ 1 | <?hh
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+   |               ^ [3]
+ 4 | newtype M as ?N = ?N;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?<expr#2> as B` [3]
+->   by the definition of `N` [4]
+
+newtype_sub_nullable_tvar.php--file2.php:49:11
+17 | function expect_N(N $_): void {}
+18 | function expect_M(M $_): void {}
+19 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+20 | 
+21 | function test1(M $n): void {
+   :
+47 |   $x = new A(); // $x : A<#0>
+48 |   expect_int($x->get()); // #0 <: N
+49 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+   |           ^^ [1]
+50 |   We take the first that works, i.e. none, so we error. */
+51 | }
+
+newtype_sub_nullable_tvar.php--file1.php:4:15
+ 1 | <?hh
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+   |              ^^ [4]
+ 4 | newtype M as ?N = ?N;
+   |               ^ [3]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?N` [3]
+->   by the definition of `M` [4]
+
+newtype_sub_nullable_tvar.php--file2.php:49:11
+17 | function expect_N(N $_): void {}
+18 | function expect_M(M $_): void {}
+19 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+20 | 
+21 | function test1(M $n): void {
+   :
+44 | }
+45 | 
+46 | function test4(M $n): void {
+   |                ^ [3]
+47 |   $x = new A(); // $x : A<#0>
+48 |   expect_int($x->get()); // #0 <: N
+49 |   $x->set($n); /* (M <: #0 || N <: #0 || B <: #0).
+   |           ^^ [1]
+50 |   We take the first that works, i.e. none, so we error. */
+51 | }
+
+newtype_sub_nullable_tvar.php--file1.php:4:14
+ 2 | 
+ 3 | newtype N as ?B = ?B;
+ 4 | newtype M as ?N = ?N;
+   |              ^^ [4]
+
+10 errors found

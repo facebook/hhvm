@@ -1,8 +1,24 @@
-ERROR: File "prop_access_lambda2.php", line 13, characters 35-39:
-Invalid argument (Typing[4110])
-  File "prop_access_lambda2.php", line 13, characters 27-32:
-  Expected `string`
-  File "prop_access_lambda2.php", line 16, characters 20-20:
-    via this generic `T`
-  File "prop_access_lambda2.php", line 5, characters 38-40:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+prop_access_lambda2.php:13:35
+ 3 | 
+ 4 | class A {
+ 5 |   public function __construct(public int $x) {}
+   |                                      ^^^ [4]
+ 6 | }
+ 7 | 
+   :
+11 | 
+12 | function test(A $a): void {
+13 |   apply($a, $x ==> expect<string>($x->x));
+   |                           ^^^^^^ [2]
+   |                                   ^^^^^ [1]
+14 | }
+15 | 
+16 | function expect<T>(T $_): void {}
+   |                    ^ [3]
+
+1 error found

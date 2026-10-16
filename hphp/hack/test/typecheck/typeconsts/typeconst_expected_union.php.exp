@@ -1,41 +1,113 @@
-ERROR: File "typeconst_expected_union.php", line 15, characters 72-72:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "typeconst_expected_union.php", line 23, characters 12-42:
-Invalid argument (Typing[4326])
-  File "typeconst_expected_union.php", line 8, characters 23-25:
-  Expected `int`
-  File "typeconst_expected_union.php", line 15, characters 75-80:
-    resulting from accessing the type constant 'Tconst'
-  File "typeconst_expected_union.php", line 23, characters 27-40:
-    on an object of exactly the class SomeClassChild
-  File "typeconst_expected_union.php", line 15, characters 75-80:
-  But got `SomeClass::Tconst where \SomeClass::Tconst super <expr#2>::Tconst, \SomeClass::Tconst as arraykey`
-  by accessing the type constant `Tconst`
-  File "typeconst_expected_union.php", line 20, characters 33-41:
-  on an object of type SomeClass
-ERROR: File "typeconst_expected_union.php", line 23, characters 12-42:
-Invalid argument (Typing[4326])
-  File "typeconst_expected_union.php", line 8, characters 23-25:
-  Expected `int`
-  File "typeconst_expected_union.php", line 15, characters 75-80:
-    resulting from accessing the type constant 'Tconst'
-  File "typeconst_expected_union.php", line 23, characters 27-40:
-    on an object of exactly the class SomeClassChild
-  File "typeconst_expected_union.php", line 15, characters 75-80:
-  But got `arraykey`
-  by accessing the type constant `Tconst`
-  File "typeconst_expected_union.php", line 20, characters 33-41:
-  on an object of type SomeClass
-ERROR: File "typeconst_expected_union.php", line 23, characters 12-42:
-Invalid argument (Typing[4326])
-  File "typeconst_expected_union.php", line 15, characters 75-80:
-  Expected `SomeClass::Tconst`
-  by accessing the type constant `Tconst`
-  File "typeconst_expected_union.php", line 20, characters 33-41:
-  on an object of type SomeClass
-  File "typeconst_expected_union.php", line 8, characters 23-25:
-  But got `int`
-  File "typeconst_expected_union.php", line 15, characters 75-80:
-    resulting from accessing the type constant 'Tconst'
-  File "typeconst_expected_union.php", line 23, characters 27-40:
-    on an object of exactly the class SomeClassChild
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+typeconst_expected_union.php:15:72
+13 | class Inv<T> { }
+14 | 
+15 | function f<T as SomeClass, Tc>(T $sc, Tc $c): (Inv<(T,Tc)>) where Tc = T::Tconst {
+   |                                                                        ^ [1]
+16 |   throw new Exception("E");
+17 | 
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'Tconst' [3]
+->   on an object of exactly the class SomeClassChild [4]
+-> But got `SomeClass::Tconst where \SomeClass::Tconst super <expr#2>::Tconst, \SomeClass::Tconst as arraykey`
+  by accessing the type constant `Tconst` [3]
+-> on an object of type SomeClass [5]
+
+typeconst_expected_union.php:23:12
+ 6 | }
+ 7 | class SomeClassChild extends SomeClass {
+ 8 |   const type Tconst = int;
+   |                       ^^^ [2]
+ 9 | }
+10 | 
+   :
+13 | class Inv<T> { }
+14 | 
+15 | function f<T as SomeClass, Tc>(T $sc, Tc $c): (Inv<(T,Tc)>) where Tc = T::Tconst {
+   |                                                                           ^^^^^^ [3]
+16 |   throw new Exception("E");
+17 | 
+18 | }
+19 | 
+20 |   function test(SomeClass $sc, ?SomeClass $nullsc, nothing $n): void {
+   |                                 ^^^^^^^^^ [5]
+21 |     f($sc, $n); // no error
+22 |     //hh_show_env();
+23 |     f<_,_>($nullsc ?? new SomeClassChild(), $n); // ERROR???
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                           ^^^^^^^^^^^^^^ [4]
+24 |     //hh_show_env();
+25 |     $x = merge($nullsc, new SomeClassChild());
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'Tconst' [3]
+->   on an object of exactly the class SomeClassChild [4]
+-> But got `arraykey`
+  by accessing the type constant `Tconst` [3]
+-> on an object of type SomeClass [5]
+
+typeconst_expected_union.php:23:12
+ 6 | }
+ 7 | class SomeClassChild extends SomeClass {
+ 8 |   const type Tconst = int;
+   |                       ^^^ [2]
+ 9 | }
+10 | 
+   :
+13 | class Inv<T> { }
+14 | 
+15 | function f<T as SomeClass, Tc>(T $sc, Tc $c): (Inv<(T,Tc)>) where Tc = T::Tconst {
+   |                                                                           ^^^^^^ [3]
+16 |   throw new Exception("E");
+17 | 
+18 | }
+19 | 
+20 |   function test(SomeClass $sc, ?SomeClass $nullsc, nothing $n): void {
+   |                                 ^^^^^^^^^ [5]
+21 |     f($sc, $n); // no error
+22 |     //hh_show_env();
+23 |     f<_,_>($nullsc ?? new SomeClassChild(), $n); // ERROR???
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                           ^^^^^^^^^^^^^^ [4]
+24 |     //hh_show_env();
+25 |     $x = merge($nullsc, new SomeClassChild());
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `SomeClass::Tconst`
+  by accessing the type constant `Tconst` [2]
+-> on an object of type SomeClass [3]
+-> But got `int` [4]
+->   resulting from accessing the type constant 'Tconst' [2]
+->   on an object of exactly the class SomeClassChild [5]
+
+typeconst_expected_union.php:23:12
+ 6 | }
+ 7 | class SomeClassChild extends SomeClass {
+ 8 |   const type Tconst = int;
+   |                       ^^^ [4]
+ 9 | }
+10 | 
+   :
+13 | class Inv<T> { }
+14 | 
+15 | function f<T as SomeClass, Tc>(T $sc, Tc $c): (Inv<(T,Tc)>) where Tc = T::Tconst {
+   |                                                                           ^^^^^^ [2]
+16 |   throw new Exception("E");
+17 | 
+18 | }
+19 | 
+20 |   function test(SomeClass $sc, ?SomeClass $nullsc, nothing $n): void {
+   |                                 ^^^^^^^^^ [3]
+21 |     f($sc, $n); // no error
+22 |     //hh_show_env();
+23 |     f<_,_>($nullsc ?? new SomeClassChild(), $n); // ERROR???
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                           ^^^^^^^^^^^^^^ [5]
+24 |     //hh_show_env();
+25 |     $x = merge($nullsc, new SomeClassChild());
+
+4 errors found

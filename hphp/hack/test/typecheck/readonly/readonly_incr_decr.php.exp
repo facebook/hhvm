@@ -1,8 +1,41 @@
-ERROR: File "readonly_incr_decr.php", line 8, characters 3-13:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "readonly_incr_decr.php", line 9, characters 3-13:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "readonly_incr_decr.php", line 10, characters 3-13:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "readonly_incr_decr.php", line 11, characters 3-13:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_incr_decr.php:8:3
+ 6 | 
+ 7 | function foo(readonly Ref<int> $r): void {
+ 8 |   $r->value++;
+   |   ^^^^^^^^^^^ [1]
+ 9 |   $r->value--;
+10 |   ++$r->value;
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_incr_decr.php:9:3
+ 7 | function foo(readonly Ref<int> $r): void {
+ 8 |   $r->value++;
+ 9 |   $r->value--;
+   |   ^^^^^^^^^^^ [1]
+10 |   ++$r->value;
+11 |   --$r->value;
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_incr_decr.php:10:3
+ 8 |   $r->value++;
+ 9 |   $r->value--;
+10 |   ++$r->value;
+   |   ^^^^^^^^^^^ [1]
+11 |   --$r->value;
+12 | 
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+readonly_incr_decr.php:11:3
+ 9 |   $r->value--;
+10 |   ++$r->value;
+11 |   --$r->value;
+   |   ^^^^^^^^^^^ [1]
+12 | 
+13 |   $v = 0;
+
+4 errors found

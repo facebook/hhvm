@@ -1,4 +1,11 @@
-ERROR: File "tuple_splat_is_as_test_bad.php", line 5, characters 9-19:
-Invalid `as` expression hint (Typing[4195])
-  File "tuple_splat_is_as_test_bad.php", line 5, characters 9-19:
-  The `as` operator cannot be used with a tuple type with a splat element
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a tuple type with a splat element [1]
+
+tuple_splat_is_as_test_bad.php:5:9
+3 | 
+4 | function test2<<<__Enforceable>> reify T as (mixed...)>(mixed $m): void {
+5 |   $m as (int, ...T);
+  |         ^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

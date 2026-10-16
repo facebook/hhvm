@@ -1,6 +1,15 @@
-ERROR: File "yield_kv3.php", line 4, characters 3-18:
-Invalid `yield` (Typing[4110])
-  File "yield_kv3.php", line 3, characters 33-38:
-  Expected `string`
-  File "yield_kv3.php", line 4, characters 18-18:
-  But got `int`
+error: Typing[4110] Invalid `yield` [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+yield_kv3.php:4:3
+1 | <?hh
+2 | 
+3 | function f(): Generator<string, string, void> {
+  |                                 ^^^^^^ [2]
+4 |   yield 'one' => 1;
+  |   ^^^^^^^^^^^^^^^^ [1]
+  |                  ^ [3]
+5 | }
+
+1 error found

@@ -1,22 +1,120 @@
-WARN: File "wildcard_as_shape.php", line 5, characters 3-44:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => _, 'b' => _)`. (Warn[12012])
-WARN: File "wildcard_as_shape.php", line 9, characters 3-44:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => T, 'b' => _)`. (Warn[12012])
-WARN: File "wildcard_as_shape.php", line 13, characters 3-44:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => _, 'b' => T)`. (Warn[12012])
-WARN: File "wildcard_as_shape.php", line 17, characters 3-44:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => T, 'b' => T)`. (Warn[12012])
-ERROR: File "wildcard_as_shape.php", line 5, characters 8-44:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_as_shape.php", line 7, characters 12-12:
-  The `as` operator cannot be used with _ in a shape (use `mixed` instead)
-  File "wildcard_as_shape.php", line 6, characters 12-12:
-  The `as` operator cannot be used with _ in a shape (use `mixed` instead)
-ERROR: File "wildcard_as_shape.php", line 9, characters 8-44:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_as_shape.php", line 11, characters 12-12:
-  The `as` operator cannot be used with _ in a shape (use `mixed` instead)
-ERROR: File "wildcard_as_shape.php", line 13, characters 8-44:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_as_shape.php", line 14, characters 12-12:
-  The `as` operator cannot be used with _ in a shape (use `mixed` instead)
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => _, 'b' => _)`. [1]
+
+wildcard_as_shape.php:5:3
+ 3 | 
+ 4 | function f<<<__Enforceable>> reify T>(): void {
+ 5 |   3 as shape(
+   |   ^^^^^^^^^^^ [1]
+ 6 |     "a" => _,
+   |     ^^^^^^^^^ [1]
+ 7 |     "b" => _
+   |     ^^^^^^^^ [1]
+ 8 |   );
+   |   ^ [1]
+ 9 |   3 as shape(
+10 |     "a" => T,
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => T, 'b' => _)`. [1]
+
+wildcard_as_shape.php:9:3
+ 7 |     "b" => _
+ 8 |   );
+ 9 |   3 as shape(
+   |   ^^^^^^^^^^^ [1]
+10 |     "a" => T,
+   |     ^^^^^^^^^ [1]
+11 |     "b" => _
+   |     ^^^^^^^^ [1]
+12 |   );
+   |   ^ [1]
+13 |   3 as shape(
+14 |     "a" => _,
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => _, 'b' => T)`. [1]
+
+wildcard_as_shape.php:13:3
+11 |     "b" => _
+12 |   );
+13 |   3 as shape(
+   |   ^^^^^^^^^^^ [1]
+14 |     "a" => _,
+   |     ^^^^^^^^^ [1]
+15 |     "b" => T
+   |     ^^^^^^^^ [1]
+16 |   );
+   |   ^ [1]
+17 |   3 as shape(
+18 |     "a" => T,
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `shape('a' => T, 'b' => T)`. [1]
+
+wildcard_as_shape.php:17:3
+15 |     "b" => T
+16 |   );
+17 |   3 as shape(
+   |   ^^^^^^^^^^^ [1]
+18 |     "a" => T,
+   |     ^^^^^^^^^ [1]
+19 |     "b" => T
+   |     ^^^^^^^^ [1]
+20 |   );
+   |   ^ [1]
+21 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a shape (use `mixed` instead) [2]
+-> The `as` operator cannot be used with _ in a shape (use `mixed` instead) [3]
+
+wildcard_as_shape.php:5:8
+ 3 | 
+ 4 | function f<<<__Enforceable>> reify T>(): void {
+ 5 |   3 as shape(
+   |        ^^^^^^ [1]
+ 6 |     "a" => _,
+   |     ^^^^^^^^^ [1]
+   |            ^ [3]
+ 7 |     "b" => _
+   |     ^^^^^^^^ [1]
+   |            ^ [2]
+ 8 |   );
+   |   ^ [1]
+ 9 |   3 as shape(
+10 |     "a" => T,
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a shape (use `mixed` instead) [2]
+
+wildcard_as_shape.php:9:8
+ 7 |     "b" => _
+ 8 |   );
+ 9 |   3 as shape(
+   |        ^^^^^^ [1]
+10 |     "a" => T,
+   |     ^^^^^^^^^ [1]
+11 |     "b" => _
+   |     ^^^^^^^^ [1]
+   |            ^ [2]
+12 |   );
+   |   ^ [1]
+13 |   3 as shape(
+14 |     "a" => _,
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a shape (use `mixed` instead) [2]
+
+wildcard_as_shape.php:13:8
+11 |     "b" => _
+12 |   );
+13 |   3 as shape(
+   |        ^^^^^^ [1]
+14 |     "a" => _,
+   |     ^^^^^^^^^ [1]
+   |            ^ [2]
+15 |     "b" => T
+   |     ^^^^^^^^ [1]
+16 |   );
+   |   ^ [1]
+17 |   3 as shape(
+18 |     "a" => T,
+
+7 errors found

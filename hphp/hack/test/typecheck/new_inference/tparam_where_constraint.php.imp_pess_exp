@@ -1,6 +1,19 @@
-ERROR: File "tparam_where_constraint.php", line 10, characters 5-22:
-Invalid argument (Typing[4110])
-  File "tparam_where_constraint.php", line 3, characters 66-68:
-  Expected `int`
-  File "tparam_where_constraint.php", line 10, characters 5-22:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+tparam_where_constraint.php:10:5
+ 1 | <?hh
+ 2 | 
+ 3 | function f<Tk as arraykey>(dict<Tk, string> $_): void where Tk = int {}
+   |                                                                  ^^^ [2]
+ 4 | 
+ 5 | function g(): string {
+   :
+ 8 | 
+ 9 | function test2(): void {
+10 |   f(dict['foo' => g()]);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

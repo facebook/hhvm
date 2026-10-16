@@ -1,4 +1,17 @@
-ERROR: File "concrete_concrete_error.php", line 9, characters 14-14:
-Cannot re-declare this type constant (Typing[4430])
-  File "concrete_concrete_error.php", line 4, characters 14-14:
-  Previously defined here
+error: Typing[4430] Cannot re-declare this type constant [1]
+-> Previously defined here [2]
+
+concrete_concrete_error.php:9:14
+ 2 | 
+ 3 | class C {
+ 4 |   const type T = int;
+   |              ^ [2]
+ 5 | }
+ 6 | 
+ 7 | newtype X = int;
+ 8 | class D extends C {
+ 9 |   const type T = X; // can also be Tany
+   |              ^ [1]
+10 | }
+
+1 error found

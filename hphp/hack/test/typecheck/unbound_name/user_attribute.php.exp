@@ -1,16 +1,79 @@
-ERROR: File "user_attribute.php", line 16, characters 5-12:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "user_attribute.php", line 16, characters 5-12:
-Unrecognized user attribute: `NotFound` does not have a class. Please declare a class for the attribute. (Naming[2049])
-ERROR: File "user_attribute.php", line 20, characters 5-5:
-Unrecognized user attribute: `T` does not have a class. Please declare a class for the attribute. (Naming[2049])
-ERROR: File "user_attribute.php", line 24, characters 5-9:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "user_attribute.php", line 5, characters 6-10:
-  Alias definition is here.
-ERROR: File "user_attribute.php", line 24, characters 5-9:
-Unrecognized user attribute: `Alias` does not have a class. Please declare a class for the attribute. (Naming[2049])
-ERROR: File "user_attribute.php", line 20, characters 5-5:
-Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
-ERROR: File "user_attribute.php", line 20, characters 5-5:
-Generics are not allowed in this position. (Typing[4306])
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+user_attribute.php:16:5
+14 | 
+15 |   // Not allowed
+16 |   <<NotFound>>
+   |     ^^^^^^^^ [1]
+17 |   public function qux(): void {}
+18 | 
+
+error: Naming[2049] Unrecognized user attribute: `NotFound` does not have a class. Please declare a class for the attribute. [1]
+
+user_attribute.php:16:5
+14 | 
+15 |   // Not allowed
+16 |   <<NotFound>>
+   |     ^^^^^^^^ [1]
+17 |   public function qux(): void {}
+18 | 
+
+error: Naming[2049] Unrecognized user attribute: `T` does not have a class. Please declare a class for the attribute. [1]
+
+user_attribute.php:20:5
+18 | 
+19 |   // No generics allowed
+20 |   <<T>>
+   |     ^ [1]
+21 |   public function zab(): void {}
+22 | 
+
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+user_attribute.php:24:5
+ 3 | final class C implements HH\MethodAttribute {}
+ 4 | 
+ 5 | type Alias = C;
+   |      ^^^^^ [2]
+ 6 | 
+ 7 | final class Foo<T> {
+   :
+22 | 
+23 |   // No typedefs allowed
+24 |   <<Alias>>
+   |     ^^^^^ [1]
+25 |   public function nar(): void {}
+26 | }
+
+error: Naming[2049] Unrecognized user attribute: `Alias` does not have a class. Please declare a class for the attribute. [1]
+
+user_attribute.php:24:5
+22 | 
+23 |   // No typedefs allowed
+24 |   <<Alias>>
+   |     ^^^^^ [1]
+25 |   public function nar(): void {}
+26 | }
+
+error: Typing[4124] Erased generics can only be used in type hints because they do not exist at runtime. [1]
+
+user_attribute.php:20:5
+18 | 
+19 |   // No generics allowed
+20 |   <<T>>
+   |     ^ [1]
+21 |   public function zab(): void {}
+22 | 
+
+error: Typing[4306] Generics are not allowed in this position. [1]
+
+user_attribute.php:20:5
+18 | 
+19 |   // No generics allowed
+20 |   <<T>>
+   |     ^ [1]
+21 |   public function zab(): void {}
+22 | 
+
+7 errors found

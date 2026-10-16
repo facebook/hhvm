@@ -1,2 +1,9 @@
-ERROR: File "xhp_modifier_not_on_interface.php", line 4, characters 1-20:
-Interfaces are not valid xhp classes. (Parsing[1002])
+error: Parsing[1002] Interfaces are not valid xhp classes. [1]
+
+xhp_modifier_not_on_interface.php:4:1
+2 | 
+3 | // XHP keyword is not allowed for interfaces
+4 | xhp interface Foo {}
+  | ^^^^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

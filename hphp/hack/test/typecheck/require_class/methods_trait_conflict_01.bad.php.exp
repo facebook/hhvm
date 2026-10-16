@@ -1,12 +1,29 @@
-ERROR: File "methods_trait_conflict_01.bad.php", line 24, characters 7-17:
-Some members in class `TParentDemo` are incompatible with those declared in type `TChild1Demo` (Typing[4341])
-  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
-  The method `asEnt` is not compatible with the overridden method
-  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
-  `TChild2Demo` and `TChild1Demo` both declare ambiguous implementations of `asEnt`.
-  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
-  `TChild2Demo`'s definition is here.
-  File "methods_trait_conflict_01.bad.php", line 29, characters 19-23:
-  `TChild1Demo`'s definition is here.
-  File "methods_trait_conflict_01.bad.php", line 35, characters 19-23:
-  Redeclare `asEnt` in `TParentDemo` with a compatible signature.
+error: Typing[4341] Some members in class `TParentDemo` are incompatible with those declared in type `TChild1Demo` [1]
+-> The method `asEnt` is not compatible with the overridden method [2]
+-> `TChild2Demo` and `TChild1Demo` both declare ambiguous implementations of `asEnt`. [2]
+-> `TChild2Demo`'s definition is here. [2]
+-> `TChild1Demo`'s definition is here. [3]
+-> Redeclare `asEnt` in `TParentDemo` with a compatible signature. [2]
+
+methods_trait_conflict_01.bad.php:24:7
+22 | trait TParentDemo {
+23 |   require class Demo;
+24 |   use TChild1Demo;
+   |       ^^^^^^^^^^^ [1]
+25 |   use TChild2Demo;
+26 | }
+27 | 
+28 | trait TChild1Demo {
+29 |   public function asEnt(): void {
+   |                   ^^^^^ [3]
+30 |     echo('in TChild1Demo');
+31 |   }
+32 | }
+33 | 
+34 | trait TChild2Demo {
+35 |   public function asEnt(): void {
+   |                   ^^^^^ [2]
+36 |     echo('in TChild2Demo');
+37 |   }
+
+1 error found

@@ -1,22 +1,62 @@
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 6, characters 56-62:
-Invalid argument (Typing[4110])
-  File "named_params_lambda_synthesis_2_errors.php", line 6, characters 21-23:
-  Expected `int`
-  File "named_params_lambda_synthesis_2_errors.php", line 6, characters 56-62:
-  But got `string`
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-69:
-Missing required named argument: x (Typing[4499])
-  File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-51:
-  Definition is here
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-69:
-Unexpected named argument: z (Typing[4500])
-  File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-51:
-  Definition is here
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 16, characters 14-58:
-Missing required named argument: y (Typing[4499])
-  File "named_params_lambda_synthesis_2_errors.php", line 16, characters 14-51:
-  Definition is here
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 21, characters 14-76:
-Unexpected named argument: z (Typing[4500])
-  File "named_params_lambda_synthesis_2_errors.php", line 21, characters 14-51:
-  Definition is here
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+named_params_lambda_synthesis_2_errors.php:6:56
+4 | function test_type_mismatch(): void {
+5 |   // Type mismatch: passing string where int is expected
+6 |   $result = ((named int $x, named string $y) ==> $x)(x="wrong", y="hello");
+  |                     ^^^ [2]
+  |                                                        ^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4499] Missing required named argument: x [1]
+-> Definition is here [2]
+
+named_params_lambda_synthesis_2_errors.php:11:14
+ 9 | function test_wrong_parameter_name(): void {
+10 |   // Wrong parameter name: using 'z' instead of 'x'
+11 |   $result = ((named int $x, named string $y) ==> $x)(z=42, y="hello");
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 | }
+13 | 
+
+error: Typing[4500] Unexpected named argument: z [1]
+-> Definition is here [2]
+
+named_params_lambda_synthesis_2_errors.php:11:14
+ 9 | function test_wrong_parameter_name(): void {
+10 |   // Wrong parameter name: using 'z' instead of 'x'
+11 |   $result = ((named int $x, named string $y) ==> $x)(z=42, y="hello");
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 | }
+13 | 
+
+error: Typing[4499] Missing required named argument: y [1]
+-> Definition is here [2]
+
+named_params_lambda_synthesis_2_errors.php:16:14
+14 | function test_missing_named_parameter(): void {
+15 |   // Missing required named parameter 'y'
+16 |   $result = ((named int $x, named string $y) ==> $x)(x=42);
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+17 | }
+18 | 
+
+error: Typing[4500] Unexpected named argument: z [1]
+-> Definition is here [2]
+
+named_params_lambda_synthesis_2_errors.php:21:14
+19 | function test_extra_parameter(): void {
+20 |   // Extra parameter 'z' that doesn't exist
+21 |   $result = ((named int $x, named string $y) ==> $x)(x=42, y="hello", z=100);
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+22 | }
+23 | //
+
+5 errors found

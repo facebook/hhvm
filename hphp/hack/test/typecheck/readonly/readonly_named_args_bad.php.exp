@@ -1,12 +1,38 @@
-ERROR: File "readonly_named_args_bad.php", line 10, characters 27-29:
-Invalid argument (Typing[4411])
-  File "readonly_named_args_bad.php", line 10, characters 27-29:
-  This expression is readonly
-  File "readonly_named_args_bad.php", line 4, characters 38-39:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "readonly_named_args_bad.php", line 11, characters 34-36:
-Invalid argument (Typing[4411])
-  File "readonly_named_args_bad.php", line 11, characters 34-36:
-  This expression is readonly
-  File "readonly_named_args_bad.php", line 4, characters 38-39:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_args_bad.php:10:27
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | //
+ 4 | function readonly_mutable_target(int $m, named int $n): void {}
+   |                                      ^^ [2]
+ 5 | 
+ 6 | function test_readonly_named_binding_bad(): void {
+ 7 |   $ro = readonly 1;
+ 8 |   // A readonly positional argument is rejected against mutable $m
+ 9 |   // in either order: it must not be associated with named $n.
+10 |   readonly_mutable_target($ro, n = 2);
+   |                           ^^^ [1]
+11 |   readonly_mutable_target(n = 2, $ro);
+12 | }
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_named_args_bad.php:11:34
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | //
+ 4 | function readonly_mutable_target(int $m, named int $n): void {}
+   |                                      ^^ [2]
+ 5 | 
+ 6 | function test_readonly_named_binding_bad(): void {
+   :
+ 9 |   // in either order: it must not be associated with named $n.
+10 |   readonly_mutable_target($ro, n = 2);
+11 |   readonly_mutable_target(n = 2, $ro);
+   |                                  ^^^ [1]
+12 | }
+
+2 errors found

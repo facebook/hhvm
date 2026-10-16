@@ -1,8 +1,21 @@
-ERROR: File "interface_override_trait2.php", line 12, characters 37-38:
-Some members in class `B` are incompatible with those declared in type `T1` (Typing[4374])
-  File "interface_override_trait2.php", line 9, characters 23-23:
-  Concrete and abstract type constants with default values in an interface cannot conflict with inherited concrete or abstract type constants with default values.
-  File "interface_override_trait2.php", line 5, characters 23-23:
-  `T` inherited from `T1`
-  File "interface_override_trait2.php", line 9, characters 23-23:
-  conflicts with `abstract type constant with default value` `T` inherited from `I`.
+error: Typing[4374] Some members in class `B` are incompatible with those declared in type `T1` [1]
+-> Concrete and abstract type constants with default values in an interface cannot conflict with inherited concrete or abstract type constants with default values. [2]
+-> `T` inherited from `T1` [3]
+-> conflicts with `abstract type constant with default value` `T` inherited from `I`. [2]
+
+interface_override_trait2.php:12:37
+ 3 | 
+ 4 | trait T1 {
+ 5 |   abstract const type T = int;
+   |                       ^ [3]
+ 6 | }
+ 7 | 
+ 8 | interface I {
+ 9 |   abstract const type T = string;
+   |                       ^ [2]
+10 | }
+11 | 
+12 | abstract class B implements I { use T1; }
+   |                                     ^^ [1]
+
+1 error found

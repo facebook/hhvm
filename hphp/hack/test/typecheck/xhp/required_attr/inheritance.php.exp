@@ -1,4 +1,15 @@
-ERROR: File "inheritance.php", line 6, characters 10-20:
-Required attribute `a` is missing. (Typing[4314])
-  File "inheritance.php", line 3, characters 41-43:
-  The attribute `a` is declared here.
+error: Typing[4314] Required attribute `a` is missing. [1]
+-> The attribute `a` is declared here. [2]
+
+inheritance.php:6:10
+1 | <?hh
+2 | 
+3 | class :base extends XHPTest { attribute int a @required; }
+  |                                         ^^^ [2]
+4 | class :derived extends :base {}
+5 | function bar3(): :derived {
+6 |   return <derived />;
+  |          ^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

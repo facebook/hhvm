@@ -1,6 +1,16 @@
-ERROR: File "valid_targ_new.php", line 7, characters 9-9:
-Invalid reified hint (Typing[4305])
-  File "valid_targ_new.php", line 7, characters 9-9:
-  This is not reified, it cannot be used as a reified type argument
-  File "valid_targ_new.php", line 4, characters 15-16:
-  `Tc` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+valid_targ_new.php:7:9
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [2]
+5 | 
+6 | function g<T>(): void {
+7 |   new C<T>();
+  |         ^ [1]
+8 | }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "enum_type_typedef_nonnull.php--file2.php", line 7, characters 7-9:
-Enums must be `int` or `string` or `arraykey`, not `Foo` (Typing[4024])
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `Foo` [1]
+
+enum_type_typedef_nonnull.php--file2.php:7:7
+5 | }
+6 | 
+7 | class Bar extends Enum {
+  |       ^^^ [1]
+8 |   const type TInner = Foo;
+9 | }
+
+1 error found

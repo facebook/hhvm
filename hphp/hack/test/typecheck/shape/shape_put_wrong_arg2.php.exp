@@ -1,2 +1,10 @@
-ERROR: File "shape_put_wrong_arg2.php", line 4, characters 30-36:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shape_put_wrong_arg2.php:4:30
+2 | 
+3 | function test(shape() $shape): shape() {
+4 |   return Shapes::put($shape, 'x'.'y', 'test');
+  |                              ^^^^^^^ [1]
+5 | }
+
+1 error found

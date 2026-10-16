@@ -1,8 +1,31 @@
-ERROR: File "recursive_newtype_vec.php--f1.php", line 3, characters 9-10:
-Cyclic type definition (Typing[4014])
-  File "recursive_newtype_vec.php--f2.php", line 3, characters 18-19:
-  Cyclic use is here
-ERROR: File "recursive_newtype_vec.php--f2.php", line 3, characters 9-10:
-Cyclic type definition (Typing[4014])
-  File "recursive_newtype_vec.php--f1.php", line 3, characters 15-16:
-  Cyclic use is here
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_newtype_vec.php--f1.php:3:9
+1 | <?hh
+2 | 
+3 | newtype N1 = ?N2;
+  |         ^^ [1]
+
+recursive_newtype_vec.php--f2.php:3:18
+1 | <?hh
+2 | 
+3 | newtype N2 = vec<N1>;
+  |                  ^^ [2]
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_newtype_vec.php--f2.php:3:9
+1 | <?hh
+2 | 
+3 | newtype N2 = vec<N1>;
+  |         ^^ [1]
+
+recursive_newtype_vec.php--f1.php:3:15
+1 | <?hh
+2 | 
+3 | newtype N1 = ?N2;
+  |               ^^ [2]
+
+2 errors found

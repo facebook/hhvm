@@ -1,24 +1,89 @@
-ERROR: File "named_params_errors.php", line 7, characters 20-21:
-Invalid argument (Typing[4110])
-  File "named_params_errors.php", line 3, characters 37-42:
-  Expected `string`
-  File "named_params_errors.php", line 7, characters 20-21:
-  But got `int`
-ERROR: File "named_params_errors.php", line 10, characters 28-36:
-Invalid argument (Typing[4110])
-  File "named_params_errors.php", line 3, characters 21-23:
-  Expected `int`
-  File "named_params_errors.php", line 10, characters 28-36:
-  But got `string`
-ERROR: File "named_params_errors.php", line 13, characters 3-26:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_errors.php", line 3, characters 10-19:
-  Definition is here
-ERROR: File "named_params_errors.php", line 16, characters 3-32:
-Missing required named argument: label (Typing[4499])
-  File "named_params_errors.php", line 3, characters 10-19:
-  Definition is here
-ERROR: File "named_params_errors.php", line 16, characters 3-32:
-Unexpected named argument: unknown (Typing[4500])
-  File "named_params_errors.php", line 3, characters 10-19:
-  Definition is here
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+named_params_errors.php:7:20
+1 | <?hh
+2 | 
+3 | function error_test(int $pos, named string $label): void {}
+  |                                     ^^^^^^ [2]
+4 | 
+5 | function test_errors(): void {
+6 |   // Error: Wrong type for named parameter
+7 |   error_test(label=42, 1);
+  |                    ^^ [1]
+8 | 
+9 |   // Error: Wrong type for positional parameter
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+named_params_errors.php:10:28
+ 1 | <?hh
+ 2 | 
+ 3 | function error_test(int $pos, named string $label): void {}
+   |                     ^^^ [2]
+ 4 | 
+ 5 | function test_errors(): void {
+   :
+ 8 | 
+ 9 |   // Error: Wrong type for positional parameter
+10 |   error_test(label="test", "not_int");
+   |                            ^^^^^^^^^ [1]
+11 | 
+12 |   // Error: Missing required positional parameter
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+named_params_errors.php:13:3
+ 1 | <?hh
+ 2 | 
+ 3 | function error_test(int $pos, named string $label): void {}
+   |          ^^^^^^^^^^ [2]
+ 4 | 
+ 5 | function test_errors(): void {
+   :
+11 | 
+12 |   // Error: Missing required positional parameter
+13 |   error_test(label="test");
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | 
+15 |   // Error: Unknown named parameter
+
+error: Typing[4499] Missing required named argument: label [1]
+-> Definition is here [2]
+
+named_params_errors.php:16:3
+ 1 | <?hh
+ 2 | 
+ 3 | function error_test(int $pos, named string $label): void {}
+   |          ^^^^^^^^^^ [2]
+ 4 | 
+ 5 | function test_errors(): void {
+   :
+14 | 
+15 |   // Error: Unknown named parameter
+16 |   error_test(unknown="test", 42);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+
+error: Typing[4500] Unexpected named argument: unknown [1]
+-> Definition is here [2]
+
+named_params_errors.php:16:3
+ 1 | <?hh
+ 2 | 
+ 3 | function error_test(int $pos, named string $label): void {}
+   |          ^^^^^^^^^^ [2]
+ 4 | 
+ 5 | function test_errors(): void {
+   :
+14 | 
+15 |   // Error: Unknown named parameter
+16 |   error_test(unknown="test", 42);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+
+5 errors found

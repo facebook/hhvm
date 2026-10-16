@@ -1,2 +1,9 @@
-ERROR: File "new_static2.php", line 11, characters 7-16:
-This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. (Typing[4312])
+error: Typing[4312] This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. [1]
+
+new_static2.php:11:7
+ 9 | 
+10 | 
+11 | class ChildClass<reify T> extends BaseClass {}
+   |       ^^^^^^^^^^ [1]
+
+1 error found

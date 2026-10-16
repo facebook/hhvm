@@ -1,10 +1,46 @@
-WARN: File "type_constants_self_referential.php", line 15, characters 5-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-ERROR: File "type_constants_self_referential.php", line 14, characters 10-17:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_self_referential.php", line 5, characters 23-24:
-  The `as` operator cannot be used with the abstract type constant Ta because it is not marked `<<__Enforceable>>`
-ERROR: File "type_constants_self_referential.php", line 16, characters 10-20:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_self_referential.php", line 21, characters 23-24:
-  The `as` operator cannot be used with the abstract type constant Tc because it is not marked `<<__Enforceable>>`
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+type_constants_self_referential.php:15:5
+13 |   public function f(): void {
+14 |     3 as this::Tb; // looks safe, but points to abstract type const
+15 |     4 as this::Td;
+   |     ^^^^^^^^^^^^^ [1]
+16 |     6 as this::Tg::T; // make sure this resolves to the C::Tc and not Test::Tc
+17 |   }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant Ta because it is not marked `<<__Enforceable>>` [2]
+
+type_constants_self_referential.php:14:10
+ 3 | 
+ 4 | abstract class Test {
+ 5 |   abstract const type Ta as num;
+   |                       ^^ [2]
+ 6 |   const type Tb = this::Ta;
+ 7 | 
+   :
+12 | 
+13 |   public function f(): void {
+14 |     3 as this::Tb; // looks safe, but points to abstract type const
+   |          ^^^^^^^^ [1]
+15 |     4 as this::Td;
+16 |     6 as this::Tg::T; // make sure this resolves to the C::Tc and not Test::Tc
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant Tc because it is not marked `<<__Enforceable>>` [2]
+
+type_constants_self_referential.php:16:10
+14 |     3 as this::Tb; // looks safe, but points to abstract type const
+15 |     4 as this::Td;
+16 |     6 as this::Tg::T; // make sure this resolves to the C::Tc and not Test::Tc
+   |          ^^^^^^^^^^^ [1]
+17 |   }
+18 | }
+19 | 
+20 | abstract class C {
+21 |   abstract const type Tc;
+   |                       ^^ [2]
+22 |   const type T = this::Tc;
+23 | }
+
+3 errors found

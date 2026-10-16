@@ -1,4 +1,15 @@
-ERROR: File "sealed_classes20.php", line 2, characters 12-17:
-`__Sealed` can only be used with named types, e.g. `Foo::class` (Parsing[1002])
-ERROR: File "sealed_classes20.php", line 2, characters 12-17:
-`static` is undefined outside of a class (Typing[4061])
+error: Parsing[1002] `__Sealed` can only be used with named types, e.g. `Foo::class` [1]
+
+sealed_classes20.php:2:12
+1 | <?hh
+2 | <<__Sealed(static::class)>> class X {}
+  |            ^^^^^^ [1]
+
+error: Typing[4061] `static` is undefined outside of a class [1]
+
+sealed_classes20.php:2:12
+1 | <?hh
+2 | <<__Sealed(static::class)>> class X {}
+  |            ^^^^^^ [1]
+
+2 errors found

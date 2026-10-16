@@ -1,24 +1,118 @@
-WARN: File "strict_call_tany3.php", line 14, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 14, characters 3-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 14, characters 8-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 14, characters 14-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 15, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 15, characters 3-21:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 15, characters 8-21:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 15, characters 19-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 19, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 19, characters 3-7:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany3.php", line 19, characters 7-7:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "strict_call_tany3.php", line 3, characters 10-12:
-Was expecting a return type hint (Typing[4030])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:14:3
+12 | 
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+   |   ^^ [1]
+15 |   $n = nullthrows($a);
+16 |   // That this works at all in strict mode is probably a bug, but just making
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:14:3
+12 | 
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+   |   ^^^^^^^^^^^^^^^^ [1]
+15 |   $n = nullthrows($a);
+16 |   // That this works at all in strict mode is probably a bug, but just making
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:14:8
+12 | 
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+   |        ^^^^^^^^^^^ [1]
+15 |   $n = nullthrows($a);
+16 |   // That this works at all in strict mode is probably a bug, but just making
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:14:14
+12 | 
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+   |              ^^^^^ [1]
+15 |   $n = nullthrows($a);
+16 |   // That this works at all in strict mode is probably a bug, but just making
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:15:3
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+15 |   $n = nullthrows($a);
+   |   ^^ [1]
+16 |   // That this works at all in strict mode is probably a bug, but just making
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:15:3
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+15 |   $n = nullthrows($a);
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+16 |   // That this works at all in strict mode is probably a bug, but just making
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:15:8
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+15 |   $n = nullthrows($a);
+   |        ^^^^^^^^^^^^^^ [1]
+16 |   // That this works at all in strict mode is probably a bug, but just making
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:15:19
+13 | async function f(): Awaitable<void> {
+14 |   $a = await any();
+15 |   $n = nullthrows($a);
+   |                   ^^ [1]
+16 |   // That this works at all in strict mode is probably a bug, but just making
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:19:3
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+18 |   // restriction on calling methods on Tany in strict, of course.)
+19 |   $n->f();
+   |   ^^ [1]
+20 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:19:3
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+18 |   // restriction on calling methods on Tany in strict, of course.)
+19 |   $n->f();
+   |   ^^^^^ [1]
+20 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany3.php:19:7
+17 |   // sure it doesn't give an empty position for now. (Until we remove the
+18 |   // restriction on calling methods on Tany in strict, of course.)
+19 |   $n->f();
+   |       ^ [1]
+20 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+strict_call_tany3.php:3:10
+1 | <?hh
+2 | 
+3 | function any() {}
+  |          ^^^ [1]
+4 | 
+5 | function nullthrows<T>(?T $x): T {
+
+12 errors found

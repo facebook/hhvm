@@ -1,6 +1,19 @@
-ERROR: File "awaitall_4.php", line 14, characters 17-49:
-Invalid argument (Typing[4411])
-  File "awaitall_4.php", line 14, characters 17-49:
-  This expression is readonly
-  File "awaitall_4.php", line 6, characters 28-29:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+awaitall_4.php:14:17
+ 4 |   public int $prop = 3;
+ 5 | }
+ 6 | function takes_mutable(Bar $x): void {}
+   |                            ^^ [2]
+ 7 | async function returns_readonly(): readonly Awaitable<Bar> {
+ 8 |   return readonly new Bar();
+   :
+12 | async function bar(): Awaitable<void> {
+13 |   $x = readonly Vector {};
+14 |   takes_mutable(await readonly returns_readonly());
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+
+1 error found

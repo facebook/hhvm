@@ -1,16 +1,48 @@
-ERROR: File "readonly_expected_fun.php", line 11, characters 11-12:
-Invalid argument (Typing[4411])
-  File "readonly_expected_fun.php", line 7, characters 8-53:
-  Function readonly return mismatch
-  File "readonly_expected_fun.php", line 7, characters 8-53:
-  This function returns a readonly value
-  File "readonly_expected_fun.php", line 2, characters 22-41:
-  This function does not return a readonly value
-ERROR: File "readonly_expected_fun.php", line 12, characters 11-57:
-Invalid argument (Typing[4411])
-  File "readonly_expected_fun.php", line 12, characters 11-57:
-  Function readonly return mismatch
-  File "readonly_expected_fun.php", line 12, characters 11-57:
-  This function returns a readonly value
-  File "readonly_expected_fun.php", line 2, characters 22-41:
-  This function does not return a readonly value
+error: Typing[4411] Invalid argument [1]
+-> Function readonly return mismatch [2]
+-> This function returns a readonly value [2]
+-> This function does not return a readonly value [3]
+
+readonly_expected_fun.php:11:11
+ 1 | <?hh
+ 2 | function foo(int $x, (function(int): int) $f): int {
+   |                      ^^^^^^^^^^^^^^^^^^^^ [3]
+ 3 |   return $f($x);
+ 4 | }
+ 5 | 
+ 6 | function bar(int $x): void {
+ 7 |   $f = function($x): readonly int {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 |     return 5;
+   |     ^^^^^^^^^ [2]
+ 9 |   };
+   |   ^ [2]
+10 | 
+11 |   foo($x, $f);
+   |           ^^ [1]
+12 |   foo($x, function($x): readonly int {
+13 |     return $x;
+
+error: Typing[4411] Invalid argument [1]
+-> Function readonly return mismatch [1]
+-> This function returns a readonly value [1]
+-> This function does not return a readonly value [2]
+
+readonly_expected_fun.php:12:11
+ 1 | <?hh
+ 2 | function foo(int $x, (function(int): int) $f): int {
+   |                      ^^^^^^^^^^^^^^^^^^^^ [2]
+ 3 |   return $f($x);
+ 4 | }
+   :
+10 | 
+11 |   foo($x, $f);
+12 |   foo($x, function($x): readonly int {
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |     return $x;
+   |     ^^^^^^^^^^ [1]
+14 |   });
+   |   ^ [1]
+15 | }
+
+2 errors found

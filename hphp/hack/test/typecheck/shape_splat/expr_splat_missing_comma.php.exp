@@ -1,6 +1,28 @@
-ERROR: File "expr_splat_missing_comma.php", line 5, characters 28-28:
-A right parenthesis `)` is expected here. (Parsing[1002])
-ERROR: File "expr_splat_missing_comma.php", line 5, characters 32-33:
-Unbound name: `=>` (a global constant) (Naming[2049])
-ERROR: File "expr_splat_missing_comma.php", line 5, characters 32-33:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] A right parenthesis `)` is expected here. [1]
+
+expr_splat_missing_comma.php:5:28
+3 | 
+4 | function missing_comma(shape('a' => int) $base): void {
+5 |   $result = shape(...$base 'b' => 2);
+  |                            ^ [1]
+6 | }
+
+error: Naming[2049] Unbound name: `=>` (a global constant) [1]
+
+expr_splat_missing_comma.php:5:32
+3 | 
+4 | function missing_comma(shape('a' => int) $base): void {
+5 |   $result = shape(...$base 'b' => 2);
+  |                                ^^ [1]
+6 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+expr_splat_missing_comma.php:5:32
+3 | 
+4 | function missing_comma(shape('a' => int) $base): void {
+5 |   $result = shape(...$base 'b' => 2);
+  |                                ^^ [1]
+6 | }
+
+3 errors found

@@ -1,2 +1,10 @@
-ERROR: File "xhp_children_empty.php", line 4, characters 21-21:
-An XHP name or category name is expected here. (Parsing[1002])
+error: Parsing[1002] An XHP name or category name is expected here. [1]
+
+xhp_children_empty.php:4:21
+2 | 
+3 | class :my-html-one {
+4 |   children (pcdata, empty);
+  |                     ^ [1]
+5 | }
+
+1 error found

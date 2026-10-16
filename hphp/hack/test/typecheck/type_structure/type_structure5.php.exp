@@ -1,5 +1,13 @@
-ERROR: File "type_structure5.php", line 6, characters 3-16:
-The two arguments to `HH\type_structure()` must be:
+error: Typing[4150] The two arguments to `HH\type_structure()` must be:
  - first: `ValidClassname::class` or an object of that class
  - second: a single-quoted string literal containing the name of a type constant of that class
-Second argument is not a string (Typing[4150])
+Second argument is not a string [1]
+
+type_structure5.php:6:3
+4 | 
+5 | function test(): void {
+6 |   type_structure(C::class, 123);
+  |   ^^^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

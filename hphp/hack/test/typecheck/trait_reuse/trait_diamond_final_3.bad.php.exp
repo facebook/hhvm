@@ -1,10 +1,30 @@
-ERROR: File "trait_diamond_final_3.bad.php", line 17, characters 7-8:
-Traits with final methods cannot be reused, and `T` is already used by `ParentClass`. (Typing[4186])
-  File "trait_diamond_final_3.bad.php", line 14, characters 16-16:
-  `T1` uses `T`
-  File "trait_diamond_final_3.bad.php", line 8, characters 7-17:
-  `ParentClass` is defined here
-  File "trait_diamond_final_3.bad.php", line 9, characters 7-7:
-  `ParentClass` uses `T`
-  File "trait_diamond_final_3.bad.php", line 5, characters 32-32:
-  `T` has a final method `f`
+error: Typing[4186] Traits with final methods cannot be reused, and `T` is already used by `ParentClass`. [1]
+-> `T1` uses `T` [2]
+-> `ParentClass` is defined here [3]
+-> `ParentClass` uses `T` [4]
+-> `T` has a final method `f` [5]
+
+trait_diamond_final_3.bad.php:17:7
+ 3 | 
+ 4 | trait T {
+ 5 |   final public static function f(): void {}
+   |                                ^ [5]
+ 6 | }
+ 7 | 
+ 8 | class ParentClass {
+   |       ^^^^^^^^^^^ [3]
+ 9 |   use T;
+   |       ^ [4]
+10 | }
+11 | 
+12 | class MidClass extends ParentClass {}
+13 | 
+14 | trait T1 { use T; }
+   |                ^ [2]
+15 | 
+16 | class ChildClass extends MidClass {
+17 |   use T1;
+   |       ^^ [1]
+18 | }
+
+1 error found

@@ -1,6 +1,20 @@
-ERROR: File "readonly_method_param.php", line 16, characters 16-17:
-Invalid argument (Typing[4411])
-  File "readonly_method_param.php", line 16, characters 16-17:
-  This expression is readonly
-  File "readonly_method_param.php", line 4, characters 38-39:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+readonly_method_param.php:16:16
+ 2 | class C{
+ 3 | public function test_fun_ro(readonly Vector<int> $v): void {}
+ 4 | public function test_fun(Vector<int> $v): void {}
+   |                                      ^^ [2]
+ 5 | }
+ 6 | 
+   :
+14 |   $c = new C();
+15 |   $v = readonly Vector {1};
+16 |   $c->test_fun($v); // Should error
+   |                ^^ [1]
+17 | }
+18 | 
+
+1 error found

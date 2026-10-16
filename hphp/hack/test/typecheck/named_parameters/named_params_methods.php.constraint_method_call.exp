@@ -1,20 +1,74 @@
-ERROR: File "named_params_methods.php", line 20, characters 3-40:
-Typing error (Typing[4041])
-  File "named_params_methods.php", line 7, characters 19-42:
-  Unexpected named parameter: c
-  File "named_params_methods.php", line 20, characters 3-40:
-  Because of this definition
-ERROR: File "named_params_methods.php", line 23, characters 3-52:
-Missing required named argument: b (Typing[4499])
-  File "named_params_methods.php", line 9, characters 26-56:
-  Definition is here
-ERROR: File "named_params_methods.php", line 26, characters 3-50:
-Typing error (Typing[4040])
-  File "named_params_methods.php", line 7, characters 19-42:
-  Missing required named parameter: d
-  File "named_params_methods.php", line 26, characters 3-50:
-  Because of this definition
-ERROR: File "named_params_methods.php", line 29, characters 3-62:
-Unexpected named argument: d (Typing[4500])
-  File "named_params_methods.php", line 9, characters 26-56:
-  Definition is here
+error: Typing[4041] Typing error [1]
+-> Unexpected named parameter: c [2]
+-> Because of this definition [1]
+
+named_params_methods.php:20:3
+ 5 | 
+ 6 | class TestClass {
+ 7 |   public function method_with_named_params(int $a, named int $b, named int $c): void {}
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 | 
+ 9 |   public static function static_method_with_named_params(int $a, named int $b, named int $c): void {}
+   :
+18 | 
+19 |   // Error: Missing required named parameter in instance method
+20 |   $obj->method_with_named_params(1, b=2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 | 
+22 |   // Error: Missing required named parameter in static method
+
+error: Typing[4499] Missing required named argument: b [1]
+-> Definition is here [2]
+
+named_params_methods.php:23:3
+ 7 |   public function method_with_named_params(int $a, named int $b, named int $c): void {}
+ 8 | 
+ 9 |   public static function static_method_with_named_params(int $a, named int $b, named int $c): void {}
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | }
+11 | 
+   :
+21 | 
+22 |   // Error: Missing required named parameter in static method
+23 |   TestClass::static_method_with_named_params(1, c=3);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+24 | 
+25 |   // Error: Unexpected named parameter in instance method
+
+error: Typing[4040] Typing error [1]
+-> Missing required named parameter: d [2]
+-> Because of this definition [1]
+
+named_params_methods.php:26:3
+ 5 | 
+ 6 | class TestClass {
+ 7 |   public function method_with_named_params(int $a, named int $b, named int $c): void {}
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 | 
+ 9 |   public static function static_method_with_named_params(int $a, named int $b, named int $c): void {}
+   :
+24 | 
+25 |   // Error: Unexpected named parameter in instance method
+26 |   $obj->method_with_named_params(1, b=2, c=3, d=4);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 | 
+28 |   // Error: Unexpected named parameter in static method
+
+error: Typing[4500] Unexpected named argument: d [1]
+-> Definition is here [2]
+
+named_params_methods.php:29:3
+ 7 |   public function method_with_named_params(int $a, named int $b, named int $c): void {}
+ 8 | 
+ 9 |   public static function static_method_with_named_params(int $a, named int $b, named int $c): void {}
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | }
+11 | 
+   :
+27 | 
+28 |   // Error: Unexpected named parameter in static method
+29 |   TestClass::static_method_with_named_params(1, b=2, c=3, d=4);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 | }
+
+4 errors found

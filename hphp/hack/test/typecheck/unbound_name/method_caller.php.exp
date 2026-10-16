@@ -1,4 +1,19 @@
-ERROR: File "method_caller.php", line 11, characters 15-22:
-Unbound name: `NotFound` (an object type) (Naming[2049])
-ERROR: File "method_caller.php", line 11, characters 15-22:
-Unbound name (typing): `NotFound` (Typing[4107])
+error: Naming[2049] Unbound name: `NotFound` (an object type) [1]
+
+method_caller.php:11:15
+ 9 | 
+10 |   // Should error
+11 |   meth_caller(NotFound::class, 'bar');
+   |               ^^^^^^^^ [1]
+12 | }
+
+error: Typing[4107] Unbound name (typing): `NotFound` [1]
+
+method_caller.php:11:15
+ 9 | 
+10 |   // Should error
+11 |   meth_caller(NotFound::class, 'bar');
+   |               ^^^^^^^^ [1]
+12 | }
+
+2 errors found

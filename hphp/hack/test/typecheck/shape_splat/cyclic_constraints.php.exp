@@ -1,24 +1,76 @@
-ERROR: File "cyclic_constraints.php", line 21, characters 10-15:
-Invalid return type (Typing[4110])
-  File "cyclic_constraints.php", line 14, characters 40-98:
-  Expected `nothing`
-  File "cyclic_constraints.php", line 13, characters 13-22:
-  But got `mixed`
-ERROR: File "cyclic_constraints.php", line 21, characters 10-15:
-Invalid return type (Typing[4110])
-  File "cyclic_constraints.php", line 16, characters 11-16:
-  Expected `string`
-  File "cyclic_constraints.php", line 13, characters 13-22:
-  But got `mixed`
-ERROR: File "cyclic_constraints.php", line 40, characters 10-15:
-Invalid return type (Typing[4532])
-  File "cyclic_constraints.php", line 38, characters 21-26:
-  These shape-splat bounds form a recursive dependency that cannot be checked safely
-  File "cyclic_constraints.php", line 38, characters 21-26:
-  The upper bound of `TLeft` contains the shape spread `...TRight` here
-  File "cyclic_constraints.php", line 39, characters 22-26:
-  The upper bound of `TRight` contains the shape spread `...TLeft` here
-  File "cyclic_constraints.php", line 40, characters 3-16:
-  Expected `shape('anchor' => int, 'q' => int, ?'x' => string)`
-  File "cyclic_constraints.php", line 32, characters 3-29:
-  But got `shape(...TLeft, ...shape('q' => int)) where TLeft as shape(...TRight, ...shape('anchor' => int))`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+cyclic_constraints.php:21:10
+11 | function acyclic_bounds_leave_x_unconstrained<
+12 |   TLeft,
+13 |   TRight as shape(...),
+   |             ^^^^^^^^^^ [3]
+14 | >(shape(...TLeft, 'q' => int) $value): shape(
+   |                                        ^^^^^^ [2]
+15 |   'anchor' => int,
+   |   ^^^^^^^^^^^^^^^^ [2]
+16 |   ?'x' => string,
+   |   ^^^^^^^^^^^^^^^ [2]
+17 |   'q' => int,
+   |   ^^^^^^^^^^^ [2]
+18 | )
+   | ^ [2]
+19 | where
+20 |   TLeft as shape(...TRight, 'anchor' => int) {
+21 |   return $value;
+   |          ^^^^^^ [1]
+22 | }
+23 | // REGRESSION: this must be rejected for exactly the same reason as the
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+
+cyclic_constraints.php:21:10
+11 | function acyclic_bounds_leave_x_unconstrained<
+12 |   TLeft,
+13 |   TRight as shape(...),
+   |             ^^^^^^^^^^ [3]
+14 | >(shape(...TLeft, 'q' => int) $value): shape(
+15 |   'anchor' => int,
+16 |   ?'x' => string,
+   |           ^^^^^^ [2]
+17 |   'q' => int,
+18 | )
+19 | where
+20 |   TLeft as shape(...TRight, 'anchor' => int) {
+21 |   return $value;
+   |          ^^^^^^ [1]
+22 | }
+23 | // REGRESSION: this must be rejected for exactly the same reason as the
+
+error: Typing[4532] Invalid return type [1]
+-> These shape-splat bounds form a recursive dependency that cannot be checked safely [2]
+-> The upper bound of `TLeft` contains the shape spread `...TRight` here [2]
+-> The upper bound of `TRight` contains the shape spread `...TLeft` here [3]
+-> Expected `shape('anchor' => int, 'q' => int, ?'x' => string)` [4]
+-> But got `shape(...TLeft, ...shape('q' => int)) where TLeft as shape(...TRight, ...shape('anchor' => int))` [5]
+
+cyclic_constraints.php:40:10
+30 |   TLeft,
+31 |   TRight,
+32 | >(shape(...TLeft, 'q' => int) $value): shape(
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [5]
+33 |   'anchor' => int,
+34 |   ?'x' => string,
+35 |   'q' => int,
+36 | )
+37 | where
+38 |   TLeft as shape(...TRight, 'anchor' => int),
+   |                     ^^^^^^ [2]
+39 |   TRight as shape(...TLeft, 'anchor' => int) {
+   |                      ^^^^^ [3]
+40 |   return $value;
+   |   ^^^^^^^^^^^^^^ [4]
+   |          ^^^^^^ [1]
+41 | }
+42 | // The cyclic constraints are satisfiable. Choosing XIsInt for both parameters
+
+3 errors found

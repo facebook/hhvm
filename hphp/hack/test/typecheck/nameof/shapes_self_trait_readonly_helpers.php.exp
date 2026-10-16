@@ -1,4 +1,21 @@
-ERROR: File "shapes_self_trait_readonly_helpers.php", line 5, characters 47-57:
-`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "shapes_self_trait_readonly_helpers.php", line 9, characters 46-56:
-`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+error: Naming[2137] `nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+shapes_self_trait_readonly_helpers.php:5:47
+3 | trait T {
+4 |   public function idx(readonly shape(...) $s): void {
+5 |     $_ = readonly HH\Readonly\Shapes::idx($s, nameof self);
+  |                                               ^^^^^^^^^^^ [1]
+6 |   }
+7 | 
+
+error: Naming[2137] `nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+shapes_self_trait_readonly_helpers.php:9:46
+ 7 | 
+ 8 |   public function at(readonly shape(...) $s): void {
+ 9 |     $_ = readonly HH\Readonly\Shapes::at($s, nameof self);
+   |                                              ^^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+2 errors found

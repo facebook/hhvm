@@ -1,8 +1,34 @@
-ERROR: File "interface_constants.php", line 10, characters 35-61:
-Class constant `InterfaceShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "interface_constants.php", line 6, characters 16-23:
-  The class constant is declared here
-ERROR: File "interface_constants.php", line 14, characters 14-40:
-Class constant `InterfaceShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "interface_constants.php", line 6, characters 16-23:
-  The class constant is declared here
+error: Typing[4533] Class constant `InterfaceShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+interface_constants.php:10:35
+ 4 |   <<__ShapeKey>>
+ 5 |   const string KEY = 'interface';
+ 6 |   const string UNMARKED = 'unmarked';
+   |                ^^^^^^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | type InterfaceType = shape(InterfaceShapeKey::KEY => int);
+10 | type InterfaceMissingType = shape(InterfaceShapeKey::UNMARKED => int);
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | 
+12 | function shape_key_expressions(): void {
+
+error: Typing[4533] Class constant `InterfaceShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+interface_constants.php:14:14
+ 4 |   <<__ShapeKey>>
+ 5 |   const string KEY = 'interface';
+ 6 |   const string UNMARKED = 'unmarked';
+   |                ^^^^^^^^ [2]
+ 7 | }
+ 8 | 
+   :
+12 | function shape_key_expressions(): void {
+13 |   $_ = shape(InterfaceShapeKey::KEY => 1);
+14 |   $_ = shape(InterfaceShapeKey::UNMARKED => 1);
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+
+2 errors found

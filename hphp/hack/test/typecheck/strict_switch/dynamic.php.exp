@@ -1,8 +1,37 @@
-ERROR: File "dynamic.php", line 15, characters 3-46:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "dynamic.php", line 15, characters 11-12:
-  The scrutinee has type `dynamic` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "dynamic.php", line 24, characters 3-48:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "dynamic.php", line 24, characters 11-12:
-  The scrutinee has type `?dynamic` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `dynamic` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+dynamic.php:15:3
+13 | // <<__StrictSwitch>>
+14 | function just_dynamic_no_default(dynamic $x): void {
+15 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+16 |     case 42:
+   |     ^^^^^^^^ [1]
+17 |       return;
+   |       ^^^^^^^ [1]
+18 |   }
+   |   ^ [1]
+19 | }
+20 | 
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `?dynamic` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+dynamic.php:24:3
+22 | // <<__StrictSwitch>>
+23 | function nullable_dynamic(?dynamic $x): void {
+24 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+25 |     case null:
+   |     ^^^^^^^^^^ [1]
+26 |       return;
+   |       ^^^^^^^ [1]
+27 |   }
+   |   ^ [1]
+28 | }
+29 | 
+
+2 errors found

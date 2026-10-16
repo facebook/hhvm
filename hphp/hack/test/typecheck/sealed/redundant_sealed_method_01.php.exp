@@ -1,4 +1,21 @@
-WARN: File "redundant_sealed_method_01.php", line 4, characters 14-21:
-Class `D` in sealed allowlist for method `foo` in `C`, but does not extend `C` (Warn[12035])
-WARN: File "redundant_sealed_method_01.php", line 4, characters 24-31:
-Class `E` in sealed allowlist for method `foo` in `C`, but does not override method `foo` (Warn[12041])
+warning: Warn[12035] Class `D` in sealed allowlist for method `foo` in `C`, but does not extend `C` [1]
+
+redundant_sealed_method_01.php:4:14
+2 | 
+3 | class C {
+4 |   <<__Sealed(D::class, E::class, F::class)>>
+  |              ^^^^^^^^ [1]
+5 |   public function foo(): void {}
+6 | }
+
+warning: Warn[12041] Class `E` in sealed allowlist for method `foo` in `C`, but does not override method `foo` [1]
+
+redundant_sealed_method_01.php:4:24
+2 | 
+3 | class C {
+4 |   <<__Sealed(D::class, E::class, F::class)>>
+  |                        ^^^^^^^^ [1]
+5 |   public function foo(): void {}
+6 | }
+
+2 errors found

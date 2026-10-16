@@ -1,5 +1,22 @@
-WARN: File "nullable_class.php", line 23, characters 10-13:
-Invalid case: This case will never match.
-A value of type `C` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "nullable_class.php", line 59, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `C` can never be equal to a value of type `null` [1]
+
+nullable_class.php:23:10
+21 | 
+22 |   switch ($x) {
+23 |     case null:
+   |          ^^^^ [1]
+24 |       return;
+25 |     default:
+
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+nullable_class.php:59:5
+57 |     case null:
+58 |       return;
+59 |     default:
+   |     ^^^^^^^^ [1]
+60 |       return;
+61 |   }
+
+2 errors found

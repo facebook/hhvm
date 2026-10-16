@@ -1,4 +1,21 @@
-ERROR: File "pair-bad-arity.php", line 6, characters 8-32:
-Collection expression must have less than three type arguments (Parsing[1002])
-ERROR: File "pair-bad-arity.php", line 5, characters 8-11:
-Too few arguments (Naming[2037])
+error: Parsing[1002] Collection expression must have less than three type arguments [1]
+
+pair-bad-arity.php:6:8
+4 | function badPair(): int {
+5 |   $x = Pair<int>{1, 2};
+6 |   $y = Pair<int, int, int>{1, 2};
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |   return 0;
+8 | }
+
+error: Naming[2037] Too few arguments [1]
+
+pair-bad-arity.php:5:8
+3 | 
+4 | function badPair(): int {
+5 |   $x = Pair<int>{1, 2};
+  |        ^^^^ [1]
+6 |   $y = Pair<int, int, int>{1, 2};
+7 |   return 0;
+
+2 errors found

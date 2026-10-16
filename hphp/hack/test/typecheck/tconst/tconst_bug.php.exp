@@ -10,11 +10,32 @@ File "tconst_bug.php", line 13, characters 5-52:
   (function(vec<StringType> $boxes): vec<string>)
 File "tconst_bug.php", line 14, characters 5-47:
   (function(vec<<expr#4> as StringType> $boxes): vec<string>)
-ERROR: File "tconst_bug.php", line 16, characters 37-38:
-Invalid argument (Typing[4110])
-  File "tconst_bug.php", line 37, characters 9-12:
-  Expected exactly the type `StringType`
-  File "tconst_bug.php", line 16, characters 21-30:
-    where the class `StringType` was referenced here
-  File "tconst_bug.php", line 7, characters 30-39:
-  But got the nonexact type `StringType`
+error: Typing[4110] Invalid argument [1]
+-> Expected exactly the type `StringType` [2]
+->   where the class `StringType` was referenced here [3]
+-> But got the nonexact type `StringType` [4]
+
+tconst_bug.php:16:37
+ 5 | }
+ 6 | class W {
+ 7 |   public function testit(vec<StringType> $x, StringType $st): void {
+   |                              ^^^^^^^^^^ [4]
+ 8 |     $exactst = new StringType();
+ 9 |     hh_show(StringType::foo<>);
+   :
+14 |     hh_show(($boxes) ==> $st->inst_bar($boxes));
+15 |     expectVecString(StringType::foo($x));
+16 |     expectVecString(StringType::bar($x));
+   |                     ^^^^^^^^^^ [3]
+   |                                     ^^ [1]
+17 |   }
+18 | }
+   :
+35 |   // This fails, but why?
+36 |   public static final function bar(
+37 |     vec<this> $boxes,
+   |         ^^^^ [2]
+38 |   ): vec<this::TExposeAs> {
+39 |     return vec[];
+
+1 error found

@@ -1,14 +1,50 @@
-ERROR: File "trait_class_trait_class_1.bad.php", line 16, characters 13-13:
-Constant ONCALL is defined concretely in multiple ancestors (Typing[4374])
-  File "trait_class_trait_class_1.bad.php", line 5, characters 15-20:
-  One conflicting definition is here, inherited through A
-  File "trait_class_trait_class_1.bad.php", line 9, characters 16-21:
-  Another conflicting definition is here
-ERROR: File "trait_class_trait_class_1.bad.php", line 16, characters 23-23:
-Some members in class `B` are incompatible with those declared in type `A` (Typing[4374])
-  File "trait_class_trait_class_1.bad.php", line 9, characters 16-21:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "trait_class_trait_class_1.bad.php", line 5, characters 15-20:
-  `ONCALL` inherited from `TA`
-  File "trait_class_trait_class_1.bad.php", line 9, characters 16-21:
-  conflicts with constant `ONCALL` inherited from `TB`.
+error: Typing[4374] Constant ONCALL is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through A [2]
+-> Another conflicting definition is here [3]
+
+trait_class_trait_class_1.bad.php:16:13
+ 3 | 
+ 4 | trait TA {
+ 5 |  const string ONCALL = "a";
+   |               ^^^^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | trait TB {
+ 9 |   const string ONCALL = "b";
+   |                ^^^^^^ [3]
+10 | }
+11 | 
+   :
+14 | }
+15 | 
+16 | final class B extends A {
+   |             ^ [1]
+17 |  use TB;
+18 | }
+
+error: Typing[4374] Some members in class `B` are incompatible with those declared in type `A` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `ONCALL` inherited from `TA` [3]
+-> conflicts with constant `ONCALL` inherited from `TB`. [2]
+
+trait_class_trait_class_1.bad.php:16:23
+ 3 | 
+ 4 | trait TA {
+ 5 |  const string ONCALL = "a";
+   |               ^^^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | trait TB {
+ 9 |   const string ONCALL = "b";
+   |                ^^^^^^ [2]
+10 | }
+11 | 
+   :
+14 | }
+15 | 
+16 | final class B extends A {
+   |                       ^ [1]
+17 |  use TB;
+18 | }
+
+2 errors found

@@ -1,2 +1,10 @@
-ERROR: File "undefined_class.php", line 4, characters 10-10:
-Unbound name: `C` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `C` (an object type) [1]
+
+undefined_class.php:4:10
+2 | 
+3 | function f(): void {
+4 |   nameof C;
+  |          ^ [1]
+5 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "remove_key_missing_generic_splat.php", line 7, characters 3-34:
-Cannot remove field `z`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?z => nothing` (Typing[4116])
+error: Typing[4116] Cannot remove field `z`: a type parameter spread into this shape may contain it, so the removal cannot be represented (the shape is passed `inout`, making its type invariant). The type parameter's bound must guarantee the field is absent -- a closed shape without it, or `?z => nothing` [1]
+
+remove_key_missing_generic_splat.php:7:3
+5 |   shape('x' => int, ...T) $s,
+6 | ): void {
+7 |   Shapes::removeKey(inout $s, 'z');
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 | }
+
+1 error found

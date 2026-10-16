@@ -1,4 +1,20 @@
-ERROR: File "optional_on_variadic_errors.php", line 8, characters 13-33:
-Cannot use `optional` on variadic or splat parameters (Parsing[1002])
-ERROR: File "optional_on_variadic_errors.php", line 12, characters 13-27:
-Cannot use `optional` on variadic or splat parameters (Parsing[1002])
+error: Parsing[1002] Cannot use `optional` on variadic or splat parameters [1]
+
+optional_on_variadic_errors.php:8:13
+ 6 | 
+ 7 | function f_optional_named_variadic(
+ 8 |   (function(optional named int...): void) $_,
+   |             ^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | ): void {}
+10 | 
+
+error: Parsing[1002] Cannot use `optional` on variadic or splat parameters [1]
+
+optional_on_variadic_errors.php:12:13
+10 | 
+11 | function f_optional_positional_variadic(
+12 |   (function(optional int...): void) $_,
+   |             ^^^^^^^^^^^^^^^ [1]
+13 | ): void {}
+
+2 errors found

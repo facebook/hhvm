@@ -1,6 +1,21 @@
-ERROR: File "requirethis_03.bad.php", line 9, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requirethis_03.bad.php", line 10, characters 7-7:
-  This requires to extend or implement C
-  File "requirethis_03.bad.php", line 15, characters 19-19:
-  Required here
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement C [2]
+-> Required here [3]
+
+requirethis_03.bad.php:9:7
+ 7 | }
+ 8 | 
+ 9 | class D {
+   |       ^ [1]
+10 |   use T;
+   |       ^ [2]
+11 | }
+12 | 
+13 | trait T {
+14 |   /* HH_IGNORE[12043] require-this-as constraint; class does not use trait */
+15 |   require this as C;
+   |                   ^ [3]
+16 | 
+17 |   public function foo(): void {
+
+1 error found

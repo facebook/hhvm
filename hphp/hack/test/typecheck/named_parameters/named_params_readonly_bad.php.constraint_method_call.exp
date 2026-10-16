@@ -1,44 +1,136 @@
-ERROR: File "named_params_readonly_bad.php", line 13, characters 25-27:
-Invalid argument (Typing[4411])
-  File "named_params_readonly_bad.php", line 13, characters 25-27:
-  This expression is readonly
-  File "named_params_readonly_bad.php", line 5, characters 64-65:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "named_params_readonly_bad.php", line 14, characters 18-20:
-Invalid argument (Typing[4411])
-  File "named_params_readonly_bad.php", line 14, characters 18-20:
-  This expression is readonly
-  File "named_params_readonly_bad.php", line 5, characters 64-65:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "named_params_readonly_bad.php", line 16, characters 21-23:
-Invalid argument (Typing[4411])
-  File "named_params_readonly_bad.php", line 16, characters 21-23:
-  This expression is readonly
-  File "named_params_readonly_bad.php", line 10, characters 50-51:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "named_params_readonly_bad.php", line 17, characters 14-16:
-Invalid argument (Typing[4411])
-  File "named_params_readonly_bad.php", line 17, characters 14-16:
-  This expression is readonly
-  File "named_params_readonly_bad.php", line 10, characters 50-51:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "named_params_readonly_bad.php", line 18, characters 14-23:
-Invalid argument (Typing[4411])
-  File "named_params_readonly_bad.php", line 18, characters 14-23:
-  This expression is readonly
-  File "named_params_readonly_bad.php", line 10, characters 50-51:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "named_params_readonly_bad.php", line 21, characters 10-12:
-Invalid argument (Typing[4411])
-  File "named_params_readonly_bad.php", line 21, characters 10-12:
-  This expression is readonly
-  File "named_params_readonly_bad.php", line 10, characters 50-51:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "named_params_readonly_bad.php", line 23, characters 3-33:
-Typing error (Typing[4411])
-  File "named_params_readonly_bad.php", line 23, characters 23-25:
-  Mismatched parameter readonlyness
-  File "named_params_readonly_bad.php", line 7, characters 59-60:
-  This parameter is mutable
-  File "named_params_readonly_bad.php", line 23, characters 23-25:
-  But this parameter is readonly
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+named_params_readonly_bad.php:13:25
+ 3 | 
+ 4 | class Target {
+ 5 |   public function __construct(named readonly int $r, named int $m) {}
+   |                                                                ^^ [2]
+ 6 | 
+ 7 |   public function method(named readonly int $r, named int $m): void {}
+   :
+11 | 
+12 | function test(readonly int $ro): void {
+13 |   new Target(r = 2, m = $ro);
+   |                         ^^^ [1]
+14 |   new Target(m = $ro, r = 2);
+15 | 
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+named_params_readonly_bad.php:14:18
+ 3 | 
+ 4 | class Target {
+ 5 |   public function __construct(named readonly int $r, named int $m) {}
+   |                                                                ^^ [2]
+ 6 | 
+ 7 |   public function method(named readonly int $r, named int $m): void {}
+   :
+12 | function test(readonly int $ro): void {
+13 |   new Target(r = 2, m = $ro);
+14 |   new Target(m = $ro, r = 2);
+   |                  ^^^ [1]
+15 | 
+16 |   target(r = 2, m = $ro);
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+named_params_readonly_bad.php:16:21
+ 8 | }
+ 9 | 
+10 | function target(named readonly int $r, named int $m): void {}
+   |                                                  ^^ [2]
+11 | 
+12 | function test(readonly int $ro): void {
+13 |   new Target(r = 2, m = $ro);
+14 |   new Target(m = $ro, r = 2);
+15 | 
+16 |   target(r = 2, m = $ro);
+   |                     ^^^ [1]
+17 |   target(m = $ro, r = 2);
+18 |   target(m = readonly 1, r = 2);
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+named_params_readonly_bad.php:17:14
+ 8 | }
+ 9 | 
+10 | function target(named readonly int $r, named int $m): void {}
+   |                                                  ^^ [2]
+11 | 
+12 | function test(readonly int $ro): void {
+   :
+15 | 
+16 |   target(r = 2, m = $ro);
+17 |   target(m = $ro, r = 2);
+   |              ^^^ [1]
+18 |   target(m = readonly 1, r = 2);
+19 | 
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+named_params_readonly_bad.php:18:14
+ 8 | }
+ 9 | 
+10 | function target(named readonly int $r, named int $m): void {}
+   |                                                  ^^ [2]
+11 | 
+12 | function test(readonly int $ro): void {
+   :
+16 |   target(r = 2, m = $ro);
+17 |   target(m = $ro, r = 2);
+18 |   target(m = readonly 1, r = 2);
+   |              ^^^^^^^^^^ [1]
+19 | 
+20 |   $f = target<>;
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+named_params_readonly_bad.php:21:10
+ 8 | }
+ 9 | 
+10 | function target(named readonly int $r, named int $m): void {}
+   |                                                  ^^ [2]
+11 | 
+12 | function test(readonly int $ro): void {
+   :
+19 | 
+20 |   $f = target<>;
+21 |   $f(m = $ro, r = 2);
+   |          ^^^ [1]
+22 |   $target = new Target(m = 2, r = $ro);
+23 |   $target->method(m = $ro, r = 2);
+
+error: Typing[4411] Typing error [1]
+-> Mismatched parameter readonlyness [2]
+-> This parameter is mutable [3]
+-> But this parameter is readonly [2]
+
+named_params_readonly_bad.php:23:3
+ 5 |   public function __construct(named readonly int $r, named int $m) {}
+ 6 | 
+ 7 |   public function method(named readonly int $r, named int $m): void {}
+   |                                                           ^^ [3]
+ 8 | }
+ 9 | 
+   :
+21 |   $f(m = $ro, r = 2);
+22 |   $target = new Target(m = 2, r = $ro);
+23 |   $target->method(m = $ro, r = 2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                       ^^^ [2]
+24 | }
+25 | //
+
+7 errors found

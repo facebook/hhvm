@@ -1,18 +1,73 @@
-WARN: File "wildcard_as.php", line 7, characters 3-8:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `_`. (Warn[12011])
-WARN: File "wildcard_as.php", line 8, characters 3-11:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<T#1>`. (Warn[12012])
-WARN: File "wildcard_as.php", line 9, characters 3-14:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<A<T#1>>`. (Warn[12012])
-WARN: File "wildcard_as.php", line 10, characters 3-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<A<A<T#1>>>`. (Warn[12012])
-ERROR: File "wildcard_as.php", line 7, characters 8-8:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_as.php", line 9, characters 8-14:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_as.php", line 9, characters 10-13:
-  The `as` operator cannot be used with a reified type containing a wildcard (`_`)
-ERROR: File "wildcard_as.php", line 10, characters 8-17:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_as.php", line 10, characters 12-15:
-  The `as` operator cannot be used with a reified type containing a wildcard (`_`)
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `_`. [1]
+
+wildcard_as.php:7:3
+5 | 
+6 | function f(): void {
+7 |   3 as _;
+  |   ^^^^^^ [1]
+8 |   3 as A<_>;
+9 |   3 as A<A<_>>;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<T#1>`. [1]
+
+wildcard_as.php:8:3
+ 6 | function f(): void {
+ 7 |   3 as _;
+ 8 |   3 as A<_>;
+   |   ^^^^^^^^^ [1]
+ 9 |   3 as A<A<_>>;
+10 |   3 as A<A<A<_>>>;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<A<T#1>>`. [1]
+
+wildcard_as.php:9:3
+ 7 |   3 as _;
+ 8 |   3 as A<_>;
+ 9 |   3 as A<A<_>>;
+   |   ^^^^^^^^^^^^ [1]
+10 |   3 as A<A<A<_>>>;
+11 | }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<A<A<T#1>>>`. [1]
+
+wildcard_as.php:10:3
+ 8 |   3 as A<_>;
+ 9 |   3 as A<A<_>>;
+10 |   3 as A<A<A<_>>>;
+   |   ^^^^^^^^^^^^^^^ [1]
+11 | }
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_as.php:7:8
+5 | 
+6 | function f(): void {
+7 |   3 as _;
+  |        ^ [1]
+8 |   3 as A<_>;
+9 |   3 as A<A<_>>;
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a reified type containing a wildcard (`_`) [2]
+
+wildcard_as.php:9:8
+ 7 |   3 as _;
+ 8 |   3 as A<_>;
+ 9 |   3 as A<A<_>>;
+   |        ^^^^^^^ [1]
+   |          ^^^^ [2]
+10 |   3 as A<A<A<_>>>;
+11 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a reified type containing a wildcard (`_`) [2]
+
+wildcard_as.php:10:8
+ 8 |   3 as A<_>;
+ 9 |   3 as A<A<_>>;
+10 |   3 as A<A<A<_>>>;
+   |        ^^^^^^^^^^ [1]
+   |            ^^^^ [2]
+11 | }
+
+7 errors found

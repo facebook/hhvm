@@ -1,18 +1,66 @@
-ERROR: File "representable_as_tuple.php", line 25, characters 34-35:
-Invalid argument (Typing[4110])
-  File "representable_as_tuple.php", line 4, characters 73-75:
-  Expected `int`
-  File "representable_as_tuple.php", line 23, characters 50-55:
-  But got `string`
-ERROR: File "representable_as_tuple.php", line 59, characters 42-43:
-Invalid argument (Typing[4110])
-  File "representable_as_tuple.php", line 32, characters 89-91:
-  Expected `int`
-  File "representable_as_tuple.php", line 57, characters 49-54:
-  But got `string`
-ERROR: File "representable_as_tuple.php", line 64, characters 52-53:
-Invalid argument (Typing[4110])
-  File "representable_as_tuple.php", line 34, characters 109-111:
-  Expected `int`
-  File "representable_as_tuple.php", line 62, characters 59-64:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_tuple.php:25:34
+ 2 | <<file: __EnableUnstableFeatures('representable_as')>>
+ 3 | 
+ 4 | function takes_representable_as_vec_int(\HH\Runtime\RepresentableAs<vec<int>> $c): void {}
+   |                                                                         ^^^ [2]
+ 5 | function takes_representable_as_vec_num(\HH\Runtime\RepresentableAs<vec<num>> $c): void {}
+ 6 | function takes_representable_as_vec_arraykey(\HH\Runtime\RepresentableAs<vec<arraykey>> $c): void {}
+   :
+21 | }
+22 | 
+23 | function test_tuple_int_string_not_vec_int((int, string) $t): void {
+   |                                                  ^^^^^^ [3]
+24 |   // (int, string) <: RepresentableAs<vec<int>> — should FAIL
+25 |   takes_representable_as_vec_int($t);
+   |                                  ^^ [1]
+26 | }
+27 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_tuple.php:59:42
+30 | // Traversable<T> and KeyedTraversable<int, T>.
+31 | 
+32 | function takes_representable_as_traversable_int(\HH\Runtime\RepresentableAs<Traversable<int>> $c): void {}
+   |                                                                                         ^^^ [2]
+33 | function takes_representable_as_traversable_num(\HH\Runtime\RepresentableAs<Traversable<num>> $c): void {}
+34 | function takes_representable_as_keyed_traversable_int_int(\HH\Runtime\RepresentableAs<KeyedTraversable<int, int>> $c): void {}
+   :
+55 | }
+56 | 
+57 | function test_tuple_traversable_int_fails((int, string) $t): void {
+   |                                                 ^^^^^^ [3]
+58 |   // vec<int|string> <: Traversable<int> — should FAIL
+59 |   takes_representable_as_traversable_int($t);
+   |                                          ^^ [1]
+60 | }
+61 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+representable_as_tuple.php:64:52
+32 | function takes_representable_as_traversable_int(\HH\Runtime\RepresentableAs<Traversable<int>> $c): void {}
+33 | function takes_representable_as_traversable_num(\HH\Runtime\RepresentableAs<Traversable<num>> $c): void {}
+34 | function takes_representable_as_keyed_traversable_int_int(\HH\Runtime\RepresentableAs<KeyedTraversable<int, int>> $c): void {}
+   |                                                                                                             ^^^ [2]
+35 | function takes_representable_as_keyed_traversable_int_num(\HH\Runtime\RepresentableAs<KeyedTraversable<int, num>> $c): void {}
+36 | 
+   :
+60 | }
+61 | 
+62 | function test_tuple_keyed_traversable_int_int_fails((int, string) $t): void {
+   |                                                           ^^^^^^ [3]
+63 |   // vec<int|string> <: KeyedTraversable<int, int> — should FAIL
+64 |   takes_representable_as_keyed_traversable_int_int($t);
+   |                                                    ^^ [1]
+65 | }
+
+3 errors found

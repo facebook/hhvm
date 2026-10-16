@@ -1,8 +1,44 @@
-ERROR: File "named_params_lambda.php", line 14, characters 3-12:
-Missing required named argument: opt (Typing[4499])
-  File "named_params_lambda.php", line 5, characters 13-112:
-  Definition is here
-ERROR: File "named_params_lambda.php", line 17, characters 3-49:
-Unexpected named argument: extra (Typing[4500])
-  File "named_params_lambda.php", line 5, characters 13-112:
-  Definition is here
+error: Typing[4499] Missing required named argument: opt [1]
+-> Definition is here [2]
+
+named_params_lambda.php:14:3
+ 3 | 
+ 4 | function test_lambda(): void {
+ 5 |   $lambda = (int $x, named string $opt, named vec<int> $items = vec[]): int ==> {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 6 |     return $x + $items[0];
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 7 |   };
+   |   ^ [2]
+ 8 | 
+ 9 |   // Valid calls
+   :
+12 | 
+13 |   // Missing required named parameter
+14 |   $lambda(1);
+   |   ^^^^^^^^^^ [1]
+15 | 
+16 |   // Extra named parameter
+
+error: Typing[4500] Unexpected named argument: extra [1]
+-> Definition is here [2]
+
+named_params_lambda.php:17:3
+ 3 | 
+ 4 | function test_lambda(): void {
+ 5 |   $lambda = (int $x, named string $opt, named vec<int> $items = vec[]): int ==> {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 6 |     return $x + $items[0];
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 7 |   };
+   |   ^ [2]
+ 8 | 
+ 9 |   // Valid calls
+   :
+15 | 
+16 |   // Extra named parameter
+17 |   $lambda(1, opt="test", items=vec[1], extra=123);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | }
+
+2 errors found

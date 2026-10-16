@@ -1,12 +1,33 @@
-ERROR: File "corner_bottom_super_only.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "corner_bottom_super_only.php", line 7, characters 4-4:
-  Expected `T`
-  File "corner_bottom_super_only.php", line 6, characters 3-19:
-  But got `shape('a' => int)`
-ERROR: File "corner_bottom_super_only.php", line 15, characters 10-11:
-Invalid return type (Typing[4522])
-  File "corner_bottom_super_only.php", line 13, characters 3-19:
-  This shape is not guaranteed to have the fields required here
-  File "corner_bottom_super_only.php", line 14, characters 13-13:
-  `T` may have required fields of its own
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `shape('a' => int)` [3]
+
+corner_bottom_super_only.php:8:10
+ 4 | // A concrete shape cannot satisfy every possible instantiation of `T`.
+ 5 | function only_super<<<__Explicit>> T as shape('a' => int, ...)>(
+ 6 |   shape('a' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^ [3]
+ 7 | ): T {
+   |    ^ [2]
+ 8 |   return $s;
+   |          ^^ [1]
+ 9 | }
+10 | 
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T` may have required fields of its own [3]
+
+corner_bottom_super_only.php:15:10
+11 | // `T` may require additional fields that the argument does not provide.
+12 | function only_super_inline<<<__Explicit>> T as shape(...)>(
+13 |   shape('a' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^ [2]
+14 | ): shape(...T, 'a' => int) {
+   |             ^ [3]
+15 |   return $s;
+   |          ^^ [1]
+16 | }
+17 | 
+
+2 errors found

@@ -1,8 +1,28 @@
-ERROR: File "nullsafe-bug.php", line 8, characters 25-28:
-Was expecting a type hint (Typing[4032])
-ERROR: File "nullsafe-bug.php", line 9, characters 10-28:
-Was expecting an object but type is unknown (Typing[4297])
-  File "nullsafe-bug.php", line 9, characters 10-12:
-  It is unknown because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo`
-  File "nullsafe-bug.php", line 5, characters 35-35:
-    via this generic `T`
+error: Typing[4032] Was expecting a type hint [1]
+
+nullsafe-bug.php:8:25
+ 6 |   throw new Exception("foo");
+ 7 | }
+ 8 | function bar(/* TAny */ $foo): ?Awaitable<?IFoo> {
+   |                         ^^^^ [1]
+ 9 |   return foo($foo->genFoo())?->genFoo();
+10 | }
+
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo` [2]
+->   via this generic `T` [3]
+
+nullsafe-bug.php:9:10
+ 3 |   public function genFoo(): Awaitable<?IFoo>;
+ 4 | }
+ 5 | function foo<T>(Awaitable<T> $x): T {
+   |                                   ^ [3]
+ 6 |   throw new Exception("foo");
+ 7 | }
+ 8 | function bar(/* TAny */ $foo): ?Awaitable<?IFoo> {
+ 9 |   return foo($foo->genFoo())?->genFoo();
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+   |          ^^^ [2]
+10 | }
+
+2 errors found

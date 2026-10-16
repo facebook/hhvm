@@ -1,4 +1,14 @@
-ERROR: File "needs_concrete_1.php", line 6, characters 13-14:
-Dangerous access of abstract member `A::m2`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4529])
-  File "needs_concrete_1.php", line 8, characters 35-36:
-  Declaration is here
+error: Typing[4529] Dangerous access of abstract member `A::m2`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. [1]
+-> Declaration is here [2]
+
+needs_concrete_1.php:6:13
+4 |   public static function m1(): void {
+5 |     // hh error: unsafe because `static` might not refer to a concrete class.
+6 |     static::m2();
+  |             ^^ [1]
+7 |   }
+8 |   public static abstract function m2(): void;
+  |                                   ^^ [2]
+9 | }
+
+1 error found

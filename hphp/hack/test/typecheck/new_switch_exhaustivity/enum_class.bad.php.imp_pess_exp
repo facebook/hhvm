@@ -1,37 +1,181 @@
-WARN: File "enum_class.bad.php", line 18, characters 10-16:
-Invalid case: This case will never match.
-A value of type `string` can never be equal to a value of type `int` (Warn[12007])
-ERROR: File "enum_class.bad.php", line 10, characters 3-51:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int2` (Typing[4019])
-  File "enum_class.bad.php", line 10, characters 11-12:
-  The scrutinee has type `HH\MemberOf<E, int>`.
-ERROR: File "enum_class.bad.php", line 17, characters 3-51:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::String1` (Typing[4019])
-  File "enum_class.bad.php", line 17, characters 11-12:
-  The scrutinee has type `HH\MemberOf<E, string>`.
-ERROR: File "enum_class.bad.php", line 24, characters 3-83:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::String1` (Typing[4019])
-  File "enum_class.bad.php", line 24, characters 11-12:
-  The scrutinee has type `HH\MemberOf<E, T>`.
-ERROR: File "enum_class.bad.php", line 33, characters 3-50:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `#Int2` (Typing[4019])
-  File "enum_class.bad.php", line 33, characters 11-12:
-  The scrutinee has type `HH\EnumClass\Label<E, int>`.
-ERROR: File "enum_class.bad.php", line 40, characters 3-50:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` (Typing[4019])
-  File "enum_class.bad.php", line 40, characters 11-12:
-  The scrutinee has type `HH\EnumClass\Label<E, string>`.
-ERROR: File "enum_class.bad.php", line 46, characters 33-33:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "enum_class.bad.php", line 47, characters 3-81:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` (Typing[4019])
-  File "enum_class.bad.php", line 47, characters 11-12:
-  The scrutinee has type `HH\EnumClass\Label<E, T>`.
-ERROR: File "enum_class.bad.php", line 56, characters 3-81:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int1`, `E::Int2` (Typing[4019])
-  File "enum_class.bad.php", line 56, characters 11-12:
-  The scrutinee has type `HH\MemberOf<E, int>`.
-ERROR: File "enum_class.bad.php", line 65, characters 3-83:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `#Int1`, `#Int2` (Typing[4019])
-  File "enum_class.bad.php", line 65, characters 11-12:
-  The scrutinee has type `HH\EnumClass\Label<E, int>`.
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `string` can never be equal to a value of type `int` [1]
+
+enum_class.bad.php:18:10
+16 | function test_enum_class2(HH\MemberOf<E, string> $e): void {
+17 |   switch ($e) {
+18 |     case E::Int1:
+   |          ^^^^^^^ [1]
+19 |       return;
+20 |   }
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int2` [1]
+-> The scrutinee has type `HH\MemberOf<E, int>`. [2]
+
+enum_class.bad.php:10:3
+ 8 | 
+ 9 | function test_enum_class1(HH\MemberOf<E, int> $e): void {
+10 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+11 |     case E::Int1:
+   |     ^^^^^^^^^^^^^ [1]
+12 |       return;
+   |       ^^^^^^^ [1]
+13 |   }
+   |   ^ [1]
+14 | }
+15 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::String1` [1]
+-> The scrutinee has type `HH\MemberOf<E, string>`. [2]
+
+enum_class.bad.php:17:3
+15 | 
+16 | function test_enum_class2(HH\MemberOf<E, string> $e): void {
+17 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+18 |     case E::Int1:
+   |     ^^^^^^^^^^^^^ [1]
+19 |       return;
+   |       ^^^^^^^ [1]
+20 |   }
+   |   ^ [1]
+21 | }
+22 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::String1` [1]
+-> The scrutinee has type `HH\MemberOf<E, T>`. [2]
+
+enum_class.bad.php:24:3
+22 | 
+23 | function test_enum_class3<T>(HH\MemberOf<E, T> $e): void {
+24 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+25 |     case E::Int1:
+   |     ^^^^^^^^^^^^^ [1]
+26 |       return;
+   |       ^^^^^^^ [1]
+27 |     case E::Int2:
+   |     ^^^^^^^^^^^^^ [1]
+28 |       return;
+   |       ^^^^^^^ [1]
+29 |   }
+   |   ^ [1]
+30 | }
+31 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `#Int2` [1]
+-> The scrutinee has type `HH\EnumClass\Label<E, int>`. [2]
+
+enum_class.bad.php:33:3
+31 | 
+32 | function test_enum_class_label1(HH\EnumClass\Label<E, int> $e): void {
+33 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+34 |     case E#Int1:
+   |     ^^^^^^^^^^^^ [1]
+35 |       return;
+   |       ^^^^^^^ [1]
+36 |   }
+   |   ^ [1]
+37 | }
+38 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` [1]
+-> The scrutinee has type `HH\EnumClass\Label<E, string>`. [2]
+
+enum_class.bad.php:40:3
+38 | 
+39 | function test_enum_class_label2(HH\EnumClass\Label<E, string> $e): void {
+40 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+41 |     case E#Int1:
+   |     ^^^^^^^^^^^^ [1]
+42 |       return;
+   |       ^^^^^^^ [1]
+43 |   }
+   |   ^ [1]
+44 | }
+45 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+enum_class.bad.php:46:33
+44 | }
+45 | 
+46 | function test_enum_class_label3<T>(HH\EnumClass\Label<E, T> $e): void {
+   |                                 ^ [1]
+47 |   switch ($e) {
+48 |     case E#Int1:
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` [1]
+-> The scrutinee has type `HH\EnumClass\Label<E, T>`. [2]
+
+enum_class.bad.php:47:3
+45 | 
+46 | function test_enum_class_label3<T>(HH\EnumClass\Label<E, T> $e): void {
+47 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+48 |     case E#Int1:
+   |     ^^^^^^^^^^^^ [1]
+49 |       return;
+   |       ^^^^^^^ [1]
+50 |     case E#Int2:
+   |     ^^^^^^^^^^^^ [1]
+51 |       return;
+   |       ^^^^^^^ [1]
+52 |   }
+   |   ^ [1]
+53 | }
+54 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int1`, `E::Int2` [1]
+-> The scrutinee has type `HH\MemberOf<E, int>`. [2]
+
+enum_class.bad.php:56:3
+54 | 
+55 | function test_member_of_label_mixup1(HH\MemberOf<E, int> $e): void {
+56 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+57 |     case E#Int1:
+   |     ^^^^^^^^^^^^ [1]
+58 |       return;
+   |       ^^^^^^^ [1]
+59 |     case E#Int2:
+   |     ^^^^^^^^^^^^ [1]
+60 |       return;
+   |       ^^^^^^^ [1]
+61 |   }
+   |   ^ [1]
+62 | }
+63 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `#Int1`, `#Int2` [1]
+-> The scrutinee has type `HH\EnumClass\Label<E, int>`. [2]
+
+enum_class.bad.php:65:3
+63 | 
+64 | function test_member_of_label_mixup2(HH\EnumClass\Label<E, int> $e): void {
+65 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+66 |     case E::Int1:
+   |     ^^^^^^^^^^^^^ [1]
+67 |       return;
+   |       ^^^^^^^ [1]
+68 |     case E::Int2:
+   |     ^^^^^^^^^^^^^ [1]
+69 |       return;
+   |       ^^^^^^^ [1]
+70 |   }
+   |   ^ [1]
+71 | }
+
+10 errors found

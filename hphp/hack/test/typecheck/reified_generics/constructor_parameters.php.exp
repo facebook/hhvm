@@ -2,9 +2,22 @@ File "constructor_parameters.php", line 10, characters 3-17:
   T as A
 File "constructor_parameters.php", line 12, characters 3-17:
   T as A
-ERROR: File "constructor_parameters.php", line 11, characters 18-24:
-Invalid argument (Typing[4110])
-  File "constructor_parameters.php", line 6, characters 38-40:
-  Expected `int`
-  File "constructor_parameters.php", line 11, characters 18-24:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+constructor_parameters.php:11:18
+ 4 | <<__ConsistentConstruct>>
+ 5 | class A {
+ 6 |   public function __construct(public int $i, public string $s) {}
+   |                                      ^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | function f<<<__Newable>> reify T as A>(T $param): void {
+10 |   hh_show($param);
+11 |   $local = new T("wrong", "right");
+   |                  ^^^^^^^ [1]
+12 |   hh_show($local);
+13 | }
+
+1 error found

@@ -1,4 +1,18 @@
-ERROR: File "true_type_enum_return.bad.php", line 15, characters 3-47:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
-  File "true_type_enum_return.bad.php", line 15, characters 11-12:
-  The scrutinee has type `?((arraykey & dynamic) | E)`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `null` [1]
+-> The scrutinee has type `?((arraykey & dynamic) | E)`. [2]
+
+true_type_enum_return.bad.php:15:3
+13 | function main(): void {
+14 |   $e = C::foo();
+15 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+16 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+17 |       break;
+   |       ^^^^^^ [1]
+18 |   }
+   |   ^ [1]
+19 | }
+
+1 error found

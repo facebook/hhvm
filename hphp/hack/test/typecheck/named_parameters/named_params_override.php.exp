@@ -1,48 +1,88 @@
-ERROR: File "named_params_override.php", line 19, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "named_params_override.php", line 19, characters 19-21:
-  Method `foo` has type `(function(bool $z): void)` in `Child3`
-  File "named_params_override.php", line 4, characters 19-21:
-  But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P`
-  File "named_params_override.php", line 19, characters 19-21:
-  Type `(function(bool $z): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)`
-  File "named_params_override.php", line 19, characters 19-21:
-  Missing required named parameters: y, x
-  File "named_params_override.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "named_params_override.php", line 23, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "named_params_override.php", line 23, characters 19-21:
-  Method `foo` has type `(function(named int $x, named int $y, bool $z, named int $ww): void)` in `Child4`
-  File "named_params_override.php", line 4, characters 19-21:
-  But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P`
-  File "named_params_override.php", line 23, characters 19-21:
-  Type `(function(named int $x, named int $y, bool $z, named int $ww): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)`
-  File "named_params_override.php", line 23, characters 19-21:
-  Unexpected named parameter: ww
-  File "named_params_override.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "named_params_override.php", line 27, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "named_params_override.php", line 27, characters 19-21:
-  Method `foo` has type `(function(named int $x, named int $y, bool $z): void)` in `Child5`
-  File "named_params_override.php", line 4, characters 19-21:
-  But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P`
-  File "named_params_override.php", line 27, characters 19-21:
-  Type `(function(named int $x, named int $y, bool $z): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)`
-  File "named_params_override.php", line 27, characters 19-21:
-  Named parameter x is required but expected to be optional
-  File "named_params_override.php", line 4, characters 19-21:
-  Because of this definition
-ERROR: File "named_params_override.php", line 31, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "named_params_override.php", line 31, characters 19-21:
-  Method `foo` has type `(function(named int $x, named int $y, bool $z, named int $extra): void)` in `Child6`
-  File "named_params_override.php", line 4, characters 19-21:
-  But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P`
-  File "named_params_override.php", line 31, characters 19-21:
-  Type `(function(named int $x, named int $y, bool $z, named int $extra): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)`
-  File "named_params_override.php", line 31, characters 19-21:
-  Unexpected named parameter: extra
-  File "named_params_override.php", line 4, characters 19-21:
-  Because of this definition
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(bool $z): void)` in `Child3` [1]
+-> But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P` [2]
+-> Type `(function(bool $z): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)` [1]
+-> Missing required named parameters: y, x [1]
+-> Because of this definition [2]
+
+named_params_override.php:19:19
+ 2 | 
+ 3 | class P {
+ 4 |   public function foo(named int $x = 1, named int $y, bool $z): void {}
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+17 | class Child3 extends P {
+18 |   // error: too few
+19 |   public function foo(bool $z): void {}
+   |                   ^^^ [1]
+20 | }
+21 | class Child4 extends P {
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(named int $x, named int $y, bool $z, named int $ww): void)` in `Child4` [1]
+-> But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P` [2]
+-> Type `(function(named int $x, named int $y, bool $z, named int $ww): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)` [1]
+-> Unexpected named parameter: ww [1]
+-> Because of this definition [2]
+
+named_params_override.php:23:19
+ 2 | 
+ 3 | class P {
+ 4 |   public function foo(named int $x = 1, named int $y, bool $z): void {}
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+21 | class Child4 extends P {
+22 |   // error: too many
+23 |   public function foo(named int $x, named int $y, bool $z, named int $ww): void {}
+   |                   ^^^ [1]
+24 | }
+25 | class Child5 extends P {
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(named int $x, named int $y, bool $z): void)` in `Child5` [1]
+-> But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P` [2]
+-> Type `(function(named int $x, named int $y, bool $z): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)` [1]
+-> Named parameter x is required but expected to be optional [1]
+-> Because of this definition [2]
+
+named_params_override.php:27:19
+ 2 | 
+ 3 | class P {
+ 4 |   public function foo(named int $x = 1, named int $y, bool $z): void {}
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+25 | class Child5 extends P {
+26 |   // error: x should be optional
+27 |   public function foo(named int $x, named int $y, bool $z): void {}
+   |                   ^^^ [1]
+28 | }
+29 | class Child6 extends P {
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(named int $x, named int $y, bool $z, named int $extra): void)` in `Child6` [1]
+-> But it has type `(function(optional named int $x, named int $y, bool $z): void)` in parent `P` [2]
+-> Type `(function(named int $x, named int $y, bool $z, named int $extra): void)` is not a subtype of `(function(optional named int $x, named int $y, bool $z): void)` [1]
+-> Unexpected named parameter: extra [1]
+-> Because of this definition [2]
+
+named_params_override.php:31:19
+ 2 | 
+ 3 | class P {
+ 4 |   public function foo(named int $x = 1, named int $y, bool $z): void {}
+   |                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+29 | class Child6 extends P {
+30 |   // multiple errors
+31 |   public function foo(named int $x, named int $y, bool $z, named int $extra): void {}
+   |                   ^^^ [1]
+32 | }
+
+4 errors found

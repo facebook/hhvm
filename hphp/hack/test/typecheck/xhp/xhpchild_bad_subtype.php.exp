@@ -1,8 +1,26 @@
-ERROR: File "xhpchild_bad_subtype.php--file2.php", line 5, characters 7-8:
-Invalid argument (Typing[4110])
-  File "xhpchild_bad_subtype.php--file2.php", line 2, characters 14-21:
-  Expected `XHPChild`
-  File "xhpchild_bad_subtype.php--file2.php", line 3, characters 16-17:
-  But got `mixed`
-  File "xhpchild_bad_subtype.php--file1.php", line 4, characters 9-10:
-    by the definition of `N1` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4110] Invalid argument [1]
+-> Expected `XHPChild` [2]
+-> But got `mixed` [3]
+->   by the definition of `N1` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+xhpchild_bad_subtype.php--file2.php:5:7
+1 | <?hh
+2 | function foo(XHPChild $_):void { }
+  |              ^^^^^^^^ [2]
+3 | function test1(N1 $x):void {
+  |                ^^ [3]
+4 |   // Should be rejected
+5 |   foo($x);
+  |       ^^ [1]
+6 | }
+7 | function test2(N2 $y):void {
+
+xhpchild_bad_subtype.php--file1.php:4:9
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | newtype N1 = C;
+  |         ^^ [4]
+5 | newtype N2 as C = C;
+6 | 
+
+1 error found

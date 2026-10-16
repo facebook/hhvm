@@ -1,4 +1,17 @@
-ERROR: File "override_abstract_trait.php", line 9, characters 28-28:
-Cannot re-declare this method as abstract (Typing[4142])
-  File "override_abstract_trait.php", line 4, characters 19-19:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this method as abstract [1]
+-> Previously defined here [2]
+
+override_abstract_trait.php:9:28
+ 2 | 
+ 3 | trait C {
+ 4 |   public function f(): void {}
+   |                   ^ [2]
+ 5 | }
+ 6 | 
+ 7 | abstract class D {
+ 8 |   use C;
+ 9 |   abstract public function f(): void;
+   |                            ^ [1]
+10 | }
+
+1 error found

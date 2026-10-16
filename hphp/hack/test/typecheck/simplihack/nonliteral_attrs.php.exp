@@ -1,8 +1,24 @@
-ERROR: File "nonliteral_attrs.php", line 16, characters 25-30:
-Error while evaluating this SimpliHack expression (Typing[4495])
-  File "nonliteral_attrs.php", line 16, characters 28-29:
-  Unsupported expression
-ERROR: File "nonliteral_attrs.php", line 16, characters 33-41:
-Error while evaluating this SimpliHack expression (Typing[4495])
-  File "nonliteral_attrs.php", line 16, characters 33-41:
-  Unsupported expression
+error: Typing[4495] Error while evaluating this SimpliHack expression [1]
+-> Unsupported expression [2]
+
+nonliteral_attrs.php:16:25
+14 | }
+15 | 
+16 | <<FA1(10), __SimpliHack(id(10), () ==> {}), FA2('hello')>>
+   |                         ^^^^^^ [1]
+   |                            ^^ [2]
+17 | function f(int $i): void {
+18 | 
+
+error: Typing[4495] Error while evaluating this SimpliHack expression [1]
+-> Unsupported expression [1]
+
+nonliteral_attrs.php:16:33
+14 | }
+15 | 
+16 | <<FA1(10), __SimpliHack(id(10), () ==> {}), FA2('hello')>>
+   |                                 ^^^^^^^^^ [1]
+17 | function f(int $i): void {
+18 | 
+
+2 errors found

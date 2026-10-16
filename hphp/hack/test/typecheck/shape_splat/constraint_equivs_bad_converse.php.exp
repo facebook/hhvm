@@ -1,24 +1,65 @@
-ERROR: File "constraint_equivs_bad_converse.php", line 9, characters 10-11:
-Invalid return type (Typing[4522])
-  File "constraint_equivs_bad_converse.php", line 7, characters 3-26:
-  This shape is not guaranteed to have the fields required here
-  File "constraint_equivs_bad_converse.php", line 8, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "constraint_equivs_bad_converse.php", line 9, characters 10-11:
-Invalid return type (Typing[4110])
-  File "constraint_equivs_bad_converse.php", line 9, characters 3-12:
-  Expected `nothing`
-  File "constraint_equivs_bad_converse.php", line 6, characters 26-35:
-  But got `mixed`
-ERROR: File "constraint_equivs_bad_converse.php", line 15, characters 10-11:
-Invalid return type (Typing[4522])
-  File "constraint_equivs_bad_converse.php", line 13, characters 3-26:
-  This shape is not guaranteed to have the fields required here
-  File "constraint_equivs_bad_converse.php", line 14, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "constraint_equivs_bad_converse.php", line 15, characters 10-11:
-Invalid return type (Typing[4110])
-  File "constraint_equivs_bad_converse.php", line 15, characters 3-12:
-  Expected `nothing`
-  File "constraint_equivs_bad_converse.php", line 12, characters 56-65:
-  But got `mixed`
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+constraint_equivs_bad_converse.php:9:10
+ 5 | // cannot be returned as the same row over `T2`.
+ 6 | function reject_as<T1 as shape(...), <<__Explicit>> T2 as T1>(
+ 7 |   shape(...T1, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 8 | ): shape(...T2, 'q' => int) {
+   |             ^^ [3]
+ 9 |   return $s;
+   |          ^^ [1]
+10 | }
+11 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+constraint_equivs_bad_converse.php:9:10
+ 4 | // Neither constraint spelling establishes `T1 <: T2`, so a row over `T1`
+ 5 | // cannot be returned as the same row over `T2`.
+ 6 | function reject_as<T1 as shape(...), <<__Explicit>> T2 as T1>(
+   |                          ^^^^^^^^^^ [3]
+ 7 |   shape(...T1, 'q' => int) $s,
+ 8 | ): shape(...T2, 'q' => int) {
+ 9 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+10 | }
+11 | 
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+constraint_equivs_bad_converse.php:15:10
+11 | 
+12 | function reject_super<T2 as shape(...), T1 super T2 as shape(...)>(
+13 |   shape(...T1, 'q' => int) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | ): shape(...T2, 'q' => int) {
+   |             ^^ [3]
+15 |   return $s;
+   |          ^^ [1]
+16 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+constraint_equivs_bad_converse.php:15:10
+10 | }
+11 | 
+12 | function reject_super<T2 as shape(...), T1 super T2 as shape(...)>(
+   |                                                        ^^^^^^^^^^ [3]
+13 |   shape(...T1, 'q' => int) $s,
+14 | ): shape(...T2, 'q' => int) {
+15 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+16 | }
+
+4 errors found

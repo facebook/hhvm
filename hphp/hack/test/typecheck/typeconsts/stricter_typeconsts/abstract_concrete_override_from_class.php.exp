@@ -1,12 +1,52 @@
-ERROR: File "abstract_concrete_override_from_class.php", line 7, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_class.php", line 3, characters 31-31:
-  Previously defined here
-ERROR: File "abstract_concrete_override_from_class.php", line 12, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_class.php", line 3, characters 31-31:
-  Previously defined here
-ERROR: File "abstract_concrete_override_from_class.php", line 17, characters 23-23:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_concrete_override_from_class.php", line 3, characters 31-31:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_class.php:7:23
+1 | <?hh
+2 | 
+3 | abstract class A { const type T = int; }
+  |                               ^ [2]
+4 | 
+5 | abstract class B extends A {
+6 |   // error, abstract cannot override concrete
+7 |   abstract const type T = string;
+  |                       ^ [1]
+8 | };
+9 | 
+
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_class.php:12:23
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class A { const type T = int; }
+   |                               ^ [2]
+ 4 | 
+ 5 | abstract class B extends A {
+   :
+10 | interface I { // same error
+11 |   require extends A;
+12 |   abstract const type T = bool;
+   |                       ^ [1]
+13 | }
+14 | 
+
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_concrete_override_from_class.php:17:23
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class A { const type T = int; }
+   |                               ^ [2]
+ 4 | 
+ 5 | abstract class B extends A {
+   :
+15 | trait T { // same error
+16 |   require extends A;
+17 |   abstract const type T = float;
+   |                       ^ [1]
+18 | }
+
+3 errors found

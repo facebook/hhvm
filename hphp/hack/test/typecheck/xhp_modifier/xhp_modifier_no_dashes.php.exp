@@ -1,4 +1,17 @@
-ERROR: File "xhp_modifier_no_dashes.php", line 4, characters 14-14:
-A left brace `{` is expected here. (Parsing[1002])
-ERROR: File "xhp_modifier_no_dashes.php", line 4, characters 14-14:
-Encountered unexpected text `-`, was expecting a class element. (Parsing[1002])
+error: Parsing[1002] A left brace `{` is expected here. [1]
+
+xhp_modifier_no_dashes.php:4:14
+2 | 
+3 | // XHP classes with dash in the name is not allowed.
+4 | xhp class Foo-bar {}
+  |              ^ [1]
+
+error: Parsing[1002] Encountered unexpected text `-`, was expecting a class element. [1]
+
+xhp_modifier_no_dashes.php:4:14
+2 | 
+3 | // XHP classes with dash in the name is not allowed.
+4 | xhp class Foo-bar {}
+  |              ^ [1]
+
+2 errors found

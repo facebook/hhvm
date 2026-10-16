@@ -1,2 +1,10 @@
-ERROR: File "type_structure4.php", line 4, characters 18-33:
-Unbound name: `NonExistentClass` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `NonExistentClass` (an object type) [1]
+
+type_structure4.php:4:18
+2 | 
+3 | function test(): void {
+4 |   type_structure(NonExistentClass::class, 'T');
+  |                  ^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

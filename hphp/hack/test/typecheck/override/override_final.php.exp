@@ -1,4 +1,17 @@
-ERROR: File "override_final.php", line 18, characters 22-23:
-You cannot override this method (Typing[4070])
-  File "override_final.php", line 14, characters 28-29:
-  It was declared as final
+error: Typing[4070] You cannot override this method [1]
+-> It was declared as final [2]
+
+override_final.php:18:22
+12 | 
+13 | class Foo {
+14 |   final protected function f1(): void {
+   |                            ^^ [2]
+15 |   }
+16 | }
+17 | class Bar extends Foo {
+18 |   protected function f1(): void {
+   |                      ^^ [1]
+19 |   }
+20 | }
+
+1 error found

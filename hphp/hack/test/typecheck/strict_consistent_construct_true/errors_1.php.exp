@@ -1,6 +1,29 @@
-WARN: File "errors_1.php", line 3, characters 22-42:
-An `abstract final` class cannot be `__ConsistentConstruct`. `AbstractFinalCCDirect` is `__ConsistentConstruct`. (Warn[12037])
-WARN: File "errors_1.php", line 7, characters 22-43:
-An `abstract final` class cannot be `__ConsistentConstruct`. Class `AbstractFinalChildOfCC` inherits `__ConsistentConstruct` from `AbstractCCRoot`. (Warn[12037])
-WARN: File "errors_1.php", line 12, characters 22-44:
-An `abstract final` class cannot be `__ConsistentConstruct`. Class `AbstractFinalGrandchild` inherits `__ConsistentConstruct` from `MiddleClass`. (Warn[12037])
+warning: Warn[12037] An `abstract final` class cannot be `__ConsistentConstruct`. `AbstractFinalCCDirect` is `__ConsistentConstruct`. [1]
+
+errors_1.php:3:22
+1 | <?hh
+2 | <<__ConsistentConstruct>>
+3 | abstract final class AbstractFinalCCDirect {}
+  |                      ^^^^^^^^^^^^^^^^^^^^^ [1]
+4 | 
+5 | <<__ConsistentConstruct>>
+
+warning: Warn[12037] An `abstract final` class cannot be `__ConsistentConstruct`. Class `AbstractFinalChildOfCC` inherits `__ConsistentConstruct` from `AbstractCCRoot`. [1]
+
+errors_1.php:7:22
+5 | <<__ConsistentConstruct>>
+6 | abstract class AbstractCCRoot {}
+7 | abstract final class AbstractFinalChildOfCC extends AbstractCCRoot {}
+  |                      ^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 | 
+9 | <<__ConsistentConstruct>>
+
+warning: Warn[12037] An `abstract final` class cannot be `__ConsistentConstruct`. Class `AbstractFinalGrandchild` inherits `__ConsistentConstruct` from `MiddleClass`. [1]
+
+errors_1.php:12:22
+10 | class CCGrandparent {}
+11 | class MiddleClass extends CCGrandparent {}
+12 | abstract final class AbstractFinalGrandchild extends MiddleClass {}
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+3 errors found

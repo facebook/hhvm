@@ -1,4 +1,18 @@
-ERROR: File "newtype_enum_bound.bad.php--test.php", line 4, characters 3-54:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `MyEnum2::B` (Typing[4019])
-  File "newtype_enum_bound.bad.php--test.php", line 4, characters 11-12:
-  The scrutinee has type `MyEnumWrapper2`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `MyEnum2::B` [1]
+-> The scrutinee has type `MyEnumWrapper2`. [2]
+
+newtype_enum_bound.bad.php--test.php:4:3
+2 | 
+3 | function test_newtype_nonexhaustive(MyEnumWrapper2 $x): void {
+4 |   switch ($x) {
+  |   ^^^^^^^^^^^^^ [1]
+  |           ^^ [2]
+5 |     case MyEnum2::A:
+  |     ^^^^^^^^^^^^^^^^ [1]
+6 |       return;
+  |       ^^^^^^^ [1]
+7 |   }
+  |   ^ [1]
+8 | }
+
+1 error found

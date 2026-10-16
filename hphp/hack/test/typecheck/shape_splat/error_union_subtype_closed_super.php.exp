@@ -1,24 +1,77 @@
-ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
-  Expected `shape('x' => int)`
-  File "error_union_subtype_closed_super.php", line 17, characters 13-14:
-  But got `T1 as shape('x' => int, ...)`
-ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
-Invalid argument (Typing[4110])
-  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
-  Expected `shape('x' => int)`
-  File "error_union_subtype_closed_super.php", line 17, characters 18-19:
-  But got `T2 as shape('x' => int, ...)`
-ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
-Invalid argument (Typing[4138])
-  File "error_union_subtype_closed_super.php", line 15, characters 9-30:
-  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
-  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
-  It is incompatible with a shape that does not allow unknown fields.
-ERROR: File "error_union_subtype_closed_super.php", line 18, characters 15-16:
-Invalid argument (Typing[4138])
-  File "error_union_subtype_closed_super.php", line 16, characters 9-30:
-  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
-  File "error_union_subtype_closed_super.php", line 12, characters 22-38:
-  It is incompatible with a shape that does not allow unknown fields.
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => int)` [2]
+-> But got `T1 as shape('x' => int, ...)` [3]
+
+error_union_subtype_closed_super.php:18:15
+10 | // rejected (both branches).
+11 | 
+12 | function sink_closed(shape('x' => int) $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+13 | 
+14 | function closed_super<
+15 |   T1 as shape('x' => int, ...),
+16 |   T2 as shape('x' => int, ...),
+17 | >(shape(...(T1 | T2), ...shape()) $s): void {
+   |             ^^ [3]
+18 |   sink_closed($s);
+   |               ^^ [1]
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => int)` [2]
+-> But got `T2 as shape('x' => int, ...)` [3]
+
+error_union_subtype_closed_super.php:18:15
+10 | // rejected (both branches).
+11 | 
+12 | function sink_closed(shape('x' => int) $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [2]
+13 | 
+14 | function closed_super<
+15 |   T1 as shape('x' => int, ...),
+16 |   T2 as shape('x' => int, ...),
+17 | >(shape(...(T1 | T2), ...shape()) $s): void {
+   |                  ^^ [3]
+18 |   sink_closed($s);
+   |               ^^ [1]
+19 | }
+
+error: Typing[4138] Invalid argument [1]
+-> This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration. [2]
+-> It is incompatible with a shape that does not allow unknown fields. [3]
+
+error_union_subtype_closed_super.php:18:15
+10 | // rejected (both branches).
+11 | 
+12 | function sink_closed(shape('x' => int) $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [3]
+13 | 
+14 | function closed_super<
+15 |   T1 as shape('x' => int, ...),
+   |         ^^^^^^^^^^^^^^^^^^^^^^ [2]
+16 |   T2 as shape('x' => int, ...),
+17 | >(shape(...(T1 | T2), ...shape()) $s): void {
+18 |   sink_closed($s);
+   |               ^^ [1]
+19 | }
+
+error: Typing[4138] Invalid argument [1]
+-> This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration. [2]
+-> It is incompatible with a shape that does not allow unknown fields. [3]
+
+error_union_subtype_closed_super.php:18:15
+10 | // rejected (both branches).
+11 | 
+12 | function sink_closed(shape('x' => int) $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^ [3]
+13 | 
+14 | function closed_super<
+15 |   T1 as shape('x' => int, ...),
+16 |   T2 as shape('x' => int, ...),
+   |         ^^^^^^^^^^^^^^^^^^^^^^ [2]
+17 | >(shape(...(T1 | T2), ...shape()) $s): void {
+18 |   sink_closed($s);
+   |               ^^ [1]
+19 | }
+
+4 errors found

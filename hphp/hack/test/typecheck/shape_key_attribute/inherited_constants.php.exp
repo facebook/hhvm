@@ -1,8 +1,36 @@
-ERROR: File "inherited_constants.php", line 12, characters 35-57:
-Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "inherited_constants.php", line 6, characters 16-23:
-  The class constant is declared here
-ERROR: File "inherited_constants.php", line 16, characters 14-36:
-Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. (Typing[4533])
-  File "inherited_constants.php", line 6, characters 16-23:
-  The class constant is declared here
+error: Typing[4533] Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+inherited_constants.php:12:35
+ 4 |   <<__ShapeKey>>
+ 5 |   const string KEY = 'inherited';
+ 6 |   const string UNMARKED = 'unmarked';
+   |                ^^^^^^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | class ChildShapeKey extends ParentShapeKey {}
+10 | 
+11 | type InheritedType = shape(ChildShapeKey::KEY => int);
+12 | type InheritedMissingType = shape(ChildShapeKey::UNMARKED => int);
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | 
+14 | function shape_key_expressions(): void {
+
+error: Typing[4533] Class constant `ParentShapeKey::UNMARKED` used as a shape key must be annotated with `<<__ShapeKey>>`. Prefer using an enum constant as a shape key. [1]
+-> The class constant is declared here [2]
+
+inherited_constants.php:16:14
+ 4 |   <<__ShapeKey>>
+ 5 |   const string KEY = 'inherited';
+ 6 |   const string UNMARKED = 'unmarked';
+   |                ^^^^^^^^ [2]
+ 7 | }
+ 8 | 
+   :
+14 | function shape_key_expressions(): void {
+15 |   $_ = shape(ChildShapeKey::KEY => 1);
+16 |   $_ = shape(ChildShapeKey::UNMARKED => 1);
+   |              ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+
+2 errors found

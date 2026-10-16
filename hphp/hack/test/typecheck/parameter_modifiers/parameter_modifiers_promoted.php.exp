@@ -1,4 +1,21 @@
-ERROR: File "parameter_modifiers_promoted.php", line 4, characters 38-43:
-A type specifier is expected here. (Parsing[1002])
-ERROR: File "parameter_modifiers_promoted.php", line 4, characters 38-43:
-Encountered unexpected text `public`, was expecting a type hint. (Parsing[1002])
+error: Parsing[1002] A type specifier is expected here. [1]
+
+parameter_modifiers_promoted.php:4:38
+2 | 
+3 | class C1 {
+4 |   public function __construct(public public int $x) {}
+  |                                      ^^^^^^ [1]
+5 | }
+6 | 
+
+error: Parsing[1002] Encountered unexpected text `public`, was expecting a type hint. [1]
+
+parameter_modifiers_promoted.php:4:38
+2 | 
+3 | class C1 {
+4 |   public function __construct(public public int $x) {}
+  |                                      ^^^^^^ [1]
+5 | }
+6 | 
+
+2 errors found

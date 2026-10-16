@@ -1,4 +1,19 @@
-ERROR: File "override_attr_multifile_trait.php--class_file.php", line 3, characters 7-23:
-`OverrideTrait::needsParent` is marked `__Override` but `UsesOverrideTrait` does not define or inherit a `needsParent` method. (Typing[4071])
-  File "override_attr_multifile_trait.php--trait_file.php", line 5, characters 19-29:
-  Declaration of `needsParent` is here
+error: Typing[4071] `OverrideTrait::needsParent` is marked `__Override` but `UsesOverrideTrait` does not define or inherit a `needsParent` method. [1]
+-> Declaration of `needsParent` is here [2]
+
+override_attr_multifile_trait.php--class_file.php:3:7
+1 | <?hh
+2 | 
+3 | class UsesOverrideTrait {
+  |       ^^^^^^^^^^^^^^^^^ [1]
+4 |   use OverrideTrait;
+5 | }
+
+override_attr_multifile_trait.php--trait_file.php:5:19
+3 | trait OverrideTrait {
+4 |   <<__Override>>
+5 |   public function needsParent(): void {}
+  |                   ^^^^^^^^^^^ [2]
+6 | }
+
+1 error found

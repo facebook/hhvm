@@ -1,12 +1,23 @@
-ERROR: File "methods_philippe_03.bad.php", line 22, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "methods_philippe_03.bad.php", line 22, characters 19-21:
-  Method `foo` has type `(function(int $a): void)` in `TPajoux`
-  File "methods_philippe_03.bad.php", line 13, characters 19-21:
-  But it has type `(function(int $a, optional ?int $b): void)` in parent `IPajoux2`
-  File "methods_philippe_03.bad.php", line 22, characters 19-21:
-  Type `(function(int $a): void)` is not a subtype of `(function(int $a, optional ?int $b): void)`
-  File "methods_philippe_03.bad.php", line 22, characters 19-21:
-  Too few positional arguments (required 2 but got 1)
-  File "methods_philippe_03.bad.php", line 13, characters 19-21:
-  Because of this definition
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(int $a): void)` in `TPajoux` [1]
+-> But it has type `(function(int $a, optional ?int $b): void)` in parent `IPajoux2` [2]
+-> Type `(function(int $a): void)` is not a subtype of `(function(int $a, optional ?int $b): void)` [1]
+-> Too few positional arguments (required 2 but got 1) [1]
+-> Because of this definition [2]
+
+methods_philippe_03.bad.php:22:19
+11 | 
+12 | interface IPajoux2 {
+13 |   public function foo(int $a, ?int $b = null): void;
+   |                   ^^^ [2]
+14 | }
+15 | 
+   :
+20 | 
+21 | trait TPajoux implements IPajoux1, IPajoux2 {
+22 |   public function foo(int $a): void {}
+   |                   ^^^ [1]
+23 |   require class Pajoux;
+24 | }
+
+1 error found

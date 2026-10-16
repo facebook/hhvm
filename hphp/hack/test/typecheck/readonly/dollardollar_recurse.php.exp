@@ -1,12 +1,39 @@
-ERROR: File "dollardollar_recurse.php", line 19, characters 25-26:
-Invalid argument (Typing[4411])
-  File "dollardollar_recurse.php", line 19, characters 25-26:
-  This expression is readonly
-  File "dollardollar_recurse.php", line 9, characters 33-34:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "dollardollar_recurse.php", line 20, characters 39-40:
-Invalid argument (Typing[4411])
-  File "dollardollar_recurse.php", line 20, characters 39-40:
-  This expression is readonly
-  File "dollardollar_recurse.php", line 9, characters 33-34:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+dollardollar_recurse.php:19:25
+ 7 | }
+ 8 | 
+ 9 | function mutates_ref(Ref<mixed> $r): int {
+   |                                 ^^ [2]
+10 |   $r->value = 99;
+11 |   return $r->value;
+   :
+17 |       $r |> (new Ref(0) |> mutates_ref($$)); // ok
+18 |       ($r |> new Ref(0)) |> mutates_ref($$); // ok
+19 |       $r |> mutates_ref($$) |> new Ref(0); // not ok
+   |                         ^^ [1]
+20 |       new Ref(0) |> $r |> mutates_ref($$); // not ok
+21 |       new Ref(0) |> mutates_ref($$) |> $r; // ok
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+dollardollar_recurse.php:20:39
+ 7 | }
+ 8 | 
+ 9 | function mutates_ref(Ref<mixed> $r): int {
+   |                                 ^^ [2]
+10 |   $r->value = 99;
+11 |   return $r->value;
+   :
+18 |       ($r |> new Ref(0)) |> mutates_ref($$); // ok
+19 |       $r |> mutates_ref($$) |> new Ref(0); // not ok
+20 |       new Ref(0) |> $r |> mutates_ref($$); // not ok
+   |                                       ^^ [1]
+21 |       new Ref(0) |> mutates_ref($$) |> $r; // ok
+22 |   }
+
+2 errors found

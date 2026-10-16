@@ -1,6 +1,16 @@
-ERROR: File "lambda_variadic.php", line 8, characters 9-10:
-Invalid argument (Typing[4359])
-  File "lambda_variadic.php", line 8, characters 9-10:
-  An array cannot be unpacked into the required arguments of a function
-  File "lambda_variadic.php", line 5, characters 8-44:
-  Definition is here
+error: Typing[4359] Invalid argument [1]
+-> An array cannot be unpacked into the required arguments of a function [1]
+-> Definition is here [2]
+
+lambda_variadic.php:8:9
+3 | function f(vec<int> $v): void {
+4 |   $f = (...$arg) ==> { throw new Exception(); };
+5 |   $g = ($arg) ==> { throw new Exception(); };
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+6 | 
+7 |   $f(...$v);
+8 |   $g(...$v); // error
+  |         ^^ [1]
+9 | }
+
+1 error found

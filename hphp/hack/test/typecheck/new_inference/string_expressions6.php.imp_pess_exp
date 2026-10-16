@@ -1,6 +1,15 @@
-ERROR: File "string_expressions6.php", line 14, characters 19-23:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "string_expressions6.php", line 14, characters 19-23:
-  Expected `string` or `int`
-  File "string_expressions6.php", line 13, characters 37-39:
-  But got `Meh`
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `Meh` [2]
+
+string_expressions6.php:14:19
+11 | 
+12 | class Meh {
+13 |   public static function foo(Vector<Meh> $x): void {
+   |                                     ^^^ [2]
+14 |     print "Hello, $x[1]";
+   |                   ^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

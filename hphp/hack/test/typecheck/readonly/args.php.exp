@@ -1,12 +1,39 @@
-ERROR: File "args.php", line 28, characters 17-18:
-Invalid argument (Typing[4411])
-  File "args.php", line 28, characters 17-18:
-  This expression is readonly
-  File "args.php", line 17, characters 28-29:
-  It is incompatible with this parameter, which is mutable
-ERROR: File "args.php", line 29, characters 21-22:
-Invalid argument (Typing[4411])
-  File "args.php", line 29, characters 21-22:
-  This expression is readonly
-  File "args.php", line 8, characters 46-51:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+args.php:28:17
+15 |   }
+16 | }
+17 | function takes_mutable(Foo $x) : void {
+   |                            ^^ [2]
+18 |   $x->prop = 4;
+19 | }
+   :
+26 | 
+27 |   // error, $ro_foo is readonly
+28 |   takes_mutable($x);
+   |                 ^^ [1]
+29 |   $x->takes_mutable($x);
+30 | 
+
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+args.php:29:21
+ 6 |   }
+ 7 | 
+ 8 |   public readonly function takes_mutable(Foo $other) : void {
+   |                                              ^^^^^^ [2]
+ 9 |     $other->prop = 4;
+10 |   }
+   :
+27 |   // error, $ro_foo is readonly
+28 |   takes_mutable($x);
+29 |   $x->takes_mutable($x);
+   |                     ^^ [1]
+30 | 
+31 |   // ok
+
+2 errors found

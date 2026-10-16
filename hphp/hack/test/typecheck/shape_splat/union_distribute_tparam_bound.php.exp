@@ -12,15 +12,31 @@ File "union_distribute_tparam_bound.php", line 50, characters 3-13:
   T as (T1 | T2)
 File "union_distribute_tparam_bound.php", line 51, characters 3-18:
   (int | string)
-ERROR: File "union_distribute_tparam_bound.php", line 33, characters 60-60:
-Some type arguments violate their constraints (Typing[4323])
-  File "union_distribute_tparam_bound.php", line 33, characters 51-73:
-  Expected `shape(...)`
-  File "union_distribute_tparam_bound.php", line 33, characters 45-47:
-  But got `int`
-ERROR: File "union_distribute_tparam_bound.php", line 33, characters 60-60:
-Some type arguments violate their constraints (Typing[4323])
-  File "union_distribute_tparam_bound.php", line 33, characters 51-73:
-  Expected `shape(...)`
-  File "union_distribute_tparam_bound.php", line 33, characters 60-60:
-  But got `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `int` [3]
+
+union_distribute_tparam_bound.php:33:60
+31 | 
+32 | // REJECT: `int` is not spreadable, so neither is the union containing it.
+33 | function with_int<T as (shape('a' => int) | int)>(shape(...T, 'x' => int) $s): void {}
+   |                                             ^^^ [3]
+   |                                                   ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                            ^ [1]
+34 | 
+35 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `T` [1]
+
+union_distribute_tparam_bound.php:33:60
+31 | 
+32 | // REJECT: `int` is not spreadable, so neither is the union containing it.
+33 | function with_int<T as (shape('a' => int) | int)>(shape(...T, 'x' => int) $s): void {}
+   |                                                   ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                            ^ [1]
+34 | 
+35 | 
+
+2 errors found

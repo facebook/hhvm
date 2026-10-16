@@ -1,12 +1,33 @@
-ERROR: File "corner_cycle_nested_bounds.php", line 12, characters 10-15:
-Invalid return type (Typing[4110])
-  File "corner_cycle_nested_bounds.php", line 11, characters 4-36:
-  Expected `nothing`
-  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
-  But got `mixed`
-ERROR: File "corner_cycle_nested_bounds.php", line 12, characters 10-15:
-Invalid return type (Typing[4110])
-  File "corner_cycle_nested_bounds.php", line 11, characters 18-23:
-  Expected `string`
-  File "corner_cycle_nested_bounds.php", line 10, characters 3-26:
-  But got `mixed`
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+corner_cycle_nested_bounds.php:12:10
+ 8 |   T2 as T1 as shape(...),
+ 9 | >(
+10 |   shape(...T1, 'q' => int) $value,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+11 | ): shape(?'x' => string, 'q' => int) {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 |   return $value;
+   |          ^^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+
+corner_cycle_nested_bounds.php:12:10
+ 8 |   T2 as T1 as shape(...),
+ 9 | >(
+10 |   shape(...T1, 'q' => int) $value,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+11 | ): shape(?'x' => string, 'q' => int) {
+   |                  ^^^^^^ [2]
+12 |   return $value;
+   |          ^^^^^^ [1]
+13 | }
+14 | 
+
+2 errors found

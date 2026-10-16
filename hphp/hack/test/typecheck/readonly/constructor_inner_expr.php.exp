@@ -1,4 +1,19 @@
-ERROR: File "constructor_inner_expr.php", line 17, characters 7-18:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "constructor_inner_expr.php", line 3, characters 28-35:
-  The function call is defined here.
+error: Typing[4412] This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The function call is defined here. [2]
+
+constructor_inner_expr.php:17:7
+ 1 | <?hh
+ 2 | final class X {
+ 3 |   public readonly function getValue(): readonly int {
+   |                            ^^^^^^^^ [2]
+ 4 |     return readonly 5;
+ 5 |   }
+   :
+15 |     $x = new X();
+16 |     return readonly new XContainer(
+17 |       $x->getValue(),
+   |       ^^^^^^^^^^^^ [1]
+18 |     );
+19 |   }
+
+1 error found

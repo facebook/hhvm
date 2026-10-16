@@ -1,36 +1,125 @@
-ERROR: File "classname.php", line 11, characters 13-24:
-Invalid reified hint (Typing[4305])
-  File "classname.php", line 11, characters 13-24:
-  This is a classname, it cannot be used as a reified type argument
-  File "classname.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "classname.php", line 12, characters 13-24:
-Invalid reified hint (Typing[4305])
-  File "classname.php", line 12, characters 13-24:
-  This is a typename, it cannot be used as a reified type argument
-  File "classname.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "classname.php", line 13, characters 13-14:
-Invalid reified hint (Typing[4305])
-  File "classname.php", line 8, characters 11-22:
-  This is a classname, it cannot be used as a reified type argument
-  File "classname.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "classname.php", line 14, characters 13-14:
-Invalid reified hint (Typing[4305])
-  File "classname.php", line 9, characters 11-22:
-  This is a typename, it cannot be used as a reified type argument
-  File "classname.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "classname.php", line 15, characters 13-27:
-Invalid reified hint (Typing[4305])
-  File "classname.php", line 15, characters 15-26:
-  This is a classname, it cannot be used as a reified type argument
-  File "classname.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "classname.php", line 16, characters 13-27:
-Invalid reified hint (Typing[4305])
-  File "classname.php", line 16, characters 15-26:
-  This is a typename, it cannot be used as a reified type argument
-  File "classname.php", line 3, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+classname.php:11:13
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [2]
+ 4 | class D {}
+ 5 | class E<T> {}
+   :
+ 9 | type Tz = typename<Tx>;
+10 | 
+11 | type Ta = C<classname<D>>;
+   |             ^^^^^^^^^^^^ [1]
+12 | type Tb = C<typename<Tx>>;
+13 | type Tc = C<Ty>;
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a typename, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+classname.php:12:13
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [2]
+ 4 | class D {}
+ 5 | class E<T> {}
+   :
+10 | 
+11 | type Ta = C<classname<D>>;
+12 | type Tb = C<typename<Tx>>;
+   |             ^^^^^^^^^^^^ [1]
+13 | type Tc = C<Ty>;
+14 | type Td = C<Tz>;
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+classname.php:13:13
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [3]
+ 4 | class D {}
+ 5 | class E<T> {}
+ 6 | 
+ 7 | type Tx = int;
+ 8 | type Ty = classname<D>;
+   |           ^^^^^^^^^^^^ [2]
+ 9 | type Tz = typename<Tx>;
+10 | 
+11 | type Ta = C<classname<D>>;
+12 | type Tb = C<typename<Tx>>;
+13 | type Tc = C<Ty>;
+   |             ^^ [1]
+14 | type Td = C<Tz>;
+15 | type Te = C<E<classname<D>>>;
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a typename, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+classname.php:14:13
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [3]
+ 4 | class D {}
+ 5 | class E<T> {}
+ 6 | 
+ 7 | type Tx = int;
+ 8 | type Ty = classname<D>;
+ 9 | type Tz = typename<Tx>;
+   |           ^^^^^^^^^^^^ [2]
+10 | 
+11 | type Ta = C<classname<D>>;
+12 | type Tb = C<typename<Tx>>;
+13 | type Tc = C<Ty>;
+14 | type Td = C<Tz>;
+   |             ^^ [1]
+15 | type Te = C<E<classname<D>>>;
+16 | type Tf = C<E<typename<Tx>>>;
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a classname, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+classname.php:15:13
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [3]
+ 4 | class D {}
+ 5 | class E<T> {}
+   :
+13 | type Tc = C<Ty>;
+14 | type Td = C<Tz>;
+15 | type Te = C<E<classname<D>>>;
+   |             ^^^^^^^^^^^^^^^ [1]
+   |               ^^^^^^^^^^^^ [2]
+16 | type Tf = C<E<typename<Tx>>>;
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a typename, it cannot be used as a reified type argument [2]
+-> `T` is reified [3]
+
+classname.php:16:13
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {}
+   |               ^ [3]
+ 4 | class D {}
+ 5 | class E<T> {}
+   :
+14 | type Td = C<Tz>;
+15 | type Te = C<E<classname<D>>>;
+16 | type Tf = C<E<typename<Tx>>>;
+   |             ^^^^^^^^^^^^^^^ [1]
+   |               ^^^^^^^^^^^^ [2]
+
+6 errors found

@@ -1,8 +1,21 @@
-ERROR: File "bad_input_type.php", line 10, characters 7-8:
-Invalid argument (Typing[4110])
-  File "bad_input_type.php", line 4, characters 18-20:
-  Expected `int`
-  File "bad_input_type.php", line 7, characters 14-17:
-    resulting from expanding the type constant `C::T`
-  File "bad_input_type.php", line 10, characters 7-8:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from expanding the type constant `C::T` [3]
+-> But got `string` [1]
+
+bad_input_type.php:10:7
+ 2 | 
+ 3 | class C {
+ 4 |   const type T = int;
+   |                  ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | function foo(C::T $x): void {}
+   |              ^^^^ [3]
+ 8 | 
+ 9 | function test(): void {
+10 |   foo('');
+   |       ^^ [1]
+11 | }
+
+1 error found

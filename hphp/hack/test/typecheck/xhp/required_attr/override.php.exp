@@ -1,44 +1,109 @@
-ERROR: File "override.php", line 6, characters 35-37:
-Redeclared attribute must not be less strict (Typing[4315])
-  File "override.php", line 4, characters 35-37:
-  The attribute is `@required`, which is stricter than `@lateinit`
-ERROR: File "override.php", line 7, characters 35-37:
-Redeclared attribute must not be less strict (Typing[4315])
-  File "override.php", line 4, characters 35-37:
-  The attribute is `@required`, which is stricter than not `@required` or `@lateinit`
-ERROR: File "override.php", line 7, characters 35-37:
-The property `:a` has the wrong type (Typing[4341])
-  File "override.php", line 7, characters 35-37:
-  Typing error
-  File "override.php", line 4, characters 35-37:
-  Expected `int`
-  File "override.php", line 7, characters 35-37:
-  But got `?int`
-ERROR: File "override.php", line 12, characters 35-37:
-Redeclared attribute must not be less strict (Typing[4315])
-  File "override.php", line 9, characters 35-37:
-  The attribute is `@lateinit`, which is stricter than not `@required` or `@lateinit`
-ERROR: File "override.php", line 12, characters 35-37:
-The property `:a` has the wrong type (Typing[4341])
-  File "override.php", line 12, characters 35-37:
-  Typing error
-  File "override.php", line 9, characters 35-37:
-  Expected `int`
-  File "override.php", line 12, characters 35-37:
-  But got `?int`
-ERROR: File "override.php", line 15, characters 35-37:
-The property `:a` has the wrong type (Typing[4341])
-  File "override.php", line 15, characters 35-37:
-  Typing error
-  File "override.php", line 15, characters 35-37:
-  Expected `int`
-  File "override.php", line 14, characters 35-37:
-  But got `?int`
-ERROR: File "override.php", line 16, characters 35-37:
-The property `:a` has the wrong type (Typing[4341])
-  File "override.php", line 16, characters 35-37:
-  Typing error
-  File "override.php", line 16, characters 35-37:
-  Expected `int`
-  File "override.php", line 14, characters 35-37:
-  But got `?int`
+error: Typing[4315] Redeclared attribute must not be less strict [1]
+-> The attribute is `@required`, which is stricter than `@lateinit` [2]
+
+override.php:6:35
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class :a1             { attribute int a @required; }
+  |                                   ^^^ [2]
+5 | class :b1 extends :a1 { attribute int a @required; }
+6 | class :c1 extends :a1 { attribute int a @lateinit;}
+  |                                   ^^^ [1]
+7 | class :d1 extends :a1 { attribute int a; }
+8 | 
+
+error: Typing[4315] Redeclared attribute must not be less strict [1]
+-> The attribute is `@required`, which is stricter than not `@required` or `@lateinit` [2]
+
+override.php:7:35
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class :a1             { attribute int a @required; }
+  |                                   ^^^ [2]
+5 | class :b1 extends :a1 { attribute int a @required; }
+6 | class :c1 extends :a1 { attribute int a @lateinit;}
+7 | class :d1 extends :a1 { attribute int a; }
+  |                                   ^^^ [1]
+8 | 
+9 | class :a2             { attribute int a @lateinit; }
+
+error: Typing[4341] The property `:a` has the wrong type [1]
+-> Typing error [1]
+-> Expected `int` [2]
+-> But got `?int` [1]
+
+override.php:7:35
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class :a1             { attribute int a @required; }
+  |                                   ^^^ [2]
+5 | class :b1 extends :a1 { attribute int a @required; }
+6 | class :c1 extends :a1 { attribute int a @lateinit;}
+7 | class :d1 extends :a1 { attribute int a; }
+  |                                   ^^^ [1]
+8 | 
+9 | class :a2             { attribute int a @lateinit; }
+
+error: Typing[4315] Redeclared attribute must not be less strict [1]
+-> The attribute is `@lateinit`, which is stricter than not `@required` or `@lateinit` [2]
+
+override.php:12:35
+ 7 | class :d1 extends :a1 { attribute int a; }
+ 8 | 
+ 9 | class :a2             { attribute int a @lateinit; }
+   |                                   ^^^ [2]
+10 | class :b2 extends :a2 { attribute int a @required; }
+11 | class :c2 extends :a2 { attribute int a @lateinit; }
+12 | class :d2 extends :a2 { attribute int a; }
+   |                                   ^^^ [1]
+13 | 
+14 | class :a3             { attribute int a; }
+
+error: Typing[4341] The property `:a` has the wrong type [1]
+-> Typing error [1]
+-> Expected `int` [2]
+-> But got `?int` [1]
+
+override.php:12:35
+ 7 | class :d1 extends :a1 { attribute int a; }
+ 8 | 
+ 9 | class :a2             { attribute int a @lateinit; }
+   |                                   ^^^ [2]
+10 | class :b2 extends :a2 { attribute int a @required; }
+11 | class :c2 extends :a2 { attribute int a @lateinit; }
+12 | class :d2 extends :a2 { attribute int a; }
+   |                                   ^^^ [1]
+13 | 
+14 | class :a3             { attribute int a; }
+
+error: Typing[4341] The property `:a` has the wrong type [1]
+-> Typing error [1]
+-> Expected `int` [1]
+-> But got `?int` [2]
+
+override.php:15:35
+12 | class :d2 extends :a2 { attribute int a; }
+13 | 
+14 | class :a3             { attribute int a; }
+   |                                   ^^^ [2]
+15 | class :b3 extends :a3 { attribute int a @required; }
+   |                                   ^^^ [1]
+16 | class :c3 extends :a3 { attribute int a @lateinit; }
+17 | class :d3 extends :a3 { attribute int a; }
+
+error: Typing[4341] The property `:a` has the wrong type [1]
+-> Typing error [1]
+-> Expected `int` [1]
+-> But got `?int` [2]
+
+override.php:16:35
+12 | class :d2 extends :a2 { attribute int a; }
+13 | 
+14 | class :a3             { attribute int a; }
+   |                                   ^^^ [2]
+15 | class :b3 extends :a3 { attribute int a @required; }
+16 | class :c3 extends :a3 { attribute int a @lateinit; }
+   |                                   ^^^ [1]
+17 | class :d3 extends :a3 { attribute int a; }
+
+7 errors found

@@ -1,4 +1,18 @@
-ERROR: File "not_bool.php", line 7, characters 3-48:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "not_bool.php", line 7, characters 11-12:
-  The scrutinee has type `?(nonnull & not bool)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `?(nonnull & not bool)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+not_bool.php:7:3
+ 5 |     return;
+ 6 |   }
+ 7 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 8 |     case null:
+   |     ^^^^^^^^^^ [1]
+ 9 |       return;
+   |       ^^^^^^^ [1]
+10 |   }
+   |   ^ [1]
+11 | }
+
+1 error found

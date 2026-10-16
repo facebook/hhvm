@@ -1,2 +1,11 @@
-WARN: File "this_refine_shape_index.php", line 18, characters 9-18:
-This `is` check is always `false`. The expression on the left has type `this` which shares no values with `F`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `this` which shares no values with `F`. [1]
+
+this_refine_shape_index.php:18:9
+16 |   require implements I;
+17 |   public function testit():int {
+18 |     if ($this is F) {
+   |         ^^^^^^^^^^ [1]
+19 |       return $this->item['a'];
+20 |     }
+
+1 error found

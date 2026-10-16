@@ -1,4 +1,21 @@
-ERROR: File "no_constant_fallback.php", line 18, characters 15-17:
-Unbound name: `NS\FOO` (a global constant) (Naming[2049])
-ERROR: File "no_constant_fallback.php", line 18, characters 15-17:
-Unbound global constant (Typing) (Typing[4106])
+error: Naming[2049] Unbound name: `NS\FOO` (a global constant) [1]
+
+no_constant_fallback.php:18:15
+16 | namespace NS {
+17 |   function bar(): void {
+18 |     \var_dump(FOO);
+   |               ^^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+no_constant_fallback.php:18:15
+16 | namespace NS {
+17 |   function bar(): void {
+18 |     \var_dump(FOO);
+   |               ^^^ [1]
+19 |   }
+20 | }
+
+2 errors found

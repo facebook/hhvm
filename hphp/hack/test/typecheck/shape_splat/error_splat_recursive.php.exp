@@ -1,16 +1,48 @@
-ERROR: File "error_splat_recursive.php", line 5, characters 6-9:
-Cyclic type definition (Typing[4014])
-  File "error_splat_recursive.php", line 5, characters 22-25:
-  Cyclic use is here
-ERROR: File "error_splat_recursive.php", line 5, characters 13-38:
-Invalid type hint (Typing[4419])
-  File "error_splat_recursive.php", line 5, characters 22-25:
-  Only shapes can be unpacked with `...` inside a shape type
-ERROR: File "error_splat_recursive.php", line 5, characters 22-25:
-Invalid type hint (Typing[4419])
-  File "error_splat_recursive.php", line 5, characters 22-25:
-  Only shapes can be unpacked with `...` inside a shape type
-ERROR: File "error_splat_recursive.php", line 7, characters 15-18:
-Invalid type hint (Typing[4419])
-  File "error_splat_recursive.php", line 5, characters 22-25:
-  Only shapes can be unpacked with `...` inside a shape type
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+error_splat_recursive.php:5:6
+3 | 
+4 | // Self-referential splat should error (cycle detection)
+5 | type TRec = shape(...TRec, 'x' => int);
+  |      ^^^^ [1]
+  |                      ^^^^ [2]
+6 | 
+7 | function test(TRec $s): void {}
+
+error: Typing[4419] Invalid type hint [1]
+-> Only shapes can be unpacked with `...` inside a shape type [2]
+
+error_splat_recursive.php:5:13
+3 | 
+4 | // Self-referential splat should error (cycle detection)
+5 | type TRec = shape(...TRec, 'x' => int);
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                      ^^^^ [2]
+6 | 
+7 | function test(TRec $s): void {}
+
+error: Typing[4419] Invalid type hint [1]
+-> Only shapes can be unpacked with `...` inside a shape type [1]
+
+error_splat_recursive.php:5:22
+3 | 
+4 | // Self-referential splat should error (cycle detection)
+5 | type TRec = shape(...TRec, 'x' => int);
+  |                      ^^^^ [1]
+6 | 
+7 | function test(TRec $s): void {}
+
+error: Typing[4419] Invalid type hint [1]
+-> Only shapes can be unpacked with `...` inside a shape type [2]
+
+error_splat_recursive.php:7:15
+3 | 
+4 | // Self-referential splat should error (cycle detection)
+5 | type TRec = shape(...TRec, 'x' => int);
+  |                      ^^^^ [2]
+6 | 
+7 | function test(TRec $s): void {}
+  |               ^^^^ [1]
+
+4 errors found

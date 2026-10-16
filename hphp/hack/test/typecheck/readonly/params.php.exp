@@ -1,4 +1,21 @@
-ERROR: File "params.php", line 11, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "params.php", line 18, characters 5-16:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+params.php:11:3
+ 9 |   $x = new Foo();
+10 |   $z = $y;
+11 |   $z->prop = 4;
+   |   ^^^^^^^^^^^^ [1]
+12 |   $t = readonly $x;
+13 | 
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+params.php:18:5
+16 | class Test {
+17 |   public function bar(readonly Foo $f): void {
+18 |     $f->prop = 4;
+   |     ^^^^^^^^^^^^ [1]
+19 |   }
+20 | }
+
+2 errors found

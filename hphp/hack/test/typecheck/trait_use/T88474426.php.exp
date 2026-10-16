@@ -1,6 +1,25 @@
-ERROR: File "T88474426.php", line 16, characters 7-7:
-This class overrides some members with a different staticness (Typing[4091])
-  File "T88474426.php", line 9, characters 19-22:
-  The method `oops` is declared as non-static here
-  File "T88474426.php", line 5, characters 26-29:
-  But it conflicts with an inherited static declaration here
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The method `oops` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+T88474426.php:16:7
+ 3 | 
+ 4 | trait T1 {
+ 5 |   public static function oops(): void {}
+   |                          ^^^^ [3]
+ 6 | }
+ 7 | 
+ 8 | trait T2 {
+ 9 |   public function oops(): void {}
+   |                   ^^^^ [2]
+10 | }
+11 | 
+   :
+14 | }
+15 | 
+16 | class C extends B {
+   |       ^ [1]
+17 |   use T2;
+18 | }
+
+1 error found

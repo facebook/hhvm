@@ -1,4 +1,15 @@
-ERROR: File "T105808434.php", line 6, characters 9-14:
-It is no longer allowed to use a `classname<Tm>` in this position. Please use a `class<Tm>` instead. (Typing[4482])
-  File "T105808434.php", line 4, characters 39-51:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<Tm>` in this position. Please use a `class<Tm>` instead. [1]
+-> Definition is here [2]
+
+T105808434.php:6:9
+2 | 
+3 | class C<Tm> {
+4 |   public function __construct(private classname<Tm> $className) {
+  |                                       ^^^^^^^^^^^^^ [2]
+5 |     $class = $this->className;
+6 |     new $class();
+  |         ^^^^^^ [1]
+7 |   }
+8 | }
+
+1 error found

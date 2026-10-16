@@ -1,4 +1,12 @@
-ERROR: File "requirethis_final_01.bad.php", line 12, characters 21-21:
-`C` is a `final` class, so it cannot be extended. (NastCheck[3072])
-  File "requirethis_final_01.bad.php", line 12, characters 21-21:
-  Try using `require class` instead of `require this as`.
+error: NastCheck[3072] `C` is a `final` class, so it cannot be extended. [1]
+-> Try using `require class` instead of `require this as`. [1]
+
+requirethis_final_01.bad.php:12:21
+10 | 
+11 | trait T {
+12 |     require this as C;
+   |                     ^ [1]
+13 | 
+14 |     public function foo(): void {
+
+1 error found

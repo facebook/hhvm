@@ -1,12 +1,39 @@
-ERROR: File "wildcard_nested_in_lambda_parameter_bad.php", line 11, characters 11-11:
-Invalid reified hint (Typing[4305])
-  File "wildcard_nested_in_lambda_parameter_bad.php", line 11, characters 11-11:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_nested_in_lambda_parameter_bad.php", line 3, characters 15-15:
-  `T` is reified
-ERROR: File "wildcard_nested_in_lambda_parameter_bad.php", line 16, characters 11-11:
-Invalid reified hint (Typing[4305])
-  File "wildcard_nested_in_lambda_parameter_bad.php", line 16, characters 11-11:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_nested_in_lambda_parameter_bad.php", line 3, characters 15-15:
-  `T` is reified
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+wildcard_nested_in_lambda_parameter_bad.php:11:11
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {
+   |               ^ [2]
+ 4 |   public function __construct(private T $item) {}
+ 5 |   public function get(): T {
+   :
+ 9 | 
+10 | function test1(): void {
+11 |   $f = (C<_> $x) ==> $x->get();
+   |           ^ [1]
+12 |   $x = $f(new C<int>(3));
+13 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+wildcard_nested_in_lambda_parameter_bad.php:16:11
+ 1 | <?hh
+ 2 | 
+ 3 | class C<reify T> {
+   |               ^ [2]
+ 4 |   public function __construct(private T $item) {}
+ 5 |   public function get(): T {
+   :
+14 | 
+15 | function test2(): void {
+16 |   $f = (C<_> ...$x) ==> $x[0]->get();
+   |           ^ [1]
+17 |   $x = $f(new C<int>(3));
+18 | }
+
+2 errors found

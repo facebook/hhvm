@@ -1,28 +1,133 @@
-WARN: File "type_constants_multilevel.php", line 9, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta::Tx`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 10, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 11, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 17, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 18, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 19, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
-ERROR: File "type_constants_multilevel.php", line 9, characters 10-21:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_multilevel.php", line 24, characters 23-24:
-  The `as` operator cannot be used with the abstract type constant Tx because it is not marked `<<__Enforceable>>`
-ERROR: File "type_constants_multilevel.php", line 11, characters 10-21:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_multilevel.php", line 26, characters 19-24:
-  The `as` operator cannot be used with a type with an erased generic type argument
-ERROR: File "type_constants_multilevel.php", line 17, characters 10-21:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_multilevel.php", line 31, characters 19-24:
-  The `as` operator cannot be used with a type with an erased generic type argument
-ERROR: File "type_constants_multilevel.php", line 19, characters 10-21:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_multilevel.php", line 26, characters 19-24:
-  The `as` operator cannot be used with a type with an erased generic type argument
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta::Tx`. [1]
+
+type_constants_multilevel.php:9:5
+ 7 | 
+ 8 |   public function f1(): void {
+ 9 |     3 as this::Ta::Tx;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+10 |     4 as this::Ta::Ty;
+11 |     5 as this::Ta::Tz;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. [1]
+
+type_constants_multilevel.php:10:5
+ 8 |   public function f1(): void {
+ 9 |     3 as this::Ta::Tx;
+10 |     4 as this::Ta::Ty;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+11 |     5 as this::Ta::Tz;
+12 |   }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. [1]
+
+type_constants_multilevel.php:11:5
+ 9 |     3 as this::Ta::Tx;
+10 |     4 as this::Ta::Ty;
+11 |     5 as this::Ta::Tz;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+12 |   }
+13 | 
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. [1]
+
+type_constants_multilevel.php:17:5
+15 |   // that Tb is enforceable, only that Tw, Tx, Tz are not enforceable
+16 |   public function f2(): void {
+17 |     3 as this::Tb::Tx;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+18 |     4 as this::Tb::Ty;
+19 |     5 as this::Tb::Tz;
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. [1]
+
+type_constants_multilevel.php:18:5
+16 |   public function f2(): void {
+17 |     3 as this::Tb::Tx;
+18 |     4 as this::Tb::Ty;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+19 |     5 as this::Tb::Tz;
+20 |   }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. [1]
+
+type_constants_multilevel.php:19:5
+17 |     3 as this::Tb::Tx;
+18 |     4 as this::Tb::Ty;
+19 |     5 as this::Tb::Tz;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+20 |   }
+21 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with the abstract type constant Tx because it is not marked `<<__Enforceable>>` [2]
+
+type_constants_multilevel.php:9:10
+ 7 | 
+ 8 |   public function f1(): void {
+ 9 |     3 as this::Ta::Tx;
+   |          ^^^^^^^^^^^^ [1]
+10 |     4 as this::Ta::Ty;
+11 |     5 as this::Ta::Tz;
+   :
+22 | 
+23 | abstract class A {
+24 |   abstract const type Tx as X;
+   |                       ^^ [2]
+25 |   const type Ty = Y;
+26 |   const type Tz = Z<int>;
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with an erased generic type argument [2]
+
+type_constants_multilevel.php:11:10
+ 9 |     3 as this::Ta::Tx;
+10 |     4 as this::Ta::Ty;
+11 |     5 as this::Ta::Tz;
+   |          ^^^^^^^^^^^^ [1]
+12 |   }
+13 | 
+   :
+24 |   abstract const type Tx as X;
+25 |   const type Ty = Y;
+26 |   const type Tz = Z<int>;
+   |                   ^^^^^^ [2]
+27 | }
+28 | 
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with an erased generic type argument [2]
+
+type_constants_multilevel.php:17:10
+15 |   // that Tb is enforceable, only that Tw, Tx, Tz are not enforceable
+16 |   public function f2(): void {
+17 |     3 as this::Tb::Tx;
+   |          ^^^^^^^^^^^^ [1]
+18 |     4 as this::Tb::Ty;
+19 |     5 as this::Tb::Tz;
+   :
+29 | class B extends A {
+30 |   // this shows bad cases that can be assigned to abstract type consts
+31 |   const type Tx = Z<int>;
+   |                   ^^^^^^ [2]
+32 |   const type Tw = YY<int>;
+33 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with an erased generic type argument [2]
+
+type_constants_multilevel.php:19:10
+17 |     3 as this::Tb::Tx;
+18 |     4 as this::Tb::Ty;
+19 |     5 as this::Tb::Tz;
+   |          ^^^^^^^^^^^^ [1]
+20 |   }
+21 | }
+   :
+24 |   abstract const type Tx as X;
+25 |   const type Ty = Y;
+26 |   const type Tz = Z<int>;
+   |                   ^^^^^^ [2]
+27 | }
+28 | 
+
+10 errors found

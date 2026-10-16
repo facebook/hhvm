@@ -1,4 +1,14 @@
-ERROR: File "incorrect-num-reified-extends-1.php", line 4, characters 26-34:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "incorrect-num-reified-extends-1.php", line 3, characters 7-7:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+incorrect-num-reified-extends-1.php:4:26
+1 | <?hh
+2 | 
+3 | class C<reify T> {}
+  |       ^ [2]
+4 | class D<reify T> extends C<T, int> {}
+  |                          ^^^^^^^^^ [1]
+5 | 
+6 | function f(): void {
+
+1 error found

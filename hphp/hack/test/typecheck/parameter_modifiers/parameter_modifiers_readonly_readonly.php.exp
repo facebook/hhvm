@@ -1,2 +1,10 @@
-ERROR: File "parameter_modifiers_readonly_readonly.php", line 5, characters 33-40:
-Duplicate parameter modifier `readonly`. (Parsing[1002])
+error: Parsing[1002] Duplicate parameter modifier `readonly`. [1]
+
+parameter_modifiers_readonly_readonly.php:5:33
+3 | 
+4 | interface I1 {
+5 |   public function roro(readonly readonly int $x): void;
+  |                                 ^^^^^^^^ [1]
+6 | }
+
+1 error found

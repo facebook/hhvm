@@ -1,12 +1,45 @@
-ERROR: File "xhp_constructor_check.php", line 17, characters 11-54:
-Some elements in this collection are incompatible (Typing[4110])
-  File "xhp_constructor_check.php", line 8, characters 19-21:
-  Expected `int`
-  File "xhp_constructor_check.php", line 14, characters 29-34:
-  But got `string`
-ERROR: File "xhp_constructor_check.php", line 17, characters 11-54:
-The values of this `dict` are incompatible (Typing[4110])
-  File "xhp_constructor_check.php", line 7, characters 26-28:
-  Expected `int`
-  File "xhp_constructor_check.php", line 14, characters 13-18:
-  But got `string`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+xhp_constructor_check.php:17:11
+ 6 |   public function __construct(
+ 7 |     public darray<string,int> $attributes,
+ 8 |     public varray<int> $children,
+   |                   ^^^ [2]
+ 9 |     public string $file,
+10 |     public int $line,
+11 |   ) {}
+12 | }
+13 | 
+14 | function ko(string $colour, string $child): void {
+   |                             ^^^^^^ [3]
+15 |   // There should be two type errors complaining that string <: int does not
+16 |   // hold. One due to the attributes and the other due to children.
+17 |   $elem = <element colour={$colour}>{$child}</element>;
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | }
+
+error: Typing[4110] The values of this `dict` are incompatible [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+xhp_constructor_check.php:17:11
+ 5 | 
+ 6 |   public function __construct(
+ 7 |     public darray<string,int> $attributes,
+   |                          ^^^ [2]
+ 8 |     public varray<int> $children,
+ 9 |     public string $file,
+   :
+12 | }
+13 | 
+14 | function ko(string $colour, string $child): void {
+   |             ^^^^^^ [3]
+15 |   // There should be two type errors complaining that string <: int does not
+16 |   // hold. One due to the attributes and the other due to children.
+17 |   $elem = <element colour={$colour}>{$child}</element>;
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | }
+
+2 errors found

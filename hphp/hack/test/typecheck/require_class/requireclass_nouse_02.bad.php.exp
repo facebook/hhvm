@@ -1,6 +1,22 @@
-ERROR: File "requireclass_nouse_02.bad.php", line 12, characters 7-8:
-Trait T2 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
-  File "requireclass_nouse_02.bad.php", line 16, characters 13-13:
-  Class C is defined here.
-  File "requireclass_nouse_02.bad.php", line 9, characters 17-17:
-  The require class requirement is here.
+error: Typing[4466] Trait T2 requires class C but C does not use it. Either use the trait or delete it. [1]
+-> Class C is defined here. [2]
+-> The require class requirement is here. [3]
+
+requireclass_nouse_02.bad.php:12:7
+ 7 | 
+ 8 | trait T1 {
+ 9 |   require class C;
+   |                 ^ [3]
+10 | }
+11 | 
+12 | trait T2 {
+   |       ^^ [1]
+13 |   use T1;
+14 | }
+15 | 
+16 | final class C {
+   |             ^ [2]
+17 |   use T1;
+18 | }
+
+1 error found

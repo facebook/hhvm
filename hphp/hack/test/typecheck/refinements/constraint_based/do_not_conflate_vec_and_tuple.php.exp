@@ -1,38 +1,134 @@
-ERROR: File "do_not_conflate_vec_and_tuple.php", line 18, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "do_not_conflate_vec_and_tuple.php", line 15, characters 13-22:
-  Expected `(int | (int, int))` from this `is` expression test
-  File "do_not_conflate_vec_and_tuple.php", line 11, characters 10-14:
-  But got `vec<nothing>`
-ERROR: File "do_not_conflate_vec_and_tuple.php", line 18, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "do_not_conflate_vec_and_tuple.php", line 15, characters 13-22:
-  Expected `(int, int)` from this `is` expression test
-  File "do_not_conflate_vec_and_tuple.php", line 11, characters 10-14:
-  But got `vec<nothing>`
-ERROR: File "do_not_conflate_vec_and_tuple.php", line 18, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "do_not_conflate_vec_and_tuple.php", line 18, characters 15-17:
-  Expected `int`
-  File "do_not_conflate_vec_and_tuple.php", line 11, characters 10-14:
-  But got `vec<nothing>`
-ERROR: File "do_not_conflate_vec_and_tuple.php", line 18, characters 20-21:
-Invalid argument (Typing[4110])
-  File "do_not_conflate_vec_and_tuple.php", line 15, characters 13-22:
-  Expected `(int | (int, int))` from this `is` expression test
-  File "do_not_conflate_vec_and_tuple.php", line 11, characters 10-14:
-  But got `vec<nothing>`
-ERROR: File "do_not_conflate_vec_and_tuple.php", line 18, characters 20-21:
-Invalid argument (Typing[4110])
-  File "do_not_conflate_vec_and_tuple.php", line 15, characters 13-22:
-  Expected `(int, int)` from this `is` expression test
-  File "do_not_conflate_vec_and_tuple.php", line 11, characters 10-14:
-  But got `vec<nothing>`
-ERROR: File "do_not_conflate_vec_and_tuple.php", line 18, characters 20-21:
-Invalid argument (Typing[4110])
-  File "do_not_conflate_vec_and_tuple.php", line 18, characters 15-17:
-  Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "do_not_conflate_vec_and_tuple.php", line 11, characters 10-14:
-  But got `vec<nothing>`
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `(int | (int, int))` from this `is` expression test [2]
+-> But got `vec<nothing>` [3]
+
+do_not_conflate_vec_and_tuple.php:18:5
+ 9 |     $x = 1;
+10 |   } else if (myrand()) {
+11 |     $x = vec[];
+   |          ^^^^^ [3]
+12 |   } else {
+13 |     $x = tuple(0, 1);
+14 |   }
+15 |   if ($x is (int, int)) {
+   |             ^^^^^^^^^^ [2]
+16 |     return;
+17 |   } else {
+18 |     hh_expect<int>($x); // should error
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `(int, int)` from this `is` expression test [2]
+-> But got `vec<nothing>` [3]
+
+do_not_conflate_vec_and_tuple.php:18:5
+ 9 |     $x = 1;
+10 |   } else if (myrand()) {
+11 |     $x = vec[];
+   |          ^^^^^ [3]
+12 |   } else {
+13 |     $x = tuple(0, 1);
+14 |   }
+15 |   if ($x is (int, int)) {
+   |             ^^^^^^^^^^ [2]
+16 |     return;
+17 |   } else {
+18 |     hh_expect<int>($x); // should error
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `vec<nothing>` [3]
+
+do_not_conflate_vec_and_tuple.php:18:5
+ 9 |     $x = 1;
+10 |   } else if (myrand()) {
+11 |     $x = vec[];
+   |          ^^^^^ [3]
+12 |   } else {
+13 |     $x = tuple(0, 1);
+   :
+16 |     return;
+17 |   } else {
+18 |     hh_expect<int>($x); // should error
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+   |               ^^^ [2]
+19 |   }
+20 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int | (int, int))` from this `is` expression test [2]
+-> But got `vec<nothing>` [3]
+
+do_not_conflate_vec_and_tuple.php:18:20
+ 9 |     $x = 1;
+10 |   } else if (myrand()) {
+11 |     $x = vec[];
+   |          ^^^^^ [3]
+12 |   } else {
+13 |     $x = tuple(0, 1);
+14 |   }
+15 |   if ($x is (int, int)) {
+   |             ^^^^^^^^^^ [2]
+16 |     return;
+17 |   } else {
+18 |     hh_expect<int>($x); // should error
+   |                    ^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, int)` from this `is` expression test [2]
+-> But got `vec<nothing>` [3]
+
+do_not_conflate_vec_and_tuple.php:18:20
+ 9 |     $x = 1;
+10 |   } else if (myrand()) {
+11 |     $x = vec[];
+   |          ^^^^^ [3]
+12 |   } else {
+13 |     $x = tuple(0, 1);
+14 |   }
+15 |   if ($x is (int, int)) {
+   |             ^^^^^^^^^^ [2]
+16 |     return;
+17 |   } else {
+18 |     hh_expect<int>($x); // should error
+   |                    ^^ [1]
+19 |   }
+20 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `vec<nothing>` [4]
+
+do_not_conflate_vec_and_tuple.php:18:20
+ 9 |     $x = 1;
+10 |   } else if (myrand()) {
+11 |     $x = vec[];
+   |          ^^^^^ [4]
+12 |   } else {
+13 |     $x = tuple(0, 1);
+   :
+16 |     return;
+17 |   } else {
+18 |     hh_expect<int>($x); // should error
+   |               ^^^ [2]
+   |                    ^^ [1]
+19 |   }
+20 | }
+
+hh_single_type_check_magic.hhi:4:97
+ 2 | namespace {
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                 ^ [3]
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+
+6 errors found

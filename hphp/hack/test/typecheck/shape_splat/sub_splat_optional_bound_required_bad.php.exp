@@ -1,14 +1,34 @@
-ERROR: File "sub_splat_optional_bound_required_bad.php", line 7, characters 10-11:
-Invalid return type (Typing[4163])
-  File "sub_splat_optional_bound_required_bad.php", line 4, characters 42-65:
-  The field `id` is **optional**
-  File "sub_splat_optional_bound_required_bad.php", line 6, characters 4-26:
-  The field `id` is defined as **required**
-  File "sub_splat_optional_bound_required_bad.php", line 6, characters 18-20:
-  `id` is defined here
-ERROR: File "sub_splat_optional_bound_required_bad.php", line 7, characters 10-11:
-Invalid return type (Typing[4110])
-  File "sub_splat_optional_bound_required_bad.php", line 6, characters 4-26:
-  Expected `shape('id' => int, ...)`
-  File "sub_splat_optional_bound_required_bad.php", line 5, characters 3-3:
-  But got `T as shape(?'id' => int, ...)`
+error: Typing[4163] Invalid return type [1]
+-> The field `id` is **optional** [2]
+-> The field `id` is defined as **required** [3]
+-> `id` is defined here [4]
+
+sub_splat_optional_bound_required_bad.php:7:10
+2 | <<file:__EnableUnstableFeatures('shape_splat_concrete', 'shape_splat_type_parameters')>>
+3 | 
+4 | function optional_bound_to_required<T as shape(?'id' => int, ...)>(
+  |                                          ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 |   T $s,
+6 | ): shape('id' => int, ...) {
+  |    ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+  |                  ^^^ [4]
+7 |   return $s;
+  |          ^^ [1]
+8 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `shape('id' => int, ...)` [2]
+-> But got `T as shape(?'id' => int, ...)` [3]
+
+sub_splat_optional_bound_required_bad.php:7:10
+3 | 
+4 | function optional_bound_to_required<T as shape(?'id' => int, ...)>(
+5 |   T $s,
+  |   ^ [3]
+6 | ): shape('id' => int, ...) {
+  |    ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+7 |   return $s;
+  |          ^^ [1]
+8 | }
+
+2 errors found

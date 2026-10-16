@@ -1,8 +1,22 @@
-ERROR: File "early_solve_eq_freshen.php", line 21, characters 23-31:
-Invalid argument (Typing[4110])
-  File "early_solve_eq_freshen.php", line 21, characters 10-20:
-  Expected `C<arraykey>`
-  File "early_solve_eq_freshen.php", line 16, characters 20-20:
-    via this generic `T`
-  File "early_solve_eq_freshen.php", line 18, characters 15-23:
-  But got `B<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `C<arraykey>` [2]
+->   via this generic `T` [3]
+-> But got `B<string>` [4]
+
+early_solve_eq_freshen.php:21:23
+14 | class C<+T> {}
+15 | 
+16 | function expect<T>(T $_) : void {}
+   |                    ^ [3]
+17 | 
+18 | function test(B<string> $b) : void {
+   |               ^^^^^^^^^ [4]
+19 |   $x = new A($b); // Lower bound B<string>
+20 |   expect<B<arraykey>>($x->get()); // create shallow equal bound B
+21 |   expect<C<arraykey>>($x->get()); // incompatible upper bound C<arraykey>
+   |          ^^^^^^^^^^^ [2]
+   |                       ^^^^^^^^^ [1]
+22 |   $x->get()->x; // expand type and solve to "freshened" shallow equal bound.
+23 | }
+
+1 error found

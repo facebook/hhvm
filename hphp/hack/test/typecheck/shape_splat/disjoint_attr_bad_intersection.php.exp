@@ -1,16 +1,35 @@
-ERROR: File "disjoint_attr_bad_intersection.php", line 7, characters 9-11:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_intersection.php", line 8, characters 23-25:
-  Shape field `x` is defined here
-  File "disjoint_attr_bad_intersection.php", line 8, characters 13-14:
-  Shape field `x` may also be provided by type parameter `TA`
-  File "disjoint_attr_bad_intersection.php", line 8, characters 18-19:
-  Shape field `x` may also be provided by type parameter `TB`
-ERROR: File "disjoint_attr_bad_intersection.php", line 14, characters 9-19:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_intersection.php", line 17, characters 25-27:
-  Shape field `x` is defined here
-  File "disjoint_attr_bad_intersection.php", line 17, characters 15-16:
-  Shape field `x` may also be provided by type parameter `TA`
-  File "disjoint_attr_bad_intersection.php", line 17, characters 20-21:
-  Shape field `x` may also be provided by type parameter `TB`
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` may also be provided by type parameter `TA` [3]
+-> Shape field `x` may also be provided by type parameter `TB` [4]
+
+disjoint_attr_bad_intersection.php:7:9
+ 5 | // `x` field is supplied by both the intersection splat and the explicit field.
+ 6 | <<__DisjointShapeSplat>>
+ 7 | newtype Bad<TA as shape(...), TB as shape(...)> =
+   |         ^^^ [1]
+ 8 |   shape(...(TA & TB), 'x' => int);
+   |             ^^ [3]
+   |                  ^^ [4]
+   |                       ^^^ [2]
+ 9 | 
+10 | type Witness = Bad<shape('x' => int), shape('x' => int)>;
+
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `x` is defined here [2]
+-> Shape field `x` may also be provided by type parameter `TA` [3]
+-> Shape field `x` may also be provided by type parameter `TB` [4]
+
+disjoint_attr_bad_intersection.php:14:9
+12 | // An optional field is still possibly present and must be rejected.
+13 | <<__DisjointShapeSplat>>
+14 | newtype BadOptional<
+   |         ^^^^^^^^^^^ [1]
+15 |   TA as shape(?'x' => int),
+16 |   TB as shape(...),
+17 | > = shape(...(TA & TB), 'x' => bool);
+   |               ^^ [3]
+   |                    ^^ [4]
+   |                         ^^^ [2]
+
+2 errors found

@@ -1,32 +1,128 @@
-ERROR: File "array_append_bad.php", line 32, characters 16-20:
-Invalid argument (Typing[4110])
-  File "array_append_bad.php", line 11, characters 23-28:
-  Expected `string`
-  File "array_append_bad.php", line 22, characters 10-12:
-  But got `int`
-ERROR: File "array_append_bad.php", line 35, characters 16-20:
-Invalid argument (Typing[4110])
-  File "array_append_bad.php", line 11, characters 23-28:
-  Expected `string`
-  File "array_append_bad.php", line 23, characters 7-9:
-  But got `int`
-ERROR: File "array_append_bad.php", line 37, characters 3-18:
-Invalid assignment (Typing[4110])
-  File "array_append_bad.php", line 24, characters 10-12:
-  Expected `num`
-  File "array_append_bad.php", line 37, characters 15-18:
-  But got `bool`
-ERROR: File "array_append_bad.php", line 39, characters 3-15:
-Set values must be arraykeys (Typing[4324])
-  File "array_append_bad.php", line 26, characters 3-10:
-  This container is an object of type Set<int>
-  File "array_append_bad.php", line 39, characters 12-15:
-  A bool is not an arraykey
-ERROR: File "array_append_bad.php", line 41, characters 3-21:
-an object of type Map<_, _> does not allow array append (Typing[4006])
-  File "array_append_bad.php", line 27, characters 3-14:
-  Definition is here
-ERROR: File "array_append_bad.php", line 42, characters 3-21:
-an object of type Map<int, num> does not allow array append (Typing[4006])
-  File "array_append_bad.php", line 27, characters 3-14:
-  Definition is here
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+array_append_bad.php:32:16
+ 9 | function expectFloat(float $f):void { }
+10 | function expectNum(num $n):void { }
+11 | function expectString(string $s):void { }
+   |                       ^^^^^^ [2]
+12 | function expectKeysetOfArraykey(keyset<arraykey> $ks):void { }
+13 | function expectSetOfInt(Set<int> $s):void { }
+   :
+20 |   bool $b,
+21 |   // Vector-like stuff
+22 |   varray<int> $a,
+   |          ^^^ [3]
+23 |   vec<int> $v,
+24 |   Vector<num> $vector,
+   :
+30 |   $a = (new Inv($a))->item;
+31 |   $a[] = "a";
+32 |   expectString($a[0]);
+   |                ^^^^^ [1]
+33 |   $v = (new Inv($v))->item;
+34 |   $v[] = "a";
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+array_append_bad.php:35:16
+ 9 | function expectFloat(float $f):void { }
+10 | function expectNum(num $n):void { }
+11 | function expectString(string $s):void { }
+   |                       ^^^^^^ [2]
+12 | function expectKeysetOfArraykey(keyset<arraykey> $ks):void { }
+13 | function expectSetOfInt(Set<int> $s):void { }
+   :
+21 |   // Vector-like stuff
+22 |   varray<int> $a,
+23 |   vec<int> $v,
+   |       ^^^ [3]
+24 |   Vector<num> $vector,
+25 |   keyset<string> $ks,
+   :
+33 |   $v = (new Inv($v))->item;
+34 |   $v[] = "a";
+35 |   expectString($v[0]);
+   |                ^^^^^ [1]
+36 |   $vector = (new Inv($vector))->item;
+37 |   $vector[] = true;
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `num` [2]
+-> But got `bool` [3]
+
+array_append_bad.php:37:3
+22 |   varray<int> $a,
+23 |   vec<int> $v,
+24 |   Vector<num> $vector,
+   |          ^^^ [2]
+25 |   keyset<string> $ks,
+26 |   Set<int> $set,
+   :
+35 |   expectString($v[0]);
+36 |   $vector = (new Inv($vector))->item;
+37 |   $vector[] = true;
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |               ^^^^ [3]
+38 |   $set = (new Inv($set))->item;
+39 |   $set[] = true;
+
+error: Typing[4324] Set values must be arraykeys [1]
+-> This container is an object of type Set<int> [2]
+-> A bool is not an arraykey [3]
+
+array_append_bad.php:39:3
+24 |   Vector<num> $vector,
+25 |   keyset<string> $ks,
+26 |   Set<int> $set,
+   |   ^^^^^^^^ [2]
+27 |   Map<int,num> $m,
+28 | ): void {
+   :
+37 |   $vector[] = true;
+38 |   $set = (new Inv($set))->item;
+39 |   $set[] = true;
+   |   ^^^^^^^^^^^^^ [1]
+   |            ^^^^ [3]
+40 |   $m = (new Inv($m))->item;
+41 |   $m[] = Pair{2, "a"};
+
+error: Typing[4006] an object of type Map<_, _> does not allow array append [1]
+-> Definition is here [2]
+
+array_append_bad.php:41:3
+25 |   keyset<string> $ks,
+26 |   Set<int> $set,
+27 |   Map<int,num> $m,
+   |   ^^^^^^^^^^^^ [2]
+28 | ): void {
+29 |   // Turns a concrete type into a lower bound on a Tvar
+   :
+39 |   $set[] = true;
+40 |   $m = (new Inv($m))->item;
+41 |   $m[] = Pair{2, "a"};
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+42 |   $m[] = Pair{"a", 2};
+43 | }
+
+error: Typing[4006] an object of type Map<int, num> does not allow array append [1]
+-> Definition is here [2]
+
+array_append_bad.php:42:3
+25 |   keyset<string> $ks,
+26 |   Set<int> $set,
+27 |   Map<int,num> $m,
+   |   ^^^^^^^^^^^^ [2]
+28 | ): void {
+29 |   // Turns a concrete type into a lower bound on a Tvar
+   :
+40 |   $m = (new Inv($m))->item;
+41 |   $m[] = Pair{2, "a"};
+42 |   $m[] = Pair{"a", 2};
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+43 | }
+
+6 errors found

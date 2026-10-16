@@ -1,16 +1,81 @@
-ERROR: File "variadic_named_params_disabled.php", line 6, characters 44-46:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 8, characters 41-43:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 11, characters 40-42:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 12, characters 48-50:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 16, characters 32-34:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 20, characters 31-33:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 21, characters 26-28:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
-ERROR: File "variadic_named_params_disabled.php", line 22, characters 24-26:
-Variadic named parameters (e.g. `named int...`) are not enabled. (Naming[2134])
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:6:44
+4 | // With variadic_named_parameters=false, a variadic named parameter on a
+5 | // function definition is rejected at naming time.
+6 | function take_named_variadic(named arraykey...): void {}
+  |                                            ^^^ [1]
+7 | 
+8 | function take_mixed(int $x, named string...): void {}
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:8:41
+ 6 | function take_named_variadic(named arraykey...): void {}
+ 7 | 
+ 8 | function take_mixed(int $x, named string...): void {}
+   |                                         ^^^ [1]
+ 9 | 
+10 | abstract class C {
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:11:40
+ 9 | 
+10 | abstract class C {
+11 |   abstract public function m(named bool...): void;
+   |                                        ^^^ [1]
+12 |   public static function s(int $a, named string...): void {}
+13 | }
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:12:48
+10 | abstract class C {
+11 |   abstract public function m(named bool...): void;
+12 |   public static function s(int $a, named string...): void {}
+   |                                                ^^^ [1]
+13 | }
+14 | 
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:16:32
+14 | 
+15 | interface I {
+16 |   public function j(named mixed...): void;
+   |                                ^^^ [1]
+17 | }
+18 | 
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:20:31
+18 | 
+19 | function in_lambdas(): void {
+20 |   $_ = (int $x, named arraykey...) ==> $x;
+   |                               ^^^ [1]
+21 |   $_ = function(named int...): void {};
+22 |   $_ = async (named int...) ==> 1;
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:21:26
+19 | function in_lambdas(): void {
+20 |   $_ = (int $x, named arraykey...) ==> $x;
+21 |   $_ = function(named int...): void {};
+   |                          ^^^ [1]
+22 |   $_ = async (named int...) ==> 1;
+23 | }
+
+error: Naming[2134] Variadic named parameters (e.g. `named int...`) are not enabled. [1]
+
+variadic_named_params_disabled.php:22:24
+20 |   $_ = (int $x, named arraykey...) ==> $x;
+21 |   $_ = function(named int...): void {};
+22 |   $_ = async (named int...) ==> 1;
+   |                        ^^^ [1]
+23 | }
+24 | 
+
+8 errors found

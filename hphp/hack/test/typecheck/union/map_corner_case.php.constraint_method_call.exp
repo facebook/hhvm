@@ -1,16 +1,75 @@
-ERROR: File "map_corner_case.php", line 23, characters 5-16:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4370])
-ERROR: File "map_corner_case.php", line 23, characters 5-16:
-This is not an object of type `KeyedContainer`, this is some value (Typing[4370])
-  File "map_corner_case.php", line 13, characters 27-32:
-  Definition is here
-ERROR: File "map_corner_case.php", line 24, characters 5-17:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4370])
-ERROR: File "map_corner_case.php", line 24, characters 5-17:
-This is not an object of type `KeyedContainer`, this is some value (Typing[4370])
-  File "map_corner_case.php", line 5, characters 14-19:
-  Definition is here
-ERROR: File "map_corner_case.php", line 24, characters 5-17:
-This is not an object of type `KeyedContainer`, this is some value (Typing[4370])
-  File "map_corner_case.php", line 12, characters 27-32:
-  Definition is here
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is a nonnull value [1]
+
+map_corner_case.php:23:5
+21 |     $l = $n;
+22 | 
+23 |     $c[$key] = 1;
+   |     ^^^^^^^^^^^^ [1]
+24 |     $b[$key] = $c;
+25 |     $a[$key] = $b;
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is some value [1]
+-> Definition is here [2]
+
+map_corner_case.php:23:5
+11 |   while ($cond) {
+12 |     $a = $m->get($key) ?? Map {};
+13 |     $b = $a->get($key) ?? Map {};
+   |                           ^^^^^^ [2]
+14 |     $c = $b->get($key) ?? Map {};
+15 | 
+   :
+21 |     $l = $n;
+22 | 
+23 |     $c[$key] = 1;
+   |     ^^^^^^^^^^^^ [1]
+24 |     $b[$key] = $c;
+25 |     $a[$key] = $b;
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is a nonnull value [1]
+
+map_corner_case.php:24:5
+22 | 
+23 |     $c[$key] = 1;
+24 |     $b[$key] = $c;
+   |     ^^^^^^^^^^^^^ [1]
+25 |     $a[$key] = $b;
+26 |   }
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is some value [1]
+-> Definition is here [2]
+
+map_corner_case.php:24:5
+ 3 | function f(bool $cond, string $key): void {
+ 4 |   $m = Map {};
+ 5 |   $m[$key] = Map {};
+   |              ^^^^^^ [2]
+ 6 |   $i = 1;
+ 7 |   $j = 2;
+   :
+22 | 
+23 |     $c[$key] = 1;
+24 |     $b[$key] = $c;
+   |     ^^^^^^^^^^^^^ [1]
+25 |     $a[$key] = $b;
+26 |   }
+
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is some value [1]
+-> Definition is here [2]
+
+map_corner_case.php:24:5
+10 |   $n = 5;
+11 |   while ($cond) {
+12 |     $a = $m->get($key) ?? Map {};
+   |                           ^^^^^^ [2]
+13 |     $b = $a->get($key) ?? Map {};
+14 |     $c = $b->get($key) ?? Map {};
+   :
+22 | 
+23 |     $c[$key] = 1;
+24 |     $b[$key] = $c;
+   |     ^^^^^^^^^^^^^ [1]
+25 |     $a[$key] = $b;
+26 |   }
+
+5 errors found

@@ -1,6 +1,15 @@
-ERROR: File "shape_put_no_nested_intersection.php", line 4, characters 10-55:
-Invalid return type (Typing[4057])
-  File "shape_put_no_nested_intersection.php", line 4, characters 35-54:
-  The field `y` is missing
-  File "shape_put_no_nested_intersection.php", line 3, characters 78-80:
-  The field `y` is required here
+error: Typing[4057] Invalid return type [1]
+-> The field `y` is missing [2]
+-> The field `y` is required here [3]
+
+shape_put_no_nested_intersection.php:4:10
+1 | <?hh
+2 | 
+3 | function test(shape('x' => shape('y' => string)) $shape): shape('x' => shape('y' => string, 'z' => string)) {
+  |                                                                              ^^^ [3]
+4 |   return Shapes::put($shape, 'x', shape('z' => 'test'));
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                   ^^^^^^^^^^^^^^^^^^^^ [2]
+5 | }
+
+1 error found

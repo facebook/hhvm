@@ -1,18 +1,58 @@
-ERROR: File "method_contravariant.php", line 14, characters 16-21:
-Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-  File "method_contravariant.php", line 3, characters 16-16:
-  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
-ERROR: File "method_contravariant.php", line 19, characters 46-47:
-Invalid argument (Typing[4110])
-  File "method_contravariant.php", line 13, characters 39-45:
-  Expected `this::T`
-  File "method_contravariant.php", line 19, characters 46-47:
-  But got `string`
-ERROR: File "method_contravariant.php", line 34, characters 14-15:
-Invalid argument (Typing[4110])
-  File "method_contravariant.php", line 13, characters 39-45:
-  Expected `<expr#2>::T`
-  File "method_contravariant.php", line 34, characters 3-4:
-    where `<expr#2>` is a reference to this expression
-  File "method_contravariant.php", line 34, characters 14-15:
-  But got `string`
+error: Typing[4060] Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes [1]
+-> This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute [2]
+
+method_contravariant.php:14:16
+ 1 | <?hh
+ 2 | 
+ 3 | abstract class X {
+   |                ^ [2]
+ 4 |   abstract const type T as arraykey = string;
+ 5 | 
+   :
+12 |   <<__NeedsConcrete>>
+13 |   final public static function create(this::T $x): this {
+14 |     return new static($x);
+   |                ^^^^^^ [1]
+15 |   }
+16 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this::T` [2]
+-> But got `string` [1]
+
+method_contravariant.php:19:46
+11 | 
+12 |   <<__NeedsConcrete>>
+13 |   final public static function create(this::T $x): this {
+   |                                       ^^^^^^^ [2]
+14 |     return new static($x);
+15 |   }
+16 | 
+17 |   private function test(this::T $x): (this, X, X, Y) {
+18 |     return
+19 |       tuple(static::create($x), self::create(''), XConcrete::create(''), Y::create(0));
+   |                                              ^^ [1]
+20 |   }
+21 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2>::T` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+-> But got `string` [1]
+
+method_contravariant.php:34:14
+11 | 
+12 |   <<__NeedsConcrete>>
+13 |   final public static function create(this::T $x): this {
+   |                                       ^^^^^^^ [2]
+14 |     return new static($x);
+15 |   }
+   :
+32 | 
+33 | function error(X $x): void {
+34 |   $x::create('');
+   |   ^^ [3]
+   |              ^^ [1]
+35 | }
+
+3 errors found

@@ -1,80 +1,167 @@
-ERROR: File "function_subtype.php", line 30, characters 19-21:
-The method `get` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 30, characters 19-21:
-  Method `get` has type `(function(): readonly ParentClass)` in `Child`
-  File "function_subtype.php", line 9, characters 28-30:
-  But it has type `(readonly function(): ParentClass)` in parent `ParentClass`
-  File "function_subtype.php", line 30, characters 19-21:
-  Type `(function(): readonly ParentClass)` is not a subtype of `(readonly function(): ParentClass)`
-  File "function_subtype.php", line 30, characters 19-21:
-  Function readonly mismatch
-  File "function_subtype.php", line 30, characters 19-21:
-  This function is not marked readonly
-  File "function_subtype.php", line 9, characters 28-30:
-  This function is marked readonly
-ERROR: File "function_subtype.php", line 35, characters 19-27:
-The method `return_ro` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 35, characters 19-27:
-  Method `return_ro` has type `(function(): readonly ParentClass)` in `Child`
-  File "function_subtype.php", line 13, characters 19-27:
-  But it has type `(function(): ParentClass)` in parent `ParentClass`
-  File "function_subtype.php", line 35, characters 19-27:
-  Type `(function(): readonly ParentClass)` is not a subtype of `(function(): ParentClass)`
-  File "function_subtype.php", line 35, characters 19-27:
-  Function readonly return mismatch
-  File "function_subtype.php", line 35, characters 19-27:
-  This function returns a readonly value
-  File "function_subtype.php", line 13, characters 19-27:
-  This function does not return a readonly value
-ERROR: File "function_subtype.php", line 39, characters 19-27:
-The method `setParams` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 39, characters 19-27:
-  Method `setParams` has type `(function(ParentClass $x, readonly ParentClass $y): void)` in `Child`
-  File "function_subtype.php", line 22, characters 19-27:
-  But it has type `(function(readonly ParentClass $x, ParentClass $y): void)` in parent `ParentClass`
-  File "function_subtype.php", line 39, characters 19-27:
-  Type `(function(ParentClass $x, readonly ParentClass $y): void)` is not a subtype of `(function(readonly ParentClass $x, ParentClass $y): void)`
-  File "function_subtype.php", line 22, characters 50-51:
-  Mismatched parameter readonlyness
-  File "function_subtype.php", line 40, characters 17-18:
-  This parameter is mutable
-  File "function_subtype.php", line 22, characters 50-51:
-  But this parameter is readonly
-ERROR: File "function_subtype.php", line 45, characters 19-29:
-The method `readonlyFun` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 45, characters 19-29:
-  Method `readonlyFun` has type `(function((readonly function(Child): Child) $f): void)` in `Child`
-  File "function_subtype.php", line 17, characters 19-29:
-  But it has type `(function((function(Child): Child) $f): void)` in parent `ParentClass`
-  File "function_subtype.php", line 45, characters 19-29:
-  Type `(function((readonly function(Child): Child) $f): void)` is not a subtype of `(function((function(Child): Child) $f): void)`
-  File "function_subtype.php", line 18, characters 5-30:
-  Function readonly mismatch
-  File "function_subtype.php", line 18, characters 5-30:
-  This function is not marked readonly
-  File "function_subtype.php", line 46, characters 5-39:
-  This function is marked readonly
-ERROR: File "function_subtype.php", line 62, characters 11-12:
-Invalid argument (Typing[4411])
-  File "function_subtype.php", line 54, characters 22-26:
-  Mismatched parameter readonlyness
-  File "function_subtype.php", line 58, characters 23-24:
-  This parameter is mutable
-  File "function_subtype.php", line 54, characters 22-26:
-  But this parameter is readonly
-ERROR: File "function_subtype.php", line 64, characters 11-13:
-Invalid argument (Typing[4411])
-  File "function_subtype.php", line 55, characters 3-46:
-  Function readonly return mismatch
-  File "function_subtype.php", line 55, characters 3-46:
-  This function returns a readonly value
-  File "function_subtype.php", line 54, characters 3-36:
-  This function does not return a readonly value
-ERROR: File "function_subtype.php", line 86, characters 15-16:
-Invalid argument (Typing[4411])
-  File "function_subtype.php", line 83, characters 8-26:
-  Function readonly mismatch
-  File "function_subtype.php", line 83, characters 8-26:
-  This function is not marked readonly
-  File "function_subtype.php", line 78, characters 31-57:
-  This function is marked readonly
+error: Typing[4341] The method `get` is not compatible with the overridden method [1]
+-> Method `get` has type `(function(): readonly ParentClass)` in `Child` [1]
+-> But it has type `(readonly function(): ParentClass)` in parent `ParentClass` [2]
+-> Type `(function(): readonly ParentClass)` is not a subtype of `(readonly function(): ParentClass)` [1]
+-> Function readonly mismatch [1]
+-> This function is not marked readonly [1]
+-> This function is marked readonly [2]
+
+function_subtype.php:30:19
+ 7 |   }
+ 8 | 
+ 9 |   public readonly function get() : ParentClass {
+   |                            ^^^ [2]
+10 |     return new ParentClass();
+11 |   }
+   :
+28 |   public readonly function set(int $y) : void {} // ok
+29 | 
+30 |   public function get() : readonly ParentClass {
+   |                   ^^^ [1]
+31 |       $this->prop = 6;
+32 |       return readonly new ParentClass();
+
+error: Typing[4341] The method `return_ro` is not compatible with the overridden method [1]
+-> Method `return_ro` has type `(function(): readonly ParentClass)` in `Child` [1]
+-> But it has type `(function(): ParentClass)` in parent `ParentClass` [2]
+-> Type `(function(): readonly ParentClass)` is not a subtype of `(function(): ParentClass)` [1]
+-> Function readonly return mismatch [1]
+-> This function returns a readonly value [1]
+-> This function does not return a readonly value [2]
+
+function_subtype.php:35:19
+11 |   }
+12 | 
+13 |   public function return_ro(): ParentClass {
+   |                   ^^^^^^^^^ [2]
+14 |     return new ParentClass();
+15 |   }
+   :
+33 |   }
+34 | 
+35 |   public function return_ro(): readonly ParentClass {
+   |                   ^^^^^^^^^ [1]
+36 |     return readonly new ParentClass();
+37 |   }
+
+error: Typing[4341] The method `setParams` is not compatible with the overridden method [1]
+-> Method `setParams` has type `(function(ParentClass $x, readonly ParentClass $y): void)` in `Child` [1]
+-> But it has type `(function(readonly ParentClass $x, ParentClass $y): void)` in parent `ParentClass` [2]
+-> Type `(function(ParentClass $x, readonly ParentClass $y): void)` is not a subtype of `(function(readonly ParentClass $x, ParentClass $y): void)` [1]
+-> Mismatched parameter readonlyness [3]
+-> This parameter is mutable [4]
+-> But this parameter is readonly [3]
+
+function_subtype.php:39:19
+20 |   }
+21 | 
+22 |   public function setParams(readonly ParentClass $x, ParentClass $y) : void {
+   |                   ^^^^^^^^^ [2]
+   |                                                  ^^ [3]
+23 |   }
+24 | }
+   :
+37 |   }
+38 | 
+39 |   public function setParams(
+   |                   ^^^^^^^^^ [1]
+40 |     ParentClass $x, // Cannot override readonly parameter with mutable
+   |                 ^^ [4]
+41 |     readonly ParentClass $y // ok
+42 |   ) : void {
+
+error: Typing[4341] The method `readonlyFun` is not compatible with the overridden method [1]
+-> Method `readonlyFun` has type `(function((readonly function(Child): Child) $f): void)` in `Child` [1]
+-> But it has type `(function((function(Child): Child) $f): void)` in parent `ParentClass` [2]
+-> Type `(function((readonly function(Child): Child) $f): void)` is not a subtype of `(function((function(Child): Child) $f): void)` [1]
+-> Function readonly mismatch [3]
+-> This function is not marked readonly [3]
+-> This function is marked readonly [4]
+
+function_subtype.php:45:19
+15 |   }
+16 | 
+17 |   public function readonlyFun(
+   |                   ^^^^^^^^^^^ [2]
+18 |     (function (Child) : Child) $f
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+19 |   ) : void {
+20 |   }
+   :
+43 |   }
+44 | 
+45 |   public function readonlyFun(
+   |                   ^^^^^^^^^^^ [1]
+46 |     (readonly function (Child) : Child) $f
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+47 |   ) : void {
+48 |   }
+
+error: Typing[4411] Invalid argument [1]
+-> Mismatched parameter readonlyness [2]
+-> This parameter is mutable [3]
+-> But this parameter is readonly [2]
+
+function_subtype.php:62:11
+52 | 
+53 | function fnTypes(
+54 |   (function(readonly Child) : Child) $f,
+   |                      ^^^^^ [2]
+55 |   (function (readonly Child) : readonly Child) $f2,
+56 | ) : void {
+57 |   $y = $f(new Child()); // error, argument is not readonly
+58 |   $z = function(Child $x) : Child {
+   |                       ^^ [3]
+59 |     return $x;
+60 |   };
+61 |   // fails because the function takes mutable args which is not a subtype
+62 |   fnTypes($z, $f2);
+   |           ^^ [1]
+63 |   // fails because the function returns readonly Child instead of mutable Child
+64 |   fnTypes($f2, $f2);
+
+error: Typing[4411] Invalid argument [1]
+-> Function readonly return mismatch [2]
+-> This function returns a readonly value [2]
+-> This function does not return a readonly value [3]
+
+function_subtype.php:64:11
+52 | 
+53 | function fnTypes(
+54 |   (function(readonly Child) : Child) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+55 |   (function (readonly Child) : readonly Child) $f2,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+56 | ) : void {
+57 |   $y = $f(new Child()); // error, argument is not readonly
+   :
+62 |   fnTypes($z, $f2);
+63 |   // fails because the function returns readonly Child instead of mutable Child
+64 |   fnTypes($f2, $f2);
+   |           ^^^ [1]
+65 | }
+66 | 
+
+error: Typing[4411] Invalid argument [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [3]
+
+function_subtype.php:86:15
+76 | // TODO: the outermost readonly typehint should be optional, as it's
+77 | // pretty confusing to have both (with different variance as well)
+78 | function readonlyFns(readonly (readonly function(): void) $f): void {
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+79 |   // Testing readonly functions and their types
+80 |   $o = readonly () ==> {};
+81 |   $g = readonly function() : void {
+82 |   };
+83 |   $h = function(): void {};
+   |        ^^^^^^^^^^^^^^^^^^^ [2]
+84 |   readonlyFns($o);
+85 |   readonlyFns($g);
+86 |   readonlyFns($h);
+   |               ^^ [1]
+87 | }
+
+7 errors found

@@ -1,4 +1,20 @@
-ERROR: File "xhp_children_empty2.php", line 3, characters 13-13:
-A name is expected here. (Parsing[1002])
-ERROR: File "xhp_children_empty2.php", line 6, characters 13-17:
-Unbound name: `Empty` (an object type) (Naming[2049])
+error: Parsing[1002] A name is expected here. [1]
+
+xhp_children_empty2.php:3:13
+1 | <?hh
+2 | 
+3 | final class Empty {}
+  |             ^ [1]
+4 | 
+5 | class :my-html-two {
+
+error: Naming[2049] Unbound name: `Empty` (an object type) [1]
+
+xhp_children_empty2.php:6:13
+4 | 
+5 | class :my-html-two {
+6 |   children (Empty);
+  |             ^^^^^ [1]
+7 | }
+
+2 errors found

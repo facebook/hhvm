@@ -1,6 +1,19 @@
-ERROR: File "new.php", line 17, characters 16-26:
-Invalid argument (Typing[4411])
-  File "new.php", line 17, characters 16-26:
-  This expression is readonly
-  File "new.php", line 6, characters 42-43:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+new.php:17:16
+ 4 |   public int $prop;
+ 5 |   public readonly Bar $ro;
+ 6 |   public function __construct(public Foo $x, public readonly Foo $y) {
+   |                                          ^^ [2]
+ 7 |     $this->prop = 1;
+ 8 |     $this->ro = new Bar();
+   :
+15 |   $t = new Foo($x, $x);
+16 |   // error, $x is readonly
+17 |   $v = new Foo(readonly $x, $t);
+   |                ^^^^^^^^^^^ [1]
+18 | }
+
+1 error found

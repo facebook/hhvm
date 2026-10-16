@@ -1,8 +1,37 @@
-ERROR: File "fun_param.php", line 3, characters 18-22:
-Cannot re-assign `$this` (Parsing[1002])
-ERROR: File "fun_param.php", line 5, characters 33-37:
-Cannot re-assign `$this` (Parsing[1002])
-ERROR: File "fun_param.php", line 3, characters 18-22:
-Cannot use `$this` as lexical variable (Naming[2077])
-ERROR: File "fun_param.php", line 5, characters 33-37:
-Cannot use `$this` as lexical variable (Naming[2077])
+error: Parsing[1002] Cannot re-assign `$this` [1]
+
+fun_param.php:3:18
+1 | <?hh
+2 | 
+3 | function foo(int $this): void {}
+  |                  ^^^^^ [1]
+4 | 
+5 | function bar(int $other, int ...$this): void {}
+
+error: Parsing[1002] Cannot re-assign `$this` [1]
+
+fun_param.php:5:33
+3 | function foo(int $this): void {}
+4 | 
+5 | function bar(int $other, int ...$this): void {}
+  |                                 ^^^^^ [1]
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+fun_param.php:3:18
+1 | <?hh
+2 | 
+3 | function foo(int $this): void {}
+  |                  ^^^^^ [1]
+4 | 
+5 | function bar(int $other, int ...$this): void {}
+
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+fun_param.php:5:33
+3 | function foo(int $this): void {}
+4 | 
+5 | function bar(int $other, int ...$this): void {}
+  |                                 ^^^^^ [1]
+
+4 errors found

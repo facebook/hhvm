@@ -1,12 +1,34 @@
-ERROR: File "positional_variadic_before_named_bad.php", line 7, characters 40-41:
-Invalid argument (Typing[4110])
-  File "positional_variadic_before_named_bad.php", line 4, characters 61-66:
-  Expected `string`
-  File "positional_variadic_before_named_bad.php", line 7, characters 40-41:
-  But got `int`
-ERROR: File "positional_variadic_before_named_bad.php", line 8, characters 39-45:
-Invalid argument (Typing[4110])
-  File "positional_variadic_before_named_bad.php", line 4, characters 50-52:
-  Expected `int` (variadic argument)
-  File "positional_variadic_before_named_bad.php", line 8, characters 39-45:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+positional_variadic_before_named_bad.php:7:40
+2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | function positional_variadic_before_named(int ...$xs, named string $s): void {}
+  |                                                             ^^^^^^ [2]
+5 | 
+6 | function test(): void {
+7 |   positional_variadic_before_named(s = 42);
+  |                                        ^^ [1]
+8 |   positional_variadic_before_named(1, "wrong", s = "ok");
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `string` [1]
+
+positional_variadic_before_named_bad.php:8:39
+ 2 | <<file: __EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function positional_variadic_before_named(int ...$xs, named string $s): void {}
+   |                                                  ^^^ [2]
+ 5 | 
+ 6 | function test(): void {
+ 7 |   positional_variadic_before_named(s = 42);
+ 8 |   positional_variadic_before_named(1, "wrong", s = "ok");
+   |                                       ^^^^^^^ [1]
+ 9 | }
+10 | //
+
+2 errors found

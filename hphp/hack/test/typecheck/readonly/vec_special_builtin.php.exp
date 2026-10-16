@@ -1,2 +1,10 @@
-ERROR: File "vec_special_builtin.php", line 9, characters 5-19:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+vec_special_builtin.php:9:5
+ 7 |     $x = readonly Vector {new Foo()};
+ 8 |     $y = vec($x);
+ 9 |     $y[0]->prop = 5;
+   |     ^^^^^^^^^^^^^^^ [1]
+10 |   }
+
+1 error found

@@ -1,8 +1,26 @@
-ERROR: File "hierarchy_property.php", line 7, characters 12-13:
-Typing error (Typing[4256])
-  File "hierarchy_property.php", line 7, characters 16-18:
-  This object access to `val` is ambiguous
-  File "hierarchy_property.php", line 4, characters 39-44:
-  You will access the private instance declared in `A`
-  File "hierarchy_property.php", line 17, characters 49-54:
-  Instead of the public instance declared in `C`
+error: Typing[4256] Typing error [1]
+-> This object access to `val` is ambiguous [2]
+-> You will access the private instance declared in `A` [3]
+-> Instead of the public instance declared in `C` [4]
+
+hierarchy_property.php:7:12
+ 2 | 
+ 3 | class A {
+ 4 |   public function __construct(private string $val) {}
+   |                                       ^^^^^^ [3]
+ 5 | 
+ 6 |   public function broken(C $c): string {
+ 7 |     return $c->val;
+   |            ^^ [1]
+   |                ^^^ [2]
+ 8 |   }
+ 9 | }
+   :
+15 | }
+16 | class C extends B {
+17 |   public function __construct(string $s, public string $val) {
+   |                                                 ^^^^^^ [4]
+18 |     parent::__construct($s);
+19 |   }
+
+1 error found

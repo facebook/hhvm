@@ -1,4 +1,21 @@
-ERROR: File "parse_type_splat_multiple_ungated.php", line 7, characters 16-19:
-Cannot use unstable feature: `shape_splat_concrete` (Parsing[1002])
-ERROR: File "parse_type_splat_multiple_ungated.php", line 7, characters 35-38:
-Cannot use unstable feature: `shape_splat_concrete` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `shape_splat_concrete` [1]
+
+parse_type_splat_multiple_ungated.php:7:16
+5 | type A = shape('x' => int);
+6 | type B = shape('y' => string);
+7 | type C = shape(...A, 'z' => bool, ...B);
+  |                ^^^^ [1]
+8 | 
+9 | function test(C $s): void {}
+
+error: Parsing[1002] Cannot use unstable feature: `shape_splat_concrete` [1]
+
+parse_type_splat_multiple_ungated.php:7:35
+5 | type A = shape('x' => int);
+6 | type B = shape('y' => string);
+7 | type C = shape(...A, 'z' => bool, ...B);
+  |                                   ^^^^ [1]
+8 | 
+9 | function test(C $s): void {}
+
+2 errors found

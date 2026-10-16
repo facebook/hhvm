@@ -1,4 +1,19 @@
-ERROR: File "readonly_wrapper.php", line 19, characters 27-31:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "readonly_wrapper.php", line 3, characters 49-49:
-  The property is defined here.
+error: Typing[4412] This property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The property is defined here. [2]
+
+readonly_wrapper.php:19:27
+ 1 | <?hh
+ 2 | final class Readonly<T> {
+ 3 |     public function __construct(public readonly T $value)[] {}
+   |                                                 ^ [2]
+ 4 | 
+ 5 |     public readonly function get()[] : readonly T {
+   :
+17 |       $result = readonly dict<Tk, Tv>[];
+18 |       foreach ($dict as $k => $v) {
+19 |         $result[$k] = $v->value;
+   |                           ^^^^^ [1]
+20 |       }
+21 |       return $result;
+
+1 error found

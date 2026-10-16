@@ -1,6 +1,30 @@
-ERROR: File "attr_on_wrong_target.php", line 6, characters 3-25:
-The `__TestsBypassVisibility` attribute cannot be used on a function. (Typing[4231])
-ERROR: File "attr_on_wrong_target.php", line 10, characters 3-25:
-The `__TestsBypassVisibility` attribute cannot be used on an enum. (Typing[4231])
-ERROR: File "attr_on_wrong_target.php", line 14, characters 3-25:
-The `__TestsBypassVisibility` attribute cannot be used on a typealias. (Typing[4231])
+error: Typing[4231] The `__TestsBypassVisibility` attribute cannot be used on a function. [1]
+
+attr_on_wrong_target.php:6:3
+4 | 
+5 | // On a top-level function (not allowed per contexts = [cls; mthd; instProperty; staticProperty])
+6 | <<__TestsBypassVisibility>>
+  |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | function standalone(): void {}
+8 | 
+
+error: Typing[4231] The `__TestsBypassVisibility` attribute cannot be used on an enum. [1]
+
+attr_on_wrong_target.php:10:3
+ 8 | 
+ 9 | // On an enum
+10 | <<__TestsBypassVisibility>>
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | enum MyEnum: int {}
+12 | 
+
+error: Typing[4231] The `__TestsBypassVisibility` attribute cannot be used on a typealias. [1]
+
+attr_on_wrong_target.php:14:3
+12 | 
+13 | // On a type alias
+14 | <<__TestsBypassVisibility>>
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | type MyAlias = int;
+
+3 errors found

@@ -1,20 +1,48 @@
-ERROR: File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 10-11:
-Invalid return type (Typing[4163])
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 7, characters 3-4:
-  The field `z` is **optional**
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 7, characters 3-4:
-  The field `z` is defined as **required**
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 8, characters 24-26:
-  `z` is defined here
-ERROR: File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 10-11:
-Invalid return type (Typing[4522])
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 7, characters 3-4:
-  This shape is not guaranteed to have the fields required here
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 8, characters 13-14:
-  `T2` may have required fields of its own
-ERROR: File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 10-11:
-Invalid return type (Typing[4110])
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 9, characters 3-12:
-  Expected `nothing`
-  File "bare_param_against_splat_bad_via_bound_missing_fields.php", line 6, characters 26-35:
-  But got `mixed`
+error: Typing[4163] Invalid return type [1]
+-> The field `z` is **optional** [2]
+-> The field `z` is defined as **required** [2]
+-> `z` is defined here [3]
+
+bare_param_against_splat_bad_via_bound_missing_fields.php:9:10
+ 5 | // value satisfy `T2`, and `T1` also does not guarantee the required field `z`.
+ 6 | function via_bound<T1 as shape(...), <<__Explicit>> T2 as T1>(
+ 7 |   T1 $s,
+   |   ^^ [2]
+ 8 | ): shape(...T2, 'z' => int) {
+   |                        ^^^ [3]
+ 9 |   return $s;
+   |          ^^ [1]
+10 | }
+
+error: Typing[4522] Invalid return type [1]
+-> This shape is not guaranteed to have the fields required here [2]
+-> `T2` may have required fields of its own [3]
+
+bare_param_against_splat_bad_via_bound_missing_fields.php:9:10
+ 5 | // value satisfy `T2`, and `T1` also does not guarantee the required field `z`.
+ 6 | function via_bound<T1 as shape(...), <<__Explicit>> T2 as T1>(
+ 7 |   T1 $s,
+   |   ^^ [2]
+ 8 | ): shape(...T2, 'z' => int) {
+   |             ^^ [3]
+ 9 |   return $s;
+   |          ^^ [1]
+10 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+
+bare_param_against_splat_bad_via_bound_missing_fields.php:9:10
+ 4 | // `T2 as shape(...T1)` makes `T2` a subtype of `T1`; it does not make a `T1`
+ 5 | // value satisfy `T2`, and `T1` also does not guarantee the required field `z`.
+ 6 | function via_bound<T1 as shape(...), <<__Explicit>> T2 as T1>(
+   |                          ^^^^^^^^^^ [3]
+ 7 |   T1 $s,
+ 8 | ): shape(...T2, 'z' => int) {
+ 9 |   return $s;
+   |   ^^^^^^^^^^ [2]
+   |          ^^ [1]
+10 | }
+
+3 errors found

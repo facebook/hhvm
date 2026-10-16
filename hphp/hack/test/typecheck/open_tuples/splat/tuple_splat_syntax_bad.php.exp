@@ -1,14 +1,70 @@
-ERROR: File "tuple_splat_syntax_bad.php", line 6, characters 36-50:
-There must be no elements following a variadic or splat element (Parsing[1002])
-ERROR: File "tuple_splat_syntax_bad.php", line 9, characters 36-53:
-There must be only one variadic or splat element (Parsing[1002])
-ERROR: File "tuple_splat_syntax_bad.php", line 12, characters 36-59:
-There must be no elements following a variadic or splat element (Parsing[1002])
-ERROR: File "tuple_splat_syntax_bad.php", line 15, characters 36-59:
-There must be no splat elements following an optional element (Parsing[1002])
-ERROR: File "tuple_splat_syntax_bad.php", line 18, characters 36-53:
-There must be only one variadic or splat element (Parsing[1002])
-ERROR: File "tuple_splat_syntax_bad.php", line 22, characters 45-68:
-Cannot use `optional` on variadic or splat parameters (Parsing[1002])
-ERROR: File "tuple_splat_syntax_bad.php", line 24, characters 45-62:
-A splat element cannot also be variadic (Parsing[1002])
+error: Parsing[1002] There must be no elements following a variadic or splat element [1]
+
+tuple_splat_syntax_bad.php:6:36
+4 | 
+5 | // Illegal because splat is followed by another parameter
+6 | function bad1<Targs as (mixed...)>((...Targs, int) $p): void {}
+  |                                    ^^^^^^^^^^^^^^^ [1]
+7 | 
+8 | // Illegal because splat is followed by a variadic
+
+error: Parsing[1002] There must be only one variadic or splat element [1]
+
+tuple_splat_syntax_bad.php:9:36
+ 7 | 
+ 8 | // Illegal because splat is followed by a variadic
+ 9 | function bad2<Targs as (mixed...)>((...Targs, int...) $p): void {}
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+10 | 
+11 | // Illegal because splat is followed by an optional
+
+error: Parsing[1002] There must be no elements following a variadic or splat element [1]
+
+tuple_splat_syntax_bad.php:12:36
+10 | 
+11 | // Illegal because splat is followed by an optional
+12 | function bad3<Targs as (mixed...)>((...Targs, optional int) $p): void {}
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | 
+14 | // Illegal because splat is preceded by an optional
+
+error: Parsing[1002] There must be no splat elements following an optional element [1]
+
+tuple_splat_syntax_bad.php:15:36
+13 | 
+14 | // Illegal because splat is preceded by an optional
+15 | function bad4<Targs as (mixed...)>((optional int, ...Targs) $p): void {}
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | 
+17 | // Illegal because splat is preceded by a variadic
+
+error: Parsing[1002] There must be only one variadic or splat element [1]
+
+tuple_splat_syntax_bad.php:18:36
+16 | 
+17 | // Illegal because splat is preceded by a variadic
+18 | function bad5<Targs as (mixed...)>((int..., ...Targs) $p): void {}
+   |                                    ^^^^^^^^^^^^^^^^^^ [1]
+19 | 
+20 | interface I {
+
+error: Parsing[1002] Cannot use `optional` on variadic or splat parameters [1]
+
+tuple_splat_syntax_bad.php:22:45
+20 | interface I {
+21 |   // Illegal because splat is optional
+22 |   public function bad7<Targs as (mixed...)>((int, optional ...Targs) $p): void;
+   |                                             ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 |   // Illegal because splat is variadic
+24 |   public function bad8<Targs as (mixed...)>((int, ...Targs...) $p): void;
+
+error: Parsing[1002] A splat element cannot also be variadic [1]
+
+tuple_splat_syntax_bad.php:24:45
+22 |   public function bad7<Targs as (mixed...)>((int, optional ...Targs) $p): void;
+23 |   // Illegal because splat is variadic
+24 |   public function bad8<Targs as (mixed...)>((int, ...Targs...) $p): void;
+   |                                             ^^^^^^^^^^^^^^^^^^ [1]
+25 | }
+
+7 errors found

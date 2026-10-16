@@ -1,8 +1,28 @@
-ERROR: File "method_abstractclass_05.php", line 28, characters 18-18:
-Some members in class `D2` are incompatible with those declared in type `C` (Typing[4341])
-  File "method_abstractclass_05.php", line 19, characters 19-21:
-  The method `foo` is not compatible with the overridden method
-  File "method_abstractclass_05.php", line 19, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_abstractclass_05.php", line 5, characters 28-30:
-  Declaration is here
+error: Typing[4341] Some members in class `D2` are incompatible with those declared in type `C` [1]
+-> The method `foo` is not compatible with the overridden method [2]
+-> You cannot override the method because it is sealed. [2]
+-> Declaration is here [3]
+
+method_abstractclass_05.php:28:18
+ 3 | abstract class C {
+ 4 |   <<__Sealed(T1::class)>>
+ 5 |   abstract public function foo(): void;
+   |                            ^^^ [3]
+ 6 | }
+ 7 | 
+   :
+17 | trait T2 {
+18 |   <<__Override>>
+19 |   public function foo(): void {
+   |                   ^^^ [2]
+20 |     echo "I am foo in T2\n";
+21 |   }
+   :
+26 | }
+27 | 
+28 | class D2 extends C {
+   |                  ^ [1]
+29 |   use T2; // this is rejected
+30 | }
+
+1 error found

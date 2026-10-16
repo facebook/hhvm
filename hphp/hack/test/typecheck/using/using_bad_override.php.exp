@@ -1,48 +1,89 @@
-ERROR: File "using_bad_override.php", line 14, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "using_bad_override.php", line 14, characters 19-21:
-  Method `foo` has type `(function(mixed $h): void)` in `BadDerived1`
-  File "using_bad_override.php", line 10, characters 19-21:
-  But it has type `(function(<<__AcceptDisposable>> mixed $h): void)` in parent `Base`
-  File "using_bad_override.php", line 14, characters 19-21:
-  Type `(function(mixed $h): void)` is not a subtype of `(function(<<__AcceptDisposable>> mixed $h): void)`
-  File "using_bad_override.php", line 10, characters 51-52:
-  This parameter is marked `<<__AcceptDisposable>>`
-  File "using_bad_override.php", line 14, characters 29-30:
-  This parameter is not marked `<<__AcceptDisposable>>`
-ERROR: File "using_bad_override.php", line 19, characters 19-21:
-The method `bar` is not compatible with the overridden method (Typing[4341])
-  File "using_bad_override.php", line 19, characters 19-21:
-  Method `bar` has type `(function(<<__AcceptDisposable>> mixed $h): void)` in `BadDerived2`
-  File "using_bad_override.php", line 11, characters 19-21:
-  But it has type `(function(mixed $h): void)` in parent `Base`
-  File "using_bad_override.php", line 19, characters 19-21:
-  Type `(function(<<__AcceptDisposable>> mixed $h): void)` is not a subtype of `(function(mixed $h): void)`
-  File "using_bad_override.php", line 19, characters 51-52:
-  This parameter is marked `<<__AcceptDisposable>>`
-  File "using_bad_override.php", line 11, characters 29-30:
-  This parameter is not marked `<<__AcceptDisposable>>`
-ERROR: File "using_bad_override.php", line 31, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "using_bad_override.php", line 31, characters 19-21:
-  Method `foo` has type `(function(): void)` in `RBadDerived1`
-  File "using_bad_override.php", line 27, characters 19-21:
-  But it has type `<<__ReturnDisposable>> (function(): void)` in parent `RBase`
-  File "using_bad_override.php", line 31, characters 19-21:
-  Type `(function(): void)` is not a subtype of `<<__ReturnDisposable>> (function(): void)`
-  File "using_bad_override.php", line 27, characters 19-21:
-  This is marked `<<__ReturnDisposable>>`.
-  File "using_bad_override.php", line 31, characters 19-21:
-  This is not marked `<<__ReturnDisposable>>`.
-ERROR: File "using_bad_override.php", line 38, characters 19-21:
-The method `bar` is not compatible with the overridden method (Typing[4341])
-  File "using_bad_override.php", line 38, characters 19-21:
-  Method `bar` has type `<<__ReturnDisposable>> (function(): void)` in `RBadDerived2`
-  File "using_bad_override.php", line 28, characters 19-21:
-  But it has type `(function(): void)` in parent `RBase`
-  File "using_bad_override.php", line 38, characters 19-21:
-  Type `<<__ReturnDisposable>> (function(): void)` is not a subtype of `(function(): void)`
-  File "using_bad_override.php", line 28, characters 19-21:
-  This is not marked `<<__ReturnDisposable>>`.
-  File "using_bad_override.php", line 38, characters 19-21:
-  This is marked `<<__ReturnDisposable>>`.
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(mixed $h): void)` in `BadDerived1` [1]
+-> But it has type `(function(<<__AcceptDisposable>> mixed $h): void)` in parent `Base` [2]
+-> Type `(function(mixed $h): void)` is not a subtype of `(function(<<__AcceptDisposable>> mixed $h): void)` [1]
+-> This parameter is marked `<<__AcceptDisposable>>` [3]
+-> This parameter is not marked `<<__AcceptDisposable>>` [4]
+
+using_bad_override.php:14:19
+ 8 | 
+ 9 | class Base {
+10 |   public function foo(<<__AcceptDisposable>>mixed $h): void {}
+   |                   ^^^ [2]
+   |                                                   ^^ [3]
+11 |   public function bar(mixed $h): void {}
+12 | }
+13 | class BadDerived1 extends Base {
+14 |   public function foo(mixed $h): void {}
+   |                   ^^^ [1]
+   |                             ^^ [4]
+15 |   public function bar(mixed $h): void {}
+16 | }
+
+error: Typing[4341] The method `bar` is not compatible with the overridden method [1]
+-> Method `bar` has type `(function(<<__AcceptDisposable>> mixed $h): void)` in `BadDerived2` [1]
+-> But it has type `(function(mixed $h): void)` in parent `Base` [2]
+-> Type `(function(<<__AcceptDisposable>> mixed $h): void)` is not a subtype of `(function(mixed $h): void)` [1]
+-> This parameter is marked `<<__AcceptDisposable>>` [3]
+-> This parameter is not marked `<<__AcceptDisposable>>` [4]
+
+using_bad_override.php:19:19
+ 9 | class Base {
+10 |   public function foo(<<__AcceptDisposable>>mixed $h): void {}
+11 |   public function bar(mixed $h): void {}
+   |                   ^^^ [2]
+   |                             ^^ [4]
+12 | }
+13 | class BadDerived1 extends Base {
+   :
+17 | class BadDerived2 extends Base {
+18 |   public function foo(<<__AcceptDisposable>>mixed $h): void {}
+19 |   public function bar(<<__AcceptDisposable>>mixed $h): void {}
+   |                   ^^^ [1]
+   |                                                   ^^ [3]
+20 | }
+21 | class GoodDerived extends Base {
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(): void)` in `RBadDerived1` [1]
+-> But it has type `<<__ReturnDisposable>> (function(): void)` in parent `RBase` [2]
+-> Type `(function(): void)` is not a subtype of `<<__ReturnDisposable>> (function(): void)` [1]
+-> This is marked `<<__ReturnDisposable>>`. [2]
+-> This is not marked `<<__ReturnDisposable>>`. [1]
+
+using_bad_override.php:31:19
+25 | class RBase {
+26 |   <<__ReturnDisposable>>
+27 |   public function foo(): void {}
+   |                   ^^^ [2]
+28 |   public function bar(): void {}
+29 | }
+30 | class RBadDerived1 extends RBase {
+31 |   public function foo(): void {}
+   |                   ^^^ [1]
+32 |   public function bar(): void {}
+33 | }
+
+error: Typing[4341] The method `bar` is not compatible with the overridden method [1]
+-> Method `bar` has type `<<__ReturnDisposable>> (function(): void)` in `RBadDerived2` [1]
+-> But it has type `(function(): void)` in parent `RBase` [2]
+-> Type `<<__ReturnDisposable>> (function(): void)` is not a subtype of `(function(): void)` [1]
+-> This is not marked `<<__ReturnDisposable>>`. [2]
+-> This is marked `<<__ReturnDisposable>>`. [1]
+
+using_bad_override.php:38:19
+26 |   <<__ReturnDisposable>>
+27 |   public function foo(): void {}
+28 |   public function bar(): void {}
+   |                   ^^^ [2]
+29 | }
+30 | class RBadDerived1 extends RBase {
+   :
+36 |   public function foo(): void {}
+37 |   <<__ReturnDisposable>>
+38 |   public function bar(): void {}
+   |                   ^^^ [1]
+39 | }
+40 | class RGoodDerived extends RBase {
+
+4 errors found

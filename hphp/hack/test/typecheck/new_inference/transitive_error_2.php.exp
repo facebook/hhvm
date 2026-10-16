@@ -1,14 +1,37 @@
-ERROR: File "transitive_error_2.php", line 4, characters 12-12:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `int` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "transitive_error_2.php", line 12, characters 5-6:
-Invalid argument (Typing[4323])
-  File "transitive_error_2.php", line 8, characters 12-12:
-  `T` is a constrained type parameter
-  File "transitive_error_2.php", line 8, characters 17-22:
-  This type constraint is violated
-  File "transitive_error_2.php", line 8, characters 17-22:
-  Expected `string`
-  File "transitive_error_2.php", line 4, characters 20-22:
-  But got `int`
-  File "transitive_error_2.php", line 4, characters 28-28:
-    via this generic `T`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `int` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+transitive_error_2.php:4:12
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function f<T super int>(): T {
+  |            ^ [1]
+5 |   return 0;
+6 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+->   via this generic `T` [5]
+
+transitive_error_2.php:12:5
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function f<T super int>(): T {
+   |                    ^^^ [4]
+   |                            ^ [5]
+ 5 |   return 0;
+ 6 | }
+ 7 | 
+ 8 | function g<T as string>(T $_): void {}
+   |            ^ [2]
+   |                 ^^^^^^ [3]
+ 9 | 
+10 | function test(): void {
+11 |   $x = f();
+12 |   g($x);
+   |     ^^ [1]
+13 | }
+
+2 errors found

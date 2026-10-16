@@ -1,20 +1,45 @@
-ERROR: File "t21684610.php", line 23, characters 27-27:
-Invalid argument (Typing[4323])
-  File "t21684610.php", line 9, characters 38-39:
-  `Ti` is a constrained type parameter
-  File "t21684610.php", line 9, characters 44-48:
-  This type constraint is violated
-  File "t21684610.php", line 9, characters 44-48:
-  Expected `I1<_>`
-  File "t21684610.php", line 23, characters 27-27:
-  But got `int`
-ERROR: File "t21684610.php", line 27, characters 16-16:
-Invalid argument (Typing[4323])
-  File "t21684610.php", line 9, characters 38-39:
-  `Ti` is a constrained type parameter
-  File "t21684610.php", line 9, characters 44-48:
-  This type constraint is violated
-  File "t21684610.php", line 9, characters 44-48:
-  Expected `I1<_>`
-  File "t21684610.php", line 27, characters 16-16:
-  But got `int`
+error: Typing[4323] Invalid argument [1]
+-> `Ti` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I1<_>` [3]
+-> But got `int` [1]
+
+t21684610.php:23:27
+ 7 | 
+ 8 | abstract class A1 {
+ 9 |   final public static function do<T, Ti as I1<T>>(
+   |                                      ^^ [2]
+   |                                            ^^^^^ [3]
+10 |     I2<T> $_,
+11 |     Ti $_,
+   :
+21 | 
+22 |   final public static function call(): void {
+23 |     A2::do(self::query(), 1); // this passes!!!
+   |                           ^ [1]
+24 |   }
+25 | 
+
+error: Typing[4323] Invalid argument [1]
+-> `Ti` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I1<_>` [3]
+-> But got `int` [1]
+
+t21684610.php:27:16
+ 7 | 
+ 8 | abstract class A1 {
+ 9 |   final public static function do<T, Ti as I1<T>>(
+   |                                      ^^ [2]
+   |                                            ^^^^^ [3]
+10 |     I2<T> $_,
+11 |     Ti $_,
+   :
+25 | 
+26 |   final public static function call2(A3 $a): void {
+27 |     A2::do($a, 1); // this fails (int is not compatible with I1)
+   |                ^ [1]
+28 |   }
+29 | }
+
+2 errors found

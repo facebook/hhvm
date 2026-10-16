@@ -1,2 +1,10 @@
-ERROR: File "new_without_newable_simple.php", line 5, characters 3-9:
-`T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute (Typing[4309])
+error: Typing[4309] `T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute [1]
+
+new_without_newable_simple.php:5:3
+3 | 
+4 | function f<reify T>(): void {
+5 |   new T();
+  |   ^^^^^^^ [1]
+6 | }
+
+1 error found

@@ -1,6 +1,20 @@
-ERROR: File "method_class_01.php", line 17, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "method_class_01.php", line 17, characters 19-21:
-  You cannot override the method because it is sealed.
-  File "method_class_01.php", line 5, characters 19-21:
-  Declaration is here
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override the method because it is sealed. [1]
+-> Declaration is here [2]
+
+method_class_01.php:17:19
+ 3 | class C {
+ 4 |   <<__Sealed(D::class)>>
+ 5 |   public function foo(): void {}
+   |                   ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+15 |   // this is NOT allowed
+16 |   <<__Override>>
+17 |   public function foo(): void {}
+   |                   ^^^ [1]
+18 | }
+19 | 
+
+1 error found

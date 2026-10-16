@@ -1,4 +1,21 @@
-ERROR: File "bare_param_against_splat_good_open_identity.php", line 6, characters 46-56:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
-ERROR: File "bare_param_against_splat_good_open_identity.php", line 10, characters 39-49:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+bare_param_against_splat_good_open_identity.php:6:46
+4 | // The two spellings remain equivalent with an open bound, where `T` may carry
+5 | // unknown fields.
+6 | function id_open_fwd<T as shape(...)>(T $s): shape(...T) {
+  |                                              ^^^^^^^^^^^ [1]
+7 |   return $s;
+8 | }
+
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+bare_param_against_splat_good_open_identity.php:10:39
+ 8 | }
+ 9 | 
+10 | function id_open_rev<T as shape(...)>(shape(...T) $s): T {
+   |                                       ^^^^^^^^^^^ [1]
+11 |   return $s;
+12 | }
+
+2 errors found

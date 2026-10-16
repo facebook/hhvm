@@ -1,18 +1,77 @@
-WARN: File "int_string_arraykey.php", line 103, characters 10-12:
-This switch case, `0`, occurred before. It will never be matched. (Warn[12019])
-  File "int_string_arraykey.php", line 99, characters 10-12:
-  This is the original occurrence of the case.
-WARN: File "int_string_arraykey.php", line 105, characters 10-10:
-This switch case, `0`, occurred before. It will never be matched. (Warn[12019])
-  File "int_string_arraykey.php", line 101, characters 10-10:
-  This is the original occurrence of the case.
-WARN: File "int_string_arraykey.php", line 115, characters 10-13:
-Invalid case: This case will never match.
-A value of type `arraykey` can never be equal to a value of type `bool` (Warn[12007])
-WARN: File "int_string_arraykey.php", line 117, characters 10-13:
-Invalid case: This case will never match.
-A value of type `arraykey` can never be equal to a value of type `null` (Warn[12007])
-ERROR: File "int_string_arraykey.php", line 56, characters 3-77:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "int_string_arraykey.php", line 56, characters 11-12:
-  The scrutinee has type `arraykey` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+warning: Warn[12019] This switch case, `0`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+int_string_arraykey.php:103:10
+ 97 | function redundant_literal_arraykey(arraykey $x): void {
+ 98 |   switch ($x) {
+ 99 |     case "0":
+    |          ^^^ [2]
+100 |       return;
+101 |     case 0:
+102 |       return;
+103 |     case "0":
+    |          ^^^ [1]
+104 |       return;
+105 |     case 0:
+
+warning: Warn[12019] This switch case, `0`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+int_string_arraykey.php:105:10
+ 99 |     case "0":
+100 |       return;
+101 |     case 0:
+    |          ^ [2]
+102 |       return;
+103 |     case "0":
+104 |       return;
+105 |     case 0:
+    |          ^ [1]
+106 |       return;
+107 |     default:
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `arraykey` can never be equal to a value of type `bool` [1]
+
+int_string_arraykey.php:115:10
+113 | function not_subtype_arraykey(arraykey $x): void {
+114 |   switch ($x) {
+115 |     case true:
+    |          ^^^^ [1]
+116 |       return;
+117 |     case null:
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `arraykey` can never be equal to a value of type `null` [1]
+
+int_string_arraykey.php:117:10
+115 |     case true:
+116 |       return;
+117 |     case null:
+    |          ^^^^ [1]
+118 |       return;
+119 |     default:
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `arraykey` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+int_string_arraykey.php:56:3
+54 | <<__StrictSwitch>>
+55 | function transparent_arraykey_enum_no_default(arraykey $x): void {
+56 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+57 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+58 |       return;
+   |       ^^^^^^^ [1]
+59 |     case E::B:
+   |     ^^^^^^^^^^ [1]
+60 |       return;
+   |       ^^^^^^^ [1]
+61 |   }
+   |   ^ [1]
+62 | }
+63 | 
+
+5 errors found

@@ -1,30 +1,151 @@
-ERROR: File "invalid_syntax.php", line 11, characters 14-23:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "invalid_syntax.php", line 11, characters 24-24:
-An arrow `=>` is expected here. (Parsing[1002])
-ERROR: File "invalid_syntax.php", line 17, characters 14-20:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "invalid_syntax.php", line 22, characters 14-24:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "invalid_syntax.php", line 27, characters 14-15:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "invalid_syntax.php", line 11, characters 24-24:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "invalid_syntax.php", line 17, characters 21-21:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "invalid_syntax.php", line 22, characters 25-25:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "invalid_syntax.php", line 27, characters 16-16:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "invalid_syntax.php", line 32, characters 21-21:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "invalid_syntax.php", line 11, characters 24-24:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "invalid_syntax.php", line 17, characters 21-21:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "invalid_syntax.php", line 22, characters 25-25:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "invalid_syntax.php", line 27, characters 16-16:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "invalid_syntax.php", line 32, characters 21-21:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+invalid_syntax.php:11:14
+ 9 |   $obj = new Foo();
+10 |   // Property access without arrow should be a parse error
+11 |   $s = shape($obj->prop);
+   |              ^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Parsing[1002] An arrow `=>` is expected here. [1]
+
+invalid_syntax.php:11:24
+ 9 |   $obj = new Foo();
+10 |   // Property access without arrow should be a parse error
+11 |   $s = shape($obj->prop);
+   |                        ^ [1]
+12 | }
+13 | 
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+invalid_syntax.php:17:14
+15 |   $arr = vec[1, 2, 3];
+16 |   // Array access without arrow should be a parse error
+17 |   $s = shape($arr[0]);
+   |              ^^^^^^^ [1]
+18 | }
+19 | 
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+invalid_syntax.php:22:14
+20 | function test_function_call_without_arrow(): void {
+21 |   // Function call without arrow should be a parse error
+22 |   $s = shape(get_value());
+   |              ^^^^^^^^^^^ [1]
+23 | }
+24 | 
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+invalid_syntax.php:27:14
+25 | function test_literal_without_arrow(): void {
+26 |   // Literal without arrow should be a parse error
+27 |   $s = shape(42);
+   |              ^^ [1]
+28 | }
+29 | 
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+invalid_syntax.php:11:24
+ 9 |   $obj = new Foo();
+10 |   // Property access without arrow should be a parse error
+11 |   $s = shape($obj->prop);
+   |                        ^ [1]
+12 | }
+13 | 
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+invalid_syntax.php:17:21
+15 |   $arr = vec[1, 2, 3];
+16 |   // Array access without arrow should be a parse error
+17 |   $s = shape($arr[0]);
+   |                     ^ [1]
+18 | }
+19 | 
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+invalid_syntax.php:22:25
+20 | function test_function_call_without_arrow(): void {
+21 |   // Function call without arrow should be a parse error
+22 |   $s = shape(get_value());
+   |                         ^ [1]
+23 | }
+24 | 
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+invalid_syntax.php:27:16
+25 | function test_literal_without_arrow(): void {
+26 |   // Literal without arrow should be a parse error
+27 |   $s = shape(42);
+   |                ^ [1]
+28 | }
+29 | 
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+invalid_syntax.php:32:21
+30 | function test_string_literal_without_arrow(): void {
+31 |   // String literal without arrow should be a parse error
+32 |   $s = shape('hello');
+   |                     ^ [1]
+33 | }
+34 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_syntax.php:11:24
+ 9 |   $obj = new Foo();
+10 |   // Property access without arrow should be a parse error
+11 |   $s = shape($obj->prop);
+   |                        ^ [1]
+12 | }
+13 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_syntax.php:17:21
+15 |   $arr = vec[1, 2, 3];
+16 |   // Array access without arrow should be a parse error
+17 |   $s = shape($arr[0]);
+   |                     ^ [1]
+18 | }
+19 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_syntax.php:22:25
+20 | function test_function_call_without_arrow(): void {
+21 |   // Function call without arrow should be a parse error
+22 |   $s = shape(get_value());
+   |                         ^ [1]
+23 | }
+24 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_syntax.php:27:16
+25 | function test_literal_without_arrow(): void {
+26 |   // Literal without arrow should be a parse error
+27 |   $s = shape(42);
+   |                ^ [1]
+28 | }
+29 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_syntax.php:32:21
+30 | function test_string_literal_without_arrow(): void {
+31 |   // String literal without arrow should be a parse error
+32 |   $s = shape('hello');
+   |                     ^ [1]
+33 | }
+34 | 
+
+15 errors found

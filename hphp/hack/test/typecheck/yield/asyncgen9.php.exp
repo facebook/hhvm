@@ -1,8 +1,28 @@
-ERROR: File "asyncgen9.php", line 4, characters 16-20:
-`await` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "asyncgen9.php", line 4, characters 12-14:
-Invalid `foreach` (Typing[4110])
-  File "asyncgen9.php", line 4, characters 12-14:
-  Expected `AsyncIterator<_>` because this is used in a `foreach` statement with `await as`
-  File "asyncgen9.php", line 8, characters 15-28:
-  But got `Awaitable<int>`
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+asyncgen9.php:4:16
+2 | 
+3 | function f(): void {
+4 |   foreach (g() await as $x) {
+  |                ^^^^^ [1]
+5 |   }
+6 | }
+
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected `AsyncIterator<_>` because this is used in a `foreach` statement with `await as` [1]
+-> But got `Awaitable<int>` [2]
+
+asyncgen9.php:4:12
+ 2 | 
+ 3 | function f(): void {
+ 4 |   foreach (g() await as $x) {
+   |            ^^^ [1]
+ 5 |   }
+ 6 | }
+ 7 | 
+ 8 | function g(): Awaitable<int> {
+   |               ^^^^^^^^^^^^^^ [2]
+ 9 |   throw new Exception('unimplemented');
+10 | }
+
+2 errors found

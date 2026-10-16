@@ -1,4 +1,19 @@
-ERROR: File "non_re_prefixed_string.php", line 4, characters 8-20:
-Cannot use experimental feature: String prefixes other than `re` are not yet supported. (Other[0000])
-ERROR: File "non_re_prefixed_string.php", line 4, characters 8-20:
-Only `re`-prefixed strings allowed. (Parsing[1002])
+error: Other[0000] Cannot use experimental feature: String prefixes other than `re` are not yet supported. [1]
+
+non_re_prefixed_string.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $y = f"bad prefix";
+  |        ^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Parsing[1002] Only `re`-prefixed strings allowed. [1]
+
+non_re_prefixed_string.php:4:8
+2 | 
+3 | function f(): void {
+4 |   $y = f"bad prefix";
+  |        ^^^^^^^^^^^^^ [1]
+5 | }
+
+2 errors found

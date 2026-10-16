@@ -1,2 +1,9 @@
-ERROR: File "use_conflict_enum2.php", line 5, characters 6-8:
-Cannot declare `Foo` because the name was explicitly used earlier via a `use` statement on line 3 (Parsing[1002])
+error: Parsing[1002] Cannot declare `Foo` because the name was explicitly used earlier via a `use` statement on line 3 [1]
+
+use_conflict_enum2.php:5:6
+3 | use type UseNS\Foo;
+4 | 
+5 | enum Foo: int {}
+  |      ^^^ [1]
+
+1 error found

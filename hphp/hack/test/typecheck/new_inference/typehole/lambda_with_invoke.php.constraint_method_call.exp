@@ -1,4 +1,12 @@
-ERROR: File "lambda_with_invoke.php", line 21, characters 40-46:
-You are trying to access the method `rubbish` but this is an int (Typing[4062])
-  File "lambda_with_invoke.php", line 21, characters 53-53:
-  Definition is here
+error: Typing[4062] You are trying to access the method `rubbish` but this is an int [1]
+-> Definition is here [2]
+
+lambda_with_invoke.php:21:40
+19 | }
+20 | function testit():void {
+21 |   add(vec[new WrappedLambda($m ==> $m->rubbish())], 4);
+   |                                        ^^^^^^^ [1]
+   |                                                     ^ [2]
+22 | }
+
+1 error found

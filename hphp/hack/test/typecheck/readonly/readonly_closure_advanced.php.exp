@@ -1,8 +1,27 @@
-ERROR: File "readonly_closure_advanced.php", line 27, characters 18-19:
-Invalid argument (Typing[4411])
-  File "readonly_closure_advanced.php", line 23, characters 8-51:
-  Function readonly mismatch
-  File "readonly_closure_advanced.php", line 23, characters 8-51:
-  This function is not marked readonly
-  File "readonly_closure_advanced.php", line 10, characters 12-38:
-  This function is marked readonly
+error: Typing[4411] Invalid argument [1]
+-> Function readonly mismatch [2]
+-> This function is not marked readonly [2]
+-> This function is marked readonly [3]
+
+readonly_closure_advanced.php:27:18
+ 8 | 
+ 9 | function takes_readonly(
+10 |   readonly (readonly function(): void) $f
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+11 | ) : void {
+12 |     $f();
+   :
+21 |   takes_readonly($y);
+22 | 
+23 |   $z = (): void ==> {
+   |        ^^^^^^^^^^^^^^ [2]
+24 |     echo "mutable fun\n";
+   |     ^^^^^^^^^^^^^^^^^^^^^ [2]
+25 |   };
+   |   ^ [2]
+26 |   takes_mutable($z);
+27 |   takes_readonly($z); // error here
+   |                  ^^ [1]
+28 | }
+
+1 error found

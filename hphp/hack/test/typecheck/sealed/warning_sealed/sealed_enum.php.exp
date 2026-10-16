@@ -1,2 +1,11 @@
-WARN: File "sealed_enum.php", line 5, characters 3-10:
-Enum `B` in sealed allowlist for `E`, but does not use `E` (Warn[12035])
+warning: Warn[12035] Enum `B` in sealed allowlist for `E`, but does not use `E` [1]
+
+sealed_enum.php:5:3
+3 | <<__Sealed(
+4 |   A::class,
+5 |   B::class // error, E is not a parent of B
+  |   ^^^^^^^^ [1]
+6 | )>>
+7 | enum E: int {}
+
+1 error found

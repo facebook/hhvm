@@ -1,10 +1,23 @@
-ERROR: File "t28246566.php", line 12, characters 12-13:
-Invalid return type (Typing[4110])
-  File "t28246566.php", line 9, characters 41-43:
-  Expected `int`
-  File "t28246566.php", line 6, characters 20-27:
-  But got `arraykey`
-  File "t28246566.php", line 6, characters 20-27:
-  This type argument to `Vector` must match exactly (it is invariant)
-  File "t28246566.php", line 6, characters 20-27:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+t28246566.php:12:12
+ 4 | class C {
+ 5 |   public function __construct(
+ 6 |     private Vector<arraykey> $y,
+   |                    ^^^^^^^^ [3]
+ 7 |   ) {}
+ 8 | 
+ 9 |   public function test(bool $c): Vector<int> {
+   |                                         ^^^ [2]
+10 |     $x = Vector {42};
+11 |     $this->y = $c ? $x : Vector {'foo'};
+12 |     return $x;
+   |            ^^ [1]
+13 |   }
+14 | 
+
+1 error found

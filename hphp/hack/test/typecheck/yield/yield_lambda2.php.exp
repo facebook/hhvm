@@ -1,16 +1,56 @@
-ERROR: File "yield_lambda2.php", line 16, characters 12-14:
-Invalid argument (Typing[4110])
-  File "yield_lambda2.php", line 4, characters 20-23:
-  Expected `null`
-  File "classes.hhi", line 26, characters 27-28:
-    via this generic `Ts`
-  File "yield_lambda2.php", line 16, characters 12-14:
-  But got `string`
-ERROR: File "yield_lambda2.php", line 17, characters 12-12:
-Invalid argument (Typing[4110])
-  File "yield_lambda2.php", line 4, characters 20-23:
-  Expected `null`
-  File "classes.hhi", line 26, characters 27-28:
-    via this generic `Ts`
-  File "yield_lambda2.php", line 17, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` [2]
+->   via this generic `Ts` [3]
+-> But got `string` [1]
+
+yield_lambda2.php:16:12
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | function expectInt(?int $x):void { }
+   |                    ^^^^ [2]
+ 5 | function expectString(?string $s):void { }
+ 6 | <<__EntryPoint>>
+   :
+14 |   $g = ($f)();
+15 |   $g->next();
+16 |   $g->send('a');
+   |            ^^^ [1]
+17 |   $g->send(3);
+18 | }
+
+classes.hhi:26:27
+24 |     public function valid(): bool {}
+25 |     public function next(): void {}
+26 |     public function send(?Ts $v): void {}
+   |                           ^^ [3]
+27 |     public function raise(Exception $e): void {}
+28 |     public function rewind(): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `null` [2]
+->   via this generic `Ts` [3]
+-> But got `int` [1]
+
+yield_lambda2.php:17:12
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | function expectInt(?int $x):void { }
+   |                    ^^^^ [2]
+ 5 | function expectString(?string $s):void { }
+ 6 | <<__EntryPoint>>
+   :
+15 |   $g->next();
+16 |   $g->send('a');
+17 |   $g->send(3);
+   |            ^ [1]
+18 | }
+
+classes.hhi:26:27
+24 |     public function valid(): bool {}
+25 |     public function next(): void {}
+26 |     public function send(?Ts $v): void {}
+   |                           ^^ [3]
+27 |     public function raise(Exception $e): void {}
+28 |     public function rewind(): void {}
+
+2 errors found

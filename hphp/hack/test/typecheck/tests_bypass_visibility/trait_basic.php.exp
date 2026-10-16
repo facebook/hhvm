@@ -1,8 +1,37 @@
-ERROR: File "trait_basic.php", line 26, characters 11-20:
-You cannot access this member (Typing[4112])
-  File "trait_basic.php", line 7, characters 20-29:
-  This member is private
-ERROR: File "trait_basic.php", line 27, characters 11-20:
-Cannot access this protected member, you don't extend UsesTraitClass (Typing[4112])
-  File "trait_basic.php", line 10, characters 22-31:
-  This member is protected
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+trait_basic.php:26:11
+ 5 | trait MyTrait {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private function trait_priv(): void {}
+   |                    ^^^^^^^^^^ [2]
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+   :
+24 | class TraitNonTest {
+25 |   public function test(UsesTraitClass $obj): void {
+26 |     $obj->trait_priv(); // error: not in test context
+   |           ^^^^^^^^^^ [1]
+27 |     $obj->trait_prot(); // error: not in test context
+28 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend UsesTraitClass [1]
+-> This member is protected [2]
+
+trait_basic.php:27:11
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   protected function trait_prot(): void {}
+   |                      ^^^^^^^^^^ [2]
+11 | }
+12 | 
+   :
+25 |   public function test(UsesTraitClass $obj): void {
+26 |     $obj->trait_priv(); // error: not in test context
+27 |     $obj->trait_prot(); // error: not in test context
+   |           ^^^^^^^^^^ [1]
+28 |   }
+29 | }
+
+2 errors found

@@ -1,12 +1,29 @@
-ERROR: File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 5, characters 6-14:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 5, characters 41-43:
-  Shape field `a` is defined here
-  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 5, characters 27-38:
-  Shape field `a` may also be provided by newtype `OpaqueFields`
-ERROR: File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 8, characters 9-21:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 8, characters 56-58:
-  Shape field `a` is defined here
-  File "disjoint_attr_opaque_newtype.php--opaque_newtype_use.php", line 8, characters 53-53:
-  Shape field `a` may also be provided by type parameter `T`
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `a` is defined here [2]
+-> Shape field `a` may also be provided by newtype `OpaqueFields` [3]
+
+disjoint_attr_opaque_newtype.php--opaque_newtype_use.php:5:6
+3 | 
+4 | <<__DisjointShapeSplat>>
+5 | type BadDirect = shape(...OpaqueFields, 'a' => string);
+  |      ^^^^^^^^^ [1]
+  |                           ^^^^^^^^^^^^ [3]
+  |                                         ^^^ [2]
+6 | 
+7 | <<__DisjointShapeSplat>>
+
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `a` is defined here [2]
+-> Shape field `a` may also be provided by type parameter `T` [3]
+
+disjoint_attr_opaque_newtype.php--opaque_newtype_use.php:8:9
+ 6 | 
+ 7 | <<__DisjointShapeSplat>>
+ 8 | newtype BadTransitive<T as OpaqueFields> = shape(...T, 'a' => string);
+   |         ^^^^^^^^^^^^^ [1]
+   |                                                     ^ [3]
+   |                                                        ^^^ [2]
+ 9 | 
+10 | <<__DisjointShapeSplat>>
+
+2 errors found

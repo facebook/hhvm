@@ -1,4 +1,23 @@
-ERROR: File "generic_enum_class.php", line 32, characters 3-145:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `DerivedEnumClass::LabelIntClass` (Typing[4019])
-  File "generic_enum_class.php", line 32, characters 11-12:
-  The scrutinee has type `HH\MemberOf<DerivedEnumClass, GenericClass<T>>`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `DerivedEnumClass::LabelIntClass` [1]
+-> The scrutinee has type `HH\MemberOf<DerivedEnumClass, GenericClass<T>>`. [2]
+
+generic_enum_class.php:32:3
+30 |   \HH\MemberOf<DerivedEnumClass, GenericClass<T>> $x,
+31 | ): void {
+32 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+33 |     case DerivedEnumClass::GenInt:
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+34 |     case DerivedEnumClass::DerGenInt2:
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+35 |     case DerivedEnumClass::GenString:
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+36 |       return;
+   |       ^^^^^^^ [1]
+37 |   }
+   |   ^ [1]
+38 | }
+39 | 
+
+1 error found

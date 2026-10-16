@@ -1,10 +1,23 @@
-ERROR: File "unsatisfiable_refinement.php", line 14, characters 7-9:
-Invalid argument (Typing[4323])
-  File "unsatisfiable_refinement.php", line 7, characters 14-14:
-  `T` is a constrained type parameter
-  File "unsatisfiable_refinement.php", line 7, characters 19-19:
-  This type constraint is violated
-  File "unsatisfiable_refinement.php", line 7, characters 19-19:
-  Expected `I`
-  File "unsatisfiable_refinement.php", line 14, characters 7-9:
-  But got `string`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `string` [1]
+
+unsatisfiable_refinement.php:14:7
+ 5 | class C<T> { }
+ 6 | class D extends C<string> { }
+ 7 | function foo<T as I>(T $x):void {
+   |              ^ [2]
+   |                   ^ [3]
+ 8 |   $x->bar();
+ 9 | }
+   :
+12 |     // just drop through
+13 |   }
+14 |   foo("A");
+   |       ^^^ [1]
+15 | }
+16 | 
+
+1 error found

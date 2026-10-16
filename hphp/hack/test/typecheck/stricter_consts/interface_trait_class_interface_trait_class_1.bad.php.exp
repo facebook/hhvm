@@ -1,14 +1,54 @@
-ERROR: File "interface_trait_class_interface_trait_class_1.bad.php", line 19, characters 13-13:
-Constant ONCALL is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_trait_class_interface_trait_class_1.bad.php", line 5, characters 15-20:
-  One conflicting definition is here, inherited through A
-  File "interface_trait_class_interface_trait_class_1.bad.php", line 11, characters 16-21:
-  Another conflicting definition is here, inherited through TIB
-ERROR: File "interface_trait_class_interface_trait_class_1.bad.php", line 19, characters 23-23:
-Some members in class `B` are incompatible with those declared in type `A` (Typing[4374])
-  File "interface_trait_class_interface_trait_class_1.bad.php", line 11, characters 16-21:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "interface_trait_class_interface_trait_class_1.bad.php", line 5, characters 15-20:
-  `ONCALL` inherited from `IA`
-  File "interface_trait_class_interface_trait_class_1.bad.php", line 11, characters 16-21:
-  conflicts with constant `ONCALL` inherited from `IB`.
+error: Typing[4374] Constant ONCALL is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through A [2]
+-> Another conflicting definition is here, inherited through TIB [3]
+
+interface_trait_class_interface_trait_class_1.bad.php:19:13
+ 3 | 
+ 4 | interface IA {
+ 5 |  const string ONCALL = "a";
+   |               ^^^^^^ [2]
+ 6 | }
+ 7 | trait TIA implements IA {}
+ 8 | 
+ 9 | 
+10 | interface IB {
+11 |   const string ONCALL = "b";
+   |                ^^^^^^ [3]
+12 | }
+13 | trait TIB implements IB {}
+   :
+17 | }
+18 | 
+19 | final class B extends A {
+   |             ^ [1]
+20 |  use TIB;
+21 | }
+
+error: Typing[4374] Some members in class `B` are incompatible with those declared in type `A` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `ONCALL` inherited from `IA` [3]
+-> conflicts with constant `ONCALL` inherited from `IB`. [2]
+
+interface_trait_class_interface_trait_class_1.bad.php:19:23
+ 3 | 
+ 4 | interface IA {
+ 5 |  const string ONCALL = "a";
+   |               ^^^^^^ [3]
+ 6 | }
+ 7 | trait TIA implements IA {}
+ 8 | 
+ 9 | 
+10 | interface IB {
+11 |   const string ONCALL = "b";
+   |                ^^^^^^ [2]
+12 | }
+13 | trait TIB implements IB {}
+   :
+17 | }
+18 | 
+19 | final class B extends A {
+   |                       ^ [1]
+20 |  use TIB;
+21 | }
+
+2 errors found

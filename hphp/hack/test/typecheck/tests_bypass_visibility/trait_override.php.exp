@@ -1,8 +1,36 @@
-ERROR: File "trait_override.php", line 25, characters 22-25:
-`prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute (Typing[4516])
-  File "trait_override.php", line 7, characters 22-25:
-  The parent method was declared with `<<__TestsBypassVisibility>>` here
-ERROR: File "trait_override.php", line 32, characters 20-23:
-Cannot override or shadow `priv` (Typing[4514])
-  File "trait_override.php", line 10, characters 20-23:
-  This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>`
+error: Typing[4516] `prot` must also have `<<__TestsBypassVisibility>>` because it overrides a method with the attribute [1]
+-> The parent method was declared with `<<__TestsBypassVisibility>>` here [2]
+
+trait_override.php:25:22
+ 5 | trait TraitWithBypass {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   protected function prot(): void {}
+   |                      ^^^^ [2]
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+   :
+23 |   use TraitWithBypass;
+24 | 
+25 |   protected function prot(): void {}
+   |                      ^^^^ [1]
+26 | }
+27 | 
+
+error: Typing[4514] Cannot override or shadow `priv` [1]
+-> This concrete private member is in the same hierarchy as a member marked with `<<__TestsBypassVisibility>>` [2]
+
+trait_override.php:32:20
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   private function priv(): void {}
+   |                    ^^^^ [2]
+11 | }
+12 | 
+   :
+30 |   use TraitWithBypass;
+31 | 
+32 |   private function priv(): void {}
+   |                    ^^^^ [1]
+33 | }
+
+2 errors found

@@ -1,10 +1,41 @@
-WARN: File "num_int.php", line 19, characters 10-13:
-Invalid case: This case will never match.
-A value of type `num` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "num_int.php", line 29, characters 10-13:
-Invalid case: This case will never match.
-A value of type `num` can never be equal to a value of type `bool` (Warn[12007])
-ERROR: File "num_int.php", line 18, characters 3-48:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "num_int.php", line 18, characters 11-12:
-  The scrutinee has type `num` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `num` can never be equal to a value of type `null` [1]
+
+num_int.php:19:10
+17 | function missing_num(num $x): void {
+18 |   switch ($x) {
+19 |     case null:
+   |          ^^^^ [1]
+20 |       return;
+21 |   }
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `num` can never be equal to a value of type `bool` [1]
+
+num_int.php:29:10
+27 |     case 0:
+28 |       return;
+29 |     case true:
+   |          ^^^^ [1]
+30 |       return;
+31 |     default:
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `num` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+num_int.php:18:3
+16 | // <<__StrictSwitch>>
+17 | function missing_num(num $x): void {
+18 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+19 |     case null:
+   |     ^^^^^^^^^^ [1]
+20 |       return;
+   |       ^^^^^^^ [1]
+21 |   }
+   |   ^ [1]
+22 | }
+23 | 
+
+3 errors found

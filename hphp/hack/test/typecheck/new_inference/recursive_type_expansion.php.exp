@@ -1,2 +1,11 @@
-ERROR: File "recursive_type_expansion.php", line 13, characters 12-17:
-Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type `Vector<[rec]>` (Typing[4155])
+error: Typing[4155] Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type `Vector<[rec]>` [1]
+
+recursive_type_expansion.php:13:12
+11 | 
+12 | function test(): void {
+13 |   $x = new Vector(null); // new tvar v, $x:Vector<v>
+   |            ^^^^^^ [1]
+14 |   $x[0] = $x; // Vector<v> <: v --> error
+15 | }
+
+1 error found

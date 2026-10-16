@@ -1,8 +1,20 @@
-ERROR: File "use_trait_multiple_times_fail.php", line 6, characters 7-7:
-Class `C` uses trait `T` multiple times (Typing[4365])
-  File "use_trait_multiple_times_fail.php", line 8, characters 7-7:
-  used here
-  File "use_trait_multiple_times_fail.php", line 9, characters 7-7:
-  used here
-  File "use_trait_multiple_times_fail.php", line 10, characters 7-7:
-  used here
+error: Typing[4365] Class `C` uses trait `T` multiple times [1]
+-> used here [2]
+-> used here [3]
+-> used here [4]
+
+use_trait_multiple_times_fail.php:6:7
+ 4 | trait T {}
+ 5 | 
+ 6 | class C {
+   |       ^ [1]
+ 7 |   // using the same trait multiple times in a class is forbidden
+ 8 |   use T;
+   |       ^ [2]
+ 9 |   use T;
+   |       ^ [3]
+10 |   use T;
+   |       ^ [4]
+11 | }
+
+1 error found

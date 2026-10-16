@@ -1,16 +1,67 @@
-ERROR: File "named_arguments_pseudo_functions_bad.php", line 6, characters 3-16:
-Unexpected named argument for `invariant` (NastCheck[3106])
-ERROR: File "named_arguments_pseudo_functions_bad.php", line 11, characters 3-21:
-Invalid argument (Typing[4110])
-  File "printf.hhi", line 125, characters 14-22:
-  Expected `(HH\TypedFormatString<PlainSprintf, _>, ..._)`
-  File "named_arguments_pseudo_functions_bad.php", line 11, characters 3-21:
-  But got `()`
-ERROR: File "named_arguments_pseudo_functions_bad.php", line 11, characters 3-39:
-Unexpected named argument: format (Typing[4500])
-  File "printf.hhi", line 123, characters 12-30:
-  Definition is here
-ERROR: File "named_arguments_pseudo_functions_bad.php", line 16, characters 3-18:
-Unexpected named argument: status (Typing[4500])
-  File "stdlib/builtins_exit.hhi", line 13, characters 10-13:
-  Definition is here
+error: NastCheck[3106] Unexpected named argument for `invariant` [1]
+
+named_arguments_pseudo_functions_bad.php:6:3
+4 | function test_named_invariant(): void {
+5 |   // Error: invariant does not accept named arguments
+6 |   invariant(cond = true, "message");
+  |   ^^^^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(HH\TypedFormatString<PlainSprintf, _>, ..._)` [2]
+-> But got `()` [1]
+
+named_arguments_pseudo_functions_bad.php:11:3
+  9 | function test_named_invariant_violation(): void {
+ 10 |   // Error: invariant_violation does not accept named arguments
+ 11 |   invariant_violation(format = "error");
+    |   ^^^^^^^^^^^^^^^^^^^ [1]
+ 12 | }
+ 13 | 
+
+printf.hhi:125:14
+123 |   function invariant_violation<Targs as (mixed...)>(
+124 |     TypedFormatString<\PlainSprintf,Targs> $fmt,
+125 |     ...Targs $fmt_args
+    |              ^^^^^^^^^ [2]
+126 |   )[]: noreturn;
+127 | 
+
+error: Typing[4500] Unexpected named argument: format [1]
+-> Definition is here [2]
+
+named_arguments_pseudo_functions_bad.php:11:3
+  9 | function test_named_invariant_violation(): void {
+ 10 |   // Error: invariant_violation does not accept named arguments
+ 11 |   invariant_violation(format = "error");
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 12 | }
+ 13 | 
+
+printf.hhi:123:12
+121 |   // Equivalent to invariant(false, $fmt, ...$fmt_args).
+122 |   <<__NoAutoLikes>>
+123 |   function invariant_violation<Targs as (mixed...)>(
+    |            ^^^^^^^^^^^^^^^^^^^ [2]
+124 |     TypedFormatString<\PlainSprintf,Targs> $fmt,
+125 |     ...Targs $fmt_args
+
+error: Typing[4500] Unexpected named argument: status [1]
+-> Definition is here [2]
+
+named_arguments_pseudo_functions_bad.php:16:3
+14 | function test_named_exit(): void {
+15 |   // Error: exit does not accept named arguments
+16 |   exit(status = 0);
+   |   ^^^^^^^^^^^^^^^^ [1]
+17 | }
+18 | //
+
+stdlib/builtins_exit.hhi:13:10
+11 | // exit terminates the request
+12 | <<__PHPStdLib>>
+13 | function exit(HH\FIXME\MISSING_PARAM_TYPE $exit_code_or_message = 0): noreturn;
+   |          ^^^^ [2]
+
+4 errors found

@@ -1,6 +1,26 @@
-ERROR: File "hierarchy_method.php", line 9, characters 16-18:
-This object access to `get` is ambiguous (Typing[4256])
-  File "hierarchy_method.php", line 4, characters 20-22:
-  You will access the private instance declared in `A`
-  File "hierarchy_method.php", line 15, characters 19-21:
-  Instead of the public instance declared in `C`
+error: Typing[4256] This object access to `get` is ambiguous [1]
+-> You will access the private instance declared in `A` [2]
+-> Instead of the public instance declared in `C` [3]
+
+hierarchy_method.php:9:16
+ 2 | 
+ 3 | class A {
+ 4 |   private function get(): int {
+   |                    ^^^ [2]
+ 5 |     return 42;
+ 6 |   }
+ 7 | 
+ 8 |   public function broken(C $c): string {
+ 9 |     return $c->get();
+   |                ^^^ [1]
+10 |   }
+11 | }
+12 | 
+13 | class B extends A {}
+14 | class C extends B {
+15 |   public function get(): string {
+   |                   ^^^ [3]
+16 |     return "";
+17 |   }
+
+1 error found

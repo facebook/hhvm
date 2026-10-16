@@ -1,10 +1,49 @@
-ERROR: File "duplicate_fields.php", line 7, characters 26-29:
-Field name already bound (Naming[2015])
-ERROR: File "duplicate_fields.php", line 13, characters 20-23:
-Field name already bound (Naming[2015])
-ERROR: File "duplicate_fields.php", line 19, characters 20-24:
-Field name already bound (Naming[2015])
-ERROR: File "duplicate_fields.php", line 25, characters 18-20:
-Field name already bound (Naming[2015])
-ERROR: File "duplicate_fields.php", line 25, characters 28-29:
-Field name already bound (Naming[2015])
+error: Naming[2015] Field name already bound [1]
+
+duplicate_fields.php:7:26
+5 |   $foo = 1;
+6 |   // Error: field 'foo' already bound
+7 |   $s = shape('foo' => 2, $foo);
+  |                          ^^^^ [1]
+8 | }
+9 | 
+
+error: Naming[2015] Field name already bound [1]
+
+duplicate_fields.php:13:20
+11 |   $bar = 1;
+12 |   // Error: field 'bar' already bound
+13 |   $s = shape($bar, $bar);
+   |                    ^^^^ [1]
+14 | }
+15 | 
+
+error: Naming[2015] Field name already bound [1]
+
+duplicate_fields.php:19:20
+17 |   $baz = 1;
+18 |   // Error: field 'baz' already bound
+19 |   $s = shape($baz, 'baz' => 2);
+   |                    ^^^^^ [1]
+20 | }
+21 | 
+
+error: Naming[2015] Field name already bound [1]
+
+duplicate_fields.php:25:18
+23 |   $x = 1;
+24 |   // Multiple duplicates
+25 |   $s = shape($x, 'x' => 2, $x);
+   |                  ^^^ [1]
+26 | }
+
+error: Naming[2015] Field name already bound [1]
+
+duplicate_fields.php:25:28
+23 |   $x = 1;
+24 |   // Multiple duplicates
+25 |   $s = shape($x, 'x' => 2, $x);
+   |                            ^^ [1]
+26 | }
+
+5 errors found

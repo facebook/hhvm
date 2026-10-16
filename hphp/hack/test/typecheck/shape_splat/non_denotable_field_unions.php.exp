@@ -1,10 +1,26 @@
-ERROR: File "non_denotable_field_unions.php", line 18, characters 6-8:
-Shape splat produces fields with non-denotable types (Typing[4419])
-  File "non_denotable_field_unions.php", line 5, characters 3-10:
-  Shape field `nested` has non-denotable type `vec<(bool | string)>`
-  File "non_denotable_field_unions.php", line 7, characters 4-22:
-  Shape field `optional_optional` has non-denotable type `(bool | float)`
-  File "non_denotable_field_unions.php", line 6, characters 3-21:
-  Shape field `required_optional` has non-denotable type `(bool | string)`
-  File "non_denotable_field_unions.php", line 8, characters 3-13:
-  Shape field `three_way` has non-denotable type `(bool | float | string)`
+error: Typing[4419] Shape splat produces fields with non-denotable types [1]
+-> Shape field `nested` has non-denotable type `vec<(bool | string)>` [2]
+-> Shape field `optional_optional` has non-denotable type `(bool | float)` [3]
+-> Shape field `required_optional` has non-denotable type `(bool | string)` [4]
+-> Shape field `three_way` has non-denotable type `(bool | float | string)` [5]
+
+non_denotable_field_unions.php:18:6
+ 3 | 
+ 4 | type Left = shape(
+ 5 |   'nested' => vec<bool>,
+   |   ^^^^^^^^ [2]
+ 6 |   'required_optional' => bool,
+   |   ^^^^^^^^^^^^^^^^^^^ [4]
+ 7 |   ?'optional_optional' => float,
+   |    ^^^^^^^^^^^^^^^^^^^ [3]
+ 8 |   'three_way' => bool,
+   |   ^^^^^^^^^^^ [5]
+ 9 | );
+10 | type Middle = shape(?'three_way' => string);
+   :
+16 | );
+17 | 
+18 | type Bad = shape(...Left, ...Middle, ...Right);
+   |      ^^^ [1]
+
+1 error found

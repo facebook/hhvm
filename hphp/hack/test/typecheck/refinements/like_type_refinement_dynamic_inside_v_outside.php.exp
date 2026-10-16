@@ -1,2 +1,11 @@
-WARN: File "like_type_refinement_dynamic_inside_v_outside.php", line 7, characters 7-41:
-This `is` check is always `false`. The expression on the left has type `null` which shares no values with `KeyedTraversable<Tk#1, Tv#1>`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `null` which shares no values with `KeyedTraversable<Tk#1, Tv#1>`. [1]
+
+like_type_refinement_dynamic_inside_v_outside.php:7:7
+5 | function my_repo(HH\Lib\Ref<null> $null_ref): void {
+6 |   $dyn_null = $null_ref->value;
+7 |   if ($dyn_null is KeyedTraversable<_, _>) {
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+8 |     foreach ($dyn_null as $_key => $value) {
+9 |       if ($value is KeyedContainer<_, _>) {
+
+1 error found

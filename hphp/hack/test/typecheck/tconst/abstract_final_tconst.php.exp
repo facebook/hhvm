@@ -1,4 +1,13 @@
-ERROR: File "abstract_final_tconst.php", line 7, characters 23-23:
-Type constant `T` is abstract but the class is final. Either provide an implementation here. (Typing[4465])
-  File "abstract_final_tconst.php", line 6, characters 22-22:
-  Or make the class abstract and not final.
+error: Typing[4465] Type constant `T` is abstract but the class is final. Either provide an implementation here. [1]
+-> Or make the class abstract and not final. [2]
+
+abstract_final_tconst.php:7:23
+4 | // type constants
+5 | 
+6 | abstract final class C {
+  |                      ^ [2]
+7 |   abstract const type T;
+  |                       ^ [1]
+8 | }
+
+1 error found

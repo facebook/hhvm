@@ -1,2 +1,11 @@
-ERROR: File "foreach.php", line 17, characters 5-18:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+foreach.php:17:5
+15 | function test(readonly vec<Foo> $vec): void {
+16 |   foreach($vec as $val) {
+17 |     $val->prop = 3; // error, $val is readonly
+   |     ^^^^^^^^^^^^^^ [1]
+18 |   }
+19 |   // This will error since $val is already assigned a readonly value.
+
+1 error found

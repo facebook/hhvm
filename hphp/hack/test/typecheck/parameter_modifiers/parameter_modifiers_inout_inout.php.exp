@@ -1,2 +1,10 @@
-ERROR: File "parameter_modifiers_inout_inout.php", line 5, characters 30-34:
-Duplicate parameter modifier `inout`. (Parsing[1002])
+error: Parsing[1002] Duplicate parameter modifier `inout`. [1]
+
+parameter_modifiers_inout_inout.php:5:30
+3 | 
+4 | interface I1 {
+5 |   public function ioio(inout inout int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+1 error found

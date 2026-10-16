@@ -1,1 +1,2 @@
 --config typed_open_shapes=false
+--error-format plain_highlighted

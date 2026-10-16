@@ -1,4 +1,20 @@
-ERROR: File "deep_prop_array.php", line 12, characters 3-17:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "deep_prop_array.php", line 10, characters 10-13:
-Was expecting a return type hint (Typing[4030])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+deep_prop_array.php:12:3
+10 | function main() {
+11 |   $p = readonly new P(5);
+12 |   $p->inner[] = 5; // error, $p is readonly
+   |   ^^^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+deep_prop_array.php:10:10
+ 8 | 
+ 9 | <<__EntryPoint>>
+10 | function main() {
+   |          ^^^^ [1]
+11 |   $p = readonly new P(5);
+12 |   $p->inner[] = 5; // error, $p is readonly
+
+2 errors found

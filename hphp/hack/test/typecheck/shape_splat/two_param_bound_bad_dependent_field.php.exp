@@ -1,6 +1,17 @@
-ERROR: File "two_param_bound_bad_dependent_field.php", line 9, characters 10-11:
-Invalid return type (Typing[4110])
-  File "two_param_bound_bad_dependent_field.php", line 8, characters 24-26:
-  Expected `int`
-  File "two_param_bound_bad_dependent_field.php", line 6, characters 45-48:
-  But got `bool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+two_param_bound_bad_dependent_field.php:9:10
+ 4 | // `T2` inherits `b` as `bool` through `T1`, so an inline `b` of type `int`
+ 5 | // conflicts with its bound.
+ 6 | function dependent_field<T1 as shape('b' => bool), T2 as T1>(
+   |                                             ^^^^ [3]
+ 7 |   T2 $s,
+ 8 | ): shape(...T2, 'b' => int) {
+   |                        ^^^ [2]
+ 9 |   return $s;
+   |          ^^ [1]
+10 | }
+
+1 error found

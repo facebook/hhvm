@@ -1,28 +1,93 @@
-ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 7, characters 12-45:
-  Expected `Reified<Reified<Reified<int>>>`
-  File "is_as_deep_inference_check.php", line 11, characters 12-12:
-  But got `I`
-ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 7, characters 12-45:
-  Expected `Reified<Reified<Reified<int>>>`
-  File "is_as_deep_inference_check.php", line 12, characters 8-9:
-  But got `(<expr#4> as I & <expr#4> as Reified<Reified<int>>)` from this "as" assertion
-ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 8, characters 3-14:
-  Expected `Reified<int>`
-  File "is_as_deep_inference_check.php", line 13, characters 5-7:
-  But got `int`
-  File "is_as_deep_inference_check.php", line 13, characters 5-7:
-  This type argument to `Reified` must match exactly (it is invariant)
-ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 13, characters 5-7:
-  Expected `int`
-  File "is_as_deep_inference_check.php", line 8, characters 3-14:
-  But got `Reified<int>`
-  File "is_as_deep_inference_check.php", line 8, characters 3-14:
-  This type argument to `Reified` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `Reified<Reified<Reified<int>>>` [2]
+-> But got `I` [3]
+
+is_as_deep_inference_check.php:16:5
+ 5 | interface I {}
+ 6 | 
+ 7 | function f(Reified<Reified<
+   |            ^^^^^^^^^^^^^^^^ [2]
+ 8 |   Reified<int>
+   |   ^^^^^^^^^^^^ [2]
+ 9 | >> $r) : void {}
+   | ^^ [2]
+10 | 
+11 | function g(I $i): void {
+   |            ^ [3]
+12 |   $a = $i as Reified<Reified<
+13 |     int
+14 |   >>;
+15 | 
+16 |   f($a);
+   |     ^^ [1]
+17 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Reified<Reified<Reified<int>>>` [2]
+-> But got `(<expr#4> as I & <expr#4> as Reified<Reified<int>>)` from this "as" assertion [3]
+
+is_as_deep_inference_check.php:16:5
+ 5 | interface I {}
+ 6 | 
+ 7 | function f(Reified<Reified<
+   |            ^^^^^^^^^^^^^^^^ [2]
+ 8 |   Reified<int>
+   |   ^^^^^^^^^^^^ [2]
+ 9 | >> $r) : void {}
+   | ^^ [2]
+10 | 
+11 | function g(I $i): void {
+12 |   $a = $i as Reified<Reified<
+   |        ^^ [3]
+13 |     int
+14 |   >>;
+15 | 
+16 |   f($a);
+   |     ^^ [1]
+17 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Reified<int>` [2]
+-> But got `int` [3]
+-> This type argument to `Reified` must match exactly (it is invariant) [3]
+
+is_as_deep_inference_check.php:16:5
+ 6 | 
+ 7 | function f(Reified<Reified<
+ 8 |   Reified<int>
+   |   ^^^^^^^^^^^^ [2]
+ 9 | >> $r) : void {}
+10 | 
+11 | function g(I $i): void {
+12 |   $a = $i as Reified<Reified<
+13 |     int
+   |     ^^^ [3]
+14 |   >>;
+15 | 
+16 |   f($a);
+   |     ^^ [1]
+17 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `Reified<int>` [3]
+-> This type argument to `Reified` must match exactly (it is invariant) [3]
+
+is_as_deep_inference_check.php:16:5
+ 6 | 
+ 7 | function f(Reified<Reified<
+ 8 |   Reified<int>
+   |   ^^^^^^^^^^^^ [3]
+ 9 | >> $r) : void {}
+10 | 
+11 | function g(I $i): void {
+12 |   $a = $i as Reified<Reified<
+13 |     int
+   |     ^^^ [2]
+14 |   >>;
+15 | 
+16 |   f($a);
+   |     ^^ [1]
+17 | }
+
+4 errors found

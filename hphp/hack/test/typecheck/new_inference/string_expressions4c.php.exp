@@ -1,20 +1,40 @@
-ERROR: File "string_expressions4c.php", line 32, characters 12-19:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "string_expressions4c.php", line 32, characters 12-19:
-  Expected `string` or `int`
-  File "string_expressions4c.php", line 32, characters 12-19:
-  But got `Other`
-  File "string_expressions4c.php", line 31, characters 29-33:
-    from this definition
-ERROR: File "string_expressions4c.php", line 32, characters 20-24:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "string_expressions4c.php", line 32, characters 20-24:
-  Expected `string` or `int`
-  File "string_expressions4c.php", line 32, characters 20-24:
-  But got `Meh`
-ERROR: File "string_expressions4c.php", line 32, characters 20-24:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "string_expressions4c.php", line 32, characters 20-24:
-  Expected `string` or `int`
-  File "string_expressions4c.php", line 32, characters 20-24:
-  But got `this as Meh`
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `Other` [1]
+->   from this definition [2]
+
+string_expressions4c.php:32:12
+29 | 
+30 |   public function foo(): void {
+31 |     $b = dict["blah" => new Other()];
+   |                             ^^^^^ [2]
+32 |     print "$b[blah]$this";
+   |            ^^^^^^^^ [1]
+33 |   }
+34 | }
+
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `Meh` [1]
+
+string_expressions4c.php:32:20
+30 |   public function foo(): void {
+31 |     $b = dict["blah" => new Other()];
+32 |     print "$b[blah]$this";
+   |                    ^^^^^ [1]
+33 |   }
+34 | }
+
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `this as Meh` [1]
+
+string_expressions4c.php:32:20
+30 |   public function foo(): void {
+31 |     $b = dict["blah" => new Other()];
+32 |     print "$b[blah]$this";
+   |                    ^^^^^ [1]
+33 |   }
+34 | }
+
+3 errors found

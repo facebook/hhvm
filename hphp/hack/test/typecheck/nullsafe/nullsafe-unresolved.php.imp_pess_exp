@@ -1,8 +1,30 @@
-ERROR: File "nullsafe-unresolved.php", line 8, characters 18-19:
-Invalid argument (Typing[4110])
-  File "nullsafe-unresolved.php", line 15, characters 25-40:
-  Expected `Container<mixed>`
-  File "nullsafe-unresolved.php", line 7, characters 8-13:
-  But got `null` (use of `?->` operator)
-ERROR: File "nullsafe-unresolved.php", line 11, characters 35-35:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4110] Invalid argument [1]
+-> Expected `Container<mixed>` [2]
+-> But got `null` (use of `?->` operator) [3]
+
+nullsafe-unresolved.php:8:18
+ 5 |   $f = $a?->f();
+ 6 |   expect_nonnull($f);
+ 7 |   $b = $a?->b;
+   |        ^^^^^^ [3]
+ 8 |   expect_nonnull($b);
+   |                  ^^ [1]
+ 9 | }
+10 | 
+   :
+13 | }
+14 | 
+15 | function expect_nonnull(Container<mixed> $container): void {}
+   |                         ^^^^^^^^^^^^^^^^ [2]
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+nullsafe-unresolved.php:11:35
+ 9 | }
+10 | 
+11 | function make_nullable_unresolved<T>(): ?T {
+   |                                   ^ [1]
+12 |   return null;
+13 | }
+
+2 errors found

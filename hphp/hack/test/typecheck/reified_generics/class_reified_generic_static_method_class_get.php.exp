@@ -1,2 +1,11 @@
-ERROR: File "class_reified_generic_static_method_class_get.php", line 9, characters 5-8:
-You may not use reified generics of the class in a static method (Parsing[1002])
+error: Parsing[1002] You may not use reified generics of the class in a static method [1]
+
+class_reified_generic_static_method_class_get.php:9:5
+ 7 | class Test<reify T as C> {
+ 8 |   public static function x(): void {
+ 9 |     T::f();
+   |     ^^^^ [1]
+10 |   }
+11 | }
+
+1 error found

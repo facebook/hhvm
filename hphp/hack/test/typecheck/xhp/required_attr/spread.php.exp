@@ -1,16 +1,73 @@
-ERROR: File "spread.php", line 22, characters 8-20:
-Required attribute `a` is missing. (Typing[4314])
-  File "spread.php", line 6, characters 38-40:
-  The attribute `a` is declared here.
-ERROR: File "spread.php", line 22, characters 8-20:
-Required attribute `b` is missing. (Typing[4314])
-  File "spread.php", line 6, characters 65-67:
-  The attribute `b` is declared here.
-ERROR: File "spread.php", line 29, characters 8-20:
-Required attribute `b` is missing. (Typing[4314])
-  File "spread.php", line 5, characters 38-40:
-  The attribute `b` is declared here.
-ERROR: File "spread.php", line 36, characters 8-20:
-Required attribute `a` is missing. (Typing[4314])
-  File "spread.php", line 3, characters 38-40:
-  The attribute `a` is declared here.
+error: Typing[4314] Required attribute `a` is missing. [1]
+-> The attribute `a` is declared here. [2]
+
+spread.php:22:8
+ 4 | class :x1 extends :x {}
+ 5 | class :y extends XHPTest { attribute int b @required; }
+ 6 | class :z extends XHPTest { attribute int a @required; attribute int b @required; }
+   |                                      ^^^ [2]
+ 7 | 
+ 8 | function bar1(): void {
+   :
+20 |     $x = <y b={1}/>;
+21 |   }
+22 |   $z = <z {...$x} />;
+   |        ^^^^^^^^^^^^^ [1]
+23 | 
+24 |   if ($b) {
+
+error: Typing[4314] Required attribute `b` is missing. [1]
+-> The attribute `b` is declared here. [2]
+
+spread.php:22:8
+ 4 | class :x1 extends :x {}
+ 5 | class :y extends XHPTest { attribute int b @required; }
+ 6 | class :z extends XHPTest { attribute int a @required; attribute int b @required; }
+   |                                                                 ^^^ [2]
+ 7 | 
+ 8 | function bar1(): void {
+   :
+20 |     $x = <y b={1}/>;
+21 |   }
+22 |   $z = <z {...$x} />;
+   |        ^^^^^^^^^^^^^ [1]
+23 | 
+24 |   if ($b) {
+
+error: Typing[4314] Required attribute `b` is missing. [1]
+-> The attribute `b` is declared here. [2]
+
+spread.php:29:8
+ 3 | class :x extends XHPTest { attribute int a @required; }
+ 4 | class :x1 extends :x {}
+ 5 | class :y extends XHPTest { attribute int b @required; }
+   |                                      ^^^ [2]
+ 6 | class :z extends XHPTest { attribute int a @required; attribute int b @required; }
+ 7 | 
+   :
+27 |     $x = <z a={2} b={1} />;
+28 |   }
+29 |   $z = <y {...$x} />;
+   |        ^^^^^^^^^^^^^ [1]
+30 | 
+31 |   if ($b) {
+
+error: Typing[4314] Required attribute `a` is missing. [1]
+-> The attribute `a` is declared here. [2]
+
+spread.php:36:8
+ 1 | <?hh
+ 2 | 
+ 3 | class :x extends XHPTest { attribute int a @required; }
+   |                                      ^^^ [2]
+ 4 | class :x1 extends :x {}
+ 5 | class :y extends XHPTest { attribute int b @required; }
+   :
+34 |     $x = <z a={2} b={1} />;
+35 |   }
+36 |   $z = <x {...$x} />;
+   |        ^^^^^^^^^^^^^ [1]
+37 | 
+38 |   if ($b) {
+
+4 errors found

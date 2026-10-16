@@ -1,8 +1,21 @@
-ERROR: File "lambda_with_invoke.php", line 21, characters 36-37:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_with_invoke.php", line 21, characters 3-5:
-  It is unknown because type parameter `T` of `add` could not be determined. Please add explicit type parameters to the invocation of `add`
-  File "lambda_with_invoke.php", line 4, characters 26-26:
-    via this generic `T`
-  File "lambda_with_invoke.php", line 21, characters 3-5:
-  This type argument to `Func` only allows supertypes (it is contravariant)
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `T` of `add` could not be determined. Please add explicit type parameters to the invocation of `add` [2]
+->   via this generic `T` [3]
+-> This type argument to `Func` only allows supertypes (it is contravariant) [2]
+
+lambda_with_invoke.php:21:36
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function add<T>(vec<Func<T>> $rules, T $val):void {
+   |                          ^ [3]
+ 5 |   $rules[0]->apply($val);
+ 6 | }
+   :
+19 | }
+20 | function testit():void {
+21 |   add(vec[new WrappedLambda($m ==> $m->rubbish())], 4);
+   |   ^^^ [2]
+   |                                    ^^ [1]
+22 | }
+
+1 error found

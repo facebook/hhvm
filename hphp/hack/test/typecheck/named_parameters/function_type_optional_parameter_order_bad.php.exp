@@ -1,4 +1,20 @@
-ERROR: File "function_type_optional_parameter_order_bad.php", line 4, characters 3-38:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
-ERROR: File "function_type_optional_parameter_order_bad.php", line 8, characters 3-52:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
+error: Parsing[1002] Optional parameter cannot precede non-optional parameter [1]
+
+function_type_optional_parameter_order_bad.php:4:3
+2 | // error, produced in naming phase
+3 | function rejects_optional_positional_before_required_positional(
+4 |   (function(optional int, bool): void) $_,
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | ): void {}
+6 | // error, produced in naming phase
+
+error: Parsing[1002] Optional parameter cannot precede non-optional parameter [1]
+
+function_type_optional_parameter_order_bad.php:8:3
+6 | // error, produced in naming phase
+7 | function rejects_optional_positional_before_named_then_required_positional(
+8 |   (function(optional int, named int $y, bool): void) $_,
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | ): void {}
+
+2 errors found

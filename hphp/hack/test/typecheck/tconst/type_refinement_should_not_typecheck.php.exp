@@ -1,12 +1,42 @@
-WARN: File "type_refinement_should_not_typecheck.php", line 28, characters 13-22:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `D1` which shares no values with `D0`. (Warn[12012])
-ERROR: File "type_refinement_should_not_typecheck.php", line 25, characters 13-22:
-Invalid argument (Typing[4110])
-  File "type_refinement_should_not_typecheck.php", line 10, characters 39-40:
-  Expected `D0`
-  File "type_refinement_should_not_typecheck.php", line 15, characters 33-34:
-    resulting from accessing the type constant 'T2'
-  File "type_refinement_should_not_typecheck.php", line 17, characters 52-53:
-    on an object of type A0
-  File "type_refinement_should_not_typecheck.php", line 25, characters 21-22:
-  But got `D1`
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `D1` which shares no values with `D0`. [1]
+
+type_refinement_should_not_typecheck.php:28:13
+26 |     // FIXME: Knowledge from the branch above leaks
+27 |     // in this branch. See T59317869.
+28 |     $x->fn1($arg as D0); // should not typecheck
+   |             ^^^^^^^^^^ [1]
+29 |   }
+30 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `D0` [2]
+->   resulting from accessing the type constant 'T2' [3]
+->   on an object of type A0 [4]
+-> But got `D1` [5]
+
+type_refinement_should_not_typecheck.php:25:13
+ 8 | class D1 {}
+ 9 | 
+10 | class A0 extends C2 { const type T2 = D0; }
+   |                                       ^^ [2]
+11 | class A1 extends C2 { const type T2 = D1; }
+12 | 
+13 | interface B {
+14 |   abstract const type T1 as C2;
+15 |   public function fn1(this::T1::T2 $x): void;
+   |                                 ^^ [3]
+16 | }
+17 | interface B0 extends B { abstract const type T1 as A0; }
+   |                                                    ^^ [4]
+18 | interface B1 extends B { abstract const type T1 as A1; }
+19 | 
+   :
+23 |   } else if ($x is B1) {
+24 |     // hh_show_env();
+25 |     $x->fn1($arg as D1);
+   |             ^^^^^^^^^^ [1]
+   |                     ^^ [5]
+26 |     // FIXME: Knowledge from the branch above leaks
+27 |     // in this branch. See T59317869.
+
+2 errors found

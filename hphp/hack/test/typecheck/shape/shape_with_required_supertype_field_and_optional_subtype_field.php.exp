@@ -1,8 +1,26 @@
-ERROR: File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 13, characters 21-37:
-Invalid argument (Typing[4163])
-  File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 8, characters 29-35:
-  The field `a` is **optional**
-  File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 6, characters 28-36:
-  The field `a` is defined as **required**
-  File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 3, characters 31-33:
-  `a` is defined here
+error: Typing[4163] Invalid argument [1]
+-> The field `a` is **optional** [2]
+-> The field `a` is defined as **required** [3]
+-> `a` is defined here [4]
+
+shape_with_required_supertype_field_and_optional_subtype_field.php:13:21
+ 1 | <?hh
+ 2 | 
+ 3 | type Supertype = shape('a' => int);
+   |                               ^^^ [4]
+ 4 | type Subtype = shape(?'a' => int);
+ 5 | 
+ 6 | function consumesSupertype(Supertype $argument): void {}
+   |                            ^^^^^^^^^ [3]
+ 7 | 
+ 8 | function providesSubtype(): Subtype {
+   |                             ^^^^^^^ [2]
+ 9 |   return shape('a' => 0);
+10 | }
+11 | 
+12 | function test(): void {
+13 |   consumesSupertype(providesSubtype());
+   |                     ^^^^^^^^^^^^^^^^^ [1]
+14 | }
+
+1 error found

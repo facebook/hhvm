@@ -1,4 +1,18 @@
-ERROR: File "mixed_and_null.php", line 16, characters 3-48:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "mixed_and_null.php", line 16, characters 11-12:
-  The scrutinee has type `mixed` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `mixed` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+mixed_and_null.php:16:3
+14 | // <<__StrictSwitch>>
+15 | function mixed_only_null(mixed $x): void {
+16 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+17 |     case null:
+   |     ^^^^^^^^^^ [1]
+18 |       return;
+   |       ^^^^^^^ [1]
+19 |   }
+   |   ^ [1]
+20 | }
+
+1 error found

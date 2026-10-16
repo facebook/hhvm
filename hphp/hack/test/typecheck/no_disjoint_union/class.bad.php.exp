@@ -1,8 +1,21 @@
-WARN: File "class.bad.php", line 10, characters 3-15:
-Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "class.bad.php", line 9, characters 15-17:
-  `int` is one of the disjoint types
-  File "class.bad.php", line 9, characters 23-28:
-  `string` is one of the disjoint types
-  File "class.bad.php", line 5, characters 31-31:
-  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
+warning: Warn[12017] Invalid type argument due to disjoint types in a union [1]
+-> `int` is one of the disjoint types [2]
+-> `string` is one of the disjoint types [3]
+-> This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors [4]
+
+class.bad.php:10:3
+ 3 | <<file: __EnableUnstableFeatures('no_disjoint_union')>>
+ 4 | 
+ 5 | class C<<<__NoDisjointUnion>> T> {
+   |                               ^ [4]
+ 6 |   public function __construct(T $_, T $_) {}
+ 7 | }
+ 8 | 
+ 9 | function main(int $i, string $s): void {
+   |               ^^^ [2]
+   |                       ^^^^^^ [3]
+10 |   new C($i, $s);
+   |   ^^^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "option_subtype_null.php", line 4, characters 16-16:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+option_subtype_null.php:4:16
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function null_<T>(): ?T {
+  |                ^ [1]
+5 |   return null;
+6 | }
+
+1 error found

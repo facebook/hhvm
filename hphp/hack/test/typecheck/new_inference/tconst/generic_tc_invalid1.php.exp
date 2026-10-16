@@ -1,14 +1,48 @@
-ERROR: File "generic_tc_invalid1.php", line 16, characters 70-71:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "generic_tc_invalid1.php", line 28, characters 10-11:
-Invalid return type (Typing[4110])
-  File "generic_tc_invalid1.php", line 22, characters 19-24:
-  Expected `string`
-  File "generic_tc_invalid1.php", line 9, characters 18-20:
-  But got `int`
-  File "generic_tc_invalid1.php", line 16, characters 74-74:
-    resulting from accessing the type constant 'T'
-  File "generic_tc_invalid1.php", line 23, characters 12-17:
-    on an object of exactly the class IntBox
-  File "generic_tc_invalid1.php", line 16, characters 55-56:
-    via this generic `T2`
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+generic_tc_invalid1.php:16:70
+14 | 
+15 | class C {
+16 |   public static function foo<T1 as Box, T2> (T1 $x) : T2  where T2 = T1::T {
+   |                                                                      ^^ [1]
+17 |     return $x->get();
+18 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+->   resulting from accessing the type constant 'T' [4]
+->   on an object of exactly the class IntBox [5]
+->   via this generic `T2` [6]
+
+generic_tc_invalid1.php:28:10
+ 7 | 
+ 8 | class IntBox extends Box {
+ 9 |   const type T = int;
+   |                  ^^^ [3]
+10 |   public function get() : this::T {
+11 |     return 0;
+   :
+14 | 
+15 | class C {
+16 |   public static function foo<T1 as Box, T2> (T1 $x) : T2  where T2 = T1::T {
+   |                                                       ^^ [6]
+   |                                                                          ^ [4]
+17 |     return $x->get();
+18 |   }
+19 | }
+20 | 
+21 | 
+22 | function test() : string {
+   |                   ^^^^^^ [2]
+23 |   $x = new IntBox();
+   |            ^^^^^^ [5]
+24 |   // x is a IntBox
+25 |   // foo is type function(T1 $x) : T1::T
+26 |   // foo($x) should therefore be type IntBox::T = int
+27 |   $y = C::foo($x);
+28 |   return $y; // error
+   |          ^^ [1]
+29 | }
+
+2 errors found

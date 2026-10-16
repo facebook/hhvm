@@ -1,2 +1,11 @@
-ERROR: File "yield_decl.php", line 3, characters 16-18:
-Was expecting a return type hint (Typing[4030])
+error: Typing[4030] Was expecting a return type hint [1]
+
+yield_decl.php:3:16
+1 | <?hh
+2 | 
+3 | async function foo() {
+  |                ^^^ [1]
+4 |   yield 10;
+5 | }
+
+1 error found

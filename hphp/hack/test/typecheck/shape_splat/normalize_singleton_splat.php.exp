@@ -1,30 +1,92 @@
-ERROR: File "normalize_singleton_splat.php", line 6, characters 41-51:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
-ERROR: File "normalize_singleton_splat.php", line 21, characters 36-46:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
-ERROR: File "normalize_singleton_splat.php", line 22, characters 10-11:
-Invalid return type (Typing[4057])
-  File "normalize_singleton_splat.php", line 21, characters 45-45:
-  The field `b` is missing
-  File "normalize_singleton_splat.php", line 21, characters 65-67:
-  The field `b` is required here
-ERROR: File "normalize_singleton_splat.php", line 26, characters 10-11:
-Invalid return type (Typing[4057])
-  File "normalize_singleton_splat.php", line 25, characters 33-33:
-  The field `b` is missing
-  File "normalize_singleton_splat.php", line 25, characters 52-54:
-  The field `b` is required here
-ERROR: File "normalize_singleton_splat.php", line 32, characters 3-13:
-A shape containing only one splat is redundant. Use the splatted type directly. (Typing[4531])
-ERROR: File "normalize_singleton_splat.php", line 34, characters 10-11:
-Invalid return type (Typing[4057])
-  File "normalize_singleton_splat.php", line 32, characters 12-12:
-  The field `b` is missing
-  File "normalize_singleton_splat.php", line 33, characters 16-18:
-  The field `b` is required here
-ERROR: File "normalize_singleton_splat.php", line 40, characters 10-11:
-Invalid return type (Typing[4057])
-  File "normalize_singleton_splat.php", line 38, characters 3-3:
-  The field `b` is missing
-  File "normalize_singleton_splat.php", line 39, characters 16-18:
-  The field `b` is required here
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+normalize_singleton_splat.php:6:41
+4 | // A splat of one element and nothing else IS that element, so normalization
+5 | // lifts it out: `shape(...T)` is `T`, with no residual splat wrapper.
+6 | function lifted<T as shape('a' => int)>(shape(...T) $s): void {
+  |                                         ^^^^^^^^^^^ [1]
+7 |   hh_expect_equivalent<T>($s);
+8 |   // Reached through the ordinary rules for `T`, not the corner's bound
+
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+normalize_singleton_splat.php:21:36
+19 | // The lifted and unlifted spellings must decide subtyping the same way, and
+20 | // both must REJECT: the super requires 'b' and `T` cannot supply it.
+21 | function wrapped_sub<T as shape()>(shape(...T) $s): shape(...T, 'b' => int) {
+   |                                    ^^^^^^^^^^^ [1]
+22 |   return $s;
+23 | }
+
+error: Typing[4057] Invalid return type [1]
+-> The field `b` is missing [2]
+-> The field `b` is required here [3]
+
+normalize_singleton_splat.php:22:10
+19 | // The lifted and unlifted spellings must decide subtyping the same way, and
+20 | // both must REJECT: the super requires 'b' and `T` cannot supply it.
+21 | function wrapped_sub<T as shape()>(shape(...T) $s): shape(...T, 'b' => int) {
+   |                                             ^ [2]
+   |                                                                 ^^^ [3]
+22 |   return $s;
+   |          ^^ [1]
+23 | }
+24 | 
+
+error: Typing[4057] Invalid return type [1]
+-> The field `b` is missing [2]
+-> The field `b` is required here [3]
+
+normalize_singleton_splat.php:26:10
+23 | }
+24 | 
+25 | function bare_sub<T as shape()>(T $s): shape(...T, 'b' => int) {
+   |                                 ^ [2]
+   |                                                    ^^^ [3]
+26 |   return $s;
+   |          ^^ [1]
+27 | }
+28 | 
+
+error: Typing[4531] A shape containing only one splat is redundant. Use the splatted type directly. [1]
+
+normalize_singleton_splat.php:32:3
+30 | // shapeSplatOracleTest's prop_rigid_param exercises it.
+31 | function wrapped_sub_pinned<T super shape() as shape()>(
+32 |   shape(...T) $s,
+   |   ^^^^^^^^^^^ [1]
+33 | ): shape(...T, 'b' => int) {
+34 |   return $s;
+
+error: Typing[4057] Invalid return type [1]
+-> The field `b` is missing [2]
+-> The field `b` is required here [3]
+
+normalize_singleton_splat.php:34:10
+30 | // shapeSplatOracleTest's prop_rigid_param exercises it.
+31 | function wrapped_sub_pinned<T super shape() as shape()>(
+32 |   shape(...T) $s,
+   |            ^ [2]
+33 | ): shape(...T, 'b' => int) {
+   |                ^^^ [3]
+34 |   return $s;
+   |          ^^ [1]
+35 | }
+36 | 
+
+error: Typing[4057] Invalid return type [1]
+-> The field `b` is missing [2]
+-> The field `b` is required here [3]
+
+normalize_singleton_splat.php:40:10
+36 | 
+37 | function bare_sub_pinned<T super shape() as shape()>(
+38 |   T $s,
+   |   ^ [2]
+39 | ): shape(...T, 'b' => int) {
+   |                ^^^ [3]
+40 |   return $s;
+   |          ^^ [1]
+41 | }
+
+7 errors found

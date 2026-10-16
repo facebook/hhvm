@@ -1,2 +1,11 @@
-ERROR: File "shapes_args.php", line 5, characters 17-24:
-Shape field name must not be a `C::class` expression (Parsing[1002])
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_args.php:5:17
+3 | class C {}
+4 | type T1 = shape(nameof C => float);
+5 | type T2 = shape(C::class => float);
+  |                 ^^^^^^^^ [1]
+6 | 
+7 | function f(T1 $t1, T2 $t2): void {
+
+1 error found

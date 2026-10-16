@@ -1,4 +1,19 @@
-ERROR: File "requirethis_05.bad.php", line 15, characters 16-18:
-You cannot access this member (Typing[4112])
-  File "requirethis_05.bad.php", line 8, characters 22-24:
-  This member is private
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+requirethis_05.bad.php:15:16
+ 6 |     use T;
+ 7 | 
+ 8 |     private function bar(): void {}
+   |                      ^^^ [2]
+ 9 | }
+10 | 
+   :
+13 | 
+14 |     public function foo(): void {
+15 |         $this->bar();
+   |                ^^^ [1]
+16 |     }
+17 | }
+
+1 error found

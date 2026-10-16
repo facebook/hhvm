@@ -1,8 +1,37 @@
-ERROR: File "static_properties.php", line 19, characters 32-41:
-You cannot access this member (Typing[4112])
-  File "static_properties.php", line 7, characters 18-20:
-  This member is private. To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig`
-ERROR: File "static_properties.php", line 20, characters 32-41:
-Cannot access this protected member, you don't extend StaticPropertyTarget (Typing[4112])
-  File "static_properties.php", line 10, characters 20-22:
-  This member is protected. To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig`
+error: Typing[4112] You cannot access this member [1]
+-> This member is private. To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig` [2]
+
+static_properties.php:19:32
+ 5 | class StaticPropertyTarget {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private static int $priv_prop = 0;
+   |                  ^^^ [2]
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+   :
+17 |   public function test(): void {
+18 |     StaticPropertyTarget::priv_method(); // ok: static methods use the main gate
+19 |     $_ = StaticPropertyTarget::$priv_prop; // error: static-property gate is off
+   |                                ^^^^^^^^^^ [1]
+20 |     $_ = StaticPropertyTarget::$prot_prop; // error: static-property gate is off
+21 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend StaticPropertyTarget [1]
+-> This member is protected. To allow static property access from test contexts, set `tests_bypass_visibility_static_properties = true` in `.hhconfig` [2]
+
+static_properties.php:20:32
+ 8 | 
+ 9 |   <<__TestsBypassVisibility>>
+10 |   protected static int $prot_prop = 0;
+   |                    ^^^ [2]
+11 | 
+12 |   <<__TestsBypassVisibility>>
+   :
+18 |     StaticPropertyTarget::priv_method(); // ok: static methods use the main gate
+19 |     $_ = StaticPropertyTarget::$priv_prop; // error: static-property gate is off
+20 |     $_ = StaticPropertyTarget::$prot_prop; // error: static-property gate is off
+   |                                ^^^^^^^^^^ [1]
+21 |   }
+22 | }
+
+2 errors found

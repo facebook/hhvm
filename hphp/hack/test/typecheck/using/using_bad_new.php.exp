@@ -1,6 +1,30 @@
-ERROR: File "using_bad_new.php", line 14, characters 12-17:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_new.php", line 19, characters 14-19:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_new.php", line 22, characters 12-22:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_new.php:14:12
+12 | 
+13 | function test_it(): void {
+14 |   $x = new Handle();
+   |            ^^^^^^ [1]
+15 | 
+16 |   // This is legal
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_new.php:19:14
+17 |   using ($x = new Handle()) {
+18 |     // But this is not
+19 |     $w = new Handle();
+   |              ^^^^^^ [1]
+20 |   }
+21 | 
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_new.php:22:12
+20 |   }
+21 | 
+22 |   $z = new AsyncHandle();
+   |            ^^^^^^^^^^^ [1]
+23 | }
+
+3 errors found

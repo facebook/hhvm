@@ -1,32 +1,113 @@
-ERROR: File "method_soft_reification.php", line 16, characters 3-19:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "method_soft_reification.php", line 6, characters 48-48:
-  Definition is here
-ERROR: File "method_soft_reification.php", line 19, characters 3-15:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "method_soft_reification.php", line 7, characters 33-33:
-  Definition is here
-ERROR: File "method_soft_reification.php", line 34, characters 19-24:
-Invalid reified hint (Typing[4305])
-  File "method_soft_reification.php", line 34, characters 19-24:
-  This is not reified, it cannot be used as a reified type argument
-  File "method_soft_reification.php", line 6, characters 48-48:
-  `T` is reified
-ERROR: File "method_soft_reification.php", line 35, characters 19-23:
-Invalid reified hint (Typing[4305])
-  File "method_soft_reification.php", line 35, characters 19-23:
-  This is soft reified, it cannot be used as a reified type argument
-  File "method_soft_reification.php", line 6, characters 48-48:
-  `T` is reified
-ERROR: File "method_soft_reification.php", line 38, characters 15-20:
-Invalid reified hint (Typing[4305])
-  File "method_soft_reification.php", line 38, characters 15-20:
-  This is not reified, it cannot be used as a reified type argument
-  File "method_soft_reification.php", line 7, characters 33-33:
-  `T` is reified
-ERROR: File "method_soft_reification.php", line 39, characters 15-19:
-Invalid reified hint (Typing[4305])
-  File "method_soft_reification.php", line 39, characters 15-19:
-  This is soft reified, it cannot be used as a reified type argument
-  File "method_soft_reification.php", line 7, characters 33-33:
-  `T` is reified
+error: Typing[4303] All type arguments must be specified because a type parameter is reified [1]
+-> Definition is here [2]
+
+method_soft_reification.php:16:3
+ 4 | class C {
+ 5 |   public function erased<T>(): void {}
+ 6 |   public function softReified<<<__Soft>> reify T>(): void {}
+   |                                                ^ [2]
+ 7 |   public function reified<reify T>(): void {}
+ 8 | }
+   :
+14 |   $c->erased<int>();
+15 | 
+16 |   $c->softReified(); // bad
+   |   ^^^^^^^^^^^^^^^^^ [1]
+17 |   $c->softReified<int>();
+18 | 
+
+error: Typing[4303] All type arguments must be specified because a type parameter is reified [1]
+-> Definition is here [2]
+
+method_soft_reification.php:19:3
+ 5 |   public function erased<T>(): void {}
+ 6 |   public function softReified<<<__Soft>> reify T>(): void {}
+ 7 |   public function reified<reify T>(): void {}
+   |                                 ^ [2]
+ 8 | }
+ 9 | 
+   :
+17 |   $c->softReified<int>();
+18 | 
+19 |   $c->reified(); // bad
+   |   ^^^^^^^^^^^^^ [1]
+20 |   $c->reified<int>();
+21 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+method_soft_reification.php:34:19
+ 4 | class C {
+ 5 |   public function erased<T>(): void {}
+ 6 |   public function softReified<<<__Soft>> reify T>(): void {}
+   |                                                ^ [2]
+ 7 |   public function reified<reify T>(): void {}
+ 8 | }
+   :
+32 |   $c->erased<Thard>();
+33 | 
+34 |   $c->softReified<Terase>();
+   |                   ^^^^^^ [1]
+35 |   $c->softReified<Tsoft>();
+36 |   $c->softReified<Thard>();
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is soft reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+method_soft_reification.php:35:19
+ 4 | class C {
+ 5 |   public function erased<T>(): void {}
+ 6 |   public function softReified<<<__Soft>> reify T>(): void {}
+   |                                                ^ [2]
+ 7 |   public function reified<reify T>(): void {}
+ 8 | }
+   :
+33 | 
+34 |   $c->softReified<Terase>();
+35 |   $c->softReified<Tsoft>();
+   |                   ^^^^^ [1]
+36 |   $c->softReified<Thard>();
+37 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is not reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+method_soft_reification.php:38:15
+ 5 |   public function erased<T>(): void {}
+ 6 |   public function softReified<<<__Soft>> reify T>(): void {}
+ 7 |   public function reified<reify T>(): void {}
+   |                                 ^ [2]
+ 8 | }
+ 9 | 
+   :
+36 |   $c->softReified<Thard>();
+37 | 
+38 |   $c->reified<Terase>();
+   |               ^^^^^^ [1]
+39 |   $c->reified<Tsoft>();
+40 |   $c->reified<Thard>();
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is soft reified, it cannot be used as a reified type argument [1]
+-> `T` is reified [2]
+
+method_soft_reification.php:39:15
+ 5 |   public function erased<T>(): void {}
+ 6 |   public function softReified<<<__Soft>> reify T>(): void {}
+ 7 |   public function reified<reify T>(): void {}
+   |                                 ^ [2]
+ 8 | }
+ 9 | 
+   :
+37 | 
+38 |   $c->reified<Terase>();
+39 |   $c->reified<Tsoft>();
+   |               ^^^^^ [1]
+40 |   $c->reified<Thard>();
+41 | }
+
+6 errors found

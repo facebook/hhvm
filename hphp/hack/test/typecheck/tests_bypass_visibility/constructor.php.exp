@@ -1,4 +1,19 @@
-ERROR: File "constructor.php", line 19, characters 16-26:
-You cannot access this member (Typing[4112])
-  File "constructor.php", line 7, characters 20-30:
-  This member is private
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+constructor.php:19:16
+ 5 | class PrivateCtor {
+ 6 |   <<__TestsBypassVisibility>>
+ 7 |   private function __construct(private int $x) {}
+   |                    ^^^^^^^^^^^ [2]
+ 8 | }
+ 9 | 
+   :
+17 | class CtorNonTest {
+18 |   public function test(): void {
+19 |     $obj = new PrivateCtor(1); // error
+   |                ^^^^^^^^^^^ [1]
+20 |   }
+21 | }
+
+1 error found

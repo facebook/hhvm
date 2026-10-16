@@ -1,6 +1,22 @@
-ERROR: File "override_final4.php", line 20, characters 26-36:
-Some members in class `ChildClass` are incompatible with those declared in type `ParentClass` (Typing[4070])
-  File "override_final4.php", line 17, characters 25-25:
-  You cannot override this method
-  File "override_final4.php", line 13, characters 25-25:
-  It was declared as final
+error: Typing[4070] Some members in class `ChildClass` are incompatible with those declared in type `ParentClass` [1]
+-> You cannot override this method [2]
+-> It was declared as final [3]
+
+override_final4.php:20:26
+11 | 
+12 | class ParentClass {
+13 |   final public function f(): void {}
+   |                         ^ [3]
+14 | }
+15 | 
+16 | trait T {
+17 |   final public function f(): void {}
+   |                         ^ [2]
+18 | }
+19 | 
+20 | class ChildClass extends ParentClass {
+   |                          ^^^^^^^^^^^ [1]
+21 |   use T;
+22 | }
+
+1 error found

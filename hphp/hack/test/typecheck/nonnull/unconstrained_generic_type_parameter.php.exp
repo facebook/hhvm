@@ -1,14 +1,30 @@
-ERROR: File "unconstrained_generic_type_parameter.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "unconstrained_generic_type_parameter.php", line 3, characters 25-31:
-  Expected `nonnull`
-  File "unconstrained_generic_type_parameter.php", line 3, characters 18-18:
-  But got `T`
-ERROR: File "unconstrained_generic_type_parameter.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "unconstrained_generic_type_parameter.php", line 3, characters 25-31:
-  Expected `nonnull`
-  File "unconstrained_generic_type_parameter.php", line 3, characters 18-18:
-  But got `mixed`
-  File "unconstrained_generic_type_parameter.php", line 3, characters 18-18:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `T` [3]
+
+unconstrained_generic_type_parameter.php:4:10
+1 | <?hh
+2 | 
+3 | function cast<T>(T $x): nonnull {
+  |                  ^ [3]
+  |                         ^^^^^^^ [2]
+4 |   return $x;
+  |          ^^ [1]
+5 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `mixed` [3]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [3]
+
+unconstrained_generic_type_parameter.php:4:10
+1 | <?hh
+2 | 
+3 | function cast<T>(T $x): nonnull {
+  |                  ^ [3]
+  |                         ^^^^^^^ [2]
+4 |   return $x;
+  |          ^^ [1]
+5 | }
+
+2 errors found

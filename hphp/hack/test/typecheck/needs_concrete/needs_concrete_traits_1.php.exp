@@ -1,4 +1,18 @@
-WARN: File "needs_concrete_traits_1.php", line 16, characters 7-8:
-Dangerous call to `C1::m1` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `C1` is not concrete. (Warn[12024])
-  File "needs_concrete_traits_1.php", line 5, characters 26-27:
-  Declaration is here
+warning: Warn[12024] Dangerous call to `C1::m1` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `C1` is not concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_traits_1.php:16:7
+ 3 | trait Tr {
+ 4 |   <<__NeedsConcrete>>
+ 5 |   public static function m1(): void {
+   |                          ^^ [2]
+ 6 |     static::abs();
+ 7 |   }
+   :
+14 | 
+15 | function example(): void {
+16 |   C1::m1(); // hh error
+   |       ^^ [1]
+17 | }
+
+1 error found

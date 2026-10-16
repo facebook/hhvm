@@ -26,11 +26,37 @@ File "nonnull.php--file2.php", line 54, characters 3-13:
   mixed
 File "nonnull.php--file2.php", line 57, characters 3-13:
   nonnull
-ERROR: File "nonnull.php--file2.php", line 51, characters 18-19:
-Invalid argument (Typing[4110])
-  File "nonnull.php--file2.php", line 60, characters 25-31:
-  Expected `nonnull`
-  File "nonnull.php--file2.php", line 13, characters 3-3:
-  But got `?int`
-  File "nonnull.php--file1.php", line 5, characters 14-17:
-    by the definition of `C`
+error: Typing[4110] Invalid argument [1]
+-> Expected `nonnull` [2]
+-> But got `?int` [3]
+->   by the definition of `C` [4]
+
+nonnull.php--file2.php:51:18
+11 |   ?A $nullableA,
+12 |   B $b,
+13 |   C $c,
+   |   ^ [3]
+14 |   D $d,
+15 |   E $e,
+   :
+49 |   $x = ($cond ? $c : $nonnull);
+50 |   hh_show($x);
+51 |   expect_nonnull($c); // error
+   |                  ^^ [1]
+52 | 
+53 |   $x = ($cond ? $d : $nonnull);
+   :
+58 | }
+59 | 
+60 | function expect_nonnull(nonnull $x): void {}
+   |                         ^^^^^^^ [2]
+
+nonnull.php--file1.php:5:14
+ 3 | newtype B = int;
+ 4 | 
+ 5 | newtype C as ?int = int;
+   |              ^^^^ [4]
+ 6 | 
+ 7 | type D = ?int;
+
+1 error found

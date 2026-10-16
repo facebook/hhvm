@@ -1,2 +1,9 @@
-ERROR: File "nothing_keyword.php", line 4, characters 9-15:
-Cannot use `nothing` as a type name as it is reserved (Parsing[1002])
+error: Parsing[1002] Cannot use `nothing` as a type name as it is reserved [1]
+
+nothing_keyword.php:4:9
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | newtype nothing = mixed;
+  |         ^^^^^^^ [1]
+
+1 error found

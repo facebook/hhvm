@@ -1,6 +1,17 @@
-ERROR: File "error_var.php", line 6, characters 8-9:
-Invalid argument (Typing[4110])
-  File "error_var.php", line 3, characters 19-20:
-  Expected `int` (variadic argument)
-  File "error_var.php", line 5, characters 16-20:
-  But got `float`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `float` [3]
+
+error_var.php:6:8
+1 | <?hh
+2 | 
+3 | function f(int ...$i): void {}
+  |                   ^^ [2]
+4 | 
+5 | function g(vec<float> $v): void {
+  |                ^^^^^ [3]
+6 |   f(...$v); // float <: #1 </: int
+  |        ^^ [1]
+7 | }
+
+1 error found

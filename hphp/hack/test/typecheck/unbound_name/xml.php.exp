@@ -1,6 +1,30 @@
-ERROR: File "xml.php", line 11, characters 11-23:
-Unbound name: `:notfound:post` (an object type) (Naming[2049])
-ERROR: File "xml.php", line 14, characters 11-11:
-Unbound name: `:T` (an object type) (Naming[2049])
-ERROR: File "xml.php", line 17, characters 11-15:
-Unbound name: `:alias` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `:notfound:post` (an object type) [1]
+
+xml.php:11:11
+ 9 | 
+10 |   // Should error
+11 |   $bar = <notfound:post>bar</notfound:post>;
+   |           ^^^^^^^^^^^^^ [1]
+12 | 
+13 |   // Does not allow generics
+
+error: Naming[2049] Unbound name: `:T` (an object type) [1]
+
+xml.php:14:11
+12 | 
+13 |   // Does not allow generics
+14 |   $bar = <T>bar</T>;
+   |           ^ [1]
+15 | 
+16 |   // Does not allow typedefs
+
+error: Naming[2049] Unbound name: `:alias` (an object type) [1]
+
+xml.php:17:11
+15 | 
+16 |   // Does not allow typedefs
+17 |   $bar = <alias>bar</alias>;
+   |           ^^^^^ [1]
+18 | }
+
+3 errors found

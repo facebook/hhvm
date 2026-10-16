@@ -1,18 +1,92 @@
-WARN: File "just_bool.php", line 33, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
-WARN: File "just_bool.php", line 40, characters 3-108:
-This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
-  File "just_bool.php", line 45, characters 10-14:
-  The case is redundant.
-WARN: File "just_bool.php", line 45, characters 10-14:
-This switch case, `false`, occurred before. It will never be matched. (Warn[12019])
-  File "just_bool.php", line 41, characters 10-14:
-  This is the original occurrence of the case.
-ERROR: File "just_bool.php", line 18, characters 3-76:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `true` (Typing[4019])
-  File "just_bool.php", line 18, characters 11-12:
-  The scrutinee has type `bool`.
-ERROR: File "just_bool.php", line 52, characters 3-49:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `true` (Typing[4019])
-  File "just_bool.php", line 52, characters 11-12:
-  The scrutinee has type `bool`.
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+just_bool.php:33:5
+31 |     case false:
+32 |       return;
+33 |     default:
+   |     ^^^^^^^^ [1]
+34 |       return;
+35 |   }
+
+warning: Warn[12019] This switch statement contains redundant cases. There are 1 redundant cases. [1]
+-> The case is redundant. [2]
+
+just_bool.php:40:3
+38 | // <<__StrictSwitch>>
+39 | function redundant_false(bool $x): void {
+40 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+41 |     case false:
+   |     ^^^^^^^^^^^ [1]
+42 |       return;
+   |       ^^^^^^^ [1]
+43 |     case true:
+   |     ^^^^^^^^^^ [1]
+44 |       return;
+   |       ^^^^^^^ [1]
+45 |     case false:
+   |     ^^^^^^^^^^^ [1]
+   |          ^^^^^ [2]
+46 |       return;
+   |       ^^^^^^^ [1]
+47 |   }
+   |   ^ [1]
+48 | }
+49 | 
+
+warning: Warn[12019] This switch case, `false`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+just_bool.php:45:10
+39 | function redundant_false(bool $x): void {
+40 |   switch ($x) {
+41 |     case false:
+   |          ^^^^^ [2]
+42 |       return;
+43 |     case true:
+44 |       return;
+45 |     case false:
+   |          ^^^^^ [1]
+46 |       return;
+47 |   }
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `true` [1]
+-> The scrutinee has type `bool`. [2]
+
+just_bool.php:18:3
+16 |   $y = true;
+17 | 
+18 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+19 |     case $y:
+   |     ^^^^^^^^ [1]
+20 |       return;
+   |       ^^^^^^^ [1]
+21 |     case false:
+   |     ^^^^^^^^^^^ [1]
+22 |       return;
+   |       ^^^^^^^ [1]
+23 |   }
+   |   ^ [1]
+24 | }
+25 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `true` [1]
+-> The scrutinee has type `bool`. [2]
+
+just_bool.php:52:3
+50 | // <<__StrictSwitch>>
+51 | function missing_true(bool $x): void {
+52 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+53 |     case false:
+   |     ^^^^^^^^^^^ [1]
+54 |       return;
+   |       ^^^^^^^ [1]
+55 |   }
+   |   ^ [1]
+56 | }
+
+5 errors found

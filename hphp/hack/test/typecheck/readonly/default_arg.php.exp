@@ -1,6 +1,21 @@
-ERROR: File "default_arg.php--file1.php", line 10, characters 33-41:
-Invalid argument (Typing[4411])
-  File "default_arg.php--file1.php", line 10, characters 33-41:
-  This expression is readonly
-  File "default_arg.php--file2.php", line 3, characters 40-48:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+default_arg.php--file1.php:10:33
+ 8 |     mixed ...$args
+ 9 |   ): void {
+10 |     PHPUnit_Util_Type::toString($expected);
+   |                                 ^^^^^^^^^ [1]
+11 |   }
+12 | 
+
+default_arg.php--file2.php:3:40
+ 1 | <?hh
+ 2 | abstract final class  PHPUnit_Util_Type {
+ 3 |  public static function toString(mixed $expected, bool $short = false): string {
+   |                                        ^^^^^^^^^ [2]
+ 4 |    return "";
+ 5 |  }
+
+1 error found

@@ -1,22 +1,52 @@
-ERROR: File "transitive_error_3.php", line 18, characters 10-11:
-Invalid return type (Typing[4323])
-  File "transitive_error_3.php", line 10, characters 12-12:
-  `T` is a constrained type parameter
-  File "transitive_error_3.php", line 10, characters 17-22:
-  This type constraint is violated
-  File "transitive_error_3.php", line 10, characters 17-22:
-  Expected `string`
-  File "transitive_error_3.php", line 14, characters 22-24:
-  But got `int`
-  File "transitive_error_3.php", line 14, characters 22-24:
-  This type argument to `Inv` must match exactly (it is invariant)
-ERROR: File "transitive_error_3.php", line 18, characters 10-11:
-Invalid return type (Typing[4110])
-  File "transitive_error_3.php", line 15, characters 8-10:
-  Expected `~_` because type parameter `T` of `inv` could not be determined. Please add explicit type parameters to the invocation of `inv`
-  File "transitive_error_3.php", line 6, characters 24-24:
-    via this generic `T`
-  File "transitive_error_3.php", line 14, characters 22-24:
-  But got `int`
-  File "transitive_error_3.php", line 14, characters 22-24:
-  This type argument to `Inv` must match exactly (it is invariant)
+error: Typing[4323] Invalid return type [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+-> This type argument to `Inv` must match exactly (it is invariant) [4]
+
+transitive_error_3.php:18:10
+ 8 | }
+ 9 | 
+10 | function f<T as string>(): (function(Inv<T>): void) {
+   |            ^ [2]
+   |                 ^^^^^^ [3]
+11 |   return $_ ==> {};
+12 | }
+13 | 
+14 | function test(): Inv<int> {
+   |                      ^^^ [4]
+15 |   $x = inv();
+16 |   $f = f();
+17 |   $f($x);
+18 |   return $x;
+   |          ^^ [1]
+19 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~_` because type parameter `T` of `inv` could not be determined. Please add explicit type parameters to the invocation of `inv` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+-> This type argument to `Inv` must match exactly (it is invariant) [4]
+
+transitive_error_3.php:18:10
+ 4 | class Inv<T> {}
+ 5 | 
+ 6 | function inv<T>(): Inv<T> {
+   |                        ^ [3]
+ 7 |   return new Inv();
+ 8 | }
+   :
+12 | }
+13 | 
+14 | function test(): Inv<int> {
+   |                      ^^^ [4]
+15 |   $x = inv();
+   |        ^^^ [2]
+16 |   $f = f();
+17 |   $f($x);
+18 |   return $x;
+   |          ^^ [1]
+19 | }
+
+2 errors found

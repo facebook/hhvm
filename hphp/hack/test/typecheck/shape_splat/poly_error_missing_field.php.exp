@@ -1,6 +1,21 @@
-ERROR: File "poly_error_missing_field.php", line 13, characters 14-15:
-Invalid argument (Typing[4057])
-  File "poly_error_missing_field.php", line 12, characters 8-24:
-  The field `name` is missing
-  File "poly_error_missing_field.php", line 5, characters 15-20:
-  The field `name` is required here
+error: Typing[4057] Invalid argument [1]
+-> The field `name` is missing [2]
+-> The field `name` is required here [3]
+
+poly_error_missing_field.php:13:14
+ 3 | 
+ 4 | function needs_name<T as shape(...)>(
+ 5 |   shape(...T, 'name' => string) $s,
+   |               ^^^^^^ [3]
+ 6 | ): void {
+ 7 |   $_ = $s['name'];
+   :
+10 | function test(): void {
+11 |   // Error: shape missing 'name' field
+12 |   $s = shape('id' => 42);
+   |        ^^^^^^^^^^^^^^^^^ [2]
+13 |   needs_name($s);
+   |              ^^ [1]
+14 | }
+
+1 error found

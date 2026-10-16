@@ -1,4 +1,20 @@
-ERROR: File "parameter_modifiers_readonly_inout.php", line 5, characters 42-43:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_readonly_inout.php", line 6, characters 42-43:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_readonly_inout.php:5:42
+3 | 
+4 | interface I1 {
+5 |   public function ri1(inout readonly int $x): void;
+  |                                          ^^ [1]
+6 |   public function ri2(readonly inout int $x): void;
+7 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_readonly_inout.php:6:42
+4 | interface I1 {
+5 |   public function ri1(inout readonly int $x): void;
+6 |   public function ri2(readonly inout int $x): void;
+  |                                          ^^ [1]
+7 | }
+
+2 errors found

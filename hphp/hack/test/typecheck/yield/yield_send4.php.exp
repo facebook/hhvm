@@ -1,6 +1,19 @@
-ERROR: File "yield_send4.php", line 7, characters 5-6:
-Invalid argument (Typing[4110])
-  File "yield_send4.php", line 3, characters 13-16:
-  Expected `bool`
-  File "yield_send4.php", line 5, characters 39-41:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+yield_send4.php:7:5
+1 | <?hh
+2 | 
+3 | function i(?bool $x): void {}
+  |             ^^^^ [2]
+4 | 
+5 | function f(): Generator<bool, string, int> {
+  |                                       ^^^ [3]
+6 |   $x = yield true => 'troo';
+7 |   i($x);
+  |     ^^ [1]
+8 | }
+9 | 
+
+1 error found

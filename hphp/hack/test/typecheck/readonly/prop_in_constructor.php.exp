@@ -1,10 +1,38 @@
-ERROR: File "prop_in_constructor.php", line 15, characters 3-14:
-Invalid property assignment (Typing[4411])
-  File "prop_in_constructor.php", line 15, characters 18-34:
-  This expression is readonly
-  File "prop_in_constructor.php", line 6, characters 69-70:
-  But it's being assigned to a mutable property
-ERROR: File "prop_in_constructor.php", line 17, characters 12-15:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "prop_in_constructor.php", line 6, characters 47-48:
-  The property is defined here.
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+prop_in_constructor.php:15:3
+ 4 | 
+ 5 | class P {
+ 6 |   public function __construct(public readonly ?P $prop=null, public ?P $mut_prop = null) { }
+   |                                                                     ^^ [3]
+ 7 | }
+ 8 | 
+   :
+13 |   $p->mut_prop = new P();
+14 |   $p->prop = readonly new P(); // ok
+15 |   $p->mut_prop = readonly $p->prop; // not ok
+   |   ^^^^^^^^^^^^ [1]
+   |                  ^^^^^^^^^^^^^^^^^ [2]
+16 |   $z = readonly $p->prop; // should be okay
+17 |   $w = $p->prop; // not okay
+
+error: Typing[4412] This property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The property is defined here. [2]
+
+prop_in_constructor.php:17:12
+ 4 | 
+ 5 | class P {
+ 6 |   public function __construct(public readonly ?P $prop=null, public ?P $mut_prop = null) { }
+   |                                               ^^ [2]
+ 7 | }
+ 8 | 
+   :
+15 |   $p->mut_prop = readonly $p->prop; // not ok
+16 |   $z = readonly $p->prop; // should be okay
+17 |   $w = $p->prop; // not okay
+   |            ^^^^ [1]
+18 | }
+
+2 errors found

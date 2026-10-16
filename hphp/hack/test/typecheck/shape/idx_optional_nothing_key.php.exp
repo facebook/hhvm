@@ -1,8 +1,22 @@
-ERROR: File "idx_optional_nothing_key.php", line 4, characters 26-28:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "Shapes.hhi", line 42, characters 19-24:
-  The type of the field `a` in this shape doesn't allow any values
-  File "idx_optional_nothing_key.php", line 4, characters 18-20:
-  It is nothing because type parameter `Tv` of `idx` could not be determined. Please add explicit type parameters to the invocation of `idx`
-  File "Shapes.hhi", line 42, characters 19-24:
-    via this generic `Tv`
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The type of the field `a` in this shape doesn't allow any values [2]
+-> It is nothing because type parameter `Tv` of `idx` could not be determined. Please add explicit type parameters to the invocation of `idx` [3]
+->   via this generic `Tv` [2]
+
+idx_optional_nothing_key.php:4:26
+ 2 | 
+ 3 | function main(): void {
+ 4 |   $s ==> Shapes::idx($s, 'a');
+   |                  ^^^ [3]
+   |                          ^^^ [1]
+ 5 | }
+
+Shapes.hhi:42:19
+40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+41 |     public static function idx<Tv>(
+42 |       ?shape(...) $shape,
+   |                   ^^^^^^ [2]
+43 |       arraykey $index,
+44 |       ?Tv $default = null,
+
+1 error found

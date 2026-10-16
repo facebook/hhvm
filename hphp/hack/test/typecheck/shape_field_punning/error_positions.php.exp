@@ -1,18 +1,64 @@
-ERROR: File "error_positions.php", line 7, characters 20-23:
-Field name already bound (Naming[2015])
-ERROR: File "error_positions.php", line 13, characters 22-28:
-Field name already bound (Naming[2015])
-ERROR: File "error_positions.php", line 26, characters 33-37:
-Field name already bound (Naming[2015])
-ERROR: File "error_positions.php", line 20, characters 3-36:
-hh_expect type mismatch (Typing[4453])
-  File "error_positions.php", line 20, characters 28-30:
-  Expected `int`
-  File "error_positions.php", line 17, characters 10-17:
-  But got `string`
-ERROR: File "error_positions.php", line 20, characters 34-35:
-Invalid argument (Typing[4110])
-  File "error_positions.php", line 20, characters 28-30:
-  Expected `int`
-  File "error_positions.php", line 17, characters 10-17:
-  But got `string`
+error: Naming[2015] Field name already bound [1]
+
+error_positions.php:7:20
+5 |   $dup = 1;
+6 |   // The error should point to the second occurrence
+7 |   $s = shape($dup, $dup);
+  |                    ^^^^ [1]
+8 | }
+9 | 
+
+error: Naming[2015] Field name already bound [1]
+
+error_positions.php:13:22
+11 |   $field = 1;
+12 |   // Error should point to 'field' => 2, not $field
+13 |   $s = shape($field, 'field' => 2);
+   |                      ^^^^^^^ [1]
+14 | }
+15 | 
+
+error: Naming[2015] Field name already bound [1]
+
+error_positions.php:26:33
+24 |   $name = 'value';
+25 |   // Error should point to $name (second occurrence)
+26 |   $s = shape('name' => 'other', $name);
+   |                                 ^^^^^ [1]
+27 | }
+
+error: Typing[4453] hh_expect type mismatch [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+error_positions.php:20:3
+15 | 
+16 | function test_type_error_with_punning(): void {
+17 |   $val = 'string';
+   |          ^^^^^^^^ [3]
+18 |   $s = shape($val);
+19 |   // Type error should reference correct position
+20 |   hh_expect<shape('val' => int)>($s);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                            ^^^ [2]
+21 | }
+22 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+error_positions.php:20:34
+15 | 
+16 | function test_type_error_with_punning(): void {
+17 |   $val = 'string';
+   |          ^^^^^^^^ [3]
+18 |   $s = shape($val);
+19 |   // Type error should reference correct position
+20 |   hh_expect<shape('val' => int)>($s);
+   |                            ^^^ [2]
+   |                                  ^^ [1]
+21 | }
+22 | 
+
+5 errors found

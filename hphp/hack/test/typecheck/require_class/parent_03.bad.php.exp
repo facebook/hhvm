@@ -1,4 +1,19 @@
-ERROR: File "parent_03.bad.php", line 7, characters 20-22:
-Cannot call `parent::bar()`; it is abstract (Typing[4073])
-  File "parent_03.bad.php", line 13, characters 35-37:
-  Declaration is here
+error: Typing[4073] Cannot call `parent::bar()`; it is abstract [1]
+-> Declaration is here [2]
+
+parent_03.bad.php:7:20
+ 5 | 
+ 6 |   public function foo(): int {
+ 7 |     return parent::bar();
+   |                    ^^^ [1]
+ 8 |   }
+ 9 | }
+10 | 
+11 | 
+12 | abstract class C {
+13 |   public static abstract function bar(): int;
+   |                                   ^^^ [2]
+14 | }
+15 | 
+
+1 error found

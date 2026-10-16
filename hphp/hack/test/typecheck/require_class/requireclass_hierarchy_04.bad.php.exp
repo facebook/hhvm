@@ -1,6 +1,21 @@
-ERROR: File "requireclass_hierarchy_04.bad.php", line 18, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requireclass_hierarchy_04.bad.php", line 19, characters 7-8:
-  This requires to be exactly C
-  File "requireclass_hierarchy_04.bad.php", line 9, characters 17-17:
-  Required here
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to be exactly C [2]
+-> Required here [3]
+
+requireclass_hierarchy_04.bad.php:18:7
+ 7 | 
+ 8 | trait T1 {
+ 9 |   require class C;
+   |                 ^ [3]
+10 | }
+11 | 
+   :
+16 | final class C { use T2; }
+17 | 
+18 | class D {
+   |       ^ [1]
+19 |   use T2;
+   |       ^^ [2]
+20 | }
+
+1 error found

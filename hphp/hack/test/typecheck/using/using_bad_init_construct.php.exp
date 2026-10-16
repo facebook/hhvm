@@ -1,3 +1,12 @@
-ERROR: File "using_bad_init_construct.php", line 13, characters 22-26:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because `$this->x` can still potentially be null (NastCheck[3004])
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->x` can still potentially be null [1]
+
+using_bad_init_construct.php:13:22
+11 |   private int $x;
+12 |   public function __construct() {
+13 |     using new Handle($this);
+   |                      ^^^^^ [1]
+14 |     $this->x = 42;
+15 |   }
+
+1 error found

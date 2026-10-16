@@ -1,2 +1,11 @@
-ERROR: File "null_coalesce1.php", line 5, characters 12-32:
-This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])
+error: Parsing[1002] This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. [1]
+
+null_coalesce1.php:5:12
+3 |   public ?Foo $x = null;
+4 |   public readonly function getFoo(): Foo {
+5 |     return $this->x ?? new Foo(); // error, could ber readonly
+  |            ^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

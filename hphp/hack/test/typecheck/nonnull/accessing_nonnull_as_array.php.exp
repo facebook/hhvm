@@ -1,6 +1,14 @@
-ERROR: File "accessing_nonnull_as_array.php", line 4, characters 8-16:
-Typing error (Typing[4110])
-  File "accessing_nonnull_as_array.php", line 4, characters 8-16:
-  Expected an array that can be indexed
-  File "accessing_nonnull_as_array.php", line 3, characters 12-18:
-  But got `nonnull`
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `nonnull` [2]
+
+accessing_nonnull_as_array.php:4:8
+1 | <?hh
+2 | 
+3 | function f(nonnull $x): void {
+  |            ^^^^^^^ [2]
+4 |   $_ = $x['foo'];
+  |        ^^^^^^^^^ [1]
+5 | }
+
+1 error found

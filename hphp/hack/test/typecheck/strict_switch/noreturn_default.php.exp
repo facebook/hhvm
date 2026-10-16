@@ -1,4 +1,21 @@
-WARN: File "noreturn_default.php", line 7, characters 9-20:
-This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])
-WARN: File "noreturn_default.php", line 9, characters 9-16:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. [1]
+
+noreturn_default.php:7:9
+5 | function noreturn_default(mixed $x): void {
+6 |   if ($x is int) {
+7 |     if ($x is string) {
+  |         ^^^^^^^^^^^^ [1]
+8 |       switch ($x) {
+9 |         default:
+
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+noreturn_default.php:9:9
+ 7 |     if ($x is string) {
+ 8 |       switch ($x) {
+ 9 |         default:
+   |         ^^^^^^^^ [1]
+10 |           return;
+11 |       }
+
+2 errors found

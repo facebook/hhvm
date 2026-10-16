@@ -1,8 +1,40 @@
-ERROR: File "nested_prop_multifile.php", line 23, characters 3-9:
-This value is readonly, its properties cannot be modified (Typing[4409])
-ERROR: File "nested_prop_multifile.php", line 25, characters 3-16:
-This value is readonly, its properties cannot be modified (Typing[4409])
-ERROR: File "nested_prop_multifile.php", line 27, characters 3-25:
-This value is readonly, its properties cannot be modified (Typing[4409])
-ERROR: File "nested_prop_multifile.php", line 28, characters 3-25:
-This value is readonly, its properties cannot be modified (Typing[4409])
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+nested_prop_multifile.php:23:3
+21 | //// test.php
+22 | function test(Bar $b) : void {
+23 |   $b->foo->prop = 4;
+   |   ^^^^^^^ [1]
+24 |   $b->foo_vec[] = new Foo(1); // ok
+25 |   $b->foo_vector[] = new Foo(1); // not ok
+
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+nested_prop_multifile.php:25:3
+23 |   $b->foo->prop = 4;
+24 |   $b->foo_vec[] = new Foo(1); // ok
+25 |   $b->foo_vector[] = new Foo(1); // not ok
+   |   ^^^^^^^^^^^^^^ [1]
+26 |   Bar::$foo_vec_static[]  = new Foo(1); // ok
+27 |   Bar::$foo_vector_static[] = new Foo(1); // not ok
+
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+nested_prop_multifile.php:27:3
+25 |   $b->foo_vector[] = new Foo(1); // not ok
+26 |   Bar::$foo_vec_static[]  = new Foo(1); // ok
+27 |   Bar::$foo_vector_static[] = new Foo(1); // not ok
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 |   Bar::$foo_vec_static[0]->prop = 4; // error
+29 | }
+
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+nested_prop_multifile.php:28:3
+26 |   Bar::$foo_vec_static[]  = new Foo(1); // ok
+27 |   Bar::$foo_vector_static[] = new Foo(1); // not ok
+28 |   Bar::$foo_vec_static[0]->prop = 4; // error
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 | }
+
+4 errors found

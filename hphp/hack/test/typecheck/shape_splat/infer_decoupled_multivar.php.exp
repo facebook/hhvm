@@ -1,8 +1,24 @@
-ERROR: File "infer_decoupled_multivar.php", line 20, characters 10-24:
-Invalid argument (Typing[4163])
-  File "infer_decoupled_multivar.php", line 11, characters 6-24:
-  The field `k` is **optional**
-  File "infer_decoupled_multivar.php", line 11, characters 6-24:
-  The field `k` is defined as **required**
-  File "infer_decoupled_multivar.php", line 16, characters 53-55:
-  `k` is defined here
+error: Typing[4163] Invalid argument [1]
+-> The field `k` is **optional** [2]
+-> The field `k` is defined as **required** [2]
+-> `k` is defined here [3]
+
+infer_decoupled_multivar.php:20:10
+ 9 |     TA $a,
+10 |     TB $b,
+11 |   ): shape(...TA, ...TB);
+   |      ^^^^^^^^^^^^^^^^^^^ [2]
+12 | }
+13 | 
+14 | function want_open<T as shape(...)>(T $s): void {}
+15 | 
+16 | function want_k<T as shape(...)>(shape(...T, 'k' => int) $s): void {}
+   |                                                     ^^^ [3]
+17 | 
+18 | function test(I $i, shape(...) $x, shape(...) $y): void {
+19 |   want_open($i->two($x, $y)); // OK
+20 |   want_k($i->two($x, $y)); // ERROR: 'k' not guaranteed by the open args
+   |          ^^^^^^^^^^^^^^^ [1]
+21 | }
+
+1 error found

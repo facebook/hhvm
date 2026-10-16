@@ -1,10 +1,34 @@
-ERROR: File "unsupported_expression.php", line 19, characters 16-29:
-Error while evaluating this SimpliHack expression (Typing[4495])
-  File "unsupported_expression.php", line 5, characters 3-41:
-  Unsupported statement
-  File "unsupported_expression.php", line 12, characters 10-31:
-  via prompt3(...)
-  File "unsupported_expression.php", line 16, characters 10-27:
-  via prompt2(...)
-  File "unsupported_expression.php", line 19, characters 16-29:
-  via prompt(...)
+error: Typing[4495] Error while evaluating this SimpliHack expression [1]
+-> Unsupported statement [2]
+-> via prompt3(...) [3]
+-> via prompt2(...) [4]
+-> via prompt(...) [1]
+
+unsupported_expression.php:19:16
+ 3 | 
+ 4 | function prompt3(string $txt): string {
+ 5 |   if ($txt === '') {
+   |   ^^^^^^^^^^^^^^^^^^ [2]
+ 6 |     return $txt;
+   |     ^^^^^^^^^^^^ [2]
+ 7 |   }
+   |   ^ [2]
+ 8 |   return 'None';
+ 9 | }
+10 | 
+11 | function prompt2(string $txt): string {
+12 |   return prompt3("More {$txt}");
+   |          ^^^^^^^^^^^^^^^^^^^^^^ [3]
+13 | }
+14 | 
+15 | function prompt(string $txt): string {
+16 |   return prompt2($txt.$txt);
+   |          ^^^^^^^^^^^^^^^^^^ [4]
+17 | }
+18 | 
+19 | <<__SimpliHack(prompt('Test'))>>
+   |                ^^^^^^^^^^^^^^ [1]
+20 | function f(): void {
+21 | }
+
+1 error found

@@ -1,10 +1,34 @@
-ERROR: File "collection_append.php", line 11, characters 10-27:
-This expression is readonly, but the collection you're modifying is mutable, which isn't allowed. (Parsing[1002])
-ERROR: File "collection_append.php", line 11, characters 3-6:
-Invalid collection modification (Typing[4411])
-  File "collection_append.php", line 11, characters 10-27:
-  This expression is readonly
-  File "collection_append.php", line 11, characters 3-4:
-  But this value is mutable
-ERROR: File "collection_append.php", line 19, characters 3-9:
-This value is readonly, its properties cannot be modified (Typing[4409])
+error: Parsing[1002] This expression is readonly, but the collection you're modifying is mutable, which isn't allowed. [1]
+
+collection_append.php:11:10
+ 9 |   // error readonly assigned to mutable vec
+10 |   // todo, update the type of $y instead
+11 |   $y[] = readonly new Foo();
+   |          ^^^^^^^^^^^^^^^^^^ [1]
+12 |   $z['a'] = readonly new Foo();
+13 | 
+
+error: Typing[4411] Invalid collection modification [1]
+-> This expression is readonly [2]
+-> But this value is mutable [3]
+
+collection_append.php:11:3
+ 9 |   // error readonly assigned to mutable vec
+10 |   // todo, update the type of $y instead
+11 |   $y[] = readonly new Foo();
+   |   ^^^^ [1]
+   |   ^^ [3]
+   |          ^^^^^^^^^^^^^^^^^^ [2]
+12 |   $z['a'] = readonly new Foo();
+13 | 
+
+error: Typing[4409] This value is readonly, its properties cannot be modified [1]
+
+collection_append.php:19:3
+17 |   // is readonly
+18 |   $vector = Vector { readonly new Foo() };
+19 |   $vector[] = new Foo(); // error, readonly modified
+   |   ^^^^^^^ [1]
+20 | }
+
+3 errors found

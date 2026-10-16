@@ -1,14 +1,37 @@
-ERROR: File "await_nonnull.php", line 3, characters 31-34:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "await_nonnull.php", line 3, characters 16-16:
-Invalid return type (Typing[4336])
-  File "await_nonnull.php", line 3, characters 31-34:
-  Expected `void`
-  File "await_nonnull.php", line 3, characters 16-16:
-  But got `Awaitable<void>` because this function does not always return a value
-ERROR: File "await_nonnull.php", line 4, characters 3-10:
-`await` can only operate on an `Awaitable` (Typing[4110])
-  File "await_nonnull.php", line 4, characters 3-10:
-  Expected `Awaitable<nothing>`
-  File "await_nonnull.php", line 3, characters 18-24:
-  But got `nonnull`
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+await_nonnull.php:3:31
+1 | <?hh
+2 | 
+3 | async function g(nonnull $x): void {
+  |                               ^^^^ [1]
+4 |   await $x;
+5 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `Awaitable<void>` because this function does not always return a value [1]
+
+await_nonnull.php:3:16
+1 | <?hh
+2 | 
+3 | async function g(nonnull $x): void {
+  |                ^ [1]
+  |                               ^^^^ [2]
+4 |   await $x;
+5 | }
+
+error: Typing[4110] `await` can only operate on an `Awaitable` [1]
+-> Expected `Awaitable<nothing>` [1]
+-> But got `nonnull` [2]
+
+await_nonnull.php:4:3
+1 | <?hh
+2 | 
+3 | async function g(nonnull $x): void {
+  |                  ^^^^^^^ [2]
+4 |   await $x;
+  |   ^^^^^^^^ [1]
+5 | }
+
+3 errors found

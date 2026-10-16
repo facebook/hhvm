@@ -1,2 +1,11 @@
-ERROR: File "unstable_feature.php", line 11, characters 12-13:
-`nameof` can only be used with a class (Parsing[1002])
+error: Parsing[1002] `nameof` can only be used with a class [1]
+
+unstable_feature.php:11:12
+ 9 |     expect_string(nameof C);
+10 |     expect_classname(nameof static);
+11 |     nameof $x;
+   |            ^^ [1]
+12 |   }
+13 | }
+
+1 error found

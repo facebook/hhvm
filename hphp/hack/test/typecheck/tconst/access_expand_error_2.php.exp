@@ -1,6 +1,15 @@
-ERROR: File "access_expand_error_2.php", line 4, characters 10-17:
-Invalid type hint (Typing[4090])
-  File "access_expand_error_2.php", line 4, characters 13-17:
-  No type constant `ERROR` in `C`
-  File "access_expand_error_2.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4090] Invalid type hint [1]
+-> No type constant `ERROR` in `C` [2]
+-> Declaration of `C` is here [3]
+
+access_expand_error_2.php:4:10
+1 | <?hh
+2 | 
+3 | class C {
+  |       ^ [3]
+4 |   public C::ERROR $test = 0;
+  |          ^^^^^^^^ [1]
+  |             ^^^^^ [2]
+5 | }
+
+1 error found

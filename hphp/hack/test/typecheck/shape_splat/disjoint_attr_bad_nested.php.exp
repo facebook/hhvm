@@ -1,12 +1,35 @@
-ERROR: File "disjoint_attr_bad_nested.php", line 8, characters 6-8:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_nested.php", line 4, characters 16-23:
-  Shape field `nested` is defined here
-  File "disjoint_attr_bad_nested.php", line 8, characters 24-31:
-  Shape field `nested` is also defined here
-ERROR: File "disjoint_attr_bad_nested.php", line 13, characters 6-16:
-Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes (Typing[4419])
-  File "disjoint_attr_bad_nested.php", line 15, characters 23-32:
-  Shape field `internal` is defined here
-  File "disjoint_attr_bad_nested.php", line 15, characters 43-52:
-  Shape field `internal` is also defined here
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `nested` is defined here [2]
+-> Shape field `nested` is also defined here [3]
+
+disjoint_attr_bad_nested.php:8:6
+ 2 | <<file:__EnableUnstableFeatures('shape_splat_concrete')>>
+ 3 | 
+ 4 | type A = shape('nested' => int);
+   |                ^^^^^^^^ [2]
+ 5 | type B = shape(...A, 'other' => bool);
+ 6 | 
+ 7 | <<__DisjointShapeSplat>>
+ 8 | type Bad = shape(...B, 'nested' => string);
+   |      ^^^ [1]
+   |                        ^^^^^^^^ [3]
+ 9 | 
+10 | // REGRESSION (previously a false negative): an outer splat must not hide an
+
+error: Typing[4419] Type alias marked `<<__DisjointShapeSplat>>` may contain overlapping shapes [1]
+-> Shape field `internal` is defined here [2]
+-> Shape field `internal` is also defined here [3]
+
+disjoint_attr_bad_nested.php:13:6
+11 | // overlap entirely within its nested shape.
+12 | <<__DisjointShapeSplat>>
+13 | type BadInternal =
+   |      ^^^^^^^^^^^ [1]
+14 |   shape(
+15 |     ...shape(...shape('internal' => int), 'internal' => string),
+   |                       ^^^^^^^^^^ [2]
+   |                                           ^^^^^^^^^^ [3]
+16 |     'outer' => bool,
+17 |   );
+
+2 errors found

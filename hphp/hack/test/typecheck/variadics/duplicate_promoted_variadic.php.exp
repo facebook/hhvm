@@ -1,2 +1,10 @@
-ERROR: File "duplicate_promoted_variadic.php", line 5, characters 31-50:
-Cannot redeclare `C::$args` (Parsing[1002])
+error: Parsing[1002] Cannot redeclare `C::$args` [1]
+
+duplicate_promoted_variadic.php:5:31
+3 | class C {
+4 |   private vec<int> $args;
+5 |   public function __construct(private int... $args) { }
+  |                               ^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

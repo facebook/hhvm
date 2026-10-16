@@ -1,8 +1,30 @@
-ERROR: File "is_as_generic_coercion.php", line 14, characters 14-15:
-Invalid argument (Typing[4110])
-  File "is_as_generic_coercion.php", line 3, characters 33-33:
-  Expected `T`
-  File "is_as_generic_coercion.php", line 17, characters 21-21:
-    via this generic `T`
-  File "is_as_generic_coercion.php", line 8, characters 27-31:
-  But got `not T`
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+->   via this generic `T` [3]
+-> But got `not T` [4]
+
+is_as_generic_coercion.php:14:14
+ 1 | <?hh
+ 2 | 
+ 3 | class C<<<__Enforceable>> reify T> {
+   |                                 ^ [2]
+ 4 |   public function gate_as(mixed $x): void {
+ 5 |     $this->f($x as T);
+ 6 |   }
+ 7 | 
+ 8 |   public function gate_is(mixed $x): void {
+   |                           ^^^^^ [4]
+ 9 |     if ($x is T) {
+10 |         $this->f($x);
+11 |     }
+12 | 
+13 |     // here, $x is a (mixed | T), error
+14 |     $this->f($x);
+   |              ^^ [1]
+15 |   }
+16 | 
+17 |   public function f(T $t): void {}
+   |                     ^ [3]
+18 | }
+
+1 error found

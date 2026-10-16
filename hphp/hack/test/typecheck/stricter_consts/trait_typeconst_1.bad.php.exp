@@ -1,14 +1,45 @@
-ERROR: File "trait_typeconst_1.bad.php", line 15, characters 7-7:
-Constant Ty is defined concretely in multiple ancestors (Typing[4374])
-  File "trait_typeconst_1.bad.php", line 8, characters 14-15:
-  One conflicting definition is here
-  File "trait_typeconst_1.bad.php", line 12, characters 14-15:
-  Another conflicting definition is here
-ERROR: File "trait_typeconst_1.bad.php", line 15, characters 17-17:
-Some members in class `D` are incompatible with those declared in type `C` (Typing[4340])
-  File "trait_typeconst_1.bad.php", line 12, characters 14-15:
-  The assigned type of this type constant is inconsistent with its parent
-  File "trait_typeconst_1.bad.php", line 8, characters 19-21:
-  Expected `int`
-  File "trait_typeconst_1.bad.php", line 12, characters 19-24:
-  But got `string`
+error: Typing[4374] Constant Ty is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+trait_typeconst_1.bad.php:15:7
+ 6 | 
+ 7 | class C {
+ 8 |   const type Ty = int;
+   |              ^^ [2]
+ 9 | }
+10 | 
+11 | trait T {
+12 |   const type Ty = string;
+   |              ^^ [3]
+13 | }
+14 | 
+15 | class D extends C {
+   |       ^ [1]
+16 |   use T;
+17 | }
+
+error: Typing[4340] Some members in class `D` are incompatible with those declared in type `C` [1]
+-> The assigned type of this type constant is inconsistent with its parent [2]
+-> Expected `int` [3]
+-> But got `string` [4]
+
+trait_typeconst_1.bad.php:15:17
+ 6 | 
+ 7 | class C {
+ 8 |   const type Ty = int;
+   |                   ^^^ [3]
+ 9 | }
+10 | 
+11 | trait T {
+12 |   const type Ty = string;
+   |              ^^ [2]
+   |                   ^^^^^^ [4]
+13 | }
+14 | 
+15 | class D extends C {
+   |                 ^ [1]
+16 |   use T;
+17 | }
+
+2 errors found

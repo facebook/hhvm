@@ -1,6 +1,17 @@
-ERROR: File "static_access_03.bad.php", line 12, characters 36-38:
-No static method `bar` in `C` (Typing[4090])
-  File "static_access_03.bad.php", line 12, characters 19-21:
-  Did you mean instance method `foo` instead?
-  File "static_access_03.bad.php", line 9, characters 13-13:
-  Declaration of `C` is here
+error: Typing[4090] No static method `bar` in `C` [1]
+-> Did you mean instance method `foo` instead? [2]
+-> Declaration of `C` is here [3]
+
+static_access_03.bad.php:12:36
+ 7 | }
+ 8 | 
+ 9 | final class C  {
+   |             ^ [3]
+10 |   use T;
+11 | 
+12 |   public function foo(): void { C::bar(); }
+   |                   ^^^ [2]
+   |                                    ^^^ [1]
+13 | }
+
+1 error found

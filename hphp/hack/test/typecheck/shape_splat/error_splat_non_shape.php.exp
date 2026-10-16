@@ -1,14 +1,38 @@
-ERROR: File "error_splat_non_shape.php", line 6, characters 13-45:
-Invalid type hint (Typing[4419])
-  File "error_splat_non_shape.php", line 6, characters 22-31:
-  Only shapes can be unpacked with `...` inside a shape type
-ERROR: File "error_splat_non_shape.php", line 6, characters 22-31:
-Some type arguments violate their constraints (Typing[4323])
-  File "error_splat_non_shape.php", line 6, characters 13-45:
-  Expected `shape(...)`
-  File "error_splat_non_shape.php", line 6, characters 22-31:
-  But got `int`
-ERROR: File "error_splat_non_shape.php", line 8, characters 15-18:
-Invalid type hint (Typing[4419])
-  File "error_splat_non_shape.php", line 6, characters 22-31:
-  Only shapes can be unpacked with `...` inside a shape type
+error: Typing[4419] Invalid type hint [1]
+-> Only shapes can be unpacked with `...` inside a shape type [2]
+
+error_splat_non_shape.php:6:13
+4 | type TNotAShape = int;
+5 | // Splatting a non-shape type should produce an error
+6 | type TBad = shape(...TNotAShape, 'x' => bool);
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                      ^^^^^^^^^^ [2]
+7 | 
+8 | function test(TBad $s): void {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `shape(...)` [2]
+-> But got `int` [1]
+
+error_splat_non_shape.php:6:22
+4 | type TNotAShape = int;
+5 | // Splatting a non-shape type should produce an error
+6 | type TBad = shape(...TNotAShape, 'x' => bool);
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+  |                      ^^^^^^^^^^ [1]
+7 | 
+8 | function test(TBad $s): void {}
+
+error: Typing[4419] Invalid type hint [1]
+-> Only shapes can be unpacked with `...` inside a shape type [2]
+
+error_splat_non_shape.php:8:15
+4 | type TNotAShape = int;
+5 | // Splatting a non-shape type should produce an error
+6 | type TBad = shape(...TNotAShape, 'x' => bool);
+  |                      ^^^^^^^^^^ [2]
+7 | 
+8 | function test(TBad $s): void {}
+  |               ^^^^ [1]
+
+3 errors found

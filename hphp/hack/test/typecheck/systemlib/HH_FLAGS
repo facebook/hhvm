@@ -1,1 +1,2 @@
 --config is_systemlib=true
+--error-format plain_highlighted

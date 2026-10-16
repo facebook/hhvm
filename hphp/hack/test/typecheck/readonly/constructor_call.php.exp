@@ -1,6 +1,19 @@
-ERROR: File "constructor_call.php", line 10, characters 11-12:
-Invalid argument (Typing[4411])
-  File "constructor_call.php", line 10, characters 11-12:
-  This expression is readonly
-  File "constructor_call.php", line 4, characters 44-47:
-  It is incompatible with this parameter, which is mutable
+error: Typing[4411] Invalid argument [1]
+-> This expression is readonly [1]
+-> It is incompatible with this parameter, which is mutable [2]
+
+constructor_call.php:10:11
+ 2 | class Bar {}
+ 3 | class Foo {
+ 4 |   public function __construct(public mixed $foo) {
+   |                                            ^^^^ [2]
+ 5 |   }
+ 6 | }
+ 7 | <<__EntryPoint>>
+ 8 | function test() : void {
+ 9 |   $y = readonly new Bar();
+10 |   new Foo($y); // error
+   |           ^^ [1]
+11 | }
+
+1 error found

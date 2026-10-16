@@ -1,8 +1,28 @@
-WARN: File "property_override.php", line 9, characters 25-37:
-The readonly-ness of property `a` is changed by this override (Warn[12045])
-  File "property_override.php", line 10, characters 19-21:
-  Overriding property is here
-WARN: File "property_override.php", line 9, characters 25-37:
-The readonly-ness of property `b` is changed by this override (Warn[12045])
-  File "property_override.php", line 11, characters 10-12:
-  Overriding property is here
+warning: Warn[12045] The readonly-ness of property `a` is changed by this override [1]
+-> Overriding property is here [2]
+
+property_override.php:9:25
+ 7 | 
+ 8 | // Overriding changes readonly-ness in both directions: both warn.
+ 9 | class ChildFlip extends ParentMutable {
+   |                         ^^^^^^^^^^^^^ [1]
+10 |   public readonly int $a = 0;
+   |                   ^^^ [2]
+11 |   public int $b = 0;
+12 | }
+
+warning: Warn[12045] The readonly-ness of property `b` is changed by this override [1]
+-> Overriding property is here [2]
+
+property_override.php:9:25
+ 7 | 
+ 8 | // Overriding changes readonly-ness in both directions: both warn.
+ 9 | class ChildFlip extends ParentMutable {
+   |                         ^^^^^^^^^^^^^ [1]
+10 |   public readonly int $a = 0;
+11 |   public int $b = 0;
+   |          ^^^ [2]
+12 | }
+13 | 
+
+2 errors found

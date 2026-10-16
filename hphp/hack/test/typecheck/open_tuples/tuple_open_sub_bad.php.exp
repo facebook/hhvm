@@ -1,48 +1,174 @@
-ERROR: File "tuple_open_sub_bad.php", line 6, characters 26-27:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 10, characters 34-41:
-  Expected `arraykey`
-  File "tuple_open_sub_bad.php", line 5, characters 26-30:
-  But got `mixed`
-ERROR: File "tuple_open_sub_bad.php", line 7, characters 20-21:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 13, characters 27-41:
-  Expected `(int, mixed...)`
-  File "tuple_open_sub_bad.php", line 5, characters 25-34:
-  But got `(mixed...)`
-ERROR: File "tuple_open_sub_bad.php", line 8, characters 28-29:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 16, characters 35-56:
-  Expected `(int, optional string)`
-  File "tuple_open_sub_bad.php", line 5, characters 25-34:
-  But got `(mixed...)`
-ERROR: File "tuple_open_sub_bad.php", line 23, characters 28-29:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 16, characters 35-56:
-  Expected `(int, optional string)`
-  File "tuple_open_sub_bad.php", line 21, characters 3-41:
-  But got `(int, optional arraykey, optional bool)`
-ERROR: File "tuple_open_sub_bad.php", line 24, characters 25-26:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 18, characters 32-55:
-  Expected `(int, arraykey, bool...)`
-  File "tuple_open_sub_bad.php", line 21, characters 3-41:
-  But got `(int, optional arraykey, optional bool)`
-ERROR: File "tuple_open_sub_bad.php", line 32, characters 26-30:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 10, characters 34-41:
-  Expected `arraykey`
-  File "tuple_open_sub_bad.php", line 31, characters 17-21:
-  But got `bool`
-ERROR: File "tuple_open_sub_bad.php", line 33, characters 20-24:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 13, characters 28-30:
-  Expected `int`
-  File "tuple_open_sub_bad.php", line 31, characters 17-21:
-  But got `bool`
-ERROR: File "tuple_open_sub_bad.php", line 34, characters 20-24:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 13, characters 27-41:
-  Expected `(int, mixed...)`
-  File "tuple_open_sub_bad.php", line 28, characters 11-17:
-  But got `()`
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+tuple_open_sub_bad.php:6:26
+ 3 | 
+ 4 | 
+ 5 | function expectAnyTuple((mixed...) $x): void {
+   |                          ^^^^^ [3]
+ 6 |   expectAnyArraykeyTuple($x);
+   |                          ^^ [1]
+ 7 |   expectAtLeastInt($x);
+ 8 |   expectIntThenMaybeString($x);
+ 9 | }
+10 | function expectAnyArraykeyTuple((arraykey...) $x): void {
+   |                                  ^^^^^^^^ [2]
+11 |   expectAnyTuple($x);
+12 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, mixed...)` [2]
+-> But got `(mixed...)` [3]
+
+tuple_open_sub_bad.php:7:20
+ 3 | 
+ 4 | 
+ 5 | function expectAnyTuple((mixed...) $x): void {
+   |                         ^^^^^^^^^^ [3]
+ 6 |   expectAnyArraykeyTuple($x);
+ 7 |   expectAtLeastInt($x);
+   |                    ^^ [1]
+ 8 |   expectIntThenMaybeString($x);
+ 9 | }
+10 | function expectAnyArraykeyTuple((arraykey...) $x): void {
+11 |   expectAnyTuple($x);
+12 | }
+13 | function expectAtLeastInt((int, mixed...) $x): void {
+   |                           ^^^^^^^^^^^^^^^ [2]
+14 |   expectAnyTuple($x);
+15 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, optional string)` [2]
+-> But got `(mixed...)` [3]
+
+tuple_open_sub_bad.php:8:28
+ 3 | 
+ 4 | 
+ 5 | function expectAnyTuple((mixed...) $x): void {
+   |                         ^^^^^^^^^^ [3]
+ 6 |   expectAnyArraykeyTuple($x);
+ 7 |   expectAtLeastInt($x);
+ 8 |   expectIntThenMaybeString($x);
+   |                            ^^ [1]
+ 9 | }
+10 | function expectAnyArraykeyTuple((arraykey...) $x): void {
+   :
+14 |   expectAnyTuple($x);
+15 | }
+16 | function expectIntThenMaybeString((int, optional string) $x): void {
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^ [2]
+17 | }
+18 | function expectIntThenArraykey((int, arraykey, bool...) $_): void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, optional string)` [2]
+-> But got `(int, optional arraykey, optional bool)` [3]
+
+tuple_open_sub_bad.php:23:28
+14 |   expectAnyTuple($x);
+15 | }
+16 | function expectIntThenMaybeString((int, optional string) $x): void {
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^ [2]
+17 | }
+18 | function expectIntThenArraykey((int, arraykey, bool...) $_): void {}
+19 | 
+20 | function expectIntThenMaybeArraykeyThenMaybeBool(
+21 |   (int, optional arraykey, optional bool) $x,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+22 | ): void {
+23 |   expectIntThenMaybeString($x);
+   |                            ^^ [1]
+24 |   expectIntThenArraykey($x);
+25 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, arraykey, bool...)` [2]
+-> But got `(int, optional arraykey, optional bool)` [3]
+
+tuple_open_sub_bad.php:24:25
+16 | function expectIntThenMaybeString((int, optional string) $x): void {
+17 | }
+18 | function expectIntThenArraykey((int, arraykey, bool...) $_): void {}
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+19 | 
+20 | function expectIntThenMaybeArraykeyThenMaybeBool(
+21 |   (int, optional arraykey, optional bool) $x,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+22 | ): void {
+23 |   expectIntThenMaybeString($x);
+24 |   expectIntThenArraykey($x);
+   |                         ^^ [1]
+25 | }
+26 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `bool` [3]
+
+tuple_open_sub_bad.php:32:26
+ 8 |   expectIntThenMaybeString($x);
+ 9 | }
+10 | function expectAnyArraykeyTuple((arraykey...) $x): void {
+   |                                  ^^^^^^^^ [2]
+11 |   expectAnyTuple($x);
+12 | }
+   :
+29 |   $one = tuple(1);
+30 |   $two = tuple(1, 'a');
+31 |   $two2 = tuple(false, 'a');
+   |                 ^^^^^ [3]
+32 |   expectAnyArraykeyTuple($two2);
+   |                          ^^^^^ [1]
+33 |   expectAtLeastInt($two2);
+34 |   expectAtLeastInt($none);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+tuple_open_sub_bad.php:33:20
+11 |   expectAnyTuple($x);
+12 | }
+13 | function expectAtLeastInt((int, mixed...) $x): void {
+   |                            ^^^ [2]
+14 |   expectAnyTuple($x);
+15 | }
+   :
+29 |   $one = tuple(1);
+30 |   $two = tuple(1, 'a');
+31 |   $two2 = tuple(false, 'a');
+   |                 ^^^^^ [3]
+32 |   expectAnyArraykeyTuple($two2);
+33 |   expectAtLeastInt($two2);
+   |                    ^^^^^ [1]
+34 |   expectAtLeastInt($none);
+35 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int, mixed...)` [2]
+-> But got `()` [3]
+
+tuple_open_sub_bad.php:34:20
+11 |   expectAnyTuple($x);
+12 | }
+13 | function expectAtLeastInt((int, mixed...) $x): void {
+   |                           ^^^^^^^^^^^^^^^ [2]
+14 |   expectAnyTuple($x);
+15 | }
+   :
+26 | 
+27 | function test_closed_sub(): void {
+28 |   $none = tuple();
+   |           ^^^^^^^ [3]
+29 |   $one = tuple(1);
+30 |   $two = tuple(1, 'a');
+31 |   $two2 = tuple(false, 'a');
+32 |   expectAnyArraykeyTuple($two2);
+33 |   expectAtLeastInt($two2);
+34 |   expectAtLeastInt($none);
+   |                    ^^^^^ [1]
+35 | }
+
+8 errors found

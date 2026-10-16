@@ -2,5 +2,14 @@ File "union_w_any.php", line 8, characters 5-27:
   vec<(int | _)>
 File "union_w_any.php", line 9, characters 5-27:
   vec<(int | _)>
-ERROR: File "union_w_any.php", line 4, characters 7-7:
-Wildcard typehints are not allowed in this position (Naming[2084])
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+union_w_any.php:4:7
+2 | 
+3 | function test(
+4 |   vec<_> $v1,
+  |       ^ [1]
+5 |   vec<int> $v2,
+6 |   bool $b,
+
+1 error found

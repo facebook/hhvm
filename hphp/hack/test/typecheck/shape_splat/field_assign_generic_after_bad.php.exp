@@ -1,10 +1,21 @@
-ERROR: File "field_assign_generic_after_bad.php", line 8, characters 10-11:
-Invalid return type (Typing[4523])
-  File "field_assign_generic_after_bad.php", line 5, characters 3-31:
-  The field `id` here is not compatible with every instantiation of `T`
-  File "field_assign_generic_after_bad.php", line 6, characters 31-31:
-  `T` may provide `id` with a type of its own
-  File "field_assign_generic_after_bad.php", line 8, characters 3-12:
-  Expected `nothing`
-  File "field_assign_generic_after_bad.php", line 7, characters 14-25:
-  But got `string`
+error: Typing[4523] Invalid return type [1]
+-> The field `id` here is not compatible with every instantiation of `T` [2]
+-> `T` may provide `id` with a type of its own [3]
+-> Expected `nothing` [4]
+-> But got `string` [5]
+
+field_assign_generic_after_bad.php:8:10
+3 | 
+4 | function clobber_after_generic<T as shape(...)>(
+5 |   shape('name' => string, ...T) $s,
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+6 | ): shape('name' => string, ...T) {
+  |                               ^ [3]
+7 |   $s['id'] = 'not an int';
+  |              ^^^^^^^^^^^^ [5]
+8 |   return $s;
+  |   ^^^^^^^^^^ [4]
+  |          ^^ [1]
+9 | }
+
+1 error found

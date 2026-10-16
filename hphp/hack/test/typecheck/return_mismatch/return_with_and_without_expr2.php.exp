@@ -1,16 +1,62 @@
-ERROR: File "return_with_and_without_expr2.php", line 5, characters 8-83:
-This function can exit with and without returning a value (Typing[4421])
-  File "return_with_and_without_expr2.php", line 7, characters 7-16:
-  Returning a value here.
-  File "return_with_and_without_expr2.php", line 9, characters 7-13:
-  Returning without a value here
-ERROR: File "return_with_and_without_expr2.php", line 13, characters 3-16:
-You cannot return a value (Typing[4084])
-  File "return_with_and_without_expr2.php", line 4, characters 25-28:
-  This is a `void` function
-ERROR: File "return_with_and_without_expr2.php", line 13, characters 13-14:
-Invalid argument (Typing[4110])
-  File "return_with_and_without_expr2.php", line 4, characters 25-28:
-  Expected `void`
-  File "return_with_and_without_expr2.php", line 13, characters 13-14:
-  But got `int`
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+return_with_and_without_expr2.php:5:8
+ 3 | 
+ 4 | function test(bool $b): void {
+ 5 |   $f = $x ==> {
+   |        ^^^^^^^^ [1]
+ 6 |     if ($b) {
+   |     ^^^^^^^^^ [1]
+ 7 |       return $x;
+   |       ^^^^^^^^^^ [1]
+   |       ^^^^^^^^^^ [2]
+ 8 |     } else {
+   |     ^^^^^^^^ [1]
+ 9 |       return;
+   |       ^^^^^^^ [1]
+   |       ^^^^^^^ [3]
+10 |     }
+   |     ^ [1]
+11 |   };
+   |   ^ [1]
+12 | 
+13 |   return $f(42);
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+return_with_and_without_expr2.php:13:3
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function test(bool $b): void {
+   |                         ^^^^ [2]
+ 5 |   $f = $x ==> {
+ 6 |     if ($b) {
+   :
+11 |   };
+12 | 
+13 |   return $f(42);
+   |   ^^^^^^^^^^^^^^ [1]
+14 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `void` [2]
+-> But got `int` [1]
+
+return_with_and_without_expr2.php:13:13
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function test(bool $b): void {
+   |                         ^^^^ [2]
+ 5 |   $f = $x ==> {
+ 6 |     if ($b) {
+   :
+11 |   };
+12 | 
+13 |   return $f(42);
+   |             ^^ [1]
+14 | }
+
+3 errors found

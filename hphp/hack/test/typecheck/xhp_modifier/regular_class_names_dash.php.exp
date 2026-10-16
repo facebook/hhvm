@@ -1,4 +1,17 @@
-ERROR: File "regular_class_names_dash.php", line 4, characters 10-10:
-A left brace `{` is expected here. (Parsing[1002])
-ERROR: File "regular_class_names_dash.php", line 4, characters 10-10:
-Encountered unexpected text `-`, was expecting a class element. (Parsing[1002])
+error: Parsing[1002] A left brace `{` is expected here. [1]
+
+regular_class_names_dash.php:4:10
+2 | 
+3 | // Regular classes containing dashes but no xhp colon prefix are not allowed.
+4 | class foo-bar {}
+  |          ^ [1]
+
+error: Parsing[1002] Encountered unexpected text `-`, was expecting a class element. [1]
+
+regular_class_names_dash.php:4:10
+2 | 
+3 | // Regular classes containing dashes but no xhp colon prefix are not allowed.
+4 | class foo-bar {}
+  |          ^ [1]
+
+2 errors found

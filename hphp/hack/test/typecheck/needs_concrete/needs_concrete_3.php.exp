@@ -1,4 +1,19 @@
-ERROR: File "needs_concrete_3.php", line 15, characters 13-14:
-Dangerous call to `C1::m2` (a `<<__NeedsConcrete>>` method) via `parent`. It requires `static` to refer to a concrete class, but `parent` sets `static` to a class that may not be concrete. (Typing[4528])
-  File "needs_concrete_3.php", line 5, characters 26-27:
-  Declaration is here
+error: Typing[4528] Dangerous call to `C1::m2` (a `<<__NeedsConcrete>>` method) via `parent`. It requires `static` to refer to a concrete class, but `parent` sets `static` to a class that may not be concrete. [1]
+-> Declaration is here [2]
+
+needs_concrete_3.php:15:13
+ 3 | abstract class C1 {
+ 4 |   <<__NeedsConcrete>>
+ 5 |   public static function m2(): void {
+   |                          ^^ [2]
+ 6 |     static::m3();
+ 7 |   }
+   :
+13 |   public static function m1(): void {
+14 |     // hh error: unsafe because `static` may refer to a non-concrete class
+15 |     parent::m2();
+   |             ^^ [1]
+16 |   }
+17 | }
+
+1 error found

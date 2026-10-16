@@ -1,24 +1,96 @@
-ERROR: File "recursive_type_bad.php", line 4, characters 6-18:
-Cyclic type definition (Typing[4014])
-  File "recursive_type_bad.php", line 20, characters 25-37:
-  Cyclic use is here
-ERROR: File "recursive_type_bad.php", line 11, characters 6-17:
-Cyclic type definition (Typing[4014])
-  File "recursive_type_bad.php", line 21, characters 24-35:
-  Cyclic use is here
-ERROR: File "recursive_type_bad.php", line 20, characters 6-21:
-Cyclic type definition (Typing[4014])
-  File "recursive_type_bad.php", line 6, characters 14-29:
-  Cyclic use is here
-ERROR: File "recursive_type_bad.php", line 21, characters 6-20:
-Cyclic type definition (Typing[4014])
-  File "recursive_type_bad.php", line 14, characters 14-28:
-  Cyclic use is here
-ERROR: File "recursive_type_bad.php", line 27, characters 10-20:
-Invalid return type (Typing[4110])
-  File "recursive_type_bad.php", line 24, characters 33-44:
-  Expected `shape('inner' => mixed, 'value1' => int, 'value2' => string)`
-  File "recursive_type_bad.php", line 27, characters 10-20:
-  But got `mixed`
-  File "recursive_type_bad.php", line 6, characters 14-29:
-    from this definition
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_type_bad.php:4:6
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | type MyParentShape = shape(
+   |      ^^^^^^^^^^^^^ [1]
+ 5 |   'value1' => int,
+ 6 |   'inner' => MyParentShapeFix, // for some reason this is fine?!
+   :
+18 | 
+19 | // sprinkle in a bit of indirection
+20 | type MyParentShapeFix = MyParentShape;
+   |                         ^^^^^^^^^^^^^ [2]
+21 | type MyChildShapeFix = MyChildShape;
+22 | 
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_type_bad.php:11:6
+ 9 | );
+10 | 
+11 | type MyChildShape = shape(
+   |      ^^^^^^^^^^^^ [1]
+12 |   'value1' => int,
+13 |   'value2' => string,
+   :
+19 | // sprinkle in a bit of indirection
+20 | type MyParentShapeFix = MyParentShape;
+21 | type MyChildShapeFix = MyChildShape;
+   |                        ^^^^^^^^^^^^ [2]
+22 | 
+23 | // Demo how MyParentShape and MyChildShape are broken
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_type_bad.php:20:6
+ 4 | type MyParentShape = shape(
+ 5 |   'value1' => int,
+ 6 |   'inner' => MyParentShapeFix, // for some reason this is fine?!
+   |              ^^^^^^^^^^^^^^^^ [2]
+ 7 |   // 'inner' => MyParentShape, // is an recursive error
+ 8 |   ...
+   :
+18 | 
+19 | // sprinkle in a bit of indirection
+20 | type MyParentShapeFix = MyParentShape;
+   |      ^^^^^^^^^^^^^^^^ [1]
+21 | type MyChildShapeFix = MyChildShape;
+22 | 
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+recursive_type_bad.php:21:6
+12 |   'value1' => int,
+13 |   'value2' => string,
+14 |   'inner' => MyChildShapeFix, // for some reason this is fine?!
+   |              ^^^^^^^^^^^^^^^ [2]
+15 |   // 'inner' => MyChildShape, // is an recursive error
+16 | );
+   :
+19 | // sprinkle in a bit of indirection
+20 | type MyParentShapeFix = MyParentShape;
+21 | type MyChildShapeFix = MyChildShape;
+   |      ^^^^^^^^^^^^^^^ [1]
+22 | 
+23 | // Demo how MyParentShape and MyChildShape are broken
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `shape('inner' => mixed, 'value1' => int, 'value2' => string)` [2]
+-> But got `mixed` [1]
+->   from this definition [3]
+
+recursive_type_bad.php:27:10
+ 4 | type MyParentShape = shape(
+ 5 |   'value1' => int,
+ 6 |   'inner' => MyParentShapeFix, // for some reason this is fine?!
+   |              ^^^^^^^^^^^^^^^^ [3]
+ 7 |   // 'inner' => MyParentShape, // is an recursive error
+ 8 |   ...
+   :
+22 | 
+23 | // Demo how MyParentShape and MyChildShape are broken
+24 | function foo(MyParentShape $x): MyChildShape {
+   |                                 ^^^^^^^^^^^^ [2]
+25 |   // MyChildShape isn't a subtype of MyParentShape (it's the other way around)
+26 |   // return $x; // this is an error, (expected)
+27 |   return $x['inner']; // this is an error (expected)
+   |          ^^^^^^^^^^^ [1]
+28 | }
+
+5 errors found

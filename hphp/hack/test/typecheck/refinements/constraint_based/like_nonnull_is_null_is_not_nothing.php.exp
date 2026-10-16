@@ -1,2 +1,11 @@
-WARN: File "like_nonnull_is_null_is_not_nothing.php", line 12, characters 7-27:
-This `is` check is always `false`. The expression on the left has type `nonnull` which shares no values with `null`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `nonnull` which shares no values with `null`. [1]
+
+like_nonnull_is_null_is_not_nothing.php:12:7
+10 |   $like_nonnull = get_like_nonnull();
+11 |   hh_expect_equivalent<~nonnull>($like_nonnull);
+12 |   if ($like_nonnull is null) {
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |     hh_expect_equivalent<(dynamic & null)>($like_nonnull);
+14 |   } else {
+
+1 error found

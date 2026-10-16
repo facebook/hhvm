@@ -1,4 +1,12 @@
-ERROR: File "xhp_dupe.php", line 13, characters 11-13:
-Name already bound: `foo` (Naming[2012])
-  File "xhp_dupe.php", line 12, characters 7-9:
-  Previous definition is here
+error: Naming[2012] Name already bound: `foo` [1]
+-> Previous definition is here [2]
+
+xhp_dupe.php:13:11
+10 |  */
+11 | 
+12 | class foo {}
+   |       ^^^ [2]
+13 | xhp class foo {}
+   |           ^^^ [1]
+
+1 error found

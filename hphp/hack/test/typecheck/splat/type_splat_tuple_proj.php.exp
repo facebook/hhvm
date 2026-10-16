@@ -1,4 +1,21 @@
-ERROR: File "type_splat_tuple_proj.php", line 9, characters 13-13:
-Tuple accessed with an index out of bounds (Typing[4116])
-ERROR: File "type_splat_tuple_proj.php", line 19, characters 13-13:
-Tuple accessed with an index out of bounds (Typing[4116])
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+type_splat_tuple_proj.php:9:13
+ 7 |   hh_expect_equivalent<string>($tup[1]);
+ 8 |   // This should be an array because the element may not exist
+ 9 |   $y = $tup[2];
+   |             ^ [1]
+10 |   hh_expect_equivalent<?arraykey>($tup[2] ?? null);
+11 | }
+
+error: Typing[4116] Tuple accessed with an index out of bounds [1]
+
+type_splat_tuple_proj.php:19:13
+17 |   hh_expect_equivalent<bool>($tup[3]);
+18 |   // This should be an array because the element may not exist
+19 |   $y = $tup[4];
+   |             ^ [1]
+20 |   hh_expect_equivalent<?arraykey>($tup[4] ?? null);
+21 | }
+
+2 errors found

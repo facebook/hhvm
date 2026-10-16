@@ -1,5 +1,13 @@
-ERROR: File "class_non_classish.php", line 8, characters 3-25:
-The two arguments to `HH\type_structure_class()` must be:
+error: Typing[4150] The two arguments to `HH\type_structure_class()` must be:
  - first: `ValidClassname::class` or an object of that class
  - second: a single-quoted string literal containing the name of a type constant of that class
-The type constant does not resolve to a classish type (Typing[4150])
+The type constant does not resolve to a classish type [1]
+
+class_non_classish.php:8:3
+6 | 
+7 | function test(): void {
+8 |   HH\type_structure_class(Foo::class, 'T');
+  |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

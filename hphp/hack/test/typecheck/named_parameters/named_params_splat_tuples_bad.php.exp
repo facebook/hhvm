@@ -1,10 +1,38 @@
-ERROR: File "named_params_splat_tuples_bad.php", line 24, characters 3-19:
-Missing required named argument: n (Typing[4499])
-  File "named_params_splat_tuples_bad.php", line 6, characters 10-13:
-  Definition is here
-ERROR: File "named_params_splat_tuples_bad.php", line 28, characters 16-24:
-Invalid argument (Typing[4105])
-  File "named_params_splat_tuples_bad.php", line 28, characters 16-24:
-  Too many positional arguments (expected 2 but got 5)
-  File "named_params_splat_tuples_bad.php", line 6, characters 10-13:
-  Definition is here
+error: Typing[4499] Missing required named argument: n [1]
+-> Definition is here [2]
+
+named_params_splat_tuples_bad.php:24:3
+ 4 | // Tests for splatting tuples with named parameters
+ 5 | 
+ 6 | function take(named int $n, int $x1, int $x2): void {}
+   |          ^^^^ [2]
+ 7 | 
+ 8 | function take_many(named int $n, int $x1, int $x2, int $x3): void {}
+   :
+22 | 
+23 |   // Error: Missing required named parameter
+24 |   take(...$numbers);
+   |   ^^^^^^^^^^^^^^^^^ [1]
+25 | 
+26 |   // Error: Too many arguments with splat
+
+error: Typing[4105] Invalid argument [1]
+-> Too many positional arguments (expected 2 but got 5) [1]
+-> Definition is here [2]
+
+named_params_splat_tuples_bad.php:28:16
+ 4 | // Tests for splatting tuples with named parameters
+ 5 | 
+ 6 | function take(named int $n, int $x1, int $x2): void {}
+   |          ^^^^ [2]
+ 7 | 
+ 8 | function take_many(named int $n, int $x1, int $x2, int $x3): void {}
+   :
+26 |   // Error: Too many arguments with splat
+27 |   $too_many = tuple(1, 2, 3, 4, 5);
+28 |   take(n=1, ...$too_many);
+   |                ^^^^^^^^^ [1]
+29 | }
+30 | //
+
+2 errors found

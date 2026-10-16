@@ -1,2 +1,11 @@
-ERROR: File "using_bad_syntax_3.php", line 19, characters 5-41:
-Using statement in function scoped form may only be used at the top level of a function or a method (Parsing[1002])
+error: Parsing[1002] Using statement in function scoped form may only be used at the top level of a function or a method [1]
+
+using_bad_syntax_3.php:19:5
+17 |   using ($w = new Handle()) {
+18 |     // This is not
+19 |     using $q = new ScopeGuard(() ==> {});
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+20 |   }
+21 | }
+
+1 error found

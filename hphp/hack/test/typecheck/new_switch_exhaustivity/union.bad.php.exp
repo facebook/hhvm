@@ -1,28 +1,155 @@
-ERROR: File "union.bad.php", line 14, characters 3-77:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
-  File "union.bad.php", line 14, characters 11-12:
-  The scrutinee has type `?E`.
-ERROR: File "union.bad.php", line 24, characters 3-77:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "union.bad.php", line 24, characters 11-12:
-  The scrutinee has type `~?E`.
-ERROR: File "union.bad.php", line 34, characters 3-77:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A` (Typing[4019])
-  File "union.bad.php", line 34, characters 11-12:
-  The scrutinee has type `~?E`.
-ERROR: File "union.bad.php", line 44, characters 3-77:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
-  File "union.bad.php", line 44, characters 11-12:
-  The scrutinee has type `~?E`.
-ERROR: File "union.bad.php", line 54, characters 3-77:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "union.bad.php", line 54, characters 11-12:
-  The scrutinee has type `~?E`.
-ERROR: File "union.bad.php", line 63, characters 3-106:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `F::B` (Typing[4019])
-  File "union.bad.php", line 63, characters 11-12:
-  The scrutinee has type `(E | F)`.
-ERROR: File "union.bad.php", line 74, characters 3-48:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "union.bad.php", line 74, characters 11-12:
-  The scrutinee has type `E`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `null` [1]
+-> The scrutinee has type `?E`. [2]
+
+union.bad.php:14:3
+12 | 
+13 | function test_nullable_as_union((E | null) $e): void {
+14 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+15 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+16 |       return;
+   |       ^^^^^^^ [1]
+17 |     case E::B:
+   |     ^^^^^^^^^^ [1]
+18 |       return;
+   |       ^^^^^^^ [1]
+19 |   }
+   |   ^ [1]
+20 | }
+21 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `~?E`. [2]
+
+union.bad.php:24:3
+22 | function test_like_nullable_as_union(~(E | null) $e): void {
+23 |   $e = id<~(E | null)>($e);
+24 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+25 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+26 |       return;
+   |       ^^^^^^^ [1]
+27 |     case null:
+   |     ^^^^^^^^^^ [1]
+28 |       return;
+   |       ^^^^^^^ [1]
+29 |   }
+   |   ^ [1]
+30 | }
+31 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A` [1]
+-> The scrutinee has type `~?E`. [2]
+
+union.bad.php:34:3
+32 | function test_nullable_as_union_like1((~E | null) $e): void {
+33 |   $e = id<(~E | null)>($e);
+34 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+35 |     case E::B:
+   |     ^^^^^^^^^^ [1]
+36 |       return;
+   |       ^^^^^^^ [1]
+37 |     case null:
+   |     ^^^^^^^^^^ [1]
+38 |       return;
+   |       ^^^^^^^ [1]
+39 |   }
+   |   ^ [1]
+40 | }
+41 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `null` [1]
+-> The scrutinee has type `~?E`. [2]
+
+union.bad.php:44:3
+42 | function test_nullable_as_union_like2((E | ~null) $e): void {
+43 |   $e = id<(E | ~null)>($e);
+44 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+45 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+46 |       return;
+   |       ^^^^^^^ [1]
+47 |     case E::B:
+   |     ^^^^^^^^^^ [1]
+48 |       return;
+   |       ^^^^^^^ [1]
+49 |   }
+   |   ^ [1]
+50 | }
+51 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `~?E`. [2]
+
+union.bad.php:54:3
+52 | function test_nullable_as_union_like3((~E | ~null) $e): void {
+53 |   $e = id<(~E | ~null)>($e);
+54 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+55 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+56 |       return;
+   |       ^^^^^^^ [1]
+57 |     case null:
+   |     ^^^^^^^^^^ [1]
+58 |       return;
+   |       ^^^^^^^ [1]
+59 |   }
+   |   ^ [1]
+60 | }
+61 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `F::B` [1]
+-> The scrutinee has type `(E | F)`. [2]
+
+union.bad.php:63:3
+61 | 
+62 | function test_enum_or_enum((E | F) $e): void {
+63 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+64 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+65 |       return;
+   |       ^^^^^^^ [1]
+66 |     case E::B:
+   |     ^^^^^^^^^^ [1]
+67 |       return;
+   |       ^^^^^^^ [1]
+68 |     case F::A:
+   |     ^^^^^^^^^^ [1]
+69 |       return;
+   |       ^^^^^^^ [1]
+70 |   }
+   |   ^ [1]
+71 | }
+72 | 
+
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `E`. [2]
+
+union.bad.php:74:3
+72 | 
+73 | function test_enum_or_same_enum((E | E) $e): void {
+74 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+75 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+76 |       return;
+   |       ^^^^^^^ [1]
+77 |   }
+   |   ^ [1]
+78 | }
+79 | 
+
+7 errors found

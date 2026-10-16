@@ -1,6 +1,22 @@
-WARN: File "sealed_classes21.php", line 2, characters 12-19:
-Class `X` in sealed allowlist for `X`, but does not extend `X` (Warn[12035])
-ERROR: File "sealed_classes21.php", line 2, characters 22-27:
-`__Sealed` can only be used with named types, e.g. `Foo::class` (Parsing[1002])
-ERROR: File "sealed_classes21.php", line 2, characters 22-27:
-`static` is undefined outside of a class (Typing[4061])
+warning: Warn[12035] Class `X` in sealed allowlist for `X`, but does not extend `X` [1]
+
+sealed_classes21.php:2:12
+1 | <?hh
+2 | <<__Sealed(X::class, static::class)>> class X {}
+  |            ^^^^^^^^ [1]
+
+error: Parsing[1002] `__Sealed` can only be used with named types, e.g. `Foo::class` [1]
+
+sealed_classes21.php:2:22
+1 | <?hh
+2 | <<__Sealed(X::class, static::class)>> class X {}
+  |                      ^^^^^^ [1]
+
+error: Typing[4061] `static` is undefined outside of a class [1]
+
+sealed_classes21.php:2:22
+1 | <?hh
+2 | <<__Sealed(X::class, static::class)>> class X {}
+  |                      ^^^^^^ [1]
+
+3 errors found

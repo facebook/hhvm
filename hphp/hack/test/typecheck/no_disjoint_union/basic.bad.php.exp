@@ -1,8 +1,21 @@
-WARN: File "basic.bad.php", line 10, characters 3-15:
-Invalid type argument due to disjoint types in a union (Warn[12017])
-  File "basic.bad.php", line 9, characters 15-17:
-  `int` is one of the disjoint types
-  File "basic.bad.php", line 9, characters 23-28:
-  `string` is one of the disjoint types
-  File "basic.bad.php", line 5, characters 38-38:
-  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
+warning: Warn[12017] Invalid type argument due to disjoint types in a union [1]
+-> `int` is one of the disjoint types [2]
+-> `string` is one of the disjoint types [3]
+-> This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors [4]
+
+basic.bad.php:10:3
+ 3 | <<file: __EnableUnstableFeatures('no_disjoint_union')>>
+ 4 | 
+ 5 | function equal<<<__NoDisjointUnion>> T>(T $t1, T $t2): bool {
+   |                                      ^ [4]
+ 6 |   return $t1 === $t2;
+ 7 | }
+ 8 | 
+ 9 | function main(int $i, string $j): void {
+   |               ^^^ [2]
+   |                       ^^^^^^ [3]
+10 |   equal($i, $j);
+   |   ^^^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

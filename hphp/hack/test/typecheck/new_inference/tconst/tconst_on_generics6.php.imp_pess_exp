@@ -1,110 +1,320 @@
-ERROR: File "tconst_on_generics6.php", line 30, characters 82-83:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics6.php", line 33, characters 69-70:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics6.php", line 43, characters 19-20:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
-  File "tconst_on_generics6.php", line 18, characters 18-23:
-  But got `string`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 39, characters 12-20:
-    on an object of exactly the class StringBox
-ERROR: File "tconst_on_generics6.php", line 43, characters 19-20:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 18, characters 18-23:
-  Expected `string`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 39, characters 12-20:
-    on an object of exactly the class StringBox
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  But got `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-  But got `<expr#3>::T`
-  by accessing the type constant `T`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  on the expression dependent type <expr#3>
-  File "tconst_on_generics6.php", line 44, characters 20-21:
-    where `<expr#3>` is a reference to this expression
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-  But got `Box::T`
-  by accessing the type constant `T`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  on the expression dependent type <expr#3>
-  File "tconst_on_generics6.php", line 44, characters 20-21:
-    where `<expr#3>` is a reference to this expression
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  Expected `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-  But got `arraykey`
-  by accessing the type constant `T`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  on the expression dependent type <expr#3>
-  File "tconst_on_generics6.php", line 44, characters 20-21:
-    where `<expr#3>` is a reference to this expression
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-  Expected `<expr#3>::T`
-  by accessing the type constant `T`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  on the expression dependent type <expr#3>
-  File "tconst_on_generics6.php", line 44, characters 20-21:
-    where `<expr#3>` is a reference to this expression
-  File "tconst_on_generics6.php", line 10, characters 18-20:
-  But got `int`
-  File "tconst_on_generics6.php", line 30, characters 86-86:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics6.php", line 30, characters 47-52:
-    on an object of type IntBox
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4110])
-  File "tconst_on_generics6.php", line 44, characters 15-18:
-  Expected `dynamic` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta`
-  File "tconst_on_generics6.php", line 30, characters 59-60:
-    via this generic `T1`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  But got `Box`
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4110])
-  File "tconst_on_generics6.php", line 44, characters 15-18:
-  Expected `~_` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta`
-  File "tconst_on_generics6.php", line 30, characters 59-60:
-    via this generic `T1`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  But got `<expr#3> as Box`
-  File "tconst_on_generics6.php", line 44, characters 20-21:
-    where `<expr#3>` is a reference to this expression
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics6.php:30:82
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                                                  ^^ [1]
+31 |     return $x->getK();
+32 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics6.php:33:69
+31 |     return $x->getK();
+32 |   }
+33 |   public static function getc<T1 as Box, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                                     ^^ [1]
+34 |     return $x->getK();
+35 |   }
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of type IntBox [4]
+-> But got `string` [5]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of exactly the class StringBox [6]
+
+tconst_on_generics6.php:43:19
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [2]
+11 |   public function getK() : this::T {
+12 |     return 0;
+   :
+16 | 
+17 | class StringBox extends Box {
+18 |   const type T = string;
+   |                  ^^^^^^ [5]
+19 |   public function getK() : this::T {
+20 |     return "5";
+   :
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                               ^^^^^^ [4]
+   |                                                                                      ^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+39 |   $x = new StringBox();
+   |            ^^^^^^^^^ [6]
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+   |                   ^^ [1]
+44 |   $yy = Test::geta($b); // nok
+45 |   $z = Test::getc($s); // ok
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `string` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of exactly the class StringBox [4]
+-> But got `int` [5]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of type IntBox [6]
+
+tconst_on_generics6.php:43:19
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [5]
+11 |   public function getK() : this::T {
+12 |     return 0;
+   :
+16 | 
+17 | class StringBox extends Box {
+18 |   const type T = string;
+   |                  ^^^^^^ [2]
+19 |   public function getK() : this::T {
+20 |     return "5";
+   :
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                               ^^^^^^ [6]
+   |                                                                                      ^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+39 |   $x = new StringBox();
+   |            ^^^^^^^^^ [4]
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+   |                   ^^ [1]
+44 |   $yy = Test::geta($b); // nok
+45 |   $z = Test::getc($s); // ok
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of type IntBox [4]
+-> But got `<expr#3>::T`
+  by accessing the type constant `T` [3]
+-> on the expression dependent type <expr#3> [5]
+->   where `<expr#3>` is a reference to this expression [1]
+
+tconst_on_generics6.php:44:20
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [2]
+11 |   public function getK() : this::T {
+12 |     return 0;
+   :
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                               ^^^^^^ [4]
+   |                                                                                      ^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+36 | }
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+   |                          ^^^ [5]
+39 |   $x = new StringBox();
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+44 |   $yy = Test::geta($b); // nok
+   |                    ^^ [1]
+45 |   $z = Test::getc($s); // ok
+46 |   expect_int($yy); // nok
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of type IntBox [4]
+-> But got `Box::T`
+  by accessing the type constant `T` [3]
+-> on the expression dependent type <expr#3> [5]
+->   where `<expr#3>` is a reference to this expression [1]
+
+tconst_on_generics6.php:44:20
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [2]
+11 |   public function getK() : this::T {
+12 |     return 0;
+   :
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                               ^^^^^^ [4]
+   |                                                                                      ^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+36 | }
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+   |                          ^^^ [5]
+39 |   $x = new StringBox();
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+44 |   $yy = Test::geta($b); // nok
+   |                    ^^ [1]
+45 |   $z = Test::getc($s); // ok
+46 |   expect_int($yy); // nok
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+->   resulting from accessing the type constant 'T' [3]
+->   on an object of type IntBox [4]
+-> But got `arraykey`
+  by accessing the type constant `T` [3]
+-> on the expression dependent type <expr#3> [5]
+->   where `<expr#3>` is a reference to this expression [1]
+
+tconst_on_generics6.php:44:20
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [2]
+11 |   public function getK() : this::T {
+12 |     return 0;
+   :
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                               ^^^^^^ [4]
+   |                                                                                      ^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+36 | }
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+   |                          ^^^ [5]
+39 |   $x = new StringBox();
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+44 |   $yy = Test::geta($b); // nok
+   |                    ^^ [1]
+45 |   $z = Test::getc($s); // ok
+46 |   expect_int($yy); // nok
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `<expr#3>::T`
+  by accessing the type constant `T` [2]
+-> on the expression dependent type <expr#3> [3]
+->   where `<expr#3>` is a reference to this expression [1]
+-> But got `int` [4]
+->   resulting from accessing the type constant 'T' [2]
+->   on an object of type IntBox [5]
+
+tconst_on_generics6.php:44:20
+ 8 | 
+ 9 | class IntBox extends Box {
+10 |   const type T = int;
+   |                  ^^^ [4]
+11 |   public function getK() : this::T {
+12 |     return 0;
+   :
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                               ^^^^^^ [5]
+   |                                                                                      ^ [2]
+31 |     return $x->getK();
+32 |   }
+   :
+36 | }
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+   |                          ^^^ [3]
+39 |   $x = new StringBox();
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+44 |   $yy = Test::geta($b); // nok
+   |                    ^^ [1]
+45 |   $z = Test::getc($s); // ok
+46 |   expect_int($yy); // nok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta` [2]
+->   via this generic `T1` [3]
+-> But got `Box` [4]
+
+tconst_on_generics6.php:44:20
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                           ^^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+36 | }
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+   |                          ^^^ [4]
+39 |   $x = new StringBox();
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+44 |   $yy = Test::geta($b); // nok
+   |               ^^^^ [2]
+   |                    ^^ [1]
+45 |   $z = Test::getc($s); // ok
+46 |   expect_int($yy); // nok
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~_` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta` [2]
+->   via this generic `T1` [3]
+-> But got `<expr#3> as Box` [4]
+->   where `<expr#3>` is a reference to this expression [1]
+
+tconst_on_generics6.php:44:20
+28 | 
+29 | class Test {
+30 |   public static function geta<T1 as Box super IntBox, T2>(T1 $x) : T2 where T2 = T1::T {
+   |                                                           ^^ [3]
+31 |     return $x->getK();
+32 |   }
+   :
+36 | }
+37 | 
+38 | function t(AbsStrBox $s, Box $b) : void {
+   |                          ^^^ [4]
+39 |   $x = new StringBox();
+40 |   // x is a StringBox
+41 |   // foo is type function(T1 $x) : T1::T
+42 |   // foo($x) should therefore be type StringBox::T = string
+43 |   $y = Test::geta($x); // nok
+44 |   $yy = Test::geta($b); // nok
+   |               ^^^^ [2]
+   |                    ^^ [1]
+45 |   $z = Test::getc($s); // ok
+46 |   expect_int($yy); // nok
+
+10 errors found

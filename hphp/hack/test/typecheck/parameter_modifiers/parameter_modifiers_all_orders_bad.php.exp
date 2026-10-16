@@ -1,430 +1,1847 @@
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_inout.php", line 5, characters 30-34:
-Duplicate parameter modifier `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named.php", line 6, characters 30-34:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional.php", line 5, characters 24-50:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional.php", line 5, characters 30-34:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 5, characters 30-34:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly.php", line 5, characters 30-34:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly.php", line 5, characters 49-50:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php", line 5, characters 30-34:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional.php", line 5, characters 24-44:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 5, characters 24-50:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 5, characters 24-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php", line 5, characters 52-53:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 5, characters 48-52:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly.php", line 5, characters 43-44:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named.php", line 5, characters 49-50:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional.php", line 5, characters 24-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional.php", line 5, characters 52-53:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 5, characters 48-52:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php", line 5, characters 24-50:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php", line 5, characters 49-50:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_named.php", line 5, characters 30-34:
-Duplicate parameter modifier `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional.php", line 5, characters 30-37:
-Invalid parameter modifier order. The correct order is `optional named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php", line 5, characters 24-50:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php", line 5, characters 30-37:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout.php", line 5, characters 49-50:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional.php", line 5, characters 39-46:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 5, characters 24-28:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout.php", line 5, characters 24-44:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named.php", line 5, characters 24-50:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly.php", line 5, characters 24-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly.php", line 5, characters 52-53:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php", line 5, characters 48-52:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout.php", line 5, characters 24-50:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout.php", line 5, characters 33-37:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 5, characters 33-37:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php", line 5, characters 33-37:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_optional.php", line 5, characters 33-40:
-Duplicate parameter modifier `optional`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout.php", line 5, characters 24-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout.php", line 5, characters 52-53:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 5, characters 48-52:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named.php", line 5, characters 42-46:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 5, characters 42-46:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout.php", line 5, characters 43-44:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php", line 5, characters 49-50:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 5, characters 39-43:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 5, characters 24-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php", line 5, characters 52-53:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 5, characters 48-52:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named.php", line 5, characters 33-37:
-Invalid parameter modifier order. The correct order is `named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 5, characters 33-37:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php", line 5, characters 49-50:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 5, characters 33-37:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php", line 5, characters 33-37:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 5, characters 33-37:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional.php", line 5, characters 33-40:
-Invalid parameter modifier order. The correct order is `optional readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 5, characters 24-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php", line 5, characters 52-53:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 5, characters 48-52:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php", line 5, characters 33-40:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 5, characters 24-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 5, characters 42-46:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php", line 5, characters 58-59:
-A parameter cannot be both `inout` and `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--abstract_method_readonly_readonly.php", line 5, characters 33-40:
-Duplicate parameter modifier `readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_inout.php", line 4, characters 47-51:
-Duplicate parameter modifier `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named.php", line 4, characters 47-51:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 4, characters 49-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php", line 4, characters 55-59:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 4, characters 57-61:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php", line 4, characters 63-67:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly.php", line 4, characters 55-59:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 4, characters 57-61:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php", line 4, characters 63-67:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional.php", line 4, characters 44-48:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 4, characters 49-53:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php", line 4, characters 64-68:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 4, characters 57-61:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php", line 4, characters 72-76:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php", line 4, characters 52-56:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 4, characters 57-61:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php", line 4, characters 81-85:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php", line 4, characters 64-68:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 4, characters 57-61:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php", line 4, characters 72-76:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional.php", line 4, characters 52-56:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 4, characters 57-61:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php", line 4, characters 81-85:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout.php", line 4, characters 41-45:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 4, characters 49-53:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php", line 4, characters 55-59:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 4, characters 57-61:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php", line 4, characters 63-67:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php", line 4, characters 49-53:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 4, characters 57-61:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php", line 4, characters 63-67:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_named.php", line 4, characters 47-51:
-Duplicate parameter modifier `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional.php", line 4, characters 50-57:
-Invalid parameter modifier order. The correct order is `optional named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 4, characters 49-53:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php", line 4, characters 64-68:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 4, characters 57-61:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php", line 4, characters 72-76:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php", line 4, characters 58-65:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 4, characters 57-61:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php", line 4, characters 81-85:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php", line 4, characters 49-53:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 4, characters 57-61:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php", line 4, characters 72-76:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php", line 4, characters 67-74:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 4, characters 57-61:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php", line 4, characters 81-85:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout.php", line 4, characters 53-57:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named.php", line 4, characters 58-62:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named.php", line 4, characters 64-68:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named_readonly.php", line 4, characters 66-70:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named_readonly.php", line 4, characters 72-76:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly.php", line 4, characters 61-65:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 4, characters 66-70:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php", line 4, characters 81-85:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 4, characters 58-62:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php", line 4, characters 64-68:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 4, characters 66-70:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php", line 4, characters 72-76:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 4, characters 66-70:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php", line 4, characters 81-85:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_optional.php", line 4, characters 56-63:
-Duplicate parameter modifier `optional`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout.php", line 4, characters 70-74:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 4, characters 75-79:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php", line 4, characters 81-85:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php", line 4, characters 70-74:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 4, characters 75-79:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php", line 4, characters 81-85:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout.php", line 4, characters 53-57:
-Invalid parameter modifier order. The correct order is `inout readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php", line 4, characters 64-68:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 4, characters 66-70:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php", line 4, characters 72-76:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php", line 4, characters 61-65:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 4, characters 66-70:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php", line 4, characters 81-85:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php", line 4, characters 53-57:
-Invalid parameter modifier order. The correct order is `named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php", line 4, characters 58-62:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 4, characters 66-70:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php", line 4, characters 72-76:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php", line 4, characters 61-65:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 4, characters 66-70:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php", line 4, characters 81-85:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional.php", line 4, characters 56-63:
-Invalid parameter modifier order. The correct order is `optional readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php", line 4, characters 70-74:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 4, characters 75-79:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php", line 4, characters 81-85:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php", line 4, characters 61-68:
-Invalid parameter modifier order. The correct order is `optional named readonly`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 4, characters 75-79:
-A parameter cannot be both `inout` and `named`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php", line 4, characters 81-85:
-A parameter cannot be both `optional` and `inout`. (Parsing[1002])
-ERROR: File "parameter_modifiers_all_orders_bad.php--function_type_readonly_readonly.php", line 4, characters 56-63:
-Duplicate parameter modifier `readonly`. (Parsing[1002])
+error: Parsing[1002] Duplicate parameter modifier `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_inout.php:5:30
+3 | 
+4 | interface AbstractMethodInoutInout {
+5 |   public function test(inout inout int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named.php:6:30
+4 | 
+5 | interface AbstractMethodInoutNamed {
+6 |   public function test(inout named int $x): void;
+  |                              ^^^^^ [1]
+7 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional.php:5:24
+3 | 
+4 | interface AbstractMethodInoutNamedOptional {
+5 |   public function test(inout named optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional.php:5:30
+3 | 
+4 | interface AbstractMethodInoutNamedOptional {
+5 |   public function test(inout named optional int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodInoutNamedOptionalReadonly {
+5 |   public function test(inout named optional readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php:5:30
+3 | 
+4 | interface AbstractMethodInoutNamedOptionalReadonly {
+5 |   public function test(inout named optional readonly int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_optional_readonly.php:5:58
+3 | 
+4 | interface AbstractMethodInoutNamedOptionalReadonly {
+5 |   public function test(inout named optional readonly int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly.php:5:30
+3 | 
+4 | interface AbstractMethodInoutNamedReadonly {
+5 |   public function test(inout named readonly int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly.php:5:49
+3 | 
+4 | interface AbstractMethodInoutNamedReadonly {
+5 |   public function test(inout named readonly int $x): void;
+  |                                                 ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php:5:24
+3 | 
+4 | interface AbstractMethodInoutNamedReadonlyOptional {
+5 |   public function test(inout named readonly optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php:5:30
+3 | 
+4 | interface AbstractMethodInoutNamedReadonlyOptional {
+5 |   public function test(inout named readonly optional int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_named_readonly_optional.php:5:58
+3 | 
+4 | interface AbstractMethodInoutNamedReadonlyOptional {
+5 |   public function test(inout named readonly optional int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodInoutOptional {
+5 |   public function test(inout optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php:5:24
+3 | 
+4 | interface AbstractMethodInoutOptionalNamed {
+5 |   public function test(inout optional named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named.php:5:39
+3 | 
+4 | interface AbstractMethodInoutOptionalNamed {
+5 |   public function test(inout optional named int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodInoutOptionalNamedReadonly {
+5 |   public function test(inout optional named readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php:5:39
+3 | 
+4 | interface AbstractMethodInoutOptionalNamedReadonly {
+5 |   public function test(inout optional named readonly int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_named_readonly.php:5:58
+3 | 
+4 | interface AbstractMethodInoutOptionalNamedReadonly {
+5 |   public function test(inout optional named readonly int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodInoutOptionalReadonly {
+5 |   public function test(inout optional readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly.php:5:52
+3 | 
+4 | interface AbstractMethodInoutOptionalReadonly {
+5 |   public function test(inout optional readonly int $x): void;
+  |                                                    ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php:5:24
+3 | 
+4 | interface AbstractMethodInoutOptionalReadonlyNamed {
+5 |   public function test(inout optional readonly named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php:5:48
+3 | 
+4 | interface AbstractMethodInoutOptionalReadonlyNamed {
+5 |   public function test(inout optional readonly named int $x): void;
+  |                                                ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_optional_readonly_named.php:5:58
+3 | 
+4 | interface AbstractMethodInoutOptionalReadonlyNamed {
+5 |   public function test(inout optional readonly named int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly.php:5:43
+3 | 
+4 | interface AbstractMethodInoutReadonly {
+5 |   public function test(inout readonly int $x): void;
+  |                                           ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named.php:5:39
+3 | 
+4 | interface AbstractMethodInoutReadonlyNamed {
+5 |   public function test(inout readonly named int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named.php:5:49
+3 | 
+4 | interface AbstractMethodInoutReadonlyNamed {
+5 |   public function test(inout readonly named int $x): void;
+  |                                                 ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php:5:24
+3 | 
+4 | interface AbstractMethodInoutReadonlyNamedOptional {
+5 |   public function test(inout readonly named optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php:5:39
+3 | 
+4 | interface AbstractMethodInoutReadonlyNamedOptional {
+5 |   public function test(inout readonly named optional int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_named_optional.php:5:58
+3 | 
+4 | interface AbstractMethodInoutReadonlyNamedOptional {
+5 |   public function test(inout readonly named optional int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional.php:5:24
+3 | 
+4 | interface AbstractMethodInoutReadonlyOptional {
+5 |   public function test(inout readonly optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional.php:5:52
+3 | 
+4 | interface AbstractMethodInoutReadonlyOptional {
+5 |   public function test(inout readonly optional int $x): void;
+  |                                                    ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php:5:24
+3 | 
+4 | interface AbstractMethodInoutReadonlyOptionalNamed {
+5 |   public function test(inout readonly optional named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php:5:48
+3 | 
+4 | interface AbstractMethodInoutReadonlyOptionalNamed {
+5 |   public function test(inout readonly optional named int $x): void;
+  |                                                ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_inout_readonly_optional_named.php:5:58
+3 | 
+4 | interface AbstractMethodInoutReadonlyOptionalNamed {
+5 |   public function test(inout readonly optional named int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInout {
+5 |   public function test(named inout int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutOptional {
+5 |   public function test(named inout optional int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutOptional {
+5 |   public function test(named inout optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutOptionalReadonly {
+5 |   public function test(named inout optional readonly int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutOptionalReadonly {
+5 |   public function test(named inout optional readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_optional_readonly.php:5:58
+3 | 
+4 | interface AbstractMethodNamedInoutOptionalReadonly {
+5 |   public function test(named inout optional readonly int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutReadonly {
+5 |   public function test(named inout readonly int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly.php:5:49
+3 | 
+4 | interface AbstractMethodNamedInoutReadonly {
+5 |   public function test(named inout readonly int $x): void;
+  |                                                 ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutReadonlyOptional {
+5 |   public function test(named inout readonly optional int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php:5:24
+3 | 
+4 | interface AbstractMethodNamedInoutReadonlyOptional {
+5 |   public function test(named inout readonly optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_inout_readonly_optional.php:5:58
+3 | 
+4 | interface AbstractMethodNamedInoutReadonlyOptional {
+5 |   public function test(named inout readonly optional int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Duplicate parameter modifier `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_named.php:5:30
+3 | 
+4 | interface AbstractMethodNamedNamed {
+5 |   public function test(named named int $x): void;
+  |                              ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional.php:5:30
+3 | 
+4 | interface AbstractMethodNamedOptional {
+5 |   public function test(named optional int $x): void;
+  |                              ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedOptionalInout {
+5 |   public function test(named optional inout int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedOptionalInout {
+5 |   public function test(named optional inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodNamedOptionalInoutReadonly {
+5 |   public function test(named optional inout readonly int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodNamedOptionalInoutReadonly {
+5 |   public function test(named optional inout readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_inout_readonly.php:5:58
+3 | 
+4 | interface AbstractMethodNamedOptionalInoutReadonly {
+5 |   public function test(named optional inout readonly int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly.php:5:30
+3 | 
+4 | interface AbstractMethodNamedOptionalReadonly {
+5 |   public function test(named optional readonly int $x): void;
+  |                              ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedOptionalReadonlyInout {
+5 |   public function test(named optional readonly inout int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedOptionalReadonlyInout {
+5 |   public function test(named optional readonly inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_optional_readonly_inout.php:5:58
+3 | 
+4 | interface AbstractMethodNamedOptionalReadonlyInout {
+5 |   public function test(named optional readonly inout int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedReadonlyInout {
+5 |   public function test(named readonly inout int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout.php:5:49
+3 | 
+4 | interface AbstractMethodNamedReadonlyInout {
+5 |   public function test(named readonly inout int $x): void;
+  |                                                 ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodNamedReadonlyInoutOptional {
+5 |   public function test(named readonly inout optional int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodNamedReadonlyInoutOptional {
+5 |   public function test(named readonly inout optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_inout_optional.php:5:58
+3 | 
+4 | interface AbstractMethodNamedReadonlyInoutOptional {
+5 |   public function test(named readonly inout optional int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional.php:5:39
+3 | 
+4 | interface AbstractMethodNamedReadonlyOptional {
+5 |   public function test(named readonly optional int $x): void;
+  |                                       ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedReadonlyOptionalInout {
+5 |   public function test(named readonly optional inout int $x): void;
+  |                        ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodNamedReadonlyOptionalInout {
+5 |   public function test(named readonly optional inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_named_readonly_optional_inout.php:5:58
+3 | 
+4 | interface AbstractMethodNamedReadonlyOptionalInout {
+5 |   public function test(named readonly optional inout int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalInout {
+5 |   public function test(optional inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalInoutNamed {
+5 |   public function test(optional inout named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named.php:5:39
+3 | 
+4 | interface AbstractMethodOptionalInoutNamed {
+5 |   public function test(optional inout named int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalInoutNamedReadonly {
+5 |   public function test(optional inout named readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php:5:39
+3 | 
+4 | interface AbstractMethodOptionalInoutNamedReadonly {
+5 |   public function test(optional inout named readonly int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_named_readonly.php:5:58
+3 | 
+4 | interface AbstractMethodOptionalInoutNamedReadonly {
+5 |   public function test(optional inout named readonly int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalInoutReadonly {
+5 |   public function test(optional inout readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly.php:5:52
+3 | 
+4 | interface AbstractMethodOptionalInoutReadonly {
+5 |   public function test(optional inout readonly int $x): void;
+  |                                                    ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalInoutReadonlyNamed {
+5 |   public function test(optional inout readonly named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php:5:48
+3 | 
+4 | interface AbstractMethodOptionalInoutReadonlyNamed {
+5 |   public function test(optional inout readonly named int $x): void;
+  |                                                ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_inout_readonly_named.php:5:58
+3 | 
+4 | interface AbstractMethodOptionalInoutReadonlyNamed {
+5 |   public function test(optional inout readonly named int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalNamedInout {
+5 |   public function test(optional named inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout.php:5:33
+3 | 
+4 | interface AbstractMethodOptionalNamedInout {
+5 |   public function test(optional named inout int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalNamedInoutReadonly {
+5 |   public function test(optional named inout readonly int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php:5:33
+3 | 
+4 | interface AbstractMethodOptionalNamedInoutReadonly {
+5 |   public function test(optional named inout readonly int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_inout_readonly.php:5:58
+3 | 
+4 | interface AbstractMethodOptionalNamedInoutReadonly {
+5 |   public function test(optional named inout readonly int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalNamedReadonlyInout {
+5 |   public function test(optional named readonly inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php:5:33
+3 | 
+4 | interface AbstractMethodOptionalNamedReadonlyInout {
+5 |   public function test(optional named readonly inout int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_named_readonly_inout.php:5:58
+3 | 
+4 | interface AbstractMethodOptionalNamedReadonlyInout {
+5 |   public function test(optional named readonly inout int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Duplicate parameter modifier `optional`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_optional.php:5:33
+3 | 
+4 | interface AbstractMethodOptionalOptional {
+5 |   public function test(optional optional int $x): void;
+  |                                 ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalReadonlyInout {
+5 |   public function test(optional readonly inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout.php:5:52
+3 | 
+4 | interface AbstractMethodOptionalReadonlyInout {
+5 |   public function test(optional readonly inout int $x): void;
+  |                                                    ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalReadonlyInoutNamed {
+5 |   public function test(optional readonly inout named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php:5:48
+3 | 
+4 | interface AbstractMethodOptionalReadonlyInoutNamed {
+5 |   public function test(optional readonly inout named int $x): void;
+  |                                                ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_inout_named.php:5:58
+3 | 
+4 | interface AbstractMethodOptionalReadonlyInoutNamed {
+5 |   public function test(optional readonly inout named int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named.php:5:42
+3 | 
+4 | interface AbstractMethodOptionalReadonlyNamed {
+5 |   public function test(optional readonly named int $x): void;
+  |                                          ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php:5:24
+3 | 
+4 | interface AbstractMethodOptionalReadonlyNamedInout {
+5 |   public function test(optional readonly named inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php:5:42
+3 | 
+4 | interface AbstractMethodOptionalReadonlyNamedInout {
+5 |   public function test(optional readonly named inout int $x): void;
+  |                                          ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_optional_readonly_named_inout.php:5:58
+3 | 
+4 | interface AbstractMethodOptionalReadonlyNamedInout {
+5 |   public function test(optional readonly named inout int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout.php:5:43
+3 | 
+4 | interface AbstractMethodReadonlyInout {
+5 |   public function test(readonly inout int $x): void;
+  |                                           ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php:5:39
+3 | 
+4 | interface AbstractMethodReadonlyInoutNamed {
+5 |   public function test(readonly inout named int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named.php:5:49
+3 | 
+4 | interface AbstractMethodReadonlyInoutNamed {
+5 |   public function test(readonly inout named int $x): void;
+  |                                                 ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyInoutNamedOptional {
+5 |   public function test(readonly inout named optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php:5:39
+3 | 
+4 | interface AbstractMethodReadonlyInoutNamedOptional {
+5 |   public function test(readonly inout named optional int $x): void;
+  |                                       ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_named_optional.php:5:58
+3 | 
+4 | interface AbstractMethodReadonlyInoutNamedOptional {
+5 |   public function test(readonly inout named optional int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyInoutOptional {
+5 |   public function test(readonly inout optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional.php:5:52
+3 | 
+4 | interface AbstractMethodReadonlyInoutOptional {
+5 |   public function test(readonly inout optional int $x): void;
+  |                                                    ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyInoutOptionalNamed {
+5 |   public function test(readonly inout optional named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php:5:48
+3 | 
+4 | interface AbstractMethodReadonlyInoutOptionalNamed {
+5 |   public function test(readonly inout optional named int $x): void;
+  |                                                ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_inout_optional_named.php:5:58
+3 | 
+4 | interface AbstractMethodReadonlyInoutOptionalNamed {
+5 |   public function test(readonly inout optional named int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyNamed {
+5 |   public function test(readonly named int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyNamedInout {
+5 |   public function test(readonly named inout int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout.php:5:49
+3 | 
+4 | interface AbstractMethodReadonlyNamedInout {
+5 |   public function test(readonly named inout int $x): void;
+  |                                                 ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyNamedInoutOptional {
+5 |   public function test(readonly named inout optional int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyNamedInoutOptional {
+5 |   public function test(readonly named inout optional int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_inout_optional.php:5:58
+3 | 
+4 | interface AbstractMethodReadonlyNamedInoutOptional {
+5 |   public function test(readonly named inout optional int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyNamedOptional {
+5 |   public function test(readonly named optional int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyNamedOptionalInout {
+5 |   public function test(readonly named optional inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyNamedOptionalInout {
+5 |   public function test(readonly named optional inout int $x): void;
+  |                                 ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_named_optional_inout.php:5:58
+3 | 
+4 | interface AbstractMethodReadonlyNamedOptionalInout {
+5 |   public function test(readonly named optional inout int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyOptional {
+5 |   public function test(readonly optional int $x): void;
+  |                                 ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyOptionalInout {
+5 |   public function test(readonly optional inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout.php:5:52
+3 | 
+4 | interface AbstractMethodReadonlyOptionalInout {
+5 |   public function test(readonly optional inout int $x): void;
+  |                                                    ^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyOptionalInoutNamed {
+5 |   public function test(readonly optional inout named int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php:5:48
+3 | 
+4 | interface AbstractMethodReadonlyOptionalInoutNamed {
+5 |   public function test(readonly optional inout named int $x): void;
+  |                                                ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_inout_named.php:5:58
+3 | 
+4 | interface AbstractMethodReadonlyOptionalInoutNamed {
+5 |   public function test(readonly optional inout named int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyOptionalNamed {
+5 |   public function test(readonly optional named int $x): void;
+  |                                 ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php:5:24
+3 | 
+4 | interface AbstractMethodReadonlyOptionalNamedInout {
+5 |   public function test(readonly optional named inout int $x): void;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php:5:42
+3 | 
+4 | interface AbstractMethodReadonlyOptionalNamedInout {
+5 |   public function test(readonly optional named inout int $x): void;
+  |                                          ^^^^^ [1]
+6 | }
+
+error: Parsing[1002] A parameter cannot be both `inout` and `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_optional_named_inout.php:5:58
+3 | 
+4 | interface AbstractMethodReadonlyOptionalNamedInout {
+5 |   public function test(readonly optional named inout int $x): void;
+  |                                                          ^^ [1]
+6 | }
+
+error: Parsing[1002] Duplicate parameter modifier `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--abstract_method_readonly_readonly.php:5:33
+3 | 
+4 | interface AbstractMethodReadonlyReadonly {
+5 |   public function test(readonly readonly int $x): void;
+  |                                 ^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] Duplicate parameter modifier `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_inout.php:4:47
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutInout = (function(inout inout int): void);
+  |                                               ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named.php:4:47
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamed = (function(inout named int $x): void);
+  |                                               ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php:4:49
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedOptional = (function(inout named optional int $x): void);
+  |                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional.php:4:55
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedOptional = (function(inout named optional int $x): void);
+  |                                                       ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedOptionalReadonly = (function(inout named optional readonly int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_optional_readonly.php:4:63
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedOptionalReadonly = (function(inout named optional readonly int $x): void);
+  |                                                               ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly.php:4:55
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedReadonly = (function(inout named readonly int $x): void);
+  |                                                       ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedReadonlyOptional = (function(inout named readonly optional int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_named_readonly_optional.php:4:63
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutNamedReadonlyOptional = (function(inout named readonly optional int $x): void);
+  |                                                               ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional.php:4:44
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptional = (function(inout optional int): void);
+  |                                            ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php:4:49
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalNamed = (function(inout optional named int $x): void);
+  |                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named.php:4:64
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalNamed = (function(inout optional named int $x): void);
+  |                                                                ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalNamedReadonly = (function(inout optional named readonly int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_named_readonly.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalNamedReadonly = (function(inout optional named readonly int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly.php:4:52
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalReadonly = (function(inout optional readonly int): void);
+  |                                                    ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalReadonlyNamed = (function(inout optional readonly named int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_optional_readonly_named.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutOptionalReadonlyNamed = (function(inout optional readonly named int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named.php:4:64
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutReadonlyNamed = (function(inout readonly named int $x): void);
+  |                                                                ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutReadonlyNamedOptional = (function(inout readonly named optional int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_named_optional.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutReadonlyNamedOptional = (function(inout readonly named optional int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional.php:4:52
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutReadonlyOptional = (function(inout readonly optional int): void);
+  |                                                    ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutReadonlyOptionalNamed = (function(inout readonly optional named int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_inout_readonly_optional_named.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeInoutReadonlyOptionalNamed = (function(inout readonly optional named int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout.php:4:41
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInout = (function(named inout int $x): void);
+  |                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php:4:49
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutOptional = (function(named inout optional int $x): void);
+  |                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional.php:4:55
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutOptional = (function(named inout optional int $x): void);
+  |                                                       ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutOptionalReadonly = (function(named inout optional readonly int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_optional_readonly.php:4:63
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutOptionalReadonly = (function(named inout optional readonly int $x): void);
+  |                                                               ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly.php:4:49
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutReadonly = (function(named inout readonly int $x): void);
+  |                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutReadonlyOptional = (function(named inout readonly optional int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_inout_readonly_optional.php:4:63
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedInoutReadonlyOptional = (function(named inout readonly optional int $x): void);
+  |                                                               ^^^^^ [1]
+
+error: Parsing[1002] Duplicate parameter modifier `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_named.php:4:47
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedNamed = (function(named named int $x): void);
+  |                                               ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional.php:4:50
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptional = (function(named optional int $x): void);
+  |                                                  ^^^^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php:4:49
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalInout = (function(named optional inout int $x): void);
+  |                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout.php:4:64
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalInout = (function(named optional inout int $x): void);
+  |                                                                ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalInoutReadonly = (function(named optional inout readonly int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_inout_readonly.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalInoutReadonly = (function(named optional inout readonly int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly.php:4:58
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalReadonly = (function(named optional readonly int $x): void);
+  |                                                          ^^^^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalReadonlyInout = (function(named optional readonly inout int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_optional_readonly_inout.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedOptionalReadonlyInout = (function(named optional readonly inout int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout.php:4:49
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedReadonlyInout = (function(named readonly inout int $x): void);
+  |                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedReadonlyInoutOptional = (function(named readonly inout optional int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_readonly_inout_optional.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedReadonlyInoutOptional = (function(named readonly inout optional int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional.php:4:67
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedReadonlyOptional = (function(named readonly optional int $x): void);
+  |                                                                   ^^^^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php:4:57
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedReadonlyOptionalInout = (function(named readonly optional inout int $x): void);
+  |                                                         ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_named_readonly_optional_inout.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeNamedReadonlyOptionalInout = (function(named readonly optional inout int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout.php:4:53
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInout = (function(optional inout int): void);
+  |                                                     ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named.php:4:58
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutNamed = (function(optional inout named int $x): void);
+  |                                                          ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named.php:4:64
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutNamed = (function(optional inout named int $x): void);
+  |                                                                ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named_readonly.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutNamedReadonly = (function(optional inout named readonly int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_named_readonly.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutNamedReadonly = (function(optional inout named readonly int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly.php:4:61
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutReadonly = (function(optional inout readonly int): void);
+  |                                                             ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutReadonlyNamed = (function(optional inout readonly named int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_inout_readonly_named.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalInoutReadonlyNamed = (function(optional inout readonly named int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php:4:58
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalNamedInout = (function(optional named inout int $x): void);
+  |                                                          ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout.php:4:64
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalNamedInout = (function(optional named inout int $x): void);
+  |                                                                ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalNamedInoutReadonly = (function(optional named inout readonly int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_named_inout_readonly.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalNamedInoutReadonly = (function(optional named inout readonly int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalNamedReadonlyInout = (function(optional named readonly inout int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_named_readonly_inout.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalNamedReadonlyInout = (function(optional named readonly inout int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Duplicate parameter modifier `optional`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_optional.php:4:56
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalOptional = (function(optional optional int): void);
+  |                                                        ^^^^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout.php:4:70
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalReadonlyInout = (function(optional readonly inout int): void);
+  |                                                                      ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php:4:75
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalReadonlyInoutNamed = (function(optional readonly inout named int $x): void);
+  |                                                                           ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_inout_named.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalReadonlyInoutNamed = (function(optional readonly inout named int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named.php:4:70
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalReadonlyNamed = (function(optional readonly named int $x): void);
+  |                                                                      ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php:4:75
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalReadonlyNamedInout = (function(optional readonly named inout int $x): void);
+  |                                                                           ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_optional_readonly_named_inout.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeOptionalReadonlyNamedInout = (function(optional readonly named inout int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `inout readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout.php:4:53
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInout = (function(readonly inout int): void);
+  |                                                     ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named.php:4:64
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInoutNamed = (function(readonly inout named int $x): void);
+  |                                                                ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInoutNamedOptional = (function(readonly inout named optional int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_named_optional.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInoutNamedOptional = (function(readonly inout named optional int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional.php:4:61
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInoutOptional = (function(readonly inout optional int): void);
+  |                                                             ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInoutOptionalNamed = (function(readonly inout optional named int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_inout_optional_named.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyInoutOptionalNamed = (function(readonly inout optional named int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named.php:4:53
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamed = (function(readonly named int $x): void);
+  |                                                     ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout.php:4:58
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamedInout = (function(readonly named inout int $x): void);
+  |                                                          ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamedInoutOptional = (function(readonly named inout optional int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named_inout_optional.php:4:72
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamedInoutOptional = (function(readonly named inout optional int $x): void);
+  |                                                                        ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional.php:4:61
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamedOptional = (function(readonly named optional int $x): void);
+  |                                                             ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php:4:66
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamedOptionalInout = (function(readonly named optional inout int $x): void);
+  |                                                                  ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_named_optional_inout.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyNamedOptionalInout = (function(readonly named optional inout int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional.php:4:56
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptional = (function(readonly optional int): void);
+  |                                                        ^^^^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout.php:4:70
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptionalInout = (function(readonly optional inout int): void);
+  |                                                                      ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php:4:75
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptionalInoutNamed = (function(readonly optional inout named int $x): void);
+  |                                                                           ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_inout_named.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptionalInoutNamed = (function(readonly optional inout named int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Invalid parameter modifier order. The correct order is `optional named readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named.php:4:61
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptionalNamed = (function(readonly optional named int $x): void);
+  |                                                             ^^^^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `inout` and `named`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php:4:75
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptionalNamedInout = (function(readonly optional named inout int $x): void);
+  |                                                                           ^^^^^ [1]
+
+error: Parsing[1002] A parameter cannot be both `optional` and `inout`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_optional_named_inout.php:4:81
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyOptionalNamedInout = (function(readonly optional named inout int $x): void);
+  |                                                                                 ^^^^^ [1]
+
+error: Parsing[1002] Duplicate parameter modifier `readonly`. [1]
+
+parameter_modifiers_all_orders_bad.php--function_type_readonly_readonly.php:4:56
+2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+3 | 
+4 | type FunctionTypeReadonlyReadonly = (function(readonly readonly int): void);
+  |                                                        ^^^^^^^^ [1]
+
+215 errors found

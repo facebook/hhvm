@@ -1,14 +1,55 @@
-ERROR: File "named_params_constructors.php", line 11, characters 20-23:
-Invalid argument (Typing[4110])
-  File "named_params_constructors.php", line 3, characters 59-64:
-  Expected `string`
-  File "named_params_constructors.php", line 11, characters 20-23:
-  But got `bool`
-ERROR: File "named_params_constructors.php", line 12, characters 7-13:
-Unexpected named argument: extra_param (Typing[4500])
-  File "named_params_constructors.php", line 3, characters 33-43:
-  Definition is here
-ERROR: File "named_params_constructors.php", line 13, characters 7-13:
-Missing required named argument: y (Typing[4499])
-  File "named_params_constructors.php", line 3, characters 33-43:
-  Definition is here
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [1]
+
+named_params_constructors.php:11:20
+ 1 | <?hh
+ 2 | 
+ 3 | class Example { public function __construct(int $x, named string $y): void {} }
+   |                                                           ^^^^^^ [2]
+ 4 | 
+ 5 | function test_constructor_named_args(): void {
+   :
+ 9 |   new Example(1, y="");
+10 | 
+11 |   new Example(1, y=true); // Error
+   |                    ^^^^ [1]
+12 |   new Example(1, y="", extra_param=""); // Error
+13 |   new Example(1); // Error
+
+error: Typing[4500] Unexpected named argument: extra_param [1]
+-> Definition is here [2]
+
+named_params_constructors.php:12:7
+ 1 | <?hh
+ 2 | 
+ 3 | class Example { public function __construct(int $x, named string $y): void {} }
+   |                                 ^^^^^^^^^^^ [2]
+ 4 | 
+ 5 | function test_constructor_named_args(): void {
+   :
+10 | 
+11 |   new Example(1, y=true); // Error
+12 |   new Example(1, y="", extra_param=""); // Error
+   |       ^^^^^^^ [1]
+13 |   new Example(1); // Error
+14 | }
+
+error: Typing[4499] Missing required named argument: y [1]
+-> Definition is here [2]
+
+named_params_constructors.php:13:7
+ 1 | <?hh
+ 2 | 
+ 3 | class Example { public function __construct(int $x, named string $y): void {} }
+   |                                 ^^^^^^^^^^^ [2]
+ 4 | 
+ 5 | function test_constructor_named_args(): void {
+   :
+11 |   new Example(1, y=true); // Error
+12 |   new Example(1, y="", extra_param=""); // Error
+13 |   new Example(1); // Error
+   |       ^^^^^^^ [1]
+14 | }
+
+3 errors found

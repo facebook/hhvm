@@ -1,12 +1,39 @@
-ERROR: File "awaitall_1.php", line 18, characters 8-15:
-Invalid property assignment (Typing[4411])
-  File "awaitall_1.php", line 18, characters 30-88:
-  This expression is readonly
-  File "awaitall_1.php", line 4, characters 10-12:
-  But it's being assigned to a mutable property
-ERROR: File "awaitall_1.php", line 18, characters 18-25:
-Invalid property assignment (Typing[4411])
-  File "awaitall_1.php", line 18, characters 30-88:
-  This expression is readonly
-  File "awaitall_1.php", line 4, characters 10-12:
-  But it's being assigned to a mutable property
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+awaitall_1.php:18:8
+ 2 | class Bar {
+ 3 |   public readonly int $ro_prop = 3;
+ 4 |   public int $prop = 3;
+   |          ^^^ [3]
+ 5 | }
+ 6 | async function returns_5(): readonly Awaitable<int> {
+   :
+16 |   }
+17 |   // this desugars into the concurrent block above with $x->prop
+18 |   list($x->prop, $x->prop) = vec[await readonly returns_5(), await readonly returns_5()];
+   |        ^^^^^^^^ [1]
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+19 | }
+
+error: Typing[4411] Invalid property assignment [1]
+-> This expression is readonly [2]
+-> But it's being assigned to a mutable property [3]
+
+awaitall_1.php:18:18
+ 2 | class Bar {
+ 3 |   public readonly int $ro_prop = 3;
+ 4 |   public int $prop = 3;
+   |          ^^^ [3]
+ 5 | }
+ 6 | async function returns_5(): readonly Awaitable<int> {
+   :
+16 |   }
+17 |   // this desugars into the concurrent block above with $x->prop
+18 |   list($x->prop, $x->prop) = vec[await readonly returns_5(), await readonly returns_5()];
+   |                  ^^^^^^^^ [1]
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+19 | }
+
+2 errors found

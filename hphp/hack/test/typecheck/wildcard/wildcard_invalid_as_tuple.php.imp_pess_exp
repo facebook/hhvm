@@ -1,46 +1,126 @@
-ERROR: File "wildcard_invalid_as_tuple.php", line 4, characters 9-11:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 4, characters 10-10:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 5, characters 9-16:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 5, characters 10-10:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 6, characters 9-16:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 6, characters 15-15:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 7, characters 9-14:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 7, characters 10-10:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-  File "wildcard_invalid_as_tuple.php", line 7, characters 13-13:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 8, characters 9-20:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 8, characters 11-11:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 9, characters 9-20:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 9, characters 18-18:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 10, characters 9-23:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 10, characters 16-16:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-  File "wildcard_invalid_as_tuple.php", line 10, characters 21-21:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 11, characters 9-23:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 11, characters 16-16:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 12, characters 9-23:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 12, characters 10-10:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-ERROR: File "wildcard_invalid_as_tuple.php", line 13, characters 9-21:
-Invalid `as` expression hint (Typing[4195])
-  File "wildcard_invalid_as_tuple.php", line 13, characters 19-19:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-  File "wildcard_invalid_as_tuple.php", line 13, characters 10-10:
-  The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:4:9
+2 | 
+3 | function f(mixed $x): void {
+4 |   $x as (_);
+  |         ^^^ [1]
+  |          ^ [2]
+5 |   $x as (_, int);
+6 |   $x as (int, _);
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:5:9
+3 | function f(mixed $x): void {
+4 |   $x as (_);
+5 |   $x as (_, int);
+  |         ^^^^^^^^ [1]
+  |          ^ [2]
+6 |   $x as (int, _);
+7 |   $x as (_, _);
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:6:9
+4 |   $x as (_);
+5 |   $x as (_, int);
+6 |   $x as (int, _);
+  |         ^^^^^^^^ [1]
+  |               ^ [2]
+7 |   $x as (_, _);
+8 |   $x as ((_), (int));
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [3]
+
+wildcard_invalid_as_tuple.php:7:9
+5 |   $x as (_, int);
+6 |   $x as (int, _);
+7 |   $x as (_, _);
+  |         ^^^^^^ [1]
+  |          ^ [2]
+  |             ^ [3]
+8 |   $x as ((_), (int));
+9 |   $x as ((int), (_));
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:8:9
+ 6 |   $x as (int, _);
+ 7 |   $x as (_, _);
+ 8 |   $x as ((_), (int));
+   |         ^^^^^^^^^^^^ [1]
+   |           ^ [2]
+ 9 |   $x as ((int), (_));
+10 |   $x as ((int, _), (_));
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:9:9
+ 7 |   $x as (_, _);
+ 8 |   $x as ((_), (int));
+ 9 |   $x as ((int), (_));
+   |         ^^^^^^^^^^^^ [1]
+   |                  ^ [2]
+10 |   $x as ((int, _), (_));
+11 |   $x as (int, (_, int));
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [3]
+
+wildcard_invalid_as_tuple.php:10:9
+ 8 |   $x as ((_), (int));
+ 9 |   $x as ((int), (_));
+10 |   $x as ((int, _), (_));
+   |         ^^^^^^^^^^^^^^^ [1]
+   |                ^ [2]
+   |                     ^ [3]
+11 |   $x as (int, (_, int));
+12 |   $x as (_, (int, int));
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:11:9
+ 9 |   $x as ((int), (_));
+10 |   $x as ((int, _), (_));
+11 |   $x as (int, (_, int));
+   |         ^^^^^^^^^^^^^^^ [1]
+   |                ^ [2]
+12 |   $x as (_, (int, int));
+13 |   $x as (_, (int, _));
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+
+wildcard_invalid_as_tuple.php:12:9
+10 |   $x as ((int, _), (_));
+11 |   $x as (int, (_, int));
+12 |   $x as (_, (int, int));
+   |         ^^^^^^^^^^^^^^^ [1]
+   |          ^ [2]
+13 |   $x as (_, (int, _));
+14 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [2]
+-> The `as` operator cannot be used with _ in a tuple (use `mixed` instead) [3]
+
+wildcard_invalid_as_tuple.php:13:9
+11 |   $x as (int, (_, int));
+12 |   $x as (_, (int, int));
+13 |   $x as (_, (int, _));
+   |         ^^^^^^^^^^^^^ [1]
+   |          ^ [3]
+   |                   ^ [2]
+14 | }
+
+10 errors found

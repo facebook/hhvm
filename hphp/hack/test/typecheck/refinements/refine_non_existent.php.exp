@@ -1,8 +1,29 @@
-ERROR: File "refine_non_existent.php", line 6, characters 13-13:
-Unbound name: `C` (Naming[2049])
-ERROR: File "refine_non_existent.php", line 7, characters 15-16:
-Invalid argument (Typing[4110])
-  File "refine_non_existent.php", line 3, characters 20-22:
-  Expected `int`
-  File "refine_non_existent.php", line 6, characters 13-13:
-  But got `C` from this `is` expression test
+error: Naming[2049] Unbound name: `C` [1]
+
+refine_non_existent.php:6:13
+4 | 
+5 | function f(mixed $m): void {
+6 |   if ($m is C) { // C does not exist.
+  |             ^ [1]
+7 |     takes_int($m); // Terr works in place of any type.
+8 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `C` from this `is` expression test [3]
+
+refine_non_existent.php:7:15
+1 | <?hh
+2 | 
+3 | function takes_int(int $_): void {}
+  |                    ^^^ [2]
+4 | 
+5 | function f(mixed $m): void {
+6 |   if ($m is C) { // C does not exist.
+  |             ^ [3]
+7 |     takes_int($m); // Terr works in place of any type.
+  |               ^^ [1]
+8 |   }
+9 | }
+
+2 errors found

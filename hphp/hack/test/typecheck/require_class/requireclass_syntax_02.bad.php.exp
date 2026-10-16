@@ -1,4 +1,20 @@
-ERROR: File "requireclass_syntax_02.bad.php", line 12, characters 17-17:
-`I` is not a class. It is an interface. (NastCheck[3017])
-ERROR: File "requireclass_syntax_02.bad.php", line 16, characters 17-18:
-`Tr` is not a class. It is a trait. (NastCheck[3017])
+error: NastCheck[3017] `I` is not a class. It is an interface. [1]
+
+requireclass_syntax_02.bad.php:12:17
+10 | 
+11 | trait T2 {
+12 |   require class I;
+   |                 ^ [1]
+13 | }
+14 | 
+
+error: NastCheck[3017] `Tr` is not a class. It is a trait. [1]
+
+requireclass_syntax_02.bad.php:16:17
+14 | 
+15 | trait T3 {
+16 |   require class Tr;
+   |                 ^^ [1]
+17 | }
+
+2 errors found

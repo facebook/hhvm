@@ -1,10 +1,23 @@
-ERROR: File "field_assign_update_bad.php", line 9, characters 10-11:
-Invalid return type (Typing[4523])
-  File "field_assign_update_bad.php", line 5, characters 3-25:
-  The field `k` here is not compatible with every instantiation of `T`
-  File "field_assign_update_bad.php", line 7, characters 25-25:
-  `T` may provide `k` with a type of its own
-  File "field_assign_update_bad.php", line 9, characters 3-12:
-  Expected `nothing`
-  File "field_assign_update_bad.php", line 6, characters 3-8:
-  But got `string`
+error: Typing[4523] Invalid return type [1]
+-> The field `k` here is not compatible with every instantiation of `T` [2]
+-> `T` may provide `k` with a type of its own [3]
+-> Expected `nothing` [4]
+-> But got `string` [5]
+
+field_assign_update_bad.php:9:10
+ 3 | 
+ 4 | function assign_governed<T as shape('k' => arraykey)>(
+ 5 |   shape('k' => int, ...T) $s,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 6 |   string $v,
+   |   ^^^^^^ [5]
+ 7 | ): shape('k' => int, ...T) {
+   |                         ^ [3]
+ 8 |   $s['k'] = $v;
+ 9 |   return $s;
+   |   ^^^^^^^^^^ [4]
+   |          ^^ [1]
+10 | }
+11 | 
+
+1 error found

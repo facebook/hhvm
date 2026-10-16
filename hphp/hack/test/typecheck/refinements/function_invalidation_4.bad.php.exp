@@ -1,13 +1,40 @@
-WARN: File "function_invalidation_4.bad.php", line 11, characters 5-12:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "function_invalidation_4.bad.php", line 9, characters 26-32:
-  This expression has type `dynamic`
-ERROR: File "function_invalidation_4.bad.php", line 12, characters 15-19:
-Invalid argument (Typing[4110])
-  File "function_invalidation_4.bad.php", line 7, characters 20-22:
-  Expected `int`
-  File "function_invalidation_4.bad.php", line 4, characters 10-13:
-  But got `?int`
-  File "function_invalidation_4.bad.php", line 11, characters 5-14:
-  All the local information about `$c->i` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+function_invalidation_4.bad.php:11:5
+ 7 | function takes_int(int $i)[]: void {}
+ 8 | 
+ 9 | function refine_ko(C $c, dynamic $harmful): void {
+   |                          ^^^^^^^ [2]
+10 |   if ($c->i is nonnull) {
+11 |     $harmful();
+   |     ^^^^^^^^ [1]
+12 |     takes_int($c->i);
+13 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$c->i` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+function_invalidation_4.bad.php:12:15
+ 2 | 
+ 3 | class C {
+ 4 |   public ?int $i = null;
+   |          ^^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | function takes_int(int $i)[]: void {}
+   |                    ^^^ [2]
+ 8 | 
+ 9 | function refine_ko(C $c, dynamic $harmful): void {
+10 |   if ($c->i is nonnull) {
+11 |     $harmful();
+   |     ^^^^^^^^^^ [4]
+12 |     takes_int($c->i);
+   |               ^^^^^ [1]
+13 |   }
+14 | }
+
+2 errors found

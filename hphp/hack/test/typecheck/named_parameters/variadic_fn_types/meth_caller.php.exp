@@ -1,16 +1,72 @@
-ERROR: File "meth_caller.php", line 15, characters 3-60:
-`meth_caller` does not support methods with named parameters (Typing[4527])
-  File "meth_caller.php", line 5, characters 37-39:
-  This parameter is named
-ERROR: File "meth_caller.php", line 16, characters 3-70:
-`meth_caller` does not support methods with named parameters (Typing[4527])
-  File "meth_caller.php", line 7, characters 48-49:
-  This parameter is named
-ERROR: File "meth_caller.php", line 17, characters 3-57:
-`meth_caller` does not support methods with named parameters (Typing[4527])
-  File "meth_caller.php", line 9, characters 42-44:
-  This parameter is named
-ERROR: File "meth_caller.php", line 18, characters 3-66:
-`meth_caller` does not support methods with named parameters (Typing[4527])
-  File "meth_caller.php", line 11, characters 57-59:
-  This parameter is named
+error: Typing[4527] `meth_caller` does not support methods with named parameters [1]
+-> This parameter is named [2]
+
+meth_caller.php:15:3
+ 3 | 
+ 4 | class MethCallerNamedVariadic {
+ 5 |   public function variadic(named int...): void {}
+   |                                     ^^^ [2]
+ 6 | 
+ 7 |   public function fixed_and_variadic(named int $x, named int...): void {}
+   :
+13 | 
+14 | function test_meth_caller_named_variadic(): void {
+15 |   HH\meth_caller(MethCallerNamedVariadic::class, 'variadic');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   HH\meth_caller(MethCallerNamedVariadic::class, 'fixed_and_variadic');
+17 |   HH\meth_caller(MethCallerNamedVariadic::class, 'mixed');
+
+error: Typing[4527] `meth_caller` does not support methods with named parameters [1]
+-> This parameter is named [2]
+
+meth_caller.php:16:3
+ 5 |   public function variadic(named int...): void {}
+ 6 | 
+ 7 |   public function fixed_and_variadic(named int $x, named int...): void {}
+   |                                                ^^ [2]
+ 8 | 
+ 9 |   public function mixed(int $x, named int...): void {}
+   :
+14 | function test_meth_caller_named_variadic(): void {
+15 |   HH\meth_caller(MethCallerNamedVariadic::class, 'variadic');
+16 |   HH\meth_caller(MethCallerNamedVariadic::class, 'fixed_and_variadic');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   HH\meth_caller(MethCallerNamedVariadic::class, 'mixed');
+18 |   HH\meth_caller(MethCallerNamedVariadic::class, 'both_variadics');
+
+error: Typing[4527] `meth_caller` does not support methods with named parameters [1]
+-> This parameter is named [2]
+
+meth_caller.php:17:3
+ 7 |   public function fixed_and_variadic(named int $x, named int...): void {}
+ 8 | 
+ 9 |   public function mixed(int $x, named int...): void {}
+   |                                          ^^^ [2]
+10 | 
+11 |   public function both_variadics(int ...$args, named int...): void {}
+   :
+15 |   HH\meth_caller(MethCallerNamedVariadic::class, 'variadic');
+16 |   HH\meth_caller(MethCallerNamedVariadic::class, 'fixed_and_variadic');
+17 |   HH\meth_caller(MethCallerNamedVariadic::class, 'mixed');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   HH\meth_caller(MethCallerNamedVariadic::class, 'both_variadics');
+19 | }
+
+error: Typing[4527] `meth_caller` does not support methods with named parameters [1]
+-> This parameter is named [2]
+
+meth_caller.php:18:3
+ 9 |   public function mixed(int $x, named int...): void {}
+10 | 
+11 |   public function both_variadics(int ...$args, named int...): void {}
+   |                                                         ^^^ [2]
+12 | }
+13 | 
+   :
+16 |   HH\meth_caller(MethCallerNamedVariadic::class, 'fixed_and_variadic');
+17 |   HH\meth_caller(MethCallerNamedVariadic::class, 'mixed');
+18 |   HH\meth_caller(MethCallerNamedVariadic::class, 'both_variadics');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+4 errors found

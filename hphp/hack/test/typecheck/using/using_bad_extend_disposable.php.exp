@@ -1,4 +1,21 @@
-ERROR: File "using_bad_extend_disposable.php", line 15, characters 7-9:
-A disposable type may not extend a class or use a trait that is not disposable (Typing[4194])
-ERROR: File "using_bad_extend_disposable.php", line 17, characters 25-27:
-A disposable type may not extend a class or use a trait that is not disposable (Typing[4194])
+error: Typing[4194] A disposable type may not extend a class or use a trait that is not disposable [1]
+
+using_bad_extend_disposable.php:15:7
+13 | final class Foo implements IDisposable, I {
+14 |   public function __dispose():void { }
+15 |   use Bar; // this should error
+   |       ^^^ [1]
+16 | }
+17 | final class Boo extends Moo implements IDisposable {
+
+error: Typing[4194] A disposable type may not extend a class or use a trait that is not disposable [1]
+
+using_bad_extend_disposable.php:17:25
+15 |   use Bar; // this should error
+16 | }
+17 | final class Boo extends Moo implements IDisposable {
+   |                         ^^^ [1]
+18 |   public function __dispose():void { }
+19 | }
+
+2 errors found

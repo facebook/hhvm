@@ -1,6 +1,28 @@
-ERROR: File "cast.php", line 4, characters 19-22:
-Encountered unexpected token `$obj`. (Parsing[1002])
-ERROR: File "cast.php", line 4, characters 9-17:
-Unbound name: `TNotFound` (a global constant) (Naming[2049])
-ERROR: File "cast.php", line 4, characters 9-17:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Encountered unexpected token `$obj`. [1]
+
+cast.php:4:19
+2 | 
+3 | function test(mixed $obj): void {
+4 |   $x = (TNotFound)$obj;
+  |                   ^^^^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `TNotFound` (a global constant) [1]
+
+cast.php:4:9
+2 | 
+3 | function test(mixed $obj): void {
+4 |   $x = (TNotFound)$obj;
+  |         ^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+cast.php:4:9
+2 | 
+3 | function test(mixed $obj): void {
+4 |   $x = (TNotFound)$obj;
+  |         ^^^^^^^^^ [1]
+5 | }
+
+3 errors found

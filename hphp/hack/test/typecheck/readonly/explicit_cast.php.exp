@@ -1,8 +1,38 @@
-ERROR: File "explicit_cast.php--file2.php", line 7, characters 8-10:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "explicit_cast.php--file1.php", line 6, characters 10-12:
-  The function call is defined here.
-ERROR: File "explicit_cast.php--file2.php", line 9, characters 12-14:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "explicit_cast.php--file1.php", line 4, characters 47-49:
-  The property is defined here.
+error: Typing[4412] This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The function call is defined here. [2]
+
+explicit_cast.php--file2.php:7:8
+5 | function breakIt() : void {
+6 |   // error, foo returns readonly
+7 |   $y = foo();
+  |        ^^^ [1]
+8 |   // error, bar is a readonly prop
+9 |   $z = $y->bar;
+
+explicit_cast.php--file1.php:6:10
+4 |   public function __construct(public readonly Bar $bar) {}
+5 | }
+6 | function foo(): readonly Foo {
+  |          ^^^ [2]
+7 |   return new Foo(readonly new Bar());
+8 | }
+
+error: Typing[4412] This property returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The property is defined here. [2]
+
+explicit_cast.php--file2.php:9:12
+ 7 |   $y = foo();
+ 8 |   // error, bar is a readonly prop
+ 9 |   $z = $y->bar;
+   |            ^^^ [1]
+10 | }
+
+explicit_cast.php--file1.php:4:47
+ 2 | class Bar {}
+ 3 | class Foo {
+ 4 |   public function __construct(public readonly Bar $bar) {}
+   |                                               ^^^ [2]
+ 5 | }
+ 6 | function foo(): readonly Foo {
+
+2 errors found

@@ -1,2 +1,11 @@
-ERROR: File "new_without_newable.php", line 13, characters 5-13:
-`Tnn` cannot be used with `new` because it does not have the `<<__Newable>>` attribute (Typing[4309])
+error: Typing[4309] `Tnn` cannot be used with `new` because it does not have the `<<__Newable>>` attribute [1]
+
+new_without_newable.php:13:5
+11 |     reify Tnn as Tc
+12 |   >(): void {
+13 |     new Tnn();
+   |     ^^^^^^^^^ [1]
+14 |   }
+15 | 
+
+1 error found

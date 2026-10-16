@@ -1,6 +1,30 @@
-ERROR: File "wildcard_invalid.php", line 3, characters 14-14:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid.php", line 6, characters 25-25:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid.php", line 10, characters 39-39:
-Wildcard typehints are not allowed in this position (Naming[2084])
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid.php:3:14
+1 | <?hh
+2 | 
+3 | function foo(_ $x): void {
+  |              ^ [1]
+4 | }
+5 | 
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid.php:6:25
+4 | }
+5 | 
+6 | function bar(mixed $x): _ {
+  |                         ^ [1]
+7 | }
+8 | 
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid.php:10:39
+ 8 | 
+ 9 | final class C {
+10 |   public function __construct(private _ $foo) {}
+   |                                       ^ [1]
+11 | }
+
+3 errors found

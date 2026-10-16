@@ -1,6 +1,25 @@
-WARN: File "just_enum.php", line 27, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
-WARN: File "just_enum.php", line 37, characters 10-21:
-This switch case, `IntEnumAB::A`, occurred before. It will never be matched. (Warn[12019])
-  File "just_enum.php", line 35, characters 10-21:
-  This is the original occurrence of the case.
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+just_enum.php:27:5
+25 |     case IntEnumAB::B:
+26 |       return;
+27 |     default:
+   |     ^^^^^^^^ [1]
+28 |       return;
+29 |   }
+
+warning: Warn[12019] This switch case, `IntEnumAB::A`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+just_enum.php:37:10
+33 | function redundant_label(IntEnumAB $x): void {
+34 |   switch ($x) {
+35 |     case IntEnumAB::A:
+   |          ^^^^^^^^^^^^ [2]
+36 |       return;
+37 |     case IntEnumAB::A:
+   |          ^^^^^^^^^^^^ [1]
+38 |       return;
+39 |     default:
+
+2 errors found

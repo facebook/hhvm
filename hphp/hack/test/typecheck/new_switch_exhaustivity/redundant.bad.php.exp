@@ -1,18 +1,99 @@
-WARN: File "redundant.bad.php", line 4, characters 3-106:
-This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
-  File "redundant.bad.php", line 9, characters 10-10:
-  The case is redundant.
-WARN: File "redundant.bad.php", line 9, characters 10-10:
-Invalid case: This case will never match.
-A value of type `bool` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "redundant.bad.php", line 15, characters 3-133:
-This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
-  File "redundant.bad.php", line 20, characters 10-10:
-  The case is redundant.
-WARN: File "redundant.bad.php", line 20, characters 10-10:
-Invalid case: This case will never match.
-A value of type `bool` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "redundant.bad.php", line 22, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
-WARN: File "redundant.bad.php", line 33, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+warning: Warn[12019] This switch statement contains redundant cases. There are 1 redundant cases. [1]
+-> The case is redundant. [2]
+
+redundant.bad.php:4:3
+ 2 | 
+ 3 | function redundant_case(): void {
+ 4 |   switch (true) {
+   |   ^^^^^^^^^^^^^^^ [1]
+ 5 |     case true:
+   |     ^^^^^^^^^^ [1]
+ 6 |       return;
+   |       ^^^^^^^ [1]
+ 7 |     case false:
+   |     ^^^^^^^^^^^ [1]
+ 8 |       return;
+   |       ^^^^^^^ [1]
+ 9 |     case 1:
+   |     ^^^^^^^ [1]
+   |          ^ [2]
+10 |       return;
+   |       ^^^^^^^ [1]
+11 |   }
+   |   ^ [1]
+12 | }
+13 | 
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `bool` can never be equal to a value of type `int` [1]
+
+redundant.bad.php:9:10
+ 7 |     case false:
+ 8 |       return;
+ 9 |     case 1:
+   |          ^ [1]
+10 |       return;
+11 |   }
+
+warning: Warn[12019] This switch statement contains redundant cases. There are 1 redundant cases. [1]
+-> The case is redundant. [2]
+
+redundant.bad.php:15:3
+13 | 
+14 | function redundant_case_with_default(): void {
+15 |   switch (true) {
+   |   ^^^^^^^^^^^^^^^ [1]
+16 |     case true:
+   |     ^^^^^^^^^^ [1]
+17 |       return;
+   |       ^^^^^^^ [1]
+18 |     case false:
+   |     ^^^^^^^^^^^ [1]
+19 |       return;
+   |       ^^^^^^^ [1]
+20 |     case 1:
+   |     ^^^^^^^ [1]
+   |          ^ [2]
+21 |       return;
+   |       ^^^^^^^ [1]
+22 |     default:
+   |     ^^^^^^^^ [1]
+23 |       return;
+   |       ^^^^^^^ [1]
+24 |   }
+   |   ^ [1]
+25 | }
+26 | 
+
+warning: Warn[12007] Invalid case: This case will never match.
+A value of type `bool` can never be equal to a value of type `int` [1]
+
+redundant.bad.php:20:10
+18 |     case false:
+19 |       return;
+20 |     case 1:
+   |          ^ [1]
+21 |       return;
+22 |     default:
+
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+redundant.bad.php:22:5
+20 |     case 1:
+21 |       return;
+22 |     default:
+   |     ^^^^^^^^ [1]
+23 |       return;
+24 |   }
+
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+redundant.bad.php:33:5
+31 |     case false:
+32 |       return;
+33 |     default:
+   |     ^^^^^^^^ [1]
+34 |       return;
+35 |   }
+
+6 errors found

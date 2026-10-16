@@ -1,8 +1,22 @@
-ERROR: File "readonly_method_param.php", line 16, characters 3-18:
-Typing error (Typing[4411])
-  File "readonly_method_param.php", line 16, characters 16-17:
-  Mismatched parameter readonlyness
-  File "readonly_method_param.php", line 4, characters 38-39:
-  This parameter is mutable
-  File "readonly_method_param.php", line 16, characters 16-17:
-  But this parameter is readonly
+error: Typing[4411] Typing error [1]
+-> Mismatched parameter readonlyness [2]
+-> This parameter is mutable [3]
+-> But this parameter is readonly [2]
+
+readonly_method_param.php:16:3
+ 2 | class C{
+ 3 | public function test_fun_ro(readonly Vector<int> $v): void {}
+ 4 | public function test_fun(Vector<int> $v): void {}
+   |                                      ^^ [3]
+ 5 | }
+ 6 | 
+   :
+14 |   $c = new C();
+15 |   $v = readonly Vector {1};
+16 |   $c->test_fun($v); // Should error
+   |   ^^^^^^^^^^^^^^^^ [1]
+   |                ^^ [2]
+17 | }
+18 | 
+
+1 error found

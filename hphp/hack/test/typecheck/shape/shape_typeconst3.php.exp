@@ -1,4 +1,17 @@
-ERROR: File "shape_typeconst3.php", line 7, characters 8-20:
-No class constant `MISSING_CONST` in `C` (Typing[4090])
-  File "shape_typeconst3.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4090] No class constant `MISSING_CONST` in `C` [1]
+-> Declaration of `C` is here [2]
+
+shape_typeconst3.php:7:8
+1 | <?hh
+2 | 
+3 | class C {
+  |       ^ [2]
+4 |   const FOO_KEY = 'foo';
+5 |   const type TShape = shape(
+6 |     C::FOO_KEY => string,
+7 |     C::MISSING_CONST => null,
+  |        ^^^^^^^^^^^^^ [1]
+8 |   );
+9 | }
+
+1 error found

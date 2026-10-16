@@ -1,24 +1,74 @@
-ERROR: File "T139120762.php", line 7, characters 14-14:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "T139120762.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-  File "T139120762.php", line 7, characters 63-66:
-  Expected `Tacc`
-  File "T139120762.php", line 7, characters 52-56:
-  But got `mixed`
-ERROR: File "T139120762.php", line 13, characters 14-14:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "T139120762.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "T139120762.php", line 13, characters 64-70:
-  Expected `nothing`
-  File "T139120762.php", line 13, characters 54-57:
-  But got `Tacc`
-ERROR: File "T139120762.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "T139120762.php", line 13, characters 64-70:
-  Expected `nothing`
-  File "T139120762.php", line 13, characters 54-57:
-  But got `mixed`
-  File "T139120762.php", line 13, characters 48-51:
-    by the definition of `Tacc`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+T139120762.php:7:14
+5 | }
+6 | 
+7 | function id1<T as C with { type T = mixed }, Tacc>(mixed $x): Tacc
+  |              ^ [1]
+8 | where
+9 |   T as C with { type T = Tacc } {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tacc` [2]
+-> But got `mixed` [3]
+
+T139120762.php:10:10
+ 5 | }
+ 6 | 
+ 7 | function id1<T as C with { type T = mixed }, Tacc>(mixed $x): Tacc
+   |                                                    ^^^^^ [3]
+   |                                                               ^^^^ [2]
+ 8 | where
+ 9 |   T as C with { type T = Tacc } {
+10 |   return $x;
+   |          ^^ [1]
+11 | }
+12 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+T139120762.php:13:14
+11 | }
+12 | 
+13 | function id2<T as C with { type T = nothing }, Tacc>(Tacc $x): nothing
+   |              ^ [1]
+14 | where
+15 |   T as C with { type T = Tacc } {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `Tacc` [3]
+
+T139120762.php:16:10
+11 | }
+12 | 
+13 | function id2<T as C with { type T = nothing }, Tacc>(Tacc $x): nothing
+   |                                                      ^^^^ [3]
+   |                                                                ^^^^^^^ [2]
+14 | where
+15 |   T as C with { type T = Tacc } {
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nothing` [2]
+-> But got `mixed` [3]
+->   by the definition of `Tacc` [4]
+
+T139120762.php:16:10
+11 | }
+12 | 
+13 | function id2<T as C with { type T = nothing }, Tacc>(Tacc $x): nothing
+   |                                                ^^^^ [4]
+   |                                                      ^^^^ [3]
+   |                                                                ^^^^^^^ [2]
+14 | where
+15 |   T as C with { type T = Tacc } {
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+5 errors found

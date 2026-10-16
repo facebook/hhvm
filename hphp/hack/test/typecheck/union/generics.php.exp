@@ -64,23 +64,67 @@ File "generics.php--file2.php", line 28, characters 5-15:
   int
 File "generics.php--file2.php", line 31, characters 5-15:
   ?int
-ERROR: File "generics.php--file2.php", line 20, characters 43-50:
-Invalid type hint (Typing[4352])
-  File "generics.php--file2.php", line 20, characters 47-50:
-  An abstract type constant is not allowed in this position. Did you mean `this::Tabs`?
-  File "generics.php--file2.php", line 4, characters 23-26:
-  `Tabs` is abstract here.
-ERROR: File "generics.php--file2.php", line 20, characters 58-66:
-Invalid type hint (Typing[4352])
-  File "generics.php--file2.php", line 20, characters 62-66:
-  An abstract type constant is not allowed in this position. Did you mean `this::Tcstr`?
-  File "generics.php--file2.php", line 5, characters 23-27:
-  `Tcstr` is abstract here.
-ERROR: File "generics.php--file2.php", line 102, characters 32-33:
-Invalid argument (Typing[4110])
-  File "generics.php--file2.php", line 100, characters 20-22:
-  Expected `int`
-  File "generics.php--file2.php", line 16, characters 36-36:
-    via this generic `T`
-  File "generics.php--file2.php", line 102, characters 32-33:
-  But got `string`
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::Tabs`? [2]
+-> `Tabs` is abstract here. [3]
+
+generics.php--file2.php:20:43
+ 2 | 
+ 3 | abstract class AA<T> {
+ 4 |   abstract const type Tabs;
+   |                       ^^^^ [3]
+ 5 |   abstract const type Tcstr as int;
+ 6 | }
+   :
+18 |   }
+19 | 
+20 |   public function f(bool $cond, A::Ta $a, AA::Tabs $abs, AA::Tcstr $cstr): void {
+   |                                           ^^^^^^^^ [1]
+   |                                               ^^^^ [2]
+21 |     $x = ($cond ? 0 : $a);
+22 |     hh_show($x);
+
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::Tcstr`? [2]
+-> `Tcstr` is abstract here. [3]
+
+generics.php--file2.php:20:58
+ 3 | abstract class AA<T> {
+ 4 |   abstract const type Tabs;
+ 5 |   abstract const type Tcstr as int;
+   |                       ^^^^^ [3]
+ 6 | }
+ 7 | class A<T> extends AA<T> {
+   :
+18 |   }
+19 | 
+20 |   public function f(bool $cond, A::Ta $a, AA::Tabs $abs, AA::Tcstr $cstr): void {
+   |                                                          ^^^^^^^^^ [1]
+   |                                                              ^^^^^ [2]
+21 |     $x = ($cond ? 0 : $a);
+22 |     hh_show($x);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `string` [1]
+
+generics.php--file2.php:102:32
+ 14 |   }
+ 15 | 
+ 16 |   public function isSomethingWithT(T $x): bool {
+    |                                    ^ [3]
+ 17 |     return true;
+ 18 |   }
+    :
+ 98 |   hh_show($x);
+ 99 | 
+100 |   $x = ($b ? new A<int>() : new A<string>());
+    |                    ^^^ [2]
+101 |   hh_show($x);
+102 |   hh_show($x->isSomethingWithT("")); // error
+    |                                ^^ [1]
+103 | 
+104 |   $x = ($b ? new A<num>() : new A<arraykey>());
+
+3 errors found

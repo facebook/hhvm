@@ -1,2 +1,11 @@
-ERROR: File "nameof_array_get.php", line 5, characters 12-18:
-`nameof` can only be used with a class (Parsing[1002])
+error: Parsing[1002] `nameof` can only be used with a class [1]
+
+nameof_array_get.php:5:12
+3 | class C {
+4 |   public static function f(vec<int> $foo): void {
+5 |     nameof $foo[3];
+  |            ^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

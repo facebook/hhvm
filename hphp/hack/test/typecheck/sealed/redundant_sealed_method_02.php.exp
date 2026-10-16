@@ -1,4 +1,21 @@
-WARN: File "redundant_sealed_method_02.php", line 4, characters 14-22:
-Trait `T1` in sealed allowlist for method `foo` in `C`, but does not override method `foo` (Warn[12041])
-WARN: File "redundant_sealed_method_02.php", line 4, characters 25-33:
-Trait `T2` in sealed allowlist for method `foo` in `C`, but does not require extends `C` (Warn[12035])
+warning: Warn[12041] Trait `T1` in sealed allowlist for method `foo` in `C`, but does not override method `foo` [1]
+
+redundant_sealed_method_02.php:4:14
+2 | 
+3 | class C {
+4 |   <<__Sealed(T1::class, T2::class)>>
+  |              ^^^^^^^^^ [1]
+5 |   public function foo(): void {}
+6 | }
+
+warning: Warn[12035] Trait `T2` in sealed allowlist for method `foo` in `C`, but does not require extends `C` [1]
+
+redundant_sealed_method_02.php:4:25
+2 | 
+3 | class C {
+4 |   <<__Sealed(T1::class, T2::class)>>
+  |                         ^^^^^^^^^ [1]
+5 |   public function foo(): void {}
+6 | }
+
+2 errors found

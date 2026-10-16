@@ -1,30 +1,151 @@
-ERROR: File "using_bad_hints.php", line 13, characters 22-23:
-Parameter with type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. (Typing[4190])
-ERROR: File "using_bad_hints.php", line 14, characters 32-33:
-Parameter with type `IAsyncDisposable` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. (Typing[4190])
-ERROR: File "using_bad_hints.php", line 16, characters 36-37:
-Parameter with type `AsyncHandle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. (Typing[4190])
-ERROR: File "using_bad_hints.php", line 19, characters 30-31:
-Parameter with type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. (Typing[4190])
-ERROR: File "using_bad_hints.php", line 20, characters 26-31:
-Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-ERROR: File "using_bad_hints.php", line 23, characters 49-65:
-Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-ERROR: File "using_bad_hints.php", line 24, characters 14-19:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_hints.php", line 28, characters 31-44:
-Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-ERROR: File "using_bad_hints.php", line 31, characters 42-59:
-Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-ERROR: File "using_bad_hints.php", line 36, characters 22-27:
-Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-ERROR: File "using_bad_hints.php", line 38, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_hints.php", line 42, characters 28-44:
-Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. (Typing[4206])
-ERROR: File "using_bad_hints.php", line 44, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_hints.php", line 50, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
-ERROR: File "using_bad_hints.php", line 56, characters 16-21:
-Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+error: Typing[4190] Parameter with type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. [1]
+
+using_bad_hints.php:13:22
+11 | }
+12 | 
+13 | function bad1(Handle $h): void {}
+   |                      ^^ [1]
+14 | function bad2(IAsyncDisposable $x): void {}
+15 | class C {
+
+error: Typing[4190] Parameter with type `IAsyncDisposable` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. [1]
+
+using_bad_hints.php:14:32
+12 | 
+13 | function bad1(Handle $h): void {}
+14 | function bad2(IAsyncDisposable $x): void {}
+   |                                ^^ [1]
+15 | class C {
+16 |   public function bad3(AsyncHandle $h): void {}
+
+error: Typing[4190] Parameter with type `AsyncHandle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. [1]
+
+using_bad_hints.php:16:36
+14 | function bad2(IAsyncDisposable $x): void {}
+15 | class C {
+16 |   public function bad3(AsyncHandle $h): void {}
+   |                                    ^^ [1]
+17 | }
+18 | interface I {
+
+error: Typing[4190] Parameter with type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead. [1]
+
+using_bad_hints.php:19:30
+17 | }
+18 | interface I {
+19 |   public function boo(Handle $h):void;
+   |                              ^^ [1]
+20 |   public function goo(): Handle;
+21 | }
+
+error: Typing[4206] Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. [1]
+
+using_bad_hints.php:20:26
+18 | interface I {
+19 |   public function boo(Handle $h):void;
+20 |   public function goo(): Handle;
+   |                          ^^^^^^ [1]
+21 | }
+22 | 
+
+error: Typing[4206] Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. [1]
+
+using_bad_hints.php:23:49
+21 | }
+22 | 
+23 | async function unmarkedAsyncReturnDisposable(): Awaitable<Handle> {
+   |                                                 ^^^^^^^^^^^^^^^^^ [1]
+24 |   return new Handle();
+25 | }
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_hints.php:24:14
+22 | 
+23 | async function unmarkedAsyncReturnDisposable(): Awaitable<Handle> {
+24 |   return new Handle();
+   |              ^^^^^^ [1]
+25 | }
+26 | 
+
+error: Typing[4206] Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. [1]
+
+using_bad_hints.php:28:31
+26 | 
+27 | class MyList<T> { }
+28 | function badEmbeddedHandle(): MyList<Handle> {
+   |                               ^^^^^^^^^^^^^^ [1]
+29 |   return new MyList();
+30 | }
+
+error: Typing[4206] Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. [1]
+
+using_bad_hints.php:31:42
+29 |   return new MyList();
+30 | }
+31 | async function asyncBadEmbeddedHandle(): Awaitable<?Handle> {
+   |                                          ^^^^^^^^^^^^^^^^^^ [1]
+32 |   return null;
+33 | }
+
+error: Typing[4206] Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. [1]
+
+using_bad_hints.php:36:22
+34 | 
+35 | function test():void {
+36 |   $foo = function(): Handle {
+   |                      ^^^^^^ [1]
+37 |     // don't even need HH FIXME
+38 |     return new Handle();
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_hints.php:38:16
+36 |   $foo = function(): Handle {
+37 |     // don't even need HH FIXME
+38 |     return new Handle();
+   |                ^^^^^^ [1]
+39 |   };
+40 | 
+
+error: Typing[4206] Return type `Handle` must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute. [1]
+
+using_bad_hints.php:42:28
+40 | 
+41 |   // and this does
+42 |   $foo = async function(): Awaitable<Handle> {
+   |                            ^^^^^^^^^^^^^^^^^ [1]
+43 |     // don't even need HH FIXME
+44 |     return new Handle();
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_hints.php:44:16
+42 |   $foo = async function(): Awaitable<Handle> {
+43 |     // don't even need HH FIXME
+44 |     return new Handle();
+   |                ^^^^^^ [1]
+45 |   };
+46 | 
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_hints.php:50:16
+48 |   $foo = () ==> {
+49 |     // don't even need HH FIXME
+50 |     return new Handle();
+   |                ^^^^^^ [1]
+51 |   };
+52 | 
+
+error: Typing[4187] Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` [1]
+
+using_bad_hints.php:56:16
+54 |   $foo = async () ==> {
+55 |     // don't even need HH FIXME
+56 |     return new Handle();
+   |                ^^^^^^ [1]
+57 |   };
+58 | }
+
+15 errors found

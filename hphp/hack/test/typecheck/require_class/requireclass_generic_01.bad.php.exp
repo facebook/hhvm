@@ -1,8 +1,28 @@
-ERROR: File "requireclass_generic_01.bad.php", line 6, characters 17-22:
-Require class cannot be used with a generic class (Parsing[1002])
-ERROR: File "requireclass_generic_01.bad.php", line 9, characters 13-13:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requireclass_generic_01.bad.php", line 10, characters 7-13:
-  This requires to be exactly C
-  File "requireclass_generic_01.bad.php", line 6, characters 17-22:
-  Required here
+error: Parsing[1002] Require class cannot be used with a generic class [1]
+
+requireclass_generic_01.bad.php:6:17
+4 | 
+5 | trait MyTrait {
+6 |   require class C<int>;
+  |                 ^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to be exactly C [2]
+-> Required here [3]
+
+requireclass_generic_01.bad.php:9:13
+ 4 | 
+ 5 | trait MyTrait {
+ 6 |   require class C<int>;
+   |                 ^^^^^^ [3]
+ 7 | }
+ 8 | 
+ 9 | final class C<T> {
+   |             ^ [1]
+10 |   use MyTrait;
+   |       ^^^^^^^ [2]
+11 | }
+
+2 errors found

@@ -1,40 +1,125 @@
-ERROR: File "split_shape_types.php", line 32, characters 5-76:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "split_shape_types.php", line 32, characters 26-71:
-  Expected `shape('x' => int, 'y' => string, 'z' => float)`
-  File "split_shape_types.php", line 29, characters 13-56:
-  But got `(shape('x' => int, 'y' => string, 'z' => num) & not shape('z' => int, 'y' => string, 'x' => int))` from this `is` expression test
-ERROR: File "split_shape_types.php", line 32, characters 5-76:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "split_shape_types.php", line 32, characters 26-71:
-  Expected `shape('x' => int, 'y' => string, 'z' => float)`
-  File "split_shape_types.php", line 29, characters 13-56:
-  But got `not shape('z' => int, 'y' => string, 'x' => int)` from this `is` expression test
-ERROR: File "split_shape_types.php", line 32, characters 5-76:
-hh_expect_equivalent type mismatch (Typing[4452])
-  File "split_shape_types.php", line 32, characters 66-70:
-  Expected `float`
-  File "split_shape_types.php", line 27, characters 43-45:
-  But got `int`
-ERROR: File "split_shape_types.php", line 32, characters 74-75:
-Invalid argument (Typing[4110])
-  File "split_shape_types.php", line 32, characters 26-71:
-  Expected `shape('x' => int, 'y' => string, 'z' => float)`
-  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
-    via this generic `T`
-  File "split_shape_types.php", line 29, characters 13-56:
-  But got `(shape('x' => int, 'y' => string, 'z' => num) & not shape('z' => int, 'y' => string, 'x' => int))` from this `is` expression test
-ERROR: File "split_shape_types.php", line 32, characters 74-75:
-Invalid argument (Typing[4110])
-  File "split_shape_types.php", line 32, characters 26-71:
-  Expected `shape('x' => int, 'y' => string, 'z' => float)`
-  File "hh_single_type_check_magic.hhi", line 5, characters 108-108:
-    via this generic `T`
-  File "split_shape_types.php", line 29, characters 13-56:
-  But got `not shape('z' => int, 'y' => string, 'x' => int)` from this `is` expression test
-ERROR: File "split_shape_types.php", line 32, characters 74-75:
-Invalid argument (Typing[4110])
-  File "split_shape_types.php", line 32, characters 66-70:
-  Expected `float`
-  File "split_shape_types.php", line 27, characters 43-45:
-  But got `num`
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `shape('x' => int, 'y' => string, 'z' => float)` [2]
+-> But got `(shape('x' => int, 'y' => string, 'z' => num) & not shape('z' => int, 'y' => string, 'x' => int))` from this `is` expression test [3]
+
+split_shape_types.php:32:5
+27 |   shape('x' => int, 'y' => string, 'z' => num) $x,
+28 | ): void {
+29 |   if ($x is shape('x' => int, 'y' => string, 'z' => int)) {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+30 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => int)>($x);
+31 |   } else {
+32 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => float)>($x);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+33 |   }
+34 | }
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `shape('x' => int, 'y' => string, 'z' => float)` [2]
+-> But got `not shape('z' => int, 'y' => string, 'x' => int)` from this `is` expression test [3]
+
+split_shape_types.php:32:5
+27 |   shape('x' => int, 'y' => string, 'z' => num) $x,
+28 | ): void {
+29 |   if ($x is shape('x' => int, 'y' => string, 'z' => int)) {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+30 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => int)>($x);
+31 |   } else {
+32 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => float)>($x);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+33 |   }
+34 | }
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `float` [2]
+-> But got `int` [3]
+
+split_shape_types.php:32:5
+25 | 
+26 | function subsplit_tuples(
+27 |   shape('x' => int, 'y' => string, 'z' => num) $x,
+   |                                           ^^^ [3]
+28 | ): void {
+29 |   if ($x is shape('x' => int, 'y' => string, 'z' => int)) {
+30 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => int)>($x);
+31 |   } else {
+32 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => float)>($x);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                                                  ^^^^^ [2]
+33 |   }
+34 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => int, 'y' => string, 'z' => float)` [2]
+->   via this generic `T` [3]
+-> But got `(shape('x' => int, 'y' => string, 'z' => num) & not shape('z' => int, 'y' => string, 'x' => int))` from this `is` expression test [4]
+
+split_shape_types.php:32:74
+27 |   shape('x' => int, 'y' => string, 'z' => num) $x,
+28 | ): void {
+29 |   if ($x is shape('x' => int, 'y' => string, 'z' => int)) {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+30 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => int)>($x);
+31 |   } else {
+32 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => float)>($x);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                                          ^^ [1]
+33 |   }
+34 | }
+
+hh_single_type_check_magic.hhi:5:108
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                            ^ [3]
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+ 7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('x' => int, 'y' => string, 'z' => float)` [2]
+->   via this generic `T` [3]
+-> But got `not shape('z' => int, 'y' => string, 'x' => int)` from this `is` expression test [4]
+
+split_shape_types.php:32:74
+27 |   shape('x' => int, 'y' => string, 'z' => num) $x,
+28 | ): void {
+29 |   if ($x is shape('x' => int, 'y' => string, 'z' => int)) {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+30 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => int)>($x);
+31 |   } else {
+32 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => float)>($x);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                                          ^^ [1]
+33 |   }
+34 | }
+
+hh_single_type_check_magic.hhi:5:108
+ 3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+ 5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+   |                                                                                                            ^ [3]
+ 6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+ 7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `num` [3]
+
+split_shape_types.php:32:74
+25 | 
+26 | function subsplit_tuples(
+27 |   shape('x' => int, 'y' => string, 'z' => num) $x,
+   |                                           ^^^ [3]
+28 | ): void {
+29 |   if ($x is shape('x' => int, 'y' => string, 'z' => int)) {
+30 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => int)>($x);
+31 |   } else {
+32 |     hh_expect_equivalent<shape('x' => int, 'y' => string, 'z' => float)>($x);
+   |                                                                  ^^^^^ [2]
+   |                                                                          ^^ [1]
+33 |   }
+34 | }
+
+6 errors found

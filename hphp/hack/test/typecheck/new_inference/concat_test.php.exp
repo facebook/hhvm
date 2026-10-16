@@ -1,64 +1,170 @@
-WARN: File "concat_test.php--file2.php", line 11, characters 14-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "concat_test.php--file1.php", line 3, characters 10-12:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "concat_test.php--file2.php", line 5, characters 9-10:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 5, characters 9-10:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 19-21:
-  But got `num`
-ERROR: File "concat_test.php--file2.php", line 5, characters 14-15:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 5, characters 14-15:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 41-44:
-  But got `bool`
-ERROR: File "concat_test.php--file2.php", line 6, characters 9-10:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 6, characters 9-10:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 19-21:
-  But got `num`
-ERROR: File "concat_test.php--file2.php", line 7, characters 15-16:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 7, characters 15-16:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 41-44:
-  But got `bool`
-ERROR: File "concat_test.php--file2.php", line 8, characters 9-12:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 8, characters 9-12:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 8, characters 9-12:
-  But got `null`
-ERROR: File "concat_test.php--file2.php", line 9, characters 9-12:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 9, characters 9-12:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 9, characters 9-12:
-  But got `null`
-ERROR: File "concat_test.php--file2.php", line 9, characters 16-17:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 9, characters 16-17:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 19-21:
-  But got `num`
-ERROR: File "concat_test.php--file2.php", line 10, characters 9-12:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 10, characters 9-12:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 10, characters 9-12:
-  But got `null`
-ERROR: File "concat_test.php--file2.php", line 10, characters 16-17:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 10, characters 16-17:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 41-44:
-  But got `bool`
-ERROR: File "concat_test.php--file2.php", line 11, characters 9-10:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "concat_test.php--file2.php", line 11, characters 9-10:
-  Expected `string` or `int`
-  File "concat_test.php--file2.php", line 4, characters 19-21:
-  But got `num`
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+concat_test.php--file2.php:11:14
+ 9 |   $x5 = null . $n;
+10 |   $x6 = null . $b;
+11 |   $x7 = $n . any();
+   |              ^^^^^ [1]
+12 |   $x8 = $ak . $d;
+13 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+concat_test.php--file1.php:3:10
+1 | <?hh
+2 | 
+3 | function any() /* : Tany */ { return 3; }
+  |          ^^^ [1]
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `num` [2]
+
+concat_test.php--file2.php:5:9
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+  |                   ^^^ [2]
+5 |   $x1 = $n . $b;
+  |         ^^ [1]
+6 |   $x2 = $n . $ak;
+7 |   $x3 = $ak . $b;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [2]
+
+concat_test.php--file2.php:5:14
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+  |                                         ^^^^ [2]
+5 |   $x1 = $n . $b;
+  |              ^^ [1]
+6 |   $x2 = $n . $ak;
+7 |   $x3 = $ak . $b;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `num` [2]
+
+concat_test.php--file2.php:6:9
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+  |                   ^^^ [2]
+5 |   $x1 = $n . $b;
+6 |   $x2 = $n . $ak;
+  |         ^^ [1]
+7 |   $x3 = $ak . $b;
+8 |   $x4 = null . $ak;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [2]
+
+concat_test.php--file2.php:7:15
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+  |                                         ^^^^ [2]
+5 |   $x1 = $n . $b;
+6 |   $x2 = $n . $ak;
+7 |   $x3 = $ak . $b;
+  |               ^^ [1]
+8 |   $x4 = null . $ak;
+9 |   $x5 = null . $n;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [1]
+
+concat_test.php--file2.php:8:9
+ 6 |   $x2 = $n . $ak;
+ 7 |   $x3 = $ak . $b;
+ 8 |   $x4 = null . $ak;
+   |         ^^^^ [1]
+ 9 |   $x5 = null . $n;
+10 |   $x6 = null . $b;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [1]
+
+concat_test.php--file2.php:9:9
+ 7 |   $x3 = $ak . $b;
+ 8 |   $x4 = null . $ak;
+ 9 |   $x5 = null . $n;
+   |         ^^^^ [1]
+10 |   $x6 = null . $b;
+11 |   $x7 = $n . any();
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `num` [2]
+
+concat_test.php--file2.php:9:16
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+   |                   ^^^ [2]
+ 5 |   $x1 = $n . $b;
+ 6 |   $x2 = $n . $ak;
+ 7 |   $x3 = $ak . $b;
+ 8 |   $x4 = null . $ak;
+ 9 |   $x5 = null . $n;
+   |                ^^ [1]
+10 |   $x6 = null . $b;
+11 |   $x7 = $n . any();
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [1]
+
+concat_test.php--file2.php:10:9
+ 8 |   $x4 = null . $ak;
+ 9 |   $x5 = null . $n;
+10 |   $x6 = null . $b;
+   |         ^^^^ [1]
+11 |   $x7 = $n . any();
+12 |   $x8 = $ak . $d;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `bool` [2]
+
+concat_test.php--file2.php:10:16
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+   |                                         ^^^^ [2]
+ 5 |   $x1 = $n . $b;
+ 6 |   $x2 = $n . $ak;
+ 7 |   $x3 = $ak . $b;
+ 8 |   $x4 = null . $ak;
+ 9 |   $x5 = null . $n;
+10 |   $x6 = null . $b;
+   |                ^^ [1]
+11 |   $x7 = $n . any();
+12 |   $x8 = $ak . $d;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `num` [2]
+
+concat_test.php--file2.php:11:9
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 |   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {
+   |                   ^^^ [2]
+ 5 |   $x1 = $n . $b;
+ 6 |   $x2 = $n . $ak;
+   :
+ 9 |   $x5 = null . $n;
+10 |   $x6 = null . $b;
+11 |   $x7 = $n . any();
+   |         ^^ [1]
+12 |   $x8 = $ak . $d;
+13 | }
+
+12 errors found

@@ -1,4 +1,15 @@
-WARN: File "T63738857b.php", line 7, characters 26-27:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "T63738857b.php", line 5, characters 16-22:
-  This expression has type `dynamic`
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+T63738857b.php:7:26
+3 | 
+4 | function my_example(darray<int, int> $items): void {
+5 |   $k = null as dynamic;
+  |                ^^^^^^^ [2]
+6 |   $v = null;
+7 |   foreach ($items as $k->$v) {
+  |                          ^^ [1]
+8 |   }
+9 | }
+
+1 error found

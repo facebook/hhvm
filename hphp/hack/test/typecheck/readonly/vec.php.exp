@@ -1,4 +1,20 @@
-ERROR: File "vec.php", line 16, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-ERROR: File "vec.php", line 18, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+vec.php:16:3
+14 | ): Awaitable<void> {
+15 |   $z = $v[0];
+16 |   $z->prop = 5;
+   |   ^^^^^^^^^^^^ [1]
+17 |   $w = $d[2];
+18 |   $w->prop = 4;
+
+error: Parsing[1002] This expression is readonly, its members cannot be modified [1]
+
+vec.php:18:3
+16 |   $z->prop = 5;
+17 |   $w = $d[2];
+18 |   $w->prop = 4;
+   |   ^^^^^^^^^^^^ [1]
+19 | }
+
+2 errors found

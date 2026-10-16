@@ -1,8 +1,20 @@
-ERROR: File "recursive_type_option.php", line 8, characters 10-14:
-Invalid return type (Typing[4110])
-  File "recursive_type_option.php", line 3, characters 25-27:
-  Expected `int`
-  File "recursive_type_option.php", line 8, characters 10-14:
-  But got `?(int | _)`
-  File "recursive_type_option.php", line 5, characters 13-16:
-    from this definition
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `?(int | _)` [1]
+->   from this definition [3]
+
+recursive_type_option.php:8:10
+1 | <?hh
+2 | 
+3 | function test(bool $b): int {
+  |                         ^^^ [2]
+4 |   $x = new Vector(null); // new tvar v, $x : Vector<v>
+5 |   $y = ($b? null : $x[0]); // $y : ?v
+  |             ^^^^ [3]
+6 |   $x[] = $y; // ?v <: v, should be simplified to Tnull <: v
+7 |   $x[] = 0;
+8 |   return $x[0]; // error, this is ?int
+  |          ^^^^^ [1]
+9 | }
+
+1 error found

@@ -1,46 +1,231 @@
-ERROR: File "shapes_illegal.php", line 5, characters 26-36:
-Shape field name must not be a `self::class` expression (Parsing[1002])
-ERROR: File "shapes_illegal.php", line 6, characters 26-36:
-Shape field name must not be a `self::class` expression (Parsing[1002])
-ERROR: File "shapes_illegal.php", line 9, characters 25-32:
-Shape field name must not be a `C::class` expression (Parsing[1002])
-ERROR: File "shapes_illegal.php", line 12, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 13, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 13, characters 9-21:
-Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` (Typing[4482])
-ERROR: File "shapes_illegal.php", line 14, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 15, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 15, characters 9-21:
-Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` (Typing[4482])
-ERROR: File "shapes_illegal.php", line 16, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 17, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 17, characters 9-21:
-Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` (Typing[4482])
-ERROR: File "shapes_illegal.php", line 18, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 19, characters 9-21:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 19, characters 9-21:
-Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` (Typing[4482])
-ERROR: File "shapes_illegal.php", line 22, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 23, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 24, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 25, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 26, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 27, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 28, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
-ERROR: File "shapes_illegal.php", line 29, characters 22-34:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+error: Parsing[1002] Shape field name must not be a `self::class` expression [1]
+
+shapes_illegal.php:5:26
+3 | class B {}
+4 | class C extends B {
+5 |   const type Te1 = shape(nameof self => float);
+  |                          ^^^^^^^^^^^ [1]
+6 |   const type Te2 = shape(self::class => float);
+7 | 
+
+error: Parsing[1002] Shape field name must not be a `self::class` expression [1]
+
+shapes_illegal.php:6:26
+4 | class C extends B {
+5 |   const type Te1 = shape(nameof self => float);
+6 |   const type Te2 = shape(self::class => float);
+  |                          ^^^^^^^^^^^ [1]
+7 | 
+8 |   const type T1 = shape(nameof C => float);
+
+error: Parsing[1002] Shape field name must not be a `C::class` expression [1]
+
+shapes_illegal.php:9:25
+ 7 | 
+ 8 |   const type T1 = shape(nameof C => float);
+ 9 |   const type T2 = shape(C::class => float);
+   |                         ^^^^^^^^ [1]
+10 | 
+11 |   public function f(this::T1 $t1, this::T1 $t2): void {
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:12:9
+10 | 
+11 |   public function f(this::T1 $t1, this::T1 $t2): void {
+12 |     $t1[nameof static];
+   |         ^^^^^^^^^^^^^ [1]
+13 |     $t1[static::class];
+14 |     $t2[nameof static];
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:13:9
+11 |   public function f(this::T1 $t1, this::T1 $t2): void {
+12 |     $t1[nameof static];
+13 |     $t1[static::class];
+   |         ^^^^^^^^^^^^^ [1]
+14 |     $t2[nameof static];
+15 |     $t2[static::class];
+
+error: Typing[4482] Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` [1]
+
+shapes_illegal.php:13:9
+11 |   public function f(this::T1 $t1, this::T1 $t2): void {
+12 |     $t1[nameof static];
+13 |     $t1[static::class];
+   |         ^^^^^^^^^^^^^ [1]
+14 |     $t2[nameof static];
+15 |     $t2[static::class];
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:14:9
+12 |     $t1[nameof static];
+13 |     $t1[static::class];
+14 |     $t2[nameof static];
+   |         ^^^^^^^^^^^^^ [1]
+15 |     $t2[static::class];
+16 |     $t1[nameof parent];
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:15:9
+13 |     $t1[static::class];
+14 |     $t2[nameof static];
+15 |     $t2[static::class];
+   |         ^^^^^^^^^^^^^ [1]
+16 |     $t1[nameof parent];
+17 |     $t1[parent::class];
+
+error: Typing[4482] Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` [1]
+
+shapes_illegal.php:15:9
+13 |     $t1[static::class];
+14 |     $t2[nameof static];
+15 |     $t2[static::class];
+   |         ^^^^^^^^^^^^^ [1]
+16 |     $t1[nameof parent];
+17 |     $t1[parent::class];
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:16:9
+14 |     $t2[nameof static];
+15 |     $t2[static::class];
+16 |     $t1[nameof parent];
+   |         ^^^^^^^^^^^^^ [1]
+17 |     $t1[parent::class];
+18 |     $t2[nameof parent];
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:17:9
+15 |     $t2[static::class];
+16 |     $t1[nameof parent];
+17 |     $t1[parent::class];
+   |         ^^^^^^^^^^^^^ [1]
+18 |     $t2[nameof parent];
+19 |     $t2[parent::class];
+
+error: Typing[4482] Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` [1]
+
+shapes_illegal.php:17:9
+15 |     $t2[static::class];
+16 |     $t1[nameof parent];
+17 |     $t1[parent::class];
+   |         ^^^^^^^^^^^^^ [1]
+18 |     $t2[nameof parent];
+19 |     $t2[parent::class];
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:18:9
+16 |     $t1[nameof parent];
+17 |     $t1[parent::class];
+18 |     $t2[nameof parent];
+   |         ^^^^^^^^^^^^^ [1]
+19 |     $t2[parent::class];
+20 |   }
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:19:9
+17 |     $t1[parent::class];
+18 |     $t2[nameof parent];
+19 |     $t2[parent::class];
+   |         ^^^^^^^^^^^^^ [1]
+20 |   }
+21 |   public function g(this::T1 $t1, this::T1 $t2): void {
+
+error: Typing[4482] Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` [1]
+
+shapes_illegal.php:19:9
+17 |     $t1[parent::class];
+18 |     $t2[nameof parent];
+19 |     $t2[parent::class];
+   |         ^^^^^^^^^^^^^ [1]
+20 |   }
+21 |   public function g(this::T1 $t1, this::T1 $t2): void {
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:22:22
+20 |   }
+21 |   public function g(this::T1 $t1, this::T1 $t2): void {
+22 |     Shapes::idx($t1, nameof static);
+   |                      ^^^^^^^^^^^^^ [1]
+23 |     Shapes::idx($t1, static::class);
+24 |     Shapes::idx($t2, nameof static);
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:23:22
+21 |   public function g(this::T1 $t1, this::T1 $t2): void {
+22 |     Shapes::idx($t1, nameof static);
+23 |     Shapes::idx($t1, static::class);
+   |                      ^^^^^^^^^^^^^ [1]
+24 |     Shapes::idx($t2, nameof static);
+25 |     Shapes::idx($t2, static::class);
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:24:22
+22 |     Shapes::idx($t1, nameof static);
+23 |     Shapes::idx($t1, static::class);
+24 |     Shapes::idx($t2, nameof static);
+   |                      ^^^^^^^^^^^^^ [1]
+25 |     Shapes::idx($t2, static::class);
+26 |     Shapes::idx($t1, nameof parent);
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:25:22
+23 |     Shapes::idx($t1, static::class);
+24 |     Shapes::idx($t2, nameof static);
+25 |     Shapes::idx($t2, static::class);
+   |                      ^^^^^^^^^^^^^ [1]
+26 |     Shapes::idx($t1, nameof parent);
+27 |     Shapes::idx($t1, parent::class);
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:26:22
+24 |     Shapes::idx($t2, nameof static);
+25 |     Shapes::idx($t2, static::class);
+26 |     Shapes::idx($t1, nameof parent);
+   |                      ^^^^^^^^^^^^^ [1]
+27 |     Shapes::idx($t1, parent::class);
+28 |     Shapes::idx($t2, nameof parent);
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:27:22
+25 |     Shapes::idx($t2, static::class);
+26 |     Shapes::idx($t1, nameof parent);
+27 |     Shapes::idx($t1, parent::class);
+   |                      ^^^^^^^^^^^^^ [1]
+28 |     Shapes::idx($t2, nameof parent);
+29 |     Shapes::idx($t2, parent::class);
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:28:22
+26 |     Shapes::idx($t1, nameof parent);
+27 |     Shapes::idx($t1, parent::class);
+28 |     Shapes::idx($t2, nameof parent);
+   |                      ^^^^^^^^^^^^^ [1]
+29 |     Shapes::idx($t2, parent::class);
+30 |   }
+
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:29:22
+27 |     Shapes::idx($t1, parent::class);
+28 |     Shapes::idx($t2, nameof parent);
+29 |     Shapes::idx($t2, parent::class);
+   |                      ^^^^^^^^^^^^^ [1]
+30 |   }
+31 | }
+
+23 errors found

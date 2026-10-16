@@ -1,1 +1,2 @@
 --config disable_xhp_children_declarations=true
+--error-format plain_highlighted

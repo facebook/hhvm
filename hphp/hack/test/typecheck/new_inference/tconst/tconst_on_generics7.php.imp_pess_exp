@@ -1,26 +1,102 @@
-WARN: File "tconst_on_generics7.php", line 66, characters 14-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "tconst_on_generics7.php", line 50, characters 39-40:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics7.php", line 59, characters 11-12:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics7.php", line 77, characters 21-23:
-  Expected `int`
-  File "tconst_on_generics7.php", line 30, characters 18-23:
-  But got `string`
-  File "tconst_on_generics7.php", line 50, characters 43-43:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics7.php", line 56, characters 12-20:
-    on an object of type StringBox
-ERROR: File "tconst_on_generics7.php", line 64, characters 12-15:
-Can't access a type constant T from an unresolved type (Typing[4436])
-  File "tconst_on_generics7.php", line 50, characters 43-43:
-  Access happens here
-  File "tconst_on_generics7.php", line 64, characters 12-15:
-  Disambiguate the types using explicit type annotations here.
-ERROR: File "tconst_on_generics7.php", line 72, characters 11-12:
-Invalid argument (Typing[4110])
-  File "tconst_on_generics7.php", line 79, characters 35-45:
-  Expected `ArraykeyBox`
-  File "tconst_on_generics7.php", line 69, characters 13-21:
-  But got `StringBox`
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tconst_on_generics7.php:66:14
+64 |   $x = new Test();
+65 |   mess_with_an_ArraykeyBox($x->get(), "oh!");
+66 |   expect_int($x->getK()); // nok, this is unsafe!
+   |              ^^^^^^^^^^ [1]
+67 | }
+68 | 
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_on_generics7.php:50:39
+48 |     return $this->v;
+49 |   }
+50 |   public function getK(): T2 where T2=T1::T {
+   |                                       ^^ [1]
+51 |     if ($this->v == null) { throw new Exception(); }
+52 |     return $this->v->getK();
+
+error: Typing[4326] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+->   resulting from accessing the type constant 'T' [4]
+->   on an object of type StringBox [5]
+
+tconst_on_generics7.php:59:11
+28 | 
+29 | class StringBox extends AbsArraykeyBox {
+30 |   const type T = string;
+   |                  ^^^^^^ [3]
+31 |   public function getK() : this::T {
+32 |     return "5";
+   :
+48 |     return $this->v;
+49 |   }
+50 |   public function getK(): T2 where T2=T1::T {
+   |                                           ^ [4]
+51 |     if ($this->v == null) { throw new Exception(); }
+52 |     return $this->v->getK();
+53 |   }
+54 | }
+55 | 
+56 | function t(StringBox $s, IntBox $i): void {
+   |            ^^^^^^^^^ [5]
+57 |   $x = new Test();
+58 |   expect_int($x->getK());
+59 |   $x->put($s);
+   |           ^^ [1]
+60 |   $x->put($i);
+61 | }
+   :
+75 | function expect_AbsArraykeyBox(AbsArraykeyBox $_): void {}
+76 | function expect_arraykey(arraykey $_): void {}
+77 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+78 | 
+79 | function mess_with_an_ArraykeyBox(ArraykeyBox $b, arraykey $k): void {
+
+error: Typing[4436] Can't access a type constant T from an unresolved type [1]
+-> Access happens here [2]
+-> Disambiguate the types using explicit type annotations here. [1]
+
+tconst_on_generics7.php:64:12
+48 |     return $this->v;
+49 |   }
+50 |   public function getK(): T2 where T2=T1::T {
+   |                                           ^ [2]
+51 |     if ($this->v == null) { throw new Exception(); }
+52 |     return $this->v->getK();
+   :
+62 | 
+63 | function t1() : void {
+64 |   $x = new Test();
+   |            ^^^^ [1]
+65 |   mess_with_an_ArraykeyBox($x->get(), "oh!");
+66 |   expect_int($x->getK()); // nok, this is unsafe!
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `ArraykeyBox` [2]
+-> But got `StringBox` [3]
+
+tconst_on_generics7.php:72:11
+67 | }
+68 | 
+69 | function t2(StringBox $s) : void {
+   |             ^^^^^^^^^ [3]
+70 |   $x = new Test();
+71 |   mess_with_an_ArraykeyBox($x->get(), 9);
+72 |   $x->put($s); // error
+   |           ^^ [1]
+73 | }
+74 | 
+   :
+77 | function expect_int(int $_): void {}
+78 | 
+79 | function mess_with_an_ArraykeyBox(ArraykeyBox $b, arraykey $k): void {
+   |                                   ^^^^^^^^^^^ [2]
+80 |   $b->setK($k);
+81 | }
+
+5 errors found

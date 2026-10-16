@@ -1,4 +1,13 @@
 File "tany.php", line 4, characters 3-13:
   mixed
-ERROR: File "tany.php", line 3, characters 34-35:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+tany.php:3:34
+1 | <?hh
+2 | 
+3 | function test(bool $b, mixed $x, $y): void {
+  |                                  ^^ [1]
+4 |   hh_show($x);
+5 |   if (!HH\is_php_array($x)) {
+
+1 error found

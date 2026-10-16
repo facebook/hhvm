@@ -1,14 +1,55 @@
-ERROR: File "box_keyword.php", line 8, characters 14-19:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_keyword.php", line 4, characters 7-12:
-  Definition is here
-ERROR: File "box_keyword.php", line 16, characters 15-20:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "box_keyword.php", line 4, characters 7-12:
-  Definition is here
-ERROR: File "box_keyword.php", line 17, characters 15-23:
-Invalid reified hint (Typing[4305])
-  File "box_keyword.php", line 17, characters 22-22:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "box_keyword.php", line 5, characters 21-22:
-  `Tr` is reified
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_keyword.php:8:14
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+ 7 | function Erased_keywordCheck(): void {
+ 8 |   new Erased<Erased>(); // bad, Erased requires argument
+   |              ^^^^^^ [1]
+ 9 |   new Erased<Erased<_>>();
+10 | 
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+box_keyword.php:16:15
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class Erased<T> {}
+   |       ^^^^^^ [2]
+ 5 | class Reified<reify Tr> {}
+ 6 | 
+   :
+14 | 
+15 | function Reified_keywordCheck(): void {
+16 |   new Reified<Erased>(); // bad, Erased requires argument
+   |               ^^^^^^ [1]
+17 |   new Reified<Erased<_>>();
+18 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [2]
+-> `Tr` is reified [3]
+
+box_keyword.php:17:15
+ 3 | 
+ 4 | class Erased<T> {}
+ 5 | class Reified<reify Tr> {}
+   |                     ^^ [3]
+ 6 | 
+ 7 | function Erased_keywordCheck(): void {
+   :
+15 | function Reified_keywordCheck(): void {
+16 |   new Reified<Erased>(); // bad, Erased requires argument
+17 |   new Reified<Erased<_>>();
+   |               ^^^^^^^^^ [1]
+   |                      ^ [2]
+18 | 
+19 |   new Reified<Reified<int>>();
+
+3 errors found

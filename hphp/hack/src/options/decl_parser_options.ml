@@ -13,6 +13,7 @@ type t = {
   enable_xhp_class_modifier: bool;
   everything_sdt: bool;
   include_enum_member_values: bool;
+  include_const_shape_key_values: bool;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;
@@ -36,6 +37,7 @@ let from_parser_options (popt : Parser_options.t) =
     enable_xhp_class_modifier = popt.enable_xhp_class_modifier;
     everything_sdt = popt.everything_sdt;
     include_enum_member_values = popt.include_enum_member_values;
+    include_const_shape_key_values = popt.include_const_shape_key_values;
     php5_compat_mode = false;
     hhvm_compat_mode = false;
     keep_user_attributes = popt.keep_user_attributes;

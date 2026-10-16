@@ -119,6 +119,8 @@ module Hhconfig = struct
 
   let include_enum_member_values = key "include_enum_member_values"
 
+  let include_const_shape_key_values = key "include_const_shape_key_values"
+
   let disallow_toplevel_requires = key "disallow_toplevel_requires"
 
   let disallow_unresolved_type_variables =

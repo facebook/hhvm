@@ -387,6 +387,9 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
         include_enum_member_values =
           bool_opt Config_keys.Hhconfig.include_enum_member_values config
           >?? po_opt.include_enum_member_values;
+        include_const_shape_key_values =
+          bool_opt Config_keys.Hhconfig.include_const_shape_key_values config
+          >?? po_opt.include_const_shape_key_values;
         keep_user_attributes =
           bool_opt Config_keys.Hhconfig.keep_user_attributes config
           >?? po_opt.keep_user_attributes;

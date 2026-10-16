@@ -34,6 +34,9 @@ type t = {
   include_enum_member_values: bool;
       (** If set, the parser records enum member values in decls (used by the
           duplicate-enum-value check). *)
+  include_const_shape_key_values: bool;
+      (** If set, the parser records `__ShapeKey` class-constant metadata in
+          decls. *)
   keep_user_attributes: bool;
       (** Parse all user attributes rather than only the ones needed for typing *)
   stack_size: int;

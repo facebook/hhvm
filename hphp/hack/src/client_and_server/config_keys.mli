@@ -110,6 +110,8 @@ module Hhconfig : sig
 
   val include_enum_member_values : string
 
+  val include_const_shape_key_values : string
+
   val disallow_toplevel_requires : string
 
   val disallow_unresolved_type_variables : string

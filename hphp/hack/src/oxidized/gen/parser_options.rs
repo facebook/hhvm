@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8023f59734581409337067e049b114fe>>
+// @generated SignedSource<<a3cdb1233eb304120aa0ff11ae4cbecc>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -68,6 +68,9 @@ pub struct ParserOptions {
     /// If set, the parser records enum member values in decls (used by the
     /// duplicate-enum-value check).
     pub include_enum_member_values: bool,
+    /// If set, the parser records `__ShapeKey` class-constant metadata in
+    /// decls.
+    pub include_const_shape_key_values: bool,
     /// Parse all user attributes rather than only the ones needed for typing
     pub keep_user_attributes: bool,
     /// Stack size to use for parallel workers inside the parser.

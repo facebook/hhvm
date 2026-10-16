@@ -292,6 +292,10 @@ impl HhConfig {
                 "include_enum_member_values",
                 default.include_enum_member_values,
             )?,
+            include_const_shape_key_values: hhconfig.get_bool_or(
+                "include_const_shape_key_values",
+                default.include_const_shape_key_values,
+            )?,
             disallow_static_constants_in_default_func_args: default
                 .disallow_static_constants_in_default_func_args,
             unwrap_concurrent: default.unwrap_concurrent,

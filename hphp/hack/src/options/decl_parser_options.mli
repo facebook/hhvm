@@ -13,6 +13,7 @@ type t = {
   enable_xhp_class_modifier: bool;
   everything_sdt: bool;
   include_enum_member_values: bool;
+  include_const_shape_key_values: bool;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;

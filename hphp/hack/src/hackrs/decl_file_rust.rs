@@ -53,6 +53,10 @@ struct CliOptions {
     /// Record enum member values on class consts (for duplicate-value checking).
     #[clap(long)]
     enable_enum_member_values: bool,
+
+    /// Record ShapeKey class-constant metadata in decls.
+    #[clap(long)]
+    enable_const_shape_key_values: bool,
 }
 
 fn main() {
@@ -107,6 +111,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         Arc::clone(&file_provider),
         DeclParserOptions {
             include_enum_member_values: opts.enable_enum_member_values,
+            include_const_shape_key_values: opts.enable_const_shape_key_values,
             ..Default::default()
         },
     );

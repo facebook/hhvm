@@ -1323,6 +1323,7 @@ dependencies = [
  "flatten_smart_constructors",
  "hash",
  "hh_autoimport_rust",
+ "hhbc_string_utils",
  "itertools 0.15.0",
  "namespaces_rust",
  "naming_special_names_rust",

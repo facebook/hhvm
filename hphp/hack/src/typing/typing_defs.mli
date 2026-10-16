@@ -118,6 +118,15 @@ module Const_value : sig
       [member_name] supplies the name for the [CVLabel] case. *)
   val value_repr : member_name:string -> t -> string
 
+  (** Values used only for shape key normalisation. *)
+  type concrete_value =
+    | SKVInt of string
+    | SKVString of string
+
+  (** For shape key normalisation only; class pointers become class-name strings,
+      with legacy XHP names mangled as at runtime. Unresolved values return [None]. *)
+  val concrete_value : member_name:string -> t -> concrete_value option
+
   (** Whether the value cannot be resolved to a concrete, comparable form. *)
   val is_uncheckable : t -> bool
 
@@ -139,8 +148,8 @@ type class_const = {
       (** Whether the constant is explicitly or intrinsically permitted as a
           shape key. *)
   cc_value: Const_value.t;
-      (** The recorded constant value; [CVAbsent] means no value was
-          recorded or the initializer cannot be represented. *)
+      (** The recorded value for a `__ShapeKey` constant or enum member;
+          [CVAbsent] means the value was not recorded or cannot be represented. *)
 }
 [@@deriving show]
 

@@ -10,7 +10,9 @@ FoldedClass {
             origin: "\\ShapeKeyInterface",
             refs: [],
             is_shape_key: true,
-            value: CVAbsent,
+            value: CVString(
+                "interface",
+            ),
         },
         "UNMARKED": ClassConst {
             is_synthesized: false,
@@ -46,7 +48,9 @@ FoldedClass {
             origin: "\\ShapeKeyTrait",
             refs: [],
             is_shape_key: true,
-            value: CVAbsent,
+            value: CVString(
+                "trait",
+            ),
         },
         "UNMARKED": ClassConst {
             is_synthesized: false,
@@ -84,7 +88,9 @@ FoldedClass {
             origin: "\\ShapeKeyParent",
             refs: [],
             is_shape_key: true,
-            value: CVAbsent,
+            value: CVString(
+                "parent",
+            ),
         },
         "UNMARKED": ClassConst {
             is_synthesized: false,
@@ -134,7 +140,9 @@ FoldedClass {
             origin: "\\ShapeKeyParent",
             refs: [],
             is_shape_key: true,
-            value: CVAbsent,
+            value: CVString(
+                "parent",
+            ),
         },
         "UNMARKED": ClassConst {
             is_synthesized: false,
@@ -187,7 +195,9 @@ FoldedClass {
             origin: "\\ShapeKeyTrait",
             refs: [],
             is_shape_key: true,
-            value: CVAbsent,
+            value: CVString(
+                "trait",
+            ),
         },
         "UNMARKED": ClassConst {
             is_synthesized: false,

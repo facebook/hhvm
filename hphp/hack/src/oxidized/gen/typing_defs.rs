@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7138557a09ec91e7429c31b61baf764c>>
+// @generated SignedSource<<2ba0bd60fdd976c5c3c226997664b9b1>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -296,8 +296,8 @@ pub struct ClassConst {
     /// Whether the constant is explicitly or intrinsically permitted as a
     /// shape key.
     pub is_shape_key: bool,
-    /// The recorded constant value; `CVAbsent` means no value was
-    /// recorded or the initializer cannot be represented.
+    /// The recorded value for a `__ShapeKey` constant or enum member;
+    /// `CVAbsent` means the value was not recorded or cannot be represented.
     pub value: ConstValue,
 }
 

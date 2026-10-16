@@ -1,0 +1,501 @@
+FoldedClass {
+    name: "\\ShapeKeyBase",
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                1,
+            ),
+        },
+        "STRING_LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: true,
+            value: CVString(
+                "literal",
+            ),
+        },
+        "LABEL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: true,
+            value: CVLabel,
+        },
+        "SELF_CONST": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "FORWARDED_CONST": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\ShapeKeyTraitUser",
+                    ),
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "COMPUTED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "UNANNOTATED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+}
+FoldedClass {
+    name: "\\ShapeKeyChild",
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\ShapeKeyBase": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\ShapeKeyChild",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\ShapeKeyBase": ShapeKeyBase,
+    },
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                1,
+            ),
+        },
+        "STRING_LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: true,
+            value: CVString(
+                "literal",
+            ),
+        },
+        "LABEL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: true,
+            value: CVLabel,
+        },
+        "SELF_CONST": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "FORWARDED_CONST": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\ShapeKeyTraitUser",
+                    ),
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "COMPUTED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "UNANNOTATED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyBase",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyChild",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+    extends: {
+        "\\ShapeKeyBase",
+    },
+}
+FoldedClass {
+    name: "\\ShapeKeyTrait",
+    kind: Ctrait,
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyTrait",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                1,
+            ),
+        },
+        "SELF_CONST": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyTrait",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyTrait",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+}
+FoldedClass {
+    name: "\\ShapeKeyTraitUser",
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: {
+        "\\ShapeKeyTrait": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\ShapeKeyTraitUser",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\ShapeKeyTrait": ShapeKeyTrait,
+    },
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyTrait",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                1,
+            ),
+        },
+        "SELF_CONST": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyTrait",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "LITERAL",
+                ),
+            ],
+            is_shape_key: true,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyTraitUser",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+    extends: {
+        "\\ShapeKeyTrait",
+    },
+}
+FoldedClass {
+    name: "\\ShapeKeyInterface",
+    kind: Cinterface,
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                3,
+            ),
+        },
+        "LABEL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: true,
+            value: CVLabel,
+        },
+        "UNANNOTATED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+}
+FoldedClass {
+    name: "\\ShapeKeyInterfaceChild",
+    kind: Cinterface,
+    substs: {
+        "\\ShapeKeyInterface": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\ShapeKeyInterfaceChild",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\ShapeKeyInterface": ShapeKeyInterface,
+    },
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                3,
+            ),
+        },
+        "LABEL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: true,
+            value: CVLabel,
+        },
+        "UNANNOTATED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyInterfaceChild",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+    extends: {
+        "\\ShapeKeyInterface",
+    },
+}
+FoldedClass {
+    name: "\\ShapeKeyInterfaceUser",
+    kind: Cclass(
+        Concrete,
+    ),
+    ancestors: {
+        "\\ShapeKeyInterface": ShapeKeyInterface,
+        "\\ShapeKeyInterfaceChild": ShapeKeyInterfaceChild,
+    },
+    consts: {
+        "LITERAL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: true,
+            value: CVInt(
+                3,
+            ),
+        },
+        "LABEL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: string,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: true,
+            value: CVLabel,
+        },
+        "UNANNOTATED": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: int,
+            origin: "\\ShapeKeyInterface",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\ShapeKeyInterfaceUser",
+            refs: [],
+            is_shape_key: false,
+            value: CVAbsent,
+        },
+    },
+}

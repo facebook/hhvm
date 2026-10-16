@@ -185,6 +185,24 @@ module Const_value = struct
     | CVConstAccess (cls, member) -> cls ^ "::" ^ member
     | CVAbsent -> "<absent>"
 
+  (** Values used only for shape key normalisation. *)
+  type concrete_value =
+    | SKVInt of string
+    | SKVString of string
+
+  let concrete_value ~member_name (value : t) =
+    match value with
+    | CVInt value -> Some (SKVInt (string_of_int value))
+    | CVLargeInt value -> Some (SKVInt value)
+    | CVString value -> Some (SKVString value)
+    | CVLabel -> Some (SKVString member_name)
+    | CVNameof value
+    | CVClassPointer value ->
+      Some (SKVString (Utils.strip_ns value))
+    | CVAbsent
+    | CVConstAccess _ ->
+      None
+
   (** Whether the value cannot be resolved to a concrete, comparable form:
       absent (no recorded value), or a reference to another enum's member
       (`CVConstAccess`, resolvable only through the pure-alias exemption). *)
@@ -213,8 +231,8 @@ type class_const = {
       (** Whether the constant is explicitly or intrinsically permitted as a
           shape key. *)
   cc_value: Const_value.t;
-      (** The recorded constant value; `CVAbsent` means no value was
-          recorded or the initializer cannot be represented. *)
+      (** The recorded value for a `__ShapeKey` constant or enum member;
+          `CVAbsent` means the value was not recorded or cannot be represented. *)
 }
 [@@deriving show]
 

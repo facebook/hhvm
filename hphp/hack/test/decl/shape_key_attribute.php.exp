@@ -14,7 +14,7 @@
           scc_type =
           (Rhint ([5:9-15]), (Tapply (([5:9-15], "\\HH\\string"), [])));
           scc_refs = []; scc_value = None; scc_is_shape_key = true;
-          scc_const_value = Typing_defs.Const_value.CVAbsent };
+          scc_const_value = (Typing_defs.Const_value.CVString "interface") };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:16-24], "UNMARKED");
            scc_type =
@@ -42,7 +42,7 @@
            scc_type =
            (Rhint ([11:9-15]), (Tapply (([11:9-15], "\\HH\\string"), [])));
            scc_refs = []; scc_value = None; scc_is_shape_key = true;
-           scc_const_value = Typing_defs.Const_value.CVAbsent };
+           scc_const_value = (Typing_defs.Const_value.CVString "trait") };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([12:16-24], "UNMARKED");
             scc_type =
@@ -71,7 +71,7 @@
            scc_type =
            (Rhint ([17:9-15]), (Tapply (([17:9-15], "\\HH\\string"), [])));
            scc_refs = []; scc_value = None; scc_is_shape_key = true;
-           scc_const_value = Typing_defs.Const_value.CVAbsent };
+           scc_const_value = (Typing_defs.Const_value.CVString "parent") };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([18:16-24], "UNMARKED");
             scc_type =

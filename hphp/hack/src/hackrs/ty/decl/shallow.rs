@@ -76,8 +76,8 @@ pub struct ShallowClassConst<R: Reason> {
     /// Whether the constant is explicitly or intrinsically permitted as a shape key.
     pub is_shape_key: bool,
 
-    /// The recorded constant value. CVAbsent means no value was recorded
-    /// or the initializer cannot be represented.
+    /// The recorded value for a `__ShapeKey` constant or enum member.
+    /// CVAbsent means the value was not recorded or cannot be represented.
     pub const_value: ConstValue,
 }
 

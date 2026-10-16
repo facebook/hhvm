@@ -226,8 +226,8 @@ type shallow_class_const = {
       (** Whether the constant is explicitly or intrinsically permitted as a
       shape key. *)
   scc_const_value: Typing_defs.Const_value.t;
-      (** The recorded constant value. CVAbsent means no value was
-      recorded or the initializer cannot be represented. *)
+      (** The recorded value for a `__ShapeKey` constant or enum member.
+      CVAbsent means the value was not recorded or cannot be represented. *)
 }
 [@@deriving eq, show]
 

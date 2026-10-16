@@ -14,6 +14,7 @@ use bstr::BString;
 use flatten_smart_constructors::FlattenSmartConstructors;
 use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
+use hhbc_string_utils::mangle;
 use itertools::Either;
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
@@ -1430,9 +1431,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
     /// For a class-constant initializer, returns its recorded value when it is a
     /// recordable kind (int, string, nameof or ::class), and None for computed
     /// values (constant references, arithmetic, ...).
-    fn const_value(value: Node) -> Option<ConstValue> {
+    fn const_value(value: &Node) -> Option<ConstValue> {
         match value {
-            Node::IntLiteral(s, _) => Self::int_const_value(&s, false),
+            Node::IntLiteral(s, _) => Self::int_const_value(s, false),
             // Only valid UTF-8 strings are recorded; non-UTF-8 bytes -> None
             // (treated as computed) so distinct byte strings can't collapse to
             // the same recorded value.
@@ -1445,23 +1446,28 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 aast::Expr_::ClassConst(box (
                     aast::ClassId(_, _, aast::ClassId_::CI(Id(_, class_name))),
                     (_, const_name),
-                )) if const_name == "class" => Some(ConstValue::CVClassPointer(class_name)),
+                )) if const_name == "class" => {
+                    Some(ConstValue::CVClassPointer(mangle(class_name.clone())))
+                }
                 // `C::A` (accessing another constant): record the accessed class
                 // and constant so callers can resolve the reference through decl.
                 aast::Expr_::ClassConst(box (
                     aast::ClassId(_, _, aast::ClassId_::CI(Id(_, class_name))),
                     (_, const_name),
-                )) => Some(ConstValue::CVConstAccess(class_name, const_name)),
+                )) => Some(ConstValue::CVConstAccess(
+                    class_name.clone(),
+                    const_name.clone(),
+                )),
                 aast::Expr_::Nameof(box aast::ClassId(
                     _,
                     _,
                     aast::ClassId_::CI(Id(_, class_name)),
-                )) => Some(ConstValue::CVNameof(class_name)),
+                )) => Some(ConstValue::CVNameof(mangle(class_name.clone()))),
                 aast::Expr_::Unop(box (Uop::Uminus, aast::Expr(_, _, aast::Expr_::Int(s)))) => {
-                    Self::int_const_value(&s, true)
+                    Self::int_const_value(s, true)
                 }
                 aast::Expr_::Unop(box (Uop::Uplus, aast::Expr(_, _, aast::Expr_::Int(s)))) => {
-                    Self::int_const_value(&s, false)
+                    Self::int_const_value(s, false)
                 }
                 _ => None,
             },
@@ -4284,6 +4290,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 let ty = self.node_to_ty(hint);
                 let is_shape_key = attributes
                     .contains_marker_attribute(naming_special_names::user_attributes::SHAPE_KEY);
+                let should_record_value = is_shape_key && self.opts.include_const_shape_key_values;
                 Node::List(
                     consts
                         .into_iter()
@@ -4302,6 +4309,19 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                                         .infer_const(name, initializer.clone())
                                         .unwrap_or_else(tany),
                                 };
+                                let const_value = if should_record_value {
+                                    match Self::const_value(&initializer) {
+                                        Some(ConstValue::CVString(s)) if s == id.1 => {
+                                            ConstValue::CVLabel
+                                        }
+                                        Some(ConstValue::CVConstAccess(..)) | None => {
+                                            ConstValue::CVAbsent
+                                        }
+                                        Some(value) => value,
+                                    }
+                                } else {
+                                    ConstValue::CVAbsent
+                                };
                                 Some(Node::Const(Box::new(
                                     shallow_decl_defs::ShallowClassConst {
                                         abstract_,
@@ -4314,7 +4334,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                                             None
                                         },
                                         is_shape_key,
-                                        const_value: ConstValue::CVAbsent,
+                                        const_value,
                                     },
                                 )))
                             }
@@ -5330,7 +5350,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         // Inline the "no value" case as CVAbsent (no option wrapper), and
         // collapse `MEMBER = 'MEMBER'` to the nullary CVLabel (no stored string).
         let const_value = if self.opts.include_enum_member_values {
-            match Self::const_value(value.clone()) {
+            match Self::const_value(&value) {
                 Some(ConstValue::CVString(s)) if s == id.1 => ConstValue::CVLabel,
                 Some(v) => v,
                 None => ConstValue::CVAbsent,

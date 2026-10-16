@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c2fb8b902dd8f7ee3de4b61a415dd61>>
+// @generated SignedSource<<af7a739a8dced2f2222d546efae97c0c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -56,8 +56,8 @@ pub struct ShallowClassConst {
     /// Whether the constant is explicitly or intrinsically permitted as a
     /// shape key.
     pub is_shape_key: bool,
-    /// The recorded constant value. CVAbsent means no value was
-    /// recorded or the initializer cannot be represented.
+    /// The recorded value for a `__ShapeKey` constant or enum member.
+    /// CVAbsent means the value was not recorded or cannot be represented.
     pub const_value: typing_defs::ConstValue,
 }
 

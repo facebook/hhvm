@@ -50,7 +50,7 @@ type T2 = (function(int, string..., named bool...):void);
 // Explicit named parameter and variadic
 type T3 = (function(named int $n, named string...):void);
 ```
-The named variadic can appear anywhere in the parameter list, but there can be at most one named variadic.
+The named variadic must be the last parameter, and there can be at most one named variadic.
 
 Function definitions (top-level, method, and lambda) are extended with the same syntax, i.e. without a name for binding
 the named variadic parameters. Some examples are listed below:

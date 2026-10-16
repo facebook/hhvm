@@ -45,3 +45,13 @@ val release_closures : unit -> unit
     call, so a caller must reset before a run or risk a closure computed from a
     file's earlier contents, or under a different [max]. *)
 val reset : unit -> unit
+
+(** [referrers ctx naming_table candidate] is every file outside [candidate]
+    that references a symbol defined inside it. Direct references only, where
+    [get] walks the closure. Not memoised, unlike [get]. Master-only, like
+    [get]. *)
+val referrers :
+  Provider_context.t ->
+  Naming_table.t ->
+  Relative_path.Set.t ->
+  Relative_path.Set.t

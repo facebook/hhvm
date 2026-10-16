@@ -163,3 +163,9 @@ let reset () =
   HashSet.clear refused;
   computed_count := 0;
   served_count := 0
+
+let referrers ctx naming_table candidate =
+  let deps_mode = Provider_context.get_deps_mode ctx in
+  let own = symbols_of_files naming_table candidate in
+  let dependents = Typing_deps.add_typing_deps deps_mode own in
+  Relative_path.Set.diff (Naming_provider.get_files ctx dependents) candidate

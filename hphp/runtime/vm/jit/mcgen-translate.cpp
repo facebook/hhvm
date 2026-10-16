@@ -703,9 +703,17 @@ Optional<SBInvOffset> offsetAtLocation(SrcKey sk) {
       off += instrNumPushes(pc);
       off -= instrNumPops(pc);
 
+      auto const op = peek_op(pc);
       auto const targets = instrJumpTargets(start, pc - start);
-      for (auto t : targets) toProcess.emplace_back(start + t, off);
-      if (!instrAllowsFallThru(peek_op(pc))) break;
+      for (size_t i = 0; i < targets.size(); ++i) {
+        auto targetOff = off;
+        // Memo misses (the first target) do not push a cached value.
+        if (i == 0 && (op == Op::MemoGet || op == Op::MemoGetEager)) {
+          --targetOff;
+        }
+        toProcess.emplace_back(start + targets[i], targetOff);
+      }
+      if (!instrAllowsFallThru(op)) break;
       pc += instrLen(pc);
     }
   }

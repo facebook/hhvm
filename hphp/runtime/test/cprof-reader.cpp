@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/sha1.h"
@@ -120,6 +121,29 @@ DV:
 }
 )HHAS";
 
+constexpr auto kMemoHhas = R"HHAS(
+.function N cont_prof_reader_memo_get_81c7e9d2() {
+  .ismemoizewrapper;
+  MemoGet miss L:0+0
+  RetC None
+miss:
+  Null
+  MemoSet L:0+0
+  RetC None
+}
+.function N cont_prof_reader_memo_get_eager_81c7e9d2() isAsync {
+  .ismemoizewrapper;
+  MemoGetEager miss suspended L:0+0
+  RetC None
+miss:
+  Null
+  MemoSetEager L:0+0
+  RetC None
+suspended:
+  RetCSuspended
+}
+)HHAS";
+
 ContProfProfileRecord makeRecord(
   std::string name,
   uint8_t identity,
@@ -172,6 +196,20 @@ std::unique_ptr<Unit> makeBytecodeTestUnit() {
   return emitter->create();
 }
 
+std::unique_ptr<Unit> makeMemoTestUnit() {
+  auto const emitter = assemble_string(
+    kMemoHhas,
+    "hphp/runtime/test/cont-prof-reader-memo-test.php",
+    SHA1{"5555555555555555555555555555555555555555"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  if (!emitter || emitter->m_fatalUnit) return nullptr;
+  return emitter->create();
+}
+
 ContProfProfileRecord makeBytecodeRecord(
   const ContProfFuncKey& key,
   Offset offset,
@@ -195,6 +233,22 @@ ContProfProfileRecord makeBytecodeRecord(
     },
   };
   return record;
+}
+
+void expectMemoStart(const Func& func, Offset offset, int expectedDepth) {
+  auto const start = SrcKey{&func, offset, ResumeMode::None};
+  auto const stackOffset = mcgen::offsetAtLocation(start);
+  ASSERT_TRUE(stackOffset);
+  EXPECT_EQ(SBInvOffset{expectedDepth}, *stackOffset);
+
+  auto const key = makeContProfFuncKey(func);
+  ASSERT_TRUE(key);
+  auto const record = makeBytecodeRecord(*key, offset, 1);
+  ASSERT_TRUE(isValidContProfProfileRecord(record));
+  EXPECT_EQ(
+    expectedDepth == 0,
+    isContProfProfileRecordCompatible(record, func)
+  );
 }
 
 bool writeTextFile(const std::string& path, const std::string& contents) {
@@ -586,6 +640,38 @@ TEST_F(ContProfReaderBytecodeTest, ValidatesSwitchProfileSize) {
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
+}
+
+TEST(ContProfReader, MemoGetStackOffsets) {
+  auto const unit = makeMemoTestUnit();
+  ASSERT_NE(nullptr, unit);
+  ASSERT_EQ(2, unit->funcs().size());
+  auto const func = unit->funcs()[0];
+  ASSERT_TRUE(func->isMemoizeWrapper());
+  ASSERT_EQ(Op::MemoGet, peek_op(func->entry()));
+
+  auto const targets = instrJumpTargets(func->entry(), 0);
+  ASSERT_EQ(1, targets.size());
+  // A miss pushes nothing; the fallthrough hit pushes the cached value.
+  expectMemoStart(*func, targets[0], 0);
+  expectMemoStart(*func, instrLen(func->entry()), 1);
+}
+
+TEST(ContProfReader, MemoGetEagerStackOffsets) {
+  auto const unit = makeMemoTestUnit();
+  ASSERT_NE(nullptr, unit);
+  ASSERT_EQ(2, unit->funcs().size());
+  auto const func = unit->funcs()[1];
+  ASSERT_TRUE(func->isMemoizeWrapper());
+  ASSERT_TRUE(func->isAsyncFunction());
+  ASSERT_EQ(Op::MemoGetEager, peek_op(func->entry()));
+
+  auto const targets = instrJumpTargets(func->entry(), 0);
+  ASSERT_EQ(2, targets.size());
+  // Both kinds of hit push a value; only the miss keeps the stack empty.
+  expectMemoStart(*func, targets[0], 0);
+  expectMemoStart(*func, instrLen(func->entry()), 1);
+  expectMemoStart(*func, targets[1], 1);
 }
 
 }

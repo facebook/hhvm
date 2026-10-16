@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #ifdef __aarch64__
 #include "hphp/runtime/vm/jit/relocation-arm.h"
 #else
@@ -383,6 +384,7 @@ size_t relocate(RelocationInfo& rel,
                 CodeBlock& srcBlock,
                 CGMeta& fixups,
                 AreaIndex codeArea) {
+  CodeWriteScope scope(destBlock);
   return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, srcBlock,
                           fixups, codeArea);
 }

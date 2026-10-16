@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -266,6 +267,7 @@ void clearRange(TCA start, size_t len, const char* info) {
   if (len == 0) {
     return;
   }
+  CodeWriteScope scope(start, start + len);
   CodeBlock cb;
   cb.init(start, len, info);
 

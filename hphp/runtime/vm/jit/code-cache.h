@@ -21,6 +21,10 @@
 
 #include "hphp/util/data-block.h"
 
+#include <mutex>
+#include <utility>
+#include <vector>
+
 namespace HPHP::jit {
 
 namespace tc {
@@ -153,6 +157,7 @@ struct CodeCache {
     return addr - m_base;
   }
   bool isValidCodeAddress(ConstCodeAddress addr) const;
+  bool isProtectedCodeAddress(ConstCodeAddress addr) const;
 
   bool inMain(ConstCodeAddress addr) const {
     return m_all.contains(addr) && blockFor(addr).name() == kMainName;
@@ -343,6 +348,32 @@ private:
   DataBlock* m_data;
   bool m_isLocal;
   bool m_isOwned;
+};
+
+/*
+ * Serialize writes to published JIT code and open only the affected pages for
+ * the duration of the write. Nested scopes share their parent's writable
+ * intervals, so an inner scope cannot restore a page while an outer scope is
+ * still emitting into it.
+ */
+struct CodeWriteScope {
+  CodeWriteScope() = default;
+  explicit CodeWriteScope(CodeBlock& block);
+  CodeWriteScope(CodeAddress begin, CodeAddress end);
+  CodeWriteScope(ConstCodeAddress begin, ConstCodeAddress end);
+  ~CodeWriteScope();
+
+  CodeWriteScope(const CodeWriteScope&) = delete;
+  CodeWriteScope& operator=(const CodeWriteScope&) = delete;
+  CodeWriteScope(CodeWriteScope&&) = delete;
+  CodeWriteScope& operator=(CodeWriteScope&&) = delete;
+
+private:
+  void init(ConstCodeAddress begin, ConstCodeAddress end);
+
+  bool m_locked{false};
+  std::recursive_mutex* m_mutex{nullptr};
+  std::vector<std::pair<CodeAddress, CodeAddress>> m_owned;
 };
 
 }

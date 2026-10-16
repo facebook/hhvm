@@ -41,6 +41,7 @@ struct SinkAnalysis {
   jit::vector<Vlabel> idoms;
   jit::vector<int32_t> rpoOrder;
   jit::vector<UseBlocks> useBlocks;
+  jit::vector<Vreg> sfLiveIn;
   PredVector preds;
 };
 
@@ -55,6 +56,7 @@ struct SinkDefInfo {
   AliasClass loadSrc{AEmpty};
   RegSet physUses;
   bool isPureLoad{false};
+  bool clobbersFlags{false};
 };
 
 bool isSinkablePureLoad(const Vinstr& inst, AliasClass& loadSrc) {
@@ -96,15 +98,18 @@ bool isSinkableDef(const Vunit& unit,
   auto const noteDef = [&] (Vreg r, Width w) {
     if (!r.isValid()) return;
     if (w == Width::Flags) {
-      // isPure() still allows flag producers (test/cmp/etc.); we can sink
-      // those when the SF they define is dead. useBlocks is computed up
-      // front for all regs in this unit, so an empty entry means no later
-      // instruction reads this SF. The bounds check is defensive against a
-      // future pass introducing SF regs after analyzeSinks ran.
+      // isPure() still allows flag producers (test/cmp/etc.); we can consider
+      // those when the SF they define is dead, but they still clobber hardware
+      // flags. useBlocks is computed up front for all regs in this unit, so an
+      // empty entry means no later instruction reads this SF. The bounds check
+      // is defensive against a future pass introducing SF regs after
+      // analyzeSinks ran.
       if (r.isPhys() ||
           r >= analysis.useBlocks.size() ||
           !analysis.useBlocks[r].empty()) {
         touchesFlags = true;
+      } else {
+        info.clobbersFlags = true;
       }
       return;
     }
@@ -239,6 +244,7 @@ bool canSinkToTarget(const Vunit& unit,
                      boost::dynamic_bitset<>& seen,
                      jit::vector<Vlabel>& worklist) {
   if (targetIsHotter(unit.blocks[src], unit.blocks[target])) return false;
+  if (info.clobbersFlags && analysis.sfLiveIn[target].isValid()) return false;
   if ((info.isPureLoad || !info.physUses.empty()) &&
       pathHasClobber(
         unit,
@@ -325,6 +331,11 @@ SinkAnalysis analyzeSinks(const Vunit& unit) {
   analysis.preds = computePreds(unit);
   analysis.idoms = findDominators(unit, analysis.rpo, analysis.preds);
   analysis.useBlocks = computeUseBlocks(unit, analysis.rpo);
+  analysis.sfLiveIn = compute_sf_livein(
+    unit,
+    analysis.rpo,
+    analysis.preds
+  );
   analysis.rpoOrder =
     jit::vector<int32_t>(unit.blocks.size(), kInvalidRpoOrder);
   for (size_t i = 0; i < analysis.rpo.size(); ++i) {

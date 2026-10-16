@@ -596,6 +596,54 @@ void testSinkDefsMovesDefsWithDeadSF() {
   }
 }
 
+void testSinkDefsKeepsDeadSFDefsOutOfLiveSFRanges() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const target = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vt(unit, target);
+
+    auto const src = Vreg64{rarg(0)};
+    auto const shifted = Vreg64{v.makeReg()};
+    auto const deadSf = v.makeReg();
+    auto const liveSf = v.makeReg();
+    auto const condition = Vreg8{vt.makeReg()};
+    auto const out = Vreg64{vt.makeReg()};
+
+    v << shrqi{Immed{5}, src, shifted, deadSf, Vflags{}};
+    v << testqi{Immed{1}, src, liveSf, Vflags{}};
+    v << jmp{target};
+
+    vt << setcc{CC_NZ, liveSf, condition};
+    vt << copy{shifted, out};
+    vt << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 3);
+    ASSERT_EQ(entryCode[0].op, Vinstr::shrqi);
+    EXPECT_EQ(entryCode[0].shrqi_.d, shifted);
+    ASSERT_EQ(entryCode[1].op, Vinstr::testqi);
+    EXPECT_EQ(entryCode[1].testqi_.sf, liveSf);
+    ASSERT_EQ(entryCode[2].op, Vinstr::jmp);
+    EXPECT_EQ(entryCode[2].jmp_.target, target);
+
+    auto const& targetCode = unit.blocks[target].code;
+    ASSERT_EQ(targetCode.size(), 3);
+    ASSERT_EQ(targetCode[0].op, Vinstr::setcc);
+    EXPECT_EQ(targetCode[0].setcc_.sf, liveSf);
+    ASSERT_EQ(targetCode[1].op, Vinstr::copy);
+    EXPECT_EQ(targetCode[1].copy_.s, Vreg{shifted});
+    EXPECT_EQ(targetCode[1].copy_.d, Vreg{out});
+    ASSERT_EQ(targetCode[2].op, Vinstr::ret);
+  }
+}
+
 struct PureLoadSinkLinearContext {
   Vunit& unit;
   Vlabel mid;
@@ -1210,6 +1258,7 @@ TEST(Vasm, Simplifier) {
   testSinkDefsKeepsDefsOutOfHotterBlocks();
   testSinkDefsFallsBackToLegalDominator();
   testSinkDefsMovesDefsWithDeadSF();
+  testSinkDefsKeepsDeadSFDefsOutOfLiveSFRanges();
   testSinkDefsPureLoadSinksWithPhysicalBase();
   testSinkDefsPureLoadStopsBeforeExplicitPhysicalClobber();
   testSinkDefsPureLoadStopsBeforeImplicitPhysicalClobber();

@@ -1,0 +1,8 @@
+ERROR: File "box_invariant_equality.php", line 15, characters 14-18:
+Invalid argument (Typing[4110])
+  File "box_invariant_equality.php", line 13, characters 18-20:
+  Expected `int`
+  File "box_invariant_equality.php", line 8, characters 23-23:
+    via this generic `T`
+  File "box_invariant_equality.php", line 15, characters 14-18:
+  But got `string`

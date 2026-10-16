@@ -1,0 +1,6 @@
+ERROR: File "vector_equality.php", line 5, characters 5-18:
+Invalid assignment (Typing[4110])
+  File "vector_equality.php", line 3, characters 21-23:
+  Expected `int`
+  File "vector_equality.php", line 5, characters 14-18:
+  But got `string`

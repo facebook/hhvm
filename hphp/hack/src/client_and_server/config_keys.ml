@@ -105,6 +105,8 @@ module Hhconfig = struct
   let disable_class_sub_classname_method_override =
     key "disable_class_sub_classname_method_override"
 
+  let disable_eqeq_refinement = key "disable_eqeq_refinement"
+
   let disable_physical_equality = key "disable_physical_equality"
 
   let disallow_discarded_nullable_awaitables =

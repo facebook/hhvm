@@ -183,9 +183,7 @@ let rec end_line p =
   | Pos_tiny { pos_span; _ } -> Pos_span_tiny.end_line_number pos_span
   | Pos_from_reason p -> end_line p
 
-(* This returns a closed interval. *)
-let string t =
-  let (line, start, end_) = info_pos t in
+let filename_for_display t =
   let path = filename t in
 
   let hhi_path =
@@ -195,11 +193,14 @@ let string t =
       ""
   in
   (* Strip temporary .hhi directories from the path shown. *)
-  let path =
-    match String.chop_prefix path ~prefix:hhi_path with
-    | Some file_path -> file_path
-    | None -> path
-  in
+  match String.chop_prefix path ~prefix:hhi_path with
+  | Some file_path -> file_path
+  | None -> path
+
+(* This returns a closed interval. *)
+let string t =
+  let (line, start, end_) = info_pos t in
+  let path = filename_for_display t in
   Printf.sprintf "File %S, line %d, characters %d-%d:" path line start end_
 
 (* Some positions, like those in buffers sent by IDE/created by unit tests might

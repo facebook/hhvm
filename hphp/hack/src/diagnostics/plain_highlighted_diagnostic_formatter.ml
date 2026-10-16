@@ -246,7 +246,7 @@ let file_header (groups : position_group list) : string =
   let (line, col) = Pos.line_column primary_pos in
   Printf.sprintf
     "%s:%d:%d"
-    (relative_path (Pos.filename primary_pos))
+    (relative_path (Pos.filename_for_display primary_pos))
     line
     (col + 1)
 

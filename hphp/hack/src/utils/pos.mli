@@ -29,6 +29,8 @@ val hash : t -> int
 
 val filename : 'a pos -> 'a
 
+val filename_for_display : absolute -> string
+
 val start_offset : 'a pos -> int
 
 val end_offset : 'a pos -> int

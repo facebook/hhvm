@@ -26,8 +26,16 @@ type clusters_destination =
   | To_file of string
   | Dropped
 
+type mode =
+  | Measure
+  | Grow
+
+let is_grow = function
+  | Grow -> true
+  | Measure -> false
+
 type options = {
-  grow: bool;
+  mode: mode;
   clusters_destination: clusters_destination;
   seed_framework: string option;
   seed_list: string option;

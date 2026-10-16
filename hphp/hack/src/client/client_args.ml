@@ -312,7 +312,11 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let isolation_options () =
     Server_isolation_types.
       {
-        grow = !isolation_grow;
+        mode =
+          (if !isolation_grow then
+            Grow
+          else
+            Measure);
         clusters_destination =
           (match !isolation_output with
           | Some path -> To_file path

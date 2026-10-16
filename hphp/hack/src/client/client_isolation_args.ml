@@ -18,7 +18,7 @@ let check
     ~max_dependents_given
     Server_isolation_types.
       {
-        grow;
+        mode;
         clusters_destination = _;
         seed_framework;
         seed_list;
@@ -30,6 +30,7 @@ let check
         max_seeds;
         seed_offset;
       } =
+  let grow = Server_isolation_types.is_grow mode in
   (match max_seeds with
   | Some n when n < 1 ->
     reject (Printf.sprintf "--isolation-max-seeds must be at least 1, got %d" n)

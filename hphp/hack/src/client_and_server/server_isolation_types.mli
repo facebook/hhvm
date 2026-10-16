@@ -43,12 +43,19 @@ type clusters_destination =
       (** Written here as they are produced, one JSON object per line. *)
   | Dropped  (** Counted in the summary and forgotten. *)
 
+(** What a run does with its starting files. *)
+type mode =
+  | Measure
+      (** Report the smallest isolatable set around each starting file: its
+          closure under reverse dependencies. *)
+  | Grow  (** Grow a bigger cluster around each starting file. *)
+
+(** Whether the mode grows clusters. *)
+val is_grow : mode -> bool
+
 (** Where to start growing clusters, and how far to take them. *)
 type options = {
-  grow: bool;
-      (** Grow a bigger cluster around each starting file, instead of reporting
-          its smallest isolatable set — its closure under reverse
-          dependencies. *)
+  mode: mode;
   clusters_destination: clusters_destination;
   seed_framework: string option;
       (** Start from every subclass of this class. *)

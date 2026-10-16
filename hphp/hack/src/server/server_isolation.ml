@@ -716,7 +716,7 @@ let unreadable_seed_source ~seed_list ~seed_dir =
 let query r options =
   let Server_isolation_types.
         {
-          grow;
+          mode;
           seed_framework;
           seed_list;
           seed_dir;
@@ -727,6 +727,7 @@ let query r options =
         } =
     options
   in
+  let grow = Server_isolation_types.is_grow mode in
   (* Accumulates across a run; a second query in the same server would otherwise
      report the first one's totals. *)
   Growth.reset_stats ();
@@ -773,11 +774,11 @@ let go
     (options : Server_isolation_types.options)
     (genv : Server_env.genv)
     (env : Server_env.env) : Server_isolation_types.result =
-  let Server_isolation_types.{ grow; clusters_destination; _ } = options in
+  let Server_isolation_types.{ mode; clusters_destination; _ } = options in
   let sink =
     let open Server_isolation_types in
     match clusters_destination with
-    | To_file path -> Sink.to_file ~grow path
+    | To_file path -> Sink.to_file ~grow:(is_grow mode) path
     | Dropped -> Sink.discard
   in
   (* Non-evictable shared heaps that outlive the query: cleared on the way in so

@@ -1,6 +1,19 @@
-ERROR: File "closure_strict_def_typecheck.php", line 17, characters 28-29:
-No static method `f1` in `Foo` (Typing[4090])
-  File "closure_strict_def_typecheck.php", line 14, characters 19-21:
-  Did you mean instance method `bar` instead?
-  File "closure_strict_def_typecheck.php", line 13, characters 7-9:
-  Declaration of `Foo` is here
+error: Typing[4090] No static method `f1` in `Foo` [1]
+-> Did you mean instance method `bar` instead? [2]
+-> Declaration of `Foo` is here [3]
+
+closure_strict_def_typecheck.php:17:28
+11 | 
+12 | 
+13 | class Foo {
+   |       ^^^ [3]
+14 |   public function bar(): void {
+   |                   ^^^ [2]
+15 |     /* Make sure we raise a type error for the nonexistent method access in the
+16 |      * lambda below */
+17 |     $f = function() { Foo::f1(); };
+   |                            ^^ [1]
+18 |   }
+19 | }
+
+1 error found

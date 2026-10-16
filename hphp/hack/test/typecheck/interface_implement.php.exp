@@ -1,2 +1,15 @@
-ERROR: File "interface_implement.php", line 8, characters 1-99:
-Interfaces may not implement other interfaces or classes (Parsing[1002])
+error: Parsing[1002] Interfaces may not implement other interfaces or classes [1]
+
+interface_implement.php:8:1
+ 6 | }
+ 7 | 
+ 8 | interface IFace2<T> implements IFace<T> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |   public function foo(): T;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |   public function bar(): T;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | }
+   | ^ [1]
+
+1 error found

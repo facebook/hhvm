@@ -1,2 +1,7 @@
-ERROR: File "heredoc_missing_end.php", line 16, characters 1-1:
-This string literal is not terminated. (Parsing[1002])
+error: Parsing[1002] This string literal is not terminated. [1]
+
+heredoc_missing_end.php:16:1
+14 |     Here is some heredoc content.
+15 | }
+
+1 error found

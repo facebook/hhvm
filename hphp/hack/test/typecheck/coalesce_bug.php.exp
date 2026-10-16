@@ -1,6 +1,19 @@
-ERROR: File "coalesce_bug.php", line 19, characters 10-11:
-Invalid return type (Typing[4110])
-  File "coalesce_bug.php", line 17, characters 47-47:
-  Expected `C`
-  File "coalesce_bug.php", line 14, characters 19-19:
-  But got `I`
+error: Typing[4110] Invalid return type [1]
+-> Expected `C` [2]
+-> But got `I` [3]
+
+coalesce_bug.php:19:10
+12 | class C {}
+13 | interface I {}
+14 | function genI(): ?I {
+   |                   ^ [3]
+15 |   return null;
+16 | }
+17 | function genC(bool $f, ?C $a, ?C $b, ?I $c): ?C {
+   |                                               ^ [2]
+18 |   $r = coalesce3($f ? $a : null, $b, genI());
+19 |   return $r;
+   |          ^^ [1]
+20 | }
+
+1 error found

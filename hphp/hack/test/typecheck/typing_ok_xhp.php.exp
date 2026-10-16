@@ -1,4 +1,14 @@
-ERROR: File "typing_ok_xhp.php", line 18, characters 29-30:
-XHP children must be compatible with XHPChild (Typing[4193])
-  File "typing_ok_xhp.php", line 16, characters 14-18:
-  This is a mixed value
+error: Typing[4193] XHP children must be compatible with XHPChild [1]
+-> This is a mixed value [2]
+
+typing_ok_xhp.php:18:29
+14 | class :x:dumb extends XHPTest {}
+15 | 
+16 | function foo(mixed $x): void {
+   |              ^^^^^ [2]
+17 |   // Almost anything goes in XHP
+18 |   $x = <x:dumb>{0}{'hello'}{$x}{new A()}</x:dumb>;
+   |                             ^^ [1]
+19 | }
+
+1 error found

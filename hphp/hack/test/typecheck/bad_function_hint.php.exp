@@ -1,6 +1,32 @@
-ERROR: File "bad_function_hint.php", line 12, characters 15-22:
-A type specifier is expected here. (Parsing[1002])
-ERROR: File "bad_function_hint.php", line 12, characters 15-22:
-Encountered unexpected text `function`, was expecting a type hint. (Parsing[1002])
-ERROR: File "bad_function_hint.php", line 12, characters 25-42:
-Cannot use collection initialization for non-collection class. (Parsing[1002])
+error: Parsing[1002] A type specifier is expected here. [1]
+
+bad_function_hint.php:12:15
+10 |  */
+11 | 
+12 | function f(): function():int {
+   |               ^^^^^^^^ [1]
+13 |   return () ==> 1;
+14 | }
+
+error: Parsing[1002] Encountered unexpected text `function`, was expecting a type hint. [1]
+
+bad_function_hint.php:12:15
+10 |  */
+11 | 
+12 | function f(): function():int {
+   |               ^^^^^^^^ [1]
+13 |   return () ==> 1;
+14 | }
+
+error: Parsing[1002] Cannot use collection initialization for non-collection class. [1]
+
+bad_function_hint.php:12:25
+10 |  */
+11 | 
+12 | function f(): function():int {
+   |                         ^^^^^^ [1]
+13 |   return () ==> 1;
+   |   ^^^^^^^^^ [1]
+14 | }
+
+3 errors found

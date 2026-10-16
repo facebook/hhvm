@@ -1,4 +1,21 @@
-ERROR: File "forbid_await_in_sync_functions3.php", line 14, characters 5-21:
-`await` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "forbid_await_in_sync_functions3.php", line 12, characters 10-12:
-Was expecting a return type hint (Typing[4030])
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+forbid_await_in_sync_functions3.php:14:5
+12 | function sjm() {
+13 |   return function(Awaitable<mixed> $the_doctor) {
+14 |     await $the_doctor;
+   |     ^^^^^^^^^^^^^^^^^ [1]
+15 |   };
+16 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+forbid_await_in_sync_functions3.php:12:10
+10 |  */
+11 | 
+12 | function sjm() {
+   |          ^^^ [1]
+13 |   return function(Awaitable<mixed> $the_doctor) {
+14 |     await $the_doctor;
+
+2 errors found

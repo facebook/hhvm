@@ -1,2 +1,11 @@
-ERROR: File "constraint_gen5.php", line 12, characters 41-45:
-Cyclic class definition : `Equal`  (Typing[4013])
+error: Typing[4013] Cyclic class definition : `Equal`  [1]
+
+constraint_gen5.php:12:41
+10 |  */
+11 | 
+12 | class Equal<T1 as T2, T2 as T1> extends Equal<T2, T1> {
+   |                                         ^^^^^ [1]
+13 | 
+14 |   public function __construct(T1 $x, T2 $y) {
+
+1 error found

@@ -1,3 +1,12 @@
-WARN: File "array.php", line 5, characters 7-17:
-Invalid comparison: This expression will always return `false`.
-A value of type `vec<int>` can never be equal to a value of type `null` (Warn[12007])
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `vec<int>` can never be equal to a value of type `null` [1]
+
+array.php:5:7
+3 | function f(varray<int> $x): void {
+4 |   // this should be an error, since it can never be true
+5 |   if ($x === null) {
+  |       ^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

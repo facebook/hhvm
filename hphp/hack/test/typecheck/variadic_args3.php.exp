@@ -1,6 +1,19 @@
-ERROR: File "variadic_args3.php", line 12, characters 19-20:
-Invalid argument (Typing[4110])
-  File "variadic_args3.php", line 5, characters 22-26:
-  Expected `string` (variadic argument)
-  File "variadic_args3.php", line 12, characters 19-20:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` (variadic argument) [2]
+-> But got `int` [1]
+
+variadic_args3.php:12:19
+ 3 | function takes_string(string $s): void {}
+ 4 | 
+ 5 | function f(string ...$args): void {
+   |                      ^^^^^ [2]
+ 6 |   foreach ($args as $arg) {
+ 7 |     takes_string($arg);
+   :
+10 | 
+11 | function test(): void {
+12 |   f('str', 'str', 20);
+   |                   ^^ [1]
+13 | }
+
+1 error found

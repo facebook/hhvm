@@ -1,2 +1,11 @@
-ERROR: File "heredoc_bad_identifier.php", line 13, characters 6-8:
-A name is expected here. (Parsing[1002])
+error: Parsing[1002] A name is expected here. [1]
+
+heredoc_bad_identifier.php:13:6
+11 | 
+12 | function main(): void {
+13 | $a = <<<9
+   |      ^^^ [1]
+14 |    Should not work.
+15 | 9;
+
+1 error found

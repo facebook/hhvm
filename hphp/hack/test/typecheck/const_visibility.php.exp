@@ -1,4 +1,20 @@
-ERROR: File "const_visibility.php", line 4, characters 3-9:
-Constants cannot be declared `private` (Parsing[1002])
-ERROR: File "const_visibility.php", line 5, characters 3-9:
-Constants cannot be declared `private` (Parsing[1002])
+error: Parsing[1002] Constants cannot be declared `private` [1]
+
+const_visibility.php:4:3
+2 | 
+3 | class MyClass {
+4 |   private const MY_CONSTA = 'a';
+  |   ^^^^^^^ [1]
+5 |   private const string MY_CONSTB = 'b';
+6 | }
+
+error: Parsing[1002] Constants cannot be declared `private` [1]
+
+const_visibility.php:5:3
+3 | class MyClass {
+4 |   private const MY_CONSTA = 'a';
+5 |   private const string MY_CONSTB = 'b';
+  |   ^^^^^^^ [1]
+6 | }
+
+2 errors found

@@ -1,6 +1,20 @@
-ERROR: File "refine_consistent_tpenv.php", line 21, characters 9-9:
-Invalid argument (Typing[4110])
-  File "refine_consistent_tpenv.php", line 8, characters 39-42:
-  Expected `bool`
-  File "refine_consistent_tpenv.php", line 21, characters 9-9:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [1]
+
+refine_consistent_tpenv.php:21:9
+ 6 | }
+ 7 | 
+ 8 | function f<T>(T $x) : void where T as bool {}
+   |                                       ^^^^ [2]
+ 9 | 
+10 | class D<T as I> {
+   :
+19 |     if ($t is C) {
+20 |       // This won't fail if the tpenv is inconsistent
+21 |       f(1);
+   |         ^ [1]
+22 |     }
+23 |   }
+
+1 error found

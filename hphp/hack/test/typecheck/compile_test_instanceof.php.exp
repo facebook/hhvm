@@ -1,8 +1,41 @@
-WARN: File "compile_test_instanceof.php", line 27, characters 7-13:
-This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `B`. (Warn[12009])
-WARN: File "compile_test_instanceof.php", line 27, characters 18-24:
-This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `B`. (Warn[12009])
-WARN: File "compile_test_instanceof.php", line 27, characters 29-35:
-This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `I`. (Warn[12009])
-WARN: File "compile_test_instanceof.php", line 28, characters 9-15:
-This `is` check is always `false`. The expression on the left has type `A` which shares no values with `C`. (Warn[12010])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `B`. [1]
+
+compile_test_instanceof.php:27:7
+25 | function main(): void {
+26 |   $x = new A();
+27 |   if ($x is B && $x is B && $x is I &&
+   |       ^^^^^^^ [1]
+28 |       !($x is C)) {
+29 |     echo 'OK';
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `B`. [1]
+
+compile_test_instanceof.php:27:18
+25 | function main(): void {
+26 |   $x = new A();
+27 |   if ($x is B && $x is B && $x is I &&
+   |                  ^^^^^^^ [1]
+28 |       !($x is C)) {
+29 |     echo 'OK';
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `I`. [1]
+
+compile_test_instanceof.php:27:29
+25 | function main(): void {
+26 |   $x = new A();
+27 |   if ($x is B && $x is B && $x is I &&
+   |                             ^^^^^^^ [1]
+28 |       !($x is C)) {
+29 |     echo 'OK';
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `A` which shares no values with `C`. [1]
+
+compile_test_instanceof.php:28:9
+26 |   $x = new A();
+27 |   if ($x is B && $x is B && $x is I &&
+28 |       !($x is C)) {
+   |         ^^^^^^^ [1]
+29 |     echo 'OK';
+30 |   }
+
+4 errors found

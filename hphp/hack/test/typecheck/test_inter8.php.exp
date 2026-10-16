@@ -1,6 +1,19 @@
-ERROR: File "test_inter8.php", line 21, characters 7-9:
-No instance method `get` in `B` (Typing[4053])
-  File "test_inter8.php", line 20, characters 27-27:
-  This is why I think it is an object of type B
-  File "test_inter8.php", line 16, characters 7-7:
-  Declaration of `B` is here
+error: Typing[4053] No instance method `get` in `B` [1]
+-> This is why I think it is an object of type B [2]
+-> Declaration of `B` is here [3]
+
+test_inter8.php:21:7
+14 |   public function get(): void {}
+15 | }
+16 | class B implements I {}
+   |       ^ [3]
+17 | class Z {}
+18 | 
+19 | function bar(bool $b): void {
+20 |   $x = $b ? new A() : new B();
+   |                           ^ [2]
+21 |   $x->get();
+   |       ^^^ [1]
+22 | }
+
+1 error found

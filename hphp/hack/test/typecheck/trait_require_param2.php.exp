@@ -1,14 +1,41 @@
-ERROR: File "trait_require_param2.php", line 5, characters 22-24:
-Invalid return type (Typing[4336])
-  File "trait_require_param2.php", line 5, characters 29-29:
-  Expected `T`
-  File "trait_require_param2.php", line 5, characters 22-24:
-  But got `void` because this function does not always return a value
-ERROR: File "trait_require_param2.php", line 14, characters 17-20:
-Invalid argument (Typing[4110])
-  File "trait_require_param2.php", line 18, characters 22-24:
-  Expected `int`
-  File "trait_require_param2.php", line 10, characters 23-27:
-  But got `float`
-  File "trait_require_param2.php", line 5, characters 29-29:
-    via this generic `T`
+error: Typing[4336] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `void` because this function does not always return a value [1]
+
+trait_require_param2.php:5:22
+3 | abstract class Foo<T> {
+4 |   /* HH_FIXME[4110] */
+5 |   protected function bar(): T {
+  |                      ^^^ [1]
+  |                             ^ [2]
+6 |   }
+7 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `float` [3]
+->   via this generic `T` [4]
+
+trait_require_param2.php:14:17
+ 3 | abstract class Foo<T> {
+ 4 |   /* HH_FIXME[4110] */
+ 5 |   protected function bar(): T {
+   |                             ^ [4]
+ 6 |   }
+ 7 | }
+ 8 | 
+ 9 | trait Tbaz {
+10 |   require extends Foo<float>;
+   |                       ^^^^^ [3]
+11 | 
+12 |   protected function f(): void {
+13 |     $int = $this->bar();
+14 |     f_takes_int($int);
+   |                 ^^^^ [1]
+15 |   }
+16 | }
+17 | 
+18 | function f_takes_int(int $f): void {}
+   |                      ^^^ [2]
+
+2 errors found

@@ -1,8 +1,18 @@
-ERROR: File "typing_fail_private_access.php", line 18, characters 12-16:
-Typing error (Typing[4053])
-  File "typing_fail_private_access.php", line 18, characters 19-19:
-  No property `a` in `Bar`
-  File "typing_fail_private_access.php", line 16, characters 7-9:
-  This is why I think it is an object of type Bar
-  File "typing_fail_private_access.php", line 16, characters 7-9:
-  Declaration of `Bar` is here
+error: Typing[4053] Typing error [1]
+-> No property `a` in `Bar` [2]
+-> This is why I think it is an object of type Bar [3]
+-> Declaration of `Bar` is here [3]
+
+typing_fail_private_access.php:18:12
+14 | }
+15 | 
+16 | class Bar extends Foo {
+   |       ^^^ [3]
+17 |   public function x(): ?int {
+18 |     return $this->a; // ERROR
+   |            ^^^^^ [1]
+   |                   ^ [2]
+19 |   }
+20 | }
+
+1 error found

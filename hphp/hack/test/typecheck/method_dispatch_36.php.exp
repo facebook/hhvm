@@ -1,6 +1,22 @@
-ERROR: File "method_dispatch_36.php", line 25, characters 9-10:
-No static method `f1` in `A` (Typing[4090])
-  File "method_dispatch_36.php", line 17, characters 19-20:
-  Did you mean instance method `f1` instead?
-  File "method_dispatch_36.php", line 16, characters 7-7:
-  Declaration of `A` is here
+error: Typing[4090] No static method `f1` in `A` [1]
+-> Did you mean instance method `f1` instead? [2]
+-> Declaration of `A` is here [3]
+
+method_dispatch_36.php:25:9
+14 |  */
+15 | 
+16 | class A {
+   |       ^ [3]
+17 |   public function f1(): void {}
+   |                   ^^ [2]
+18 |   public static function f2(): void {}
+19 | }
+   :
+23 |   public static function f2(): void {}
+24 |   public function test1(A $x): void {
+25 |     $x::f1();
+   |         ^^ [1]
+26 |   }
+27 |   public static function test2(): void {}
+
+1 error found

@@ -1,4 +1,19 @@
-WARN: File "is_as_no_check_unbound_name.php", line 8, characters 3-13:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `B<int>`. (Warn[12012])
-ERROR: File "is_as_no_check_unbound_name.php", line 8, characters 8-8:
-Unbound name: `B` (Naming[2049])
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `B<int>`. [1]
+
+is_as_no_check_unbound_name.php:8:3
+6 | function f(): void {
+7 |   // This will not produce a 4195 error now
+8 |   3 as B<int>;
+  |   ^^^^^^^^^^^ [1]
+9 | }
+
+error: Naming[2049] Unbound name: `B` [1]
+
+is_as_no_check_unbound_name.php:8:8
+6 | function f(): void {
+7 |   // This will not produce a 4195 error now
+8 |   3 as B<int>;
+  |        ^ [1]
+9 | }
+
+2 errors found

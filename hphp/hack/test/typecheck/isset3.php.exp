@@ -1,6 +1,14 @@
-ERROR: File "isset3.php", line 14, characters 9-13:
-Typing error (Typing[4110])
-  File "isset3.php", line 14, characters 9-13:
-  Expected an array that can be indexed
-  File "isset3.php", line 13, characters 8-8:
-  But got `int`
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `int` [2]
+
+isset3.php:14:9
+11 | 
+12 | function test(): void {
+13 |   $x = 0;
+   |        ^ [2]
+14 |   isset($x[1]);
+   |         ^^^^^ [1]
+15 | }
+
+1 error found

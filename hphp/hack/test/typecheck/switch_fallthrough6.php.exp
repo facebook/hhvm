@@ -1,8 +1,42 @@
-ERROR: File "switch_fallthrough6.php", line 13, characters 11-11:
-This `switch` has a `case` that implicitly falls through and is not annotated with `// FALLTHROUGH` (NastCheck[3005])
-  File "switch_fallthrough6.php", line 14, characters 10-10:
-  This `case` implicitly falls through. Did you forget to add `break` or `return`?
-ERROR: File "switch_fallthrough6.php", line 13, characters 3-118:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_fallthrough6.php", line 13, characters 11-11:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: NastCheck[3005] This `switch` has a `case` that implicitly falls through and is not annotated with `// FALLTHROUGH` [1]
+-> This `case` implicitly falls through. Did you forget to add `break` or `return`? [2]
+
+switch_fallthrough6.php:13:11
+11 | 
+12 | function f(): void {
+13 |   switch (1) {
+   |           ^ [1]
+14 |     case 1:
+   |          ^ [2]
+15 |       if (condition()) {
+16 |         break;
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_fallthrough6.php:13:3
+11 | 
+12 | function f(): void {
+13 |   switch (1) {
+   |   ^^^^^^^^^^^^ [1]
+   |           ^ [2]
+14 |     case 1:
+   |     ^^^^^^^ [1]
+15 |       if (condition()) {
+   |       ^^^^^^^^^^^^^^^^^^ [1]
+16 |         break;
+   |         ^^^^^^ [1]
+17 |       } else {
+   |       ^^^^^^^^ [1]
+18 |       }
+   |       ^ [1]
+19 |     case 2:
+   |     ^^^^^^^ [1]
+20 |       break;
+   |       ^^^^^^ [1]
+21 |   }
+   |   ^ [1]
+22 | }
+23 | 
+
+2 errors found

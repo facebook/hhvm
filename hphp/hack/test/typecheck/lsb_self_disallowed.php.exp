@@ -1,4 +1,16 @@
-ERROR: File "lsb_self_disallowed.php", line 7, characters 18-20:
-__LSB properties cannot be accessed with self:: (Typing[4112])
-  File "lsb_self_disallowed.php", line 4, characters 28-30:
-  This member is private
+error: Typing[4112] __LSB properties cannot be accessed with self:: [1]
+-> This member is private [2]
+
+lsb_self_disallowed.php:7:18
+2 | 
+3 | class C {
+4 |   <<__LSB>> private static int $id = 0;
+  |                            ^^^ [2]
+5 | 
+6 |   public static function foo(): int {
+7 |     return self::$id;
+  |                  ^^^ [1]
+8 |   }
+9 | }
+
+1 error found

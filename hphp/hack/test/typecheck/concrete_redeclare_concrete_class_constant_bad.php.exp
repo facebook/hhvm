@@ -1,6 +1,19 @@
-ERROR: File "concrete_redeclare_concrete_class_constant_bad.php--file2.hack", line 1, characters 17-17:
-Some members in class `B` are incompatible with those declared in type `A` (Typing[4348])
-  File "concrete_redeclare_concrete_class_constant_bad.php--file1.php", line 5, characters 9-11:
-  Expected `int`
-  File "concrete_redeclare_concrete_class_constant_bad.php--file2.hack", line 2, characters 9-16:
-  But got `arraykey`
+error: Typing[4348] Some members in class `B` are incompatible with those declared in type `A` [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+concrete_redeclare_concrete_class_constant_bad.php--file2.hack:1:17
+1 | class B extends A {
+  |                 ^ [1]
+2 |   const arraykey P = 5;
+  |         ^^^^^^^^ [3]
+3 | }
+
+concrete_redeclare_concrete_class_constant_bad.php--file1.php:5:9
+3 | 
+4 | class A {
+5 |   const int P = 9;
+  |         ^^^ [2]
+6 | }
+
+1 error found

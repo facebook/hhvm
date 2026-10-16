@@ -1,2 +1,10 @@
-ERROR: File "override_use.php", line 10, characters 16-20:
-Cannot use function `C\foo` as `foo` because the name is already in use (Parsing[1002])
+error: Parsing[1002] Cannot use function `C\foo` as `foo` because the name is already in use [1]
+
+override_use.php:10:16
+ 8 | 
+ 9 | namespace B {
+10 |   use function C\foo;
+   |                ^^^^^ [1]
+11 | }
+
+1 error found

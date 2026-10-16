@@ -1,10 +1,25 @@
-ERROR: File "unresolved_compare.php", line 13, characters 10-16:
-This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
-  File "unresolved_compare.php", line 11, characters 15-15:
-  This is an object of exactly the class A
-  File "unresolved_compare.php", line 3, characters 23-23:
-    via this generic `T`
-  File "unresolved_compare.php", line 12, characters 15-15:
-  This is an object of exactly the class B
-  File "unresolved_compare.php", line 3, characters 23-23:
-    via this generic `T`
+error: Typing[4240] This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed [1]
+-> This is an object of exactly the class A [2]
+->   via this generic `T` [3]
+-> This is an object of exactly the class B [4]
+->   via this generic `T` [3]
+
+unresolved_compare.php:13:10
+ 1 | <?hh
+ 2 | 
+ 3 | function id<T>(T $x): T {
+   |                       ^ [3]
+ 4 |   return $x;
+ 5 | }
+   :
+ 9 | 
+10 | function test(): bool {
+11 |   $x = id(new A());
+   |               ^ [2]
+12 |   $y = id(new B());
+   |               ^ [4]
+13 |   return $x > $y;
+   |          ^^^^^^^ [1]
+14 | }
+
+1 error found

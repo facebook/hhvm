@@ -1,6 +1,18 @@
-ERROR: File "trait_abstract_function.php", line 16, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract method `f1` (Typing[4047])
-  File "trait_abstract_function.php", line 17, characters 7-7:
-  `B` uses `A`
-  File "trait_abstract_function.php", line 13, characters 28-29:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `f1` [1]
+-> `B` uses `A` [2]
+-> The method is defined here [3]
+
+trait_abstract_function.php:16:7
+11 | 
+12 | trait A {
+13 |   public abstract function f1(): void;
+   |                            ^^ [3]
+14 | }
+15 | 
+16 | class B {
+   |       ^ [1]
+17 |   use A;
+   |       ^ [2]
+18 | }
+
+1 error found

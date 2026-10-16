@@ -1,8 +1,44 @@
-ERROR: File "policied_local_funs.php", line 7, characters 8-30:
-Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
-ERROR: File "policied_local_funs.php", line 9, characters 8-16:
-Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
-ERROR: File "policied_local_funs.php", line 13, characters 8-30:
-Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
-ERROR: File "policied_local_funs.php", line 15, characters 8-16:
-Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
+error: Parsing[1002] Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. [1]
+
+policied_local_funs.php:7:8
+ 5 | <<__EntryPoint>>
+ 6 | function test()[zoned_local]: void {
+ 7 |   $f = function() : void {
+   |        ^^^^^^^^^^^^^^^^^^^ [1]
+ 8 |   };
+   |   ^ [1]
+ 9 |   $g = () ==> {};
+10 | }
+
+error: Parsing[1002] Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. [1]
+
+policied_local_funs.php:9:8
+ 7 |   $f = function() : void {
+ 8 |   };
+ 9 |   $g = () ==> {};
+   |        ^^^^^^^^^ [1]
+10 | }
+11 | 
+
+error: Parsing[1002] Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. [1]
+
+policied_local_funs.php:13:8
+11 | 
+12 | function test_leak_safe_local()[leak_safe_local]: void {
+13 |   $f = function() : void {
+   |        ^^^^^^^^^^^^^^^^^^^ [1]
+14 |   };
+   |   ^ [1]
+15 |   $g = () ==> {};
+16 | }
+
+error: Parsing[1002] Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. [1]
+
+policied_local_funs.php:15:8
+13 |   $f = function() : void {
+14 |   };
+15 |   $g = () ==> {};
+   |        ^^^^^^^^^ [1]
+16 | }
+
+4 errors found

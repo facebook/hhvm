@@ -1,6 +1,16 @@
-ERROR: File "list_array3.php", line 13, characters 3-19:
-Invalid assignment (Typing[4357])
-  File "list_array3.php", line 13, characters 3-14:
-  This expression cannot be destructured with a `list(...)` expression
-  File "list_array3.php", line 12, characters 16-31:
-  This is `dict<int, int>`
+error: Typing[4357] Invalid assignment [1]
+-> This expression cannot be destructured with a `list(...)` expression [2]
+-> This is `dict<int, int>` [3]
+
+list_array3.php:13:3
+10 |  */
+11 | 
+12 | function test3(darray<int, int> $x): int {
+   |                ^^^^^^^^^^^^^^^^ [3]
+13 |   list($x, $y) = $x;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+   |   ^^^^^^^^^^^^ [2]
+14 |   return $x;
+15 | }
+
+1 error found

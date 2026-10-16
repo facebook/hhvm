@@ -1,8 +1,26 @@
-ERROR: File "call_in_static_varray.php", line 7, characters 41-46:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "call_in_static_varray.php", line 7, characters 41-44:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "call_in_static_varray.php", line 7, characters 37-47:
-  From this declaration, the context of this function body provides the capability set {}
-  File "call_in_static_varray.php", line 4, characters 26-26:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+call_in_static_varray.php:7:41
+5 |     return "lol";
+6 |   }
+7 |   public static varray<string> $x = vec[C::f()];
+  |                                         ^^^^^^ [1]
+8 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+call_in_static_varray.php:7:41
+2 | 
+3 | class C {
+4 |   public static function f(): string {
+  |                          ^ [3]
+5 |     return "lol";
+6 |   }
+7 |   public static varray<string> $x = vec[C::f()];
+  |                                     ^^^^^^^^^^^ [2]
+  |                                         ^^^^ [1]
+8 | }
+
+2 errors found

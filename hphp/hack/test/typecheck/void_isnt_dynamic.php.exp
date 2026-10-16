@@ -1,6 +1,13 @@
-ERROR: File "void_isnt_dynamic.php", line 3, characters 10-12:
-Invalid return type (Typing[4336])
-  File "void_isnt_dynamic.php", line 3, characters 17-23:
-  Expected `dynamic`
-  File "void_isnt_dynamic.php", line 3, characters 10-12:
-  But got `void` because this function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `void` because this function does not always return a value [1]
+
+void_isnt_dynamic.php:3:10
+1 | <?hh
+2 | 
+3 | function foo(): dynamic {
+  |          ^^^ [1]
+  |                 ^^^^^^^ [2]
+4 | }
+
+1 error found

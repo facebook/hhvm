@@ -1,6 +1,12 @@
-ERROR: File "global_const2.php", line 3, characters 7-9:
-Wrong type hint (Typing[4110])
-  File "global_const2.php", line 3, characters 7-9:
-  Expected `int`
-  File "global_const2.php", line 3, characters 15-19:
-  But got `vec<nothing>`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `vec<nothing>` [2]
+
+global_const2.php:3:7
+1 | <?hh
+2 | 
+3 | const int X = vec[];
+  |       ^^^ [1]
+  |               ^^^^^ [2]
+
+1 error found

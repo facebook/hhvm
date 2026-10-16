@@ -1,12 +1,48 @@
-ERROR: File "require_extends_private_access.php", line 30, characters 9-16:
-No instance method `privatef` in `I` (Typing[4053])
-  File "require_extends_private_access.php", line 10, characters 19-25:
-  Did you mean `publicf` instead?
-  File "require_extends_private_access.php", line 29, characters 25-25:
-  This is why I think it is an object of type I
-  File "require_extends_private_access.php", line 4, characters 11-11:
-  Declaration of `I` is here
-ERROR: File "require_extends_private_access.php", line 33, characters 9-16:
-You cannot access this member (Typing[4112])
-  File "require_extends_private_access.php", line 9, characters 20-27:
-  This member is private
+error: Typing[4053] No instance method `privatef` in `I` [1]
+-> Did you mean `publicf` instead? [2]
+-> This is why I think it is an object of type I [3]
+-> Declaration of `I` is here [4]
+
+require_extends_private_access.php:30:9
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | interface I {
+   |           ^ [4]
+ 5 |   require extends B;
+ 6 | }
+ 7 | 
+ 8 | class B {
+ 9 |   private function privatef():void { }
+10 |   public function publicf():void { }
+   |                   ^^^^^^^ [2]
+11 |   public function test1(I $i):void {
+12 |     $i->privatef();
+   :
+27 | 
+28 | class C extends B {
+29 |   public function test3(I $i):void {
+   |                         ^ [3]
+30 |     $i->privatef();
+   |         ^^^^^^^^ [1]
+31 |   }
+32 |   public function test4(B $b):void {
+
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+require_extends_private_access.php:33:9
+ 7 | 
+ 8 | class B {
+ 9 |   private function privatef():void { }
+   |                    ^^^^^^^^ [2]
+10 |   public function publicf():void { }
+11 |   public function test1(I $i):void {
+   :
+31 |   }
+32 |   public function test4(B $b):void {
+33 |     $b->privatef();
+   |         ^^^^^^^^ [1]
+34 |   }
+35 | }
+
+2 errors found

@@ -1,2 +1,10 @@
-ERROR: File "interface_static_variable.php", line 13, characters 21-22:
-Interfaces cannot have static variables (NastCheck[3010])
+error: NastCheck[3010] Interfaces cannot have static variables [1]
+
+interface_static_variable.php:13:21
+11 | 
+12 | interface I {
+13 |   public static int $x = 123;
+   |                     ^^ [1]
+14 | }
+
+1 error found

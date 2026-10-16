@@ -1,12 +1,42 @@
-ERROR: File "double_cast.php", line 13, characters 11-16:
-Casts are only supported for `bool`, `int`, `float` and `string`. (Naming[2055])
-ERROR: File "double_cast.php", line 13, characters 11-16:
-No such type `double`, did you mean `float`? (Naming[2123])
-ERROR: File "double_cast.php", line 13, characters 11-16:
-Unbound name: `double` (Naming[2049])
-ERROR: File "double_cast.php", line 13, characters 10-19:
-Invalid return type (Typing[4110])
-  File "double_cast.php", line 12, characters 23-27:
-  Expected `float`
-  File "double_cast.php", line 13, characters 11-16:
-  But got `double`
+error: Naming[2055] Casts are only supported for `bool`, `int`, `float` and `string`. [1]
+
+double_cast.php:13:11
+11 | 
+12 | function foo(int $x): float {
+13 |   return (double)$x;
+   |           ^^^^^^ [1]
+14 | }
+
+error: Naming[2123] No such type `double`, did you mean `float`? [1]
+
+double_cast.php:13:11
+11 | 
+12 | function foo(int $x): float {
+13 |   return (double)$x;
+   |           ^^^^^^ [1]
+14 | }
+
+error: Naming[2049] Unbound name: `double` [1]
+
+double_cast.php:13:11
+11 | 
+12 | function foo(int $x): float {
+13 |   return (double)$x;
+   |           ^^^^^^ [1]
+14 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `float` [2]
+-> But got `double` [3]
+
+double_cast.php:13:10
+10 |  */
+11 | 
+12 | function foo(int $x): float {
+   |                       ^^^^^ [2]
+13 |   return (double)$x;
+   |          ^^^^^^^^^^ [1]
+   |           ^^^^^^ [3]
+14 | }
+
+4 errors found

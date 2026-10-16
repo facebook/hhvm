@@ -1,8 +1,16 @@
-ERROR: File "test_array3.php", line 13, characters 10-14:
-Invalid return type (Typing[4110])
-  File "test_array3.php", line 12, characters 33-35:
-  Expected `int`
-  File "test_array3.php", line 13, characters 10-14:
-  But got `bool`
-  File "test_array3.php", line 12, characters 22-25:
-    from this definition
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [1]
+->   from this definition [3]
+
+test_array3.php:13:10
+10 |  */
+11 | 
+12 | function test(varray<bool> $x): int {
+   |                      ^^^^ [3]
+   |                                 ^^^ [2]
+13 |   return $x[0];
+   |          ^^^^^ [1]
+14 | }
+
+1 error found

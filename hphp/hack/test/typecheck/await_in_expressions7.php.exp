@@ -1,6 +1,28 @@
-ERROR: File "await_in_expressions7.php", line 6, characters 10-17:
-`await` cannot be used in this location (Parsing[1002])
-ERROR: File "await_in_expressions7.php", line 5, characters 3-46:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "await_in_expressions7.php", line 5, characters 11-12:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Parsing[1002] `await` cannot be used in this location [1]
+
+await_in_expressions7.php:6:10
+4 |   $x = 1;
+5 |   switch ($x) {
+6 |     case await $a: {
+  |          ^^^^^^^^ [1]
+7 |     }
+8 |   }
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+await_in_expressions7.php:5:3
+3 | async function f1(Awaitable<int> $a): Awaitable<void> {
+4 |   $x = 1;
+5 |   switch ($x) {
+  |   ^^^^^^^^^^^^^ [1]
+  |           ^^ [2]
+6 |     case await $a: {
+  |     ^^^^^^^^^^^^^^^^ [1]
+7 |     }
+  |     ^ [1]
+8 |   }
+  |   ^ [1]
+9 | }
+
+2 errors found

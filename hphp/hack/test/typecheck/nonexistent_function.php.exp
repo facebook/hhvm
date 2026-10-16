@@ -1,6 +1,29 @@
-ERROR: File "nonexistent_function.php", line 4, characters 3-14:
-Unbound name: `no_such_func` (a global function) (Naming[2049])
-ERROR: File "nonexistent_function.php", line 3, characters 17-21:
-Functions that do not return a value must have a type of void (Typing[4422])
-ERROR: File "nonexistent_function.php", line 4, characters 3-14:
-Unbound name (typing): `no_such_func` (Typing[4107])
+error: Naming[2049] Unbound name: `no_such_func` (a global function) [1]
+
+nonexistent_function.php:4:3
+2 | 
+3 | function foo(): mixed {
+4 |   no_such_func();
+  |   ^^^^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4422] Functions that do not return a value must have a type of void [1]
+
+nonexistent_function.php:3:17
+1 | <?hh
+2 | 
+3 | function foo(): mixed {
+  |                 ^^^^^ [1]
+4 |   no_such_func();
+5 | }
+
+error: Typing[4107] Unbound name (typing): `no_such_func` [1]
+
+nonexistent_function.php:4:3
+2 | 
+3 | function foo(): mixed {
+4 |   no_such_func();
+  |   ^^^^^^^^^^^^ [1]
+5 | }
+
+3 errors found

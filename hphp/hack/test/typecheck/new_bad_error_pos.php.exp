@@ -1,18 +1,50 @@
-ERROR: File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
-Invalid argument (Typing[4110])
-  File "new_bad_error_pos.php--file2.php", line 8, characters 32-39:
-  Expected `<expr#2>::Ta`
-  File "new_bad_error_pos.php--file1.php", line 6, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-  File "new_bad_error_pos.php--file1.php", line 4, characters 3-3:
-  But got `<expr#3> as A`
-  File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
-    where `<expr#3>` is a reference to this expression
-ERROR: File "new_bad_error_pos.php--file1.php", line 7, characters 15-16:
-Invalid argument (Typing[4110])
-  File "new_bad_error_pos.php--file2.php", line 8, characters 32-39:
-  Expected `<expr#2>::Ta`
-  File "new_bad_error_pos.php--file1.php", line 6, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-  File "new_bad_error_pos.php--file1.php", line 4, characters 3-3:
-  But got `A`
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2>::Ta` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+-> But got `<expr#3> as A` [4]
+->   where `<expr#3>` is a reference to this expression [1]
+
+new_bad_error_pos.php--file1.php:7:15
+2 | function test<T as C>(
+3 |   T $c,
+4 |   A $a,
+  |   ^ [4]
+5 | ): void {
+6 |   $b = $c->b();
+  |        ^^ [3]
+7 |   $_ = new $b($a);
+  |               ^^ [1]
+8 | }
+
+new_bad_error_pos.php--file2.php:8:32
+6 | interface C {
+7 |   abstract const type Ta as A;
+8 |   public function b(): class<B<this::Ta>>;
+  |                                ^^^^^^^^ [2]
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2>::Ta` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+-> But got `A` [4]
+
+new_bad_error_pos.php--file1.php:7:15
+2 | function test<T as C>(
+3 |   T $c,
+4 |   A $a,
+  |   ^ [4]
+5 | ): void {
+6 |   $b = $c->b();
+  |        ^^ [3]
+7 |   $_ = new $b($a);
+  |               ^^ [1]
+8 | }
+
+new_bad_error_pos.php--file2.php:8:32
+6 | interface C {
+7 |   abstract const type Ta as A;
+8 |   public function b(): class<B<this::Ta>>;
+  |                                ^^^^^^^^ [2]
+9 | }
+
+2 errors found

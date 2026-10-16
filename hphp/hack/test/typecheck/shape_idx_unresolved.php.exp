@@ -1,6 +1,19 @@
-ERROR: File "shape_idx_unresolved.php", line 9, characters 22-35:
-Invalid argument (Typing[4110])
-  File "shape_idx_unresolved.php", line 8, characters 18-20:
-  Expected `int`
-  File "shape_idx_unresolved.php", line 4, characters 29-32:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+shape_idx_unresolved.php:9:22
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function f(): ?shape('x' => ?int) {
+   |                             ^^^^ [3]
+ 5 |   return null;
+ 6 | }
+ 7 | 
+ 8 | function test(): int {
+   |                  ^^^ [2]
+ 9 |   return Shapes::idx(f() ?? shape(), 'x', 0);
+   |                      ^^^^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

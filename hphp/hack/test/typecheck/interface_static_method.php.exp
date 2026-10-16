@@ -1,6 +1,28 @@
-ERROR: File "interface_static_method.php", line 12, characters 19-19:
-`B` is a `final` class, so it cannot be extended. (NastCheck[3072])
-ERROR: File "interface_static_method.php", line 17, characters 6-8:
-Cannot call `C::foo()`; `foo` is not defined in `C` (Typing[4185])
-  File "interface_static_method.php", line 8, characters 26-28:
-  Declaration is here
+error: NastCheck[3072] `B` is a `final` class, so it cannot be extended. [1]
+
+interface_static_method.php:12:19
+10 | 
+11 | interface C {
+12 |   require extends B;
+   |                   ^ [1]
+13 | }
+14 | 
+
+error: Typing[4185] Cannot call `C::foo()`; `foo` is not defined in `C` [1]
+-> Declaration is here [2]
+
+interface_static_method.php:17:6
+ 6 | 
+ 7 | final class B implements A {
+ 8 |   public static function foo(): void {}
+   |                          ^^^ [2]
+ 9 | }
+10 | 
+   :
+15 | function bar(): void {
+16 |   B::foo();
+17 |   C::foo();
+   |      ^^^ [1]
+18 | }
+
+2 errors found

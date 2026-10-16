@@ -1,44 +1,154 @@
-ERROR: File "tc_in_enum_class.php", line 76, characters 5-11:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `IAntGetter<AntChild, TValue>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tc_in_enum_class.php", line 89, characters 40-46:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `IAntGetter<TSource, TValue>` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
-Typing error (Typing[4110])
-  File "tc_in_enum_class.php", line 47, characters 23-25:
-  Expected `int`
-  File "tc_in_enum_class.php", line 91, characters 29-44:
-  But got `<expr#8>::T::TSource`
-  File "tc_in_enum_class.php", line 91, characters 38-44:
-  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
-ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
-Typing error (Typing[4110])
-  File "tc_in_enum_class.php", line 47, characters 23-25:
-  Expected `int`
-  File "tc_in_enum_class.php", line 91, characters 29-44:
-  But got `IAntParent::T::TSource`
-  File "tc_in_enum_class.php", line 91, characters 38-44:
-  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
-ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
-Typing error (Typing[4110])
-  File "tc_in_enum_class.php", line 47, characters 23-25:
-  Expected `int`
-  File "tc_in_enum_class.php", line 91, characters 29-44:
-  But got `ParentAccessors::TSource`
-  File "tc_in_enum_class.php", line 91, characters 38-44:
-  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
-ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
-Typing error (Typing[4110])
-  File "tc_in_enum_class.php", line 47, characters 23-25:
-  Expected `int`
-  File "tc_in_enum_class.php", line 91, characters 29-44:
-  But got `mixed`
-  File "tc_in_enum_class.php", line 91, characters 38-44:
-  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
-ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
-Invalid argument (Typing[4110])
-  File "tc_in_enum_class.php", line 103, characters 20-23:
-  Expected a class with a constant `Bar`
-  File "tc_in_enum_class.php", line 90, characters 24-30:
-  But got `<expr#8>::T`
-  File "tc_in_enum_class.php", line 103, characters 10-13:
-    where `<expr#8>` is a reference to this expression
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `IAntGetter<AntChild, TValue>` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tc_in_enum_class.php:76:5
+74 |   public function get<
+75 |     TValue,
+76 |     TGetter as IAntGetter<ChildAccessors::TSource, TValue>,
+   |     ^^^^^^^ [1]
+77 |   >(HH\EnumClass\Label<ChildAccessors, TGetter> $label): TValue {
+78 |     return ChildAccessors::valueOf($label)->impl($this);
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `IAntGetter<TSource, TValue>` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tc_in_enum_class.php:89:40
+87 |   abstract const type T as AntAccessors;
+88 |   // Generic label-based `get()` signature.
+89 |   public function get<TValue, TSource, TGetter as IAntGetter<TSource, TValue>>(
+   |                                        ^^^^^^^ [1]
+90 |     HH\EnumClass\Label<this::T, TGetter> $label,
+91 |   ): TValue where TSource = this::T::TSource;
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` [2]
+-> But got `<expr#8>::T::TSource` [3]
+-> This type argument to `IAntGetter` only allows supertypes (it is contravariant) [4]
+
+tc_in_enum_class.php:103:10
+ 45 |   abstract const type TSource;
+ 46 |   abstract IAntGetter<this::TSource, arraykey> Foo;
+ 47 |   abstract IAntGetter<int, arraykey> Bar;
+    |                       ^^^ [2]
+ 48 | }
+ 49 | 
+    :
+ 89 |   public function get<TValue, TSource, TGetter as IAntGetter<TSource, TValue>>(
+ 90 |     HH\EnumClass\Label<this::T, TGetter> $label,
+ 91 |   ): TValue where TSource = this::T::TSource;
+    |                             ^^^^^^^^^^^^^^^^ [3]
+    |                                      ^^^^^^^ [4]
+ 92 | }
+ 93 | 
+    :
+101 |   public static function bar(IAntParent $ant): arraykey {
+102 |     // expect an error here
+103 |     $r = $ant->get(#Bar);
+    |          ^^^^^^^^^^^^^^^ [1]
+104 |     //              ^ hover-at-caret
+105 |     hh_expect<nothing>($r);
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` [2]
+-> But got `IAntParent::T::TSource` [3]
+-> This type argument to `IAntGetter` only allows supertypes (it is contravariant) [4]
+
+tc_in_enum_class.php:103:10
+ 45 |   abstract const type TSource;
+ 46 |   abstract IAntGetter<this::TSource, arraykey> Foo;
+ 47 |   abstract IAntGetter<int, arraykey> Bar;
+    |                       ^^^ [2]
+ 48 | }
+ 49 | 
+    :
+ 89 |   public function get<TValue, TSource, TGetter as IAntGetter<TSource, TValue>>(
+ 90 |     HH\EnumClass\Label<this::T, TGetter> $label,
+ 91 |   ): TValue where TSource = this::T::TSource;
+    |                             ^^^^^^^^^^^^^^^^ [3]
+    |                                      ^^^^^^^ [4]
+ 92 | }
+ 93 | 
+    :
+101 |   public static function bar(IAntParent $ant): arraykey {
+102 |     // expect an error here
+103 |     $r = $ant->get(#Bar);
+    |          ^^^^^^^^^^^^^^^ [1]
+104 |     //              ^ hover-at-caret
+105 |     hh_expect<nothing>($r);
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` [2]
+-> But got `ParentAccessors::TSource` [3]
+-> This type argument to `IAntGetter` only allows supertypes (it is contravariant) [4]
+
+tc_in_enum_class.php:103:10
+ 45 |   abstract const type TSource;
+ 46 |   abstract IAntGetter<this::TSource, arraykey> Foo;
+ 47 |   abstract IAntGetter<int, arraykey> Bar;
+    |                       ^^^ [2]
+ 48 | }
+ 49 | 
+    :
+ 89 |   public function get<TValue, TSource, TGetter as IAntGetter<TSource, TValue>>(
+ 90 |     HH\EnumClass\Label<this::T, TGetter> $label,
+ 91 |   ): TValue where TSource = this::T::TSource;
+    |                             ^^^^^^^^^^^^^^^^ [3]
+    |                                      ^^^^^^^ [4]
+ 92 | }
+ 93 | 
+    :
+101 |   public static function bar(IAntParent $ant): arraykey {
+102 |     // expect an error here
+103 |     $r = $ant->get(#Bar);
+    |          ^^^^^^^^^^^^^^^ [1]
+104 |     //              ^ hover-at-caret
+105 |     hh_expect<nothing>($r);
+
+error: Typing[4110] Typing error [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> This type argument to `IAntGetter` only allows supertypes (it is contravariant) [4]
+
+tc_in_enum_class.php:103:10
+ 45 |   abstract const type TSource;
+ 46 |   abstract IAntGetter<this::TSource, arraykey> Foo;
+ 47 |   abstract IAntGetter<int, arraykey> Bar;
+    |                       ^^^ [2]
+ 48 | }
+ 49 | 
+    :
+ 89 |   public function get<TValue, TSource, TGetter as IAntGetter<TSource, TValue>>(
+ 90 |     HH\EnumClass\Label<this::T, TGetter> $label,
+ 91 |   ): TValue where TSource = this::T::TSource;
+    |                             ^^^^^^^^^^^^^^^^ [3]
+    |                                      ^^^^^^^ [4]
+ 92 | }
+ 93 | 
+    :
+101 |   public static function bar(IAntParent $ant): arraykey {
+102 |     // expect an error here
+103 |     $r = $ant->get(#Bar);
+    |          ^^^^^^^^^^^^^^^ [1]
+104 |     //              ^ hover-at-caret
+105 |     hh_expect<nothing>($r);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected a class with a constant `Bar` [1]
+-> But got `<expr#8>::T` [2]
+->   where `<expr#8>` is a reference to this expression [3]
+
+tc_in_enum_class.php:103:20
+ 88 |   // Generic label-based `get()` signature.
+ 89 |   public function get<TValue, TSource, TGetter as IAntGetter<TSource, TValue>>(
+ 90 |     HH\EnumClass\Label<this::T, TGetter> $label,
+    |                        ^^^^^^^ [2]
+ 91 |   ): TValue where TSource = this::T::TSource;
+ 92 | }
+    :
+101 |   public static function bar(IAntParent $ant): arraykey {
+102 |     // expect an error here
+103 |     $r = $ant->get(#Bar);
+    |          ^^^^ [3]
+    |                    ^^^^ [1]
+104 |     //              ^ hover-at-caret
+105 |     hh_expect<nothing>($r);
+
+7 errors found

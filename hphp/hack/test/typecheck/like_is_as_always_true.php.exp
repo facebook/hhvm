@@ -1,2 +1,11 @@
-WARN: File "like_is_as_always_true.php", line 11, characters 7-16:
-This `is` check is always `false`. The expression on the left has type `Foo<mixed>` which shares no values with `null`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `Foo<mixed>` which shares no values with `null`. [1]
+
+like_is_as_always_true.php:11:7
+ 9 | function test(): void {
+10 |   $f = get_like_foo();
+11 |   if ($f is null) {
+   |       ^^^^^^^^^^ [1]
+12 |     echo "never going to happen";
+13 |   }
+
+1 error found

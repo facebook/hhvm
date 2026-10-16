@@ -1,12 +1,25 @@
-ERROR: File "trait_priv_extends1.php", line 17, characters 20-20:
-The method `f` is not compatible with the overridden method (Typing[4341])
-  File "trait_priv_extends1.php", line 17, characters 20-20:
-  Method `f` has type `(function(): string)` in `C`
-  File "trait_priv_extends1.php", line 5, characters 20-20:
-  But it has type `(function(): int)` in parent `T`
-  File "trait_priv_extends1.php", line 17, characters 20-20:
-  Type `(function(): string)` is not a subtype of `(function(): int)`
-  File "trait_priv_extends1.php", line 5, characters 25-27:
-  Expected `int`
-  File "trait_priv_extends1.php", line 17, characters 25-30:
-  But got `string`
+error: Typing[4341] The method `f` is not compatible with the overridden method [1]
+-> Method `f` has type `(function(): string)` in `C` [1]
+-> But it has type `(function(): int)` in parent `T` [2]
+-> Type `(function(): string)` is not a subtype of `(function(): int)` [1]
+-> Expected `int` [3]
+-> But got `string` [4]
+
+trait_priv_extends1.php:17:20
+ 3 | 
+ 4 | trait T {
+ 5 |   private function f(): int {
+   |                    ^ [2]
+   |                         ^^^ [3]
+ 6 |     return 10;
+ 7 |   }
+   :
+15 |   }
+16 | 
+17 |   private function f(): string { // should conflict
+   |                    ^ [1]
+   |                         ^^^^^^ [4]
+18 |     return 'foo';
+19 |   }
+
+1 error found

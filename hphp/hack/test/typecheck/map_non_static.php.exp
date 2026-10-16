@@ -1,8 +1,28 @@
-ERROR: File "map_non_static.php", line 8, characters 45-49:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "map_non_static.php", line 8, characters 45-47:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "map_non_static.php", line 8, characters 34-65:
-  From this declaration, the context of this function body provides the capability set {}
-  File "map_non_static.php", line 3, characters 10-12:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+map_non_static.php:8:45
+6 | 
+7 | class Foo {
+8 |   public Map<int, string> $vec = Map { 3 => get(), 4 => 'world' };
+  |                                             ^^^^^ [1]
+9 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+map_non_static.php:8:45
+1 | <?hh
+2 | 
+3 | function get(): string {
+  |          ^^^ [3]
+4 |   return 'hello';
+5 | }
+6 | 
+7 | class Foo {
+8 |   public Map<int, string> $vec = Map { 3 => get(), 4 => 'world' };
+  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+  |                                             ^^^ [1]
+9 | }
+
+2 errors found

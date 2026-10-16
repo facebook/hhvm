@@ -1,32 +1,85 @@
-ERROR: File "generic_fun_4.php", line 18, characters 10-22:
-Invalid return type (Typing[4110])
-  File "generic_fun_4.php", line 16, characters 35-37:
-  Expected `int`
-  File "generic_fun_4.php", line 17, characters 11-14:
-  But got `bool`
-  File "generic_fun_4.php", line 12, characters 23-23:
-    via this generic `T`
-ERROR: File "generic_fun_4.php", line 18, characters 10-22:
-Invalid return type (Typing[4110])
-  File "generic_fun_4.php", line 16, characters 60-65:
-  Expected `string`
-  File "generic_fun_4.php", line 17, characters 11-14:
-  But got `bool`
-  File "generic_fun_4.php", line 12, characters 23-23:
-    via this generic `T`
-ERROR: File "generic_fun_4.php", line 18, characters 10-22:
-Invalid return type (Typing[4110])
-  File "generic_fun_4.php", line 17, characters 11-14:
-  Expected `bool`
-  File "generic_fun_4.php", line 12, characters 16-16:
-    via this generic `T`
-  File "generic_fun_4.php", line 16, characters 29-31:
-  But got `int`
-ERROR: File "generic_fun_4.php", line 18, characters 10-22:
-Invalid return type (Typing[4110])
-  File "generic_fun_4.php", line 17, characters 11-14:
-  Expected `bool`
-  File "generic_fun_4.php", line 12, characters 16-16:
-    via this generic `T`
-  File "generic_fun_4.php", line 16, characters 51-56:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+->   via this generic `T` [4]
+
+generic_fun_4.php:18:10
+10 |  */
+11 | 
+12 | function id<T>(T $x): T {
+   |                       ^ [4]
+13 |   return $x;
+14 | }
+15 | 
+16 | function test(): ((function(int): int), (function(string): string)) {
+   |                                   ^^^ [2]
+17 |   $f = id<bool>;
+   |           ^^^^ [3]
+18 |   return tuple($f, $f);
+   |          ^^^^^^^^^^^^^ [1]
+19 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+->   via this generic `T` [4]
+
+generic_fun_4.php:18:10
+10 |  */
+11 | 
+12 | function id<T>(T $x): T {
+   |                       ^ [4]
+13 |   return $x;
+14 | }
+15 | 
+16 | function test(): ((function(int): int), (function(string): string)) {
+   |                                                            ^^^^^^ [2]
+17 |   $f = id<bool>;
+   |           ^^^^ [3]
+18 |   return tuple($f, $f);
+   |          ^^^^^^^^^^^^^ [1]
+19 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+generic_fun_4.php:18:10
+10 |  */
+11 | 
+12 | function id<T>(T $x): T {
+   |                ^ [3]
+13 |   return $x;
+14 | }
+15 | 
+16 | function test(): ((function(int): int), (function(string): string)) {
+   |                             ^^^ [4]
+17 |   $f = id<bool>;
+   |           ^^^^ [2]
+18 |   return tuple($f, $f);
+   |          ^^^^^^^^^^^^^ [1]
+19 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+->   via this generic `T` [3]
+-> But got `string` [4]
+
+generic_fun_4.php:18:10
+10 |  */
+11 | 
+12 | function id<T>(T $x): T {
+   |                ^ [3]
+13 |   return $x;
+14 | }
+15 | 
+16 | function test(): ((function(int): int), (function(string): string)) {
+   |                                                   ^^^^^^ [4]
+17 |   $f = id<bool>;
+   |           ^^^^ [2]
+18 |   return tuple($f, $f);
+   |          ^^^^^^^^^^^^^ [1]
+19 | }
+
+4 errors found

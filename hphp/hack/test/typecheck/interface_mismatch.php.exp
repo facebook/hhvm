@@ -1,4 +1,15 @@
-ERROR: File "interface_mismatch.php", line 16, characters 22-25:
-This interface is not properly implemented (Typing[4054])
-  File "interface_mismatch.php", line 13, characters 19-26:
-  Method `whatever` does not have an implementation
+error: Typing[4054] This interface is not properly implemented [1]
+-> Method `whatever` does not have an implementation [2]
+
+interface_mismatch.php:16:22
+11 | 
+12 | interface IFoo {
+13 |   public function whatever(): void;
+   |                   ^^^^^^^^ [2]
+14 | }
+15 | 
+16 | class Foo implements IFoo {
+   |                      ^^^^ [1]
+17 | }
+
+1 error found

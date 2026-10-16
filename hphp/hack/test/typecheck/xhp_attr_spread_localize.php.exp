@@ -1,10 +1,32 @@
-ERROR: File "xhp_attr_spread_localize.php", line 23, characters 12-13:
-Invalid xhp value for attribute `:my-foo` in `:baz` (Typing[4343])
-  File "xhp_attr_spread_localize.php", line 23, characters 4-6:
-  Expected `:baz`
-  File "xhp_attr_spread_localize.php", line 15, characters 13-16:
-    via this generic `this`
-  File "xhp_attr_spread_localize.php", line 19, characters 9-11:
-  But got `:foo`
-  File "xhp_attr_spread_localize.php", line 7, characters 13-16:
-    via this generic `this`
+error: Typing[4343] Invalid xhp value for attribute `:my-foo` in `:baz` [1]
+-> Expected `:baz` [2]
+->   via this generic `this` [3]
+-> But got `:foo` [4]
+->   via this generic `this` [5]
+
+xhp_attr_spread_localize.php:23:12
+ 5 |  */
+ 6 | class :foo extends XHPTest {
+ 7 |   attribute this my-foo;
+   |             ^^^^ [5]
+ 8 | }
+ 9 | 
+   :
+13 | 
+14 | class :baz extends XHPTest {
+15 |   attribute this my-foo;
+   |             ^^^^ [3]
+16 | }
+17 | 
+18 | function test(): void {
+19 |   $x = <foo my-foo={<foo />} />;
+   |         ^^^ [4]
+20 |   // This should work, my-foo is a :foo in $x, which is compatible
+21 |   <bar {...$x} />;
+22 |   // And this should fail, because it's not a :baz
+23 |   <baz {...$x} />;
+   |    ^^^ [2]
+   |            ^^ [1]
+24 | }
+
+1 error found

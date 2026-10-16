@@ -1,4 +1,17 @@
-ERROR: File "global_const15.php", line 5, characters 16-21:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "global_const15.php", line 5, characters 16-21:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+global_const15.php:5:16
+3 | class :div extends XHPTest {}
+4 | 
+5 | const :div X = <div/>;
+  |                ^^^^^^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+global_const15.php:5:16
+3 | class :div extends XHPTest {}
+4 | 
+5 | const :div X = <div/>;
+  |                ^^^^^^ [1]
+
+2 errors found

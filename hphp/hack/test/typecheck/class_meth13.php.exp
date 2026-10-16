@@ -1,2 +1,11 @@
-ERROR: File "class_meth13.php", line 13, characters 5-8:
-Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Whoops::bar` instead (Naming[2113])
+error: Naming[2113] Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Whoops::bar` instead [1]
+
+class_meth13.php:13:5
+11 | class Whoops {
+12 |   public static function bar(): void {
+13 |     self::bar<>;
+   |     ^^^^ [1]
+14 |   }
+15 | }
+
+1 error found

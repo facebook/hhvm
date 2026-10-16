@@ -1,4 +1,18 @@
-ERROR: File "T120247995.php", line 10, characters 13-16:
-You are trying to access the method `ohno` but this is an int (Typing[4062])
-  File "T120247995.php", line 5, characters 15-15:
-  Definition is here
+error: Typing[4062] You are trying to access the method `ohno` but this is an int [1]
+-> Definition is here [2]
+
+T120247995.php:10:13
+ 3 | function gogogo(): void {
+ 4 |   $local = null;
+ 5 |   foreach(vec[1] as $value) {
+   |               ^ [2]
+ 6 |     if ($local is null) {
+ 7 |       $local = $value;
+ 8 |       continue;
+ 9 |     }
+10 |     $local->ohno();
+   |             ^^^^ [1]
+11 |   }
+12 | }
+
+1 error found

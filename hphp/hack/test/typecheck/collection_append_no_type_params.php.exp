@@ -1,12 +1,40 @@
-ERROR: File "collection_append_no_type_params.php", line 8, characters 3-11:
-an object of type Map does not allow array append (Typing[4006])
-  File "collection_append_no_type_params.php", line 7, characters 15-17:
-  Definition is here
-ERROR: File "collection_append_no_type_params.php", line 12, characters 3-11:
-an object of type Map does not allow array append (Typing[4006])
-  File "collection_append_no_type_params.php", line 11, characters 15-17:
-  Definition is here
-ERROR: File "collection_append_no_type_params.php", line 16, characters 3-25:
-an object of type Map does not allow array append (Typing[4006])
-  File "collection_append_no_type_params.php", line 15, characters 15-17:
-  Definition is here
+error: Typing[4006] an object of type Map does not allow array append [1]
+-> Definition is here [2]
+
+collection_append_no_type_params.php:8:3
+ 5 | }
+ 6 | /* HH_FIXME[4101] */
+ 7 | function foo2(Map $c, Pair $p): void {
+   |               ^^^ [2]
+ 8 |   $c[] = $p;
+   |   ^^^^^^^^^ [1]
+ 9 | }
+10 | /* HH_FIXME[4101] */
+
+error: Typing[4006] an object of type Map does not allow array append [1]
+-> Definition is here [2]
+
+collection_append_no_type_params.php:12:3
+ 9 | }
+10 | /* HH_FIXME[4101] */
+11 | function foo3(Map $c, Pair<int, string> $p): void {
+   |               ^^^ [2]
+12 |   $c[] = $p;
+   |   ^^^^^^^^^ [1]
+13 | }
+14 | /* HH_FIXME[4101] */
+
+error: Typing[4006] an object of type Map does not allow array append [1]
+-> Definition is here [2]
+
+collection_append_no_type_params.php:16:3
+13 | }
+14 | /* HH_FIXME[4101] */
+15 | function foo4(Map $c): void {
+   |               ^^^ [2]
+16 |   $c[] = Pair { 42, 'b' };
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | }
+18 | /* HH_FIXME[4101] */
+
+3 errors found

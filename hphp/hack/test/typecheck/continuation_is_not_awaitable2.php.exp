@@ -1,6 +1,13 @@
-ERROR: File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
-Invalid return type (Typing[4110])
-  File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
-  Expected `Awaitable<int>`
-  File "continuation_is_not_awaitable2.php", line 12, characters 17-30:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
+error: Typing[4110] Invalid return type [1]
+-> Expected `Awaitable<int>` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+continuation_is_not_awaitable2.php:12:17
+10 |  */
+11 | 
+12 | function foo(): Awaitable<int> {
+   |                 ^^^^^^^^^^^^^^ [1]
+13 |   yield 123;
+14 | }
+
+1 error found

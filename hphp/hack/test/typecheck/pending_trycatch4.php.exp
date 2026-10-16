@@ -1,6 +1,25 @@
-ERROR: File "pending_trycatch4.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-  File "pending_trycatch4.php", line 13, characters 15-17:
-  Expected `int`
-  File "pending_trycatch4.php", line 19, characters 12-16:
-  But got `bool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+pending_trycatch4.php:24:10
+11 | function g(): void {}
+12 | 
+13 | function f(): int {
+   |               ^^^ [2]
+14 |   try {
+15 |     try {
+16 |       $x = 1;
+17 |       g();
+18 |     } catch (Exception $e) {
+19 |       $x = false;
+   |            ^^^^^ [3]
+20 |     }
+21 |   } catch (Exception $e) {
+22 |     $x = 4;
+23 |   }
+24 |   return $x;
+   |          ^^ [1]
+25 | }
+
+1 error found

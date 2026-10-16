@@ -1,2 +1,9 @@
-ERROR: File "functions_without_body.php", line 12, characters 39-39:
-Non-native functions must have a body (Parsing[1002])
+error: Parsing[1002] Non-native functions must have a body [1]
+
+functions_without_body.php:12:39
+10 |  */
+11 | 
+12 | function function_without_body(): void;
+   |                                       ^ [1]
+
+1 error found

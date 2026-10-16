@@ -1,6 +1,22 @@
-ERROR: File "pipe_operator_dollardollar_static_member2.php", line 12, characters 26-35:
-Invalid argument (Typing[4110])
-  File "pipe_operator_dollardollar_static_member2.php", line 7, characters 25-30:
-  Expected `string`
-  File "pipe_operator_dollardollar_static_member2.php", line 4, characters 17-19:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+pipe_operator_dollardollar_static_member2.php:12:26
+ 2 | 
+ 3 | class Foo {
+ 4 |   public static int $myInt = 0;
+   |                 ^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | function takes_a_string(string $string): void {}
+   |                         ^^^^^^ [2]
+ 8 | 
+ 9 | function test_member_type(): void {
+10 |   $foo = Foo::class;
+11 | 
+12 |   $foo |> takes_a_string($$::$myInt);
+   |                          ^^^^^^^^^^ [1]
+13 | }
+
+1 error found

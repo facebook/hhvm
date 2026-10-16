@@ -1,12 +1,59 @@
-ERROR: File "test_consts4.php", line 11, characters 22-24:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "test_consts4.php", line 9, characters 19-19:
-Unbound name: `X` (a global constant) (Naming[2049])
-ERROR: File "test_consts4.php", line 9, characters 33-33:
-Unbound name: `X` (a global constant) (Naming[2049])
-ERROR: File "test_consts4.php", line 11, characters 22-24:
-Illegal constant value (Naming[2023])
-ERROR: File "test_consts4.php", line 9, characters 19-19:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "test_consts4.php", line 9, characters 33-33:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+test_consts4.php:11:22
+ 9 |   const int Y = -(X + (10 - 2 * X));
+10 | 
+11 |   const int Z = 10 + f();
+   |                      ^^^ [1]
+12 | }
+
+error: Naming[2049] Unbound name: `X` (a global constant) [1]
+
+test_consts4.php:9:19
+ 7 | class A {
+ 8 |   const int X = 10;
+ 9 |   const int Y = -(X + (10 - 2 * X));
+   |                   ^ [1]
+10 | 
+11 |   const int Z = 10 + f();
+
+error: Naming[2049] Unbound name: `X` (a global constant) [1]
+
+test_consts4.php:9:33
+ 7 | class A {
+ 8 |   const int X = 10;
+ 9 |   const int Y = -(X + (10 - 2 * X));
+   |                                 ^ [1]
+10 | 
+11 |   const int Z = 10 + f();
+
+error: Naming[2023] Illegal constant value [1]
+
+test_consts4.php:11:22
+ 9 |   const int Y = -(X + (10 - 2 * X));
+10 | 
+11 |   const int Z = 10 + f();
+   |                      ^^^ [1]
+12 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+test_consts4.php:9:19
+ 7 | class A {
+ 8 |   const int X = 10;
+ 9 |   const int Y = -(X + (10 - 2 * X));
+   |                   ^ [1]
+10 | 
+11 |   const int Z = 10 + f();
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+test_consts4.php:9:33
+ 7 | class A {
+ 8 |   const int X = 10;
+ 9 |   const int Y = -(X + (10 - 2 * X));
+   |                                 ^ [1]
+10 | 
+11 |   const int Z = 10 + f();
+
+6 errors found

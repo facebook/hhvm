@@ -16,11 +16,88 @@ File "switch_fallthrough12.php", line 33, characters 7-17:
   float
 File "switch_fallthrough12.php", line 37, characters 3-13:
   (bool | num)
-WARN: File "switch_fallthrough12.php", line 28, characters 10-10:
-This switch case, `4`, occurred before. It will never be matched. (Warn[12019])
-  File "switch_fallthrough12.php", line 24, characters 10-10:
-  This is the original occurrence of the case.
-ERROR: File "switch_fallthrough12.php", line 7, characters 3-646:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_fallthrough12.php", line 7, characters 11-12:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+warning: Warn[12019] This switch case, `4`, occurred before. It will never be matched. [1]
+-> This is the original occurrence of the case. [2]
+
+switch_fallthrough12.php:28:10
+22 |       hh_show($x);
+23 |       // FALLTHROUGH
+24 |     case 4:
+   |          ^ [2]
+25 |       // $x should be int | bool
+26 |       hh_show($x);
+27 |       break;
+28 |     case 4:
+   |          ^ [1]
+29 |       // $x should be int
+30 |       hh_show($x);
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_fallthrough12.php:7:3
+ 5 |   $x = 0;
+ 6 |   hh_show($x);
+ 7 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 8 |     case 0:
+   |     ^^^^^^^ [1]
+ 9 |     // This is a noop fallthrough so we should not do an intersect
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     case 1:
+   |     ^^^^^^^ [1]
+11 |       // $x should be int, that isn't wrapped in an unresolved
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+13 |       // $x is a string
+   |       ^^^^^^^^^^^^^^^^^ [1]
+14 |       $x = '';
+   |       ^^^^^^^^ [1]
+15 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+16 |       // FALLTHROUGH
+   |       ^^^^^^^^^^^^^^ [1]
+17 |     case 3:
+   |     ^^^^^^^ [1]
+18 |       // $x should be string | int
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+20 |       $x = true;
+   |       ^^^^^^^^^^ [1]
+21 |       // $x should be string | int | bool
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+23 |       // FALLTHROUGH
+   |       ^^^^^^^^^^^^^^ [1]
+24 |     case 4:
+   |     ^^^^^^^ [1]
+25 |       // $x should be int | bool
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+27 |       break;
+   |       ^^^^^^ [1]
+28 |     case 4:
+   |     ^^^^^^^ [1]
+29 |       // $x should be int
+   |       ^^^^^^^^^^^^^^^^^^^ [1]
+30 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+31 |       // $x should be float
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+32 |       $x = 1.0;
+   |       ^^^^^^^^^ [1]
+33 |       hh_show($x);
+   |       ^^^^^^^^^^^^ [1]
+34 |       break;
+   |       ^^^^^^ [1]
+35 |   }
+   |   ^ [1]
+36 |   // $x should be int | float | bool
+37 |   hh_show($x);
+
+2 errors found

@@ -1,6 +1,21 @@
-ERROR: File "shape7.php", line 21, characters 10-11:
-Invalid return type (Typing[4057])
-  File "shape7.php", line 19, characters 8-27:
-  The field `field2` is missing
-  File "shape7.php", line 14, characters 3-10:
-  The field `field2` is required here
+error: Typing[4057] Invalid return type [1]
+-> The field `field2` is missing [2]
+-> The field `field2` is required here [3]
+
+shape7.php:21:10
+12 | type myshape = shape(
+13 |   'field1' => int,
+14 |   'field2' => bool,
+   |   ^^^^^^^^ [3]
+15 |   ...
+16 | );
+17 | 
+18 | function test(): myshape {
+19 |   $x = shape('field1' => 0);
+   |        ^^^^^^^^^^^^^^^^^^^^ [2]
+20 |   $x['undef'] = 0;
+21 |   return $x;
+   |          ^^ [1]
+22 | }
+
+1 error found

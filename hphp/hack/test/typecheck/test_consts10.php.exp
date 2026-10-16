@@ -1,10 +1,32 @@
-ERROR: File "test_consts10.php", line 6, characters 16-16:
-Cannot reference abstract constant `C1::X` directly (Typing[4129])
-  File "test_consts10.php", line 4, characters 22-22:
-  Declaration is here
-ERROR: File "test_consts10.php", line 7, characters 12-13:
-Invalid return type (Typing[4110])
-  File "test_consts10.php", line 5, characters 24-29:
-  Expected `string`
-  File "test_consts10.php", line 4, characters 18-20:
-  But got `int`
+error: Typing[4129] Cannot reference abstract constant `C1::X` directly [1]
+-> Declaration is here [2]
+
+test_consts10.php:6:16
+2 | 
+3 | abstract class C1 {
+4 |   abstract const int X;
+  |                      ^ [2]
+5 |   public function f(): string {
+6 |     $x = self::X;
+  |                ^ [1]
+7 |     return $x;
+8 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+test_consts10.php:7:12
+2 | 
+3 | abstract class C1 {
+4 |   abstract const int X;
+  |                  ^^^ [3]
+5 |   public function f(): string {
+  |                        ^^^^^^ [2]
+6 |     $x = self::X;
+7 |     return $x;
+  |            ^^ [1]
+8 |   }
+9 | }
+
+2 errors found

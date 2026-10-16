@@ -1,6 +1,19 @@
-ERROR: File "trait_not_enforceable.php", line 12, characters 7-14:
-Invalid type (Typing[4302])
-  File "trait_not_enforceable.php", line 7, characters 38-38:
-  Type parameter `T` was declared `__Enforceable` here
-  File "trait_not_enforceable.php", line 12, characters 7-14:
-  This type is not enforceable because it has a trait name
+error: Typing[4302] Invalid type [1]
+-> Type parameter `T` was declared `__Enforceable` here [2]
+-> This type is not enforceable because it has a trait name [1]
+
+trait_not_enforceable.php:12:7
+ 5 | class C{}
+ 6 | 
+ 7 | function foo<<<__Enforceable>> reify T>(mixed $in): void {
+   |                                      ^ [2]
+ 8 |   $in as T;
+ 9 | }
+10 | 
+11 | function test(): void {
+12 |   foo<FooTrait>(42);
+   |       ^^^^^^^^ [1]
+13 |   foo<C>(42);
+14 | }
+
+1 error found

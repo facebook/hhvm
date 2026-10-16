@@ -1,2 +1,11 @@
-ERROR: File "string_expressions11.php", line 17, characters 20-30:
-The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
+error: Parsing[1002] The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. [1]
+
+string_expressions11.php:17:20
+15 |   public static function foo(): void {
+16 |     $blah = "uh oh";
+17 |     print "Hello, ${Meh::$six}"; // hphp output: Hello, uh oh
+   |                    ^^^^^^^^^^^ [1]
+18 |   }
+19 | }
+
+1 error found

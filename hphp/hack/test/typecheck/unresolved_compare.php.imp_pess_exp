@@ -1,6 +1,19 @@
-ERROR: File "unresolved_compare.php", line 13, characters 10-16:
-This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
-  File "unresolved_compare.php", line 3, characters 23-23:
-  This is a dynamic value or an object of exactly the class A because the type of this return is implicitly a like-type due to unenforced generic parameter
-  File "unresolved_compare.php", line 3, characters 23-23:
-  This is a dynamic value or an object of exactly the class B because the type of this return is implicitly a like-type due to unenforced generic parameter
+error: Typing[4240] This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed [1]
+-> This is a dynamic value or an object of exactly the class A because the type of this return is implicitly a like-type due to unenforced generic parameter [2]
+-> This is a dynamic value or an object of exactly the class B because the type of this return is implicitly a like-type due to unenforced generic parameter [2]
+
+unresolved_compare.php:13:10
+ 1 | <?hh
+ 2 | 
+ 3 | function id<T>(T $x): T {
+   |                       ^ [2]
+ 4 |   return $x;
+ 5 | }
+   :
+11 |   $x = id(new A());
+12 |   $y = id(new B());
+13 |   return $x > $y;
+   |          ^^^^^^^ [1]
+14 | }
+
+1 error found

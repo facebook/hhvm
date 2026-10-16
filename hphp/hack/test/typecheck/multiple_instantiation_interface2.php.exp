@@ -1,12 +1,41 @@
-ERROR: File "multiple_instantiation_interface2.php", line 26, characters 17-18:
-Invalid argument (Typing[4110])
-  File "multiple_instantiation_interface2.php", line 26, characters 13-13:
-  Expected `A`
-  File "multiple_instantiation_interface2.php", line 15, characters 23-23:
-  But got `B`
-ERROR: File "multiple_instantiation_interface2.php", line 28, characters 17-18:
-Invalid argument (Typing[4110])
-  File "multiple_instantiation_interface2.php", line 28, characters 13-13:
-  Expected `A`
-  File "multiple_instantiation_interface2.php", line 15, characters 23-23:
-  But got `B`
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `B` [3]
+
+multiple_instantiation_interface2.php:26:17
+13 | }
+14 | 
+15 | class C1 implements I<B> {
+   |                       ^ [3]
+16 |   use T1;
+17 | }
+   :
+24 | 
+25 | function foo(C1 $x, C2 $y): void {
+26 |   expects<I<A>>($x);
+   |             ^ [2]
+   |                 ^^ [1]
+27 |   expects<I<B>>($x);
+28 |   expects<I<A>>($y);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `B` [3]
+
+multiple_instantiation_interface2.php:28:17
+13 | }
+14 | 
+15 | class C1 implements I<B> {
+   |                       ^ [3]
+16 |   use T1;
+17 | }
+   :
+26 |   expects<I<A>>($x);
+27 |   expects<I<B>>($x);
+28 |   expects<I<A>>($y);
+   |             ^ [2]
+   |                 ^^ [1]
+29 |   expects<I<B>>($y);
+30 | }
+
+2 errors found

@@ -1,6 +1,19 @@
-ERROR: File "awaitable_subtype_error.php", line 17, characters 10-23:
-Invalid return type (Typing[4110])
-  File "awaitable_subtype_error.php", line 16, characters 36-41:
-  Expected `string`
-  File "awaitable_subtype_error.php", line 12, characters 36-38:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+awaitable_subtype_error.php:17:10
+10 |  */
+11 | 
+12 | async function genFoo(): Awaitable<int> {
+   |                                    ^^^ [3]
+13 |   return 123;
+14 | }
+15 | 
+16 | async function genBar(): Awaitable<string> {
+   |                                    ^^^^^^ [2]
+17 |   return await genFoo();
+   |          ^^^^^^^^^^^^^^ [1]
+18 | }
+
+1 error found

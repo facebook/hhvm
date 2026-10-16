@@ -1,2 +1,10 @@
-ERROR: File "init_static.php", line 13, characters 21-22:
-Please assign a value (Typing[4055])
+error: Typing[4055] Please assign a value [1]
+
+init_static.php:13:21
+11 | 
+12 | class A {
+13 |   public static int $x;
+   |                     ^^ [1]
+14 | }
+
+1 error found

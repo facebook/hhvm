@@ -1,6 +1,19 @@
-ERROR: File "typing_fail_duck.php", line 37, characters 21-34:
-Invalid argument (Typing[4110])
-  File "typing_fail_duck.php", line 32, characters 15-24:
-  Expected `DoesRender`
-  File "typing_fail_duck.php", line 37, characters 25-32:
-  But got `MyClass1`
+error: Typing[4110] Invalid argument [1]
+-> Expected `DoesRender` [2]
+-> But got `MyClass1` [3]
+
+typing_fail_duck.php:37:21
+30 | }
+31 | 
+32 | function test(DoesRender $obj): string {
+   |               ^^^^^^^^^^ [2]
+33 |   return $obj->render();
+34 | }
+35 | 
+36 | function main(): void {
+37 |   $my_string = test(new MyClass1());
+   |                     ^^^^^^^^^^^^^^ [1]
+   |                         ^^^^^^^^ [3]
+38 | }
+
+1 error found

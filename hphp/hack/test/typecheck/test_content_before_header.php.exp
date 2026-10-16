@@ -1,8 +1,38 @@
-ERROR: File "test_content_before_header.php", line 1, characters 1-1:
-A .php file must begin with `<?hh`. (Parsing[1002])
-ERROR: File "test_content_before_header.php", line 4, characters 1-1:
-Encountered unexpected text ``, was expecting a expression. (Parsing[1002])
-ERROR: File "test_content_before_header.php", line 3, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "test_content_before_header.php", line 6, characters 19-21:
-Was expecting a return type hint (Typing[4030])
+error: Parsing[1002] A .php file must begin with `<?hh`. [1]
+
+test_content_before_header.php:1:1
+1 | 
+2 | // hello
+3 | <?hh
+
+error: Parsing[1002] Encountered unexpected text ``, was expecting a expression. [1]
+
+test_content_before_header.php:4:1
+2 | // hello
+3 | <?hh
+4 | class foo {
+  | ^ [1]
+5 |   // comment inside
+6 |   public function bar() {
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+test_content_before_header.php:3:1
+1 | 
+2 | // hello
+3 | <?hh
+  | ^^^^ [1]
+4 | class foo {
+5 |   // comment inside
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+test_content_before_header.php:6:19
+4 | class foo {
+5 |   // comment inside
+6 |   public function bar() {
+  |                   ^^^ [1]
+7 |     return "hello world";
+8 |   }
+
+4 errors found

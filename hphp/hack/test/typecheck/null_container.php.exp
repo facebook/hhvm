@@ -1,4 +1,13 @@
-ERROR: File "null_container.php", line 13, characters 10-21:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "null_container.php", line 12, characters 14-33:
-  This is what makes me believe it can be `null`
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+null_container.php:13:10
+10 |  */
+11 | 
+12 | function foo(?Map<string, string> $map): string {
+   |              ^^^^^^^^^^^^^^^^^^^^ [2]
+13 |   return $map['boom'];
+   |          ^^^^^^^^^^^^ [1]
+14 | }
+
+1 error found

@@ -1,4 +1,18 @@
-ERROR: File "class_abstract_final_7.php", line 8, characters 66-68:
-`Foo` is uninstantiable (Typing[4002])
-  File "class_abstract_final_7.php", line 3, characters 22-24:
-  Declaration is here
+error: Typing[4002] `Foo` is uninstantiable [1]
+-> Declaration is here [2]
+
+class_abstract_final_7.php:8:66
+ 1 | <?hh
+ 2 | 
+ 3 | abstract final class Foo {
+   |                      ^^^ [2]
+ 4 |   public static function bar(): void {}
+ 5 | }
+ 6 | 
+ 7 | class C {
+ 8 |   public function takes_complex_foo<T as Vector<varray<Awaitable<Foo>>>>(
+   |                                                                  ^^^ [1]
+ 9 |     T $x
+10 |   ): void {}
+
+1 error found

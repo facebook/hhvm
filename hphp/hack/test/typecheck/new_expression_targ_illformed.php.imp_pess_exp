@@ -1,10 +1,31 @@
-ERROR: File "new_expression_targ_illformed.php", line 6, characters 7-10:
-Some type arguments violate their constraints (Typing[4323])
-  File "new_expression_targ_illformed.php", line 3, characters 7-10:
-  Expected `dynamic`
-  File "new_expression_targ_illformed.php", line 6, characters 12-15:
-  Type `Test` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "new_expression_targ_illformed.php", line 6, characters 12-15:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "new_expression_targ_illformed.php", line 3, characters 7-10:
-  Definition is here
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `Test` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+new_expression_targ_illformed.php:6:7
+1 | <?hh
+2 | 
+3 | class Test<T> {}
+  |       ^^^^ [2]
+4 | 
+5 | function test() : void {
+6 |   new Test<Test>(); //bad, missing type arg on inner Test
+  |       ^^^^ [1]
+  |            ^^^^ [3]
+7 | }
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+new_expression_targ_illformed.php:6:12
+1 | <?hh
+2 | 
+3 | class Test<T> {}
+  |       ^^^^ [2]
+4 | 
+5 | function test() : void {
+6 |   new Test<Test>(); //bad, missing type arg on inner Test
+  |            ^^^^ [1]
+7 | }
+
+2 errors found

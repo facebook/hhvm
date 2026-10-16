@@ -1,6 +1,20 @@
-ERROR: File "unresolved_container2.php", line 19, characters 10-14:
-Invalid return type (Typing[4110])
-  File "unresolved_container2.php", line 12, characters 51-53:
-  Expected `int`
-  File "unresolved_container2.php", line 12, characters 22-25:
-  But got `bool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+unresolved_container2.php:19:10
+10 |  */
+11 | 
+12 | function test(Vector<bool> $x, Map<int, int> $y): int {
+   |                      ^^^^ [3]
+   |                                                   ^^^ [2]
+13 |   if(true) {
+14 |     $v = $x;
+   :
+17 |     $v = $y;
+18 |   }
+19 |   return $v[0];
+   |          ^^^^^ [1]
+20 | }
+
+1 error found

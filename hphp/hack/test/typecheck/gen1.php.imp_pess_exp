@@ -1,50 +1,108 @@
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4323])
-  File "gen1.php", line 18, characters 14-14:
-  `T` is a constrained type parameter
-  File "gen1.php", line 18, characters 19-19:
-  This type constraint is violated
-  File "gen1.php", line 18, characters 19-19:
-  Expected `A`
-  File "gen1.php", line 22, characters 23-23:
-  But got `B`
-  File "gen1.php", line 22, characters 20-20:
-    by the definition of `T`
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4323])
-  File "gen1.php", line 18, characters 14-14:
-  `T` is a constrained type parameter
-  File "gen1.php", line 18, characters 19-19:
-  This type constraint is violated
-  File "gen1.php", line 18, characters 19-19:
-  Expected `A`
-  File "gen1.php", line 22, characters 23-23:
-  But got `T as B`
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4110])
-  File "gen1.php", line 23, characters 3-5:
-  Expected `dynamic` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo`
-  File "gen1.php", line 18, characters 22-22:
-    via this generic `T`
-  File "gen1.php", line 22, characters 23-23:
-  But got `B`
-  File "gen1.php", line 22, characters 20-20:
-    by the definition of `T`
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4110])
-  File "gen1.php", line 23, characters 3-5:
-  Expected `dynamic` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo`
-  File "gen1.php", line 18, characters 22-22:
-    via this generic `T`
-  File "gen1.php", line 22, characters 23-23:
-  But got `T as B`
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4110])
-  File "gen1.php", line 23, characters 3-5:
-  Expected `~_` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo`
-  File "gen1.php", line 18, characters 22-22:
-    via this generic `T`
-  File "gen1.php", line 22, characters 23-23:
-  But got `<expr#2> as T where T as B`
-  File "gen1.php", line 23, characters 7-8:
-    where `<expr#2>` is a reference to this expression
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `A` [3]
+-> But got `B` [4]
+->   by the definition of `T` [5]
+
+gen1.php:23:7
+16 | }
+17 | 
+18 | function foo<T as A>(T $x): T {
+   |              ^ [2]
+   |                   ^ [3]
+19 |   return $x;
+20 | }
+21 | 
+22 | function foo2<T as B>(T $x): void {
+   |                    ^ [5]
+   |                       ^ [4]
+23 |   foo($x);
+   |       ^^ [1]
+24 | }
+
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `A` [3]
+-> But got `T as B` [4]
+
+gen1.php:23:7
+16 | }
+17 | 
+18 | function foo<T as A>(T $x): T {
+   |              ^ [2]
+   |                   ^ [3]
+19 |   return $x;
+20 | }
+21 | 
+22 | function foo2<T as B>(T $x): void {
+   |                       ^ [4]
+23 |   foo($x);
+   |       ^^ [1]
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo` [2]
+->   via this generic `T` [3]
+-> But got `B` [4]
+->   by the definition of `T` [5]
+
+gen1.php:23:7
+16 | }
+17 | 
+18 | function foo<T as A>(T $x): T {
+   |                      ^ [3]
+19 |   return $x;
+20 | }
+21 | 
+22 | function foo2<T as B>(T $x): void {
+   |                    ^ [5]
+   |                       ^ [4]
+23 |   foo($x);
+   |   ^^^ [2]
+   |       ^^ [1]
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo` [2]
+->   via this generic `T` [3]
+-> But got `T as B` [4]
+
+gen1.php:23:7
+16 | }
+17 | 
+18 | function foo<T as A>(T $x): T {
+   |                      ^ [3]
+19 |   return $x;
+20 | }
+21 | 
+22 | function foo2<T as B>(T $x): void {
+   |                       ^ [4]
+23 |   foo($x);
+   |   ^^^ [2]
+   |       ^^ [1]
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~_` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo` [2]
+->   via this generic `T` [3]
+-> But got `<expr#2> as T where T as B` [4]
+->   where `<expr#2>` is a reference to this expression [1]
+
+gen1.php:23:7
+16 | }
+17 | 
+18 | function foo<T as A>(T $x): T {
+   |                      ^ [3]
+19 |   return $x;
+20 | }
+21 | 
+22 | function foo2<T as B>(T $x): void {
+   |                       ^ [4]
+23 |   foo($x);
+   |   ^^^ [2]
+   |       ^^ [1]
+24 | }
+
+5 errors found

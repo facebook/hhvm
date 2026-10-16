@@ -1,6 +1,13 @@
-ERROR: File "index_type_error_message_vector.php", line 14, characters 3-15:
-Invalid index type for this Vector (Typing[4324])
-  File "index_type_error_message_vector.php", line 14, characters 6-8:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "index_type_error_message_vector.php", line 14, characters 6-8:
-  But got `string`
+error: Typing[4324] Invalid index type for this Vector [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [2]
+
+index_type_error_message_vector.php:14:3
+12 | function test(): void {
+13 |   $m = Vector { 3, 2, 1, 0 };
+14 |   $m['0'] = 100;
+   |   ^^^^^^^^^^^^^ [1]
+   |      ^^^ [2]
+15 | }
+
+1 error found

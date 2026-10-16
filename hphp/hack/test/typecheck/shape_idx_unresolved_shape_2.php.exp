@@ -1,6 +1,24 @@
-ERROR: File "shape_idx_unresolved_shape_2.php", line 14, characters 22-23:
-Invalid argument (Typing[4110])
-  File "shape_idx_unresolved_shape_2.php", line 8, characters 32-34:
-  Expected `int`
-  File "shape_idx_unresolved_shape_2.php", line 4, characters 61-63:
-  But got `nonnull`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `nonnull` [3]
+
+shape_idx_unresolved_shape_2.php:14:22
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function returnSomeOpenShapeType(): shape(?'foo' => string, ...) {
+   |                                                             ^^^ [3]
+ 5 |   return shape();
+ 6 | }
+ 7 | 
+ 8 | function mySandboxFunction(): ?int {
+   |                                ^^^ [2]
+ 9 |   if (true) {
+10 |     $s = returnSomeOpenShapeType();
+11 |   } else {
+12 |     $s = shape('bar' => 0);
+13 |   }
+14 |   return Shapes::idx($s, 'bar');
+   |                      ^^ [1]
+15 | }
+
+1 error found

@@ -1,20 +1,43 @@
-ERROR: File "generic_capture_bad.php", line 5, characters 33-34:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "generic_capture_bad.php", line 13, characters 19-22:
-The method `cast` is not compatible with the overridden method (Typing[4341])
-  File "generic_capture_bad.php", line 13, characters 19-22:
-  Method `cast` has type `(function<TF>(TF $x): ~TF)` in `Bad2`
-  File "generic_capture_bad.php", line 5, characters 28-31:
-  But it has type `(function<TF#0>(mixed $x): ~TF#0)` in parent `Bad<mixed>` and comes from ancestor or trait `Base<TF>`
-  File "generic_capture_bad.php", line 13, characters 19-22:
-  Type `(function<TF>(TF $x): ~TF)` is not a subtype of `(function<TF#0>(mixed $x): ~TF#0)`
-  File "generic_capture_bad.php", line 5, characters 33-34:
-  Expected `TF#0`
-  File "generic_capture_bad.php", line 5, characters 43-44:
-    via this generic `TF`
-  File "generic_capture_bad.php", line 12, characters 24-28:
-  But got `mixed`
-  File "generic_capture_bad.php", line 9, characters 37-38:
-    via this generic `TF`
-  File "generic_capture_bad.php", line 5, characters 37-37:
-    via this generic `T`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+generic_capture_bad.php:5:33
+3 | 
+4 | abstract class Base<T> {
+5 |   abstract public function cast<TF>(T $x):TF;
+  |                                 ^^ [1]
+6 | }
+7 | 
+
+error: Typing[4341] The method `cast` is not compatible with the overridden method [1]
+-> Method `cast` has type `(function<TF>(TF $x): ~TF)` in `Bad2` [1]
+-> But it has type `(function<TF#0>(mixed $x): ~TF#0)` in parent `Bad<mixed>` and comes from ancestor or trait `Base<TF>` [2]
+-> Type `(function<TF>(TF $x): ~TF)` is not a subtype of `(function<TF#0>(mixed $x): ~TF#0)` [1]
+-> Expected `TF#0` [3]
+->   via this generic `TF` [4]
+-> But got `mixed` [5]
+->   via this generic `TF` [6]
+->   via this generic `T` [7]
+
+generic_capture_bad.php:13:19
+ 3 | 
+ 4 | abstract class Base<T> {
+ 5 |   abstract public function cast<TF>(T $x):TF;
+   |                            ^^^^ [2]
+   |                                 ^^ [3]
+   |                                     ^ [7]
+   |                                           ^^ [4]
+ 6 | }
+ 7 | 
+ 8 | // This is bad because we've captured TF
+ 9 | abstract class Bad<TF> extends Base<TF> {
+   |                                     ^^ [6]
+10 | }
+11 | 
+12 | class Bad2 extends Bad<mixed> {
+   |                        ^^^^^ [5]
+13 |   public function cast<TF>(TF $x):TF {
+   |                   ^^^^ [1]
+14 |     return $x;
+15 |   }
+
+2 errors found

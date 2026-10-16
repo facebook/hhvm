@@ -1,4 +1,17 @@
-ERROR: File "dict_const.php", line 12, characters 46-53:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "dict_const.php", line 12, characters 46-53:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+dict_const.php:12:46
+10 | 
+11 | const dict<string, (function(): int)>
+12 |   dict_with_illegal_elements = dict['foo' => () ==> 1];
+   |                                              ^^^^^^^^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+dict_const.php:12:46
+10 | 
+11 | const dict<string, (function(): int)>
+12 |   dict_with_illegal_elements = dict['foo' => () ==> 1];
+   |                                              ^^^^^^^^ [1]
+
+2 errors found

@@ -1,4 +1,21 @@
-ERROR: File "array_supportdyn.php", line 11, characters 15-24:
-Cannot use experimental feature: supportdyn type hint (Other[0000])
-ERROR: File "array_supportdyn.php", line 10, characters 3-17:
-This attribute is not yet supported in user code (Typing[4474])
+error: Other[0000] Cannot use experimental feature: supportdyn type hint [1]
+
+array_supportdyn.php:11:15
+ 9 | 
+10 | <<__NoAutoDynamic>>
+11 | function test(supportdyn<KeyedContainer<arraykey, mixed>> $kc): void {
+   |               ^^^^^^^^^^ [1]
+12 |   $v = Vector{$kc};
+13 |   $kc2 = get($v);
+
+error: Typing[4474] This attribute is not yet supported in user code [1]
+
+array_supportdyn.php:10:3
+ 8 | }
+ 9 | 
+10 | <<__NoAutoDynamic>>
+   |   ^^^^^^^^^^^^^^^ [1]
+11 | function test(supportdyn<KeyedContainer<arraykey, mixed>> $kc): void {
+12 |   $v = Vector{$kc};
+
+2 errors found

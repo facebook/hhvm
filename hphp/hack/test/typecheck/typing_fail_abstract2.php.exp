@@ -1,6 +1,23 @@
-ERROR: File "typing_fail_abstract2.php", line 14, characters 7-7:
-Class `A` contains an abstract method and must therefore be declared `abstract` (Parsing[1002])
-ERROR: File "typing_fail_abstract2.php", line 15, characters 28-28:
-Method `f` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "typing_fail_abstract2.php", line 14, characters 7-7:
-  Or make the class abstract.
+error: Parsing[1002] Class `A` contains an abstract method and must therefore be declared `abstract` [1]
+
+typing_fail_abstract2.php:14:7
+12 | // Abstract method in "normal" class
+13 | 
+14 | class A {
+   |       ^ [1]
+15 |   public abstract function f(): int;
+16 | }
+
+error: Typing[4465] Method `f` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+typing_fail_abstract2.php:15:28
+12 | // Abstract method in "normal" class
+13 | 
+14 | class A {
+   |       ^ [2]
+15 |   public abstract function f(): int;
+   |                            ^ [1]
+16 | }
+
+2 errors found

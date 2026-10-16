@@ -1,14 +1,30 @@
-ERROR: File "newtype11.php--file2.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "newtype11.php--file2.php", line 7, characters 32-33:
-  Expected `T2`
-  File "newtype11.php--file2.php", line 7, characters 25-26:
-  But got `T1`
-ERROR: File "newtype11.php--file2.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "newtype11.php--file2.php", line 7, characters 32-33:
-  Expected `T2`
-  File "newtype11.php--file2.php", line 7, characters 25-26:
-  But got `mixed`
-  File "newtype11.php--file2.php", line 7, characters 25-26:
-    by the definition of `T1` arising from an implicit `as mixed` constraint on this type
+error: Typing[4110] Invalid return type [1]
+-> Expected `T2` [2]
+-> But got `T1` [3]
+
+newtype11.php--file2.php:8:10
+5 | // T1 <: T2 implies N<T1> <: N<T2>
+6 | // but the reverse direction does not hold in general.
+7 | function badcast<T1,T2>(T1 $x):T2 where N<T1> as N<T2> {
+  |                         ^^ [3]
+  |                                ^^ [2]
+8 |   return $x;
+  |          ^^ [1]
+9 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T2` [2]
+-> But got `mixed` [3]
+->   by the definition of `T1` arising from an implicit `as mixed` constraint on this type [3]
+
+newtype11.php--file2.php:8:10
+5 | // T1 <: T2 implies N<T1> <: N<T2>
+6 | // but the reverse direction does not hold in general.
+7 | function badcast<T1,T2>(T1 $x):T2 where N<T1> as N<T2> {
+  |                         ^^ [3]
+  |                                ^^ [2]
+8 |   return $x;
+  |          ^^ [1]
+9 | }
+
+2 errors found

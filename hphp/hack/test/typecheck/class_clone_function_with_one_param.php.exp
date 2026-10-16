@@ -1,2 +1,11 @@
-ERROR: File "class_clone_function_with_one_param.php", line 5, characters 3-14:
-Method `A1::__clone` cannot accept any arguments (Parsing[1002])
+error: Parsing[1002] Method `A1::__clone` cannot accept any arguments [1]
+
+class_clone_function_with_one_param.php:5:3
+3 | 
+4 | final class A1 {
+5 |   final public function __clone(int $_): void {
+  |   ^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

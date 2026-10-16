@@ -1,8 +1,32 @@
-ERROR: File "construct_extends_php.php", line 12, characters 23-26:
-Unbound name: `Base` (an object type) (Naming[2049])
-ERROR: File "construct_extends_php.php", line 16, characters 7-13:
-This constructor expects no argument (Typing[4012])
-ERROR: File "construct_extends_php.php", line 16, characters 19-22:
-You are trying to access the method `test` but this is an int (Typing[4062])
-  File "construct_extends_php.php", line 15, characters 14-16:
-  Definition is here
+error: Naming[2049] Unbound name: `Base` (an object type) [1]
+
+construct_extends_php.php:12:23
+10 |  */
+11 | 
+12 | class Derived extends Base {
+   |                       ^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4012] This constructor expects no argument [1]
+
+construct_extends_php.php:16:7
+14 | 
+15 | function foo(int $x): void {
+16 |   new Derived($x->test());
+   |       ^^^^^^^ [1]
+17 | }
+
+error: Typing[4062] You are trying to access the method `test` but this is an int [1]
+-> Definition is here [2]
+
+construct_extends_php.php:16:19
+13 | }
+14 | 
+15 | function foo(int $x): void {
+   |              ^^^ [2]
+16 |   new Derived($x->test());
+   |                   ^^^^ [1]
+17 | }
+
+3 errors found

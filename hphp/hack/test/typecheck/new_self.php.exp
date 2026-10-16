@@ -1,12 +1,40 @@
-ERROR: File "new_self.php", line 17, characters 14-17:
-`A` is uninstantiable (Typing[4002])
-  File "new_self.php", line 12, characters 16-16:
-  Declaration is here
-ERROR: File "new_self.php", line 18, characters 9-11:
-No instance method `xxx` in `A` (Typing[4053])
-  File "new_self.php", line 14, characters 19-21:
-  Did you mean `foo` instead?
-  File "new_self.php", line 17, characters 14-17:
-  This is why I think it is an object of type A
-  File "new_self.php", line 12, characters 16-16:
-  Declaration of `A` is here
+error: Typing[4002] `A` is uninstantiable [1]
+-> Declaration is here [2]
+
+new_self.php:17:14
+10 |  */
+11 | 
+12 | abstract class A {
+   |                ^ [2]
+13 | 
+14 |   public function foo(): void {}
+15 | 
+16 |   public static function bar(): void {
+17 |     $x = new self();
+   |              ^^^^ [1]
+18 |     $x->xxx();
+19 |   }
+
+error: Typing[4053] No instance method `xxx` in `A` [1]
+-> Did you mean `foo` instead? [2]
+-> This is why I think it is an object of type A [3]
+-> Declaration of `A` is here [4]
+
+new_self.php:18:9
+10 |  */
+11 | 
+12 | abstract class A {
+   |                ^ [4]
+13 | 
+14 |   public function foo(): void {}
+   |                   ^^^ [2]
+15 | 
+16 |   public static function bar(): void {
+17 |     $x = new self();
+   |              ^^^^ [3]
+18 |     $x->xxx();
+   |         ^^^ [1]
+19 |   }
+20 | }
+
+2 errors found

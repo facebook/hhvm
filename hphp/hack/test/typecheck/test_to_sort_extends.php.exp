@@ -1,6 +1,18 @@
-ERROR: File "test_to_sort_extends.php", line 22, characters 12-13:
-Invalid return type (Typing[4110])
-  File "test_to_sort_extends.php", line 19, characters 37-37:
-  Expected `B`
-  File "test_to_sort_extends.php", line 19, characters 24-24:
-  But got `A`
+error: Typing[4110] Invalid return type [1]
+-> Expected `B` [2]
+-> But got `A` [3]
+
+test_to_sort_extends.php:22:12
+17 | 
+18 | class B extends A {
+19 |   public function plus(A $x, A $y): B {
+   |                        ^ [3]
+   |                                     ^ [2]
+20 |     $res = parent::plus($x, $x);
+21 |     $res->plus($x, $y);
+22 |     return $x;
+   |            ^^ [1]
+23 |   }
+24 | 
+
+1 error found

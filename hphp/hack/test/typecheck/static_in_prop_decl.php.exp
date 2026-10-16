@@ -1,4 +1,21 @@
-ERROR: File "static_in_prop_decl.php", line 6, characters 26-35:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "static_in_prop_decl.php", line 7, characters 35-44:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_in_prop_decl.php:6:26
+4 | class C {
+5 |   const A = 5;
+6 |   public static int $x = static::$x;
+  |                          ^^^^^^^^^^ [1]
+7 |   public static vec<int> $y = vec[static::$x];
+8 |   public static function test():int {
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+static_in_prop_decl.php:7:35
+5 |   const A = 5;
+6 |   public static int $x = static::$x;
+7 |   public static vec<int> $y = vec[static::$x];
+  |                                   ^^^^^^^^^^ [1]
+8 |   public static function test():int {
+9 |     return static::$x;
+
+2 errors found

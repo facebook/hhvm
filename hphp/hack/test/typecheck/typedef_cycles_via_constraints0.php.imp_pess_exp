@@ -1,47 +1,136 @@
-ERROR: File "typedef_cycles_via_constraints0.php", line 21, characters 14-17:
-Cannot use `this` outside of a class (Naming[2045])
-ERROR: File "typedef_cycles_via_constraints0.php", line 6, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints0.php", line 6, characters 16-16:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 9, characters 14-14:
-Cyclic type constant:
-  `C::T` -> `D` -> `C::T` (Typing[4131])
-ERROR: File "typedef_cycles_via_constraints0.php", line 11, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints0.php", line 9, characters 18-18:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 14, characters 18-18:
-Invalid type hint (Typing[4062])
-  File "typedef_cycles_via_constraints0.php", line 16, characters 17-17:
-  You are trying to access the type constant `T` but this is a mixed value
-  File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
-  Definition is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 16, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
-Invalid type hint (Typing[4062])
-  File "typedef_cycles_via_constraints0.php", line 16, characters 17-17:
-  You are trying to access the type constant `T` but this is a mixed value
-  File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
-  Definition is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 18, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints0.php", line 18, characters 15-15:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 19, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints0.php", line 19, characters 18-18:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 20, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints0.php", line 20, characters 28-28:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints0.php", line 22, characters 9-9:
-Invalid constraint on `newtype` (Typing[4332])
-  File "typedef_cycles_via_constraints0.php", line 22, characters 21-23:
-  Expected `int`
-  File "typedef_cycles_via_constraints0.php", line 22, characters 17-17:
-  But got `mixed`. Using `mixed` instead of M because this is an illegal recursive use of M in the definition of M
+error: Naming[2045] Cannot use `this` outside of a class [1]
+
+typedef_cycles_via_constraints0.php:21:14
+19 | newtype F as vec<F> = vec<nothing>;
+20 | newtype G as shape(?'g' => G) = shape();
+21 | newtype J as this = nothing;
+   |              ^^^^ [1]
+22 | newtype M super M = int;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints0.php:6:9
+4 | 
+5 | newtype N<+T> as T = T; // ok
+6 | newtype B as N<B> = N<nothing>;
+  |         ^ [1]
+  |                ^ [2]
+7 | 
+8 | class C {
+
+error: Typing[4131] Cyclic type constant:
+  `C::T` -> `D` -> `C::T` [1]
+
+typedef_cycles_via_constraints0.php:9:14
+ 7 | 
+ 8 | class C {
+ 9 |   const type T = D;
+   |              ^ [1]
+10 | }
+11 | newtype D as C::T = int;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints0.php:11:9
+ 7 | 
+ 8 | class C {
+ 9 |   const type T = D;
+   |                  ^ [2]
+10 | }
+11 | newtype D as C::T = int;
+   |         ^ [1]
+12 | 
+13 | class H {
+
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `T` but this is a mixed value [2]
+-> Definition is here [3]
+
+typedef_cycles_via_constraints0.php:14:18
+12 | 
+13 | class H {
+14 |   const type T = I;
+   |                  ^ [1]
+15 | }
+16 | newtype I as I::T = H;
+   |              ^^^^ [3]
+   |                 ^ [2]
+17 | 
+18 | newtype E as ?E = null;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints0.php:16:9
+14 |   const type T = I;
+15 | }
+16 | newtype I as I::T = H;
+   |         ^ [1]
+   |              ^^^^ [2]
+17 | 
+18 | newtype E as ?E = null;
+
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `T` but this is a mixed value [2]
+-> Definition is here [1]
+
+typedef_cycles_via_constraints0.php:16:14
+14 |   const type T = I;
+15 | }
+16 | newtype I as I::T = H;
+   |              ^^^^ [1]
+   |                 ^ [2]
+17 | 
+18 | newtype E as ?E = null;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints0.php:18:9
+16 | newtype I as I::T = H;
+17 | 
+18 | newtype E as ?E = null;
+   |         ^ [1]
+   |               ^ [2]
+19 | newtype F as vec<F> = vec<nothing>;
+20 | newtype G as shape(?'g' => G) = shape();
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints0.php:19:9
+17 | 
+18 | newtype E as ?E = null;
+19 | newtype F as vec<F> = vec<nothing>;
+   |         ^ [1]
+   |                  ^ [2]
+20 | newtype G as shape(?'g' => G) = shape();
+21 | newtype J as this = nothing;
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints0.php:20:9
+18 | newtype E as ?E = null;
+19 | newtype F as vec<F> = vec<nothing>;
+20 | newtype G as shape(?'g' => G) = shape();
+   |         ^ [1]
+   |                            ^ [2]
+21 | newtype J as this = nothing;
+22 | newtype M super M = int;
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `int` [2]
+-> But got `mixed`. Using `mixed` instead of M because this is an illegal recursive use of M in the definition of M [3]
+
+typedef_cycles_via_constraints0.php:22:9
+20 | newtype G as shape(?'g' => G) = shape();
+21 | newtype J as this = nothing;
+22 | newtype M super M = int;
+   |         ^ [1]
+   |                 ^ [3]
+   |                     ^^^ [2]
+
+11 errors found

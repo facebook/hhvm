@@ -1,2 +1,10 @@
-ERROR: File "test_toplevel_stmt_in_braced_namespace.php", line 6, characters 3-12:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+test_toplevel_stmt_in_braced_namespace.php:6:3
+4 |     echo $x + $x;
+5 |   }
+6 |   foo(true);
+  |   ^^^^^^^^^^ [1]
+7 | }
+
+1 error found

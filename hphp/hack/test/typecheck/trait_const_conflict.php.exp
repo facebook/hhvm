@@ -1,14 +1,44 @@
-ERROR: File "trait_const_conflict.php", line 11, characters 7-7:
-Constant FOO is defined concretely in multiple ancestors (Typing[4374])
-  File "trait_const_conflict.php", line 4, characters 9-11:
-  One conflicting definition is here
-  File "trait_const_conflict.php", line 8, characters 9-11:
-  Another conflicting definition is here
-ERROR: File "trait_const_conflict.php", line 12, characters 7-7:
-Some members in class `A` are incompatible with those declared in type `T` (Typing[4374])
-  File "trait_const_conflict.php", line 8, characters 9-11:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "trait_const_conflict.php", line 4, characters 9-11:
-  `FOO` inherited from `T`
-  File "trait_const_conflict.php", line 8, characters 9-11:
-  conflicts with constant `FOO` inherited from `T1`.
+error: Typing[4374] Constant FOO is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+trait_const_conflict.php:11:7
+ 2 | 
+ 3 | trait T {
+ 4 |   const FOO = "a";
+   |         ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | trait T1 {
+ 8 |   const FOO = "b";
+   |         ^^^ [3]
+ 9 | }
+10 | 
+11 | class A {
+   |       ^ [1]
+12 |   use T, T1; // ok
+13 | }
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `T` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `FOO` inherited from `T` [3]
+-> conflicts with constant `FOO` inherited from `T1`. [2]
+
+trait_const_conflict.php:12:7
+ 2 | 
+ 3 | trait T {
+ 4 |   const FOO = "a";
+   |         ^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | trait T1 {
+ 8 |   const FOO = "b";
+   |         ^^^ [2]
+ 9 | }
+10 | 
+11 | class A {
+12 |   use T, T1; // ok
+   |       ^ [1]
+13 | }
+
+2 errors found

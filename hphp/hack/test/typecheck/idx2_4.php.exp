@@ -1,6 +1,21 @@
-ERROR: File "idx2_4.php", line 9, characters 12-12:
-Invalid argument (Typing[4110])
-  File "idx.hhi", line 31, characters 6-27:
-  Expected `KeyedContainer<_, _>`
-  File "idx2_4.php", line 9, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `KeyedContainer<_, _>` [2]
+-> But got `int` [1]
+
+idx2_4.php:9:12
+ 7 | function f(): ?int {
+ 8 |   $m = m();
+ 9 |   $x = idx(0, 'a');
+   |            ^ [1]
+10 |   return $x;
+11 | }
+
+idx.hhi:31:6
+29 |    */
+30 |   function idx<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
+31 |     ?KeyedContainer<Tk, Tv> $collection,
+   |      ^^^^^^^^^^^^^^^^^^^^^^ [2]
+32 |     ?Tk $index,
+33 |     \HH\FIXME\MISSING_PARAM_TYPE $default = null,
+
+1 error found

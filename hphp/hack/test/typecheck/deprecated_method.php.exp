@@ -1,4 +1,16 @@
-ERROR: File "deprecated_method.php", line 9, characters 6-8:
-The method foo is deprecated: use bar() instead (Typing[4128])
-  File "deprecated_method.php", line 5, characters 26-28:
-  Definition is here
+error: Typing[4128] The method foo is deprecated: use bar() instead [1]
+-> Definition is here [2]
+
+deprecated_method.php:9:6
+ 3 | class F {
+ 4 |   <<__Deprecated('use bar() instead')>>
+ 5 |   public static function foo(): void {}
+   |                          ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | function f(): void {
+ 9 |   F::foo();
+   |      ^^^ [1]
+10 | }
+
+1 error found

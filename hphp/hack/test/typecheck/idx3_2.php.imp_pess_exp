@@ -1,14 +1,56 @@
-ERROR: File "idx3_2.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-  File "idx3_2.php", line 7, characters 15-20:
-  Expected `string`
-  File "idx3_2.php", line 3, characters 27-29:
-  But got `int`
-  File "collections/Map.hhi", line 58, characters 32-33:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 1111, characters 26-27:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 845, characters 26-27:
-    via this generic `Tv`
-  File "idx.hhi", line 34, characters 8-9:
-    via this generic `Tv` because the type of this return is implicitly a like-type due to unenforced generic parameter
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+->   via this generic `Tv` because the type of this return is implicitly a like-type due to unenforced generic parameter [7]
+
+idx3_2.php:10:10
+   1 | <?hh
+   2 | 
+   3 | function m(): Map<string, int> {
+     |                           ^^^ [3]
+   4 |   return Map {};
+   5 | }
+   6 | 
+   7 | function f(): string {
+     |               ^^^^^^ [2]
+   8 |   $m = m();
+   9 |   $x = idx($m, 'a', 0);
+  10 |   return $x;
+     |          ^^ [1]
+  11 | }
+
+collections/Map.hhi:58:32
+  56 |    */
+  57 |   final class Map<Tk as arraykey, Tv>
+  58 |     implements \MutableMap<Tk, Tv> {
+     |                                ^^ [4]
+  59 |     /**
+  60 |      * Creates a `Map` from the given `KeyedTraversable`, or an empty `Map` if
+
+collections/interfaces.hhi:1111:26
+ 843 |   interface ConstMap<Tk as arraykey, +Tv>
+ 844 |     extends
+ 845 |       KeyedContainer<Tk, Tv>,
+     |                          ^^ [6]
+ 846 |       ConstCollection<Pair<Tk, Tv>>,
+ 847 |       ConstMapAccess<Tk, Tv>,
+     :
+1109 |   <<__Sealed(Map::class)>>
+1110 |   interface MutableMap<Tk as arraykey, Tv>
+1111 |     extends ConstMap<Tk, Tv>, Collection<Pair<Tk, Tv>>, MapAccess<Tk, Tv> {
+     |                          ^^ [5]
+1112 |     /**
+1113 |      * Returns a `MutableVector` containing the values of the current
+
+idx.hhi:34:8
+  32 |     ?Tk $index,
+  33 |     \HH\FIXME\MISSING_PARAM_TYPE $default = null,
+  34 |   )[]: Tv {}
+     |        ^^ [7]
+  35 | 
+  36 |   function idx_readonly<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
+
+1 error found

@@ -1,4 +1,15 @@
-ERROR: File "immvector_immutable2.php", line 17, characters 3-14:
-You cannot mutate this (Typing[4011])
-  File "immvector_immutable2.php", line 15, characters 9-27:
-  This is an object of type ImmVector<int>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type ImmVector<int> [2]
+
+immvector_immutable2.php:17:3
+13 | 
+14 | function bad(bool $b):void {
+15 |   $fv = ImmVector {1, 2, 3};
+   |         ^^^^^^^^^^^^^^^^^^^ [2]
+16 |   if ($b) { $fv = Vector { 4 }; }
+17 |   $fv[0] = 2.3;
+   |   ^^^^^^^^^^^^ [1]
+18 |   // But check that the result makes sense, in case we silenced the error
+19 |   hh_expect_equivalent<(ImmVector<int> | Vector<num>)>($fv);
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "implicit_constructor_arguments1.php", line 15, characters 12-12:
-This constructor expects no argument (Typing[4012])
+error: Typing[4012] This constructor expects no argument [1]
+
+implicit_constructor_arguments1.php:15:12
+13 | 
+14 | function f(): void {
+15 |   $a = new A(1);
+   |            ^ [1]
+16 | }
+
+1 error found

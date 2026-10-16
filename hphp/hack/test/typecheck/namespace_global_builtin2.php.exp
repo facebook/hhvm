@@ -1,4 +1,20 @@
-ERROR: File "namespace_global_builtin2.php", line 20, characters 7-12:
-You cannot implement sealed interface `Traversable` (Typing[4238])
-  File "interfaces.hhi", line 44, characters 13-23:
-  Declaration is here
+error: Typing[4238] You cannot implement sealed interface `Traversable` [1]
+-> Declaration is here [2]
+
+namespace_global_builtin2.php:20:7
+18 | 
+19 | // Refers to autoimported Traversable
+20 | class Vector implements Traversable<int> {}
+   |       ^^^^^^ [1]
+21 | 
+22 | function h(): Traversable<int> {
+
+interfaces.hhi:44:13
+42 |     \SplHeap::class,
+43 |   )>>
+44 |   interface Traversable<<<__NoAutoBound>> +Tv> {
+   |             ^^^^^^^^^^^ [2]
+45 | 
+46 |   }
+
+1 error found

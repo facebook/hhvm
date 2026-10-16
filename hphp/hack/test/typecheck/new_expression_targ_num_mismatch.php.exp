@@ -1,4 +1,17 @@
-ERROR: File "new_expression_targ_num_mismatch.php", line 8, characters 7-9:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "new_expression_targ_num_mismatch.php", line 3, characters 7-9:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+new_expression_targ_num_mismatch.php:8:7
+1 | <?hh
+2 | 
+3 | class Foo<T> {}
+  |       ^^^ [2]
+4 | 
+5 | function foo<T>() : void {}
+6 | 
+7 | function test() : void {
+8 |   new Foo<int,int>(); // bad
+  |       ^^^ [1]
+9 | }
+
+1 error found

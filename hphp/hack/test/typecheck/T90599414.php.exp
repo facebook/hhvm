@@ -1,6 +1,15 @@
-ERROR: File "T90599414.php", line 6, characters 3-10:
-Typing error (Typing[4110])
-  File "T90599414.php", line 5, characters 8-13:
-  Expected `arraykey`
-  File "T90599414.php", line 6, characters 6-9:
-  But got `null`
+error: Typing[4110] Typing error [1]
+-> Expected `arraykey` [2]
+-> But got `null` [3]
+
+T90599414.php:6:3
+3 | <<__EntryPoint>>
+4 | function non_arraykey_index_access(): void {
+5 |   $m = Map {};
+  |        ^^^^^^ [2]
+6 |   $m[null];
+  |   ^^^^^^^^ [1]
+  |      ^^^^ [3]
+7 | }
+
+1 error found

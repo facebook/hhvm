@@ -1,8 +1,30 @@
-ERROR: File "typedef4.php", line 18, characters 7-15:
-Expected a `trait` but got a type alias. (Naming[2052])
-  File "typedef4.php", line 14, characters 6-14:
-  Alias definition is here.
-ERROR: File "typedef4.php", line 14, characters 18-18:
-`A` is uninstantiable (Typing[4002])
-  File "typedef4.php", line 12, characters 7-7:
-  Declaration is here
+error: Naming[2052] Expected a `trait` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+typedef4.php:18:7
+12 | trait A {}
+13 | 
+14 | type MyTypedef = A;
+   |      ^^^^^^^^^ [2]
+15 | 
+16 | /* HH_FIXME[4123]: cascading errors */
+17 | class X {
+18 |   use MyTypedef;
+   |       ^^^^^^^^^ [1]
+19 | }
+
+error: Typing[4002] `A` is uninstantiable [1]
+-> Declaration is here [2]
+
+typedef4.php:14:18
+10 |  */
+11 | 
+12 | trait A {}
+   |       ^ [2]
+13 | 
+14 | type MyTypedef = A;
+   |                  ^ [1]
+15 | 
+16 | /* HH_FIXME[4123]: cascading errors */
+
+2 errors found

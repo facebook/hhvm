@@ -1,16 +1,43 @@
-ERROR: File "trait_priv_extends2.php", line 15, characters 20-20:
-The method `f` is not compatible with the overridden method (Typing[4341])
-  File "trait_priv_extends2.php", line 15, characters 20-20:
-  Method `f` has type `(function(): string)` in `C`
-  File "trait_priv_extends2.php", line 5, characters 28-28:
-  But it has type `(function(): int)` in parent `T`
-  File "trait_priv_extends2.php", line 15, characters 20-20:
-  Type `(function(): string)` is not a subtype of `(function(): int)`
-  File "trait_priv_extends2.php", line 5, characters 33-35:
-  Expected `int`
-  File "trait_priv_extends2.php", line 15, characters 25-30:
-  But got `string`
-ERROR: File "trait_priv_extends2.php", line 15, characters 20-20:
-This member visibility is: `private` (Typing[4113])
-  File "trait_priv_extends2.php", line 5, characters 28-28:
-  `public` was expected
+error: Typing[4341] The method `f` is not compatible with the overridden method [1]
+-> Method `f` has type `(function(): string)` in `C` [1]
+-> But it has type `(function(): int)` in parent `T` [2]
+-> Type `(function(): string)` is not a subtype of `(function(): int)` [1]
+-> Expected `int` [3]
+-> But got `string` [4]
+
+trait_priv_extends2.php:15:20
+ 3 | 
+ 4 | trait T {
+ 5 |   abstract public function f(): int;
+   |                            ^ [2]
+   |                                 ^^^ [3]
+ 6 | }
+ 7 | 
+   :
+13 |   }
+14 | 
+15 |   private function f(): string {
+   |                    ^ [1]
+   |                         ^^^^^^ [4]
+16 |     return '';
+17 |   }
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `public` was expected [2]
+
+trait_priv_extends2.php:15:20
+ 3 | 
+ 4 | trait T {
+ 5 |   abstract public function f(): int;
+   |                            ^ [2]
+ 6 | }
+ 7 | 
+   :
+13 |   }
+14 | 
+15 |   private function f(): string {
+   |                    ^ [1]
+16 |     return '';
+17 |   }
+
+2 errors found

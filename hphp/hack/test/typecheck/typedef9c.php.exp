@@ -1,4 +1,11 @@
-ERROR: File "typedef9c.php--file1.php", line 12, characters 6-6:
-Cyclic type definition (Typing[4014])
-  File "typedef9c.php--file1.php", line 12, characters 10-10:
-  Cyclic use is here
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef9c.php--file1.php:12:6
+10 |  */
+11 | 
+12 | type A = A;
+   |      ^ [1]
+   |          ^ [2]
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "missing_const_typehint.php", line 5, characters 9-9:
-Please add a type hint (Naming[2035])
+error: Naming[2035] Please add a type hint [1]
+
+missing_const_typehint.php:5:9
+3 |   const X = 123; // This is OK; it's clear what the type is.
+4 |   const int Y = self::X; // This is OK.
+5 |   const Z = self::X; // This is not OK.
+  |         ^ [1]
+6 | }
+
+1 error found

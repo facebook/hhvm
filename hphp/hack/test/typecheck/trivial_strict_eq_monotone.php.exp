@@ -1,27 +1,80 @@
-WARN: File "trivial_strict_eq_monotone.php", line 7, characters 10-29:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "trivial_strict_eq_monotone.php", line 7, characters 10-29:
-This expression is likely always `false` (Warn[12001])
-  File "trivial_strict_eq_monotone.php", line 6, characters 16-21:
-  This is a string
-  File "trivial_strict_eq_monotone.php", line 2, characters 22-24:
-  This is an int
-WARN: File "trivial_strict_eq_monotone.php", line 11, characters 10-18:
-Invalid comparison: This expression will always return `false`.
-A value of type `int` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "trivial_strict_eq_monotone.php", line 11, characters 10-18:
-This expression is likely always `false` (Warn[12001])
-  File "trivial_strict_eq_monotone.php", line 10, characters 24-26:
-  This is an int
-  File "trivial_strict_eq_monotone.php", line 10, characters 32-37:
-  This is a string
-WARN: File "trivial_strict_eq_monotone.php", line 15, characters 10-18:
-Invalid comparison: This expression will always return `true`.
-A value of type `string` can never be equal to a value of type `int` (Warn[12007])
-WARN: File "trivial_strict_eq_monotone.php", line 15, characters 10-18:
-This expression is likely always `true` (Warn[12001])
-  File "trivial_strict_eq_monotone.php", line 14, characters 25-30:
-  This is a string
-  File "trivial_strict_eq_monotone.php", line 14, characters 36-38:
-  This is an int
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `int` [1]
+
+trivial_strict_eq_monotone.php:7:10
+5 | 
+6 | function repro(string $year): bool {
+7 |   return $year === get_year();
+  |          ^^^^^^^^^^^^^^^^^^^^ [1]
+8 | }
+9 | 
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is a string [2]
+-> This is an int [3]
+
+trivial_strict_eq_monotone.php:7:10
+1 | <?hh
+2 | function get_year(): int {
+  |                      ^^^ [3]
+3 |   return 2026;
+4 | }
+5 | 
+6 | function repro(string $year): bool {
+  |                ^^^^^^ [2]
+7 |   return $year === get_year();
+  |          ^^^^^^^^^^^^^^^^^^^^ [1]
+8 | }
+9 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `string` [1]
+
+trivial_strict_eq_monotone.php:11:10
+ 9 | 
+10 | function int_eq_string(int $i, string $s): bool {
+11 |   return $i === $s;
+   |          ^^^^^^^^^ [1]
+12 | }
+13 | 
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is an int [2]
+-> This is a string [3]
+
+trivial_strict_eq_monotone.php:11:10
+ 8 | }
+ 9 | 
+10 | function int_eq_string(int $i, string $s): bool {
+   |                        ^^^ [2]
+   |                                ^^^^^^ [3]
+11 |   return $i === $s;
+   |          ^^^^^^^^^ [1]
+12 | }
+13 | 
+
+warning: Warn[12007] Invalid comparison: This expression will always return `true`.
+A value of type `string` can never be equal to a value of type `int` [1]
+
+trivial_strict_eq_monotone.php:15:10
+13 | 
+14 | function string_neq_int(string $s, int $i): bool {
+15 |   return $s !== $i;
+   |          ^^^^^^^^^ [1]
+16 | }
+
+warning: Warn[12001] This expression is likely always `true` [1]
+-> This is a string [2]
+-> This is an int [3]
+
+trivial_strict_eq_monotone.php:15:10
+12 | }
+13 | 
+14 | function string_neq_int(string $s, int $i): bool {
+   |                         ^^^^^^ [2]
+   |                                    ^^^ [3]
+15 |   return $s !== $i;
+   |          ^^^^^^^^^ [1]
+16 | }
+
+6 errors found

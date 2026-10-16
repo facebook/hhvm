@@ -1,10 +1,23 @@
-ERROR: File "fc_enum_cyclic_constraint.php", line 3, characters 6-6:
-Underlying type for enum is incompatible with constraint (Typing[4330])
-  File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
-  Expected `E`
-  File "fc_enum_cyclic_constraint.php", line 3, characters 9-11:
-  But got `int`
-ERROR: File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
-Invalid type hint (Typing[4146])
-  File "fc_enum_cyclic_constraint.php", line 3, characters 6-6:
-  Cyclic enum constraint
+error: Typing[4330] Underlying type for enum is incompatible with constraint [1]
+-> Expected `E` [2]
+-> But got `int` [3]
+
+fc_enum_cyclic_constraint.php:3:6
+1 | <?hh
+2 | 
+3 | enum E: int as E {}
+  |      ^ [1]
+  |         ^^^ [3]
+  |                ^ [2]
+
+error: Typing[4146] Invalid type hint [1]
+-> Cyclic enum constraint [2]
+
+fc_enum_cyclic_constraint.php:3:16
+1 | <?hh
+2 | 
+3 | enum E: int as E {}
+  |      ^ [2]
+  |                ^ [1]
+
+2 errors found

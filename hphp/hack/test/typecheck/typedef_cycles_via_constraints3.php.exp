@@ -1,32 +1,99 @@
-ERROR: File "typedef_cycles_via_constraints3.php--defs.php", line 5, characters 1-23:
-Cannot use unstable feature: `case_types` (Parsing[1002])
-ERROR: File "typedef_cycles_via_constraints3.php--defs.php", line 7, characters 1-23:
-Cannot use unstable feature: `case_types` (Parsing[1002])
-ERROR: File "typedef_cycles_via_constraints3.php--defs.php", line 5, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints3.php--defs.php", line 7, characters 16-16:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints3.php--defs.php", line 7, characters 11-11:
-Cyclic type definition (Typing[4014])
-  File "typedef_cycles_via_constraints3.php--defs.php", line 5, characters 16-16:
-  Cyclic use is here
-ERROR: File "typedef_cycles_via_constraints3.php--uses.php", line 6, characters 17-18:
-Invalid argument (Typing[4110])
-  File "typedef_cycles_via_constraints3.php--uses.php", line 3, characters 24-29:
-  Expected `string`
-  File "typedef_cycles_via_constraints3.php--uses.php", line 5, characters 15-15:
-  But got `mixed`
-  File "typedef_cycles_via_constraints3.php--defs.php", line 5, characters 16-16:
-    by the definition of `A`
-  File "typedef_cycles_via_constraints3.php--defs.php", line 7, characters 16-16:
-    by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
-ERROR: File "typedef_cycles_via_constraints3.php--uses.php", line 7, characters 17-18:
-Invalid argument (Typing[4110])
-  File "typedef_cycles_via_constraints3.php--uses.php", line 3, characters 24-29:
-  Expected `string`
-  File "typedef_cycles_via_constraints3.php--uses.php", line 5, characters 21-21:
-  But got `mixed`
-  File "typedef_cycles_via_constraints3.php--defs.php", line 7, characters 16-16:
-    by the definition of `B`
-  File "typedef_cycles_via_constraints3.php--defs.php", line 5, characters 16-16:
-    by the definition of `A`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B
+error: Parsing[1002] Cannot use unstable feature: `case_types` [1]
+
+typedef_cycles_via_constraints3.php--defs.php:5:1
+3 | // Transparent type aliases like `type X = int`cannot have constraints
+4 | 
+5 | case type A as B = int;
+  | ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | 
+7 | case type B as A = int;
+
+error: Parsing[1002] Cannot use unstable feature: `case_types` [1]
+
+typedef_cycles_via_constraints3.php--defs.php:7:1
+5 | case type A as B = int;
+6 | 
+7 | case type B as A = int;
+  | ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints3.php--defs.php:5:11
+3 | // Transparent type aliases like `type X = int`cannot have constraints
+4 | 
+5 | case type A as B = int;
+  |           ^ [1]
+6 | 
+7 | case type B as A = int;
+  |                ^ [2]
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_cycles_via_constraints3.php--defs.php:7:11
+3 | // Transparent type aliases like `type X = int`cannot have constraints
+4 | 
+5 | case type A as B = int;
+  |                ^ [2]
+6 | 
+7 | case type B as A = int;
+  |           ^ [1]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   by the definition of `A` [4]
+->   by the definition of `B`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [5]
+
+typedef_cycles_via_constraints3.php--uses.php:6:17
+1 | <?hh
+2 | 
+3 | function expect_string(string $x): void {}
+  |                        ^^^^^^ [2]
+4 | 
+5 | function test(A $a, B $b): void {
+  |               ^ [3]
+6 |   expect_string($a);
+  |                 ^^ [1]
+7 |   expect_string($b);
+8 | }
+
+typedef_cycles_via_constraints3.php--defs.php:5:16
+3 | // Transparent type aliases like `type X = int`cannot have constraints
+4 | 
+5 | case type A as B = int;
+  |                ^ [4]
+6 | 
+7 | case type B as A = int;
+  |                ^ [5]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   by the definition of `B` [4]
+->   by the definition of `A`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B [5]
+
+typedef_cycles_via_constraints3.php--uses.php:7:17
+1 | <?hh
+2 | 
+3 | function expect_string(string $x): void {}
+  |                        ^^^^^^ [2]
+4 | 
+5 | function test(A $a, B $b): void {
+  |                     ^ [3]
+6 |   expect_string($a);
+7 |   expect_string($b);
+  |                 ^^ [1]
+8 | }
+
+typedef_cycles_via_constraints3.php--defs.php:7:16
+3 | // Transparent type aliases like `type X = int`cannot have constraints
+4 | 
+5 | case type A as B = int;
+  |                ^ [5]
+6 | 
+7 | case type B as A = int;
+  |                ^ [4]
+
+6 errors found

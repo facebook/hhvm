@@ -1,2 +1,9 @@
-ERROR: File "type_parameter5.php", line 12, characters 10-12:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
+error: Naming[2042] Please make your type parameter start with the letter `T` (capital) [1]
+
+type_parameter5.php:12:10
+10 |  */
+11 | 
+12 | type Foo<Bar> = int;
+   |          ^^^ [1]
+
+1 error found

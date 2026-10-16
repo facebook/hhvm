@@ -1,6 +1,15 @@
-ERROR: File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 4, characters 10-33:
-Invalid return type (Typing[4057])
-  File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 3, characters 63-69:
-  The field `a` is missing
-  File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 3, characters 21-23:
-  The field `a` is required here
+error: Typing[4057] Invalid return type [1]
+-> The field `a` is missing [2]
+-> The field `a` is required here [3]
+
+shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php:4:10
+1 | <?hh
+2 | 
+3 | function test(shape('a' => string) $shape_with_known_fields): shape() {
+  |                     ^^^ [3]
+  |                                                               ^^^^^^^ [2]
+4 |   return $shape_with_known_fields;
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

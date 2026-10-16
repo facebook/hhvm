@@ -1,4 +1,18 @@
-ERROR: File "evade_enum_exhaustivity.php", line 14, characters 3-47:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
-  File "evade_enum_exhaustivity.php", line 14, characters 11-12:
-  The scrutinee has type `(string & ~E)`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` [1]
+-> The scrutinee has type `(string & ~E)`. [2]
+
+evade_enum_exhaustivity.php:14:3
+12 | function main(): void {
+13 |   $e = (new C())->getEnumWrong();
+14 |   switch ($e) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+15 |     case E::A:
+   |     ^^^^^^^^^^ [1]
+16 |       break;
+   |       ^^^^^^ [1]
+17 |   }
+   |   ^ [1]
+18 | }
+
+1 error found

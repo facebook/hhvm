@@ -1,6 +1,26 @@
-ERROR: File "trait_priv_multi.php--file3.php", line 2, characters 17-17:
-Some members in class `C` are incompatible with those declared in type `B` (Typing[4113])
-  File "trait_priv_multi.php--file1.php", line 5, characters 20-20:
-  This member visibility is: `private`
-  File "trait_priv_multi.php--file2.php", line 3, characters 19-19:
-  `public` was expected
+error: Typing[4113] Some members in class `C` are incompatible with those declared in type `B` [1]
+-> This member visibility is: `private` [2]
+-> `public` was expected [3]
+
+trait_priv_multi.php--file3.php:2:17
+1 | <?hh
+2 | class C extends B {
+  |                 ^ [1]
+3 |   use T1;
+4 | }
+
+trait_priv_multi.php--file1.php:5:20
+3 | 
+4 | trait T1 {
+5 |   private function f(): int { return 3; }
+  |                    ^ [2]
+6 | }
+
+trait_priv_multi.php--file2.php:3:19
+1 | <?hh
+2 | class B {
+3 |   public function f(): int { return 4; }
+  |                   ^ [3]
+4 | }
+
+1 error found

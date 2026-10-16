@@ -1,4 +1,18 @@
-ERROR: File "naming_fail_test1.php", line 20, characters 3-4:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "naming_fail_test1.php", line 14, characters 20-21:
-  Did you mean `$b` instead?
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$b` instead? [2]
+
+naming_fail_test1.php:20:3
+12 | // testing that names existing on both sides of if is defined
+13 | 
+14 | function stmt(bool $b): void {
+   |                    ^^ [2]
+15 |   if ($b) {
+16 |     $x = 0;
+17 |   }
+18 |   else {
+19 |   }
+20 |   $x += 1;
+   |   ^^ [1]
+21 | }
+
+1 error found

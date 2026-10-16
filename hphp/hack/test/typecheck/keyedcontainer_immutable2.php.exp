@@ -1,4 +1,13 @@
-ERROR: File "keyedcontainer_immutable2.php", line 4, characters 3-12:
-You cannot mutate this (Typing[4011])
-  File "keyedcontainer_immutable2.php", line 3, characters 15-45:
-  This is an object of type KeyedContainer<arraykey, mixed>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type KeyedContainer<arraykey, mixed> [2]
+
+keyedcontainer_immutable2.php:4:3
+1 | <?hh
+2 | 
+3 | function test(KeyedContainer<arraykey, mixed> $kc): void {
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+4 |   $kc[0] = 1;
+  |   ^^^^^^^^^^ [1]
+5 | }
+
+1 error found

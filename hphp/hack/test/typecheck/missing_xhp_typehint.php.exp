@@ -1,2 +1,10 @@
-ERROR: File "missing_xhp_typehint.php", line 5, characters 23-26:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+missing_xhp_typehint.php:5:23
+3 | class :a {
+4 |   attribute string foo;
+5 |   public function bar($baz): void {}
+  |                       ^^^^ [1]
+6 | }
+
+1 error found

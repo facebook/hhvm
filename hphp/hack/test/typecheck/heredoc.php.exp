@@ -1,6 +1,16 @@
-ERROR: File "heredoc.php", line 53, characters 3-7:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "heredoc.php", line 53, characters 3-7:
-  Expected `string` or `int`
-  File "heredoc.php", line 51, characters 17-20:
-  But got `Test`
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `Test` [2]
+
+heredoc.php:53:3
+49 | }
+50 | function test2(): void {
+51 |     $test = new Test();
+   |                 ^^^^ [2]
+52 |       print <<<identifier_with_underscores_and_like_50_characters
+53 |   $test = <Test>
+   |   ^^^^^ [1]
+54 |   $test->a = a
+55 |   \x41 = A
+
+1 error found

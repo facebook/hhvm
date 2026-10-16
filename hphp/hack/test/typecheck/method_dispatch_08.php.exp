@@ -1,8 +1,26 @@
-ERROR: File "method_dispatch_08.php", line 26, characters 9-10:
-No instance method `f2` in `A` (Typing[4053])
-  File "method_dispatch_08.php", line 18, characters 26-27:
-  Did you mean static method `f2` instead?
-  File "method_dispatch_08.php", line 25, characters 32-32:
-  This is why I think it is an object of type A
-  File "method_dispatch_08.php", line 16, characters 7-7:
-  Declaration of `A` is here
+error: Typing[4053] No instance method `f2` in `A` [1]
+-> Did you mean static method `f2` instead? [2]
+-> This is why I think it is an object of type A [3]
+-> Declaration of `A` is here [4]
+
+method_dispatch_08.php:26:9
+14 |  */
+15 | 
+16 | class A {
+   |       ^ [4]
+17 |   public function f1(): void {}
+18 |   public static function f2(): void {}
+   |                          ^^ [2]
+19 | }
+20 | 
+   :
+23 |   public static function f2(): void {}
+24 |   public function test1(): void {}
+25 |   public static function test2(A $x): void {
+   |                                ^ [3]
+26 |     $x->f2();
+   |         ^^ [1]
+27 |   }
+28 | }
+
+1 error found

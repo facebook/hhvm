@@ -1,6 +1,26 @@
-ERROR: File "variadic_parameters.php", line 8, characters 3-42:
-Attributes on variadic parameters are not allowed (Parsing[1002])
-ERROR: File "variadic_parameters.php", line 8, characters 5-23:
-The `AttributeForTesting` attribute cannot be used on a parameter. (Typing[4231])
-  File "variadic_parameters.php", line 3, characters 7-25:
-  The attribute's class is defined here. To be available for use on a parameter, the `AttributeForTesting` class must implement `HH\ParameterAttribute`.
+error: Parsing[1002] Attributes on variadic parameters are not allowed [1]
+
+variadic_parameters.php:8:3
+6 | 
+7 | function test(
+8 |   <<AttributeForTesting(42)>> mixed ... $_
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | ): void {}
+
+error: Typing[4231] The `AttributeForTesting` attribute cannot be used on a parameter. [1]
+-> The attribute's class is defined here. To be available for use on a parameter, the `AttributeForTesting` class must implement `HH\ParameterAttribute`. [2]
+
+variadic_parameters.php:8:5
+1 | <?hh
+2 | 
+3 | class AttributeForTesting implements HH\MethodAttribute {
+  |       ^^^^^^^^^^^^^^^^^^^ [2]
+4 |   public function __construct(mixed $anything) {}
+5 | }
+6 | 
+7 | function test(
+8 |   <<AttributeForTesting(42)>> mixed ... $_
+  |     ^^^^^^^^^^^^^^^^^^^ [1]
+9 | ): void {}
+
+2 errors found

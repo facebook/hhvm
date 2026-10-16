@@ -1,8 +1,33 @@
-ERROR: File "global_const24.php", line 3, characters 17-19:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "global_const24.php", line 3, characters 19-19:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "global_const24.php", line 3, characters 19-19:
-You cannot use this syntax with an increment or decrement statement. (Parsing[1002])
-ERROR: File "global_const24.php", line 3, characters 17-19:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+global_const24.php:3:17
+1 | <?hh
+2 | 
+3 | const mixed X = ++X;
+  |                 ^^^ [1]
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+global_const24.php:3:19
+1 | <?hh
+2 | 
+3 | const mixed X = ++X;
+  |                   ^ [1]
+
+error: Parsing[1002] You cannot use this syntax with an increment or decrement statement. [1]
+
+global_const24.php:3:19
+1 | <?hh
+2 | 
+3 | const mixed X = ++X;
+  |                   ^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+global_const24.php:3:17
+1 | <?hh
+2 | 
+3 | const mixed X = ++X;
+  |                 ^^^ [1]
+
+4 errors found

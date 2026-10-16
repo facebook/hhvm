@@ -1,4 +1,16 @@
-ERROR: File "capitalization4.php--f2.php", line 3, characters 10-18:
-Name already bound: `cAmelCase` (Naming[2012])
-  File "capitalization4.php--f1.php", line 3, characters 10-18:
-  Previous definition is here
+error: Naming[2012] Name already bound: `cAmelCase` [1]
+-> Previous definition is here [2]
+
+capitalization4.php--f2.php:3:10
+1 | <?hh
+2 | 
+3 | function cAmelCase(string $y): void {}
+  |          ^^^^^^^^^ [1]
+
+capitalization4.php--f1.php:3:10
+1 | <?hh
+2 | 
+3 | function CamelCase(int $x): void {}
+  |          ^^^^^^^^^ [2]
+
+1 error found

@@ -1,20 +1,84 @@
-ERROR: File "bad_function_hint2.php", line 12, characters 30-30:
-A right parenthesis `)` is expected here. (Parsing[1002])
-ERROR: File "bad_function_hint2.php", line 12, characters 30-30:
-Unbound name: `,` (a global constant) (Naming[2049])
-ERROR: File "bad_function_hint2.php", line 12, characters 32-34:
-Unbound name: `int` (a global constant) (Naming[2049])
-ERROR: File "bad_function_hint2.php", line 12, characters 35-35:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "bad_function_hint2.php", line 12, characters 30-30:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "bad_function_hint2.php", line 12, characters 32-34:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "bad_function_hint2.php", line 12, characters 35-35:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "bad_function_hint2.php", line 13, characters 10-27:
-Invalid return type (Typing[4110])
-  File "bad_function_hint2.php", line 12, characters 15-29:
-  Expected `(function(): ~int)`
-  File "bad_function_hint2.php", line 13, characters 10-27:
-  But got `((function(): int), int)`
+error: Parsing[1002] A right parenthesis `)` is expected here. [1]
+
+bad_function_hint2.php:12:30
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                              ^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Naming[2049] Unbound name: `,` (a global constant) [1]
+
+bad_function_hint2.php:12:30
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                              ^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Naming[2049] Unbound name: `int` (a global constant) [1]
+
+bad_function_hint2.php:12:32
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                                ^^^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Naming[2049] Unbound name: `)` (a global constant) [1]
+
+bad_function_hint2.php:12:35
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                                   ^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+bad_function_hint2.php:12:30
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                              ^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+bad_function_hint2.php:12:32
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                                ^^^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+bad_function_hint2.php:12:35
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |                                   ^ [1]
+13 |   return tuple(() ==> 1, 1);
+14 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `(function(): ~int)` [2]
+-> But got `((function(): int), int)` [1]
+
+bad_function_hint2.php:13:10
+10 |  */
+11 | 
+12 | function f(): (function():int, int) {
+   |               ^^^^^^^^^^^^^^^ [2]
+13 |   return tuple(() ==> 1, 1);
+   |          ^^^^^^^^^^^^^^^^^^ [1]
+14 | }
+
+8 errors found

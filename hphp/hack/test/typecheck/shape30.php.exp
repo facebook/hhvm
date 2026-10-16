@@ -1,12 +1,36 @@
-ERROR: File "shape30.php", line 11, characters 3-20:
-Invalid assignment (Typing[4057])
-  File "shape30.php", line 10, characters 17-31:
-  The field `y` is missing
-  File "shape30.php", line 11, characters 9-11:
-  The field `y` is required here
-ERROR: File "shape30.php", line 12, characters 10-14:
-Invalid return type (Typing[4057])
-  File "shape30.php", line 10, characters 17-31:
-  The field `y` is missing
-  File "shape30.php", line 5, characters 3-5:
-  The field `y` is required here
+error: Typing[4057] Invalid assignment [1]
+-> The field `y` is missing [2]
+-> The field `y` is required here [3]
+
+shape30.php:11:3
+ 8 | // Nested shapes don't grow
+ 9 | function test(): myshape {
+10 |   $v = Vector { shape('x' => 4) };
+   |                 ^^^^^^^^^^^^^^^ [2]
+11 |   $v[0]['y'] = 'aaa';
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+   |         ^^^ [3]
+12 |   return $v[0];
+13 | }
+
+error: Typing[4057] Invalid return type [1]
+-> The field `y` is missing [2]
+-> The field `y` is required here [3]
+
+shape30.php:12:10
+ 3 | newtype myshape = shape(
+ 4 |   'x' => int,
+ 5 |   'y' => string,
+   |   ^^^ [3]
+ 6 | );
+ 7 | 
+ 8 | // Nested shapes don't grow
+ 9 | function test(): myshape {
+10 |   $v = Vector { shape('x' => 4) };
+   |                 ^^^^^^^^^^^^^^^ [2]
+11 |   $v[0]['y'] = 'aaa';
+12 |   return $v[0];
+   |          ^^^^^ [1]
+13 | }
+
+2 errors found

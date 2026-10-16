@@ -1,4 +1,18 @@
-ERROR: File "pipe_operator_dollardollar_static_call2.php", line 17, characters 36-37:
-It is no longer allowed to use a `classname<Bar>` in this position. Please use a `class<Bar>` instead. (Typing[4482])
-  File "pipe_operator_dollardollar_static_call2.php", line 11, characters 44-57:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<Bar>` in this position. Please use a `class<Bar>` instead. [1]
+-> Definition is here [2]
+
+pipe_operator_dollardollar_static_call2.php:17:36
+ 9 | }
+10 | 
+11 | function gives_a_bar(classname<Foo> $foo): classname<Bar> {
+   |                                            ^^^^^^^^^^^^^^ [2]
+12 |   return nameof Bar;
+13 | }
+14 | 
+15 | function test_secondary_call(): void {
+16 |   // Make sure $$ always points to the right type
+17 |   Foo::class |> gives_a_bar($$) |> $$::barMeth();
+   |                                    ^^ [1]
+18 | }
+
+1 error found

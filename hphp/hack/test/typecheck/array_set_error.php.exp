@@ -1,4 +1,13 @@
-ERROR: File "array_set_error.php", line 4, characters 3-13:
-Elements in a keyset cannot be assigned, use append instead. (Typing[4156])
-  File "array_set_error.php", line 3, characters 14-24:
-  Definition is here
+error: Typing[4156] Elements in a keyset cannot be assigned, use append instead. [1]
+-> Definition is here [2]
+
+array_set_error.php:4:3
+1 | <?hh
+2 | 
+3 | function foo(keyset<int> $k): void {
+  |              ^^^^^^^^^^^ [2]
+4 |   $k[10] = 10;
+  |   ^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

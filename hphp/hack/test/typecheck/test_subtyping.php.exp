@@ -1,2 +1,11 @@
-ERROR: File "test_subtyping.php", line 16, characters 12-19:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+test_subtyping.php:16:12
+14 | 
+15 |   public function test(string $x): string {
+16 |     return $this->x = $x;
+   |            ^^^^^^^^ [1]
+17 |   }
+18 | }
+
+1 error found

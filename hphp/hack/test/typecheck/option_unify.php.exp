@@ -1,14 +1,36 @@
-ERROR: File "option_unify.php", line 4, characters 10-19:
-Invalid return type (Typing[4336])
-  File "option_unify.php", line 4, characters 45-53:
-  Expected `Vector<T>`
-  File "option_unify.php", line 4, characters 10-19:
-  But got `void` because this function does not always return a value
-ERROR: File "option_unify.php", line 19, characters 10-16:
-Invalid return type (Typing[4110])
-  File "option_unify.php", line 8, characters 26-31:
-  Expected `string`
-  File "option_unify.php", line 10, characters 24-25:
-  But got `int`
-  File "option_unify.php", line 10, characters 24-25:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4336] Invalid return type [1]
+-> Expected `Vector<T>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+option_unify.php:4:10
+2 | 
+3 | /* HH_FIXME[4110] */
+4 | function my_compact<T>(Vector<?T> $vector): Vector<T> {
+  |          ^^^^^^^^^^ [1]
+  |                                             ^^^^^^^^^ [2]
+5 | 
+6 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+option_unify.php:19:10
+ 6 | }
+ 7 | 
+ 8 | function test(bool $b): ?string {
+   |                          ^^^^^^ [2]
+ 9 | 
+10 |   $nullable = Vector { 42, null };
+   |                        ^^ [3]
+11 |   $non_nullable = my_compact($nullable);
+12 | 
+   :
+17 |   }
+18 | 
+19 |   return $res[0];
+   |          ^^^^^^^ [1]
+20 | }
+
+2 errors found

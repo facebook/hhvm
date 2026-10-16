@@ -1,6 +1,22 @@
-ERROR: File "parent_const.php", line 13, characters 12-22:
-Invalid return type (Typing[4110])
-  File "parent_const.php", line 12, characters 27-32:
-  Expected `string`
-  File "parent_const.php", line 4, characters 9-11:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+parent_const.php:13:12
+ 2 | 
+ 3 | class C1 {
+ 4 |   const int foo = 10;
+   |         ^^^ [3]
+ 5 | 
+ 6 |   final public function foo(): string {
+   :
+10 | 
+11 | class C2 extends C1 {
+12 |   public function test(): string {
+   |                           ^^^^^^ [2]
+13 |     return parent::foo;
+   |            ^^^^^^^^^^^ [1]
+14 |   }
+15 | }
+
+1 error found

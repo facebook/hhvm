@@ -1,12 +1,29 @@
-ERROR: File "abstract_implement6.php", line 23, characters 7-12:
-This class must be declared `abstract`, or provide an implementation for the abstract method `foo` (Typing[4047])
-  File "abstract_implement6.php", line 23, characters 22-27:
-  `DClass` uses `CClass`
-  File "abstract_implement6.php", line 22, characters 31-36:
-  `CClass` uses `BClass`
-  File "abstract_implement6.php", line 21, characters 31-36:
-  `BClass` uses `AClass`
-  File "abstract_implement6.php", line 19, characters 34-38:
-  `AClass` uses `IFace`
-  File "abstract_implement6.php", line 15, characters 19-21:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `foo` [1]
+-> `DClass` uses `CClass` [2]
+-> `CClass` uses `BClass` [3]
+-> `BClass` uses `AClass` [4]
+-> `AClass` uses `IFace` [5]
+-> The method is defined here [6]
+
+abstract_implement6.php:23:7
+13 | 
+14 | interface IFace {
+15 |   public function foo(): int;
+   |                   ^^^ [6]
+16 | }
+17 | 
+18 | // multiple layers
+19 | abstract class AClass implements IFace {}
+   |                                  ^^^^^ [5]
+20 | 
+21 | abstract class BClass extends AClass {}
+   |                               ^^^^^^ [4]
+22 | abstract class CClass extends BClass {}
+   |                               ^^^^^^ [3]
+23 | class DClass extends CClass {
+   |       ^^^^^^ [1]
+   |                      ^^^^^^ [2]
+24 |   /* should fail, foo is missing */
+25 | }
+
+1 error found

@@ -1,4 +1,12 @@
-ERROR: File "typedef10.php", line 12, characters 6-6:
-Cyclic type definition (Typing[4014])
-  File "typedef10.php", line 12, characters 15-18:
-  Cyclic use is here
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef10.php:12:6
+10 |  */
+11 | 
+12 | type A<T> = B<A<T>>;
+   |      ^ [1]
+   |               ^^^^ [2]
+13 | type B<T> = T;
+
+1 error found

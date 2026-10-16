@@ -1,14 +1,44 @@
-ERROR: File "parent_override_trait.php", line 11, characters 7-8:
-Constant FOO1 is defined concretely in multiple ancestors (Typing[4374])
-  File "parent_override_trait.php", line 8, characters 9-12:
-  One conflicting definition is here
-  File "parent_override_trait.php", line 4, characters 9-12:
-  Another conflicting definition is here
-ERROR: File "parent_override_trait.php", line 11, characters 18-19:
-Some members in class `A1` are incompatible with those declared in type `B1` (Typing[4374])
-  File "parent_override_trait.php", line 4, characters 9-12:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "parent_override_trait.php", line 8, characters 9-12:
-  `FOO1` inherited from `B1`
-  File "parent_override_trait.php", line 4, characters 9-12:
-  conflicts with constant `FOO1` inherited from `T1`.
+error: Typing[4374] Constant FOO1 is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+parent_override_trait.php:11:7
+ 2 | 
+ 3 | trait T1 {
+ 4 |   const FOO1 = "trait";
+   |         ^^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | class B1 {
+ 8 |   const FOO1 = "parent";
+   |         ^^^^ [2]
+ 9 | }
+10 | 
+11 | class A1 extends B1 {
+   |       ^^ [1]
+12 |   use T1;
+13 | }
+
+error: Typing[4374] Some members in class `A1` are incompatible with those declared in type `B1` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `FOO1` inherited from `B1` [3]
+-> conflicts with constant `FOO1` inherited from `T1`. [2]
+
+parent_override_trait.php:11:18
+ 2 | 
+ 3 | trait T1 {
+ 4 |   const FOO1 = "trait";
+   |         ^^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | class B1 {
+ 8 |   const FOO1 = "parent";
+   |         ^^^^ [3]
+ 9 | }
+10 | 
+11 | class A1 extends B1 {
+   |                  ^^ [1]
+12 |   use T1;
+13 | }
+
+2 errors found

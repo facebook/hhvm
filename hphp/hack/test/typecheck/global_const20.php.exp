@@ -1,4 +1,17 @@
-ERROR: File "global_const20.php", line 3, characters 17-21:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "global_const20.php", line 3, characters 17-21:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+global_const20.php:3:17
+1 | <?hh
+2 | 
+3 | const mixed X = A::$x;
+  |                 ^^^^^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+global_const20.php:3:17
+1 | <?hh
+2 | 
+3 | const mixed X = A::$x;
+  |                 ^^^^^ [1]
+
+2 errors found

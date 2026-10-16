@@ -1,6 +1,19 @@
-ERROR: File "nullable_compare.php", line 8, characters 10-22:
-This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
-  File "nullable_compare.php", line 3, characters 23-23:
-  This is a dynamic value or an int because the type of this return is implicitly a like-type due to unenforced generic parameter
-  File "nullable_compare.php", line 8, characters 19-22:
-  This is null
+error: Typing[4240] This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed [1]
+-> This is a dynamic value or an int because the type of this return is implicitly a like-type due to unenforced generic parameter [2]
+-> This is null [3]
+
+nullable_compare.php:8:10
+1 | <?hh
+2 | 
+3 | function id<T>(T $x): T {
+  |                       ^ [2]
+4 |   return $x;
+5 | }
+6 | 
+7 | function test(int $x): bool {
+8 |   return id($x) < null;
+  |          ^^^^^^^^^^^^^ [1]
+  |                   ^^^^ [3]
+9 | }
+
+1 error found

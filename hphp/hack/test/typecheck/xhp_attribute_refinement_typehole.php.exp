@@ -1,9 +1,29 @@
-ERROR: File "xhp_attribute_refinement_typehole.php", line 28, characters 16-23:
-Invalid argument (Typing[4110])
-  File "xhp_attribute_refinement_typehole.php", line 22, characters 23-28:
-  Expected `string`
-  File "xhp_attribute_refinement_typehole.php", line 4, characters 10-16:
-  But got `?string`
-  File "xhp_attribute_refinement_typehole.php", line 27, characters 4-6:
-  All the local information about `$c->prop` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `?string` [3]
+-> All the local information about `$c->prop` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+xhp_attribute_refinement_typehole.php:28:16
+ 2 | 
+ 3 | class C {
+ 4 |   public ?string $prop;
+   |          ^^^^^^^ [3]
+ 5 | }
+ 6 | 
+   :
+20 | }
+21 | 
+22 | function takes_string(string $_): void {}
+   |                       ^^^^^^ [2]
+23 | 
+24 | <<__EntryPoint>>
+25 | function main(): void {
+26 |   $c = new C();
+27 |   <xhp attr1={$c} attr2={$c->prop as nonnull} />;
+   |    ^^^ [4]
+28 |   takes_string($c->prop);
+   |                ^^^^^^^^ [1]
+29 | }
+
+1 error found

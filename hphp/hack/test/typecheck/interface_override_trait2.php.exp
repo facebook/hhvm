@@ -1,42 +1,160 @@
-ERROR: File "interface_override_trait2.php", line 23, characters 13-13:
-Constant BAR is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_override_trait2.php", line 12, characters 16-18:
-  One conflicting definition is here, inherited through T
-  File "interface_override_trait2.php", line 4, characters 16-18:
-  Another conflicting definition is here, inherited through B
-ERROR: File "interface_override_trait2.php", line 23, characters 13-13:
-Constant BAR1 is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_override_trait2.php", line 13, characters 16-19:
-  One conflicting definition is here, inherited through T
-  File "interface_override_trait2.php", line 5, characters 16-19:
-  Another conflicting definition is here, inherited through B
-ERROR: File "interface_override_trait2.php", line 23, characters 13-13:
-Constant BAR2 is defined concretely in multiple ancestors (Typing[4374])
-  File "interface_override_trait2.php", line 14, characters 16-19:
-  One conflicting definition is here, inherited through T
-  File "interface_override_trait2.php", line 6, characters 16-19:
-  Another conflicting definition is here, inherited through B
-ERROR: File "interface_override_trait2.php", line 23, characters 23-23:
-Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
-  File "interface_override_trait2.php", line 12, characters 16-18:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "interface_override_trait2.php", line 4, characters 16-18:
-  `BAR` inherited from `I1`
-  File "interface_override_trait2.php", line 12, characters 16-18:
-  conflicts with constant `BAR` inherited from `I`.
-ERROR: File "interface_override_trait2.php", line 23, characters 23-23:
-Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
-  File "interface_override_trait2.php", line 13, characters 16-19:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "interface_override_trait2.php", line 5, characters 16-19:
-  `BAR1` inherited from `I1`
-  File "interface_override_trait2.php", line 13, characters 16-19:
-  conflicts with constant `BAR1` inherited from `I`.
-ERROR: File "interface_override_trait2.php", line 23, characters 23-23:
-Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
-  File "interface_override_trait2.php", line 14, characters 16-19:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "interface_override_trait2.php", line 6, characters 16-19:
-  `BAR2` inherited from `I1`
-  File "interface_override_trait2.php", line 14, characters 16-19:
-  conflicts with constant `BAR2` inherited from `I`.
+error: Typing[4374] Constant BAR is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through T [2]
+-> Another conflicting definition is here, inherited through B [3]
+
+interface_override_trait2.php:23:13
+ 2 | 
+ 3 | interface I1 {
+ 4 |   const string BAR = "a";
+   |                ^^^ [3]
+ 5 |   const string BAR1 = "two";
+ 6 |   const string BAR2 = "three";
+   :
+10 | 
+11 | interface I {
+12 |   const string BAR = "b";
+   |                ^^^ [2]
+13 |   const string BAR1 = "one";
+14 |   const string BAR2 = "four";
+   :
+21 | }
+22 | 
+23 | final class A extends B {
+   |             ^ [1]
+24 |   use T;
+25 | }
+
+error: Typing[4374] Constant BAR1 is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through T [2]
+-> Another conflicting definition is here, inherited through B [3]
+
+interface_override_trait2.php:23:13
+ 3 | interface I1 {
+ 4 |   const string BAR = "a";
+ 5 |   const string BAR1 = "two";
+   |                ^^^^ [3]
+ 6 |   const string BAR2 = "three";
+ 7 | }
+   :
+11 | interface I {
+12 |   const string BAR = "b";
+13 |   const string BAR1 = "one";
+   |                ^^^^ [2]
+14 |   const string BAR2 = "four";
+15 | }
+   :
+21 | }
+22 | 
+23 | final class A extends B {
+   |             ^ [1]
+24 |   use T;
+25 | }
+
+error: Typing[4374] Constant BAR2 is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through T [2]
+-> Another conflicting definition is here, inherited through B [3]
+
+interface_override_trait2.php:23:13
+ 4 |   const string BAR = "a";
+ 5 |   const string BAR1 = "two";
+ 6 |   const string BAR2 = "three";
+   |                ^^^^ [3]
+ 7 | }
+ 8 | 
+   :
+12 |   const string BAR = "b";
+13 |   const string BAR1 = "one";
+14 |   const string BAR2 = "four";
+   |                ^^^^ [2]
+15 | }
+16 | 
+   :
+21 | }
+22 | 
+23 | final class A extends B {
+   |             ^ [1]
+24 |   use T;
+25 | }
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `B` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `BAR` inherited from `I1` [3]
+-> conflicts with constant `BAR` inherited from `I`. [2]
+
+interface_override_trait2.php:23:23
+ 2 | 
+ 3 | interface I1 {
+ 4 |   const string BAR = "a";
+   |                ^^^ [3]
+ 5 |   const string BAR1 = "two";
+ 6 |   const string BAR2 = "three";
+   :
+10 | 
+11 | interface I {
+12 |   const string BAR = "b";
+   |                ^^^ [2]
+13 |   const string BAR1 = "one";
+14 |   const string BAR2 = "four";
+   :
+21 | }
+22 | 
+23 | final class A extends B {
+   |                       ^ [1]
+24 |   use T;
+25 | }
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `B` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `BAR1` inherited from `I1` [3]
+-> conflicts with constant `BAR1` inherited from `I`. [2]
+
+interface_override_trait2.php:23:23
+ 3 | interface I1 {
+ 4 |   const string BAR = "a";
+ 5 |   const string BAR1 = "two";
+   |                ^^^^ [3]
+ 6 |   const string BAR2 = "three";
+ 7 | }
+   :
+11 | interface I {
+12 |   const string BAR = "b";
+13 |   const string BAR1 = "one";
+   |                ^^^^ [2]
+14 |   const string BAR2 = "four";
+15 | }
+   :
+21 | }
+22 | 
+23 | final class A extends B {
+   |                       ^ [1]
+24 |   use T;
+25 | }
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `B` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `BAR2` inherited from `I1` [3]
+-> conflicts with constant `BAR2` inherited from `I`. [2]
+
+interface_override_trait2.php:23:23
+ 4 |   const string BAR = "a";
+ 5 |   const string BAR1 = "two";
+ 6 |   const string BAR2 = "three";
+   |                ^^^^ [3]
+ 7 | }
+ 8 | 
+   :
+12 |   const string BAR = "b";
+13 |   const string BAR1 = "one";
+14 |   const string BAR2 = "four";
+   |                ^^^^ [2]
+15 | }
+16 | 
+   :
+21 | }
+22 | 
+23 | final class A extends B {
+   |                       ^ [1]
+24 |   use T;
+25 | }
+
+6 errors found

@@ -1,2 +1,10 @@
-ERROR: File "class_const_generics.php", line 9, characters 4-11:
-Type arguments are not allowed in this position (Parsing[1002])
+error: Parsing[1002] Type arguments are not allowed in this position [1]
+
+class_const_generics.php:9:4
+ 7 | 
+ 8 | function f(): void {
+ 9 |   D<string>::m();
+   |    ^^^^^^^^ [1]
+10 | }
+
+1 error found

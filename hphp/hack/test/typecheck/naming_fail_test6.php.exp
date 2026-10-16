@@ -1,6 +1,30 @@
-ERROR: File "naming_fail_test6.php", line 16, characters 9-10:
-Variable `$i` is undefined, or not always defined. (Naming[2050])
-ERROR: File "naming_fail_test6.php", line 17, characters 5-6:
-Variable `$i` is undefined, or not always defined. (Naming[2050])
-ERROR: File "naming_fail_test6.php", line 19, characters 3-4:
-Variable `$i` is undefined, or not always defined. (Naming[2050])
+error: Naming[2050] Variable `$i` is undefined, or not always defined. [1]
+
+naming_fail_test6.php:16:9
+14 | function stmt(): void {
+15 | 
+16 |   while($i < 100) {
+   |         ^^ [1]
+17 |     $i++;
+18 |   }
+
+error: Naming[2050] Variable `$i` is undefined, or not always defined. [1]
+
+naming_fail_test6.php:17:5
+15 | 
+16 |   while($i < 100) {
+17 |     $i++;
+   |     ^^ [1]
+18 |   }
+19 |   $i+=1;
+
+error: Naming[2050] Variable `$i` is undefined, or not always defined. [1]
+
+naming_fail_test6.php:19:3
+17 |     $i++;
+18 |   }
+19 |   $i+=1;
+   |   ^^ [1]
+20 | }
+
+3 errors found

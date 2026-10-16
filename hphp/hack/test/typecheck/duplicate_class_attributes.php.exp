@@ -1,6 +1,21 @@
-ERROR: File "duplicate_class_attributes.php", line 3, characters 22-33:
-You cannot reuse the attribute `__Deprecated` (Naming[2062])
-  File "duplicate_class_attributes.php", line 3, characters 3-14:
-  `__Deprecated` was already used here
-ERROR: File "duplicate_class_attributes.php", line 3, characters 3-14:
-The `__Deprecated` attribute cannot be used on a class. (Typing[4231])
+error: Naming[2062] You cannot reuse the attribute `__Deprecated` [1]
+-> `__Deprecated` was already used here [2]
+
+duplicate_class_attributes.php:3:22
+1 | <?hh
+2 | 
+3 | <<__Deprecated('a'), __Deprecated('b')>>
+  |   ^^^^^^^^^^^^ [2]
+  |                      ^^^^^^^^^^^^ [1]
+4 | class F {}
+
+error: Typing[4231] The `__Deprecated` attribute cannot be used on a class. [1]
+
+duplicate_class_attributes.php:3:3
+1 | <?hh
+2 | 
+3 | <<__Deprecated('a'), __Deprecated('b')>>
+  |   ^^^^^^^^^^^^ [1]
+4 | class F {}
+
+2 errors found

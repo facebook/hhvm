@@ -1,7 +1,30 @@
-WARN: File "unused_awaitable17.php", line 9, characters 7-14:
-Invalid comparison: This expression will always return `false`.
-A value of type `Awaitable<?int>` can never be equal to a value of type `int` (Warn[12007])
-ERROR: File "unused_awaitable17.php", line 9, characters 7-8:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable17.php", line 3, characters 21-35:
-  This is why I think it is `Awaitable`
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `Awaitable<?int>` can never be equal to a value of type `int` [1]
+
+unused_awaitable17.php:9:7
+ 7 | function g(): void {
+ 8 |   $f = f();
+ 9 |   if ($f === 5) {
+   |       ^^^^^^^^ [1]
+10 |   }
+11 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable17.php:9:7
+ 1 | <?hh
+ 2 | 
+ 3 | async function f(): Awaitable<?int> {
+   |                     ^^^^^^^^^^^^^^^ [2]
+ 4 |   return 1;
+ 5 | }
+ 6 | 
+ 7 | function g(): void {
+ 8 |   $f = f();
+ 9 |   if ($f === 5) {
+   |       ^^ [1]
+10 |   }
+11 | }
+
+2 errors found

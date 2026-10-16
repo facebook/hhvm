@@ -1,22 +1,71 @@
-ERROR: File "memoize_obj_policied.php", line 45, characters 3-11:
-This function can only be memoized using __Memoize(#KeyedByIC) or __MemoizeLSB(#KeyedByIC) because it has zoned context (Parsing[1002])
-ERROR: File "memoize_obj_policied.php", line 19, characters 17-24:
-Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize_obj_policied.php", line 19, characters 29-30:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "memoize_obj_policied.php", line 28, characters 34-44:
-Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize_obj_policied.php", line 28, characters 49-50:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "memoize_obj_policied.php", line 31, characters 23-27:
-Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize_obj_policied.php", line 31, characters 32-33:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "memoize_obj_policied.php", line 34, characters 24-34:
-Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize_obj_policied.php", line 34, characters 39-40:
-  The local (enclosing) context provides the capability set {}
-ERROR: File "memoize_obj_policied.php", line 37, characters 18-25:
-Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize_obj_policied.php", line 37, characters 31-41:
-  The local (enclosing) context provides the capability WriteProperty
+error: Parsing[1002] This function can only be memoized using __Memoize(#KeyedByIC) or __MemoizeLSB(#KeyedByIC) because it has zoned context [1]
+
+memoize_obj_policied.php:45:3
+43 | function ok2(vec<Foo> $x)[globals] : void {}
+44 | 
+45 | <<__Memoize>>
+   |   ^^^^^^^^^ [1]
+46 | function not_ok_policied(vec<Foo> $x)[zoned] : void {}
+47 | 
+
+error: Typing[4447] Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+memoize_obj_policied.php:19:17
+17 | 
+18 | <<__Memoize>>
+19 | function not_ok(vec<Foo> $x)[] : void {}
+   |                 ^^^^^^^^ [1]
+   |                             ^^ [2]
+20 | 
+21 | <<__Memoize>>
+
+error: Typing[4447] Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+memoize_obj_policied.php:28:34
+26 | 
+27 | <<__Memoize>>
+28 | function not_ok_vector_singleton(Vector<Bar> $x)[] : void {}
+   |                                  ^^^^^^^^^^^ [1]
+   |                                                 ^^ [2]
+29 | 
+30 | <<__Memoize>>
+
+error: Typing[4447] Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+memoize_obj_policied.php:31:23
+29 | 
+30 | <<__Memoize>>
+31 | function not_ok_mixed(mixed $x)[] : void {}
+   |                       ^^^^^ [1]
+   |                                ^^ [2]
+32 | 
+33 | <<__Memoize>>
+
+error: Typing[4447] Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {} [2]
+
+memoize_obj_policied.php:34:24
+32 | 
+33 | <<__Memoize>>
+34 | function not_ok_vector(Vector<int> $x)[] : void {}
+   |                        ^^^^^^^^^^^ [1]
+   |                                       ^^ [2]
+35 | 
+36 | <<__Memoize>>
+
+error: Typing[4447] Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability WriteProperty [2]
+
+memoize_obj_policied.php:37:18
+35 | 
+36 | <<__Memoize>>
+37 | function not_ok2(vec<Foo> $x)[write_props] : void {}
+   |                  ^^^^^^^^ [1]
+   |                               ^^^^^^^^^^^ [2]
+38 | 
+39 | <<__Memoize>>
+
+6 errors found

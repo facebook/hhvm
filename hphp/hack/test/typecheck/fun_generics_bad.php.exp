@@ -1,12 +1,42 @@
-ERROR: File "fun_generics_bad.php", line 9, characters 10-26:
-Invalid return type (Typing[4336])
-  File "fun_generics_bad.php", line 12, characters 4-18:
-  Expected `dict<int, T2>`
-  File "fun_generics_bad.php", line 9, characters 10-26:
-  But got `void` because this function does not always return a value
-ERROR: File "fun_generics_bad.php", line 25, characters 36-41:
-Invalid argument (Typing[4110])
-  File "fun_generics_bad.php", line 4, characters 29-31:
-  Expected `int`
-  File "fun_generics_bad.php", line 20, characters 18-21:
-  But got `null`
+error: Typing[4336] Invalid return type [1]
+-> Expected `dict<int, T2>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+fun_generics_bad.php:9:10
+ 7 | 
+ 8 | /* HH_FIXME[4110] */
+ 9 | function special_array_map<T1, T2>(
+   |          ^^^^^^^^^^^^^^^^^ [1]
+10 |   (function(T1): T2) $f,
+11 |   darray<int, T1> $a,
+12 | ): darray<int, T2> {
+   |    ^^^^^^^^^^^^^^^ [2]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+fun_generics_bad.php:25:36
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function cannot_be_nullable(int $val): int {
+   |                             ^^^ [2]
+ 5 |   return $val;
+ 6 | }
+   :
+18 | 
+19 |   for ($k = 0; $k < 10; $k++) {
+20 |     $array[$k] = null;
+   |                  ^^^^ [3]
+21 |   }
+22 | 
+23 |   $fun1 = cannot_be_nullable<>;
+24 | 
+25 |   $val1 = special_array_map($fun1, $array);
+   |                                    ^^^^^^ [1]
+26 | 
+27 |   return $val1 !== dict[];
+
+2 errors found

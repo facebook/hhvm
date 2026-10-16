@@ -1,4 +1,15 @@
-ERROR: File "ignored_readonly_error.good.php", line 32, characters 20-28:
-Was expecting a function value but type is unknown (Typing[4297])
-  File "ignored_readonly_error.good.php", line 30, characters 10-18:
-  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+error: Typing[4297] Was expecting a function value but type is unknown [1]
+-> It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter [2]
+
+ignored_readonly_error.good.php:32:20
+28 |     self::mockFunction(meth_caller(MockedTargetClass::class, 'method'))
+29 |       ->mockImplementationWithOriginal(
+30 |         ($original) ==> ($instance, int $a) ==> {
+   |          ^^^^^^^^^ [2]
+31 |           if ($a === 5) {
+32 |             return $original($instance, 123);
+   |                    ^^^^^^^^^ [1]
+33 |           }
+34 |           return $a;
+
+1 error found

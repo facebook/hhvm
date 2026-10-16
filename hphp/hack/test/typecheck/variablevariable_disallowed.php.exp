@@ -1,2 +1,10 @@
-ERROR: File "variablevariable_disallowed.php", line 6, characters 10-10:
-A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
+error: Parsing[1002] A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores [1]
+
+variablevariable_disallowed.php:6:10
+4 |   $n = 10;
+5 |   $x = "n";
+6 |   return $$x;
+  |          ^ [1]
+7 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "lsb_nonstatic_disallowed.php", line 4, characters 5-9:
-`__LSB` attribute may only be used on static properties (Naming[2094])
-ERROR: File "lsb_nonstatic_disallowed.php", line 4, characters 5-9:
-The `__LSB` attribute cannot be used on an instance property. (Typing[4231])
+error: Naming[2094] `__LSB` attribute may only be used on static properties [1]
+
+lsb_nonstatic_disallowed.php:4:5
+2 | 
+3 | class C {
+4 |   <<__LSB>> public int $id;
+  |     ^^^^^ [1]
+5 | 
+6 |   public function __construct() {
+
+error: Typing[4231] The `__LSB` attribute cannot be used on an instance property. [1]
+
+lsb_nonstatic_disallowed.php:4:5
+2 | 
+3 | class C {
+4 |   <<__LSB>> public int $id;
+  |     ^^^^^ [1]
+5 | 
+6 |   public function __construct() {
+
+2 errors found

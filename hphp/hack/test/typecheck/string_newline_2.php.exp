@@ -1,6 +1,19 @@
-ERROR: File "string_newline_2.php", line 11, characters 10-12:
-Invalid return type (Typing[4110])
-  File "string_newline_2.php", line 3, characters 15-17:
-  Expected `int`
-  File "string_newline_2.php", line 11, characters 10-12:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+string_newline_2.php:11:10
+ 1 | <?hh
+ 2 | 
+ 3 | function f(): int {
+   |               ^^^ [2]
+ 4 |   /* Test that multiline double-quoted strings with curly braces don't mess up
+ 5 |    * line numbers in error messages. Curly braces are special because they
+   :
+ 9 |   $x = "hi {
+10 |   }";
+11 |   return "a";
+   |          ^^^ [1]
+12 | }
+
+1 error found

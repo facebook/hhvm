@@ -1,3 +1,12 @@
-ERROR: File "uninitialised_this2.bad.php", line 12, characters 27-31:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because `$this->i` can still potentially be null (NastCheck[3004])
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->i` can still potentially be null [1]
+
+uninitialised_this2.bad.php:12:27
+10 |   public int $i;
+11 |   public function __construct() {
+12 |     throw new MyException($this);
+   |                           ^^^^^ [1]
+13 |   }
+14 | }
+
+1 error found

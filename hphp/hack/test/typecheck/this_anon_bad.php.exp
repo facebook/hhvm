@@ -1,8 +1,29 @@
-ERROR: File "this_anon_bad.php", line 34, characters 11-19:
-Invalid argument (Typing[4110])
-  File "this_anon_bad.php", line 21, characters 13-17:
-  Expected `this`
-  File "this_anon_bad.php", line 14, characters 41-44:
-    via this generic `this`
-  File "this_anon_bad.php", line 34, characters 15-17:
-  But got `Foo`
+error: Typing[4110] Invalid argument [1]
+-> Expected `this` [2]
+->   via this generic `this` [3]
+-> But got `Foo` [4]
+
+this_anon_bad.php:34:11
+12 | <<__ConsistentConstruct>>
+13 | class Foo {
+14 |   public function getAnon1(): (function(this): int) {
+   |                                         ^^^^ [3]
+15 |     return function(this $x): int {
+16 |       return 4;
+   :
+19 | 
+20 |   public function test(): void {
+21 |     $func = $this->getAnon1();
+   |             ^^^^^ [2]
+22 | 
+23 |     // Can pass in $this
+   :
+32 | 
+33 |     // But not new Foo()
+34 |     $func(new Foo());
+   |           ^^^^^^^^^ [1]
+   |               ^^^ [4]
+35 |   }
+36 | }
+
+1 error found

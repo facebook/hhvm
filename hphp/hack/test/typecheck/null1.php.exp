@@ -1,6 +1,23 @@
-ERROR: File "null1.php", line 20, characters 12-13:
-Invalid return type (Typing[4110])
-  File "null1.php", line 12, characters 24-26:
-  Expected `int`
-  File "null1.php", line 15, characters 12-15:
-  But got `null`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+null1.php:20:12
+10 |  */
+11 | 
+12 | function foo(?int $x): int {
+   |                        ^^^ [2]
+13 |   try {
+14 |     if($x === null) {
+15 |       $x = null;
+   |            ^^^^ [3]
+16 |       throw new Exception('fds');
+17 |     }
+18 |     return $x;
+19 |   } catch (Exception $e) {
+20 |     return $x;
+   |            ^^ [1]
+21 |   }
+22 | }
+
+1 error found

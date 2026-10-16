@@ -1,6 +1,24 @@
-ERROR: File "bad_contra_pos_test.php", line 20, characters 24-32:
-Invalid argument (Typing[4110])
-  File "bad_contra_pos_test.php", line 11, characters 25-25:
-  Expected `I`
-  File "bad_contra_pos_test.php", line 15, characters 11-12:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `I` [2]
+-> But got `null` [3]
+
+bad_contra_pos_test.php:20:24
+ 9 | 
+10 | // Derived class
+11 | final class D extends B<I> {}
+   |                         ^ [2]
+12 | 
+13 | final class TestClass {
+14 | 
+15 |   private ?I $mv;
+   |           ^^ [3]
+16 | 
+17 |   public static function run<T>(B<T> $rule, T $rule_input): void {}
+18 |   public function test(): void {
+19 |     // The first two should give similar errors to the last of these
+20 |     self::run(new D(), $this->mv);
+   |                        ^^^^^^^^^ [1]
+21 |     //      toprun(new D(), $this->mv);
+22 |     //      toprunI(new D(), $this->mv);
+
+1 error found

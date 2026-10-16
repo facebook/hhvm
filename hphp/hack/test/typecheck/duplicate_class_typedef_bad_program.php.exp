@@ -1,18 +1,43 @@
-ERROR: File "duplicate_class_typedef_bad_program.php", line 8, characters 6-15:
-Name already bound: `ClassFirst` (Naming[2012])
-  File "duplicate_class_typedef_bad_program.php", line 7, characters 7-16:
-  Previous definition is here
-ERROR: File "duplicate_class_typedef_bad_program.php", line 11, characters 10-15:
-Typing error (Typing[4429])
-  File "duplicate_class_typedef_bad_program.php", line 11, characters 10-19:
-  Expected `num` because this is used in an arithmetic operation
-  File "duplicate_class_typedef_bad_program.php", line 10, characters 46-55:
-  But got `ClassFirst`
-ERROR: File "duplicate_class_typedef_bad_program.php", line 11, characters 10-19:
-Invalid return type (Typing[4110])
-  File "duplicate_class_typedef_bad_program.php", line 10, characters 66-68:
-  Expected `int`
-  File "duplicate_class_typedef_bad_program.php", line 11, characters 10-19:
-  But got `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
-  File "duplicate_class_typedef_bad_program.php", line 10, characters 46-55:
-  Here is why I think the argument is a `num`: this is a `num`
+error: Naming[2012] Name already bound: `ClassFirst` [1]
+-> Previous definition is here [2]
+
+duplicate_class_typedef_bad_program.php:8:6
+ 5 | // type hint below, `$value + 1` would be accepted as arithmetic on `int`.
+ 6 | // The expected errors demonstrate that `ClassFirst` is instead treated as a class.
+ 7 | class ClassFirst {}
+   |       ^^^^^^^^^^ [2]
+ 8 | type ClassFirst = int;
+   |      ^^^^^^^^^^ [1]
+ 9 | 
+10 | function duplicate_class_typedef_bad_program(ClassFirst $value): int {
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `ClassFirst` [3]
+
+duplicate_class_typedef_bad_program.php:11:10
+ 8 | type ClassFirst = int;
+ 9 | 
+10 | function duplicate_class_typedef_bad_program(ClassFirst $value): int {
+   |                                              ^^^^^^^^^^ [3]
+11 |   return $value + 1;
+   |          ^^^^^^ [1]
+   |          ^^^^^^^^^^ [2]
+12 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s. [1]
+-> Here is why I think the argument is a `num`: this is a `num` [3]
+
+duplicate_class_typedef_bad_program.php:11:10
+ 8 | type ClassFirst = int;
+ 9 | 
+10 | function duplicate_class_typedef_bad_program(ClassFirst $value): int {
+   |                                              ^^^^^^^^^^ [3]
+   |                                                                  ^^^ [2]
+11 |   return $value + 1;
+   |          ^^^^^^^^^^ [1]
+12 | }
+
+3 errors found

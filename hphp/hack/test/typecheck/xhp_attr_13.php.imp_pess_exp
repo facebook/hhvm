@@ -1,10 +1,34 @@
-ERROR: File "xhp_attr_13.php", line 7, characters 18-26:
-Invalid argument (Typing[4110])
-  File "xhp_attr_13.php", line 11, characters 23-28:
-  Expected `string`
-  File "xhp_attr_13.php", line 4, characters 13-15:
-  But got `int` because the type of this property is implicitly a like-type due to unenforced XHP attribute
-ERROR: File "xhp_attr_13.php", line 20, characters 23-28:
-Type constant `TInner` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "xhp_attr_13.php", line 19, characters 7-10:
-  Or make the class abstract.
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` because the type of this property is implicitly a like-type due to unenforced XHP attribute [3]
+
+xhp_attr_13.php:7:18
+ 2 | 
+ 3 | class :something extends :xhp {
+ 4 |   attribute Foo x @required;
+   |             ^^^ [3]
+ 5 | 
+ 6 |   public function render(): void {
+ 7 |     takes_string($this->:x);
+   |                  ^^^^^^^^^ [1]
+ 8 |   }
+ 9 | }
+10 | 
+11 | function takes_string(string $s): void {}
+   |                       ^^^^^^ [2]
+12 | 
+13 | class Foo extends Enum {
+
+error: Typing[4465] Type constant `TInner` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+xhp_attr_13.php:20:23
+17 | class :xhp extends XHPTest {}
+18 | 
+19 | class Enum {
+   |       ^^^^ [2]
+20 |   abstract const type TInner;
+   |                       ^^^^^^ [1]
+21 | }
+
+2 errors found

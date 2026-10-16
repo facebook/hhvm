@@ -1,6 +1,22 @@
-ERROR: File "case_sensitive_inheritance2.php", line 10, characters 16-16:
-`C` inherited two versions of the method `FOO` whose names differ only by case. (Typing[4393])
-  File "case_sensitive_inheritance2.php", line 6, characters 19-21:
-  It inherited `FOO` from I2 here.
-  File "case_sensitive_inheritance2.php", line 3, characters 19-21:
-  And `foo` from I1 here. Please rename these methods to the same casing.
+error: Typing[4393] `C` inherited two versions of the method `FOO` whose names differ only by case. [1]
+-> It inherited `FOO` from I2 here. [2]
+-> And `foo` from I1 here. Please rename these methods to the same casing. [3]
+
+case_sensitive_inheritance2.php:10:16
+ 1 | <?hh
+ 2 | interface I1 {
+ 3 |   public function foo(): void;
+   |                   ^^^ [3]
+ 4 | }
+ 5 | interface I2 {
+ 6 |   public function FOO(): void;
+   |                   ^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | // Error, foo defined twice with different casing
+10 | abstract class C implements I1, I2 {
+   |                ^ [1]
+11 | 
+12 | }
+
+1 error found

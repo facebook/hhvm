@@ -1,14 +1,38 @@
-ERROR: File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
-Typing error (Typing[4110])
-  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
-  Expected `B`
-  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
-    via this generic `Tnext`
-  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
-    via this generic `Tout`
-  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
-    via this generic `Tv`
-  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 19, characters 7-7:
-  But got `C`; implicitly defined constant `::class` is a reference to class `C`
-  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-34:
-    where the class `C` was referenced here
+error: Typing[4110] Typing error [1]
+-> Expected `B` [2]
+->   via this generic `Tnext` [3]
+->   via this generic `Tout` [4]
+->   via this generic `Tv` [5]
+-> But got `C`; implicitly defined constant `::class` is a reference to class `C` [6]
+->   where the class `C` was referenced here [7]
+
+class_tparam_substitution_conflicts_with_method_tparam2.php:22:10
+ 4 |   public function filterInstanceOf<Tout>(
+ 5 |     classname<Tout> $subclass,
+ 6 |   ): BaseIterable<Tout> where Tout as Tv {
+   |                                       ^^ [5]
+ 7 |     throw new Exception('unimplemented');
+ 8 |   }
+ 9 | }
+10 | 
+11 | abstract class AbstractMappedIterable<Tin, Tout>
+12 |   extends BaseIterable<Tout> {}
+   |                        ^^^^ [4]
+13 | 
+14 | class MappedIterable<Tv, Tnext>
+15 |   extends AbstractMappedIterable<Tv, Tnext> {}
+   |                                      ^^^^^ [3]
+16 | 
+17 | class A {}
+18 | class B {}
+19 | class C {}
+   |       ^ [6]
+20 | 
+21 | function test(MappedIterable<A, B> $iter): BaseIterable<C> {
+   |                                 ^ [2]
+22 |   return $iter->filterInstanceOf(C::class);
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                  ^ [7]
+23 | }
+
+1 error found

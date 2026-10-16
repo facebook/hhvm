@@ -1,4 +1,12 @@
-ERROR: File "test_consts12.php", line 3, characters 18-18:
-Constant `X` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "test_consts12.php", line 2, characters 7-8:
-  Or make the class abstract.
+error: Typing[4465] Constant `X` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+test_consts12.php:3:18
+1 | <?hh
+2 | class C1 {
+  |       ^^ [2]
+3 |   abstract const X;
+  |                  ^ [1]
+4 | }
+
+1 error found

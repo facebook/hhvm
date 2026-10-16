@@ -1,12 +1,49 @@
-ERROR: File "erling_loop2.php", line 26, characters 10-16:
-Invalid return type (Typing[4110])
-  File "erling_loop2.php", line 16, characters 18-20:
-  Expected `int`
-  File "erling_loop2.php", line 21, characters 3-103:
-  But got `(_ & (int | string))` because of this statement
-ERROR: File "erling_loop2.php", line 26, characters 10-16:
-Invalid return type (Typing[4110])
-  File "erling_loop2.php", line 16, characters 18-20:
-  Expected `int`
-  File "erling_loop2.php", line 24, characters 15-21:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `(_ & (int | string))` because of this statement [3]
+
+erling_loop2.php:26:10
+14 | }
+15 | 
+16 | function test(): int {
+   |                  ^^^ [2]
+17 |   $obj = new X();
+18 |   $obj->x = 0;
+19 |   $obj->y = 1;
+20 |   $obj->z = 2;
+21 |   for ($i = 0; $i < 3; $i++) {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+22 |     $obj->x = $obj->y;
+   |     ^^^^^^^^^^^^^^^^^^ [3]
+23 |     $obj->y = $obj->z;
+   |     ^^^^^^^^^^^^^^^^^^ [3]
+24 |     $obj->z = 'hello';
+   |     ^^^^^^^^^^^^^^^^^^ [3]
+25 |   }
+   |   ^ [3]
+26 |   return $obj->x;
+   |          ^^^^^^^ [1]
+27 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+erling_loop2.php:26:10
+14 | }
+15 | 
+16 | function test(): int {
+   |                  ^^^ [2]
+17 |   $obj = new X();
+18 |   $obj->x = 0;
+   :
+22 |     $obj->x = $obj->y;
+23 |     $obj->y = $obj->z;
+24 |     $obj->z = 'hello';
+   |               ^^^^^^^ [3]
+25 |   }
+26 |   return $obj->x;
+   |          ^^^^^^^ [1]
+27 | }
+
+2 errors found

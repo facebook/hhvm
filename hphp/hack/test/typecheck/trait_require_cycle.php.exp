@@ -1,8 +1,28 @@
-ERROR: File "trait_require_cycle.php", line 13, characters 19-19:
-Cyclic class definition : `Tr1` `C`  (Typing[4013])
-ERROR: File "trait_require_cycle.php", line 16, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_cycle.php", line 17, characters 7-9:
-  This requires to extend or implement C
-  File "trait_require_cycle.php", line 13, characters 19-19:
-  Required here
+error: Typing[4013] Cyclic class definition : `Tr1` `C`  [1]
+
+trait_require_cycle.php:13:19
+11 | 
+12 | trait Tr1 {
+13 |   require extends C;
+   |                   ^ [1]
+14 | }
+15 | 
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement C [2]
+-> Required here [3]
+
+trait_require_cycle.php:16:7
+11 | 
+12 | trait Tr1 {
+13 |   require extends C;
+   |                   ^ [3]
+14 | }
+15 | 
+16 | class C {
+   |       ^ [1]
+17 |   use Tr1;
+   |       ^^^ [2]
+18 | }
+
+2 errors found

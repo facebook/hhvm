@@ -1,6 +1,23 @@
-ERROR: File "xhp_attr_spread_4.php", line 13, characters 19-20:
-Invalid xhp value for attribute `:name` in `:bar` (Typing[4343])
-  File "xhp_attr_spread_4.php", line 8, characters 13-18:
-  Expected `string`
-  File "xhp_attr_spread_4.php", line 4, characters 13-15:
-  But got `int`
+error: Typing[4343] Invalid xhp value for attribute `:name` in `:bar` [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+xhp_attr_spread_4.php:13:19
+ 2 | 
+ 3 | class :foo {
+ 4 |   attribute int name, int age;
+   |             ^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | class :bar extends XHPTest {
+ 8 |   attribute string name;
+   |             ^^^^^^ [2]
+ 9 | }
+10 | 
+11 | function test(:foo $x): :bar {
+12 |   // Name is not compatible across the spread
+13 |   return <bar {...$x} />;
+   |                   ^^ [1]
+14 | }
+
+1 error found

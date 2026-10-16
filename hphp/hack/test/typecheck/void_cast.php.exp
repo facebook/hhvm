@@ -1,4 +1,19 @@
-ERROR: File "void_cast.php", line 13, characters 9-12:
-Unbound name: `void` (a global constant) (Naming[2049])
-ERROR: File "void_cast.php", line 13, characters 9-12:
-Unbound global constant (Typing) (Typing[4106])
+error: Naming[2049] Unbound name: `void` (a global constant) [1]
+
+void_cast.php:13:9
+11 | 
+12 | function f(int $a): void {
+13 |   $b = (void)-$a;
+   |         ^^^^ [1]
+14 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+void_cast.php:13:9
+11 | 
+12 | function f(int $a): void {
+13 |   $b = (void)-$a;
+   |         ^^^^ [1]
+14 | }
+
+2 errors found

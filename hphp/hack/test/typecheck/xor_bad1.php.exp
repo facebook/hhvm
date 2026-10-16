@@ -1,6 +1,14 @@
-ERROR: File "xor_bad1.php", line 13, characters 8-9:
-Invalid argument (Typing[4110])
-  File "xor_bad1.php", line 13, characters 8-9:
-  Expected `int` because this is used in a bitwise operation
-  File "xor_bad1.php", line 12, characters 22-25:
-  But got `bool`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `bool` [2]
+
+xor_bad1.php:13:8
+10 |  */
+11 | 
+12 | function foo(int $a, bool $b): void {
+   |                      ^^^^ [2]
+13 |   $a ^ $b;
+   |        ^^ [1]
+14 | }
+
+1 error found

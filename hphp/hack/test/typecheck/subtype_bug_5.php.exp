@@ -1,6 +1,14 @@
-ERROR: File "subtype_bug_5.php", line 6, characters 51-52:
-Invalid argument (Typing[4110])
-  File "subtype_bug_5.php", line 5, characters 14-31:
-  Expected `Pair<mixed, mixed>`
-  File "subtype_bug_5.php", line 6, characters 15-33:
-  But got `ImmMap<int, string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `Pair<mixed, mixed>` [2]
+-> But got `ImmMap<int, string>` [3]
+
+subtype_bug_5.php:6:51
+3 | class C extends B {}
+4 | 
+5 | function foo(Pair<mixed, mixed> $x): void {}
+  |              ^^^^^^^^^^^^^^^^^^ [2]
+6 | function test(ImmMap<int, string> $x): void { foo($x); }
+  |               ^^^^^^^^^^^^^^^^^^^ [3]
+  |                                                   ^^ [1]
+
+1 error found

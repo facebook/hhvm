@@ -1,6 +1,21 @@
-ERROR: File "T81252086.php", line 18, characters 3-12:
-No instance method `getAttribute` in `:foo` (Typing[4053])
-  File "T81252086.php", line 17, characters 11-13:
-  This is why I think it is an object of type :foo
-  File "T81252086.php", line 4, characters 7-10:
-  Declaration of `:foo` is here
+error: Typing[4053] No instance method `getAttribute` in `:foo` [1]
+-> This is why I think it is an object of type :foo [2]
+-> Declaration of `:foo` is here [3]
+
+T81252086.php:18:3
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | class :foo {
+   |       ^^^^ [3]
+ 5 |   attribute string bar;
+ 6 | 
+   :
+15 | <<__EntryPoint>>
+16 | function ok1(): void {
+17 |   $xml = <foo bar="hi">Hello</foo>;
+   |           ^^^ [2]
+18 |   $xml->:bar;
+   |   ^^^^^^^^^^ [1]
+19 | }
+
+1 error found

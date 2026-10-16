@@ -1,12 +1,33 @@
-ERROR: File "gen_trait4.php", line 27, characters 18-19:
-Invalid argument (Typing[4110])
-  File "gen_trait4.php", line 18, characters 30-30:
-  Expected `A`
-  File "gen_trait4.php", line 21, characters 15-15:
-  But got `B`
-  File "gen_trait4.php", line 13, characters 20-20:
-    via this generic `T`
-  File "gen_trait4.php", line 21, characters 15-15:
-  This type argument to `Vector` must match exactly (it is invariant)
-  File "gen_trait4.php", line 21, characters 15-15:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `B` [3]
+->   via this generic `T` [4]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+gen_trait4.php:27:18
+11 | 
+12 | trait MyTrait<T> {
+13 |   protected Vector<T> $a;
+   |                    ^ [4]
+14 | }
+15 | 
+16 | class B { }
+17 | 
+18 | function takesVectorA(Vector<A> $x): void {}
+   |                              ^ [2]
+19 | 
+20 | class A extends B {
+21 |   use MyTrait<B>;
+   |               ^ [3]
+22 | 
+23 | 
+24 |   public function __construct() {
+25 |     $a = Vector {new A()};
+26 |     $this->a = $a;
+27 |     takesVectorA($a);
+   |                  ^^ [1]
+28 |   }
+29 | }
+
+1 error found

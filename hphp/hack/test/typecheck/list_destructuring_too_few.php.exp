@@ -1,6 +1,15 @@
-ERROR: File "list_destructuring_too_few.php", line 4, characters 3-23:
-Invalid assignment (Typing[4104])
-  File "list_destructuring_too_few.php", line 4, characters 3-18:
-  Too few positional arguments (required 3 but got 2)
-  File "list_destructuring_too_few.php", line 3, characters 12-24:
-  Definition is here
+error: Typing[4104] Invalid assignment [1]
+-> Too few positional arguments (required 3 but got 2) [2]
+-> Definition is here [3]
+
+list_destructuring_too_few.php:4:3
+1 | <?hh
+2 | 
+3 | function f((int, string) $t): void {
+  |            ^^^^^^^^^^^^^ [3]
+4 |   list($a, $b, $c) = $t;
+  |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+  |   ^^^^^^^^^^^^^^^^ [2]
+5 | }
+
+1 error found

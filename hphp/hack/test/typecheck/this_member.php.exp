@@ -1,24 +1,46 @@
-ERROR: File "this_member.php", line 16, characters 13-20:
-Invalid assignment (Typing[4110])
-  File "this_member.php", line 13, characters 38-41:
-  Expected `<expr#4> as X`
-  File "this_member.php", line 16, characters 5-9:
-    where `<expr#4>` is a reference to this expression
-  File "this_member.php", line 16, characters 13-17:
-  But got `X`
-  File "this_member.php", line 13, characters 38-41:
-    via this generic `this`
-  File "this_member.php", line 15, characters 24-24:
-  Since `X` is not final
-  File "this_member.php", line 12, characters 7-7:
-  this might not be a `X`
-ERROR: File "this_member.php", line 16, characters 13-20:
-Invalid assignment (Typing[4110])
-  File "this_member.php", line 13, characters 38-41:
-  Expected `<expr#4> as X`
-  File "this_member.php", line 16, characters 5-9:
-    where `<expr#4>` is a reference to this expression
-  File "this_member.php", line 16, characters 13-17:
-  But got `this as X`
-  File "this_member.php", line 13, characters 38-41:
-    via this generic `this`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `<expr#4> as X` [2]
+->   where `<expr#4>` is a reference to this expression [3]
+-> But got `X` [4]
+->   via this generic `this` [2]
+-> Since `X` is not final [5]
+-> this might not be a `X` [6]
+
+this_member.php:16:13
+10 |  */
+11 | 
+12 | class X {
+   |       ^ [6]
+13 |   public function __construct(public this $y) {}
+   |                                      ^^^^ [2]
+14 | 
+15 |   public function test(X $x): void {
+   |                        ^ [5]
+16 |     $x->y = $this->y;
+   |     ^^^^^ [3]
+   |             ^^^^^^^^ [1]
+   |             ^^^^^ [4]
+17 |   }
+18 | }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `<expr#4> as X` [2]
+->   where `<expr#4>` is a reference to this expression [3]
+-> But got `this as X` [4]
+->   via this generic `this` [2]
+
+this_member.php:16:13
+11 | 
+12 | class X {
+13 |   public function __construct(public this $y) {}
+   |                                      ^^^^ [2]
+14 | 
+15 |   public function test(X $x): void {
+16 |     $x->y = $this->y;
+   |     ^^^^^ [3]
+   |             ^^^^^^^^ [1]
+   |             ^^^^^ [4]
+17 |   }
+18 | }
+
+2 errors found

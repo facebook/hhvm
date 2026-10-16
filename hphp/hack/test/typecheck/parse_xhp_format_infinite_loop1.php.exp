@@ -1,7 +1,27 @@
-ERROR: File "parse_xhp_format_infinite_loop1.php", line 4, characters 17-19:
-Encountered unexpected text `"}
-`, was expecting a type hint. (Parsing[1002])
-ERROR: File "parse_xhp_format_infinite_loop1.php", line 4, characters 17-19:
-This string literal is not terminated. (Parsing[1002])
-ERROR: File "parse_xhp_format_infinite_loop1.php", line 3, characters 20-23:
-Unbound name: `:xhp` (an object type) (Naming[2049])
+error: Parsing[1002] Encountered unexpected text `"}
+`, was expecting a type hint. [1]
+
+parse_xhp_format_infinite_loop1.php:4:17
+2 | 
+3 | class :foo extends :xhp {
+4 |       attribute "}
+  |                 ^^ [1]
+
+error: Parsing[1002] This string literal is not terminated. [1]
+
+parse_xhp_format_infinite_loop1.php:4:17
+2 | 
+3 | class :foo extends :xhp {
+4 |       attribute "}
+  |                 ^^ [1]
+
+error: Naming[2049] Unbound name: `:xhp` (an object type) [1]
+
+parse_xhp_format_infinite_loop1.php:3:20
+1 | <?hh
+2 | 
+3 | class :foo extends :xhp {
+  |                    ^^^^ [1]
+4 |       attribute "}
+
+3 errors found

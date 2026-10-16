@@ -1,6 +1,28 @@
-ERROR: File "early_solve_inter.php", line 10, characters 9-18:
-Was expecting an object but type is unknown (Typing[4297])
-  File "early_solve_inter.php", line 4, characters 8-13:
-  It is unknown because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
-  File "collections/Map.hhi", line 444, characters 36-37:
-    via this generic `Tv`
+error: Typing[4297] Was expecting an object but type is unknown [1]
+-> It is unknown because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map` [2]
+->   via this generic `Tv` [3]
+
+early_solve_inter.php:10:9
+  2 | 
+  3 | function test(Vector<int> $v): void {
+  4 |   $m = Map {};
+    |        ^^^^^^ [2]
+  5 | 
+  6 |   foreach ($v as $i) {
+  7 |     if ($m->containsKey("a")) {
+  8 |       $current_m = $m->get("a");
+  9 |       if ($current_m !== null) {
+ 10 |         $current_m->add($i);
+    |         ^^^^^^^^^^ [1]
+ 11 |       }
+ 12 |     } else {
+
+collections/Map.hhi:444:36
+442 |      *           exist.
+443 |      */
+444 |     public function get(Tk $k)[]: ?Tv;
+    |                                    ^^ [3]
+445 | 
+446 |     /**
+
+1 error found

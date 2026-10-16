@@ -1,2 +1,10 @@
-ERROR: File "xhp_expression_method.php", line 10, characters 10-21:
-Please add parentheses around the XHP component (Parsing[1002])
+error: Parsing[1002] Please add parentheses around the XHP component [1]
+
+xhp_expression_method.php:10:10
+ 8 | 
+ 9 | function test(): string {
+10 |   return <x></x>->foo();
+   |          ^^^^^^^^^^^^ [1]
+11 | }
+
+1 error found

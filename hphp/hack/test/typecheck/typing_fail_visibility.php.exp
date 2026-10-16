@@ -1,6 +1,29 @@
-ERROR: File "typing_fail_visibility.php", line 13, characters 29-29:
-A method must have a body or be marked `abstract`. (Parsing[1002])
-ERROR: File "typing_fail_visibility.php", line 19, characters 9-9:
-You cannot access this member (Typing[4112])
-  File "typing_fail_visibility.php", line 13, characters 20-20:
-  This member is private
+error: Parsing[1002] A method must have a body or be marked `abstract`. [1]
+
+typing_fail_visibility.php:13:29
+11 | 
+12 | class A {
+13 |   private function f(): void;
+   |                             ^ [1]
+14 | }
+15 | 
+
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+typing_fail_visibility.php:19:9
+11 | 
+12 | class A {
+13 |   private function f(): void;
+   |                    ^ [2]
+14 | }
+15 | 
+16 | class B extends A {
+17 |   public function g(): void {
+18 |     $x = new A();
+19 |     $x->f();
+   |         ^ [1]
+20 |   }
+21 | }
+
+2 errors found

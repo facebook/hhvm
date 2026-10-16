@@ -1,6 +1,18 @@
-ERROR: File "test_consts1.php", line 17, characters 10-13:
-Invalid return type (Typing[4110])
-  File "test_consts1.php", line 16, characters 17-20:
-  Expected `bool`
-  File "test_consts1.php", line 13, characters 13-18:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `string` [3]
+
+test_consts1.php:17:10
+11 | 
+12 | class A {
+13 |   const X = 'test';
+   |             ^^^^^^ [3]
+14 | }
+15 | 
+16 | function foo(): bool {
+   |                 ^^^^ [2]
+17 |   return A::X;
+   |          ^^^^ [1]
+18 | }
+
+1 error found

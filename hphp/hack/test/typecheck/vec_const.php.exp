@@ -1,4 +1,17 @@
-ERROR: File "vec_const.php", line 7, characters 62-69:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "vec_const.php", line 7, characters 62-69:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+vec_const.php:7:62
+5 | const vec<int> vec_const_element = vec[1, 2, 3];
+6 | const vec<vec<vec<int>>> nested_vec = vec[vec[vec[1]]];
+7 | const vec<(function(): int)> vec_with_illegal_elements = vec[() ==> 1];
+  |                                                              ^^^^^^^^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+vec_const.php:7:62
+5 | const vec<int> vec_const_element = vec[1, 2, 3];
+6 | const vec<vec<vec<int>>> nested_vec = vec[vec[vec[1]]];
+7 | const vec<(function(): int)> vec_with_illegal_elements = vec[() ==> 1];
+  |                                                              ^^^^^^^^ [1]
+
+2 errors found

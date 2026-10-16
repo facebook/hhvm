@@ -1,2 +1,11 @@
-WARN: File "switch_redundant_default.php", line 16, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+switch_redundant_default.php:16:5
+14 |       echo "E::B";
+15 |       break;
+16 |     default:
+   |     ^^^^^^^^ [1]
+17 |       echo "default";
+18 |   }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "functional_toposort.php", line 12, characters 17-17:
-Cyclic class definition : `B` `A`  (Typing[4013])
+error: Typing[4013] Cyclic class definition : `B` `A`  [1]
+
+functional_toposort.php:12:17
+10 |  */
+11 | 
+12 | class A extends B {}
+   |                 ^ [1]
+13 | 
+14 | class B extends A {}
+
+1 error found

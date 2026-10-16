@@ -1,10 +1,29 @@
-ERROR: File "xhp_attr_14.php", line 7, characters 14-18:
-Typing error (Typing[4053])
-  File "xhp_attr_14.php", line 7, characters 21-30:
-  No property `:undefined` in `:foo`
-  File "XHPTest.hhi", line 7, characters 12-17:
-  Did you mean `_filename` instead?
-  File "xhp_attr_14.php", line 3, characters 7-10:
-  This is why I think it is an object of type :foo
-  File "xhp_attr_14.php", line 3, characters 7-10:
-  Declaration of `:foo` is here
+error: Typing[4053] Typing error [1]
+-> No property `:undefined` in `:foo` [2]
+-> Did you mean `_filename` instead? [3]
+-> This is why I think it is an object of type :foo [4]
+-> Declaration of `:foo` is here [4]
+
+xhp_attr_14.php:7:14
+1 | <?hh
+2 | 
+3 | class :foo extends XHPTest {
+  |       ^^^^ [4]
+4 |   public function render(): void {
+5 |     var_dump($this->:data-undefined);
+6 |     var_dump($this->:aria-undefined);
+7 |     var_dump($this->:undefined);
+  |              ^^^^^ [1]
+  |                     ^^^^^^^^^^ [2]
+8 |   }
+9 | }
+
+XHPTest.hhi:7:12
+5 |     public darray<string,mixed> $_attributes,
+6 |     public varray<mixed> $_children,
+7 |     public string $_filename,
+  |            ^^^^^^ [3]
+8 |     public int $_line_number,
+9 |   );
+
+1 error found

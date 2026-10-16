@@ -1,2 +1,10 @@
-ERROR: File "use_unknown_class_as_trait_fail.php", line 15, characters 7-7:
-Unbound name: `Z` (a trait) (Naming[2049])
+error: Naming[2049] Unbound name: `Z` (a trait) [1]
+
+use_unknown_class_as_trait_fail.php:15:7
+13 | /* HH_FIXME[4123]: cascading errors */
+14 | class B {
+15 |   use Z; // Hack should not allow this
+   |       ^ [1]
+16 | }
+
+1 error found

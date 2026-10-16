@@ -1,24 +1,59 @@
-ERROR: File "trait_method_conflict_via_parent_and_child_trait.php", line 31, characters 7-12:
-Some members in class `Child1` are incompatible with those declared in type `TraitA` (Typing[4341])
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  The method `configPrivacy` is not compatible with the overridden method
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  `TraitB` and `TraitA` both declare ambiguous implementations of `configPrivacy`.
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  `TraitB`'s definition is here.
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 11, characters 26-38:
-  `TraitA`'s definition is here.
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  Redeclare `configPrivacy` in `Child1` with a compatible signature.
-ERROR: File "trait_method_conflict_via_parent_and_child_trait.php", line 37, characters 7-12:
-Some members in class `Child2` are incompatible with those declared in type `TraitA` (Typing[4341])
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  The method `configPrivacy` is not compatible with the overridden method
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  `TraitB` and `TraitA` both declare ambiguous implementations of `configPrivacy`.
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  `TraitB`'s definition is here.
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 11, characters 26-38:
-  `TraitA`'s definition is here.
-  File "trait_method_conflict_via_parent_and_child_trait.php", line 20, characters 26-38:
-  Redeclare `configPrivacy` in `Child2` with a compatible signature.
+error: Typing[4341] Some members in class `Child1` are incompatible with those declared in type `TraitA` [1]
+-> The method `configPrivacy` is not compatible with the overridden method [2]
+-> `TraitB` and `TraitA` both declare ambiguous implementations of `configPrivacy`. [2]
+-> `TraitB`'s definition is here. [2]
+-> `TraitA`'s definition is here. [3]
+-> Redeclare `configPrivacy` in `Child1` with a compatible signature. [2]
+
+trait_method_conflict_via_parent_and_child_trait.php:31:7
+ 9 | 
+10 |   <<__Override>>
+11 |   public static function configPrivacy(): void {
+   |                          ^^^^^^^^^^^^^ [3]
+12 |     echo "TraitA\n";
+13 |   }
+   :
+18 | 
+19 |   <<__Override>>
+20 |   public static function configPrivacy(): void {
+   |                          ^^^^^^^^^^^^^ [2]
+21 |     echo "TraitB\n";
+22 |   }
+   :
+29 | // Hack correctly reports an error here
+30 | final class Child1 extends Base {
+31 |   use TraitA;
+   |       ^^^^^^ [1]
+32 |   use TraitB;
+33 | }
+
+error: Typing[4341] Some members in class `Child2` are incompatible with those declared in type `TraitA` [1]
+-> The method `configPrivacy` is not compatible with the overridden method [2]
+-> `TraitB` and `TraitA` both declare ambiguous implementations of `configPrivacy`. [2]
+-> `TraitB`'s definition is here. [2]
+-> `TraitA`'s definition is here. [3]
+-> Redeclare `configPrivacy` in `Child2` with a compatible signature. [2]
+
+trait_method_conflict_via_parent_and_child_trait.php:37:7
+ 9 | 
+10 |   <<__Override>>
+11 |   public static function configPrivacy(): void {
+   |                          ^^^^^^^^^^^^^ [3]
+12 |     echo "TraitA\n";
+13 |   }
+   :
+18 | 
+19 |   <<__Override>>
+20 |   public static function configPrivacy(): void {
+   |                          ^^^^^^^^^^^^^ [2]
+21 |     echo "TraitB\n";
+22 |   }
+   :
+35 | // Hack correctly reports an error here too
+36 | final class Child2 extends Middle {
+37 |   use TraitA;
+   |       ^^^^^^ [1]
+38 |   use TraitB;
+39 | }
+
+2 errors found

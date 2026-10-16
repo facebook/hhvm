@@ -1,76 +1,192 @@
-ERROR: File "missing_generic.php", line 28, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 27, characters 20-20:
-  Expected `C`
-  File "missing_generic.php", line 27, characters 12-12:
-  But got `B`
-ERROR: File "missing_generic.php", line 33, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 32, characters 20-25:
-  Expected `C<int>`
-  File "missing_generic.php", line 32, characters 12-12:
-  But got `C`
-ERROR: File "missing_generic.php", line 43, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 42, characters 20-20:
-  Expected `A`
-  File "missing_generic.php", line 42, characters 12-12:
-  But got `C`
-ERROR: File "missing_generic.php", line 48, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 47, characters 20-20:
-  Expected `C`
-  File "missing_generic.php", line 47, characters 12-12:
-  But got `A`
-ERROR: File "missing_generic.php", line 53, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 9, characters 22-22:
-  Expected `T`
-  File "missing_generic.php", line 52, characters 22-24:
-  But got `int`
-  File "missing_generic.php", line 52, characters 22-24:
-  This type argument to `C` must match exactly (it is invariant)
-ERROR: File "missing_generic.php", line 53, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 52, characters 22-24:
-  Expected `int`
-  File "missing_generic.php", line 9, characters 22-22:
-  But got `T`
-  File "missing_generic.php", line 9, characters 22-22:
-  This type argument to `C` must match exactly (it is invariant)
-ERROR: File "missing_generic.php", line 53, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 52, characters 22-24:
-  Expected `int`
-  File "missing_generic.php", line 9, characters 22-22:
-  But got `mixed`
-  File "missing_generic.php", line 9, characters 22-22:
-  This type argument to `C` must match exactly (it is invariant)
-  File "missing_generic.php", line 9, characters 22-22:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
-ERROR: File "missing_generic.php", line 78, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 18, characters 21-21:
-  Expected `T`
-  File "missing_generic.php", line 77, characters 22-24:
-  But got `int`
-  File "missing_generic.php", line 77, characters 22-24:
-  This type argument to `C` must match exactly (it is invariant)
-ERROR: File "missing_generic.php", line 78, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 77, characters 22-24:
-  Expected `int`
-  File "missing_generic.php", line 18, characters 21-21:
-  But got `T`
-  File "missing_generic.php", line 18, characters 21-21:
-  This type argument to `C` must match exactly (it is invariant)
-ERROR: File "missing_generic.php", line 78, characters 10-11:
-Invalid return type (Typing[4110])
-  File "missing_generic.php", line 77, characters 22-24:
-  Expected `int`
-  File "missing_generic.php", line 18, characters 21-21:
-  But got `mixed`
-  File "missing_generic.php", line 18, characters 21-21:
-  This type argument to `C` must match exactly (it is invariant)
-  File "missing_generic.php", line 18, characters 21-21:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
+error: Typing[4110] Invalid return type [1]
+-> Expected `C` [2]
+-> But got `B` [3]
+
+missing_generic.php:28:10
+25 | 
+26 | /* HH_FIXME[4101] */
+27 | function g(B $x) : C {
+   |            ^ [3]
+   |                    ^ [2]
+28 |   return $x; // ERROR
+   |          ^^ [1]
+29 | }
+30 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `C<int>` [2]
+-> But got `C` [3]
+
+missing_generic.php:33:10
+30 | 
+31 | /* HH_FIXME[4101] */
+32 | function h(C $x) : C<int> {
+   |            ^ [3]
+   |                    ^^^^^^ [2]
+33 |   return $x; // ERROR
+   |          ^^ [1]
+34 | }
+35 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `A` [2]
+-> But got `C` [3]
+
+missing_generic.php:43:10
+40 | 
+41 | /* HH_FIXME[4101] */
+42 | function j(C $x) : A {
+   |            ^ [3]
+   |                    ^ [2]
+43 |   return $x; // ERROR
+   |          ^^ [1]
+44 | }
+45 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `C` [2]
+-> But got `A` [3]
+
+missing_generic.php:48:10
+45 | 
+46 | /* HH_FIXME[4101] */
+47 | function k(A $x) : C {
+   |            ^ [3]
+   |                    ^ [2]
+48 |   return $x; // ERROR
+   |          ^^ [1]
+49 | }
+50 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `int` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+missing_generic.php:53:10
+ 7 | class C<T> extends B {}
+ 8 | 
+ 9 | class D<T> extends C<T> {}
+   |                      ^ [2]
+10 | 
+11 | class E<T> extends C<int> {}
+   :
+50 | 
+51 | /* HH_FIXME[4101] */
+52 | function l(D $x) : C<int> {
+   |                      ^^^ [3]
+53 |   return $x; // ERROR
+   |          ^^ [1]
+54 | }
+55 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `T` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+missing_generic.php:53:10
+ 7 | class C<T> extends B {}
+ 8 | 
+ 9 | class D<T> extends C<T> {}
+   |                      ^ [3]
+10 | 
+11 | class E<T> extends C<int> {}
+   :
+50 | 
+51 | /* HH_FIXME[4101] */
+52 | function l(D $x) : C<int> {
+   |                      ^^^ [2]
+53 |   return $x; // ERROR
+   |          ^^ [1]
+54 | }
+55 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [3]
+
+missing_generic.php:53:10
+ 7 | class C<T> extends B {}
+ 8 | 
+ 9 | class D<T> extends C<T> {}
+   |                      ^ [3]
+10 | 
+11 | class E<T> extends C<int> {}
+   :
+50 | 
+51 | /* HH_FIXME[4101] */
+52 | function l(D $x) : C<int> {
+   |                      ^^^ [2]
+53 |   return $x; // ERROR
+   |          ^^ [1]
+54 | }
+55 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `int` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+missing_generic.php:78:10
+16 | 
+17 | interface J<T> {
+18 |   require extends C<T>;
+   |                     ^ [2]
+19 | }
+20 | 
+   :
+75 | 
+76 | /* HH_FIXME[4101] */
+77 | function q(J $x) : C<int> {
+   |                      ^^^ [3]
+78 |   return $x; // ERROR
+   |          ^^ [1]
+79 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `T` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+missing_generic.php:78:10
+16 | 
+17 | interface J<T> {
+18 |   require extends C<T>;
+   |                     ^ [3]
+19 | }
+20 | 
+   :
+75 | 
+76 | /* HH_FIXME[4101] */
+77 | function q(J $x) : C<int> {
+   |                      ^^^ [2]
+78 |   return $x; // ERROR
+   |          ^^ [1]
+79 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [3]
+
+missing_generic.php:78:10
+16 | 
+17 | interface J<T> {
+18 |   require extends C<T>;
+   |                     ^ [3]
+19 | }
+20 | 
+   :
+75 | 
+76 | /* HH_FIXME[4101] */
+77 | function q(J $x) : C<int> {
+   |                      ^^^ [2]
+78 |   return $x; // ERROR
+   |          ^^ [1]
+79 | }
+
+10 errors found

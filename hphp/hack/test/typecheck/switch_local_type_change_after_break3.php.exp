@@ -4,9 +4,29 @@ File "switch_local_type_change_after_break3.php", line 19, characters 9-19:
   string
 File "switch_local_type_change_after_break3.php", line 23, characters 3-13:
   (int | string)
-ERROR: File "switch_local_type_change_after_break3.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-  File "switch_local_type_change_after_break3.php", line 12, characters 22-24:
-  Expected `int`
-  File "switch_local_type_change_after_break3.php", line 18, characters 14-19:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+switch_local_type_change_after_break3.php:25:10
+10 |  */
+11 | 
+12 | function f(bool $b): int {
+   |                      ^^^ [2]
+13 |   $x = 1;
+14 |   switch (1) {
+15 |     default:
+16 |       if ($b) {
+17 |         hh_show($x);
+18 |         $x = "derp";
+   |              ^^^^^^ [3]
+19 |         hh_show($x);
+20 |         break;
+   :
+23 |   hh_show($x);
+24 | 
+25 |   return $x;
+   |          ^^ [1]
+26 | }
+
+1 error found

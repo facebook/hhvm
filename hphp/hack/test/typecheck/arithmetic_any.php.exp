@@ -30,139 +30,682 @@ File "arithmetic_any.php--file2.php", line 84, characters 3-13:
   _
 File "arithmetic_any.php--file2.php", line 89, characters 3-13:
   float
-WARN: File "arithmetic_any.php--file2.php", line 5, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 5, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 5, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 5, characters 13-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 6, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 10, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 10, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 10, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 10, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 11, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 15, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 15, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 15, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 15, characters 13-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 16, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 20, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 20, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 20, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 20, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 21, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 25, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 25, characters 3-34:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 25, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 25, characters 8-34:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 25, characters 23-34:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 26, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 30, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 30, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 30, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 30, characters 13-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 31, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 35, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 35, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 35, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 35, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 36, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 41, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 41, characters 3-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 41, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 41, characters 8-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 42, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 46, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 46, characters 3-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 46, characters 8-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 46, characters 14-25:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 47, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 51, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 51, characters 3-34:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 51, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 51, characters 8-34:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 51, characters 23-34:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 52, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 57, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 57, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 57, characters 8-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 57, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 58, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 62, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 62, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 62, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 62, characters 13-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 63, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 83, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 83, characters 3-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 83, characters 8-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 83, characters 13-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "arithmetic_any.php--file2.php", line 84, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "arithmetic_any.php--file1.php", line 3, characters 12-21:
-Was expecting a return type hint (Typing[4030])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:5:3
+3 |   // ADDITION
+4 | function doAddIntAny(int $x): void {
+5 |   $y = $x + returnsAny();
+  |   ^^ [1]
+6 |   hh_show($y);
+7 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:5:3
+3 |   // ADDITION
+4 | function doAddIntAny(int $x): void {
+5 |   $y = $x + returnsAny();
+  |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   hh_show($y);
+7 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:5:8
+3 |   // ADDITION
+4 | function doAddIntAny(int $x): void {
+5 |   $y = $x + returnsAny();
+  |        ^^^^^^^^^^^^^^^^^ [1]
+6 |   hh_show($y);
+7 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:5:13
+3 |   // ADDITION
+4 | function doAddIntAny(int $x): void {
+5 |   $y = $x + returnsAny();
+  |             ^^^^^^^^^^^^ [1]
+6 |   hh_show($y);
+7 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:6:11
+4 | function doAddIntAny(int $x): void {
+5 |   $y = $x + returnsAny();
+6 |   hh_show($y);
+  |           ^^ [1]
+7 | }
+8 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:10:3
+ 8 | 
+ 9 | function doAddAnyInt(int $x): void {
+10 |   $y = returnsAny() + $x;
+   |   ^^ [1]
+11 |   hh_show($y);
+12 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:10:3
+ 8 | 
+ 9 | function doAddAnyInt(int $x): void {
+10 |   $y = returnsAny() + $x;
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |   hh_show($y);
+12 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:10:8
+ 8 | 
+ 9 | function doAddAnyInt(int $x): void {
+10 |   $y = returnsAny() + $x;
+   |        ^^^^^^^^^^^^ [1]
+11 |   hh_show($y);
+12 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:10:8
+ 8 | 
+ 9 | function doAddAnyInt(int $x): void {
+10 |   $y = returnsAny() + $x;
+   |        ^^^^^^^^^^^^^^^^^ [1]
+11 |   hh_show($y);
+12 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:11:11
+ 9 | function doAddAnyInt(int $x): void {
+10 |   $y = returnsAny() + $x;
+11 |   hh_show($y);
+   |           ^^ [1]
+12 | }
+13 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:15:3
+13 | 
+14 | function doAddFloatAny(float $x): void {
+15 |   $y = $x + returnsAny();
+   |   ^^ [1]
+16 |   hh_show($y);
+17 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:15:3
+13 | 
+14 | function doAddFloatAny(float $x): void {
+15 |   $y = $x + returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   hh_show($y);
+17 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:15:8
+13 | 
+14 | function doAddFloatAny(float $x): void {
+15 |   $y = $x + returnsAny();
+   |        ^^^^^^^^^^^^^^^^^ [1]
+16 |   hh_show($y);
+17 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:15:13
+13 | 
+14 | function doAddFloatAny(float $x): void {
+15 |   $y = $x + returnsAny();
+   |             ^^^^^^^^^^^^ [1]
+16 |   hh_show($y);
+17 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:16:11
+14 | function doAddFloatAny(float $x): void {
+15 |   $y = $x + returnsAny();
+16 |   hh_show($y);
+   |           ^^ [1]
+17 | }
+18 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:20:3
+18 | 
+19 | function doAddAnyFloat(float $x): void {
+20 |   $y = returnsAny() + $x;
+   |   ^^ [1]
+21 |   hh_show($y);
+22 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:20:3
+18 | 
+19 | function doAddAnyFloat(float $x): void {
+20 |   $y = returnsAny() + $x;
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |   hh_show($y);
+22 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:20:8
+18 | 
+19 | function doAddAnyFloat(float $x): void {
+20 |   $y = returnsAny() + $x;
+   |        ^^^^^^^^^^^^ [1]
+21 |   hh_show($y);
+22 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:20:8
+18 | 
+19 | function doAddAnyFloat(float $x): void {
+20 |   $y = returnsAny() + $x;
+   |        ^^^^^^^^^^^^^^^^^ [1]
+21 |   hh_show($y);
+22 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:21:11
+19 | function doAddAnyFloat(float $x): void {
+20 |   $y = returnsAny() + $x;
+21 |   hh_show($y);
+   |           ^^ [1]
+22 | }
+23 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:25:3
+23 | 
+24 | function doAddAnyAny(): void {
+25 |   $y = returnsAny() + returnsAny();
+   |   ^^ [1]
+26 |   hh_show($y);
+27 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:25:3
+23 | 
+24 | function doAddAnyAny(): void {
+25 |   $y = returnsAny() + returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |   hh_show($y);
+27 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:25:8
+23 | 
+24 | function doAddAnyAny(): void {
+25 |   $y = returnsAny() + returnsAny();
+   |        ^^^^^^^^^^^^ [1]
+26 |   hh_show($y);
+27 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:25:8
+23 | 
+24 | function doAddAnyAny(): void {
+25 |   $y = returnsAny() + returnsAny();
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |   hh_show($y);
+27 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:25:23
+23 | 
+24 | function doAddAnyAny(): void {
+25 |   $y = returnsAny() + returnsAny();
+   |                       ^^^^^^^^^^^^ [1]
+26 |   hh_show($y);
+27 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:26:11
+24 | function doAddAnyAny(): void {
+25 |   $y = returnsAny() + returnsAny();
+26 |   hh_show($y);
+   |           ^^ [1]
+27 | }
+28 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:30:3
+28 | 
+29 | function doAddNumAny(num $x): void {
+30 |   $y = $x + returnsAny();
+   |   ^^ [1]
+31 |   hh_show($y);
+32 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:30:3
+28 | 
+29 | function doAddNumAny(num $x): void {
+30 |   $y = $x + returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+31 |   hh_show($y);
+32 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:30:8
+28 | 
+29 | function doAddNumAny(num $x): void {
+30 |   $y = $x + returnsAny();
+   |        ^^^^^^^^^^^^^^^^^ [1]
+31 |   hh_show($y);
+32 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:30:13
+28 | 
+29 | function doAddNumAny(num $x): void {
+30 |   $y = $x + returnsAny();
+   |             ^^^^^^^^^^^^ [1]
+31 |   hh_show($y);
+32 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:31:11
+29 | function doAddNumAny(num $x): void {
+30 |   $y = $x + returnsAny();
+31 |   hh_show($y);
+   |           ^^ [1]
+32 | }
+33 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:35:3
+33 | 
+34 | function doAddAnyNum(num $x): void {
+35 |   $y = returnsAny() + $x;
+   |   ^^ [1]
+36 |   hh_show($y);
+37 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:35:3
+33 | 
+34 | function doAddAnyNum(num $x): void {
+35 |   $y = returnsAny() + $x;
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+36 |   hh_show($y);
+37 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:35:8
+33 | 
+34 | function doAddAnyNum(num $x): void {
+35 |   $y = returnsAny() + $x;
+   |        ^^^^^^^^^^^^ [1]
+36 |   hh_show($y);
+37 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:35:8
+33 | 
+34 | function doAddAnyNum(num $x): void {
+35 |   $y = returnsAny() + $x;
+   |        ^^^^^^^^^^^^^^^^^ [1]
+36 |   hh_show($y);
+37 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:36:11
+34 | function doAddAnyNum(num $x): void {
+35 |   $y = returnsAny() + $x;
+36 |   hh_show($y);
+   |           ^^ [1]
+37 | }
+38 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:41:3
+39 |   // DIVISION
+40 | function doDivAnyFloat(float $x): void {
+41 |   $y = returnsAny() / 2.0;
+   |   ^^ [1]
+42 |   hh_show($y);
+43 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:41:3
+39 |   // DIVISION
+40 | function doDivAnyFloat(float $x): void {
+41 |   $y = returnsAny() / 2.0;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+42 |   hh_show($y);
+43 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:41:8
+39 |   // DIVISION
+40 | function doDivAnyFloat(float $x): void {
+41 |   $y = returnsAny() / 2.0;
+   |        ^^^^^^^^^^^^ [1]
+42 |   hh_show($y);
+43 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:41:8
+39 |   // DIVISION
+40 | function doDivAnyFloat(float $x): void {
+41 |   $y = returnsAny() / 2.0;
+   |        ^^^^^^^^^^^^^^^^^^ [1]
+42 |   hh_show($y);
+43 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:42:11
+40 | function doDivAnyFloat(float $x): void {
+41 |   $y = returnsAny() / 2.0;
+42 |   hh_show($y);
+   |           ^^ [1]
+43 | }
+44 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:46:3
+44 | 
+45 | function doDivFloatAny(float $x): void {
+46 |   $y = 2.0 / returnsAny();
+   |   ^^ [1]
+47 |   hh_show($y);
+48 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:46:3
+44 | 
+45 | function doDivFloatAny(float $x): void {
+46 |   $y = 2.0 / returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+47 |   hh_show($y);
+48 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:46:8
+44 | 
+45 | function doDivFloatAny(float $x): void {
+46 |   $y = 2.0 / returnsAny();
+   |        ^^^^^^^^^^^^^^^^^^ [1]
+47 |   hh_show($y);
+48 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:46:14
+44 | 
+45 | function doDivFloatAny(float $x): void {
+46 |   $y = 2.0 / returnsAny();
+   |              ^^^^^^^^^^^^ [1]
+47 |   hh_show($y);
+48 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:47:11
+45 | function doDivFloatAny(float $x): void {
+46 |   $y = 2.0 / returnsAny();
+47 |   hh_show($y);
+   |           ^^ [1]
+48 | }
+49 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:51:3
+49 | 
+50 | function doDivAnyAny(): void {
+51 |   $y = returnsAny() / returnsAny();
+   |   ^^ [1]
+52 |   hh_show($y);
+53 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:51:3
+49 | 
+50 | function doDivAnyAny(): void {
+51 |   $y = returnsAny() / returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 |   hh_show($y);
+53 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:51:8
+49 | 
+50 | function doDivAnyAny(): void {
+51 |   $y = returnsAny() / returnsAny();
+   |        ^^^^^^^^^^^^ [1]
+52 |   hh_show($y);
+53 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:51:8
+49 | 
+50 | function doDivAnyAny(): void {
+51 |   $y = returnsAny() / returnsAny();
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 |   hh_show($y);
+53 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:51:23
+49 | 
+50 | function doDivAnyAny(): void {
+51 |   $y = returnsAny() / returnsAny();
+   |                       ^^^^^^^^^^^^ [1]
+52 |   hh_show($y);
+53 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:52:11
+50 | function doDivAnyAny(): void {
+51 |   $y = returnsAny() / returnsAny();
+52 |   hh_show($y);
+   |           ^^ [1]
+53 | }
+54 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:57:3
+55 | 
+56 | function doDivAnyInt(int $x): void {
+57 |   $y = returnsAny() / $x;
+   |   ^^ [1]
+58 |   hh_show($y);
+59 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:57:3
+55 | 
+56 | function doDivAnyInt(int $x): void {
+57 |   $y = returnsAny() / $x;
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+58 |   hh_show($y);
+59 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:57:8
+55 | 
+56 | function doDivAnyInt(int $x): void {
+57 |   $y = returnsAny() / $x;
+   |        ^^^^^^^^^^^^ [1]
+58 |   hh_show($y);
+59 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:57:8
+55 | 
+56 | function doDivAnyInt(int $x): void {
+57 |   $y = returnsAny() / $x;
+   |        ^^^^^^^^^^^^^^^^^ [1]
+58 |   hh_show($y);
+59 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:58:11
+56 | function doDivAnyInt(int $x): void {
+57 |   $y = returnsAny() / $x;
+58 |   hh_show($y);
+   |           ^^ [1]
+59 | }
+60 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:62:3
+60 | 
+61 | function doDivIntAny(int $x): void {
+62 |   $y = $x / returnsAny();
+   |   ^^ [1]
+63 |   hh_show($y);
+64 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:62:3
+60 | 
+61 | function doDivIntAny(int $x): void {
+62 |   $y = $x / returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+63 |   hh_show($y);
+64 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:62:8
+60 | 
+61 | function doDivIntAny(int $x): void {
+62 |   $y = $x / returnsAny();
+   |        ^^^^^^^^^^^^^^^^^ [1]
+63 |   hh_show($y);
+64 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:62:13
+60 | 
+61 | function doDivIntAny(int $x): void {
+62 |   $y = $x / returnsAny();
+   |             ^^^^^^^^^^^^ [1]
+63 |   hh_show($y);
+64 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:63:11
+61 | function doDivIntAny(int $x): void {
+62 |   $y = $x / returnsAny();
+63 |   hh_show($y);
+   |           ^^ [1]
+64 | }
+65 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:83:3
+81 |   }
+82 |   /* HH_FIXME[4110] */
+83 |   $y = $x - returnsAny();
+   |   ^^ [1]
+84 |   hh_show($y);
+85 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:83:3
+81 |   }
+82 |   /* HH_FIXME[4110] */
+83 |   $y = $x - returnsAny();
+   |   ^^^^^^^^^^^^^^^^^^^^^^ [1]
+84 |   hh_show($y);
+85 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:83:8
+81 |   }
+82 |   /* HH_FIXME[4110] */
+83 |   $y = $x - returnsAny();
+   |        ^^^^^^^^^^^^^^^^^ [1]
+84 |   hh_show($y);
+85 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:83:13
+81 |   }
+82 |   /* HH_FIXME[4110] */
+83 |   $y = $x - returnsAny();
+   |             ^^^^^^^^^^^^ [1]
+84 |   hh_show($y);
+85 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+arithmetic_any.php--file2.php:84:11
+82 |   /* HH_FIXME[4110] */
+83 |   $y = $x - returnsAny();
+84 |   hh_show($y);
+   |           ^^ [1]
+85 | }
+86 | 
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+arithmetic_any.php--file1.php:3:12
+1 | <?hh
+2 | 
+3 |   function returnsAny() { return 5; }
+  |            ^^^^^^^^^^ [1]
+
+68 errors found

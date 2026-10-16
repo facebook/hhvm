@@ -1,12 +1,29 @@
-ERROR: File "newtype_local_arraykey.php", line 5, characters 15-27:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "newtype_local_arraykey.php", line 5, characters 20-20:
-  But got `mixed`
-  File "newtype_local_arraykey.php", line 3, characters 9-9:
-    by the definition of `N`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   by the definition of `N` [5]
+
+newtype_local_arraykey.php:5:15
+ 1 | <?hh
+ 2 | 
+ 3 | newtype N = int; // in this file, an arraykey
+   |         ^ [5]
+ 4 | 
+ 5 | function f(): dict<N, bool> {
+   |               ^^^^^^^^^^^^^ [1]
+   |                    ^ [4]
+ 6 |   return dict[];
+ 7 | }
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+1 error found

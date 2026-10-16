@@ -1,2 +1,10 @@
-ERROR: File "invalid_octal.php", line 4, characters 10-13:
-Invalid digit for octal integers (Parsing[1002])
+error: Parsing[1002] Invalid digit for octal integers [1]
+
+invalid_octal.php:4:10
+2 | 
+3 | function f(): int {
+4 |   return 0090;
+  |          ^^^^ [1]
+5 | }
+
+1 error found

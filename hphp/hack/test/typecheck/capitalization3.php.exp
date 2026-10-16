@@ -1,4 +1,17 @@
-ERROR: File "capitalization3.php", line 7, characters 7-15:
-Name already bound: `CAMELCASE` (Naming[2012])
-  File "capitalization3.php", line 3, characters 7-15:
-  Previous definition is here
+error: Naming[2012] Name already bound: `CAMELCASE` [1]
+-> Previous definition is here [2]
+
+capitalization3.php:7:7
+1 | <?hh
+2 | 
+3 | class CamelCase {
+  |       ^^^^^^^^^ [2]
+4 |   final public function foo(int $x): void {}
+5 | }
+6 | 
+7 | class CAMELCASE {
+  |       ^^^^^^^^^ [1]
+8 |   final public function bar(int $y): void {}
+9 | }
+
+1 error found

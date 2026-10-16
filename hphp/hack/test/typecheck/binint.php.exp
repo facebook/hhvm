@@ -1,2 +1,10 @@
-ERROR: File "binint.php", line 13, characters 13-14:
-Encountered unexpected token `20`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `20`. [1]
+
+binint.php:13:13
+11 | 
+12 | function foo(): int {
+13 |   return 0b020;
+   |             ^^ [1]
+14 | }
+
+1 error found

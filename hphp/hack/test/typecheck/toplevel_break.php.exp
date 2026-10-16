@@ -1,2 +1,11 @@
-ERROR: File "toplevel_break.php", line 14, characters 5-10:
-`break` can only be used inside loops or `switch` statements (NastCheck[3022])
+error: NastCheck[3022] `break` can only be used inside loops or `switch` statements [1]
+
+toplevel_break.php:14:5
+12 | function f() : void {
+13 |   if (true) {
+14 |     break;
+   |     ^^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

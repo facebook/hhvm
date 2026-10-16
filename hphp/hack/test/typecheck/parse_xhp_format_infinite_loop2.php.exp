@@ -1,6 +1,26 @@
-ERROR: File "parse_xhp_format_infinite_loop2.php", line 4, characters 16-16:
-A name is expected here. (Parsing[1002])
-ERROR: File "parse_xhp_format_infinite_loop2.php", line 5, characters 1-1:
-Encountered unexpected text ``, was expecting a XHP attribute. (Parsing[1002])
-ERROR: File "parse_xhp_format_infinite_loop2.php", line 3, characters 20-23:
-Unbound name: `:xhp` (an object type) (Naming[2049])
+error: Parsing[1002] A name is expected here. [1]
+
+parse_xhp_format_infinite_loop2.php:4:16
+2 | 
+3 | class :foo extends :xhp {
+4 |       attribute
+  |                ^ [1]
+
+error: Parsing[1002] Encountered unexpected text ``, was expecting a XHP attribute. [1]
+
+parse_xhp_format_infinite_loop2.php:5:1
+3 | class :foo extends :xhp {
+4 |       attribute
+5 | _
+  | ^ [1]
+
+error: Naming[2049] Unbound name: `:xhp` (an object type) [1]
+
+parse_xhp_format_infinite_loop2.php:3:20
+1 | <?hh
+2 | 
+3 | class :foo extends :xhp {
+  |                    ^^^^ [1]
+4 |       attribute
+
+3 errors found

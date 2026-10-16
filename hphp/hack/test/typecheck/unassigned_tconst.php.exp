@@ -1,6 +1,28 @@
-ERROR: File "unassigned_tconst.php", line 4, characters 3-17:
-Encountered unexpected text `const type asd;`, was expecting a value for the type constant. (Parsing[1002])
-ERROR: File "unassigned_tconst.php", line 4, characters 19-19:
-A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. (Parsing[1002])
-ERROR: File "unassigned_tconst.php", line 4, characters 14-16:
-This type constant is not declared as abstract, it must have an assigned type (NastCheck[3026])
+error: Parsing[1002] Encountered unexpected text `const type asd;`, was expecting a value for the type constant. [1]
+
+unassigned_tconst.php:4:3
+2 | 
+3 | class C {
+4 |   const type asd;;
+  |   ^^^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Parsing[1002] A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. [1]
+
+unassigned_tconst.php:4:19
+2 | 
+3 | class C {
+4 |   const type asd;;
+  |                   ^ [1]
+5 | }
+
+error: NastCheck[3026] This type constant is not declared as abstract, it must have an assigned type [1]
+
+unassigned_tconst.php:4:14
+2 | 
+3 | class C {
+4 |   const type asd;;
+  |              ^^^ [1]
+5 | }
+
+3 errors found

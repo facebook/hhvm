@@ -1,2 +1,9 @@
-ERROR: File "primitive_type_arguments_mixed.php", line 3, characters 12-16:
-Type arguments are not expected for this type (Naming[2064])
+error: Naming[2064] Type arguments are not expected for this type [1]
+
+primitive_type_arguments_mixed.php:3:12
+1 | <?hh
+2 | 
+3 | function f(mixed<int> $s): void {}
+  |            ^^^^^ [1]
+
+1 error found

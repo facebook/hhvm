@@ -1,20 +1,70 @@
-ERROR: File "finally_naming.php", line 20, characters 12-13:
-Variable `$b` is undefined, or not always defined. (Naming[2050])
-  File "finally_naming.php", line 19, characters 26-27:
-  Did you mean `$e` instead?
-ERROR: File "finally_naming.php", line 24, characters 10-11:
-Variable `$b` is undefined, or not always defined. (Naming[2050])
-  File "finally_naming.php", line 16, characters 5-12:
-  Did you mean `$a` instead?
-ERROR: File "finally_naming.php", line 20, characters 12-19:
-Invalid return type (Typing[4110])
-  File "finally_naming.php", line 13, characters 28-30:
-  Expected `int`
-  File "finally_naming.php", line 20, characters 12-19:
-  But got `bool` because this is the result of a comparison
-ERROR: File "finally_naming.php", line 22, characters 12-20:
-Invalid return type (Typing[4110])
-  File "finally_naming.php", line 13, characters 28-30:
-  Expected `int`
-  File "finally_naming.php", line 22, characters 12-20:
-  But got `bool` because this is the result of a comparison
+error: Naming[2050] Variable `$b` is undefined, or not always defined. [1]
+-> Did you mean `$e` instead? [2]
+
+finally_naming.php:20:12
+17 |     might_throw();
+18 |     $b = 789;
+19 |   } catch (YourException $e) {
+   |                          ^^ [2]
+20 |     return $b == 23;
+   |            ^^ [1]
+21 |   } catch (Exception $e) {
+22 |     return $a == 456;
+
+error: Naming[2050] Variable `$b` is undefined, or not always defined. [1]
+-> Did you mean `$a` instead? [2]
+
+finally_naming.php:24:10
+14 |   $a = 23;
+15 |   try {
+16 |     $a = 456;
+   |     ^^^^^^^^ [2]
+17 |     might_throw();
+18 |     $b = 789;
+   :
+22 |     return $a == 456;
+23 |   } finally {
+24 |     echo $b; // b is unknown!
+   |          ^^ [1]
+25 |   }
+26 |   return $a;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` because this is the result of a comparison [1]
+
+finally_naming.php:20:12
+11 | function might_throw(): void {}
+12 | 
+13 | function naming_finally(): int {
+   |                            ^^^ [2]
+14 |   $a = 23;
+15 |   try {
+   :
+18 |     $b = 789;
+19 |   } catch (YourException $e) {
+20 |     return $b == 23;
+   |            ^^^^^^^^ [1]
+21 |   } catch (Exception $e) {
+22 |     return $a == 456;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` because this is the result of a comparison [1]
+
+finally_naming.php:22:12
+11 | function might_throw(): void {}
+12 | 
+13 | function naming_finally(): int {
+   |                            ^^^ [2]
+14 |   $a = 23;
+15 |   try {
+   :
+20 |     return $b == 23;
+21 |   } catch (Exception $e) {
+22 |     return $a == 456;
+   |            ^^^^^^^^^ [1]
+23 |   } finally {
+24 |     echo $b; // b is unknown!
+
+4 errors found

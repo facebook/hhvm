@@ -1,6 +1,16 @@
-ERROR: File "list_pair2.php", line 13, characters 3-15:
-Invalid assignment (Typing[4105])
-  File "list_pair2.php", line 13, characters 3-10:
-  Too many positional arguments (expected 1 but got 2)
-  File "list_pair2.php", line 12, characters 15-34:
-  Definition is here
+error: Typing[4105] Invalid assignment [1]
+-> Too many positional arguments (expected 1 but got 2) [2]
+-> Definition is here [3]
+
+list_pair2.php:13:3
+10 |  */
+11 | 
+12 | function test(Pair<string, string> $v): string {
+   |               ^^^^^^^^^^^^^^^^^^^^ [3]
+13 |   list($x) = $v;
+   |   ^^^^^^^^^^^^^ [1]
+   |   ^^^^^^^^ [2]
+14 |   return $x;
+15 | }
+
+1 error found

@@ -1,4 +1,19 @@
-ERROR: File "typing_fail_inherit1.php", line 18, characters 3-30:
-Redeclared method `Bar::bar` (Parsing[1002])
-ERROR: File "typing_fail_inherit1.php", line 18, characters 19-21:
-Method name already bound: `bar` (Naming[2033])
+error: Parsing[1002] Redeclared method `Bar::bar` [1]
+
+typing_fail_inherit1.php:18:3
+16 | class Bar extends Foo {
+17 |   public function bar() : void { }
+18 |   public function bar() : void { } // ERROR
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+error: Naming[2033] Method name already bound: `bar` [1]
+
+typing_fail_inherit1.php:18:19
+16 | class Bar extends Foo {
+17 |   public function bar() : void { }
+18 |   public function bar() : void { } // ERROR
+   |                   ^^^ [1]
+19 | }
+
+2 errors found

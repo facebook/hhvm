@@ -1,4 +1,16 @@
-ERROR: File "deprecated_meth_caller.php", line 9, characters 32-36:
-The method foo is deprecated: use bar() instead (Typing[4128])
-  File "deprecated_meth_caller.php", line 5, characters 19-21:
-  Definition is here
+error: Typing[4128] The method foo is deprecated: use bar() instead [1]
+-> Definition is here [2]
+
+deprecated_meth_caller.php:9:32
+ 3 | class X {
+ 4 |   <<__Deprecated('use bar() instead')>>
+ 5 |   public function foo(): void {}
+   |                   ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | function test(): (function(X): void) {
+ 9 |   return meth_caller(X::class, 'foo');
+   |                                ^^^^^ [1]
+10 | }
+
+1 error found

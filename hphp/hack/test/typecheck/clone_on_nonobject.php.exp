@@ -1,10 +1,40 @@
-ERROR: File "clone_on_nonobject.php", line 24, characters 12-27:
-Invalid return type (Typing[4110])
-  File "clone_on_nonobject.php", line 23, characters 33-33:
-  Expected `A`
-  File "clone_on_nonobject.php", line 4, characters 11-13:
-  But got `int`
-ERROR: File "clone_on_nonobject.php", line 24, characters 12-27:
-You are trying to access the method `__clone` but this is an int (Typing[4062])
-  File "clone_on_nonobject.php", line 4, characters 11-13:
-  Definition is here
+error: Typing[4110] Invalid return type [1]
+-> Expected `A` [2]
+-> But got `int` [3]
+
+clone_on_nonobject.php:24:12
+ 2 | 
+ 3 | class A {
+ 4 |   private int $foo;
+   |           ^^^ [3]
+ 5 |   private ?A $maybeObj = null;
+ 6 | 
+   :
+21 |   }
+22 | 
+23 |   public function cloneOther(): A {
+   |                                 ^ [2]
+24 |     return clone $this->foo;
+   |            ^^^^^^^^^^^^^^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4062] You are trying to access the method `__clone` but this is an int [1]
+-> Definition is here [2]
+
+clone_on_nonobject.php:24:12
+ 2 | 
+ 3 | class A {
+ 4 |   private int $foo;
+   |           ^^^ [2]
+ 5 |   private ?A $maybeObj = null;
+ 6 | 
+   :
+22 | 
+23 |   public function cloneOther(): A {
+24 |     return clone $this->foo;
+   |            ^^^^^^^^^^^^^^^^ [1]
+25 |   }
+26 | }
+
+2 errors found

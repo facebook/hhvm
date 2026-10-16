@@ -1,2 +1,10 @@
-ERROR: File "deprecated_attr_too_many_args.php", line 3, characters 3-14:
-The attribute `__Deprecated` expects at most 2 arguments (Typing[4126])
+error: Typing[4126] The attribute `__Deprecated` expects at most 2 arguments [1]
+
+deprecated_attr_too_many_args.php:3:3
+1 | <?hh
+2 | 
+3 | <<__Deprecated('foo', 1, 2)>>
+  |   ^^^^^^^^^^^^ [1]
+4 | function f(): void {}
+
+1 error found

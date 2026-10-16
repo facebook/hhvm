@@ -1,16 +1,42 @@
-ERROR: File "array_get_newtype.php--file1.php", line 3, characters 20-39:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "array_get_newtype.php--file1.php", line 3, characters 27-31:
-  But got `mixed`
-ERROR: File "array_get_newtype.php--file2.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "array_get_newtype.php--file2.php", line 2, characters 25-31:
-  Expected `MyArray`
-  File "array_get_newtype.php--file1.php", line 3, characters 20-39:
-  But got `dict<mixed, mixed>`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+array_get_newtype.php--file1.php:3:20
+ 1 | <?hh
+ 2 | 
+ 3 | newtype MyArray as darray<mixed, mixed> = darray<string, string>;
+   |                    ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                           ^^^^^ [4]
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `MyArray` [2]
+-> But got `dict<mixed, mixed>` [3]
+
+array_get_newtype.php--file2.php:4:10
+1 | <?hh
+2 | function f(MyArray $a): MyArray {
+  |                         ^^^^^^^ [2]
+3 |   $a['x'] = 4;
+4 |   return $a;
+  |          ^^ [1]
+5 | }
+
+array_get_newtype.php--file1.php:3:20
+1 | <?hh
+2 | 
+3 | newtype MyArray as darray<mixed, mixed> = darray<string, string>;
+  |                    ^^^^^^^^^^^^^^^^^^^^ [3]
+
+2 errors found

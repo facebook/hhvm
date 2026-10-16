@@ -1,6 +1,24 @@
-ERROR: File "type_param_shadow1_fail.php", line 13, characters 23-24:
-You cannot re-bind the type parameter `Tx` (Naming[2041])
-  File "type_param_shadow1_fail.php", line 12, characters 15-16:
-  `Tx` is already bound here
-ERROR: File "type_param_shadow1_fail.php", line 13, characters 23-24:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Naming[2041] You cannot re-bind the type parameter `Tx` [1]
+-> `Tx` is already bound here [2]
+
+type_param_shadow1_fail.php:13:23
+10 |  */
+11 | 
+12 | interface Bar<Tx> {
+   |               ^^ [2]
+13 |   public function foo<Tx>():Tx;
+   |                       ^^ [1]
+14 | }
+15 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+type_param_shadow1_fail.php:13:23
+11 | 
+12 | interface Bar<Tx> {
+13 |   public function foo<Tx>():Tx;
+   |                       ^^ [1]
+14 | }
+15 | 
+
+2 errors found

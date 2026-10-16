@@ -1,6 +1,18 @@
-ERROR: File "shape_constant_missing_field.php", line 9, characters 18-20:
-Wrong type hint (Typing[4057])
-  File "shape_constant_missing_field.php", line 9, characters 24-40:
-  The field `bar` is missing
-  File "shape_constant_missing_field.php", line 5, characters 3-7:
-  The field `bar` is required here
+error: Typing[4057] Wrong type hint [1]
+-> The field `bar` is missing [2]
+-> The field `bar` is required here [3]
+
+shape_constant_missing_field.php:9:18
+ 3 | type FooShape = shape(
+ 4 |   'foo' => int,
+ 5 |   'bar' => string,
+   |   ^^^^^ [3]
+ 6 | );
+ 7 | 
+ 8 | class A {
+ 9 |   const FooShape FOO = shape('foo' => 2);
+   |                  ^^^ [1]
+   |                        ^^^^^^^^^^^^^^^^^ [2]
+10 | }
+
+1 error found

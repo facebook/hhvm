@@ -1,4 +1,19 @@
-ERROR: File "variablevariable_no_name.php", line 4, characters 10-10:
-A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
-ERROR: File "variablevariable_no_name.php", line 4, characters 11-12:
-Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])
+error: Parsing[1002] A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores [1]
+
+variablevariable_no_name.php:4:10
+2 | 
+3 | function foo(): varray<int> {
+4 |   return $$$;
+  |          ^ [1]
+5 | }
+
+error: Parsing[1002] Pipe variables must occur only in the RHS of pipe expressions [1]
+
+variablevariable_no_name.php:4:11
+2 | 
+3 | function foo(): varray<int> {
+4 |   return $$$;
+  |           ^^ [1]
+5 | }
+
+2 errors found

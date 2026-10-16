@@ -1,4 +1,19 @@
-ERROR: File "tuple-literal-1.php", line 12, characters 10-25:
-Cannot use collection initialization for non-collection class. (Parsing[1002])
-ERROR: File "tuple-literal-1.php", line 12, characters 10-14:
-Unexpected collection type `Tuple` (Naming[2013])
+error: Parsing[1002] Cannot use collection initialization for non-collection class. [1]
+
+tuple-literal-1.php:12:10
+10 |  */
+11 | function f() : (int, string) {
+12 |   return Tuple {1, 'foo'};
+   |          ^^^^^^^^^^^^^^^^ [1]
+13 | }
+
+error: Naming[2013] Unexpected collection type `Tuple` [1]
+
+tuple-literal-1.php:12:10
+10 |  */
+11 | function f() : (int, string) {
+12 |   return Tuple {1, 'foo'};
+   |          ^^^^^ [1]
+13 | }
+
+2 errors found

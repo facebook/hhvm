@@ -1,10 +1,31 @@
-ERROR: File "string_expressions10.php", line 26, characters 20-27:
-Typing error (Typing[4053])
-  File "string_expressions10.php", line 26, characters 30-31:
-  No property `wt` in `Blah`
-  File "string_expressions10.php", line 13, characters 10-12:
-  Did you mean `wut` instead?
-  File "string_expressions10.php", line 18, characters 11-14:
-  This is why I think it is an object of type Blah
-  File "string_expressions10.php", line 12, characters 7-10:
-  Declaration of `Blah` is here
+error: Typing[4053] Typing error [1]
+-> No property `wt` in `Blah` [2]
+-> Did you mean `wut` instead? [3]
+-> This is why I think it is an object of type Blah [4]
+-> Declaration of `Blah` is here [5]
+
+string_expressions10.php:26:20
+10 |  */
+11 | 
+12 | class Blah {
+   |       ^^^^ [5]
+13 |   public int $wut = 0;
+   |          ^^^ [3]
+14 | }
+15 | 
+16 | class Meh {
+17 | 
+18 |   private Blah $dude;
+   |           ^^^^ [4]
+19 | 
+20 |   public function __construct() {
+   :
+24 |   public static function foo(?Vector<Meh> $x): void {
+25 |     $m = new Meh();
+26 |     print "Hello, {$m->dude->wt}";
+   |                    ^^^^^^^^ [1]
+   |                              ^^ [2]
+27 |     // prints "Hello, hello" in HPHP, but we disallow
+28 |     // it because we don't like interpolated
+
+1 error found

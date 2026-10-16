@@ -1,6 +1,16 @@
-ERROR: File "key_exists_optional_nothing.php", line 5, characters 7-32:
-This `Shapes::keyExists()` check is always false (Typing[4250])
-  File "key_exists_optional_nothing.php", line 4, characters 15-36:
-  The type of the field `a` in this shape doesn't allow any values
-  File "key_exists_optional_nothing.php", line 4, characters 29-35:
-  It is nothing
+error: Typing[4250] This `Shapes::keyExists()` check is always false [1]
+-> The type of the field `a` in this shape doesn't allow any values [2]
+-> It is nothing [3]
+
+key_exists_optional_nothing.php:5:7
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(shape(?'a' => nothing) $s): void {
+  |               ^^^^^^^^^^^^^^^^^^^^^^ [2]
+  |                             ^^^^^^^ [3]
+5 |   if (Shapes::keyExists($s, 'a')) {
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

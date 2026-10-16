@@ -1,16 +1,57 @@
-ERROR: File "shape_coalesce.php", line 12, characters 6-10:
-The field `bar` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "shape_coalesce.php", line 9, characters 19-23:
-  This is where the field was declared as optional.
-ERROR: File "shape_coalesce.php", line 16, characters 3-22:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_coalesce.php", line 15, characters 12-18:
-  The field `bar` is not defined in this shape
-ERROR: File "shape_coalesce.php", line 17, characters 3-19:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_coalesce.php", line 15, characters 12-18:
-  The field `bar` is not defined in this shape
-ERROR: File "shape_coalesce.php", line 18, characters 6-10:
-This shape doesn't have a field `bar` (Typing[4108])
-  File "shape_coalesce.php", line 15, characters 12-18:
-  The shape is defined here
+error: Typing[4165] The field `bar` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+shape_coalesce.php:12:6
+ 7 | }
+ 8 | 
+ 9 | function g(shape(?'bar' => vec<int>) $s): void {
+   |                   ^^^^^ [2]
+10 |   $s['bar'][0] ?? null;
+11 |   $s['bar'] ?? null;
+12 |   $s['bar'];
+   |      ^^^^^ [1]
+13 | }
+14 | 
+
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `bar` is not defined in this shape [2]
+
+shape_coalesce.php:16:3
+13 | }
+14 | 
+15 | function h(shape() $s): void {
+   |            ^^^^^^^ [2]
+16 |   $s['bar'][0] ?? null;
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+17 |   $s['bar'] ?? null;
+18 |   $s['bar'];
+
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `bar` is not defined in this shape [2]
+
+shape_coalesce.php:17:3
+13 | }
+14 | 
+15 | function h(shape() $s): void {
+   |            ^^^^^^^ [2]
+16 |   $s['bar'][0] ?? null;
+17 |   $s['bar'] ?? null;
+   |   ^^^^^^^^^^^^^^^^^ [1]
+18 |   $s['bar'];
+19 | }
+
+error: Typing[4108] This shape doesn't have a field `bar` [1]
+-> The shape is defined here [2]
+
+shape_coalesce.php:18:6
+13 | }
+14 | 
+15 | function h(shape() $s): void {
+   |            ^^^^^^^ [2]
+16 |   $s['bar'][0] ?? null;
+17 |   $s['bar'] ?? null;
+18 |   $s['bar'];
+   |      ^^^^^ [1]
+19 | }
+
+4 errors found

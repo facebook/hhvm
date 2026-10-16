@@ -1,2 +1,11 @@
-ERROR: File "question_colon.php", line 14, characters 16-40:
-An Elvis operator `?:` is expected here. (Parsing[1002])
+error: Parsing[1002] An Elvis operator `?:` is expected here. [1]
+
+question_colon.php:14:16
+12 |   public function test2(): void {
+13 |     // Note space!
+14 |     $this->x = $this->x ? : $this->foo();
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

@@ -1,6 +1,27 @@
-ERROR: File "integrate_if1.php", line 27, characters 7-8:
-Invalid argument (Typing[4110])
-  File "integrate_if1.php", line 13, characters 12-14:
-  Expected `int`
-  File "integrate_if1.php", line 20, characters 12-16:
-  But got `bool`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+integrate_if1.php:27:7
+11 | function might_throw(): void {}
+12 | 
+13 | function x(int $x): void {}
+   |            ^^^ [2]
+14 | 
+15 | function y(): void {
+   :
+18 |     $b = true;
+19 |     if ($b) {
+20 |       $x = false;
+   |            ^^^^^ [3]
+21 |       might_throw();
+22 |     } else {
+   :
+25 |     }
+26 |   } catch (Exception $e) {
+27 |     x($x);
+   |       ^^ [1]
+28 |   }
+29 | }
+
+1 error found

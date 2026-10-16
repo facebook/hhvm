@@ -1,4 +1,14 @@
-ERROR: File "shape_remove_key1.php", line 10, characters 6-8:
-This shape doesn't have a field `x` (Typing[4108])
-  File "shape_remove_key1.php", line 8, characters 3-34:
-  The shape is defined here
+error: Typing[4108] This shape doesn't have a field `x` [1]
+-> The shape is defined here [2]
+
+shape_remove_key1.php:10:6
+ 6 |   $s = shape('x' => 4, 'y' => 'aaa');
+ 7 |   $s['x']; // no error
+ 8 |   Shapes::removeKey(inout $s, 'x');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+ 9 |   $s['y']; // no error
+10 |   $s['x']; // error
+   |      ^^^ [1]
+11 | }
+
+1 error found

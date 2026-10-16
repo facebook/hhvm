@@ -1,4 +1,21 @@
-ERROR: File "do2.php", line 19, characters 12-13:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "do2.php", line 24, characters 14-15:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+do2.php:19:12
+17 |     }
+18 |     $i = 0;
+19 |     while ($i++ < 10) {
+   |            ^^ [1]
+20 |       continue;
+21 |     }
+
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+do2.php:24:14
+22 |     do {
+23 |       continue;
+24 |     } while ($i-- > 0);
+   |              ^^ [1]
+25 |     $x = 0;
+26 |   } while (true);
+
+2 errors found

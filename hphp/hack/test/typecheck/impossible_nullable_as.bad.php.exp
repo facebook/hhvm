@@ -1,2 +1,10 @@
-WARN: File "impossible_nullable_as.bad.php", line 4, characters 3-18:
-This `as` assertion will always fail and lead to a `null` value. The expression on the left has type `null` which shares no values with `nonnull`. (Warn[12012])
+warning: Warn[12012] This `as` assertion will always fail and lead to a `null` value. The expression on the left has type `null` which shares no values with `nonnull`. [1]
+
+impossible_nullable_as.bad.php:4:3
+2 | 
+3 | function foo(): void {
+4 |   null ?as nonnull;
+  |   ^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

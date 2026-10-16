@@ -1,2 +1,10 @@
-ERROR: File "xhp_nullable_required.php", line 6, characters 5-8:
-XHP attribute `:bar` cannot be marked as nullable and `@required` (Naming[2079])
+error: Naming[2079] XHP attribute `:bar` cannot be marked as nullable and `@required` [1]
+
+xhp_nullable_required.php:6:5
+4 |   attribute
+5 |     int foo @required,
+6 |     ?int bar @required;
+  |     ^^^^ [1]
+7 | }
+
+1 error found

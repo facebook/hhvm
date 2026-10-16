@@ -1,2 +1,11 @@
-ERROR: File "contravariant_this3.php", line 8, characters 22-25:
-The `this` type cannot be used in this contravariant position because its enclosing class `C` is final and has a variant type parameter `T` (Typing[4158])
+error: Typing[4158] The `this` type cannot be used in this contravariant position because its enclosing class `C` is final and has a variant type parameter `T` [1]
+
+contravariant_this3.php:8:22
+ 6 |   // position, but for now the contravariant reference to 'this'
+ 7 |   // as the return type is accepted.
+ 8 |   public function id(this $p): this {
+   |                      ^^^^ [1]
+ 9 |     return $p;
+10 |   }
+
+1 error found

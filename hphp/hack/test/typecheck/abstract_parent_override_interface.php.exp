@@ -1,14 +1,40 @@
-ERROR: File "abstract_parent_override_interface.php", line 11, characters 16-16:
-Constant FOO is defined concretely in multiple ancestors (Typing[4374])
-  File "abstract_parent_override_interface.php", line 8, characters 9-11:
-  One conflicting definition is here
-  File "abstract_parent_override_interface.php", line 4, characters 9-11:
-  Another conflicting definition is here
-ERROR: File "abstract_parent_override_interface.php", line 11, characters 26-26:
-Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
-  File "abstract_parent_override_interface.php", line 4, characters 9-11:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "abstract_parent_override_interface.php", line 8, characters 9-11:
-  `FOO` inherited from `B`
-  File "abstract_parent_override_interface.php", line 4, characters 9-11:
-  conflicts with constant `FOO` inherited from `I`.
+error: Typing[4374] Constant FOO is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+abstract_parent_override_interface.php:11:16
+ 2 | 
+ 3 | interface I {
+ 4 |   const FOO = "one";
+   |         ^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | abstract class B {
+ 8 |   const FOO = "two";
+   |         ^^^ [2]
+ 9 | }
+10 | 
+11 | abstract class A extends B implements I {}
+   |                ^ [1]
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `B` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `FOO` inherited from `B` [3]
+-> conflicts with constant `FOO` inherited from `I`. [2]
+
+abstract_parent_override_interface.php:11:26
+ 2 | 
+ 3 | interface I {
+ 4 |   const FOO = "one";
+   |         ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | abstract class B {
+ 8 |   const FOO = "two";
+   |         ^^^ [3]
+ 9 | }
+10 | 
+11 | abstract class A extends B implements I {}
+   |                          ^ [1]
+
+2 errors found

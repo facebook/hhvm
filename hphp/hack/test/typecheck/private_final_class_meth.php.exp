@@ -1,2 +1,11 @@
-ERROR: File "private_final_class_meth.php", line 5, characters 26-37:
-Class methods cannot be both `private` and `final`. (NastCheck[3097])
+error: NastCheck[3097] Class methods cannot be both `private` and `final`. [1]
+
+private_final_class_meth.php:5:26
+3 | 
+4 | abstract class Base {
+5 |   final private function privateFinal(): string {
+  |                          ^^^^^^^^^^^^ [1]
+6 |     return 'Base';
+7 |     }
+
+1 error found

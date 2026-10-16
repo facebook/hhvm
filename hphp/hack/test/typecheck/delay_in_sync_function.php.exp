@@ -1,6 +1,26 @@
-ERROR: File "delay_in_sync_function.php", line 9, characters 3-13:
-`delay` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "delay_in_sync_function.php", line 9, characters 3-13:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "delay_in_sync_function.php", line 4, characters 23-36:
-  This is why I think it is `Awaitable`
+error: NastCheck[3003] `delay` can only be used inside `async` functions [1]
+
+delay_in_sync_function.php:9:3
+ 7 | 
+ 8 | function foo(): void {
+ 9 |   delay bar();
+   |   ^^^^^^^^^^^ [1]
+10 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+delay_in_sync_function.php:9:3
+ 2 | // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+ 3 | 
+ 4 | async function bar(): Awaitable<int> {
+   |                       ^^^^^^^^^^^^^^ [2]
+ 5 |   return 42;
+ 6 | }
+ 7 | 
+ 8 | function foo(): void {
+ 9 |   delay bar();
+   |   ^^^^^^^^^^^ [1]
+10 | }
+
+2 errors found

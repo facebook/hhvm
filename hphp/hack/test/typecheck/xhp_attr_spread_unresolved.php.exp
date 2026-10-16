@@ -1,6 +1,18 @@
-ERROR: File "xhp_attr_spread_unresolved.php", line 16, characters 23-24:
-An XHP instance was expected (Typing[4191])
-  File "xhp_attr_spread_unresolved.php", line 16, characters 23-24:
-  The attribute spread operator cannot be called on non-XHP
-  File "xhp_attr_spread_unresolved.php", line 11, characters 10-14:
-  This is an object of type vec<nothing>
+error: Typing[4191] An XHP instance was expected [1]
+-> The attribute spread operator cannot be called on non-XHP [1]
+-> This is an object of type vec<nothing> [2]
+
+xhp_attr_spread_unresolved.php:16:23
+ 9 |   $x = <foo />;
+10 |   if ($z === 1) {
+11 |     $x = vec[];
+   |          ^^^^^ [2]
+12 |   } else if ($z === 2) {
+13 |     $x = <baz />;
+14 |   }
+15 |   // $x might be a vec, so this is not legal
+16 |   <baz name="baz" {...$x} />;
+   |                       ^^ [1]
+17 | }
+
+1 error found

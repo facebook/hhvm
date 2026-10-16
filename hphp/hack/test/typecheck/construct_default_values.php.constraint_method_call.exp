@@ -1,12 +1,51 @@
-ERROR: File "construct_default_values.php", line 11, characters 20-26:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "construct_default_values.php", line 12, characters 22-36:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "construct_default_values.php", line 12, characters 22-36:
-Typing error (Typing[4403])
-  File "construct_default_values.php", line 12, characters 17-18:
-  Expected a function that requires the capability AccessGlobals
-  File "construct_default_values.php", line 5, characters 19-21:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "construct_default_values.php", line 12, characters 29-29:
-Read access to `$this->b` before initialization (Typing[4083])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+construct_default_values.php:11:20
+ 9 | class C {
+10 |   public function __construct(
+11 |     private B $b = new B(),
+   |                    ^^^^^^^ [1]
+12 |     private int $x = $this->b->foo(),
+13 |   ) {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+construct_default_values.php:12:22
+10 |   public function __construct(
+11 |     private B $b = new B(),
+12 |     private int $x = $this->b->foo(),
+   |                      ^^^^^^^^^^^^^^^ [1]
+13 |   ) {}
+14 | }
+
+error: Typing[4403] Typing error [1]
+-> Expected a function that requires the capability AccessGlobals [2]
+-> But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+construct_default_values.php:12:22
+ 3 | 
+ 4 | class B {
+ 5 |   public function foo(): int {
+   |                   ^^^ [3]
+ 6 |     return 2;
+ 7 |   }
+   :
+10 |   public function __construct(
+11 |     private B $b = new B(),
+12 |     private int $x = $this->b->foo(),
+   |                 ^^ [2]
+   |                      ^^^^^^^^^^^^^^^ [1]
+13 |   ) {}
+14 | }
+
+error: Typing[4083] Read access to `$this->b` before initialization [1]
+
+construct_default_values.php:12:29
+10 |   public function __construct(
+11 |     private B $b = new B(),
+12 |     private int $x = $this->b->foo(),
+   |                             ^ [1]
+13 |   ) {}
+14 | }
+
+4 errors found

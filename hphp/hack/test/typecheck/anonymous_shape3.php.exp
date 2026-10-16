@@ -1,4 +1,13 @@
-ERROR: File "anonymous_shape3.php", line 8, characters 6-8:
-This shape doesn't have a field `y` (Typing[4108])
-  File "anonymous_shape3.php", line 7, characters 15-31:
-  The shape is defined here
+error: Typing[4108] This shape doesn't have a field `y` [1]
+-> The shape is defined here [2]
+
+anonymous_shape3.php:8:6
+5 |  */
+6 | 
+7 | function test(shape('x' => int) $s): void {
+  |               ^^^^^^^^^^^^^^^^^ [2]
+8 |   $s['y'];
+  |      ^^^ [1]
+9 | }
+
+1 error found

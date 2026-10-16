@@ -1,12 +1,69 @@
-ERROR: File "conditional_function_decl.php", line 13, characters 3-20:
-Declarations are not supported outside global scope (Parsing[1002])
-ERROR: File "conditional_function_decl.php", line 13, characters 3-23:
-Encountered unexpected text `function f(): void {}`, was expecting a statement. (Parsing[1002])
-ERROR: File "conditional_function_decl.php", line 13, characters 31-31:
-Inline function definitions are not supported in Hack (Parsing[1002])
-ERROR: File "conditional_function_decl.php", line 15, characters 3-20:
-Declarations are not supported outside global scope (Parsing[1002])
-ERROR: File "conditional_function_decl.php", line 12, characters 1-84:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "conditional_function_decl.php", line 19, characters 12-12:
-Methods need to be marked `public`, `private`, `protected`, or `internal`. (Naming[2086])
+error: Parsing[1002] Declarations are not supported outside global scope [1]
+
+conditional_function_decl.php:13:3
+11 | 
+12 | if (true) {
+13 |   function f(): void {} // bad
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+14 | } else {
+15 |   function g(): void {} // bad
+
+error: Parsing[1002] Encountered unexpected text `function f(): void {}`, was expecting a statement. [1]
+
+conditional_function_decl.php:13:3
+11 | 
+12 | if (true) {
+13 |   function f(): void {} // bad
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | } else {
+15 |   function g(): void {} // bad
+
+error: Parsing[1002] Inline function definitions are not supported in Hack [1]
+
+conditional_function_decl.php:13:31
+11 | 
+12 | if (true) {
+13 |   function f(): void {} // bad
+   |                               ^ [1]
+14 | } else {
+15 |   function g(): void {} // bad
+16 | }
+
+error: Parsing[1002] Declarations are not supported outside global scope [1]
+
+conditional_function_decl.php:15:3
+13 |   function f(): void {} // bad
+14 | } else {
+15 |   function g(): void {} // bad
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+17 | 
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+conditional_function_decl.php:12:1
+10 |  */
+11 | 
+12 | if (true) {
+   | ^^^^^^^^^^^ [1]
+13 |   function f(): void {} // bad
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 | } else {
+   | ^^^^^^^^ [1]
+15 |   function g(): void {} // bad
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+   | ^ [1]
+17 | 
+18 | class ConditionalDecl {
+
+error: Naming[2086] Methods need to be marked `public`, `private`, `protected`, or `internal`. [1]
+
+conditional_function_decl.php:19:12
+17 | 
+18 | class ConditionalDecl {
+19 |   function h(): void {} // good
+   |            ^ [1]
+20 | }
+
+6 errors found

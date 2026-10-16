@@ -1,16 +1,39 @@
-ERROR: File "T142810099-3.php", line 20, characters 17-19:
-Invalid argument (Typing[4110])
-  File "T142810099-3.php", line 16, characters 15-17:
-  Expected `int`
-  File "T142810099-3.php", line 18, characters 15-22:
-  But got `arraykey`
-  File "T142810099-3.php", line 18, characters 15-22:
-  This type argument to `C` must match exactly (it is invariant)
-ERROR: File "T142810099-3.php", line 21, characters 29-31:
-Invalid argument (Typing[4110])
-  File "T142810099-3.php", line 17, characters 15-20:
-  Expected `string`
-  File "T142810099-3.php", line 18, characters 15-22:
-  But got `arraykey`
-  File "T142810099-3.php", line 18, characters 15-22:
-  This type argument to `C` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+T142810099-3.php:20:17
+14 | <<__EntryPoint>>
+15 | function entry(): int {
+16 |   $ci = new C<int>(42);
+   |               ^^^ [2]
+17 |   $cs = new C<string>("hi");
+18 |   $ca = new C<arraykey>("hi");
+   |               ^^^^^^^^ [3]
+19 |   /* hh_show_env(); */
+20 |   $ca->set_self($ci);
+   |                 ^^^ [1]
+21 |   $ca->get_self()->set_self($cs);
+22 |   return $ci->get_self()->get();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+T142810099-3.php:21:29
+15 | function entry(): int {
+16 |   $ci = new C<int>(42);
+17 |   $cs = new C<string>("hi");
+   |               ^^^^^^ [2]
+18 |   $ca = new C<arraykey>("hi");
+   |               ^^^^^^^^ [3]
+19 |   /* hh_show_env(); */
+20 |   $ca->set_self($ci);
+21 |   $ca->get_self()->set_self($cs);
+   |                             ^^^ [1]
+22 |   return $ci->get_self()->get();
+23 | }
+
+2 errors found

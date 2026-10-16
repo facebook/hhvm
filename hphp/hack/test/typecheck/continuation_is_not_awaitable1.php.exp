@@ -1,8 +1,24 @@
-ERROR: File "continuation_is_not_awaitable1.php", line 12, characters 23-47:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
-Invalid return type (Typing[4110])
-  File "continuation_is_not_awaitable1.php", line 12, characters 23-47:
-  Expected `Generator<int, int, void>`
-  File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
-  But got `int`
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+continuation_is_not_awaitable1.php:12:23
+10 |  */
+11 | 
+12 | async function foo(): Generator<int, int, void> {
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   return 123;
+14 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Generator<int, int, void>` [2]
+-> But got `int` [1]
+
+continuation_is_not_awaitable1.php:13:10
+10 |  */
+11 | 
+12 | async function foo(): Generator<int, int, void> {
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 |   return 123;
+   |          ^^^ [1]
+14 | }
+
+2 errors found

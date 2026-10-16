@@ -1,4 +1,15 @@
-ERROR: File "deprecated_fun.php", line 7, characters 3-5:
-The function foo is deprecated: use bar() instead (Typing[4128])
-  File "deprecated_fun.php", line 4, characters 10-12:
-  Definition is here
+error: Typing[4128] The function foo is deprecated: use bar() instead [1]
+-> Definition is here [2]
+
+deprecated_fun.php:7:3
+2 | 
+3 | <<__Deprecated('use bar() instead')>>
+4 | function foo(): void {}
+  |          ^^^ [2]
+5 | 
+6 | function f(): void {
+7 |   foo();
+  |   ^^^ [1]
+8 | }
+
+1 error found

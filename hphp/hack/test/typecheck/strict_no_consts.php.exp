@@ -1,2 +1,11 @@
-ERROR: File "strict_no_consts.php", line 12, characters 7-12:
-Please add a type hint `const SomeType FOOBAR` (Naming[2001])
+error: Naming[2001] Please add a type hint `const SomeType FOOBAR` [1]
+
+strict_no_consts.php:12:7
+10 |  */
+11 | 
+12 | const FOOBAR = 42;
+   |       ^^^^^^ [1]
+13 | 
+14 | function f(): int {
+
+1 error found

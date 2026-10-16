@@ -1,4 +1,13 @@
-ERROR: File "shape12.php", line 12, characters 9-15:
-Cyclic type definition (Typing[4014])
-  File "shape12.php", line 12, characters 32-38:
-  Cyclic use is here
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+shape12.php:12:9
+10 |  */
+11 | 
+12 | newtype myshape = shape('x' => myshape);
+   |         ^^^^^^^ [1]
+   |                                ^^^^^^^ [2]
+13 | 
+14 | function test(myshape $x): myshape {
+
+1 error found

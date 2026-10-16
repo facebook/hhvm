@@ -1,4 +1,19 @@
-ERROR: File "trait_use_protected.php", line 34, characters 11-18:
-Cannot access this protected member, you don't extend BarExample (Typing[4112])
-  File "trait_use_protected.php", line 20, characters 22-29:
-  This member is protected
+error: Typing[4112] Cannot access this protected member, you don't extend BarExample [1]
+-> This member is protected [2]
+
+trait_use_protected.php:34:11
+18 | 
+19 | trait TCommon {
+20 |   protected function doCommon(): void {
+   |                      ^^^^^^^^ [2]
+21 |     return;
+22 |   }
+   :
+32 |     // Fatal:
+33 |     // Call to protected method BarExample::get() from context 'FooExample'
+34 |     $bar->doCommon();
+   |           ^^^^^^^^ [1]
+35 |   }
+36 | }
+
+1 error found

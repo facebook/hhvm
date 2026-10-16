@@ -1,8 +1,26 @@
-ERROR: File "newtype9.php--useit.php", line 6, characters 24-49:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "newtype9.php--useit.php", line 6, characters 24-49:
-  Expected `string` or `int`
-  File "newtype9.php--newtype.php", line 6, characters 10-18:
-  But got `mixed`
-  File "newtype9.php--newtype.php", line 3, characters 9-17:
-    by the definition of `OpaqueInt` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `mixed` [2]
+->   by the definition of `OpaqueInt` arising from an implicit `as ?nonnull` constraint on this type [3]
+
+newtype9.php--useit.php:6:24
+4 |   public string $foo;
+5 |   public function __construct() {
+6 |     $this->foo = 'B' . (new Opaque())->opaque_int;
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |   }
+8 | };
+
+newtype9.php--newtype.php:6:10
+1 | <?hh
+2 | 
+3 | newtype OpaqueInt = int;
+  |         ^^^^^^^^^ [3]
+4 | 
+5 | class Opaque {
+6 |   public OpaqueInt $opaque_int;
+  |          ^^^^^^^^^ [2]
+7 |   public function __construct() {
+8 |     $this->opaque_int = 5;
+
+1 error found

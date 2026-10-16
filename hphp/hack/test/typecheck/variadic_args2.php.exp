@@ -1,2 +1,9 @@
-ERROR: File "variadic_args2.php", line 3, characters 12-33:
-A variadic parameter `...` must not have a default value. (Parsing[1002])
+error: Parsing[1002] A variadic parameter `...` must not have a default value. [1]
+
+variadic_args2.php:3:12
+1 | <?hh
+2 | 
+3 | function f(mixed ...$args = vec[]): void {}
+  |            ^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

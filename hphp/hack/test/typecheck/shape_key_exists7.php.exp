@@ -1,4 +1,19 @@
-ERROR: File "shape_key_exists7.php", line 6, characters 3-28:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "Shapes.hhi", line 52, characters 28-36:
-  Definition is here
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+shape_key_exists7.php:6:3
+ 4 | 
+ 5 | function test(): void {
+ 6 |   Shapes::keyExists(shape());
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 7 | }
+
+Shapes.hhi:52:28
+50 |      */
+51 |     <<__NoAutoDynamic, __SupportDynamicType>>
+52 |     public static function keyExists(
+   |                            ^^^^^^^^^ [2]
+53 |       readonly shape(...) $shape,
+54 |       arraykey $index,
+
+1 error found

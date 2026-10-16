@@ -1,6 +1,19 @@
-ERROR: File "fixme_cascade.php--b.php", line 4, characters 7-9:
-Invalid argument (Typing[4110])
-  File "fixme_cascade.php--a.php", line 5, characters 3-5:
-  Expected `int`
-  File "fixme_cascade.php--b.php", line 4, characters 7-9:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+fixme_cascade.php--b.php:4:7
+2 | 
+3 | function test(): void {
+4 |   foo('h');
+  |       ^^^ [1]
+5 | }
+
+fixme_cascade.php--a.php:5:3
+3 | function foo(
+4 |   /* HH_FIXME[4110] */
+5 |   int $i
+  |   ^^^ [2]
+6 | ): void {}
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "classname_missing_param_error.php", line 4, characters 18-26:
-Missing type parameter to `classname`; `classname` is entirely meaningless without one (Naming[2066])
+error: Naming[2066] Missing type parameter to `classname`; `classname` is entirely meaningless without one [1]
+
+classname_missing_param_error.php:4:18
+2 | 
+3 | final class TestClass {
+4 |   private keyset<classname> $test = keyset[];
+  |                  ^^^^^^^^^ [1]
+5 | }
+
+1 error found

@@ -1,4 +1,14 @@
-ERROR: File "naming_fail_test3.php", line 23, characters 3-4:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "naming_fail_test3.php", line 21, characters 19-20:
-  Did you mean `$e` instead?
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$e` instead? [2]
+
+naming_fail_test3.php:23:3
+19 |     throw new Exception('this is a test');
+20 |   }
+21 |   catch(Exception $e) {
+   |                   ^^ [2]
+22 |   }
+23 |   $x += 1;
+   |   ^^ [1]
+24 | }
+
+1 error found

@@ -1,6 +1,20 @@
-ERROR: File "while_cond3.php", line 18, characters 3-4:
-Typing error (Typing[4429])
-  File "while_cond3.php", line 18, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "while_cond3.php", line 12, characters 14-17:
-  But got `null`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `null` [3]
+
+while_cond3.php:18:3
+10 |  */
+11 | 
+12 | function foo(?int $x): void {
+   |              ^^^^ [3]
+13 |   while (!($x is null)) {
+14 |     $x += 1;
+15 |     $x = null;
+16 |   }
+17 | 
+18 |   $x += 5;
+   |   ^^ [1]
+   |   ^^^^^^^ [2]
+19 | }
+
+1 error found

@@ -1,2 +1,9 @@
-ERROR: File "type_parameter4.php", line 12, characters 14-16:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
+error: Naming[2042] Please make your type parameter start with the letter `T` (capital) [1]
+
+type_parameter4.php:12:14
+10 |  */
+11 | 
+12 | function foo<int>(): void {}
+   |              ^^^ [1]
+
+1 error found

@@ -1,4 +1,17 @@
-ERROR: File "unused_awaitable.php", line 17, characters 3-5:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable.php", line 12, characters 21-34:
-  This is why I think it is `Awaitable`
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable.php:17:3
+10 |  */
+11 | 
+12 | async function a(): Awaitable<int> {
+   |                     ^^^^^^^^^^^^^^ [2]
+13 |   return 1;
+14 | }
+15 | 
+16 | function f(): void {
+17 |   a();
+   |   ^^^ [1]
+18 | }
+
+1 error found

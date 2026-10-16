@@ -1,4 +1,16 @@
-ERROR: File "typing_fail_cannotinstantiate_abstract.php", line 15, characters 23-42:
-`CannotBeInstantiated` is uninstantiable (Typing[4002])
-  File "typing_fail_cannotinstantiate_abstract.php", line 11, characters 22-41:
-  Declaration is here
+error: Typing[4002] `CannotBeInstantiated` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_fail_cannotinstantiate_abstract.php:15:23
+ 9 |  */
+10 | 
+11 | abstract final class CannotBeInstantiated {}
+   |                      ^^^^^^^^^^^^^^^^^^^^ [2]
+12 | class TestFoo {
+13 | 
+14 |   // this type can never be satisfied
+15 |   public function foo(CannotBeInstantiated $c): void {}
+   |                       ^^^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+
+1 error found

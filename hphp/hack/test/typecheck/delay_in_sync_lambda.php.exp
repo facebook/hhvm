@@ -1,6 +1,29 @@
-ERROR: File "delay_in_sync_lambda.php", line 10, characters 5-15:
-`delay` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "delay_in_sync_lambda.php", line 10, characters 5-15:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "delay_in_sync_lambda.php", line 4, characters 23-36:
-  This is why I think it is `Awaitable`
+error: NastCheck[3003] `delay` can only be used inside `async` functions [1]
+
+delay_in_sync_lambda.php:10:5
+ 8 | function foo(): void {
+ 9 |   $f = () ==> {
+10 |     delay bar();
+   |     ^^^^^^^^^^^ [1]
+11 |   };
+12 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+delay_in_sync_lambda.php:10:5
+ 2 | // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+ 3 | 
+ 4 | async function bar(): Awaitable<int> {
+   |                       ^^^^^^^^^^^^^^ [2]
+ 5 |   return 1;
+ 6 | }
+ 7 | 
+ 8 | function foo(): void {
+ 9 |   $f = () ==> {
+10 |     delay bar();
+   |     ^^^^^^^^^^^ [1]
+11 |   };
+12 | }
+
+2 errors found

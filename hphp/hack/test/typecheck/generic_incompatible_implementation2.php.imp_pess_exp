@@ -1,18 +1,26 @@
-ERROR: File "generic_incompatible_implementation2.php", line 6, characters 19-19:
-The method `f` is not compatible with the overridden method (Typing[4341])
-  File "generic_incompatible_implementation2.php", line 6, characters 19-19:
-  Method `f` has type `(function<T as num>(C<T> $x): void)` in `Foo`
-  File "generic_incompatible_implementation2.php", line 10, characters 19-19:
-  But it has type `(function<T>(C<T> $x): void)` in parent `Bar`
-  File "generic_incompatible_implementation2.php", line 6, characters 19-19:
-  Type `(function<T as num>(C<T> $x): void)` is not a subtype of `(function<T>(C<T> $x): void)`
-  File "generic_incompatible_implementation2.php", line 6, characters 21-21:
-  `T` is a constrained type parameter
-  File "generic_incompatible_implementation2.php", line 6, characters 26-28:
-  This type constraint is violated
-  File "generic_incompatible_implementation2.php", line 6, characters 26-28:
-  Expected `num`
-  File "generic_incompatible_implementation2.php", line 10, characters 26-26:
-  But got `T`
-  File "generic_incompatible_implementation2.php", line 10, characters 26-26:
-  This type argument to `C` must match exactly (it is invariant)
+error: Typing[4341] The method `f` is not compatible with the overridden method [1]
+-> Method `f` has type `(function<T as num>(C<T> $x): void)` in `Foo` [1]
+-> But it has type `(function<T>(C<T> $x): void)` in parent `Bar` [2]
+-> Type `(function<T as num>(C<T> $x): void)` is not a subtype of `(function<T>(C<T> $x): void)` [1]
+-> `T` is a constrained type parameter [3]
+-> This type constraint is violated [4]
+-> Expected `num` [4]
+-> But got `T` [5]
+-> This type argument to `C` must match exactly (it is invariant) [5]
+
+generic_incompatible_implementation2.php:6:19
+ 4 | 
+ 5 | class Foo implements Bar {
+ 6 |   public function f<T as num>(C<T> $x): void {}
+   |                   ^ [1]
+   |                     ^ [3]
+   |                          ^^^ [4]
+ 7 | }
+ 8 | 
+ 9 | interface Bar {
+10 |   public function f<T>(C<T> $x): void;
+   |                   ^ [2]
+   |                          ^ [5]
+11 | }
+
+1 error found

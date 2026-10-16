@@ -1,8 +1,36 @@
-ERROR: File "lsb_property_visibility.php", line 11, characters 8-11:
-You cannot access this property (Typing[4112])
-  File "lsb_property_visibility.php", line 5, characters 18-20:
-  This member is private
-ERROR: File "lsb_property_visibility.php", line 12, characters 8-11:
-You cannot access this property (Typing[4112])
-  File "lsb_property_visibility.php", line 5, characters 18-20:
-  This member is private
+error: Typing[4112] You cannot access this property [1]
+-> This member is private [2]
+
+lsb_property_visibility.php:11:8
+ 3 | class Foo {
+ 4 |   <<__LSB>>
+ 5 |   private static int $bar = 1;
+   |                  ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | class Qux extends Foo {}
+ 9 | 
+10 | function baz(): void {
+11 |   Foo::$bar;
+   |        ^^^^ [1]
+12 |   Qux::$bar;
+13 | }
+
+error: Typing[4112] You cannot access this property [1]
+-> This member is private [2]
+
+lsb_property_visibility.php:12:8
+ 3 | class Foo {
+ 4 |   <<__LSB>>
+ 5 |   private static int $bar = 1;
+   |                  ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+10 | function baz(): void {
+11 |   Foo::$bar;
+12 |   Qux::$bar;
+   |        ^^^^ [1]
+13 | }
+
+2 errors found

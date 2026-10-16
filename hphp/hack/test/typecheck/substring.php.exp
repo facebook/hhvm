@@ -1,6 +1,19 @@
-ERROR: File "substring.php", line 16, characters 3-10:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "substring.php", line 16, characters 3-10:
-  Expected `string` or `int`
-  File "substring.php", line 3, characters 37-38:
-  But got `null`
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `null` [2]
+
+substring.php:16:3
+ 1 | <?hh
+ 2 | 
+ 3 | function maybe<T>(Container<T> $x): ?T {
+   |                                     ^^ [2]
+ 4 |   return null;
+ 5 | }
+   :
+14 | 
+15 |   // Force Typing_subtype.sub_string to run
+16 |   $recurse.'';
+   |   ^^^^^^^^ [1]
+17 | }
+
+1 error found

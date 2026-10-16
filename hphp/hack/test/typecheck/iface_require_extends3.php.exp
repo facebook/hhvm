@@ -1,4 +1,21 @@
-ERROR: File "iface_require_extends3.php", line 6, characters 3-28:
-Only traits may use `require implements`. (Parsing[1002])
-ERROR: File "iface_require_extends3.php", line 6, characters 22-27:
-Only traits may use `require implements` (Naming[2030])
+error: Parsing[1002] Only traits may use `require implements`. [1]
+
+iface_require_extends3.php:6:3
+4 | 
+5 | interface IMarked {
+6 |   require implements ISuper;
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | 
+8 |   public function methodOfMarked(): int;
+
+error: Naming[2030] Only traits may use `require implements` [1]
+
+iface_require_extends3.php:6:22
+4 | 
+5 | interface IMarked {
+6 |   require implements ISuper;
+  |                      ^^^^^^ [1]
+7 | 
+8 |   public function methodOfMarked(): int;
+
+2 errors found

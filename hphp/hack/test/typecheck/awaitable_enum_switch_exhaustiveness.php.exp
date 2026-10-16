@@ -1,4 +1,19 @@
-ERROR: File "awaitable_enum_switch_exhaustiveness.php", line 15, characters 5-71:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `SwitchDemoEnum::B` (Typing[4019])
-  File "awaitable_enum_switch_exhaustiveness.php", line 15, characters 13-17:
-  The scrutinee has type `SwitchDemoEnum`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `SwitchDemoEnum::B` [1]
+-> The scrutinee has type `SwitchDemoEnum`. [2]
+
+awaitable_enum_switch_exhaustiveness.php:15:5
+13 |   public static async function genTest(): Awaitable<void> {
+14 |     $enum = await self::genEnum();
+15 |     switch ($enum) {
+   |     ^^^^^^^^^^^^^^^^ [1]
+   |             ^^^^^ [2]
+16 |       case SwitchDemoEnum::A:
+   |       ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |         break;
+   |         ^^^^^^ [1]
+18 |     }
+   |     ^ [1]
+19 |   }
+20 | }
+
+1 error found

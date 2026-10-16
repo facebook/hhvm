@@ -1,6 +1,16 @@
-ERROR: File "this2.php", line 14, characters 12-18:
-Invalid return type (Typing[4110])
-  File "this2.php", line 13, characters 26-29:
-  Expected `this`
-  File "this2.php", line 14, characters 16-16:
-  But got `X`
+error: Typing[4110] Invalid return type [1]
+-> Expected `this` [2]
+-> But got `X` [3]
+
+this2.php:14:12
+11 | 
+12 | class X {
+13 |   public function foo(): this {
+   |                          ^^^^ [2]
+14 |     return new X();
+   |            ^^^^^^^ [1]
+   |                ^ [3]
+15 |   }
+16 | }
+
+1 error found

@@ -1,20 +1,91 @@
-ERROR: File "capitalization1.php", line 7, characters 21-29:
-Could not find `CAMELCASE`. (Naming[2006])
-  File "capitalization1.php", line 3, characters 7-15:
-  Did you mean `C~~amel~~C~~ase~~` instead (which only differs by case)?
-ERROR: File "capitalization1.php", line 11, characters 17-25:
-Could not find `camelcase`. (Naming[2006])
-  File "capitalization1.php", line 3, characters 7-15:
-  Did you mean `~~C~~amel~~C~~ase` instead (which only differs by case)?
-ERROR: File "capitalization1.php", line 12, characters 14-22:
-Could not find `cAMELcASE`. (Naming[2006])
-  File "capitalization1.php", line 3, characters 7-15:
-  Did you mean `~~CamelCase~~` instead (which only differs by case)?
-ERROR: File "capitalization1.php", line 15, characters 14-22:
-Could not find `cAmelCase`. (Naming[2006])
-  File "capitalization1.php", line 3, characters 7-15:
-  Did you mean `~~Ca~~melCase` instead (which only differs by case)?
-ERROR: File "capitalization1.php", line 15, characters 31-34:
-Unbound name: `:xhp` (Naming[2049])
-ERROR: File "capitalization1.php", line 19, characters 14-17:
-Unbound name: `:xhp` (an object type) (Naming[2049])
+error: Naming[2006] Could not find `CAMELCASE`. [1]
+-> Did you mean `C~~amel~~C~~ase~~` instead (which only differs by case)? [2]
+
+capitalization1.php:7:21
+1 | <?hh
+2 | 
+3 | class CamelCase {
+  |       ^^^^^^^^^ [2]
+4 |   final public function foo(int $x): void {}
+5 | }
+6 | 
+7 | class child extends CAMELCASE {
+  |                     ^^^^^^^^^ [1]
+8 |   final public function foo(float $y): void {}
+9 | }
+
+error: Naming[2006] Could not find `camelcase`. [1]
+-> Did you mean `~~C~~amel~~C~~ase` instead (which only differs by case)? [2]
+
+capitalization1.php:11:17
+ 1 | <?hh
+ 2 | 
+ 3 | class CamelCase {
+   |       ^^^^^^^^^ [2]
+ 4 |   final public function foo(int $x): void {}
+ 5 | }
+   :
+ 9 | }
+10 | 
+11 | function ret(): camelcase {
+   |                 ^^^^^^^^^ [1]
+12 |   return new cAMELcASE();
+13 | }
+
+error: Naming[2006] Could not find `cAMELcASE`. [1]
+-> Did you mean `~~CamelCase~~` instead (which only differs by case)? [2]
+
+capitalization1.php:12:14
+ 1 | <?hh
+ 2 | 
+ 3 | class CamelCase {
+   |       ^^^^^^^^^ [2]
+ 4 |   final public function foo(int $x): void {}
+ 5 | }
+   :
+10 | 
+11 | function ret(): camelcase {
+12 |   return new cAMELcASE();
+   |              ^^^^^^^^^ [1]
+13 | }
+14 | 
+
+error: Naming[2006] Could not find `cAmelCase`. [1]
+-> Did you mean `~~Ca~~melCase` instead (which only differs by case)? [2]
+
+capitalization1.php:15:14
+ 1 | <?hh
+ 2 | 
+ 3 | class CamelCase {
+   |       ^^^^^^^^^ [2]
+ 4 |   final public function foo(int $x): void {}
+ 5 | }
+   :
+13 | }
+14 | 
+15 | function foo(cAmelCase $arg): :xhp {
+   |              ^^^^^^^^^ [1]
+16 |   expect_CamelCase($arg);
+17 |   $v = ret();
+
+error: Naming[2049] Unbound name: `:xhp` [1]
+
+capitalization1.php:15:31
+13 | }
+14 | 
+15 | function foo(cAmelCase $arg): :xhp {
+   |                               ^^^^ [1]
+16 |   expect_CamelCase($arg);
+17 |   $v = ret();
+
+error: Naming[2049] Unbound name: `:xhp` (an object type) [1]
+
+capitalization1.php:19:14
+17 |   $v = ret();
+18 |   expect_CamelCase($v);
+19 |   return new :xhp();
+   |              ^^^^ [1]
+20 | }
+21 | 
+
+6 errors found

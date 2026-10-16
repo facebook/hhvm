@@ -1,4 +1,17 @@
-WARN: File "paren_lval.php", line 12, characters 8-11:
-Property accessed on a value of type `dynamic` (Warn[12042])
-  File "paren_lval.php", line 7, characters 3-9:
-  This expression has type `dynamic`
+warning: Warn[12042] Property accessed on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+paren_lval.php:12:8
+ 5 |   dict<string, string> $d1,
+ 6 |   dict<string, dict<string, int>> $d2,
+ 7 |   dynamic $d,
+   |   ^^^^^^^ [2]
+ 8 | ): void {
+ 9 |   ($i) += 42;
+10 |   ($d1)['foo'] = 'bar';
+11 |   ($d2['bar'])['baz'] = 13;
+12 |   ($d->bing) = 'crosby';
+   |        ^^^^ [1]
+13 | }
+
+1 error found

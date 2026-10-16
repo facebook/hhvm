@@ -1,6 +1,20 @@
-ERROR: File "array_append_unresolved_bad.php", line 12, characters 3-11:
-Invalid assignment (Typing[4110])
-  File "array_append_unresolved_bad.php", line 4, characters 31-33:
-  Expected `num`
-  File "array_append_unresolved_bad.php", line 4, characters 61-66:
-  But got `string`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `num` [2]
+-> But got `string` [3]
+
+array_append_unresolved_bad.php:12:3
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function test(bool $b, Vector<num> $x, Vector<arraykey> $y, string $z): void {
+   |                               ^^^ [2]
+   |                                                             ^^^^^^ [3]
+ 5 |   if ($b) {
+ 6 |     $v = $x;
+   :
+10 |   // $v : Vector<num> | Vector<arraykey> and only values that are subtypes of
+11 |   // both num and arraykey can be appended to $v.
+12 |   $v[] = $z;
+   |   ^^^^^^^^^ [1]
+13 | }
+
+1 error found

@@ -1,6 +1,14 @@
-ERROR: File "mixed_lambda_ko.php", line 10, characters 16-17:
-Typing error (Typing[4429])
-  File "mixed_lambda_ko.php", line 10, characters 16-21:
-  Expected `num` because this is used in an arithmetic operation
-  File "mixed_lambda_ko.php", line 10, characters 9-21:
-  But got `mixed`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `mixed` [3]
+
+mixed_lambda_ko.php:10:16
+ 8 | 
+ 9 | function f(): void {
+10 |   new C($x ==> $x + 1);
+   |         ^^^^^^^^^^^^^ [3]
+   |                ^^ [1]
+   |                ^^^^^^ [2]
+11 | }
+
+1 error found

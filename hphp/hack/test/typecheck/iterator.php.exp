@@ -1,4 +1,20 @@
-ERROR: File "iterator.php", line 3, characters 44-54:
-This interface is not properly implemented (Typing[4054])
-  File "interfaces.hhi", line 139, characters 21-23:
-  Method `key` does not have an implementation
+error: Typing[4054] This interface is not properly implemented [1]
+-> Method `key` does not have an implementation [2]
+
+iterator.php:3:44
+  1 | <?hh
+  2 | 
+  3 | final class ConstantIterator<T> implements Iterator<T> {
+    |                                            ^^^^^^^^^^^ [1]
+  4 |   public function __construct(private T $value) {}
+  5 |   public function current(): T { return $this->value; }
+
+interfaces.hhi:139:21
+137 |      * Returns the current key that the iterator points to.
+138 |      */
+139 |     public function key(): mixed;
+    |                     ^^^ [2]
+140 |     /**
+141 |      * Move the iterator position to the next element.
+
+1 error found

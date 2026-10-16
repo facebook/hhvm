@@ -1,2 +1,10 @@
-ERROR: File "xhp_deep_parse.php", line 15, characters 15-18:
-Unbound name: `:x:xy` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `:x:xy` (an object type) [1]
+
+xhp_deep_parse.php:15:15
+13 | 
+14 | function test(): void {
+15 |   $x = <x:xx><x:xy></x:xy></x:xx>;
+   |               ^^^^ [1]
+16 | }
+
+1 error found

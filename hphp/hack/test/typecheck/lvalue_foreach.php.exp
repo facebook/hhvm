@@ -1,2 +1,11 @@
-ERROR: File "lvalue_foreach.php", line 6, characters 22-28:
-You cannot use this syntax as the iterator variable in a `foreach` loop. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax as the iterator variable in a `foreach` loop. [1]
+
+lvalue_foreach.php:6:22
+4 | function my_example(darray<int, int> $items): void {
+5 |   $x = null as dynamic;
+6 |   foreach ($items as $x::foo) {
+  |                      ^^^^^^^ [1]
+7 |   }
+8 | }
+
+1 error found

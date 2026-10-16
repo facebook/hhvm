@@ -1,4 +1,19 @@
-ERROR: File "class_class_bad_syntax.php", line 16, characters 10-18:
-Dynamic class names are not allowed in compile-time `::class` fetch (Parsing[1002])
-ERROR: File "class_class_bad_syntax.php", line 16, characters 10-18:
-Using `::class` in this position will trigger an implicit runtime conversion to string, please use `nameof ` (Typing[4482])
+error: Parsing[1002] Dynamic class names are not allowed in compile-time `::class` fetch [1]
+
+class_class_bad_syntax.php:16:10
+14 | function f(): string {
+15 |   $i = new C();
+16 |   return $i::class;
+   |          ^^^^^^^^^ [1]
+17 | }
+
+error: Typing[4482] Using `::class` in this position will trigger an implicit runtime conversion to string, please use `nameof ` [1]
+
+class_class_bad_syntax.php:16:10
+14 | function f(): string {
+15 |   $i = new C();
+16 |   return $i::class;
+   |          ^^^^^^^^^ [1]
+17 | }
+
+2 errors found

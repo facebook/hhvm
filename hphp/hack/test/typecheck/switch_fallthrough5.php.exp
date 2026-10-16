@@ -1,4 +1,30 @@
-ERROR: File "switch_fallthrough5.php", line 13, characters 3-127:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_fallthrough5.php", line 13, characters 11-11:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_fallthrough5.php:13:3
+11 | 
+12 | function f(): void {
+13 |   switch (1) {
+   |   ^^^^^^^^^^^^ [1]
+   |           ^ [2]
+14 |     case 1:
+   |     ^^^^^^^ [1]
+15 |       if (true) {
+   |       ^^^^^^^^^^^ [1]
+16 |         break;
+   |         ^^^^^^ [1]
+17 |       } else {
+   |       ^^^^^^^^ [1]
+18 |         return;
+   |         ^^^^^^^ [1]
+19 |       }
+   |       ^ [1]
+20 |     case 2:
+   |     ^^^^^^^ [1]
+21 |       break;
+   |       ^^^^^^ [1]
+22 |   }
+   |   ^ [1]
+23 | }
+
+1 error found

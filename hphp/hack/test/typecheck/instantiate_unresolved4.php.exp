@@ -1,4 +1,21 @@
-ERROR: File "instantiate_unresolved4.php", line 12, characters 14-14:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "instantiate_unresolved4.php", line 16, characters 12-12:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+instantiate_unresolved4.php:12:14
+10 |  */
+11 | 
+12 | function foo<T>(mixed $x): varray<T> {
+   |              ^ [1]
+13 |   return vec[];
+14 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+instantiate_unresolved4.php:16:12
+14 | }
+15 | 
+16 | function a<T>(): varray<T> {
+   |            ^ [1]
+17 |   return vec[];
+18 | }
+
+2 errors found

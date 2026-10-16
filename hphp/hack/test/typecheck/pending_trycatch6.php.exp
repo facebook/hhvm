@@ -1,2 +1,10 @@
-ERROR: File "pending_trycatch6.php", line 22, characters 10-11:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+pending_trycatch6.php:22:10
+20 |   }
+21 | 
+22 |   return $x;
+   |          ^^ [1]
+23 | }
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "keyedcontainer_immutable1.php", line 4, characters 3-11:
-an object of type KeyedContainer<arraykey, mixed> does not allow array append (Typing[4006])
-  File "keyedcontainer_immutable1.php", line 3, characters 15-45:
-  Definition is here
+error: Typing[4006] an object of type KeyedContainer<arraykey, mixed> does not allow array append [1]
+-> Definition is here [2]
+
+keyedcontainer_immutable1.php:4:3
+1 | <?hh
+2 | 
+3 | function test(KeyedContainer<arraykey, mixed> $kc): void {
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+4 |   $kc[] = 1;
+  |   ^^^^^^^^^ [1]
+5 | }
+
+1 error found

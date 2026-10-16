@@ -1,10 +1,36 @@
-ERROR: File "capitalization5.php", line 6, characters 10-18:
-Could not find `cAMELcASE`. (Naming[2006])
-  File "capitalization5.php", line 3, characters 10-18:
-  Did you mean `~~CamelCase~~` instead (which only differs by case)?
-ERROR: File "capitalization5.php", line 6, characters 3-21:
-You cannot return a value (Typing[4084])
-  File "capitalization5.php", line 5, characters 18-21:
-  This is a `void` function
-ERROR: File "capitalization5.php", line 6, characters 10-18:
-Unbound name (typing): `cAMELcASE` (Typing[4107])
+error: Naming[2006] Could not find `cAMELcASE`. [1]
+-> Did you mean `~~CamelCase~~` instead (which only differs by case)? [2]
+
+capitalization5.php:6:10
+1 | <?hh
+2 | 
+3 | function CamelCase(int $x): void {}
+  |          ^^^^^^^^^ [2]
+4 | 
+5 | function test(): void {
+6 |   return cAMELcASE();
+  |          ^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+capitalization5.php:6:3
+3 | function CamelCase(int $x): void {}
+4 | 
+5 | function test(): void {
+  |                  ^^^^ [2]
+6 |   return cAMELcASE();
+  |   ^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+
+error: Typing[4107] Unbound name (typing): `cAMELcASE` [1]
+
+capitalization5.php:6:10
+4 | 
+5 | function test(): void {
+6 |   return cAMELcASE();
+  |          ^^^^^^^^^ [1]
+7 | }
+
+3 errors found

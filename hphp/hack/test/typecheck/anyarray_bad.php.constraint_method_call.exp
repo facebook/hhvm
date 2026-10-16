@@ -1,56 +1,170 @@
 File "anyarray_bad.php", line 34, characters 5-17:
   AnyArray<arraykey, mixed>
-ERROR: File "anyarray_bad.php", line 10, characters 15-20:
-Invalid argument (Typing[4110])
-  File "anyarray_bad.php", line 3, characters 22-39:
-  Expected `AnyArray<int, int>`
-  File "anyarray_bad.php", line 10, characters 15-20:
-  But got `Map<(arraykey & _), _>`
-ERROR: File "anyarray_bad.php", line 11, characters 15-20:
-Invalid argument (Typing[4110])
-  File "anyarray_bad.php", line 3, characters 22-39:
-  Expected `AnyArray<int, int>`
-  File "anyarray_bad.php", line 11, characters 15-20:
-  But got `Set<(arraykey & _)>`
-ERROR: File "anyarray_bad.php", line 12, characters 15-26:
-Invalid argument (Typing[4110])
-  File "anyarray_bad.php", line 3, characters 22-39:
-  Expected `AnyArray<int, int>`
-  File "anyarray_bad.php", line 12, characters 15-26:
-  But got `ImmVector<nothing>`
-ERROR: File "anyarray_bad.php", line 13, characters 38-50:
-Invalid argument (Typing[4110])
-  File "anyarray_bad.php", line 13, characters 30-35:
-  Expected `string`
-  File "anyarray_bad.php", line 6, characters 16-17:
-    via this generic `Tv`
-  File "anyarray_bad.php", line 4, characters 39-41:
-  But got `int`
-ERROR: File "anyarray_bad.php", line 17, characters 3-13:
-You cannot mutate this (Typing[4011])
-  File "anyarray_bad.php", line 4, characters 25-42:
-  This is an object of type AnyArray<int, int>
-ERROR: File "anyarray_bad.php", line 25, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "anyarray_bad.php", line 25, characters 19-21:
-  Method `foo` has type `(function(AnyArray<int, int> $f): void)` in `Child`
-  File "anyarray_bad.php", line 21, characters 19-21:
-  But it has type `(function(AnyArray<arraykey, int> $f): void)` in parent `Parent_`
-  File "anyarray_bad.php", line 25, characters 19-21:
-  Type `(function(AnyArray<int, int> $f): void)` is not a subtype of `(function(AnyArray<arraykey, int> $f): void)`
-  File "anyarray_bad.php", line 25, characters 32-34:
-  Expected `int`
-  File "anyarray_bad.php", line 21, characters 32-39:
-  But got `arraykey`
-ERROR: File "anyarray_bad.php", line 35, characters 18-21:
-Invalid argument (Typing[4110])
-  File "anyarray_bad.php", line 29, characters 10-15:
-  Expected `arraykey`
-  File "anyarray_bad.php", line 31, characters 10-24:
-  But got `mixed` from this `is` expression test
-  File "hackarray.hhi", line 22, characters 35-36:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 23-24:
-    via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 66-67:
-    via this generic `Tv`
+error: Typing[4110] Invalid argument [1]
+-> Expected `AnyArray<int, int>` [2]
+-> But got `Map<(arraykey & _), _>` [1]
+
+anyarray_bad.php:10:15
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_array(AnyArray<int, int> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^^ [2]
+ 4 | function gives_array(): AnyArray<int, int> { return vec[]; }
+ 5 | function handles_generic_array<Tk as arraykey, Tv>(
+   :
+ 8 | 
+ 9 | function does_things(): void {
+10 |   takes_array(Map {}); // error
+   |               ^^^^^^ [1]
+11 |   takes_array(Set {}); // error
+12 |   takes_array(ImmVector {}); // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `AnyArray<int, int>` [2]
+-> But got `Set<(arraykey & _)>` [1]
+
+anyarray_bad.php:11:15
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_array(AnyArray<int, int> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^^ [2]
+ 4 | function gives_array(): AnyArray<int, int> { return vec[]; }
+ 5 | function handles_generic_array<Tk as arraykey, Tv>(
+   :
+ 9 | function does_things(): void {
+10 |   takes_array(Map {}); // error
+11 |   takes_array(Set {}); // error
+   |               ^^^^^^ [1]
+12 |   takes_array(ImmVector {}); // error
+13 |   handles_generic_array<int, string>(gives_array()); // error
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `AnyArray<int, int>` [2]
+-> But got `ImmVector<nothing>` [1]
+
+anyarray_bad.php:12:15
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_array(AnyArray<int, int> $_): void {}
+   |                      ^^^^^^^^^^^^^^^^^^ [2]
+ 4 | function gives_array(): AnyArray<int, int> { return vec[]; }
+ 5 | function handles_generic_array<Tk as arraykey, Tv>(
+   :
+10 |   takes_array(Map {}); // error
+11 |   takes_array(Set {}); // error
+12 |   takes_array(ImmVector {}); // error
+   |               ^^^^^^^^^^^^ [1]
+13 |   handles_generic_array<int, string>(gives_array()); // error
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+->   via this generic `Tv` [3]
+-> But got `int` [4]
+
+anyarray_bad.php:13:38
+ 2 | 
+ 3 | function takes_array(AnyArray<int, int> $_): void {}
+ 4 | function gives_array(): AnyArray<int, int> { return vec[]; }
+   |                                       ^^^ [4]
+ 5 | function handles_generic_array<Tk as arraykey, Tv>(
+ 6 |   AnyArray<Tk, Tv> $a,
+   |                ^^ [3]
+ 7 | ): AnyArray<Tk, Tv> { return $a; }
+ 8 | 
+   :
+11 |   takes_array(Set {}); // error
+12 |   takes_array(ImmVector {}); // error
+13 |   handles_generic_array<int, string>(gives_array()); // error
+   |                              ^^^^^^ [2]
+   |                                      ^^^^^^^^^^^^^ [1]
+14 | 
+15 |   $a = gives_array();
+
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type AnyArray<int, int> [2]
+
+anyarray_bad.php:17:3
+ 2 | 
+ 3 | function takes_array(AnyArray<int, int> $_): void {}
+ 4 | function gives_array(): AnyArray<int, int> { return vec[]; }
+   |                         ^^^^^^^^^^^^^^^^^^ [2]
+ 5 | function handles_generic_array<Tk as arraykey, Tv>(
+ 6 |   AnyArray<Tk, Tv> $a,
+   :
+15 |   $a = gives_array();
+16 |   $a[42];
+17 |   $a[42] = 43; // error
+   |   ^^^^^^^^^^^ [1]
+18 | }
+19 | 
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(AnyArray<int, int> $f): void)` in `Child` [1]
+-> But it has type `(function(AnyArray<arraykey, int> $f): void)` in parent `Parent_` [2]
+-> Type `(function(AnyArray<int, int> $f): void)` is not a subtype of `(function(AnyArray<arraykey, int> $f): void)` [1]
+-> Expected `int` [3]
+-> But got `arraykey` [4]
+
+anyarray_bad.php:25:19
+19 | 
+20 | interface Parent_ {
+21 |   public function foo(AnyArray<arraykey, int> $f): void;
+   |                   ^^^ [2]
+   |                                ^^^^^^^^ [4]
+22 | }
+23 | 
+24 | class Child implements Parent_ {
+25 |   public function foo(AnyArray<int, int> $f): void {} // error
+   |                   ^^^ [1]
+   |                                ^^^ [3]
+26 | }
+27 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` from this `is` expression test [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+
+anyarray_bad.php:35:18
+ 27 | 
+ 28 | function fromArrays(mixed ...$argv): Set<arraykey> {
+ 29 |   $ret = Set {};
+    |          ^^^^^^ [2]
+ 30 |   foreach ($argv as $arr) {
+ 31 |     if (!HH\is_any_array($arr)) {
+    |          ^^^^^^^^^^^^^^^ [3]
+ 32 |       return Set {};
+ 33 |     }
+ 34 |     hh_show($arr);
+ 35 |     $ret->addAll($arr);
+    |                  ^^^^ [1]
+ 36 |   }
+ 37 |   return $ret; // error
+
+hackarray.hhi:22:35
+ 20 |     <<__NoAutoBound>> +Tk as arraykey,
+ 21 |     <<__NoAutoBound>> +Tv,
+ 22 |   > implements KeyedContainer<Tk, Tv>, \XHPChild {
+    |                                   ^^ [4]
+ 23 | 
+ 24 |   }
+
+interfaces.hhi:115:23
+ 90 |    */
+ 91 |   <<__Sealed(KeyedContainer::class)>>
+ 92 |   interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
+    |                                                                  ^^ [6]
+ 93 | 
+ 94 |   }
+    :
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                       ^^ [5]
+116 | 
+117 |   /**
+
+7 errors found

@@ -1,2 +1,10 @@
-ERROR: File "xhp_invalid_attr_value.php", line 9, characters 18-25:
-Invalid value for `size`, expected one of `"big"`, `"small"`. (Typing[4483])
+error: Typing[4483] Invalid value for `size`, expected one of `"big"`, `"small"`. [1]
+
+xhp_invalid_attr_value.php:9:18
+ 7 | 
+ 8 | function bad_attr_value(): void {
+ 9 |   $x = <foo size="medium" />;
+   |                  ^^^^^^^^ [1]
+10 | }
+
+1 error found

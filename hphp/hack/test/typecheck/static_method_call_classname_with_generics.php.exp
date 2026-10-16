@@ -1,10 +1,25 @@
-ERROR: File "static_method_call_classname_with_generics.php", line 16, characters 9-10:
-Invalid argument (Typing[4323])
-  File "static_method_call_classname_with_generics.php", line 8, characters 15-15:
-  `T` is a constrained type parameter
-  File "static_method_call_classname_with_generics.php", line 8, characters 20-20:
-  This type constraint is violated
-  File "static_method_call_classname_with_generics.php", line 8, characters 20-20:
-  Expected `I`
-  File "static_method_call_classname_with_generics.php", line 14, characters 15-17:
-  But got `int`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `int` [4]
+
+static_method_call_classname_with_generics.php:16:9
+ 6 | }
+ 7 | 
+ 8 | final class C<T as I> {
+   |               ^ [2]
+   |                    ^ [3]
+ 9 |   public static function g(T $x): void {
+10 |     $x->f();
+11 |   }
+12 | }
+13 | 
+14 | function test(int $x): void {
+   |               ^^^ [4]
+15 |   $c = C::class;
+16 |   $c::g($x);
+   |         ^^ [1]
+17 | }
+
+1 error found

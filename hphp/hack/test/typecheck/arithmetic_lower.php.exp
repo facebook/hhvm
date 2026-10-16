@@ -1,24 +1,65 @@
-ERROR: File "arithmetic_lower.php", line 88, characters 3-12:
-Invalid assignment (Typing[4110])
-  File "arithmetic_lower.php", line 87, characters 13-17:
-  Expected `int` because this is used in an arithmetic operation
-  File "arithmetic_lower.php", line 88, characters 10-12:
-  But got `float`
-ERROR: File "arithmetic_lower.php", line 92, characters 15-23:
-Invalid argument (Typing[4110])
-  File "arithmetic_lower.php", line 4, characters 22-26:
-  Expected `float`
-  File "arithmetic_lower.php", line 92, characters 15-23:
-  But got `int` because this is the result of an integer arithmetic operation
-ERROR: File "arithmetic_lower.php", line 93, characters 3-12:
-Invalid assignment (Typing[4110])
-  File "arithmetic_lower.php", line 92, characters 15-19:
-  Expected `int` because this is used in an arithmetic operation
-  File "arithmetic_lower.php", line 93, characters 10-12:
-  But got `float`
-ERROR: File "arithmetic_lower.php", line 99, characters 3-12:
-Invalid assignment (Typing[4110])
-  File "arithmetic_lower.php", line 97, characters 13-17:
-  Expected `int` because this is used in an arithmetic operation
-  File "arithmetic_lower.php", line 99, characters 10-12:
-  But got `num`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `float` [3]
+
+arithmetic_lower.php:88:3
+85 | function testint(): void {
+86 |   $m = Vector {};
+87 |   expectNum($m[0] + 1);
+   |             ^^^^^ [2]
+88 |   $m[] = 0.1; // ok, but can't infer
+   |   ^^^^^^^^^^ [1]
+   |          ^^^ [3]
+89 |   $m[] = 1; // ok
+90 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `int` because this is the result of an integer arithmetic operation [1]
+
+arithmetic_lower.php:92:15
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function expectFloat(float $x): void {}
+   |                      ^^^^^ [2]
+ 5 | function expectInt(int $x): void {}
+ 6 | function expectNum(num $x): void {}
+   :
+90 | 
+91 |   $m = Vector {};
+92 |   expectFloat($m[0] + 1);
+   |               ^^^^^^^^^ [1]
+93 |   $m[] = 0.1; // ok, but can't infer
+94 |   $m[] = 1; // nok
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `float` [3]
+
+arithmetic_lower.php:93:3
+90 | 
+91 |   $m = Vector {};
+92 |   expectFloat($m[0] + 1);
+   |               ^^^^^ [2]
+93 |   $m[] = 0.1; // ok, but can't infer
+   |   ^^^^^^^^^^ [1]
+   |          ^^^ [3]
+94 |   $m[] = 1; // nok
+95 | 
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `num` [3]
+
+arithmetic_lower.php:99:3
+ 95 | 
+ 96 |   $m = Vector {};
+ 97 |   expectInt($m[0] + 1);
+    |             ^^^^^ [2]
+ 98 |   $m[] = 1; // ok, but can't infer
+ 99 |   $m[] = 0.1; // nok
+    |   ^^^^^^^^^^ [1]
+    |          ^^^ [3]
+100 | }
+
+4 errors found

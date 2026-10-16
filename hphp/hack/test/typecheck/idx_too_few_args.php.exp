@@ -1,4 +1,20 @@
-ERROR: File "idx_too_few_args.php", line 9, characters 8-14:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "idx.hhi", line 30, characters 12-14:
-  Definition is here
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+idx_too_few_args.php:9:8
+ 7 | function f(): ?int {
+ 8 |   $m = m();
+ 9 |   $x = idx($m);
+   |        ^^^^^^^ [1]
+10 |   return $x;
+11 | }
+
+idx.hhi:30:12
+28 |    * `null` is a valid key in the container.
+29 |    */
+30 |   function idx<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
+   |            ^^^ [2]
+31 |     ?KeyedContainer<Tk, Tv> $collection,
+32 |     ?Tk $index,
+
+1 error found

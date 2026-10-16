@@ -1,12 +1,20 @@
-ERROR: File "var_args_inheritance1.php", line 17, characters 19-20:
-The method `f1` is not compatible with the overridden method (Typing[4341])
-  File "var_args_inheritance1.php", line 17, characters 19-20:
-  Method `f1` has type `(function(int $x): void)` in `B`
-  File "var_args_inheritance1.php", line 13, characters 19-20:
-  But it has type `(function(int $x, mixed $_...): void)` in parent `A`
-  File "var_args_inheritance1.php", line 17, characters 19-20:
-  Type `(function(int $x): void)` is not a subtype of `(function(int $x, mixed $_...): void)`
-  File "var_args_inheritance1.php", line 17, characters 19-20:
-  Should have a variadic argument
-  File "var_args_inheritance1.php", line 13, characters 19-20:
-  Because of this definition
+error: Typing[4341] The method `f1` is not compatible with the overridden method [1]
+-> Method `f1` has type `(function(int $x): void)` in `B` [1]
+-> But it has type `(function(int $x, mixed $_...): void)` in parent `A` [2]
+-> Type `(function(int $x): void)` is not a subtype of `(function(int $x, mixed $_...): void)` [1]
+-> Should have a variadic argument [1]
+-> Because of this definition [2]
+
+var_args_inheritance1.php:17:19
+11 | 
+12 | class A {
+13 |   public function f1(int $x, mixed ...$_): void {}
+   |                   ^^ [2]
+14 | }
+15 | 
+16 | class B extends A {
+17 |   public function f1(int $x): void {}
+   |                   ^^ [1]
+18 | }
+
+1 error found

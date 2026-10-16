@@ -1,8 +1,25 @@
-ERROR: File "subtype_parent_undefined.php", line 7, characters 17-17:
-Unbound name: `B` (an object type) (Naming[2049])
-ERROR: File "subtype_parent_undefined.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-  File "subtype_parent_undefined.php", line 9, characters 21-21:
-  Expected `I`
-  File "subtype_parent_undefined.php", line 9, characters 14-14:
-  But got `C`
+error: Naming[2049] Unbound name: `B` (an object type) [1]
+
+subtype_parent_undefined.php:7:17
+5 | 
+6 | // Weirdly, if B is undefined, we used to get no error in foo
+7 | class C extends B {}
+  |                 ^ [1]
+8 | 
+9 | function foo(C $x): I {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `I` [2]
+-> But got `C` [3]
+
+subtype_parent_undefined.php:10:10
+ 7 | class C extends B {}
+ 8 | 
+ 9 | function foo(C $x): I {
+   |              ^ [3]
+   |                     ^ [2]
+10 |   return $x;
+   |          ^^ [1]
+11 | }
+
+2 errors found

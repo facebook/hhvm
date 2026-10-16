@@ -1,6 +1,19 @@
-ERROR: File "generic_primitive_invariant.php", line 15, characters 10-19:
-Invalid return type (Typing[4110])
-  File "generic_primitive_invariant.php", line 14, characters 30-30:
-  Expected `T`
-  File "generic_primitive_invariant.php", line 10, characters 26-28:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `int` [3]
+
+generic_primitive_invariant.php:15:10
+ 8 |  */
+ 9 | 
+10 | function addone(int $x): int {
+   |                          ^^^ [3]
+11 |   return $x + 1;
+12 | }
+13 | 
+14 | function no<T as int>(T $i): T {
+   |                              ^ [2]
+15 |   return addone($i);
+   |          ^^^^^^^^^^ [1]
+16 | }
+
+1 error found

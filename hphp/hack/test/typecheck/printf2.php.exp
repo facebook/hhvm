@@ -1,10 +1,36 @@
-ERROR: File "printf2.php", line 18, characters 10-10:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "printf2.php", line 19, characters 5-22:
-Invalid argument (Typing[4110])
-  File "printf2.php", line 15, characters 12-30:
-  Expected `HH\FormatString<X>`
-  File "printf2.php", line 19, characters 5-22:
-  But got `string`
-ERROR: File "printf2.php", line 19, characters 12-15:
-This argument must be a literal format string (Typing[4027])
+error: Typing[4030] Was expecting a return type hint [1]
+
+printf2.php:18:10
+16 | }
+17 | 
+18 | function _(string $s) {
+   |          ^ [1]
+19 |   f("hello {$s} world", $s);
+20 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `HH\FormatString<X>` [2]
+-> But got `string` [1]
+
+printf2.php:19:5
+13 | interface X { }
+14 | 
+15 | function f(\HH\FormatString<X> $fs, mixed...$args) : void {
+   |            ^^^^^^^^^^^^^^^^^^^ [2]
+16 | }
+17 | 
+18 | function _(string $s) {
+19 |   f("hello {$s} world", $s);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+20 | }
+
+error: Typing[4027] This argument must be a literal format string [1]
+
+printf2.php:19:12
+17 | 
+18 | function _(string $s) {
+19 |   f("hello {$s} world", $s);
+   |            ^^^^ [1]
+20 | }
+
+3 errors found

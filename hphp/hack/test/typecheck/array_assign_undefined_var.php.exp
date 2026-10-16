@@ -1,2 +1,10 @@
-ERROR: File "array_assign_undefined_var.php", line 5, characters 3-16:
-Variable `$undefined_var` is undefined, or not always defined. (Naming[2050])
+error: Naming[2050] Variable `$undefined_var` is undefined, or not always defined. [1]
+
+array_assign_undefined_var.php:5:3
+3 | 
+4 | function foo(): void {
+5 |   $undefined_var['x'] = 0;
+  |   ^^^^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

@@ -1,12 +1,35 @@
-ERROR: File "null_return.php", line 12, characters 1-64:
-This function can exit with and without returning a value (Typing[4421])
-  File "null_return.php", line 14, characters 5-14:
-  Returning a value here.
-  File "null_return.php", line 12, characters 1-64:
-  This function does not always return a value
-ERROR: File "null_return.php", line 12, characters 10-12:
-Invalid return type (Typing[4336])
-  File "null_return.php", line 12, characters 18-20:
-  Expected `int`
-  File "null_return.php", line 12, characters 10-12:
-  But got `void` because this function does not always return a value
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> This function does not always return a value [1]
+
+null_return.php:12:1
+10 |  */
+11 | 
+12 | function foo(): ?int {
+   | ^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |   if (condition()) {
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+14 |     return 10;
+   |     ^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^ [2]
+15 |   }
+   |   ^ [1]
+16 | }
+   | ^ [1]
+17 | 
+18 | function condition(): bool {
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+null_return.php:12:10
+10 |  */
+11 | 
+12 | function foo(): ?int {
+   |          ^^^ [1]
+   |                  ^^^ [2]
+13 |   if (condition()) {
+14 |     return 10;
+
+2 errors found

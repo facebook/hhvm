@@ -1,2 +1,10 @@
-ERROR: File "forbid_await_in_sync_functions1.php", line 13, characters 9-16:
-`await` can only be used inside `async` functions (NastCheck[3003])
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+forbid_await_in_sync_functions1.php:13:9
+11 | 
+12 | function bar(Awaitable<string> $x): void {
+13 |   print(await $x);
+   |         ^^^^^^^^ [1]
+14 | }
+
+1 error found

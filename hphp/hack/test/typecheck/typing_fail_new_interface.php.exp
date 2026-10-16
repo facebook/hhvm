@@ -1,4 +1,18 @@
-ERROR: File "typing_fail_new_interface.php", line 18, characters 12-14:
-`Meh` is uninstantiable (Typing[4002])
-  File "typing_fail_new_interface.php", line 12, characters 11-13:
-  Declaration is here
+error: Typing[4002] `Meh` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_fail_new_interface.php:18:12
+10 |  */
+11 | 
+12 | interface Meh {
+   |           ^^^ [2]
+13 |   public function blah(): void;
+14 | 
+15 | }
+16 | 
+17 | function magic_meh_builder(): void {
+18 |   $x = new Meh();
+   |            ^^^ [1]
+19 | }
+
+1 error found

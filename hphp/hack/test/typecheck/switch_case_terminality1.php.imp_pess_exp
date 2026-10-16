@@ -1,10 +1,54 @@
-ERROR: File "switch_case_terminality1.php", line 14, characters 5-339:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_case_terminality1.php", line 14, characters 13-14:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "switch_case_terminality1.php", line 27, characters 10-11:
-Invalid return type (Typing[4110])
-  File "switch_case_terminality1.php", line 12, characters 32-34:
-  Expected `~int`
-  File "switch_case_terminality1.php", line 12, characters 14-17:
-  But got `?int`
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_case_terminality1.php:14:5
+12 | function foo(?int $x, int $y): int {
+13 |   if ($x === null) {
+14 |     switch ($y) {
+   |     ^^^^^^^^^^^^^ [1]
+   |             ^^ [2]
+15 |       case 2:
+   |       ^^^^^^^ [1]
+16 |         return 2;
+   |         ^^^^^^^^^ [1]
+17 |       case 0:
+   |       ^^^^^^^ [1]
+18 |         // this will not fallthrough in the implicit
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 |         //   default:
+   |         ^^^^^^^^^^^^^ [1]
+20 |         //       throw new RuntimeException('non-exhaustive switch')
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |         // instead, it falls through right out of the switch
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 |         // statment
+   |         ^^^^^^^^^^^ [1]
+23 |         //
+   |         ^^ [1]
+24 |         // for better or worse...
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+25 |     }
+   |     ^ [1]
+26 |   }
+27 |   return $x;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~int` [2]
+-> But got `?int` [3]
+
+switch_case_terminality1.php:27:10
+10 |  */
+11 | 
+12 | function foo(?int $x, int $y): int {
+   |              ^^^^ [3]
+   |                                ^^^ [2]
+13 |   if ($x === null) {
+14 |     switch ($y) {
+   :
+25 |     }
+26 |   }
+27 |   return $x;
+   |          ^^ [1]
+28 | }
+
+2 errors found

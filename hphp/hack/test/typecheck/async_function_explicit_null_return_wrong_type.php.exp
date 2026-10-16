@@ -1,2 +1,11 @@
-ERROR: File "async_function_explicit_null_return_wrong_type.php", line 16, characters 29-32:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+async_function_explicit_null_return_wrong_type.php:16:29
+14 | }
+15 | 
+16 | async function foo_error(): void {
+   |                             ^^^^ [1]
+17 |   return;
+18 | }
+
+1 error found

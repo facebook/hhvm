@@ -1,6 +1,17 @@
-ERROR: File "massive_type.php", line 19, characters 5-6:
-Invalid argument (Typing[4110])
-  File "massive_type.php", line 22, characters 12-14:
-  Expected `int`
-  File "massive_type.php", line 18, characters 12-12:
-  But got `shape('n1' => shape('m1' => shape('l1' => shape('k1' => shape('j1' => shape('i1' => shape('h1' => shape('g1' => shape('f1' => shape('e1' => shape('d1' => shape('c1' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)), 'c2' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int))), 'd2' => shape('c1' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)), 'c2' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)))), 'e2' => shape('d1' => shape('c1' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)), 'c2' => shape([shape was truncated])), [shape was truncated])), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]) [This type was truncated. If you need more of the type, use `hh stop; hh --config type_printer_fuel=N`. At this time, N is 100.]`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `shape('n1' => shape('m1' => shape('l1' => shape('k1' => shape('j1' => shape('i1' => shape('h1' => shape('g1' => shape('f1' => shape('e1' => shape('d1' => shape('c1' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)), 'c2' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int))), 'd2' => shape('c1' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)), 'c2' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)))), 'e2' => shape('d1' => shape('c1' => shape('b1' => shape('a1' => int, 'a2' => int), 'b2' => shape('a1' => int, 'a2' => int)), 'c2' => shape([shape was truncated])), [shape was truncated])), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]), [shape was truncated]) [This type was truncated. If you need more of the type, use `hh stop; hh --config type_printer_fuel=N`. At this time, N is 100.]` [3]
+
+massive_type.php:19:5
+16 | type N = shape('n1' => M, 'n2' => M);
+17 | 
+18 | function f(N $a): void {
+   |            ^ [3]
+19 |   g($a);
+   |     ^^ [1]
+20 | }
+21 | 
+22 | function g(int $_): void {}
+   |            ^^^ [2]
+
+1 error found

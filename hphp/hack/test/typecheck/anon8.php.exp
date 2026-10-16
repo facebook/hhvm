@@ -1,6 +1,20 @@
-ERROR: File "anon8.php", line 16, characters 10-11:
-Invalid return type (Typing[4041])
-  File "anon8.php", line 13, characters 8-43:
-  Too many mandatory arguments (expected 0 but got 1)
-  File "anon8.php", line 12, characters 18-37:
-  Because of this definition
+error: Typing[4041] Invalid return type [1]
+-> Too many mandatory arguments (expected 0 but got 1) [2]
+-> Because of this definition [3]
+
+anon8.php:16:10
+10 |  */
+11 | 
+12 | function test(): (function(): string) {
+   |                  ^^^^^^^^^^^^^^^^^^^^ [3]
+13 |   $f = function($y) {
+   |        ^^^^^^^^^^^^^^ [2]
+14 |     return $y.'';
+   |     ^^^^^^^^^^^^^ [2]
+15 |   };
+   |   ^ [2]
+16 |   return $f;
+   |          ^^ [1]
+17 | }
+
+1 error found

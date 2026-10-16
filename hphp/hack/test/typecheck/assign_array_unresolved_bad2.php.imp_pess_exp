@@ -1,12 +1,42 @@
-ERROR: File "assign_array_unresolved_bad2.php", line 15, characters 3-16:
-Invalid assignment (Typing[4110])
-  File "assign_array_unresolved_bad2.php", line 6, characters 15-17:
-  Expected `int`
-  File "assign_array_unresolved_bad2.php", line 8, characters 3-5:
-  But got `float`
-ERROR: File "assign_array_unresolved_bad2.php", line 15, characters 3-16:
-Invalid assignment (Typing[4110])
-  File "assign_array_unresolved_bad2.php", line 7, characters 15-19:
-  Expected `float`
-  File "assign_array_unresolved_bad2.php", line 8, characters 3-5:
-  But got `int`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `float` [3]
+
+assign_array_unresolved_bad2.php:15:3
+ 4 | function test(
+ 5 |   bool $b,
+ 6 |   Map<string, int> $x,
+   |               ^^^ [2]
+ 7 |   Map<string, float> $y,
+ 8 |   num $z,
+   |   ^^^ [3]
+ 9 | ): void {
+10 |   if ($b) {
+   :
+13 |     $d = $y;
+14 |   }
+15 |   $d['foo'] = $z;
+   |   ^^^^^^^^^^^^^^ [1]
+16 | }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `float` [2]
+-> But got `int` [3]
+
+assign_array_unresolved_bad2.php:15:3
+ 5 |   bool $b,
+ 6 |   Map<string, int> $x,
+ 7 |   Map<string, float> $y,
+   |               ^^^^^ [2]
+ 8 |   num $z,
+   |   ^^^ [3]
+ 9 | ): void {
+10 |   if ($b) {
+   :
+13 |     $d = $y;
+14 |   }
+15 |   $d['foo'] = $z;
+   |   ^^^^^^^^^^^^^^ [1]
+16 | }
+
+2 errors found

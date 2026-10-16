@@ -1,2 +1,10 @@
-ERROR: File "runtime_generic_bad.php", line 4, characters 3-3:
-Erased generics can only be used in type hints because they do not exist at runtime (Parsing[1002])
+error: Parsing[1002] Erased generics can only be used in type hints because they do not exist at runtime [1]
+
+runtime_generic_bad.php:4:3
+2 | 
+3 | function f<T>(): void {
+4 |   T::foo;
+  |   ^ [1]
+5 | }
+
+1 error found

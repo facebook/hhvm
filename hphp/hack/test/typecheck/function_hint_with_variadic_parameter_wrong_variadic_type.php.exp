@@ -1,6 +1,19 @@
-ERROR: File "function_hint_with_variadic_parameter_wrong_variadic_type.php", line 8, characters 24-37:
-Invalid argument (Typing[4110])
-  File "function_hint_with_variadic_parameter_wrong_variadic_type.php", line 3, characters 30-31:
-  Expected `int` (variadic argument)
-  File "function_hint_with_variadic_parameter_wrong_variadic_type.php", line 5, characters 41-46:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `string` [3]
+
+function_hint_with_variadic_parameter_wrong_variadic_type.php:8:24
+1 | <?hh
+2 | 
+3 | function variadic_int(int ...$y): void {}
+  |                              ^^ [2]
+4 | 
+5 | function hint_variadic_string((function(string...): void) $f): void {}
+  |                                         ^^^^^^ [3]
+6 | 
+7 | function test(): void {
+8 |   hint_variadic_string(variadic_int<>);
+  |                        ^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

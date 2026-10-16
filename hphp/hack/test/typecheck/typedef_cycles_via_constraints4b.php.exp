@@ -1,40 +1,99 @@
-ERROR: File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 15-20:
-Some type arguments violate their constraints (Typing[4323])
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 3, characters 16-19:
-  This type constraint is violated
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 3, characters 16-19:
-  Expected `B<int>`
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 17-19:
-  But got `int`
-ERROR: File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 26-31:
-Some type arguments violate their constraints (Typing[4323])
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 4, characters 11-11:
-  `T` is a constrained type parameter
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 4, characters 16-19:
-  This type constraint is violated
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 4, characters 16-19:
-  Expected `A<int>`
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 28-30:
-  But got `int`
-ERROR: File "typedef_cycles_via_constraints4b.php--uses.php", line 6, characters 17-18:
-Invalid argument (Typing[4110])
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 3, characters 24-29:
-  Expected `string`
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 15-20:
-  But got `int`
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 17-19:
-    by the definition of `A`
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 3, characters 25-25:
-    via this generic `T`
-ERROR: File "typedef_cycles_via_constraints4b.php--uses.php", line 7, characters 17-18:
-Invalid argument (Typing[4110])
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 3, characters 24-29:
-  Expected `string`
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 26-31:
-  But got `int`
-  File "typedef_cycles_via_constraints4b.php--uses.php", line 5, characters 28-30:
-    by the definition of `B`
-  File "typedef_cycles_via_constraints4b.php--defs.php", line 4, characters 25-25:
-    via this generic `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `B<int>` [3]
+-> But got `int` [4]
+
+typedef_cycles_via_constraints4b.php--uses.php:5:15
+3 | function expect_string(string $x): void {}
+4 | 
+5 | function test(A<int> $a, B<int> $b): void {
+  |               ^^^^^^ [1]
+  |                 ^^^ [4]
+6 |   expect_string($a);
+7 |   expect_string($b);
+
+typedef_cycles_via_constraints4b.php--defs.php:3:11
+1 | <?hh
+2 | 
+3 | newtype A<T as B<T>> as T = T;
+  |           ^ [2]
+  |                ^^^^ [3]
+4 | newtype B<T as A<T>> as T = T;
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `A<int>` [3]
+-> But got `int` [4]
+
+typedef_cycles_via_constraints4b.php--uses.php:5:26
+3 | function expect_string(string $x): void {}
+4 | 
+5 | function test(A<int> $a, B<int> $b): void {
+  |                          ^^^^^^ [1]
+  |                            ^^^ [4]
+6 |   expect_string($a);
+7 |   expect_string($b);
+
+typedef_cycles_via_constraints4b.php--defs.php:4:11
+2 | 
+3 | newtype A<T as B<T>> as T = T;
+4 | newtype B<T as A<T>> as T = T;
+  |           ^ [2]
+  |                ^^^^ [3]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+->   by the definition of `A` [4]
+->   via this generic `T` [5]
+
+typedef_cycles_via_constraints4b.php--uses.php:6:17
+1 | <?hh
+2 | 
+3 | function expect_string(string $x): void {}
+  |                        ^^^^^^ [2]
+4 | 
+5 | function test(A<int> $a, B<int> $b): void {
+  |               ^^^^^^ [3]
+  |                 ^^^ [4]
+6 |   expect_string($a);
+  |                 ^^ [1]
+7 |   expect_string($b);
+8 | }
+
+typedef_cycles_via_constraints4b.php--defs.php:3:25
+1 | <?hh
+2 | 
+3 | newtype A<T as B<T>> as T = T;
+  |                         ^ [5]
+4 | newtype B<T as A<T>> as T = T;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+->   by the definition of `B` [4]
+->   via this generic `T` [5]
+
+typedef_cycles_via_constraints4b.php--uses.php:7:17
+1 | <?hh
+2 | 
+3 | function expect_string(string $x): void {}
+  |                        ^^^^^^ [2]
+4 | 
+5 | function test(A<int> $a, B<int> $b): void {
+  |                          ^^^^^^ [3]
+  |                            ^^^ [4]
+6 |   expect_string($a);
+7 |   expect_string($b);
+  |                 ^^ [1]
+8 | }
+
+typedef_cycles_via_constraints4b.php--defs.php:4:25
+2 | 
+3 | newtype A<T as B<T>> as T = T;
+4 | newtype B<T as A<T>> as T = T;
+  |                         ^ [5]
+
+4 errors found

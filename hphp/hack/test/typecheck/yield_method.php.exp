@@ -1,6 +1,13 @@
-ERROR: File "yield_method.php", line 5, characters 24-26:
-Invalid return type (Typing[4110])
-  File "yield_method.php", line 5, characters 24-26:
-  Expected `int`
-  File "yield_method.php", line 5, characters 24-26:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+yield_method.php:5:24
+3 | 
+4 | class A {
+5 |   public function f(): int {
+  |                        ^^^ [1]
+6 |     yield 0;
+7 |   }
+
+1 error found

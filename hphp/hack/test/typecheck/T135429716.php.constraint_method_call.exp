@@ -1,36 +1,119 @@
-ERROR: File "T135429716.php", line 22, characters 23-24:
-Invalid argument (Typing[4110])
-  File "T135429716.php", line 32, characters 19-21:
-  Expected `int`
-  File "T135429716.php", line 7, characters 27-27:
-    via this generic `T`
-  File "T135429716.php", line 21, characters 27-27:
-  But got `T`
-ERROR: File "T135429716.php", line 22, characters 23-24:
-Invalid argument (Typing[4110])
-  File "T135429716.php", line 32, characters 19-21:
-  Expected `int`
-  File "T135429716.php", line 7, characters 27-27:
-    via this generic `T`
-  File "T135429716.php", line 21, characters 27-27:
-  But got `mixed`
-  File "T135429716.php", line 21, characters 27-27:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
-ERROR: File "T135429716.php", line 26, characters 23-24:
-Invalid argument (Typing[4110])
-  File "T135429716.php", line 35, characters 21-23:
-  Expected `int`
-  File "T135429716.php", line 7, characters 27-27:
-    via this generic `T`
-  File "T135429716.php", line 25, characters 28-28:
-  But got `T`
-ERROR: File "T135429716.php", line 26, characters 23-24:
-Invalid argument (Typing[4110])
-  File "T135429716.php", line 35, characters 21-23:
-  Expected `int`
-  File "T135429716.php", line 7, characters 27-27:
-    via this generic `T`
-  File "T135429716.php", line 25, characters 28-28:
-  But got `mixed`
-  File "T135429716.php", line 25, characters 28-28:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `T` [4]
+
+T135429716.php:22:23
+ 5 |   public function __construct(private T $x) {}
+ 6 | 
+ 7 |   private function update(T $t) : T {
+   |                           ^ [3]
+ 8 |     $this->x = $t;
+ 9 |     return $t;
+   :
+19 | 
+20 |   // should be rejected, T is not compatible with int
+21 |   public function g(B $b, T $t) : T {
+   |                           ^ [4]
+22 |     return $b->update($t);
+   |                       ^^ [1]
+23 |   }
+24 |   // Also should be rejected, T is not compatible with int
+   :
+30 | }
+31 | 
+32 | class B extends A<int> {}
+   |                   ^^^ [2]
+33 | 
+34 | interface I {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [4]
+
+T135429716.php:22:23
+ 5 |   public function __construct(private T $x) {}
+ 6 | 
+ 7 |   private function update(T $t) : T {
+   |                           ^ [3]
+ 8 |     $this->x = $t;
+ 9 |     return $t;
+   :
+19 | 
+20 |   // should be rejected, T is not compatible with int
+21 |   public function g(B $b, T $t) : T {
+   |                           ^ [4]
+22 |     return $b->update($t);
+   |                       ^^ [1]
+23 |   }
+24 |   // Also should be rejected, T is not compatible with int
+   :
+30 | }
+31 | 
+32 | class B extends A<int> {}
+   |                   ^^^ [2]
+33 | 
+34 | interface I {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `T` [4]
+
+T135429716.php:26:23
+ 5 |   public function __construct(private T $x) {}
+ 6 | 
+ 7 |   private function update(T $t) : T {
+   |                           ^ [3]
+ 8 |     $this->x = $t;
+ 9 |     return $t;
+   :
+23 |   }
+24 |   // Also should be rejected, T is not compatible with int
+25 |   public function gi(I $i, T $t) : T {
+   |                            ^ [4]
+26 |     return $i->update($t);
+   |                       ^^ [1]
+27 |   }
+28 | 
+   :
+33 | 
+34 | interface I {
+35 |   require extends A<int>;
+   |                     ^^^ [2]
+36 | }
+37 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `mixed` [4]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [4]
+
+T135429716.php:26:23
+ 5 |   public function __construct(private T $x) {}
+ 6 | 
+ 7 |   private function update(T $t) : T {
+   |                           ^ [3]
+ 8 |     $this->x = $t;
+ 9 |     return $t;
+   :
+23 |   }
+24 |   // Also should be rejected, T is not compatible with int
+25 |   public function gi(I $i, T $t) : T {
+   |                            ^ [4]
+26 |     return $i->update($t);
+   |                       ^^ [1]
+27 |   }
+28 | 
+   :
+33 | 
+34 | interface I {
+35 |   require extends A<int>;
+   |                     ^^^ [2]
+36 | }
+37 | 
+
+4 errors found

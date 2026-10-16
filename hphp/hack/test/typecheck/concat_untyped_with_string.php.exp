@@ -1,2 +1,11 @@
-ERROR: File "concat_untyped_with_string.php", line 3, characters 23-24:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+concat_untyped_with_string.php:3:23
+1 | <?hh
+2 | 
+3 | function f(/* TAny */ $a): string {
+  |                       ^^ [1]
+4 |   return 'a' . $a;
+5 | }
+
+1 error found

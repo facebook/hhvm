@@ -1,4 +1,17 @@
-ERROR: File "tuple_hints.php", line 12, characters 14-18:
-Unbound name: `tuple` (Naming[2049])
-ERROR: File "tuple_hints.php", line 12, characters 14-18:
-Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` (Typing[4100])
+error: Naming[2049] Unbound name: `tuple` [1]
+
+tuple_hints.php:12:14
+10 |  */
+11 | 
+12 | function foo(tuple<int> $x): void {}
+   |              ^^^^^ [1]
+
+error: Typing[4100] Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` [1]
+
+tuple_hints.php:12:14
+10 |  */
+11 | 
+12 | function foo(tuple<int> $x): void {}
+   |              ^^^^^ [1]
+
+2 errors found

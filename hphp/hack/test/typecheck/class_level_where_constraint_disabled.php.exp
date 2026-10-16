@@ -1,4 +1,19 @@
-ERROR: File "class_level_where_constraint_disabled.php", line 13, characters 16-16:
-A left brace `{` is expected here. (Parsing[1002])
-ERROR: File "class_level_where_constraint_disabled.php", line 13, characters 16-20:
-Encountered unexpected text `where`, was expecting a class element. (Parsing[1002])
+error: Parsing[1002] A left brace `{` is expected here. [1]
+
+class_level_where_constraint_disabled.php:13:16
+11 | 
+12 | // Class-level where constraints on generic T
+13 | class Base <T> where T as num {}     // Class-level where clauses is not enabled
+   |                ^ [1]
+14 | class Num_ <Tu> extends Base<Tu> where Tu = int {}
+
+error: Parsing[1002] Encountered unexpected text `where`, was expecting a class element. [1]
+
+class_level_where_constraint_disabled.php:13:16
+11 | 
+12 | // Class-level where constraints on generic T
+13 | class Base <T> where T as num {}     // Class-level where clauses is not enabled
+   |                ^^^^^ [1]
+14 | class Num_ <Tu> extends Base<Tu> where Tu = int {}
+
+2 errors found

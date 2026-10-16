@@ -1,6 +1,31 @@
-ERROR: File "trait_self_shape_keys_inheritance.php", line 15, characters 18-26:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys_inheritance.php", line 27, characters 18-26:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys_inheritance.php", line 39, characters 18-26:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys_inheritance.php:15:18
+13 | 
+14 |   public function make(): shape(...) {
+15 |     return shape(self::KEY => 1);
+   |                  ^^^^^^^^^ [1]
+16 |   }
+17 | }
+
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys_inheritance.php:27:18
+25 | 
+26 |   public function make(): shape(...) {
+27 |     return shape(self::KEY => 1);
+   |                  ^^^^^^^^^ [1]
+28 |   }
+29 | }
+
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys_inheritance.php:39:18
+37 | 
+38 |   public function make(): shape(...) {
+39 |     return shape(self::KEY => 1);
+   |                  ^^^^^^^^^ [1]
+40 |   }
+41 | }
+
+3 errors found

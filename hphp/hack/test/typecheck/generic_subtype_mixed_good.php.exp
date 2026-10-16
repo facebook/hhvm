@@ -1,2 +1,11 @@
-ERROR: File "generic_subtype_mixed_good.php", line 4, characters 19-20:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nonnull` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nonnull` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+generic_subtype_mixed_good.php:4:19
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test<T1, T2 super nonnull>(T1 $x): ?T2 {
+  |                   ^^ [1]
+5 |   return $x;
+6 | }
+
+1 error found

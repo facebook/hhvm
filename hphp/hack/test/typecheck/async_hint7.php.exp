@@ -1,2 +1,11 @@
-ERROR: File "async_hint7.php", line 10, characters 25-31:
-Was expecting a return type hint (Typing[4030])
+error: Typing[4030] Was expecting a return type hint [1]
+
+async_hint7.php:10:25
+ 8 | 
+ 9 |   // Testing method
+10 |   public async function no_hint() {
+   |                         ^^^^^^^ [1]
+11 |     throw new Exception();
+12 |   }
+
+1 error found

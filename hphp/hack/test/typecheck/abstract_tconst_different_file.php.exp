@@ -1,6 +1,19 @@
-ERROR: File "abstract_tconst_different_file.php--file1.php", line 9, characters 18-26:
-Invalid type hint (Typing[4352])
-  File "abstract_tconst_different_file.php--file1.php", line 9, characters 25-25:
-  An abstract type constant is not allowed in this position. Did you mean `this::T`?
-  File "abstract_tconst_different_file.php--file1.php", line 5, characters 23-23:
-  `T` is abstract here.
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::T`? [2]
+-> `T` is abstract here. [3]
+
+abstract_tconst_different_file.php--file1.php:9:18
+ 3 | 
+ 4 | abstract class A {
+ 5 |   abstract const type T;
+   |                       ^ [3]
+ 6 | }
+ 7 | 
+ 8 | class B {
+ 9 |   const type T = vec<A::T>;
+   |                  ^^^^^^^^^ [1]
+   |                         ^ [2]
+10 | 
+11 |   public function get(): this::T {
+
+1 error found

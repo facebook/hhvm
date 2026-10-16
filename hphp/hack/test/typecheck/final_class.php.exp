@@ -1,2 +1,10 @@
-ERROR: File "final_class.php", line 4, characters 1-14:
-Classes cannot be both `final` and `sealed`. (Parsing[1002])
+error: Parsing[1002] Classes cannot be both `final` and `sealed`. [1]
+
+final_class.php:4:1
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | <<__Sealed()>>
+  | ^^^^^^^^^^^^^^ [1]
+5 | final class A {}
+
+1 error found

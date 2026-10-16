@@ -1,4 +1,18 @@
-ERROR: File "lsb_parent_disallowed.php", line 9, characters 20-21:
-__LSB properties cannot be accessed with parent:: (Typing[4112])
-  File "lsb_parent_disallowed.php", line 4, characters 27-29:
-  This member is public
+error: Typing[4112] __LSB properties cannot be accessed with parent:: [1]
+-> This member is public [2]
+
+lsb_parent_disallowed.php:9:20
+ 2 | 
+ 3 | class A {
+ 4 |   <<__LSB>> public static int $x = 0;
+   |                           ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | class B extends A {
+ 8 |   public static function foo(): int {
+ 9 |     return parent::$x;
+   |                    ^^ [1]
+10 |   }
+11 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "shape_type.php", line 3, characters 21-21:
-A left parenthesis `(` is expected here. (Parsing[1002])
-ERROR: File "shape_type.php", line 3, characters 21-21:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
+error: Parsing[1002] A left parenthesis `(` is expected here. [1]
+
+shape_type.php:3:21
+1 | <?hh
+2 | 
+3 | function f(): shape {
+  |                     ^ [1]
+4 |   // UNSAFE
+5 | }
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+shape_type.php:3:21
+1 | <?hh
+2 | 
+3 | function f(): shape {
+  |                     ^ [1]
+4 |   // UNSAFE
+5 | }
+
+2 errors found

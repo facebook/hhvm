@@ -1,6 +1,14 @@
-ERROR: File "await_in_expressions8.php", line 4, characters 10-17:
-Invalid exception (Typing[4110])
-  File "await_in_expressions8.php", line 4, characters 10-17:
-  Expected `Throwable` because it is used as an exception
-  File "await_in_expressions8.php", line 3, characters 29-34:
-  But got `string`
+error: Typing[4110] Invalid exception [1]
+-> Expected `Throwable` because it is used as an exception [1]
+-> But got `string` [2]
+
+await_in_expressions8.php:4:10
+1 | <?hh
+2 | 
+3 | async function f1(Awaitable<string> $a): Awaitable<void> {
+  |                             ^^^^^^ [2]
+4 |   throw (await $a);
+  |          ^^^^^^^^ [1]
+5 | }
+
+1 error found

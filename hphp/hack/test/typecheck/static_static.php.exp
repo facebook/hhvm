@@ -1,2 +1,11 @@
-ERROR: File "static_static.php", line 13, characters 26-31:
-Methods cannot have duplicate modifiers (Parsing[1002])
+error: Parsing[1002] Methods cannot have duplicate modifiers [1]
+
+static_static.php:13:26
+11 | 
+12 | class Foo {
+13 |   final static protected static function bar(): void {
+   |                          ^^^^^^ [1]
+14 |   }
+15 | }
+
+1 error found

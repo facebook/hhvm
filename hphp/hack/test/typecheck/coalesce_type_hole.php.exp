@@ -1,6 +1,22 @@
-ERROR: File "coalesce_type_hole.php", line 11, characters 16-23:
-Invalid argument (Typing[4110])
-  File "coalesce_type_hole.php", line 4, characters 21-23:
-  Expected `int`
-  File "coalesce_type_hole.php", line 7, characters 11-22:
-  But got `?Set<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?Set<string>` [3]
+
+coalesce_type_hole.php:11:16
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+ 5 | 
+ 6 | class C {
+ 7 |   private ?Set<string> $s = null;
+   |           ^^^^^^^^^^^^ [3]
+ 8 | 
+ 9 |   private function test(): void {
+10 |     $_ = $this->s ?? vec[''];
+11 |     expect_int($this->s);
+   |                ^^^^^^^^ [1]
+12 |   }
+13 | }
+
+1 error found

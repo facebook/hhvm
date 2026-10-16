@@ -1,12 +1,61 @@
-ERROR: File "hhfixme_bug4.php", line 6, characters 13-176:
-Invalid argument (Typing[4110])
-  File "hhfixme_bug4.php", line 4, characters 32-35:
-  Expected `void`
-  File "hhfixme_bug4.php", line 12, characters 12-12:
-  But got `int`
-ERROR: File "hhfixme_bug4.php", line 6, characters 13-176:
-This function can exit with and without returning a value (Typing[4421])
-  File "hhfixme_bug4.php", line 12, characters 5-13:
-  Returning a value here.
-  File "hhfixme_bug4.php", line 10, characters 5-11:
-  Returning without a value here
+error: Typing[4110] Invalid argument [1]
+-> Expected `void` [2]
+-> But got `int` [3]
+
+hhfixme_bug4.php:6:13
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | function expectFun((function():void) $f):void { }
+   |                                ^^^^ [2]
+ 5 | function badreturn(bool $b):void {
+ 6 |   expectFun(() ==> {
+   |             ^^^^^^^^ [1]
+ 7 |   if ($b) {
+   |   ^^^^^^^^^ [1]
+ 8 |     // We don't expect this FIXME to silence the second return statement!
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |     /* HH_FIXME[4110] */
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     return;
+   |     ^^^^^^^ [1]
+11 |   } else {
+   |   ^^^^^^^^ [1]
+12 |     return 3;
+   |     ^^^^^^^^^ [1]
+   |            ^ [3]
+13 |   }
+   |   ^ [1]
+14 |   });
+   |   ^ [1]
+15 | }
+
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> Returning without a value here [3]
+
+hhfixme_bug4.php:6:13
+ 4 | function expectFun((function():void) $f):void { }
+ 5 | function badreturn(bool $b):void {
+ 6 |   expectFun(() ==> {
+   |             ^^^^^^^^ [1]
+ 7 |   if ($b) {
+   |   ^^^^^^^^^ [1]
+ 8 |     // We don't expect this FIXME to silence the second return statement!
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |     /* HH_FIXME[4110] */
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     return;
+   |     ^^^^^^^ [1]
+   |     ^^^^^^^ [3]
+11 |   } else {
+   |   ^^^^^^^^ [1]
+12 |     return 3;
+   |     ^^^^^^^^^ [1]
+   |     ^^^^^^^^^ [2]
+13 |   }
+   |   ^ [1]
+14 |   });
+   |   ^ [1]
+15 | }
+
+2 errors found

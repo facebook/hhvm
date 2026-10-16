@@ -1,6 +1,15 @@
-ERROR: File "generic_attr2.php", line 8, characters 23-24:
-Invalid xhp value for attribute `:foo` in `:my-xhp` (Typing[4343])
-  File "generic_attr2.php", line 7, characters 32-37:
-  Expected `string`
-  File "generic_attr2.php", line 7, characters 15-17:
-  But got `int`
+error: Typing[4343] Invalid xhp value for attribute `:foo` in `:my-xhp` [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+generic_attr2.php:8:23
+5 | }
+6 | 
+7 | function test(int $x): :my-xhp<string> {
+  |               ^^^ [3]
+  |                                ^^^^^^ [2]
+8 |   return <my-xhp foo={$x} />;
+  |                       ^^ [1]
+9 | }
+
+1 error found

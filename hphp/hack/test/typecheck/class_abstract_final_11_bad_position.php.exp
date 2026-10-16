@@ -1,6 +1,18 @@
-ERROR: File "class_abstract_final_11_bad_position.php", line 4, characters 3-67:
-Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4002])
-  File "class_abstract_final_11_bad_position.php", line 3, characters 22-23:
-  `C2` is uninstantiable
-  File "class_abstract_final_11_bad_position.php", line 3, characters 22-23:
-  Declaration is here
+error: Typing[4002] Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. [1]
+-> `C2` is uninstantiable [2]
+-> Declaration is here [2]
+
+class_abstract_final_11_bad_position.php:4:3
+1 | <?hh
+2 | 
+3 | abstract final class C2 {
+  |                      ^^ [2]
+4 |   public static function m(): void {
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 |     new static(); // error
+  |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   }
+  |   ^ [1]
+7 | }
+
+1 error found

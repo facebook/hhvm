@@ -1,6 +1,20 @@
-ERROR: File "anon9.php", line 16, characters 10-11:
-Invalid return type (Typing[4040])
-  File "anon9.php", line 13, characters 8-38:
-  Too few positional arguments (required 1 but got 0)
-  File "anon9.php", line 12, characters 18-43:
-  Because of this definition
+error: Typing[4040] Invalid return type [1]
+-> Too few positional arguments (required 1 but got 0) [2]
+-> Because of this definition [3]
+
+anon9.php:16:10
+10 |  */
+11 | 
+12 | function test(): (function(string): string) {
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+13 |   $f = function() {
+   |        ^^^^^^^^^^^^ [2]
+14 |     return '';
+   |     ^^^^^^^^^^ [2]
+15 |   };
+   |   ^ [2]
+16 |   return $f;
+   |          ^^ [1]
+17 | }
+
+1 error found

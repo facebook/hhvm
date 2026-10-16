@@ -1,2 +1,10 @@
-ERROR: File "interface.php", line 13, characters 3-9:
-Interface methods must be `public` or `protected` (Parsing[1002])
+error: Parsing[1002] Interface methods must be `public` or `protected` [1]
+
+interface.php:13:3
+11 | 
+12 | interface I {
+13 |   private function foobar(): void;
+   |   ^^^^^^^ [1]
+14 | }
+
+1 error found

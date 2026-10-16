@@ -1,10 +1,28 @@
-ERROR: File "incorrect_tparam_arity.php", line 4, characters 21-27:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "incorrect_tparam_arity.php", line 7, characters 7-7:
-  Definition is here
-ERROR: File "incorrect_tparam_arity.php", line 8, characters 19-19:
-Invalid return type (Typing[4336])
-  File "incorrect_tparam_arity.php", line 8, characters 24-24:
-  Expected `T`
-  File "incorrect_tparam_arity.php", line 8, characters 19-19:
-  But got `void` because this function does not always return a value
+error: Typing[4101] Wrong number of type arguments (expected 1, got 2) [1]
+-> Definition is here [2]
+
+incorrect_tparam_arity.php:4:21
+2 | 
+3 | class D<T> {
+4 |   public function f(C<T, T> $x): void {}
+  |                     ^^^^^^^ [1]
+5 | }
+6 | 
+7 | class C<T> {
+  |       ^ [2]
+8 |   public function f(): T {}
+9 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `void` because this function does not always return a value [1]
+
+incorrect_tparam_arity.php:8:19
+6 | 
+7 | class C<T> {
+8 |   public function f(): T {}
+  |                   ^ [1]
+  |                        ^ [2]
+9 | }
+
+2 errors found

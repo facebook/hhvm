@@ -1,20 +1,66 @@
-WARN: File "typing_fail_instance_of.php", line 29, characters 7-13:
-This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12010])
-ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
-Typing error (Typing[4429])
-  File "typing_fail_instance_of.php", line 34, characters 16-20:
-  Expected `?num`
-  File "typing_fail_instance_of.php", line 34, characters 16-20:
-  But got `(not B & not A)`
-ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
-Typing error (Typing[4429])
-  File "typing_fail_instance_of.php", line 40, characters 10-15:
-  Expected `num` because this is used in an arithmetic operation
-  File "typing_fail_instance_of.php", line 35, characters 13-13:
-  But got `not A` from this `is` expression test
-ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
-Typing error (Typing[4429])
-  File "typing_fail_instance_of.php", line 40, characters 10-15:
-  Expected `num` because this is used in an arithmetic operation
-  File "typing_fail_instance_of.php", line 37, characters 20-20:
-  But got `not B` from this `is` expression test
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. [1]
+
+typing_fail_instance_of.php:29:7
+27 | function test(): void {
+28 |   $x = new A();
+29 |   if ($x is B) {
+   |       ^^^^^^^ [1]
+30 | 
+31 |   }
+
+error: Typing[4429] Typing error [1]
+-> Expected `?num` [2]
+-> But got `(not B & not A)` [2]
+
+typing_fail_instance_of.php:40:10
+32 | }
+33 | 
+34 | function test2(mixed $x): void {
+   |                ^^^^^ [2]
+35 |   if ($x is A) {
+36 |     $x->f();
+37 |   } else if ($x is B) {
+38 |     $x->g();
+39 |   } else if ($x is nonnull) {
+40 |     $x = $x + 1;
+   |          ^^ [1]
+41 |   }
+42 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `not A` from this `is` expression test [3]
+
+typing_fail_instance_of.php:40:10
+33 | 
+34 | function test2(mixed $x): void {
+35 |   if ($x is A) {
+   |             ^ [3]
+36 |     $x->f();
+37 |   } else if ($x is B) {
+38 |     $x->g();
+39 |   } else if ($x is nonnull) {
+40 |     $x = $x + 1;
+   |          ^^ [1]
+   |          ^^^^^^ [2]
+41 |   }
+42 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `not B` from this `is` expression test [3]
+
+typing_fail_instance_of.php:40:10
+35 |   if ($x is A) {
+36 |     $x->f();
+37 |   } else if ($x is B) {
+   |                    ^ [3]
+38 |     $x->g();
+39 |   } else if ($x is nonnull) {
+40 |     $x = $x + 1;
+   |          ^^ [1]
+   |          ^^^^^^ [2]
+41 |   }
+42 | }
+
+4 errors found

@@ -1,4 +1,21 @@
-ERROR: File "dict_literal_mixed_brace2.php", line 4, characters 8-30:
-Initializers of `vec`, `dict` and `keyset` should use `[...]` instead of `{...}`. (Parsing[1002])
-ERROR: File "dict_literal_mixed_brace2.php", line 4, characters 31-31:
-A right brace `}` is expected here. (Parsing[1002])
+error: Parsing[1002] Initializers of `vec`, `dict` and `keyset` should use `[...]` instead of `{...}`. [1]
+
+dict_literal_mixed_brace2.php:4:8
+2 | 
+3 | function foo(): dict<string, int> {
+4 |   $x = dict{'a' => 2, 'b' => 5];
+  |        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   return $x;
+6 | }
+
+error: Parsing[1002] A right brace `}` is expected here. [1]
+
+dict_literal_mixed_brace2.php:4:31
+2 | 
+3 | function foo(): dict<string, int> {
+4 |   $x = dict{'a' => 2, 'b' => 5];
+  |                               ^ [1]
+5 |   return $x;
+6 | }
+
+2 errors found

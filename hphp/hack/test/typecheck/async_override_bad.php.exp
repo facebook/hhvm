@@ -1,6 +1,20 @@
-ERROR: File "async_override_bad.php", line 17, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "async_override_bad.php", line 17, characters 19-21:
-  You cannot override this method with a non-async method
-  File "async_override_bad.php", line 5, characters 25-27:
-  It was declared as async
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> You cannot override this method with a non-async method [1]
+-> It was declared as async [2]
+
+async_override_bad.php:17:19
+ 3 | 
+ 4 | class C {
+ 5 |   public async function foo():Awaitable<int> {
+   |                         ^^^ [2]
+ 6 |     return 3;
+ 7 |   }
+   :
+15 |   }
+16 |   // Illegal: do not permit non-async methods to override async ones
+17 |   public function foo():Awaitable<int> {
+   |                   ^^^ [1]
+18 |     return $this->bar();
+19 |   }
+
+1 error found

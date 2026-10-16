@@ -1,10 +1,37 @@
-ERROR: File "typedef_string_concat1.php--use.php", line 6, characters 19-19:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
-  Expected `string` or `int`
-  File "typedef_string_concat1.php--use.php", line 4, characters 11-14:
-  But got `mixed`
-  File "typedef_string_concat1.php--def.php", line 3, characters 9-12:
-    by the definition of `TDef`
+error: Typing[4030] Was expecting a return type hint [1]
+
+typedef_string_concat1.php--use.php:6:19
+4 |   private TDef $x = Vals::foo;
+5 | 
+6 |   public function f() {
+  |                   ^ [1]
+7 |     if ($this->x !== Vals::foo) {
+8 |       throw new Exception('s' . $this->x);
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `mixed` [2]
+->   by the definition of `TDef` [3]
+
+typedef_string_concat1.php--use.php:8:33
+ 2 | 
+ 3 | class C {
+ 4 |   private TDef $x = Vals::foo;
+   |           ^^^^ [2]
+ 5 | 
+ 6 |   public function f() {
+ 7 |     if ($this->x !== Vals::foo) {
+ 8 |       throw new Exception('s' . $this->x);
+   |                                 ^^^^^^^^ [1]
+ 9 |     }
+10 |   }
+
+typedef_string_concat1.php--def.php:3:9
+ 1 | <?hh
+ 2 | 
+ 3 | newtype TDef = int;
+   |         ^^^^ [3]
+ 4 | class Vals {
+ 5 |   const TDef foo = 0;
+
+2 errors found

@@ -1,6 +1,26 @@
-ERROR: File "printf3.php", line 18, characters 10-10:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "printf3.php", line 19, characters 5-8:
-Invalid format string `%s` in `"%s"` (Typing[4038])
-  File "printf3.php", line 15, characters 29-29:
-  You can add a new format specifier by adding `format_s()` to `X`
+error: Typing[4030] Was expecting a return type hint [1]
+
+printf3.php:18:10
+16 | }
+17 | 
+18 | function _(string $s) {
+   |          ^ [1]
+19 |   f('%s');
+20 | }
+
+error: Typing[4038] Invalid format string `%s` in `"%s"` [1]
+-> You can add a new format specifier by adding `format_s()` to `X` [2]
+
+printf3.php:19:5
+13 | interface X { }
+14 | 
+15 | function f(\HH\FormatString<X> $fs, mixed...$args) : void {
+   |                             ^ [2]
+16 | }
+17 | 
+18 | function _(string $s) {
+19 |   f('%s');
+   |     ^^^^ [1]
+20 | }
+
+2 errors found

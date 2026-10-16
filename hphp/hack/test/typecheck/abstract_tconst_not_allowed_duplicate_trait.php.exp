@@ -1,6 +1,19 @@
-ERROR: File "abstract_tconst_not_allowed_duplicate_trait.php", line 9, characters 23-26:
-Invalid type hint (Typing[4352])
-  File "abstract_tconst_not_allowed_duplicate_trait.php", line 9, characters 26-26:
-  An abstract type constant is not allowed in this position. Did you mean `this::T`?
-  File "abstract_tconst_not_allowed_duplicate_trait.php", line 5, characters 23-23:
-  `T` is abstract here.
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::T`? [2]
+-> `T` is abstract here. [3]
+
+abstract_tconst_not_allowed_duplicate_trait.php:9:23
+ 3 | 
+ 4 | abstract class A {
+ 5 |   abstract const type T;
+   |                       ^ [3]
+ 6 | }
+ 7 | 
+ 8 | trait MyTrait {
+ 9 |   public function foo(A::T $_): void {}
+   |                       ^^^^ [1]
+   |                          ^ [2]
+10 | }
+11 | 
+
+1 error found

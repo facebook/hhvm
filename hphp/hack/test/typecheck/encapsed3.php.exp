@@ -1,6 +1,18 @@
-ERROR: File "encapsed3.php", line 7, characters 14-14:
-No instance method `x` in `C` (Typing[4053])
-  File "encapsed3.php", line 6, characters 12-12:
-  This is why I think it is an object of type C
-  File "encapsed3.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4053] No instance method `x` in `C` [1]
+-> This is why I think it is an object of type C [2]
+-> Declaration of `C` is here [3]
+
+encapsed3.php:7:14
+1 | <?hh
+2 | 
+3 | class C {}
+  |       ^ [3]
+4 | 
+5 | function f(): void {
+6 |   $c = new C();
+  |            ^ [2]
+7 |   $s = "{$c->x()}";
+  |              ^ [1]
+8 | }
+
+1 error found

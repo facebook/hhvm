@@ -1,74 +1,371 @@
-WARN: File "tany_found_genuine.php", line 35, characters 10-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 35, characters 17-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 40, characters 5-6:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 40, characters 5-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 40, characters 10-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 40, characters 17-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 41, characters 5-6:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 41, characters 5-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 41, characters 10-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 43, characters 10-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 48, characters 5-6:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 48, characters 5-28:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 48, characters 10-28:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 48, characters 15-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 48, characters 22-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 50, characters 10-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 55, characters 5-6:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 55, characters 5-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 55, characters 10-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 55, characters 17-18:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 56, characters 9-10:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 58, characters 12-13:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 65, characters 7-8:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 65, characters 7-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 65, characters 12-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 65, characters 19-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 70, characters 10-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 75, characters 15-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 75, characters 22-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 82, characters 5-8:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 82, characters 5-27:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 82, characters 12-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 82, characters 12-27:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 82, characters 19-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 84, characters 10-13:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 89, characters 15-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "tany_found_genuine.php", line 89, characters 22-23:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:35:10
+33 |     // upper bound (IWithoutTB) doesn't define TB
+34 |     // Warn[12036] expected
+35 |     $_ = $this->tb;
+   |          ^^^^^^^^^ [1]
+36 |   }
+37 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:35:17
+33 |     // upper bound (IWithoutTB) doesn't define TB
+34 |     // Warn[12036] expected
+35 |     $_ = $this->tb;
+   |                 ^^ [1]
+36 |   }
+37 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:40:5
+38 |   // ── Assignment: genuine Tany through assignment ────────────────────────
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+   |     ^^ [1]
+41 |     $b = $a;
+42 |     // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:40:5
+38 |   // ── Assignment: genuine Tany through assignment ────────────────────────
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+   |     ^^^^^^^^^^^^^^ [1]
+41 |     $b = $a;
+42 |     // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:40:10
+38 |   // ── Assignment: genuine Tany through assignment ────────────────────────
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+   |          ^^^^^^^^^ [1]
+41 |     $b = $a;
+42 |     // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:40:17
+38 |   // ── Assignment: genuine Tany through assignment ────────────────────────
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+   |                 ^^ [1]
+41 |     $b = $a;
+42 |     // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:41:5
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+41 |     $b = $a;
+   |     ^^ [1]
+42 |     // Warn[12036] expected
+43 |     $_ = $b;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:41:5
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+41 |     $b = $a;
+   |     ^^^^^^^ [1]
+42 |     // Warn[12036] expected
+43 |     $_ = $b;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:41:10
+39 |   public function test_genuine_assignment(): void {
+40 |     $a = $this->tb;
+41 |     $b = $a;
+   |          ^^ [1]
+42 |     // Warn[12036] expected
+43 |     $_ = $b;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:43:10
+41 |     $b = $a;
+42 |     // Warn[12036] expected
+43 |     $_ = $b;
+   |          ^^ [1]
+44 |   }
+45 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:48:5
+46 |   // ── Union: genuine Tany in a union ─────────────────────────────────────
+47 |   public function test_genuine_union(bool $b, int $y): void {
+48 |     $z = $b ? $this->tb : $y;
+   |     ^^ [1]
+49 |     // Warn[12036] expected
+50 |     $_ = $z;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:48:5
+46 |   // ── Union: genuine Tany in a union ─────────────────────────────────────
+47 |   public function test_genuine_union(bool $b, int $y): void {
+48 |     $z = $b ? $this->tb : $y;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+49 |     // Warn[12036] expected
+50 |     $_ = $z;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:48:10
+46 |   // ── Union: genuine Tany in a union ─────────────────────────────────────
+47 |   public function test_genuine_union(bool $b, int $y): void {
+48 |     $z = $b ? $this->tb : $y;
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+49 |     // Warn[12036] expected
+50 |     $_ = $z;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:48:15
+46 |   // ── Union: genuine Tany in a union ─────────────────────────────────────
+47 |   public function test_genuine_union(bool $b, int $y): void {
+48 |     $z = $b ? $this->tb : $y;
+   |               ^^^^^^^^^ [1]
+49 |     // Warn[12036] expected
+50 |     $_ = $z;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:48:22
+46 |   // ── Union: genuine Tany in a union ─────────────────────────────────────
+47 |   public function test_genuine_union(bool $b, int $y): void {
+48 |     $z = $b ? $this->tb : $y;
+   |                      ^^ [1]
+49 |     // Warn[12036] expected
+50 |     $_ = $z;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:50:10
+48 |     $z = $b ? $this->tb : $y;
+49 |     // Warn[12036] expected
+50 |     $_ = $z;
+   |          ^^ [1]
+51 |   }
+52 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:55:5
+53 |   // ── Intersection: genuine Tany through `is` refinement ────────────────
+54 |   public function test_genuine_intersection(): void {
+55 |     $x = $this->tb;
+   |     ^^ [1]
+56 |     if ($x is int) {
+57 |       // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:55:5
+53 |   // ── Intersection: genuine Tany through `is` refinement ────────────────
+54 |   public function test_genuine_intersection(): void {
+55 |     $x = $this->tb;
+   |     ^^^^^^^^^^^^^^ [1]
+56 |     if ($x is int) {
+57 |       // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:55:10
+53 |   // ── Intersection: genuine Tany through `is` refinement ────────────────
+54 |   public function test_genuine_intersection(): void {
+55 |     $x = $this->tb;
+   |          ^^^^^^^^^ [1]
+56 |     if ($x is int) {
+57 |       // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:55:17
+53 |   // ── Intersection: genuine Tany through `is` refinement ────────────────
+54 |   public function test_genuine_intersection(): void {
+55 |     $x = $this->tb;
+   |                 ^^ [1]
+56 |     if ($x is int) {
+57 |       // Warn[12036] expected
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:56:9
+54 |   public function test_genuine_intersection(): void {
+55 |     $x = $this->tb;
+56 |     if ($x is int) {
+   |         ^^ [1]
+57 |       // Warn[12036] expected
+58 |       $_ = $x;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:58:12
+56 |     if ($x is int) {
+57 |       // Warn[12036] expected
+58 |       $_ = $x;
+   |            ^^ [1]
+59 |     }
+60 |   }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:65:7
+63 |   public function test_genuine_join_point(bool $b): void {
+64 |     if ($b) {
+65 |       $z = $this->tb;
+   |       ^^ [1]
+66 |     } else {
+67 |       $z = 42;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:65:7
+63 |   public function test_genuine_join_point(bool $b): void {
+64 |     if ($b) {
+65 |       $z = $this->tb;
+   |       ^^^^^^^^^^^^^^ [1]
+66 |     } else {
+67 |       $z = 42;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:65:12
+63 |   public function test_genuine_join_point(bool $b): void {
+64 |     if ($b) {
+65 |       $z = $this->tb;
+   |            ^^^^^^^^^ [1]
+66 |     } else {
+67 |       $z = 42;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:65:19
+63 |   public function test_genuine_join_point(bool $b): void {
+64 |     if ($b) {
+65 |       $z = $this->tb;
+   |                   ^^ [1]
+66 |     } else {
+67 |       $z = 42;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:70:10
+68 |     }
+69 |     // Warn[12036] expected
+70 |     $_ = $z;
+   |          ^^ [1]
+71 |   }
+72 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:75:15
+73 |   // ── Method call: genuine Tany through method call ─────────────────────
+74 |   public function test_genuine_method_call(): void {
+75 |     $result = $this->tb->someMethod();
+   |               ^^^^^^^^^ [1]
+76 |     // Warn[12036] expected
+77 |     $_ = $result;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:75:22
+73 |   // ── Method call: genuine Tany through method call ─────────────────────
+74 |   public function test_genuine_method_call(): void {
+75 |     $result = $this->tb->someMethod();
+   |                      ^^ [1]
+76 |     // Warn[12036] expected
+77 |     $_ = $result;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:82:5
+80 |   // ── Shape access: genuine Tany through array access ───────────────────
+81 |   public function test_genuine_shape_access(): void {
+82 |     $val = $this->tb['key'];
+   |     ^^^^ [1]
+83 |     // Warn[12036] expected
+84 |     $_ = $val;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:82:5
+80 |   // ── Shape access: genuine Tany through array access ───────────────────
+81 |   public function test_genuine_shape_access(): void {
+82 |     $val = $this->tb['key'];
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+83 |     // Warn[12036] expected
+84 |     $_ = $val;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:82:12
+80 |   // ── Shape access: genuine Tany through array access ───────────────────
+81 |   public function test_genuine_shape_access(): void {
+82 |     $val = $this->tb['key'];
+   |            ^^^^^^^^^ [1]
+83 |     // Warn[12036] expected
+84 |     $_ = $val;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:82:12
+80 |   // ── Shape access: genuine Tany through array access ───────────────────
+81 |   public function test_genuine_shape_access(): void {
+82 |     $val = $this->tb['key'];
+   |            ^^^^^^^^^^^^^^^^ [1]
+83 |     // Warn[12036] expected
+84 |     $_ = $val;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:82:19
+80 |   // ── Shape access: genuine Tany through array access ───────────────────
+81 |   public function test_genuine_shape_access(): void {
+82 |     $val = $this->tb['key'];
+   |                   ^^ [1]
+83 |     // Warn[12036] expected
+84 |     $_ = $val;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:84:10
+82 |     $val = $this->tb['key'];
+83 |     // Warn[12036] expected
+84 |     $_ = $val;
+   |          ^^^^ [1]
+85 |   }
+86 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:89:15
+87 |   // ── Chained: genuine Tany through chained method calls ────────────────
+88 |   public function test_genuine_chained(): void {
+89 |     $result = $this->tb->first()->second();
+   |               ^^^^^^^^^ [1]
+90 |     // Warn[12036] expected
+91 |     $_ = $result;
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+tany_found_genuine.php:89:22
+87 |   // ── Chained: genuine Tany through chained method calls ────────────────
+88 |   public function test_genuine_chained(): void {
+89 |     $result = $this->tb->first()->second();
+   |                      ^^ [1]
+90 |     // Warn[12036] expected
+91 |     $_ = $result;
+
+37 errors found

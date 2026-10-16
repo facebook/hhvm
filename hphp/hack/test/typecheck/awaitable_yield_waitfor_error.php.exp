@@ -1,8 +1,24 @@
-ERROR: File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-Invalid return type (Typing[4336])
-  File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
-  Expected `void`
-  File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-  But got `Awaitable<void>` because this function does not always return a value
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+awaitable_yield_waitfor_error.php:12:23
+10 |  */
+11 | 
+12 | async function foo(): void {
+   |                       ^^^^ [1]
+13 |   $bar = await SomePreparable::gen();
+14 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `Awaitable<void>` because this function does not always return a value [1]
+
+awaitable_yield_waitfor_error.php:12:16
+10 |  */
+11 | 
+12 | async function foo(): void {
+   |                ^^^ [1]
+   |                       ^^^^ [2]
+13 |   $bar = await SomePreparable::gen();
+14 | }
+
+2 errors found

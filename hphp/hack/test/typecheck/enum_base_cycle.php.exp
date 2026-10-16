@@ -1,8 +1,41 @@
-ERROR: File "enum_base_cycle.php", line 3, characters 6-6:
-Cyclic class definition : `E`  (Typing[4013])
-ERROR: File "enum_base_cycle.php", line 5, characters 6-7:
-Cyclic class definition : `E2` `E1` `E0`  (Typing[4013])
-ERROR: File "enum_base_cycle.php", line 7, characters 6-7:
-Cyclic class definition : `E2` `E1` `E0`  (Typing[4013])
-ERROR: File "enum_base_cycle.php", line 9, characters 6-7:
-Cyclic class definition : `E2` `E1` `E0`  (Typing[4013])
+error: Typing[4013] Cyclic class definition : `E`  [1]
+
+enum_base_cycle.php:3:6
+1 | <?hh
+2 | 
+3 | enum E : E {}
+  |      ^ [1]
+4 | 
+5 | enum E0 : E1 {}
+
+error: Typing[4013] Cyclic class definition : `E2` `E1` `E0`  [1]
+
+enum_base_cycle.php:5:6
+3 | enum E : E {}
+4 | 
+5 | enum E0 : E1 {}
+  |      ^^ [1]
+6 | 
+7 | enum E1 : E2 {}
+
+error: Typing[4013] Cyclic class definition : `E2` `E1` `E0`  [1]
+
+enum_base_cycle.php:7:6
+5 | enum E0 : E1 {}
+6 | 
+7 | enum E1 : E2 {}
+  |      ^^ [1]
+8 | 
+9 | enum E2 : E0 {}
+
+error: Typing[4013] Cyclic class definition : `E2` `E1` `E0`  [1]
+
+enum_base_cycle.php:9:6
+ 7 | enum E1 : E2 {}
+ 8 | 
+ 9 | enum E2 : E0 {}
+   |      ^^ [1]
+10 | 
+11 | /* enum XXX : self {} // not allowed */
+
+4 errors found

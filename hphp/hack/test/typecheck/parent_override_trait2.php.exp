@@ -1,14 +1,48 @@
-ERROR: File "parent_override_trait2.php", line 16, characters 7-7:
-Constant X is defined concretely in multiple ancestors (Typing[4374])
-  File "parent_override_trait2.php", line 4, characters 16-16:
-  One conflicting definition is here, inherited through B
-  File "parent_override_trait2.php", line 7, characters 16-16:
-  Another conflicting definition is here
-ERROR: File "parent_override_trait2.php", line 16, characters 17-17:
-Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
-  File "parent_override_trait2.php", line 7, characters 16-16:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "parent_override_trait2.php", line 4, characters 16-16:
-  `X` inherited from `I1`
-  File "parent_override_trait2.php", line 7, characters 16-16:
-  conflicts with constant `X` inherited from `I2`.
+error: Typing[4374] Constant X is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through B [2]
+-> Another conflicting definition is here [3]
+
+parent_override_trait2.php:16:7
+ 2 | 
+ 3 | interface I1 {
+ 4 |   const string X = "I1";
+   |                ^ [2]
+ 5 | }
+ 6 | interface I2 {
+ 7 |   const string X = "I2";
+   |                ^ [3]
+ 8 | }
+ 9 | trait T1 implements I1 {}
+   :
+14 |   use T1;
+15 | }
+16 | class A extends B implements I2 {
+   |       ^ [1]
+17 |   use T2;
+18 | }
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `B` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `X` inherited from `I1` [3]
+-> conflicts with constant `X` inherited from `I2`. [2]
+
+parent_override_trait2.php:16:17
+ 2 | 
+ 3 | interface I1 {
+ 4 |   const string X = "I1";
+   |                ^ [3]
+ 5 | }
+ 6 | interface I2 {
+ 7 |   const string X = "I2";
+   |                ^ [2]
+ 8 | }
+ 9 | trait T1 implements I1 {}
+   :
+14 |   use T1;
+15 | }
+16 | class A extends B implements I2 {
+   |                 ^ [1]
+17 |   use T2;
+18 | }
+
+2 errors found

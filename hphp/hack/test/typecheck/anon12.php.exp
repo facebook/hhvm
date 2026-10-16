@@ -1,14 +1,46 @@
-ERROR: File "anon12.php", line 13, characters 25-26:
-A previous parameter has a default value.
+error: Typing[4077] A previous parameter has a default value.
 Remove all the default values for the preceding parameters,
-or add a default value to this one. (Typing[4077])
-ERROR: File "anon12.php", line 16, characters 10-13:
-Invalid return type (Typing[4110])
-  File "anon12.php", line 12, characters 18-23:
-  Expected `string`
-  File "anon12.php", line 13, characters 22-22:
-  But got `int`
-ERROR: File "anon12.php", line 16, characters 10-13:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "anon12.php", line 13, characters 8-48:
-  Definition is here
+or add a default value to this one. [1]
+
+anon12.php:13:25
+11 | 
+12 | function test(): string {
+13 |   $f = function($x = 0, $y) {
+   |                         ^^ [1]
+14 |     return $x;
+15 |   };
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+anon12.php:16:10
+10 |  */
+11 | 
+12 | function test(): string {
+   |                  ^^^^^^ [2]
+13 |   $f = function($x = 0, $y) {
+   |                      ^ [3]
+14 |     return $x;
+15 |   };
+16 |   return $f();
+   |          ^^^^ [1]
+17 | }
+
+error: Typing[4104] Too few positional arguments (required 1 but got 0) [1]
+-> Definition is here [2]
+
+anon12.php:16:10
+11 | 
+12 | function test(): string {
+13 |   $f = function($x = 0, $y) {
+   |        ^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 |     return $x;
+   |     ^^^^^^^^^^ [2]
+15 |   };
+   |   ^ [2]
+16 |   return $f();
+   |          ^^^^ [1]
+17 | }
+
+3 errors found

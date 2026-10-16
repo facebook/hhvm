@@ -1,6 +1,18 @@
-ERROR: File "namespace_global_const2.php", line 11, characters 12-18:
-Invalid return type (Typing[4110])
-  File "namespace_global_const2.php", line 10, characters 17-22:
-  Expected `string`
-  File "namespace_global_const2.php", line 8, characters 9-11:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+namespace_global_const2.php:11:12
+ 6 | 
+ 7 | namespace N {
+ 8 |   const int MYCONST = 1;
+   |         ^^^ [3]
+ 9 | 
+10 |   function f(): string {
+   |                 ^^^^^^ [2]
+11 |     return MYCONST;
+   |            ^^^^^^^ [1]
+12 |   }
+13 | }
+
+1 error found

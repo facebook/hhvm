@@ -1,8 +1,19 @@
-ERROR: File "typedef_bad_error_message.php", line 6, characters 10-24:
-Some elements in this collection are incompatible (Typing[4110])
-  File "typedef_bad_error_message.php", line 5, characters 20-22:
-  Expected `int`
-  File "typedef_bad_error_message.php", line 3, characters 23-23:
-    via this generic `T`
-  File "typedef_bad_error_message.php", line 6, characters 19-22:
-  But got `string`
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `int` [2]
+->   via this generic `T` [3]
+-> But got `string` [4]
+
+typedef_bad_error_message.php:6:10
+1 | <?hh
+2 | 
+3 | type Blah<T> = Vector<T>;
+  |                       ^ [3]
+4 | 
+5 | function f(): Blah<int> {
+  |                    ^^^ [2]
+6 |   return Vector { 'hi' };
+  |          ^^^^^^^^^^^^^^^ [1]
+  |                   ^^^^ [4]
+7 | }
+
+1 error found

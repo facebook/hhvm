@@ -1,10 +1,51 @@
-WARN: File "T253666284.php", line 29, characters 5-30:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "T253666284.php", line 29, characters 5-42:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "T253666284.php", line 29, characters 34-42:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "T253666284.php", line 29, characters 41-42:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "T253666284.php", line 31, characters 19-44:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+T253666284.php:29:5
+27 |   public function behold(): void {
+28 |     // This is Tany because in the body of the trait, TA has an upperbound of IDontCareAboutTB
+29 |     $i_do_not_respect_lattices = $this->tb;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |     // Catchable fatal error: Argument 1 passed to giveMeABanana() must be an instance of Banana, int given
+31 |     giveMeABanana($i_do_not_respect_lattices);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+T253666284.php:29:5
+27 |   public function behold(): void {
+28 |     // This is Tany because in the body of the trait, TA has an upperbound of IDontCareAboutTB
+29 |     $i_do_not_respect_lattices = $this->tb;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |     // Catchable fatal error: Argument 1 passed to giveMeABanana() must be an instance of Banana, int given
+31 |     giveMeABanana($i_do_not_respect_lattices);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+T253666284.php:29:34
+27 |   public function behold(): void {
+28 |     // This is Tany because in the body of the trait, TA has an upperbound of IDontCareAboutTB
+29 |     $i_do_not_respect_lattices = $this->tb;
+   |                                  ^^^^^^^^^ [1]
+30 |     // Catchable fatal error: Argument 1 passed to giveMeABanana() must be an instance of Banana, int given
+31 |     giveMeABanana($i_do_not_respect_lattices);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+T253666284.php:29:41
+27 |   public function behold(): void {
+28 |     // This is Tany because in the body of the trait, TA has an upperbound of IDontCareAboutTB
+29 |     $i_do_not_respect_lattices = $this->tb;
+   |                                         ^^ [1]
+30 |     // Catchable fatal error: Argument 1 passed to giveMeABanana() must be an instance of Banana, int given
+31 |     giveMeABanana($i_do_not_respect_lattices);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+T253666284.php:31:19
+29 |     $i_do_not_respect_lattices = $this->tb;
+30 |     // Catchable fatal error: Argument 1 passed to giveMeABanana() must be an instance of Banana, int given
+31 |     giveMeABanana($i_do_not_respect_lattices);
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+32 |   }
+33 | }
+
+5 errors found

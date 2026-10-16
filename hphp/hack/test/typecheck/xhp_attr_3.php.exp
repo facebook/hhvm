@@ -1,2 +1,10 @@
-ERROR: File "xhp_attr_3.php", line 9, characters 3-12:
-`->:` operator is not allowed in write context (Parsing[1002])
+error: Parsing[1002] `->:` operator is not allowed in write context [1]
+
+xhp_attr_3.php:9:3
+ 7 | function test(:xhp $obj): void {
+ 8 |   // Using ->: syntax for writing is not supported for now
+ 9 |   $obj->:foo = 123;
+   |   ^^^^^^^^^^ [1]
+10 | }
+
+1 error found

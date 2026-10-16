@@ -1,2 +1,8 @@
-ERROR: File "include_strict.php", line 2, characters 1-25:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+include_strict.php:2:1
+1 | <?hh
+2 | echo(include('baz.php'));
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

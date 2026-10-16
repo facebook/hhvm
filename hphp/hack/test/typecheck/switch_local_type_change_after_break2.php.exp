@@ -1,10 +1,51 @@
-ERROR: File "switch_local_type_change_after_break2.php", line 14, characters 3-107:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_local_type_change_after_break2.php", line 14, characters 11-11:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "switch_local_type_change_after_break2.php", line 23, characters 10-11:
-Invalid return type (Typing[4110])
-  File "switch_local_type_change_after_break2.php", line 12, characters 15-17:
-  Expected `int`
-  File "switch_local_type_change_after_break2.php", line 17, characters 14-19:
-  But got `string`
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_local_type_change_after_break2.php:14:3
+12 | function f(): int {
+13 |   $x = 1;
+14 |   switch (1) {
+   |   ^^^^^^^^^^^^ [1]
+   |           ^ [2]
+15 |     case 1:
+   |     ^^^^^^^ [1]
+16 |       if (true) {
+   |       ^^^^^^^^^^^ [1]
+17 |         $x = "derp";
+   |         ^^^^^^^^^^^^ [1]
+18 |         break;
+   |         ^^^^^^ [1]
+19 |       }
+   |       ^ [1]
+20 |       $x = 10;
+   |       ^^^^^^^^ [1]
+21 |   }
+   |   ^ [1]
+22 | 
+23 |   return $x;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+switch_local_type_change_after_break2.php:23:10
+10 |  */
+11 | 
+12 | function f(): int {
+   |               ^^^ [2]
+13 |   $x = 1;
+14 |   switch (1) {
+15 |     case 1:
+16 |       if (true) {
+17 |         $x = "derp";
+   |              ^^^^^^ [3]
+18 |         break;
+19 |       }
+20 |       $x = 10;
+21 |   }
+22 | 
+23 |   return $x;
+   |          ^^ [1]
+24 | }
+
+2 errors found

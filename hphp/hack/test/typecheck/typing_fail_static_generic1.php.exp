@@ -1,6 +1,15 @@
-ERROR: File "typing_fail_static_generic1.php", line 15, characters 18-18:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "typing_fail_static_generic1.php", line 15, characters 17-18:
-  This is where the type of the static property was declared
-  File "typing_fail_static_generic1.php", line 14, characters 7-7:
-  This is the class containing the static property
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+typing_fail_static_generic1.php:15:18
+12 | // checking that generics are dissalowed for static values
+13 | 
+14 | class A<T> {
+   |       ^ [3]
+15 |   public static ?T $x;
+   |                 ^^ [2]
+   |                  ^ [1]
+16 | }
+
+1 error found

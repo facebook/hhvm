@@ -1,6 +1,25 @@
-WARN: File "inter_instanceof.php", line 21, characters 6-12:
-This `is` check is always `false`. The expression on the left has type `(int | string)` which shares no values with `A`. (Warn[12010])
-WARN: File "inter_instanceof.php", line 22, characters 9-11:
-Method invoked on a value of type `(dynamic & A)` (Warn[12038])
-  File "inter_instanceof.php", line 20, characters 8-12:
-  This expression has type `dynamic`
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `(int | string)` which shares no values with `A`. [1]
+
+inter_instanceof.php:21:6
+19 |   $x[] = '';
+20 |   $y = $x[0];
+21 |   if($y is A) {
+   |      ^^^^^^^ [1]
+22 |     $y->get();
+23 |   }
+
+warning: Warn[12038] Method invoked on a value of type `(dynamic & A)` [1]
+-> This expression has type `dynamic` [2]
+
+inter_instanceof.php:22:9
+18 |   $x[] = 0;
+19 |   $x[] = '';
+20 |   $y = $x[0];
+   |        ^^^^^ [2]
+21 |   if($y is A) {
+22 |     $y->get();
+   |         ^^^ [1]
+23 |   }
+24 | }
+
+2 errors found

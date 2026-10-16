@@ -1,4 +1,16 @@
-ERROR: File "abstract_redeclare_constructor.php", line 8, characters 28-38:
-Cannot re-declare this method as abstract (Typing[4142])
-  File "abstract_redeclare_constructor.php", line 4, characters 19-29:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this method as abstract [1]
+-> Previously defined here [2]
+
+abstract_redeclare_constructor.php:8:28
+2 | 
+3 | abstract class MyParent {
+4 |   public function __construct(): void {}
+  |                   ^^^^^^^^^^^ [2]
+5 | }
+6 | 
+7 | abstract class MyChild extends MyParent {
+8 |   abstract public function __construct(): void;
+  |                            ^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

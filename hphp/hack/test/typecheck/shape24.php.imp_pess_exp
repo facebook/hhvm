@@ -1,6 +1,20 @@
-ERROR: File "shape24.php", line 21, characters 10-11:
-Invalid return type (Typing[4110])
-  File "shape24.php", line 14, characters 12-15:
-  Expected `bool`
-  File "shape24.php", line 14, characters 11-15:
-  But got `nonnull`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `nonnull` [3]
+
+shape24.php:21:10
+12 | type t = shape(
+13 |   'x' => int,
+14 |   ?'z' => ?bool,
+   |           ^^^^^ [3]
+   |            ^^^^ [2]
+15 |   ...
+16 | );
+   :
+19 | // we don't know anything about. 'z' must be set explicitly in this function.
+20 | function test(s $s): t {
+21 |   return $s;
+   |          ^^ [1]
+22 | }
+
+1 error found

@@ -1,4 +1,19 @@
-ERROR: File "test_consts6.php", line 6, characters 17-25:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "test_consts6.php", line 6, characters 17-25:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+test_consts6.php:6:17
+4 |   const int X = 10;
+5 |   // static not allowed in constants
+6 |   const int Y = static::X;
+  |                 ^^^^^^^^^ [1]
+7 | }
+
+error: Naming[2023] Illegal constant value [1]
+
+test_consts6.php:6:17
+4 |   const int X = 10;
+5 |   // static not allowed in constants
+6 |   const int Y = static::X;
+  |                 ^^^^^^^^^ [1]
+7 | }
+
+2 errors found

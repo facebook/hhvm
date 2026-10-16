@@ -1,8 +1,31 @@
-ERROR: File "shape_access_coalesce_nullable.php", line 5, characters 3-15:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_access_coalesce_nullable.php", line 3, characters 13-29:
-  The field `b` is not defined in this shape
-ERROR: File "shape_access_coalesce_nullable.php", line 8, characters 3-15:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_access_coalesce_nullable.php", line 3, characters 13-29:
-  The field `b` is not defined in this shape
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `b` is not defined in this shape [2]
+
+shape_access_coalesce_nullable.php:5:3
+1 | <?hh
+2 | 
+3 | function f(?shape('a' => int) $s): void {
+  |             ^^^^^^^^^^^^^^^^^ [2]
+4 |   $s['a'] ?? 42;  // Fine
+5 |   $s['b'] ?? 42; // Not fine
+  |   ^^^^^^^^^^^^^ [1]
+6 |   $s as nonnull;
+7 |   $s['a'] ?? 42;  // Fine
+
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `b` is not defined in this shape [2]
+
+shape_access_coalesce_nullable.php:8:3
+1 | <?hh
+2 | 
+3 | function f(?shape('a' => int) $s): void {
+  |             ^^^^^^^^^^^^^^^^^ [2]
+4 |   $s['a'] ?? 42;  // Fine
+5 |   $s['b'] ?? 42; // Not fine
+6 |   $s as nonnull;
+7 |   $s['a'] ?? 42;  // Fine
+8 |   $s['b'] ?? 42; // Not fine
+  |   ^^^^^^^^^^^^^ [1]
+9 | }
+
+2 errors found

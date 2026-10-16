@@ -1,6 +1,17 @@
-ERROR: File "xhpchild2.php", line 17, characters 6-14:
-Invalid argument (Typing[4110])
-  File "xhpchild2.php", line 14, characters 13-20:
-  Expected `XHPChild`
-  File "xhpchild2.php", line 17, characters 10-12:
-  But got `Foo`
+error: Typing[4110] Invalid argument [1]
+-> Expected `XHPChild` [2]
+-> But got `Foo` [3]
+
+xhpchild2.php:17:6
+12 | class Foo {}
+13 | 
+14 | function f1(XHPChild $x): void {}
+   |             ^^^^^^^^ [2]
+15 | 
+16 | function f2(): void {
+17 |   f1(new Foo());
+   |      ^^^^^^^^^ [1]
+   |          ^^^ [3]
+18 | }
+
+1 error found

@@ -1,16 +1,29 @@
-ERROR: File "abstract_implement2.php", line 21, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "abstract_implement2.php", line 21, characters 19-21:
-  Method `foo` has type `(function(): int)` in `BClass`
-  File "abstract_implement2.php", line 15, characters 19-21:
-  But it has type `(function(): ~bool)` in parent `AClass<bool>` and comes from ancestor or trait `IFace<T>`
-  File "abstract_implement2.php", line 21, characters 19-21:
-  Type `(function(): int)` is not a subtype of `(function(): ~bool)`
-  File "abstract_implement2.php", line 20, characters 29-32:
-  Expected `bool`
-  File "abstract_implement2.php", line 18, characters 43-43:
-    via this generic `T`
-  File "abstract_implement2.php", line 15, characters 26-26:
-    via this generic `T`
-  File "abstract_implement2.php", line 21, characters 26-28:
-  But got `int`
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(): int)` in `BClass` [1]
+-> But it has type `(function(): ~bool)` in parent `AClass<bool>` and comes from ancestor or trait `IFace<T>` [2]
+-> Type `(function(): int)` is not a subtype of `(function(): ~bool)` [1]
+-> Expected `bool` [3]
+->   via this generic `T` [4]
+->   via this generic `T` [5]
+-> But got `int` [6]
+
+abstract_implement2.php:21:19
+13 | 
+14 | interface IFace<T> {
+15 |   public function foo(): T;
+   |                   ^^^ [2]
+   |                          ^ [5]
+16 | }
+17 | 
+18 | abstract class AClass<T> implements IFace<T> {}
+   |                                           ^ [4]
+19 | 
+20 | class BClass extends AClass<bool> {
+   |                             ^^^^ [3]
+21 |   public function foo(): int {
+   |                   ^^^ [1]
+   |                          ^^^ [6]
+22 |     return $this->foo();
+23 |   }
+
+1 error found

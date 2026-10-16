@@ -1,4 +1,19 @@
-ERROR: File "typing_fail_abstract3.php", line 15, characters 19-19:
-This method is declared as abstract, but has a body (NastCheck[3002])
-ERROR: File "typing_fail_abstract3.php", line 15, characters 19-19:
-This method shouldn't have a body (NastCheck[3001])
+error: NastCheck[3002] This method is declared as abstract, but has a body [1]
+
+typing_fail_abstract3.php:15:19
+13 | 
+14 | interface A {
+15 |   public function f(): int { return 0; }
+   |                   ^ [1]
+16 | }
+
+error: NastCheck[3001] This method shouldn't have a body [1]
+
+typing_fail_abstract3.php:15:19
+13 | 
+14 | interface A {
+15 |   public function f(): int { return 0; }
+   |                   ^ [1]
+16 | }
+
+2 errors found

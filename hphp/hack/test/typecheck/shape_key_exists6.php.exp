@@ -1,10 +1,33 @@
-ERROR: File "shape_key_exists6.php", line 6, characters 10-48:
-Invalid return type (Typing[4110])
-  File "shape_key_exists6.php", line 5, characters 18-23:
-  Expected `string`
-  File "Shapes.hhi", line 55, characters 10-13:
-  But got `bool`
-ERROR: File "shape_key_exists6.php", line 6, characters 10-48:
-This `Shapes::keyExists()` check is always true (Typing[4249])
-  File "shape_key_exists6.php", line 6, characters 41-41:
-  The field `z` exists because of this definition
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+shape_key_exists6.php:6:10
+ 3 | // Not matching return type of keyExists
+ 4 | 
+ 5 | function test(): string {
+   |                  ^^^^^^ [2]
+ 6 |   return Shapes::keyExists(shape('z' => 3), 'z');
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 7 | }
+
+Shapes.hhi:55:10
+53 |       readonly shape(...) $shape,
+54 |       arraykey $index,
+55 |     )[]: bool;
+   |          ^^^^ [3]
+56 | 
+57 |     /**
+
+error: Typing[4249] This `Shapes::keyExists()` check is always true [1]
+-> The field `z` exists because of this definition [2]
+
+shape_key_exists6.php:6:10
+4 | 
+5 | function test(): string {
+6 |   return Shapes::keyExists(shape('z' => 3), 'z');
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                         ^ [2]
+7 | }
+
+2 errors found

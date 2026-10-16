@@ -1,4 +1,16 @@
-ERROR: File "case_sensitive_inheritance6.php", line 7, characters 19-21:
-IFooChild inherits a method named `foo` whose name differs from this one (`Foo`) only by case. (Typing[4393])
-  File "case_sensitive_inheritance6.php", line 3, characters 19-21:
-  It was inherited from IFoo as `~~f~~oo`. If you meant to override it, please use the same casing as the inherited method. Otherwise, please choose a different name for the new method
+error: Typing[4393] IFooChild inherits a method named `foo` whose name differs from this one (`Foo`) only by case. [1]
+-> It was inherited from IFoo as `~~f~~oo`. If you meant to override it, please use the same casing as the inherited method. Otherwise, please choose a different name for the new method [2]
+
+case_sensitive_inheritance6.php:7:19
+1 | <?hh
+2 | interface IFoo {
+3 |   public function foo(): int;
+  |                   ^^^ [2]
+4 | }
+5 | 
+6 | interface IFooChild extends IFoo {
+7 |   public function Foo(): float; // hh should error
+  |                   ^^^ [1]
+8 | }
+
+1 error found

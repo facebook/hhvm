@@ -1,4 +1,13 @@
-ERROR: File "const_map2.php", line 13, characters 3-19:
-You cannot mutate this (Typing[4011])
-  File "const_map2.php", line 12, characters 14-37:
-  This is an object of type ConstMap<string, string>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type ConstMap<string, string> [2]
+
+const_map2.php:13:3
+10 |  */
+11 | 
+12 | function foo(ConstMap<string, string> $v): void {
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 |   $v["xyz"] = "foo";
+   |   ^^^^^^^^^^^^^^^^^ [1]
+14 | }
+
+1 error found

@@ -1,6 +1,21 @@
-ERROR: File "xhp_attr_spread_generic.php", line 18, characters 15-17:
-Invalid xhp value for attribute `:my-vec` in `:my-bar` (Typing[4343])
-  File "xhp_attr_spread_generic.php", line 8, characters 17-19:
-  Expected `int`
-  File "xhp_attr_spread_generic.php", line 17, characters 29-33:
-  But got `string`
+error: Typing[4343] Invalid xhp value for attribute `:my-vec` in `:my-bar` [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+xhp_attr_spread_generic.php:18:15
+ 6 | 
+ 7 | class :my-bar extends XHPTest {
+ 8 |   attribute vec<int> my-vec;
+   |                 ^^^ [2]
+ 9 | }
+10 | 
+   :
+15 | 
+16 |   // This is incorrect through the generic
+17 |   $f2 = <my-foo my-vec={vec['foo', 'bar', 'baz']} />;
+   |                             ^^^^^ [3]
+18 |   <my-bar {...$f2} />;
+   |               ^^^ [1]
+19 | }
+
+1 error found

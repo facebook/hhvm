@@ -1,8 +1,24 @@
-ERROR: File "do_while_condition_typechange.php", line 16, characters 11-12:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "do_while_condition_typechange.php", line 15, characters 11-12:
-Typing error (Typing[4429])
-  File "do_while_condition_typechange.php", line 15, characters 5-12:
-  Expected `num` because this is used in an arithmetic operation
-  File "do_while_condition_typechange.php", line 16, characters 16-19:
-  But got `bool`
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+do_while_condition_typechange.php:16:11
+14 |   do {
+15 |     $i += $x;
+16 |   } while($x = true);
+   |           ^^ [1]
+17 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `bool` [3]
+
+do_while_condition_typechange.php:15:11
+13 |   $x = $i;
+14 |   do {
+15 |     $i += $x;
+   |     ^^^^^^^^ [2]
+   |           ^^ [1]
+16 |   } while($x = true);
+   |                ^^^^ [3]
+17 | }
+
+2 errors found

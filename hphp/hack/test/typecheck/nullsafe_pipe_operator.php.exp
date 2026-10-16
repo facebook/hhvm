@@ -1,12 +1,46 @@
-ERROR: File "nullsafe_pipe_operator.php", line 13, characters 25-26:
-Invalid argument (Typing[4110])
-  File "nullsafe_pipe_operator.php", line 7, characters 14-19:
-  Expected `string`
-  File "nullsafe_pipe_operator.php", line 3, characters 31-37:
-  But got `?string`
-ERROR: File "nullsafe_pipe_operator.php", line 20, characters 7-13:
-Invalid argument (Typing[4110])
-  File "nullsafe_pipe_operator.php", line 7, characters 14-19:
-  Expected `string`
-  File "nullsafe_pipe_operator.php", line 18, characters 13-38:
-  But got `?string` (use of `|?>` operator)
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `?string` [3]
+
+nullsafe_pipe_operator.php:13:25
+ 1 | <?hh
+ 2 | 
+ 3 | function foo(bool $coinflip): ?string {
+   |                               ^^^^^^^ [3]
+ 4 |   return $coinflip ? "foo" : null;
+ 5 | }
+ 6 | 
+ 7 | function bar(string $prefix): string {
+   |              ^^^^^^ [2]
+ 8 |   return $prefix."bar";
+ 9 | }
+10 | 
+11 | function normal_pipe(bool $coinflip): void {
+12 |   // Not ok since bar expects string not ?string
+13 |   foo($coinflip) |> bar($$);
+   |                         ^^ [1]
+14 | }
+15 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `?string` (use of `|?>` operator) [3]
+
+nullsafe_pipe_operator.php:20:7
+ 5 | }
+ 6 | 
+ 7 | function bar(string $prefix): string {
+   |              ^^^^^^ [2]
+ 8 |   return $prefix."bar";
+ 9 | }
+   :
+16 | function nullsafe_pipe(bool $coinflip): void {
+17 |   // OK because of nullsafe pipe operator
+18 |   $result = foo($coinflip) |?> bar($$);
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+19 |   // Not ok since bar expects string not ?string
+20 |   bar($result);
+   |       ^^^^^^^ [1]
+21 | }
+
+2 errors found

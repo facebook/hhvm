@@ -1,8 +1,27 @@
-ERROR: File "class_meth_dollarsign.php", line 7, characters 32-37:
-`meth_caller` cannot be called on strings that contain `$` (Parsing[1002])
-ERROR: File "class_meth_dollarsign.php", line 7, characters 32-37:
-No instance method `bar$` in `Foo` (Typing[4053])
-  File "class_meth_dollarsign.php", line 7, characters 20-22:
-  This is why I think it is an object of type Foo
-  File "class_meth_dollarsign.php", line 3, characters 7-9:
-  Declaration of `Foo` is here
+error: Parsing[1002] `meth_caller` cannot be called on strings that contain `$` [1]
+
+class_meth_dollarsign.php:7:32
+5 | <<__EntryPoint>>
+6 | function test(): void {
+7 |   $y = meth_caller(Foo::class, 'bar$');
+  |                                ^^^^^^ [1]
+8 | }
+
+error: Typing[4053] No instance method `bar$` in `Foo` [1]
+-> This is why I think it is an object of type Foo [2]
+-> Declaration of `Foo` is here [3]
+
+class_meth_dollarsign.php:7:32
+1 | <?hh
+2 | 
+3 | class Foo {}
+  |       ^^^ [3]
+4 | 
+5 | <<__EntryPoint>>
+6 | function test(): void {
+7 |   $y = meth_caller(Foo::class, 'bar$');
+  |                    ^^^ [2]
+  |                                ^^^^^^ [1]
+8 | }
+
+2 errors found

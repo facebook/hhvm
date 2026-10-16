@@ -1,2 +1,10 @@
-ERROR: File "invariant_bad_call.php", line 4, characters 3-11:
-Too few arguments (Naming[2037])
+error: Naming[2037] Too few arguments [1]
+
+invariant_bad_call.php:4:3
+2 | 
+3 | function f(): void {
+4 |   invariant();
+  |   ^^^^^^^^^ [1]
+5 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "interface_memoize.php", line 4, characters 3-29:
-`__Memoize` is not allowed on interface methods (Parsing[1002])
-ERROR: File "interface_memoize.php", line 4, characters 19-21:
-Abstract methods cannot be memoized. (NastCheck[3087])
+error: Parsing[1002] `__Memoize` is not allowed on interface methods [1]
+
+interface_memoize.php:4:3
+2 | interface I {
+3 |   <<__Memoize>>
+4 |   public function foo(): void;
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | 
+6 | }
+
+error: NastCheck[3087] Abstract methods cannot be memoized. [1]
+
+interface_memoize.php:4:19
+2 | interface I {
+3 |   <<__Memoize>>
+4 |   public function foo(): void;
+  |                   ^^^ [1]
+5 | 
+6 | }
+
+2 errors found

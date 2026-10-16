@@ -1,14 +1,44 @@
-ERROR: File "iface_require_extends2.php", line 23, characters 10-22:
-No instance method `methodOfSuper` in `IMarked` (Typing[4053])
-  File "iface_require_extends2.php", line 19, characters 19-32:
-  Did you mean `methodOfMarked` instead?
-  File "iface_require_extends2.php", line 22, characters 19-25:
-  This is why I think it is an object of type IMarked
-  File "iface_require_extends2.php", line 16, characters 11-17:
-  Declaration of `IMarked` is here
-ERROR: File "iface_require_extends2.php", line 24, characters 11-15:
-Invalid argument (Typing[4110])
-  File "iface_require_extends2.php", line 29, characters 18-22:
-  Expected `Super`
-  File "iface_require_extends2.php", line 22, characters 19-25:
-  But got `IMarked`
+error: Typing[4053] No instance method `methodOfSuper` in `IMarked` [1]
+-> Did you mean `methodOfMarked` instead? [2]
+-> This is why I think it is an object of type IMarked [3]
+-> Declaration of `IMarked` is here [4]
+
+iface_require_extends2.php:23:10
+14 | }
+15 | 
+16 | interface IMarked {
+   |           ^^^^^^^ [4]
+17 |   // require extends Super;
+18 | 
+19 |   public function methodOfMarked(): int;
+   |                   ^^^^^^^^^^^^^^ [2]
+20 | }
+21 | 
+22 | function f_marked(IMarked $inst): void {
+   |                   ^^^^^^^ [3]
+23 |   $inst->methodOfSuper();
+   |          ^^^^^^^^^^^^^ [1]
+24 |   f_super($inst);
+25 |   $inst->methodOfMarked();
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Super` [2]
+-> But got `IMarked` [3]
+
+iface_require_extends2.php:24:11
+20 | }
+21 | 
+22 | function f_marked(IMarked $inst): void {
+   |                   ^^^^^^^ [3]
+23 |   $inst->methodOfSuper();
+24 |   f_super($inst);
+   |           ^^^^^ [1]
+25 |   $inst->methodOfMarked();
+26 |   f_marked2($inst);
+27 | }
+28 | 
+29 | function f_super(Super $super): void {}
+   |                  ^^^^^ [2]
+30 | function f_marked2(IMarked $inst): void {}
+
+2 errors found

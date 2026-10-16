@@ -1,10 +1,31 @@
-ERROR: File "typing_fail_protected_access2.php", line 17, characters 19-19:
-Invalid return type (Typing[4336])
-  File "typing_fail_protected_access2.php", line 17, characters 25-27:
-  Expected `int`
-  File "typing_fail_protected_access2.php", line 17, characters 19-19:
-  But got `void` because this function does not always return a value
-ERROR: File "typing_fail_protected_access2.php", line 18, characters 10-10:
-Cannot access this protected member, you don't extend Foo (Typing[4112])
-  File "typing_fail_protected_access2.php", line 13, characters 29-29:
-  This member is protected
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+typing_fail_protected_access2.php:17:19
+15 | 
+16 | class Bar {
+17 |   public function x(): ?int {
+   |                   ^ [1]
+   |                         ^^^ [2]
+18 |     Foo::f(); // ERROR
+19 |   }
+
+error: Typing[4112] Cannot access this protected member, you don't extend Foo [1]
+-> This member is protected [2]
+
+typing_fail_protected_access2.php:18:10
+11 | 
+12 | class Foo {
+13 |   protected static function f(): void {}
+   |                             ^ [2]
+14 | }
+15 | 
+16 | class Bar {
+17 |   public function x(): ?int {
+18 |     Foo::f(); // ERROR
+   |          ^ [1]
+19 |   }
+20 | }
+
+2 errors found

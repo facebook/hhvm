@@ -1,24 +1,47 @@
-ERROR: File "iface_require_incompat4.php", line 19, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "iface_require_incompat4.php", line 19, characters 39-40:
-  This requires to extend or implement Super
-  File "iface_require_incompat4.php", line 12, characters 19-30:
-  Required here
-  File "iface_require_incompat4.php", line 12, characters 25-29:
-  Expected `float`
-  File "iface_require_incompat4.php", line 19, characters 23-25:
-  But got `int`
-  File "iface_require_incompat4.php", line 19, characters 23-25:
-  This type argument to `Super` must match exactly (it is invariant)
-ERROR: File "iface_require_incompat4.php", line 19, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "iface_require_incompat4.php", line 19, characters 39-40:
-  This requires to extend or implement Super
-  File "iface_require_incompat4.php", line 12, characters 19-30:
-  Required here
-  File "iface_require_incompat4.php", line 19, characters 23-25:
-  Expected `int`
-  File "iface_require_incompat4.php", line 12, characters 25-29:
-  But got `float`
-  File "iface_require_incompat4.php", line 12, characters 25-29:
-  This type argument to `Super` must match exactly (it is invariant)
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `float` [4]
+-> But got `int` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+iface_require_incompat4.php:19:7
+10 | 
+11 | interface I2 {
+12 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [4]
+13 | }
+14 | 
+   :
+17 | 
+18 | // But as soon as it is used, we fail to extend Super<float>
+19 | class C extends Super<int> implements I3 { }
+   |       ^ [1]
+   |                       ^^^ [5]
+   |                                       ^^ [2]
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `int` [4]
+-> But got `float` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+iface_require_incompat4.php:19:7
+10 | 
+11 | interface I2 {
+12 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [5]
+13 | }
+14 | 
+   :
+17 | 
+18 | // But as soon as it is used, we fail to extend Super<float>
+19 | class C extends Super<int> implements I3 { }
+   |       ^ [1]
+   |                       ^^^ [4]
+   |                                       ^^ [2]
+
+2 errors found

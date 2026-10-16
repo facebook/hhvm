@@ -1,12 +1,27 @@
-ERROR: File "xor_bad3.php", line 13, characters 3-4:
-Invalid argument (Typing[4110])
-  File "xor_bad3.php", line 13, characters 3-4:
-  Expected `int` because this is used in a bitwise operation
-  File "xor_bad3.php", line 12, characters 14-19:
-  But got `string`
-ERROR: File "xor_bad3.php", line 13, characters 8-9:
-Invalid argument (Typing[4110])
-  File "xor_bad3.php", line 13, characters 8-9:
-  Expected `int` because this is used in a bitwise operation
-  File "xor_bad3.php", line 12, characters 25-30:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `string` [2]
+
+xor_bad3.php:13:3
+10 |  */
+11 | 
+12 | function foo(string $a, string $b): void {
+   |              ^^^^^^ [2]
+13 |   $a ^ $b;
+   |   ^^ [1]
+14 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `string` [2]
+
+xor_bad3.php:13:8
+10 |  */
+11 | 
+12 | function foo(string $a, string $b): void {
+   |                         ^^^^^^ [2]
+13 |   $a ^ $b;
+   |        ^^ [1]
+14 | }
+
+2 errors found

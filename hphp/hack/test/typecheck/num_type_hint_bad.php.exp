@@ -1,6 +1,20 @@
-ERROR: File "num_type_hint_bad.php", line 21, characters 5-6:
-Invalid argument (Typing[4110])
-  File "num_type_hint_bad.php", line 15, characters 12-14:
-  Expected `num`
-  File "num_type_hint_bad.php", line 20, characters 12-12:
-  But got `C`
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `C` [3]
+
+num_type_hint_bad.php:21:5
+13 | interface I {};
+14 | 
+15 | function f(num $n1, int $n2): num {
+   |            ^^^ [2]
+16 |   return 1 / $n2;
+17 | }
+18 | 
+19 | function test(): void {
+20 |   $c = new C();
+   |            ^ [3]
+21 |   f($c, 2);
+   |     ^^ [1]
+22 | }
+
+1 error found

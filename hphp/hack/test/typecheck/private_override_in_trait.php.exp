@@ -1,12 +1,23 @@
-ERROR: File "private_override_in_trait.php", line 16, characters 19-19:
-The method `f` is not compatible with the overridden method (Typing[4341])
-  File "private_override_in_trait.php", line 16, characters 19-19:
-  Method `f` has type `(function(int $x): int)` in `B`
-  File "private_override_in_trait.php", line 4, characters 20-20:
-  But it has type `(function(): void)` in parent `A`
-  File "private_override_in_trait.php", line 16, characters 19-19:
-  Type `(function(int $x): int)` is not a subtype of `(function(): void)`
-  File "private_override_in_trait.php", line 16, characters 19-19:
-  Too many mandatory arguments (expected 0 but got 1)
-  File "private_override_in_trait.php", line 4, characters 20-20:
-  Because of this definition
+error: Typing[4341] The method `f` is not compatible with the overridden method [1]
+-> Method `f` has type `(function(int $x): int)` in `B` [1]
+-> But it has type `(function(): void)` in parent `A` [2]
+-> Type `(function(int $x): int)` is not a subtype of `(function(): void)` [1]
+-> Too many mandatory arguments (expected 0 but got 1) [1]
+-> Because of this definition [2]
+
+private_override_in_trait.php:16:19
+ 2 | 
+ 3 | trait A {
+ 4 |   private function f(): void {
+   |                    ^ [2]
+ 5 |     echo "from A\n";
+ 6 |   }
+   :
+14 |   use A;
+15 | 
+16 |   public function f(int $x): int {
+   |                   ^ [1]
+17 |     echo "from B\n";
+18 |     return $x + 1;
+
+1 error found

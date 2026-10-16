@@ -1,4 +1,18 @@
-ERROR: File "toplevel_stmt_await.php", line 13, characters 1-18:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "toplevel_stmt_await.php", line 14, characters 1-14:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+toplevel_stmt_await.php:13:1
+11 | }
+12 | 
+13 | $c = await make();
+   | ^^^^^^^^^^^^^^^^^^ [1]
+14 | $c->foo() + 2;
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+toplevel_stmt_await.php:14:1
+12 | 
+13 | $c = await make();
+14 | $c->foo() + 2;
+   | ^^^^^^^^^^^^^^ [1]
+
+2 errors found

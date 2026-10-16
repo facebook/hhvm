@@ -1,6 +1,14 @@
-ERROR: File "immvector_invalid_key.php", line 15, characters 8-22:
-Typing error (Typing[4110])
-  File "immvector_invalid_key.php", line 15, characters 8-10:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "immvector_invalid_key.php", line 15, characters 12-21:
-  But got `string`
+error: Typing[4110] Typing error [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+immvector_invalid_key.php:15:8
+13 | 
+14 | function badkey<T>(ImmVector<T> $fv) : void {
+15 |   $x = $fv['sadpanda'];
+   |        ^^^^^^^^^^^^^^^ [1]
+   |        ^^^ [2]
+   |            ^^^^^^^^^^ [3]
+16 | }
+
+1 error found

@@ -1,4 +1,15 @@
-ERROR: File "missing_tparam5.php", line 6, characters 12-14:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "missing_tparam5.php", line 3, characters 9-11:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+missing_tparam5.php:6:12
+1 | <?hh
+2 | 
+3 | newtype Foo<T> as string = string;
+  |         ^^^ [2]
+4 | 
+5 | class C {
+6 |   private ?Foo $foo;
+  |            ^^^ [1]
+7 | }
+
+1 error found

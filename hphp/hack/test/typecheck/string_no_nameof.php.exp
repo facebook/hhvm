@@ -1,2 +1,10 @@
-ERROR: File "string_no_nameof.php", line 4, characters 10-15:
-`nameof` cannot be used with string (Parsing[1002])
+error: Parsing[1002] `nameof` cannot be used with string [1]
+
+string_no_nameof.php:4:10
+2 | 
+3 | function f() : void {
+4 |   nameof string;
+  |          ^^^^^^ [1]
+5 | }
+
+1 error found

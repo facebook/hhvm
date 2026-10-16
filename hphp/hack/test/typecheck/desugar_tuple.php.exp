@@ -1,4 +1,14 @@
-ERROR: File "desugar_tuple.php", line 14, characters 3-11:
-an int does not allow array append (Typing[4006])
-  File "desugar_tuple.php", line 12, characters 15-17:
-  Definition is here
+error: Typing[4006] an int does not allow array append [1]
+-> Definition is here [2]
+
+desugar_tuple.php:14:3
+10 |  */
+11 | 
+12 | function foo((int, int) $thing): void {
+   |               ^^^ [2]
+13 |   list($v, $x) = $thing;
+14 |   $v[] = 12;
+   |   ^^^^^^^^^ [1]
+15 | }
+
+1 error found

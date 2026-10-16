@@ -1,2 +1,15 @@
-ERROR: File "async_block3.php", line 4, characters 15-43:
-Don't use `() ==> async { ... }`. Instead, use: `async () ==> { ... }` (Parsing[1002])
+error: Parsing[1002] Don't use `() ==> async { ... }`. Instead, use: `async () ==> { ... }` [1]
+
+async_block3.php:4:15
+2 | 
+3 | async function f(): Awaitable<string> {
+4 |   $x = () ==> async {
+  |               ^^^^^^^ [1]
+5 |     return 'foo';
+  |     ^^^^^^^^^^^^^ [1]
+6 |   };
+  |   ^ [1]
+7 |   return await $x();
+8 | }
+
+1 error found

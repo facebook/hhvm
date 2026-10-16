@@ -1,4 +1,15 @@
-WARN: File "inter_instanceof_nothing.php", line 21, characters 9-11:
-Method invoked on a value of type `(A & dynamic)` (Warn[12038])
-  File "inter_instanceof_nothing.php", line 19, characters 8-12:
-  This expression has type `dynamic`
+warning: Warn[12038] Method invoked on a value of type `(A & dynamic)` [1]
+-> This expression has type `dynamic` [2]
+
+inter_instanceof_nothing.php:21:9
+17 |   $x = Vector {};
+18 |   $x[] = null;
+19 |   $y = $x[0];
+   |        ^^^^^ [2]
+20 |   if($y is A) {
+21 |     $y->get();
+   |         ^^^ [1]
+22 |   }
+23 | }
+
+1 error found

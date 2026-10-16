@@ -1,78 +1,145 @@
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 26-35:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
-  But got `T`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-    via this generic `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 26-35:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
-  But got `mixed`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-    via this generic `T`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 16-16:
-    by the definition of `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
-  But got `T`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-    via this generic `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 28-34:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
-  But got `mixed`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-    via this generic `T`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 16-16:
-    by the definition of `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 32-32:
-  But got `T`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-    via this generic `T`
-ERROR: File "constraint_newtype_param_type_advanced.php", line 7, characters 30-33:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_advanced.php", line 3, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 32-32:
-  But got `mixed`
-  File "constraint_newtype_param_type_advanced.php", line 4, characters 15-15:
-    via this generic `T`
-  File "constraint_newtype_param_type_advanced.php", line 7, characters 16-16:
-    by the definition of `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `T` [4]
+->   via this generic `T` [5]
+
+constraint_newtype_param_type_advanced.php:7:26
+1 | <?hh
+2 | 
+3 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+4 | type Y<T> = X<T>;
+  |               ^ [5]
+5 | 
+6 | function bar(Y<Y<Y<Y<int>>>> $_): void {}
+7 | function make1<T>(T $x): Y<Y<Y<T>>> {
+  |                          ^^^^^^^^^^ [1]
+  |                            ^^^^^^^ [4]
+8 |   return $x;
+9 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   via this generic `T` [5]
+->   by the definition of `T` [6]
+
+constraint_newtype_param_type_advanced.php:7:26
+1 | <?hh
+2 | 
+3 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+4 | type Y<T> = X<T>;
+  |               ^ [5]
+5 | 
+6 | function bar(Y<Y<Y<Y<int>>>> $_): void {}
+7 | function make1<T>(T $x): Y<Y<Y<T>>> {
+  |                ^ [6]
+  |                          ^^^^^^^^^^ [1]
+  |                            ^^^^^^^ [4]
+8 |   return $x;
+9 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `T` [4]
+->   via this generic `T` [5]
+
+constraint_newtype_param_type_advanced.php:7:28
+1 | <?hh
+2 | 
+3 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+4 | type Y<T> = X<T>;
+  |               ^ [5]
+5 | 
+6 | function bar(Y<Y<Y<Y<int>>>> $_): void {}
+7 | function make1<T>(T $x): Y<Y<Y<T>>> {
+  |                            ^^^^^^^ [1]
+  |                              ^^^^ [4]
+8 |   return $x;
+9 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   via this generic `T` [5]
+->   by the definition of `T` [6]
+
+constraint_newtype_param_type_advanced.php:7:28
+1 | <?hh
+2 | 
+3 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+4 | type Y<T> = X<T>;
+  |               ^ [5]
+5 | 
+6 | function bar(Y<Y<Y<Y<int>>>> $_): void {}
+7 | function make1<T>(T $x): Y<Y<Y<T>>> {
+  |                ^ [6]
+  |                            ^^^^^^^ [1]
+  |                              ^^^^ [4]
+8 |   return $x;
+9 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `T` [4]
+->   via this generic `T` [5]
+
+constraint_newtype_param_type_advanced.php:7:30
+1 | <?hh
+2 | 
+3 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+4 | type Y<T> = X<T>;
+  |               ^ [5]
+5 | 
+6 | function bar(Y<Y<Y<Y<int>>>> $_): void {}
+7 | function make1<T>(T $x): Y<Y<Y<T>>> {
+  |                              ^^^^ [1]
+  |                                ^ [4]
+8 |   return $x;
+9 | }
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+->   via this generic `T` [5]
+->   by the definition of `T` [6]
+
+constraint_newtype_param_type_advanced.php:7:30
+1 | <?hh
+2 | 
+3 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+4 | type Y<T> = X<T>;
+  |               ^ [5]
+5 | 
+6 | function bar(Y<Y<Y<Y<int>>>> $_): void {}
+7 | function make1<T>(T $x): Y<Y<Y<T>>> {
+  |                ^ [6]
+  |                              ^^^^ [1]
+  |                                ^ [4]
+8 |   return $x;
+9 | }
+
+6 errors found

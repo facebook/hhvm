@@ -1,2 +1,11 @@
-ERROR: File "dict_literal_mixed_brace.php", line 4, characters 31-31:
-A closing square bracket `]` is expected here. (Parsing[1002])
+error: Parsing[1002] A closing square bracket `]` is expected here. [1]
+
+dict_literal_mixed_brace.php:4:31
+2 | 
+3 | function foo(): dict<string, int> {
+4 |   $x = dict['a' => 2, 'b' => 5};
+  |                               ^ [1]
+5 |   return $x;
+6 | }
+
+1 error found

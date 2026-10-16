@@ -1,6 +1,14 @@
-ERROR: File "xhp_hint.php", line 6, characters 10-10:
-Invalid return type (Typing[4110])
-  File "xhp_hint.php", line 5, characters 15-18:
-  Expected `:foo`
-  File "xhp_hint.php", line 6, characters 10-10:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `:foo` [2]
+-> But got `int` [1]
+
+xhp_hint.php:6:10
+3 | class :foo {}
+4 | 
+5 | function f(): :foo {
+  |               ^^^^ [2]
+6 |   return 1;
+  |          ^ [1]
+7 | }
+
+1 error found

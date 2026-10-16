@@ -1,8 +1,26 @@
-ERROR: File "for_condition_typechange.php", line 14, characters 10-11:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "for_condition_typechange.php", line 15, characters 11-12:
-Typing error (Typing[4429])
-  File "for_condition_typechange.php", line 15, characters 5-12:
-  Expected `num` because this is used in an arithmetic operation
-  File "for_condition_typechange.php", line 14, characters 15-18:
-  But got `bool`
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+for_condition_typechange.php:14:10
+12 | function meh_for(int $i): void {
+13 |   $x = $i;
+14 |   for( ; $x = true; $i++) {
+   |          ^^ [1]
+15 |     $i += $x;
+16 |   }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `bool` [3]
+
+for_condition_typechange.php:15:11
+12 | function meh_for(int $i): void {
+13 |   $x = $i;
+14 |   for( ; $x = true; $i++) {
+   |               ^^^^ [3]
+15 |     $i += $x;
+   |     ^^^^^^^^ [2]
+   |           ^^ [1]
+16 |   }
+17 | }
+
+2 errors found

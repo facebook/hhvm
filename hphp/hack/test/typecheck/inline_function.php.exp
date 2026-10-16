@@ -1,6 +1,31 @@
-ERROR: File "inline_function.php", line 4, characters 5-18:
-Declarations are not supported outside global scope (Parsing[1002])
-ERROR: File "inline_function.php", line 4, characters 5-21:
-Encountered unexpected text `function bar() {}`, was expecting a statement. (Parsing[1002])
-ERROR: File "inline_function.php", line 4, characters 22-22:
-Inline function definitions are not supported in Hack (Parsing[1002])
+error: Parsing[1002] Declarations are not supported outside global scope [1]
+
+inline_function.php:4:5
+2 | function foo() : void {
+3 |   if(true) {
+4 |     function bar() {}
+  |     ^^^^^^^^^^^^^^ [1]
+5 |   }
+6 | }
+
+error: Parsing[1002] Encountered unexpected text `function bar() {}`, was expecting a statement. [1]
+
+inline_function.php:4:5
+2 | function foo() : void {
+3 |   if(true) {
+4 |     function bar() {}
+  |     ^^^^^^^^^^^^^^^^^ [1]
+5 |   }
+6 | }
+
+error: Parsing[1002] Inline function definitions are not supported in Hack [1]
+
+inline_function.php:4:22
+2 | function foo() : void {
+3 |   if(true) {
+4 |     function bar() {}
+  |                      ^ [1]
+5 |   }
+6 | }
+
+3 errors found

@@ -1,8 +1,34 @@
-ERROR: File "use_boolean_instead_of_bool.php", line 12, characters 11-17:
-No such type `boolean`, did you mean `bool`? (Naming[2123])
-ERROR: File "use_boolean_instead_of_bool.php", line 12, characters 11-17:
-Unbound name: `boolean` (Naming[2049])
-ERROR: File "use_boolean_instead_of_bool.php", line 11, characters 7-9:
-Class `Foo` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "use_boolean_instead_of_bool.php", line 12, characters 19-20:
-  `$this->b` is not initialized.
+error: Naming[2123] No such type `boolean`, did you mean `bool`? [1]
+
+use_boolean_instead_of_bool.php:12:11
+10 |  */
+11 | class Foo {
+12 |   private boolean $b;
+   |           ^^^^^^^ [1]
+13 |   public function foo(): void {}
+14 | }
+
+error: Naming[2049] Unbound name: `boolean` [1]
+
+use_boolean_instead_of_bool.php:12:11
+10 |  */
+11 | class Foo {
+12 |   private boolean $b;
+   |           ^^^^^^^ [1]
+13 |   public function foo(): void {}
+14 | }
+
+error: NastCheck[3015] Class `Foo` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->b` is not initialized. [2]
+
+use_boolean_instead_of_bool.php:11:7
+ 9 |  *
+10 |  */
+11 | class Foo {
+   |       ^^^ [1]
+12 |   private boolean $b;
+   |                   ^^ [2]
+13 |   public function foo(): void {}
+14 | }
+
+3 errors found

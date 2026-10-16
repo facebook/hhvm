@@ -1,2 +1,11 @@
-ERROR: File "dynamic_new_object.php", line 6, characters 12-15:
-Was expecting a class, but got a string (Typing[4026])
+error: Typing[4026] Was expecting a class, but got a string [1]
+
+dynamic_new_object.php:6:12
+4 | 
+5 | function f(string $str): void {
+6 |   $o = new $str(); // Type error
+  |            ^^^^ [1]
+7 |   takes_int($o); // Terr passes as int
+8 | }
+
+1 error found

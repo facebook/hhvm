@@ -1,4 +1,11 @@
-ERROR: File "type_param_shadow4_fail.php", line 12, characters 17-17:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "type_param_shadow4_fail.php", line 12, characters 14-14:
-  `T` is already bound here
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+type_param_shadow4_fail.php:12:17
+10 |  */
+11 | 
+12 | function foo<T, T>(): int { return 4; }
+   |              ^ [2]
+   |                 ^ [1]
+
+1 error found

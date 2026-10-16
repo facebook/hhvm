@@ -1,12 +1,25 @@
-ERROR: File "trait_matching2.php", line 23, characters 22-24:
-The method `lol` is not compatible with the overridden method (Typing[4341])
-  File "trait_matching2.php", line 23, characters 22-24:
-  Method `lol` has type `(function(): string)` in `C`
-  File "trait_matching2.php", line 13, characters 31-33:
-  But it has type `(function(): int)` in parent `MyTrait`
-  File "trait_matching2.php", line 23, characters 22-24:
-  Type `(function(): string)` is not a subtype of `(function(): int)`
-  File "trait_matching2.php", line 13, characters 38-40:
-  Expected `int`
-  File "trait_matching2.php", line 23, characters 29-34:
-  But got `string`
+error: Typing[4341] The method `lol` is not compatible with the overridden method [1]
+-> Method `lol` has type `(function(): string)` in `C` [1]
+-> But it has type `(function(): int)` in parent `MyTrait` [2]
+-> Type `(function(): string)` is not a subtype of `(function(): int)` [1]
+-> Expected `int` [3]
+-> But got `string` [4]
+
+trait_matching2.php:23:22
+11 | 
+12 | trait MyTrait {
+13 |   abstract protected function lol(): int;
+   |                               ^^^ [2]
+   |                                      ^^^ [3]
+14 | 
+15 |   public function getInt(): int {
+   :
+21 |   use MyTrait;
+22 | 
+23 |   protected function lol(): string {
+   |                      ^^^ [1]
+   |                             ^^^^^^ [4]
+24 |     return 'hello world';
+25 |   }
+
+1 error found

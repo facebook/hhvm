@@ -1,6 +1,20 @@
-ERROR: File "arraykey_type_hint_bad.php", line 20, characters 5-6:
-Invalid argument (Typing[4110])
-  File "arraykey_type_hint_bad.php", line 14, characters 12-19:
-  Expected `arraykey`
-  File "arraykey_type_hint_bad.php", line 19, characters 12-12:
-  But got `C`
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `C` [3]
+
+arraykey_type_hint_bad.php:20:5
+12 | class C {}
+13 | 
+14 | function f(arraykey $k1, arraykey $k2): arraykey {
+   |            ^^^^^^^^ [2]
+15 |   return $k2;
+16 | }
+17 | 
+18 | function test(): void {
+19 |   $c = new C();
+   |            ^ [3]
+20 |   f($c, 2);
+   |     ^^ [1]
+21 | }
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "const_vector2.php", line 13, characters 3-15:
-You cannot mutate this (Typing[4011])
-  File "const_vector2.php", line 12, characters 14-32:
-  This is an object of type ConstVector<string>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type ConstVector<string> [2]
+
+const_vector2.php:13:3
+10 |  */
+11 | 
+12 | function foo(ConstVector<string> $v): void {
+   |              ^^^^^^^^^^^^^^^^^^^ [2]
+13 |   $v[1] = "foo";
+   |   ^^^^^^^^^^^^^ [1]
+14 | }
+
+1 error found

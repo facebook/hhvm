@@ -1,6 +1,19 @@
-ERROR: File "nulllsafe_pipe_operator_precedence_wrong_type.php", line 16, characters 44-45:
-Invalid argument (Typing[4110])
-  File "nulllsafe_pipe_operator_precedence_wrong_type.php", line 11, characters 17-22:
-  Expected `string`
-  File "nulllsafe_pipe_operator_precedence_wrong_type.php", line 16, characters 20-31:
-  But got `int` because this is the result of an integer arithmetic operation
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` because this is the result of an integer arithmetic operation [3]
+
+nulllsafe_pipe_operator_precedence_wrong_type.php:16:44
+ 9 | }
+10 | 
+11 | function say_it(string $a): string {
+   |                 ^^^^^^ [2]
+12 |   return $a;
+13 | }
+14 | 
+15 | function piped(): ?string {
+16 |   return foo() |?> bar($$) + $$ |?> say_it($$);
+   |                    ^^^^^^^^^^^^ [3]
+   |                                            ^^ [1]
+17 | }
+
+1 error found

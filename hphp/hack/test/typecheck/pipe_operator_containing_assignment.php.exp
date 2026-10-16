@@ -1,2 +1,10 @@
-ERROR: File "pipe_operator_containing_assignment.php", line 16, characters 13-14:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+pipe_operator_containing_assignment.php:16:13
+14 | 
+15 | function piped(): void {
+16 |   $z = 5 |> $y = 3 + $$ |> say_it($$);
+   |             ^^ [1]
+17 | }
+
+1 error found

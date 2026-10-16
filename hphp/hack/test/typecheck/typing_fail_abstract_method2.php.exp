@@ -1,2 +1,10 @@
-ERROR: File "typing_fail_abstract_method2.php", line 14, characters 28-28:
-A method must have a body or be marked `abstract`. (Parsing[1002])
+error: Parsing[1002] A method must have a body or be marked `abstract`. [1]
+
+typing_fail_abstract_method2.php:14:28
+12 | // An abstract method shouldn't contain code
+13 | abstract class A {
+14 |   public function f(): void;
+   |                            ^ [1]
+15 | }
+
+1 error found

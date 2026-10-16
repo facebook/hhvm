@@ -1,6 +1,16 @@
-ERROR: File "newtype4.php--file2.php", line 5, characters 8-9:
-Invalid argument (Typing[4110])
-  File "newtype4.php--file2.php", line 3, characters 15-15:
-  Expected `a`
-  File "newtype4.php--file2.php", line 4, characters 16-18:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `a` [2]
+-> But got `int` [3]
+
+newtype4.php--file2.php:5:8
+1 | <?hh
+2 | 
+3 | function test(a $x): void {}
+  |               ^ [2]
+4 | function test2(int $x): void {
+  |                ^^^ [3]
+5 |   test($x);
+  |        ^^ [1]
+6 | }
+
+1 error found

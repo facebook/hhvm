@@ -1,10 +1,33 @@
-ERROR: File "contravariance_bad1.php", line 39, characters 10-11:
-Invalid return type (Typing[4110])
-  File "contravariance_bad1.php", line 33, characters 16-16:
-  Expected `A`
-  File "contravariance_bad1.php", line 16, characters 46-46:
-    via this generic `T`
-  File "contravariance_bad1.php", line 30, characters 30-30:
-  But got `B`
-  File "contravariance_bad1.php", line 30, characters 30-30:
-  This type argument to `ISettable` only allows supertypes (it is contravariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `A` [2]
+->   via this generic `T` [3]
+-> But got `B` [4]
+-> This type argument to `ISettable` only allows supertypes (it is contravariant) [4]
+
+contravariance_bad1.php:39:10
+14 | class B {}
+15 | 
+16 | final class Box<T as A> implements ISettable<T> {
+   |                                              ^ [3]
+17 |   public function __construct() {}
+18 |   private ?T $item;
+   :
+28 | 
+29 | function foo():void { }
+30 | function MakeIt(): ISettable<B> {
+   |                              ^ [4]
+31 |   // If we write new Box() then Hack
+32 |   // incorrectly accepts this: it doesn't check the constraint on T
+33 |   $x = new Box<A>();
+   |                ^ [2]
+34 |   // So here $x has type Box<v> with v <: A
+35 |   // Now we do Box<v> <: ISettable<B>
+36 |   // So ISettable<v> <: ISettable<B>
+37 |   // So B <: v by contravariance
+38 |   // By transitivity we should therefore check B <: A. Not true!
+39 |   return $x;
+   |          ^^ [1]
+40 | }
+41 | 
+
+1 error found

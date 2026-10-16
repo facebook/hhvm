@@ -1,14 +1,52 @@
-ERROR: File "test_foreach2.php", line 14, characters 12-13:
-Invalid return type (Typing[4110])
-  File "test_foreach2.php", line 12, characters 37-39:
-  Expected `int`
-  File "test_foreach2.php", line 12, characters 24-29:
-  But got `string`
-  File "collections/Map.hhi", line 58, characters 32-33:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 1111, characters 26-27:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 845, characters 26-27:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 49-50:
-    via this generic `Tv`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+->   via this generic `Tv` [7]
+
+test_foreach2.php:14:12
+  10 |  */
+  11 | 
+  12 | function test(Map<int, string> $x): int {
+     |                        ^^^^^^ [3]
+     |                                     ^^^ [2]
+  13 |   foreach ($x as $k => $v) {
+  14 |     return $v;
+     |            ^^ [1]
+  15 |   }
+  16 | 
+
+collections/Map.hhi:58:32
+  56 |    */
+  57 |   final class Map<Tk as arraykey, Tv>
+  58 |     implements \MutableMap<Tk, Tv> {
+     |                                ^^ [4]
+  59 |     /**
+  60 |      * Creates a `Map` from the given `KeyedTraversable`, or an empty `Map` if
+
+collections/interfaces.hhi:1111:26
+ 843 |   interface ConstMap<Tk as arraykey, +Tv>
+ 844 |     extends
+ 845 |       KeyedContainer<Tk, Tv>,
+     |                          ^^ [6]
+ 846 |       ConstCollection<Pair<Tk, Tv>>,
+ 847 |       ConstMapAccess<Tk, Tv>,
+     :
+1109 |   <<__Sealed(Map::class)>>
+1110 |   interface MutableMap<Tk as arraykey, Tv>
+1111 |     extends ConstMap<Tk, Tv>, Collection<Pair<Tk, Tv>>, MapAccess<Tk, Tv> {
+     |                          ^^ [5]
+1112 |     /**
+1113 |      * Returns a `MutableVector` containing the values of the current
+
+interfaces.hhi:115:49
+ 113 |   )>>
+ 114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+ 115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+     |                                                 ^^ [7]
+ 116 | 
+ 117 |   /**
+
+1 error found

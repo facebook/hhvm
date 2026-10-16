@@ -1,4 +1,14 @@
-WARN: File "static_prop_inheritance.bad.php", line 7, characters 17-17:
-Static property is overridden: `$p` (Warn[12021])
-  File "static_prop_inheritance.bad.php", line 8, characters 17-24:
-  Overriding static property is here
+warning: Warn[12021] Static property is overridden: `$p` [1]
+-> Overriding static property is here [2]
+
+static_prop_inheritance.bad.php:7:17
+ 5 | }
+ 6 | 
+ 7 | class D extends C {
+   |                 ^ [1]
+ 8 |   public static vec<int> $p = vec[];
+   |                 ^^^^^^^^ [2]
+ 9 | }
+10 | 
+
+1 error found

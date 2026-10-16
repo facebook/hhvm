@@ -1,4 +1,16 @@
-ERROR: File "typing_fail_uninstantiable_in_shape_return.php", line 14, characters 38-57:
-`CannotBeInstantiated` is uninstantiable (Typing[4002])
-  File "typing_fail_uninstantiable_in_shape_return.php", line 11, characters 22-41:
-  Declaration is here
+error: Typing[4002] `CannotBeInstantiated` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_fail_uninstantiable_in_shape_return.php:14:38
+ 9 |  */
+10 | 
+11 | abstract final class CannotBeInstantiated {}
+   |                      ^^^^^^^^^^^^^^^^^^^^ [2]
+12 | class TestFoo {
+13 | 
+14 |   const type TData = shape('text' => CannotBeInstantiated);
+   |                                      ^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   // this type can never be satisfied
+16 |   public function foo(this::TData $c): void {}
+
+1 error found

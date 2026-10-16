@@ -1,4 +1,15 @@
-ERROR: File "class_abstract_final_3.php", line 7, characters 7-7:
-You cannot extend final class `Foo` (Typing[4035])
-  File "class_abstract_final_3.php", line 3, characters 22-24:
-  Declaration is here
+error: Typing[4035] You cannot extend final class `Foo` [1]
+-> Declaration is here [2]
+
+class_abstract_final_3.php:7:7
+1 | <?hh
+2 | 
+3 | abstract final class Foo {
+  |                      ^^^ [2]
+4 |   public static function bar(): void {}
+5 | }
+6 | 
+7 | class C extends Foo {}
+  |       ^ [1]
+
+1 error found

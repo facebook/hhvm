@@ -1,12 +1,30 @@
-ERROR: File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
-Invalid argument (Typing[4110])
-  File "this_as_argument_public_inst_meth.php", line 7, characters 23-26:
-  Expected `<expr#11> as C`
-  File "this_as_argument_public_inst_meth.php", line 20, characters 5-7:
-    where `<expr#11>` is a reference to this expression
-  File "this_as_argument_public_inst_meth.php", line 11, characters 24-24:
-  But got `C`
-  File "this_as_argument_public_inst_meth.php", line 11, characters 31-31:
-  Since `C` is not final
-  File "this_as_argument_public_inst_meth.php", line 11, characters 24-24:
-  this might not be a `C`
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#11> as C` [2]
+->   where `<expr#11>` is a reference to this expression [3]
+-> But got `C` [4]
+-> Since `C` is not final [5]
+-> this might not be a `C` [4]
+
+this_as_argument_public_inst_meth.php:20:14
+ 5 | abstract class C {
+ 6 |   public function __construct(private this $self) {}
+ 7 |   public function set(this $x): void {
+   |                       ^^^^ [2]
+ 8 |     $this->self = $x;
+ 9 |   }
+10 | 
+11 |   public function test(C $c1, C $c2, this $self): void {
+   |                        ^ [4]
+   |                               ^ [5]
+12 |     // 'this' as a method parameter is treated as the 'static' type when
+13 |     // type checking within the given method. However when the method
+   :
+18 | 
+19 |     // Error because $c1 and $c2 may have different late-bound types
+20 |     $c2->set($c1);
+   |     ^^^ [3]
+   |              ^^^ [1]
+21 |   }
+22 | }
+
+1 error found

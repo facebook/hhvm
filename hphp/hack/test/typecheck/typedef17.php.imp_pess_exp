@@ -1,16 +1,44 @@
-ERROR: File "typedef17.php", line 23, characters 6-7:
-Invalid argument (Typing[4323])
-  File "typedef17.php", line 14, characters 13-13:
-  `T` is a constrained type parameter
-  File "typedef17.php", line 14, characters 18-23:
-  This type constraint is violated
-  File "typedef17.php", line 14, characters 18-23:
-  Expected `string`
-  File "typedef17.php", line 22, characters 17-19:
-  But got `int`
-ERROR: File "typedef17.php", line 23, characters 6-7:
-Invalid argument (Typing[4110])
-  File "typedef17.php", line 14, characters 26-29:
-  Expected `~vec<_>`
-  File "typedef17.php", line 22, characters 13-20:
-  But got `vec<int>`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+typedef17.php:23:6
+12 | type A<T> = vec<T>;
+13 | 
+14 | function f0<T as string>(A<T> $foo): T {
+   |             ^ [2]
+   |                  ^^^^^^ [3]
+15 |   return $foo[0];
+16 | }
+   :
+20 | }
+21 | 
+22 | function f2(vec<int> $x): void {
+   |                 ^^^ [4]
+23 |   f0($x);
+   |      ^^ [1]
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~vec<_>` [2]
+-> But got `vec<int>` [3]
+
+typedef17.php:23:6
+12 | type A<T> = vec<T>;
+13 | 
+14 | function f0<T as string>(A<T> $foo): T {
+   |                          ^^^^ [2]
+15 |   return $foo[0];
+16 | }
+   :
+20 | }
+21 | 
+22 | function f2(vec<int> $x): void {
+   |             ^^^^^^^^ [3]
+23 |   f0($x);
+   |      ^^ [1]
+24 | }
+
+2 errors found

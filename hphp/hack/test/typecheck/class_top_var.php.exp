@@ -1,14 +1,70 @@
-WARN: File "class_top_var.php", line 4, characters 5-36:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "class_top_var.php", line 7, characters 3-5:
-Encountered unexpected text `var`, was expecting a class element. (Parsing[1002])
-ERROR: File "class_top_var.php", line 7, characters 7-7:
-A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. (Parsing[1002])
-ERROR: File "class_top_var.php", line 7, characters 7-11:
-Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])
-ERROR: File "class_top_var.php", line 7, characters 7-10:
-Please add a type hint `public SomeType $foo` (Naming[2001])
-ERROR: File "class_top_var.php", line 3, characters 19-35:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "class_top_var.php", line 9, characters 19-41:
-Was expecting a return type hint (Typing[4030])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+class_top_var.php:4:5
+2 | class BadVarExample {
+3 |   public function testBadVarExample() {
+4 |     $this->thisFunctionShouldExist();
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 |   }
+6 | 
+
+error: Parsing[1002] Encountered unexpected text `var`, was expecting a class element. [1]
+
+class_top_var.php:7:3
+5 |   }
+6 | 
+7 |   var $foo;
+  |   ^^^ [1]
+8 | 
+9 |   public function thisFunctionShouldExist() {}
+
+error: Parsing[1002] A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. [1]
+
+class_top_var.php:7:7
+5 |   }
+6 | 
+7 |   var $foo;
+  |       ^ [1]
+8 | 
+9 |   public function thisFunctionShouldExist() {}
+
+error: Parsing[1002] Property declarations require a visibility modifier such as `public`, `private` or `protected`. [1]
+
+class_top_var.php:7:7
+5 |   }
+6 | 
+7 |   var $foo;
+  |       ^^^^^ [1]
+8 | 
+9 |   public function thisFunctionShouldExist() {}
+
+error: Naming[2001] Please add a type hint `public SomeType $foo` [1]
+
+class_top_var.php:7:7
+5 |   }
+6 | 
+7 |   var $foo;
+  |       ^^^^ [1]
+8 | 
+9 |   public function thisFunctionShouldExist() {}
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+class_top_var.php:3:19
+1 | <?hh
+2 | class BadVarExample {
+3 |   public function testBadVarExample() {
+  |                   ^^^^^^^^^^^^^^^^^ [1]
+4 |     $this->thisFunctionShouldExist();
+5 |   }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+class_top_var.php:9:19
+ 7 |   var $foo;
+ 8 | 
+ 9 |   public function thisFunctionShouldExist() {}
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 | }
+
+7 errors found

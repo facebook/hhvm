@@ -1,4 +1,19 @@
-ERROR: File "missing_tparam2.php", line 18, characters 14-14:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "missing_tparam2.php", line 12, characters 7-7:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+missing_tparam2.php:18:14
+10 |  */
+11 | 
+12 | class A<T> {
+   |       ^ [2]
+13 |   private T $x;
+14 |   public function __construct(T $x) { $this->x = $x; }
+15 |   public function get(): T {return $this->x;}
+16 | }
+17 | 
+18 | function foo(A $x): int {
+   |              ^ [1]
+19 |   return $x->get();
+20 | }
+
+1 error found

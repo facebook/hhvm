@@ -1,2 +1,10 @@
-ERROR: File "xhp_invalid_attr_value_int_and_string.php", line 9, characters 18-18:
-Invalid value for `bar`, expected one of `1`, `"stuff"`. (Typing[4483])
+error: Typing[4483] Invalid value for `bar`, expected one of `1`, `"stuff"`. [1]
+
+xhp_invalid_attr_value_int_and_string.php:9:18
+ 7 | 
+ 8 | function bad_attr_value(): void {
+ 9 |   $x = <foo bar={3} />;
+   |                  ^ [1]
+10 | }
+
+1 error found

@@ -1,16 +1,55 @@
-ERROR: File "stdclass_strict.php", line 9, characters 7-9:
-No property `foo` in `stdClass` (Typing[4053])
-  File "stdclass_strict.php", line 8, characters 12-19:
-  This is why I think it is an object of type stdClass
-  File "classes.hhi", line 31, characters 15-22:
-  Declaration of `stdClass` is here
-ERROR: File "stdclass_strict.php", line 11, characters 10-11:
-Typing error (Typing[4053])
-  File "stdclass_strict.php", line 11, characters 14-16:
-  No property `foo` in `stdClass`
-  File "stdclass_strict.php", line 8, characters 12-19:
-  This is why I think it is an object of type stdClass
-  File "stdclass_strict.php", line 3, characters 23-23:
-    via this generic `T`
-  File "classes.hhi", line 31, characters 15-22:
-  Declaration of `stdClass` is here
+error: Typing[4053] No property `foo` in `stdClass` [1]
+-> This is why I think it is an object of type stdClass [2]
+-> Declaration of `stdClass` is here [3]
+
+stdclass_strict.php:9:7
+ 6 | 
+ 7 | function f(): string {
+ 8 |   $x = new stdClass();
+   |            ^^^^^^^^ [2]
+ 9 |   $x->foo = 1;
+   |       ^^^ [1]
+10 |   $y = id($x);
+11 |   return $y->foo;
+
+classes.hhi:31:15
+29 |   }
+30 | 
+31 |   final class stdClass {}
+   |               ^^^^^^^^ [3]
+32 | 
+33 | } // namespace
+
+error: Typing[4053] Typing error [1]
+-> No property `foo` in `stdClass` [2]
+-> This is why I think it is an object of type stdClass [3]
+->   via this generic `T` [4]
+-> Declaration of `stdClass` is here [5]
+
+stdclass_strict.php:11:10
+ 1 | <?hh
+ 2 | 
+ 3 | function id<T>(T $x): T {
+   |                       ^ [4]
+ 4 |   return $x;
+ 5 | }
+ 6 | 
+ 7 | function f(): string {
+ 8 |   $x = new stdClass();
+   |            ^^^^^^^^ [3]
+ 9 |   $x->foo = 1;
+10 |   $y = id($x);
+11 |   return $y->foo;
+   |          ^^ [1]
+   |              ^^^ [2]
+12 | }
+
+classes.hhi:31:15
+29 |   }
+30 | 
+31 |   final class stdClass {}
+   |               ^^^^^^^^ [5]
+32 | 
+33 | } // namespace
+
+2 errors found

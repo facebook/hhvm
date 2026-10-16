@@ -1,4 +1,18 @@
-ERROR: File "pending_if8.php", line 20, characters 10-11:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-  File "pending_if8.php", line 12, characters 26-27:
-  Did you mean `$c` instead?
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+-> Did you mean `$c` instead? [2]
+
+pending_if8.php:20:10
+10 |  */
+11 | 
+12 | function f(bool $b, bool $c): int {
+   |                          ^^ [2]
+13 |   if ($b) {
+14 |     $x = 1;
+   :
+18 |   }
+19 | 
+20 |   return $x;
+   |          ^^ [1]
+21 | }
+
+1 error found

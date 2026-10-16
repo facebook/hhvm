@@ -1,2 +1,9 @@
-ERROR: File "wrong_fixme_format.php", line 10, characters 1-1:
-`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */` (Parsing[1001])
+error: Parsing[1001] `HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */` [1]
+
+wrong_fixme_format.php:10:1
+ 8 | class :g extends :ui<int> {
+ 9 |   /* HH_FIXME4110 */
+10 | }
+   | ^ [1]
+
+1 error found

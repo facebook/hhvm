@@ -1,4 +1,16 @@
-ERROR: File "printf5.php", line 22, characters 3-9:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "printf5.php", line 18, characters 10-10:
-  Definition is here
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+printf5.php:22:3
+16 | }
+17 | 
+18 | function f(\HH\FormatString<Dummy> $x, mixed...$args) : void {
+   |          ^ [2]
+19 | }
+20 | 
+21 | function _() : void {
+22 |   f('%s');
+   |   ^^^^^^^ [1]
+23 | }
+
+1 error found

@@ -1,4 +1,18 @@
-ERROR: File "parent_abstract_call.php", line 9, characters 20-22:
-Cannot call `parent::XYZ()`; it is abstract (Typing[4073])
-  File "parent_abstract_call.php", line 4, characters 28-30:
-  Declaration is here
+error: Typing[4073] Cannot call `parent::XYZ()`; it is abstract [1]
+-> Declaration is here [2]
+
+parent_abstract_call.php:9:20
+ 2 | 
+ 3 | abstract class BaseClass {
+ 4 |   public abstract function XYZ(): bool;
+   |                            ^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | class ChildClass extends BaseClass {
+ 8 |   public function XYZ(): bool {
+ 9 |     return parent::XYZ(); // parent's is abstract!
+   |                    ^^^ [1]
+10 |   }
+11 | }
+
+1 error found

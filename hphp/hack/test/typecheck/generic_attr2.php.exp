@@ -1,10 +1,21 @@
-ERROR: File "generic_attr2.php", line 8, characters 23-24:
-Invalid xhp value for attribute `:foo` in `:my-xhp` (Typing[4343])
-  File "generic_attr2.php", line 7, characters 32-37:
-  Expected `string`
-  File "generic_attr2.php", line 7, characters 32-37:
-  This type argument to `:my-xhp` must match exactly (it is invariant)
-  File "generic_attr2.php", line 4, characters 13-13:
-    via this generic `T`
-  File "generic_attr2.php", line 7, characters 15-17:
-  But got `int`
+error: Typing[4343] Invalid xhp value for attribute `:foo` in `:my-xhp` [1]
+-> Expected `string` [2]
+-> This type argument to `:my-xhp` must match exactly (it is invariant) [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+generic_attr2.php:8:23
+2 | 
+3 | class :my-xhp<T> extends XHPTest {
+4 |   attribute T foo @required;
+  |             ^ [3]
+5 | }
+6 | 
+7 | function test(int $x): :my-xhp<string> {
+  |               ^^^ [4]
+  |                                ^^^^^^ [2]
+8 |   return <my-xhp foo={$x} />;
+  |                       ^^ [1]
+9 | }
+
+1 error found

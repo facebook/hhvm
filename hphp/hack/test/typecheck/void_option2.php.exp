@@ -1,2 +1,11 @@
-ERROR: File "void_option2.php", line 12, characters 31-35:
-`?void` is a nonsensical typehint; a function cannot both only return implicitly and return null. (Typing[4066])
+error: Typing[4066] `?void` is a nonsensical typehint; a function cannot both only return implicitly and return null. [1]
+
+void_option2.php:12:31
+10 |  */
+11 | 
+12 | async function f(): Awaitable<?void> {
+   |                               ^^^^^ [1]
+13 |   return null;
+14 | }
+
+1 error found

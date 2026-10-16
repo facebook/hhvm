@@ -1,8 +1,26 @@
-ERROR: File "class_meth5.php", line 20, characters 10-18:
-Too many positional arguments (expected 0 but got 1) (Typing[4105])
-  File "class_meth5.php", line 19, characters 8-14:
-  Definition is here
-ERROR: File "class_meth5.php", line 25, characters 10-18:
-Too many positional arguments (expected 0 but got 1) (Typing[4105])
-  File "class_meth5.php", line 24, characters 8-14:
-  Definition is here
+error: Typing[4105] Too many positional arguments (expected 0 but got 1) [1]
+-> Definition is here [2]
+
+class_meth5.php:20:10
+17 | 
+18 | function foo(): int {
+19 |   $p = A::f1<>;
+   |        ^^^^^^^ [2]
+20 |   return $p('moo');
+   |          ^^^^^^^^^ [1]
+21 | }
+22 | 
+
+error: Typing[4105] Too many positional arguments (expected 0 but got 1) [1]
+-> Definition is here [2]
+
+class_meth5.php:25:10
+22 | 
+23 | function bar(): int {
+24 |   $p = A::f1<>;
+   |        ^^^^^^^ [2]
+25 |   return $p('moo');
+   |          ^^^^^^^^^ [1]
+26 | }
+
+2 errors found

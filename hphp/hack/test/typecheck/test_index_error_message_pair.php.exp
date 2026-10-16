@@ -1,4 +1,13 @@
-ERROR: File "test_index_error_message_pair.php", line 14, characters 3-13:
-You cannot mutate this (Typing[4011])
-  File "test_index_error_message_pair.php", line 13, characters 8-22:
-  This is an object of type Pair<int, string>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type Pair<int, string> [2]
+
+test_index_error_message_pair.php:14:3
+11 | 
+12 | function test(): void {
+13 |   $m = Pair { 7, 'a' };
+   |        ^^^^^^^^^^^^^^^ [2]
+14 |   $m[4] = 100;
+   |   ^^^^^^^^^^^ [1]
+15 | }
+
+1 error found

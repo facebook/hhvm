@@ -1,8 +1,28 @@
-WARN: File "lsb_disallow_override_protected.php", line 7, characters 17-17:
-Static property is overridden: `$x` (Warn[12021])
-  File "lsb_disallow_override_protected.php", line 8, characters 20-22:
-  Overriding static property is here
-ERROR: File "lsb_disallow_override_protected.php", line 8, characters 20-22:
-Member `$x` may not override `__LSB` member of parent (Typing[4284])
-  File "lsb_disallow_override_protected.php", line 4, characters 30-32:
-  This is being overridden
+warning: Warn[12021] Static property is overridden: `$x` [1]
+-> Overriding static property is here [2]
+
+lsb_disallow_override_protected.php:7:17
+5 | }
+6 | 
+7 | class B extends A {
+  |                 ^ [1]
+8 |   protected static int $x = 1;
+  |                    ^^^ [2]
+9 | }
+
+error: Typing[4284] Member `$x` may not override `__LSB` member of parent [1]
+-> This is being overridden [2]
+
+lsb_disallow_override_protected.php:8:20
+2 | 
+3 | class A {
+4 |   <<__LSB>> protected static int $x = 0;
+  |                              ^^^ [2]
+5 | }
+6 | 
+7 | class B extends A {
+8 |   protected static int $x = 1;
+  |                    ^^^ [1]
+9 | }
+
+2 errors found

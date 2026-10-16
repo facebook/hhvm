@@ -1,2 +1,10 @@
-ERROR: File "interface_async_method.php", line 4, characters 10-14:
-`async` cannot be used on a method in an interface. Use an `Awaitable<...>` return type instead. (Parsing[1002])
+error: Parsing[1002] `async` cannot be used on a method in an interface. Use an `Awaitable<...>` return type instead. [1]
+
+interface_async_method.php:4:10
+2 | 
+3 | interface I1 {
+4 |   public async function gen(): Awaitable<void>;
+  |          ^^^^^ [1]
+5 | }
+
+1 error found

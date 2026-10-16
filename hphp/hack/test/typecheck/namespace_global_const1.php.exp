@@ -1,4 +1,21 @@
-ERROR: File "namespace_global_const1.php", line 9, characters 12-18:
-Unbound name: `N\MYCONST` (a global constant) (Naming[2049])
-ERROR: File "namespace_global_const1.php", line 9, characters 12-18:
-Unbound global constant (Typing) (Typing[4106])
+error: Naming[2049] Unbound name: `N\MYCONST` (a global constant) [1]
+
+namespace_global_const1.php:9:12
+ 7 | namespace N {
+ 8 |   function f(): string {
+ 9 |     return MYCONST;
+   |            ^^^^^^^ [1]
+10 |   }
+11 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+namespace_global_const1.php:9:12
+ 7 | namespace N {
+ 8 |   function f(): string {
+ 9 |     return MYCONST;
+   |            ^^^^^^^ [1]
+10 |   }
+11 | }
+
+2 errors found

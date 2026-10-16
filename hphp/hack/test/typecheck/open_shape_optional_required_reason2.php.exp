@@ -1,8 +1,21 @@
-ERROR: File "open_shape_optional_required_reason2.php", line 10, characters 26-29:
-Some type arguments violate their constraints (Typing[4323])
-  File "open_shape_optional_required_reason2.php", line 8, characters 22-31:
-  The field `field` is **optional**
-  File "open_shape_optional_required_reason2.php", line 10, characters 28-28:
-  The field `field` is defined as **required**
-  File "open_shape_optional_required_reason2.php", line 4, characters 14-19:
-  `field` is defined here
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> The field `field` is **optional** [2]
+-> The field `field` is defined as **required** [3]
+-> `field` is defined here [4]
+
+open_shape_optional_required_reason2.php:10:26
+ 2 | 
+ 3 | type S = shape(
+ 4 |   'field' => string,
+   |              ^^^^^^ [4]
+ 5 |   ...
+ 6 | );
+ 7 | 
+ 8 | interface I<+T super shape(...)> {}
+   |                      ^^^^^^^^^^ [2]
+ 9 | 
+10 | final class C implements I<S> {}
+   |                          ^^^^ [1]
+   |                            ^ [3]
+
+1 error found

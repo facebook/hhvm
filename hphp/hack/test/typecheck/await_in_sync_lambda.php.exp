@@ -1,2 +1,10 @@
-ERROR: File "await_in_sync_lambda.php--file2.php", line 9, characters 15-25:
-`await` can only be used inside `async` functions (NastCheck[3003])
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+await_in_sync_lambda.php--file2.php:9:15
+ 7 | 
+ 8 | function test(): void {
+ 9 |   call(() ==> await gen());
+   |               ^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

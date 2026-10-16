@@ -1,4 +1,16 @@
-ERROR: File "static_property_visibility.php", line 8, characters 8-11:
-You cannot access this property (Typing[4112])
-  File "static_property_visibility.php", line 4, characters 18-20:
-  This member is private
+error: Typing[4112] You cannot access this property [1]
+-> This member is private [2]
+
+static_property_visibility.php:8:8
+2 | 
+3 | final class Foo {
+4 |   private static int $bar = 1;
+  |                  ^^^ [2]
+5 | }
+6 | 
+7 | function baz(): void {
+8 |   Foo::$bar;
+  |        ^^^^ [1]
+9 | }
+
+1 error found

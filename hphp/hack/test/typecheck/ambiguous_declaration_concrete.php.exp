@@ -1,12 +1,24 @@
-ERROR: File "ambiguous_declaration_concrete.php", line 10, characters 7-8:
-Some members in class `C` are incompatible with those declared in type `T1` (Typing[4341])
-  File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
-  The method `foo` is not compatible with the overridden method
-  File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
-  `T2` and `T1` both declare ambiguous implementations of `foo`.
-  File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
-  `T2`'s definition is here.
-  File "ambiguous_declaration_concrete.php", line 3, characters 19-21:
-  `T1`'s definition is here.
-  File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
-  Redeclare `foo` in `C` with a compatible signature.
+error: Typing[4341] Some members in class `C` are incompatible with those declared in type `T1` [1]
+-> The method `foo` is not compatible with the overridden method [2]
+-> `T2` and `T1` both declare ambiguous implementations of `foo`. [2]
+-> `T2`'s definition is here. [2]
+-> `T1`'s definition is here. [3]
+-> Redeclare `foo` in `C` with a compatible signature. [2]
+
+ambiguous_declaration_concrete.php:10:7
+ 1 | <?hh
+ 2 | trait T1 {
+ 3 |   public function foo(): void {}
+   |                   ^^^ [3]
+ 4 | }
+ 5 | trait T2 {
+ 6 |   public function foo(): void {}
+   |                   ^^^ [2]
+ 7 | }
+ 8 | 
+ 9 | class C {
+10 |   use T1, T2;
+   |       ^^ [1]
+11 | }
+
+1 error found

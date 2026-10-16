@@ -1,4 +1,16 @@
-ERROR: File "new_static3.php", line 23, characters 14-19:
-Can't use `new static()` for `B`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-  File "new_static3.php", line 20, characters 7-7:
-  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+error: Typing[4060] Can't use `new static()` for `B`; `__construct` arguments are not guaranteed to be consistent in child classes [1]
+-> This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute [2]
+
+new_static3.php:23:14
+18 | }
+19 | 
+20 | class B {
+   |       ^ [2]
+21 |   <<__NeedsConcrete>>
+22 |   public static function bar(): void {
+23 |     $x = new static();
+   |              ^^^^^^ [1]
+24 |   }
+25 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "destructor.php", line 13, characters 19-28:
-Destructors are not supported in Hack; use other patterns like `IDisposable`/`using` or `try`/`catch` instead. (NastCheck[3056])
-ERROR: File "destructor.php", line 13, characters 19-28:
-Was expecting a return type hint (Typing[4030])
+error: NastCheck[3056] Destructors are not supported in Hack; use other patterns like `IDisposable`/`using` or `try`/`catch` instead. [1]
+
+destructor.php:13:19
+11 | 
+12 | class Foo {
+13 |   public function __destruct() {
+   |                   ^^^^^^^^^^ [1]
+14 |   }
+15 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+destructor.php:13:19
+11 | 
+12 | class Foo {
+13 |   public function __destruct() {
+   |                   ^^^^^^^^^^ [1]
+14 |   }
+15 | }
+
+2 errors found

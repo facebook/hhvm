@@ -1,6 +1,12 @@
-ERROR: File "noreturn_typehint_basic_bad1.php", line 3, characters 10-17:
-Invalid return type (Typing[4336])
-  File "noreturn_typehint_basic_bad1.php", line 3, characters 22-29:
-  Expected `noreturn`
-  File "noreturn_typehint_basic_bad1.php", line 3, characters 10-17:
-  But got `void` because this function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `noreturn` [2]
+-> But got `void` because this function does not always return a value [1]
+
+noreturn_typehint_basic_bad1.php:3:10
+1 | <?hh
+2 | 
+3 | function implicit(): noreturn {}
+  |          ^^^^^^^^ [1]
+  |                      ^^^^^^^^ [2]
+
+1 error found

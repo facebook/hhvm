@@ -1,16 +1,45 @@
-ERROR: File "array_sub2.php", line 12, characters 23-38:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "array_sub2.php", line 12, characters 30-33:
-  But got `bool`
-ERROR: File "array_sub2.php", line 21, characters 12-13:
-Invalid argument (Typing[4110])
-  File "array_sub2.php", line 12, characters 23-38:
-  Expected `dict<bool, _>`
-  File "array_sub2.php", line 20, characters 15-25:
-  But got `vec<int>`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+array_sub2.php:12:23
+10 |  */
+11 | 
+12 | function get_keys<T2>(darray<bool, T2> $x): varray<bool> {
+   |                       ^^^^^^^^^^^^^^^^ [1]
+   |                              ^^^^ [4]
+13 |   $result = vec[];
+14 |   foreach ($x as $k => $v) {
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<bool, _>` [2]
+-> But got `vec<int>` [3]
+
+array_sub2.php:21:12
+10 |  */
+11 | 
+12 | function get_keys<T2>(darray<bool, T2> $x): varray<bool> {
+   |                       ^^^^^^^^^^^^^^^^ [2]
+13 |   $result = vec[];
+14 |   foreach ($x as $k => $v) {
+   :
+18 | }
+19 | 
+20 | function test(varray<int> $a): void {
+   |               ^^^^^^^^^^^ [3]
+21 |   get_keys($a);
+   |            ^^ [1]
+22 | }
+
+2 errors found

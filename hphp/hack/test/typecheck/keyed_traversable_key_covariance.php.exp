@@ -1,18 +1,48 @@
-ERROR: File "keyed_traversable_key_covariance.php", line 8, characters 14-23:
-Typing error (Typing[4110])
-  File "keyed_traversable_key_covariance.php", line 8, characters 14-18:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
-  But got `string`
-ERROR: File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
-Invalid index type for this vec (Typing[4449])
-  File "keyed_traversable_key_covariance.php", line 7, characters 6-8:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
-  It is incompatible with a string
-ERROR: File "keyed_traversable_key_covariance.php", line 15, characters 20-22:
-Invalid index type for this vec (Typing[4449])
-  File "keyed_traversable_key_covariance.php", line 4, characters 10-25:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "keyed_traversable_key_covariance.php", line 15, characters 20-22:
-  It is incompatible with a string
+error: Typing[4110] Typing error [1]
+-> Expected `int` because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> But got `string` [3]
+
+keyed_traversable_key_covariance.php:8:14
+ 6 |     vec[$vec],
+ 7 |     (vec<string> $item) ==> {
+ 8 |       return $item['a'] === 'a'; //triggers typechecker error
+   |              ^^^^^^^^^^ [1]
+   |              ^^^^^ [2]
+   |                    ^^^ [3]
+ 9 |     },
+10 |   );
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+keyed_traversable_key_covariance.php:8:20
+ 5 |   filter(
+ 6 |     vec[$vec],
+ 7 |     (vec<string> $item) ==> {
+   |      ^^^ [2]
+ 8 |       return $item['a'] === 'a'; //triggers typechecker error
+   |                    ^^^ [1]
+ 9 |     },
+10 |   );
+
+error: Typing[4449] Invalid index type for this vec [1]
+-> This is an int because only `int` can be used to index into a `Vector` or `vec`. [2]
+-> It is incompatible with a string [1]
+
+keyed_traversable_key_covariance.php:15:20
+ 2 | 
+ 3 | function main(): void {
+ 4 |   $vec = vec<string>['a'];
+   |          ^^^^^^^^^^^^^^^^ [2]
+ 5 |   filter(
+ 6 |     vec[$vec],
+   :
+13 |     vec[$vec],
+14 |     $item ==> {
+15 |       return $item['a'] === 'a'; // this should also trigger typechecker error
+   |                    ^^^ [1]
+16 |     },
+17 |   );
+
+3 errors found

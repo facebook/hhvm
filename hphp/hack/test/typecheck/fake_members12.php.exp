@@ -1,9 +1,29 @@
-ERROR: File "fake_members12.php", line 16, characters 9-16:
-Invalid argument (Typing[4110])
-  File "fake_members12.php", line 5, characters 14-16:
-  Expected `int`
-  File "fake_members12.php", line 8, characters 10-13:
-  But got `?int`
-  File "fake_members12.php", line 14, characters 10-14:
-  All the local information about `$this->x` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `$this->x` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+fake_members12.php:16:9
+ 3 | function bar(): void {}
+ 4 | 
+ 5 | function baz(int $x): void {}
+   |              ^^^ [2]
+ 6 | 
+ 7 | class Foo {
+ 8 |   public ?int $x;
+   |          ^^^^ [3]
+ 9 | 
+10 |   public function f(bool $y): void {
+11 |     if ($this->x === null) {
+12 |       return;
+13 |     }
+14 |     $y ? bar() : null;
+   |          ^^^^^ [4]
+15 |     // function call bar() invalidates info about $this->x
+16 |     baz($this->x);
+   |         ^^^^^^^^ [1]
+17 |   }
+18 | }
+
+1 error found

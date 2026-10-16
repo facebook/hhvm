@@ -1,12 +1,27 @@
-ERROR: File "ambiguous_declaration_one_synthetic_2.php", line 20, characters 7-8:
-Some members in class `B` are incompatible with those declared in type `T1` (Typing[4341])
-  File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:
-  The method `foo` is not compatible with the overridden method
-  File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:
-  `T3` and `T1` both declare ambiguous implementations of `foo`.
-  File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:
-  `T3`'s definition is here.
-  File "ambiguous_declaration_one_synthetic_2.php", line 8, characters 19-21:
-  `T1`'s definition is here.
-  File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:
-  Redeclare `foo` in `B` with a compatible signature.
+error: Typing[4341] Some members in class `B` are incompatible with those declared in type `T1` [1]
+-> The method `foo` is not compatible with the overridden method [2]
+-> `T3` and `T1` both declare ambiguous implementations of `foo`. [2]
+-> `T3`'s definition is here. [2]
+-> `T1`'s definition is here. [3]
+-> Redeclare `foo` in `B` with a compatible signature. [2]
+
+ambiguous_declaration_one_synthetic_2.php:20:7
+ 6 | 
+ 7 | trait T1 {
+ 8 |   public function foo(): void {}
+   |                   ^^^ [3]
+ 9 | }
+10 | 
+   :
+14 | 
+15 | trait T3 {
+16 |   public function foo(): void {}
+   |                   ^^^ [2]
+17 | }
+18 | 
+19 | class B extends A {
+20 |   use T1, T2, T3;
+   |       ^^ [1]
+21 | }
+
+1 error found

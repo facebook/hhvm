@@ -1,2 +1,11 @@
-ERROR: File "continue_bad.php", line 16, characters 18-18:
-Encountered unexpected token `2`. (Parsing[1002])
+error: Parsing[1002] Encountered unexpected token `2`. [1]
+
+continue_bad.php:16:18
+14 |     foreach (vec[1, 2, 3, 4] as $b) {
+15 |       foreach (vec[1, 2, 3, 4] as $c) {
+16 |         continue 2;
+   |                  ^ [1]
+17 |       }
+18 |     }
+
+1 error found

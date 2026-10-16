@@ -1,2 +1,10 @@
-ERROR: File "reading_from_append_4.php", line 5, characters 6-7:
-Cannot use `[]` for reading (NastCheck[3047])
+error: NastCheck[3047] Cannot use `[]` for reading [1]
+
+reading_from_append_4.php:5:6
+3 | 
+4 | function test(dict<string, int> $d, vec<string> $v): void {
+5 |   $d[$v[]] = 42;
+  |      ^^ [1]
+6 | }
+
+1 error found

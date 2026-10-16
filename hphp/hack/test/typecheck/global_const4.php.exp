@@ -1,2 +1,9 @@
-ERROR: File "global_const4.php", line 3, characters 17-24:
-Illegal constant value (Naming[2023])
+error: Naming[2023] Illegal constant value [1]
+
+global_const4.php:3:17
+1 | <?hh
+2 | 
+3 | const mixed X = Vector{};
+  |                 ^^^^^^^^ [1]
+
+1 error found

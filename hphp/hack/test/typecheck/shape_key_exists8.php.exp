@@ -1,2 +1,10 @@
-ERROR: File "shape_key_exists8.php", line 6, characters 30-35:
-Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shape_key_exists8.php:6:30
+4 | 
+5 | function test(string $index): void {
+6 |   Shapes::keyExists(shape(), $index);
+  |                              ^^^^^^ [1]
+7 | }
+
+1 error found

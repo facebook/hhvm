@@ -1,10 +1,25 @@
-ERROR: File "generic_subtyping2.php", line 25, characters 7-8:
-Invalid argument (Typing[4323])
-  File "generic_subtyping2.php", line 17, characters 14-14:
-  `T` is a constrained type parameter
-  File "generic_subtyping2.php", line 17, characters 19-19:
-  This type constraint is violated
-  File "generic_subtyping2.php", line 17, characters 19-19:
-  Expected `I`
-  File "generic_subtyping2.php", line 23, characters 14-27:
-  But got `UnrelatedClass`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `I` [3]
+-> But got `UnrelatedClass` [4]
+
+generic_subtyping2.php:25:7
+15 | class UnrelatedClass {}
+16 | 
+17 | function foo<T as I>(T $x): void {}
+   |              ^ [2]
+   |                   ^ [3]
+18 | 
+19 | function test(bool $b): void {
+20 |   if ($b) {
+21 |     $y = new B();
+22 |   } else {
+23 |     $y = new UnrelatedClass();
+   |              ^^^^^^^^^^^^^^ [4]
+24 |   }
+25 |   foo($y);
+   |       ^^ [1]
+26 | }
+
+1 error found

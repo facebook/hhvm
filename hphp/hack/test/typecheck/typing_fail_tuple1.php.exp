@@ -1,6 +1,14 @@
-ERROR: File "typing_fail_tuple1.php", line 13, characters 10-23:
-Invalid return type (Typing[4110])
-  File "typing_fail_tuple1.php", line 12, characters 15-24:
-  Expected `(int, int)`
-  File "typing_fail_tuple1.php", line 13, characters 10-23:
-  But got `(int, int, int)`
+error: Typing[4110] Invalid return type [1]
+-> Expected `(int, int)` [2]
+-> But got `(int, int, int)` [1]
+
+typing_fail_tuple1.php:13:10
+10 |  */
+11 | 
+12 | function f(): (int, int) {
+   |               ^^^^^^^^^^ [2]
+13 |   return tuple(5, 5, 6);
+   |          ^^^^^^^^^^^^^^ [1]
+14 | }
+
+1 error found

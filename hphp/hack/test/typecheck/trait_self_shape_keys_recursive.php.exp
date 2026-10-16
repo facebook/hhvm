@@ -1,6 +1,24 @@
-ERROR: File "trait_self_shape_keys_recursive.php", line 14, characters 15-25:
-`nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys_recursive.php", line 5, characters 12-26:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "trait_self_shape_keys_recursive.php", line 4, characters 31-33:
-  This is what makes me believe it can be `null`
+error: Naming[2137] `nameof self` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys_recursive.php:14:15
+12 |     T2 as T1,
+13 |   >(T1 $x): int {
+14 |     return $x[nameof self];
+   |               ^^^^^^^^^^^ [1]
+15 |   }
+16 | }
+
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+trait_self_shape_keys_recursive.php:5:12
+2 | 
+3 | trait Cycle {
+4 |   public function cycle<T1 as ?T2, T2 as T1>(T1 $x): mixed {
+  |                               ^^^ [2]
+5 |     return $x[nameof self];
+  |            ^^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+2 errors found

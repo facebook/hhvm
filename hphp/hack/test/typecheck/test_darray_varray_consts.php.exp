@@ -1,6 +1,22 @@
-ERROR: File "test_darray_varray_consts.php", line 12, characters 12-20:
-Invalid return type (Typing[4110])
-  File "test_darray_varray_consts.php", line 11, characters 27-32:
-  Expected `string`
-  File "test_darray_varray_consts.php", line 5, characters 9-30:
-  But got `dict<string, string>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `dict<string, string>` [3]
+
+test_darray_varray_consts.php:12:12
+ 3 | 
+ 4 | class A {
+ 5 |   const darray<string, string> FOO = dict['foo' => 'bar'];
+   |         ^^^^^^^^^^^^^^^^^^^^^^ [3]
+ 6 |   const varray<varray<string>> BAR = vec[vec['foo']];
+ 7 |   const varray<dict<string, vec<string>>>
+ 8 |     BAZ = vec[dict['foo' => vec['bar']]];
+ 9 | 
+10 |   // Should not typecheck
+11 |   public function test(): string {
+   |                           ^^^^^^ [2]
+12 |     return self::FOO;
+   |            ^^^^^^^^^ [1]
+13 |   }
+14 | }
+
+1 error found

@@ -1,9 +1,29 @@
-ERROR: File "fake_members9.php", line 36, characters 12-21:
-Invalid return type (Typing[4110])
-  File "fake_members9.php", line 31, characters 48-48:
-  Expected `A`
-  File "fake_members9.php", line 25, characters 10-10:
-  But got `I`
-  File "fake_members9.php", line 35, characters 11-24:
-  All the local information about `$this->foo` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid return type [1]
+-> Expected `A` [2]
+-> But got `I` [3]
+-> All the local information about `$this->foo` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+fake_members9.php:36:12
+23 | 
+24 | class Unrelated {
+25 |   public I $foo;
+   |          ^ [3]
+26 | 
+27 |   public function __construct(I $foo) {
+28 |     $this->foo = $foo;
+29 |   }
+30 | 
+31 |   public async function genFooAsA(): Awaitable<A> {
+   |                                                ^ [2]
+32 |     if (!($this->foo is A)) {
+33 |       $this->foo = new A();
+34 |     }
+35 |     await Z::genNotFoo();
+   |           ^^^^^^^^^^^^^^ [4]
+36 |     return $this->foo;
+   |            ^^^^^^^^^^ [1]
+37 |   }
+38 | }
+
+1 error found

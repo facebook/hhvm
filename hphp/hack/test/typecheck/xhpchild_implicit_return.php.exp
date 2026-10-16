@@ -1,12 +1,33 @@
-ERROR: File "xhpchild_implicit_return.php", line 14, characters 1-75:
-This function can exit with and without returning a value (Typing[4421])
-  File "xhpchild_implicit_return.php", line 16, characters 5-23:
-  Returning a value here.
-  File "xhpchild_implicit_return.php", line 14, characters 1-75:
-  This function does not always return a value
-ERROR: File "xhpchild_implicit_return.php", line 14, characters 10-12:
-Invalid return type (Typing[4336])
-  File "xhpchild_implicit_return.php", line 14, characters 24-31:
-  Expected `XHPChild`
-  File "xhpchild_implicit_return.php", line 14, characters 10-12:
-  But got `void` because this function does not always return a value
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> This function does not always return a value [1]
+
+xhpchild_implicit_return.php:14:1
+12 | class :div extends XHPTest implements XHPChild {}
+13 | 
+14 | function foo(bool $b): XHPChild {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   if ($b) {
+   |   ^^^^^^^^^ [1]
+16 |     return <div></div>;
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^^^^^^^^^^ [2]
+17 |   }
+   |   ^ [1]
+18 | }
+   | ^ [1]
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `XHPChild` [2]
+-> But got `void` because this function does not always return a value [1]
+
+xhpchild_implicit_return.php:14:10
+12 | class :div extends XHPTest implements XHPChild {}
+13 | 
+14 | function foo(bool $b): XHPChild {
+   |          ^^^ [1]
+   |                        ^^^^^^^^ [2]
+15 |   if ($b) {
+16 |     return <div></div>;
+
+2 errors found

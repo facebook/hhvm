@@ -1,4 +1,18 @@
-ERROR: File "trait_require_extends2.php", line 20, characters 22-24:
-You cannot override this method (Typing[4070])
-  File "trait_require_extends2.php", line 6, characters 28-30:
-  It was declared as final
+error: Typing[4070] You cannot override this method [1]
+-> It was declared as final [2]
+
+trait_require_extends2.php:20:22
+ 4 |   require extends X;
+ 5 |   <<__Override>>
+ 6 |   final protected function foo(): void { }
+   |                            ^^^ [2]
+ 7 | }
+ 8 | 
+   :
+18 |   use T1;
+19 |   use T2;
+20 |   protected function foo(): void { }
+   |                      ^^^ [1]
+21 | }
+
+1 error found

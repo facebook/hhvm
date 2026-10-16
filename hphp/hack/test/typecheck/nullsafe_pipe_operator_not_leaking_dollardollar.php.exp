@@ -1,6 +1,24 @@
-ERROR: File "nullsafe_pipe_operator_not_leaking_dollardollar.php", line 16, characters 14-15:
-Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])
-ERROR: File "nullsafe_pipe_operator_not_leaking_dollardollar.php", line 16, characters 14-15:
-Variable `$$` is undefined, or not always defined. (Naming[2050])
-  File "nullsafe_pipe_operator_not_leaking_dollardollar.php", line 13, characters 7-8:
-  Did you mean `$i` instead?
+error: Parsing[1002] Pipe variables must occur only in the RHS of pipe expressions [1]
+
+nullsafe_pipe_operator_not_leaking_dollardollar.php:16:14
+14 |     return null;
+15 |   }
+16 |   return bar($$) + $i;
+   |              ^^ [1]
+17 | }
+
+error: Naming[2050] Variable `$$` is undefined, or not always defined. [1]
+-> Did you mean `$i` instead? [2]
+
+nullsafe_pipe_operator_not_leaking_dollardollar.php:16:14
+11 | function piped(): ?int {
+12 |   $i = foo() |?> bar($$);
+13 |   if ($i is null) {
+   |       ^^ [2]
+14 |     return null;
+15 |   }
+16 |   return bar($$) + $i;
+   |              ^^ [1]
+17 | }
+
+2 errors found

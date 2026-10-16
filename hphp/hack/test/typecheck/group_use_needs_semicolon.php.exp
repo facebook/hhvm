@@ -1,2 +1,12 @@
-ERROR: File "group_use_needs_semicolon.php", line 18, characters 51-51:
-A semicolon `;` is expected here. (Parsing[1002])
+error: Parsing[1002] A semicolon `;` is expected here. [1]
+
+group_use_needs_semicolon.php:18:51
+16 | 
+17 | namespace X {
+18 |   use Foo\Bar\Baz\{CL, function f1, const CN, CL2}
+   |                                                   ^ [1]
+19 | 
+20 |   function foo(): void {}
+21 | }
+
+1 error found

@@ -1,18 +1,54 @@
-ERROR: File "loader_example.php", line 7, characters 19-21:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "loader_example.php", line 45, characters 11-12:
-Invalid argument (Typing[4110])
-  File "loader_example.php", line 18, characters 27-30:
-  Expected `<expr#6> as ALoader`
-  File "loader_example.php", line 45, characters 3-4:
-    where `<expr#6>` is a reference to this expression
-  File "loader_example.php", line 13, characters 23-38:
-    resulting from expanding the type constant `<expr#6> as ALoader::TLoadsType`
-  File "loader_example.php", line 45, characters 3-4:
-    where `<expr#6>` is a reference to this expression
-  File "loader_example.php", line 33, characters 49-55:
-  But got `ALoader`
-  File "loader_example.php", line 40, characters 16-22:
-  Since `ALoader` is not final
-  File "loader_example.php", line 33, characters 49-55:
-  this might not be a `ALoader`
+error: Typing[4030] Was expecting a return type hint [1]
+
+loader_example.php:7:19
+5 |   public static function gen(): Awaitable<T>;
+6 | 
+7 |   public function set(T $x);
+  |                   ^^^ [1]
+8 | }
+9 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#6> as ALoader` [2]
+->   where `<expr#6>` is a reference to this expression [3]
+->   resulting from expanding the type constant `<expr#6> as ALoader::TLoadsType` [4]
+->   where `<expr#6>` is a reference to this expression [3]
+-> But got `ALoader` [5]
+-> Since `ALoader` is not final [6]
+-> this might not be a `ALoader` [5]
+
+loader_example.php:45:11
+11 |   abstract const type TLoadsType;
+12 | 
+13 |   public function set(this::TLoadsType $x): void {}
+   |                       ^^^^^^^^^^^^^^^^ [4]
+14 | }
+15 | 
+16 | <<__ConsistentConstruct>>
+17 | abstract class SelfLoader extends Loader {
+18 |   const type TLoadsType = this;
+   |                           ^^^^ [2]
+19 | 
+20 |   <<__NeedsConcrete>>
+   :
+31 |   const type TLoadsType = ALoader;
+32 | 
+33 |   public static async function gen(): Awaitable<ALoader> {
+   |                                                 ^^^^^^^ [5]
+34 |     return new BLoader();
+35 |   }
+   :
+38 | async function test(): Awaitable<void> {
+39 |   concurrent {
+40 |     $a = await ALoader::gen();
+   |                ^^^^^^^ [6]
+41 |     $b = await BLoader::gen();
+42 |     $o = await OtherALoader::gen();
+43 |   }
+44 | 
+45 |   $a->set($o);
+   |   ^^ [3]
+   |           ^^ [1]
+46 | }
+
+2 errors found

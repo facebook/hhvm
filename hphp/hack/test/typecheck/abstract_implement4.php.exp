@@ -1,10 +1,29 @@
-ERROR: File "abstract_implement4.php", line 28, characters 7-12:
-This class must be declared `abstract`, or provide an implementation for the abstract method `foo` (Typing[4047])
-  File "abstract_implement4.php", line 28, characters 22-32:
-  `BClass` uses `AClass`
-  File "abstract_implement4.php", line 25, characters 7-13:
-  `AClass` uses `MyTrait`
-  File "abstract_implement4.php", line 18, characters 26-35:
-  `MyTrait` uses `IFace`
-  File "abstract_implement4.php", line 15, characters 19-21:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `foo` [1]
+-> `BClass` uses `AClass` [2]
+-> `AClass` uses `MyTrait` [3]
+-> `MyTrait` uses `IFace` [4]
+-> The method is defined here [5]
+
+abstract_implement4.php:28:7
+13 | 
+14 | interface IFace<T> {
+15 |   public function foo(): T;
+   |                   ^^^ [5]
+16 | }
+17 | 
+18 | trait MyTrait implements IFace<int> {
+   |                          ^^^^^^^^^^ [4]
+19 |   public function bar(): void {
+20 |     $this->foo();
+   :
+23 | 
+24 | abstract class AClass<T> {
+25 |   use MyTrait;
+   |       ^^^^^^^ [3]
+26 | }
+27 | 
+28 | class BClass extends AClass<int> {}
+   |       ^^^^^^ [1]
+   |                      ^^^^^^^^^^^ [2]
+
+1 error found

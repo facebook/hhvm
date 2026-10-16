@@ -1,6 +1,24 @@
-ERROR: File "idx2_2.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-  File "idx2_2.php", line 7, characters 15-17:
-  Expected `~int`
-  File "idx.hhi", line 34, characters 8-9:
-  But got `?int` because the type of this return is implicitly a like-type due to unenforced generic parameter
+error: Typing[4110] Invalid return type [1]
+-> Expected `~int` [2]
+-> But got `?int` because the type of this return is implicitly a like-type due to unenforced generic parameter [3]
+
+idx2_2.php:10:10
+ 5 | }
+ 6 | 
+ 7 | function f(): int {
+   |               ^^^ [2]
+ 8 |   $m = m();
+ 9 |   $x = idx($m, 'a');
+10 |   return $x;
+   |          ^^ [1]
+11 | }
+
+idx.hhi:34:8
+32 |     ?Tk $index,
+33 |     \HH\FIXME\MISSING_PARAM_TYPE $default = null,
+34 |   )[]: Tv {}
+   |        ^^ [3]
+35 | 
+36 |   function idx_readonly<<<__NoDisjointUnion>> Tk as arraykey, Tv>(
+
+1 error found

@@ -1,4 +1,19 @@
-ERROR: File "string_no_call.php", line 4, characters 3-31:
-Unbound name: `HH\String\__primitive_length` (a global function) (Naming[2049])
-ERROR: File "string_no_call.php", line 4, characters 3-31:
-Unbound name (typing): `HH\String\__primitive_length` (Typing[4107])
+error: Naming[2049] Unbound name: `HH\String\__primitive_length` (a global function) [1]
+
+string_no_call.php:4:3
+2 | 
+3 | function f(string $s): void {
+4 |   \HH\String\__primitive_length($s);
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4107] Unbound name (typing): `HH\String\__primitive_length` [1]
+
+string_no_call.php:4:3
+2 | 
+3 | function f(string $s): void {
+4 |   \HH\String\__primitive_length($s);
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+2 errors found

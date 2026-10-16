@@ -1,2 +1,9 @@
-ERROR: File "this_tparam_error2.php", line 12, characters 14-17:
-The type parameter `this` is reserved (Naming[2046])
+error: Naming[2046] The type parameter `this` is reserved [1]
+
+this_tparam_error2.php:12:14
+10 |  */
+11 | 
+12 | function foo<This>(): void {}
+   |              ^^^^ [1]
+
+1 error found

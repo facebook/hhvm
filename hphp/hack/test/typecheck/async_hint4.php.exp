@@ -1,2 +1,11 @@
-ERROR: File "async_hint4.php", line 7, characters 39-39:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+async_hint4.php:7:39
+5 | class Foo {
+6 |   // Testing method
+7 |   public async function wrong_hint(): C {
+  |                                       ^ [1]
+8 |     throw new Exception();
+9 |   }
+
+1 error found

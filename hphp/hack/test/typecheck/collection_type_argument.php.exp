@@ -1,40 +1,96 @@
-ERROR: File "collection_type_argument.php", line 17, characters 3-16:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 50-50:
-  `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 55-62:
-  This type constraint is violated
-  File "hackarray.hhi", line 43, characters 55-62:
-  Expected `arraykey`
-  File "collection_type_argument.php", line 17, characters 10-13:
-  But got `bool`
-ERROR: File "collection_type_argument.php", line 21, characters 3-19:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "collection_type_argument.php", line 21, characters 8-11:
-  But got `bool`
-ERROR: File "collection_type_argument.php", line 25, characters 3-19:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "collection_type_argument.php", line 25, characters 8-11:
-  But got `bool`
-ERROR: File "collection_type_argument.php", line 29, characters 3-19:
-Some type arguments violate their constraints (Typing[4323])
-  File "collections/Map.hhi", line 57, characters 19-20:
-  `Tk` is a constrained type parameter
-  File "collections/Map.hhi", line 57, characters 25-32:
-  This type constraint is violated
-  File "collections/Map.hhi", line 57, characters 25-32:
-  Expected `arraykey`
-  File "collection_type_argument.php", line 29, characters 7-10:
-  But got `bool`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+collection_type_argument.php:17:3
+15 | 
+16 | function ko_value_collection(): void {
+17 |   keyset<bool>[]; // KO: bool </: arraykey
+   |   ^^^^^^^^^^^^^^ [1]
+   |          ^^^^ [4]
+18 | }
+19 | 
+
+hackarray.hhi:43:50
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                                                  ^ [2]
+   |                                                       ^^^^^^^^ [3]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+collection_type_argument.php:21:3
+19 | 
+20 | function ko_keyed_value_collection(): void {
+21 |   dict<bool, int>[]; // KO: bool </: arraykey
+   |   ^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^ [4]
+22 | }
+23 | 
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+collection_type_argument.php:25:3
+23 | 
+24 | function ko_darray(): void {
+25 |   dict<bool, int>[]; // KO: bool </: arraykey
+   |   ^^^^^^^^^^^^^^^^^ [1]
+   |        ^^^^ [4]
+26 | }
+27 | 
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+
+collection_type_argument.php:29:3
+27 | 
+28 | function ko_map(): void {
+29 |   Map<bool, int> {}; // KO: bool </: arraykey
+   |   ^^^^^^^^^^^^^^^^^ [1]
+   |       ^^^^ [4]
+30 | }
+
+collections/Map.hhi:57:19
+55 |    * @guide /hack/collections/classes
+56 |    */
+57 |   final class Map<Tk as arraykey, Tv>
+   |                   ^^ [2]
+   |                         ^^^^^^^^ [3]
+58 |     implements \MutableMap<Tk, Tv> {
+59 |     /**
+
+4 errors found

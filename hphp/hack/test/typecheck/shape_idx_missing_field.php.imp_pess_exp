@@ -1,8 +1,25 @@
-ERROR: File "shape_idx_missing_field.php", line 3, characters 20-20:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "shape_idx_missing_field.php", line 4, characters 22-23:
-Invalid argument (Typing[4110])
-  File "shape_idx_missing_field.php", line 3, characters 40-40:
-  Expected `T`
-  File "shape_idx_missing_field.php", line 3, characters 39-40:
-  But got `nonnull`
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+shape_idx_missing_field.php:3:20
+1 | <?hh
+2 | 
+3 | function type_hole<T>(shape(...) $s): ?T {
+  |                    ^ [1]
+4 |   return Shapes::idx($s, 'x');
+5 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+-> But got `nonnull` [3]
+
+shape_idx_missing_field.php:4:22
+1 | <?hh
+2 | 
+3 | function type_hole<T>(shape(...) $s): ?T {
+  |                                       ^^ [3]
+  |                                        ^ [2]
+4 |   return Shapes::idx($s, 'x');
+  |                      ^^ [1]
+5 | }
+
+2 errors found

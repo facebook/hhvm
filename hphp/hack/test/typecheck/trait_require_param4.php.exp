@@ -1,24 +1,47 @@
-ERROR: File "trait_require_param4.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param4.php", line 15, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param4.php", line 10, characters 19-30:
-  Required here
-  File "trait_require_param4.php", line 10, characters 25-29:
-  Expected `float`
-  File "trait_require_param4.php", line 13, characters 23-25:
-  But got `int`
-  File "trait_require_param4.php", line 13, characters 23-25:
-  This type argument to `Super` must match exactly (it is invariant)
-ERROR: File "trait_require_param4.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param4.php", line 15, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param4.php", line 10, characters 19-30:
-  Required here
-  File "trait_require_param4.php", line 13, characters 23-25:
-  Expected `int`
-  File "trait_require_param4.php", line 10, characters 25-29:
-  But got `float`
-  File "trait_require_param4.php", line 10, characters 25-29:
-  This type argument to `Super` must match exactly (it is invariant)
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `float` [4]
+-> But got `int` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+trait_require_param4.php:13:7
+ 8 | 
+ 9 | trait T2 {
+10 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [4]
+11 | }
+12 | 
+13 | class C extends Super<int> {
+   |       ^ [1]
+   |                       ^^^ [5]
+14 |   use T1;
+15 |   use T2;
+   |       ^^ [2]
+16 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `int` [4]
+-> But got `float` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+trait_require_param4.php:13:7
+ 8 | 
+ 9 | trait T2 {
+10 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [5]
+11 | }
+12 | 
+13 | class C extends Super<int> {
+   |       ^ [1]
+   |                       ^^^ [4]
+14 |   use T1;
+15 |   use T2;
+   |       ^^ [2]
+16 | }
+
+2 errors found

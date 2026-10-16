@@ -1,12 +1,27 @@
-ERROR: File "bitwisenot_bad.php", line 13, characters 10-12:
-Invalid argument (Typing[4110])
-  File "bitwisenot_bad.php", line 13, characters 10-12:
-  Expected `int` because this is used in a bitwise operation
-  File "bitwisenot_bad.php", line 12, characters 14-17:
-  But got `bool`
-ERROR: File "bitwisenot_bad.php", line 13, characters 10-12:
-Invalid return type (Typing[4110])
-  File "bitwisenot_bad.php", line 12, characters 24-27:
-  Expected `bool`
-  File "bitwisenot_bad.php", line 13, characters 10-12:
-  But got `int` because this is the result of a bitwise operation
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in a bitwise operation [1]
+-> But got `bool` [2]
+
+bitwisenot_bad.php:13:10
+10 |  */
+11 | 
+12 | function foo(bool $a): bool {
+   |              ^^^^ [2]
+13 |   return ~$a;
+   |          ^^^ [1]
+14 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `int` because this is the result of a bitwise operation [1]
+
+bitwisenot_bad.php:13:10
+10 |  */
+11 | 
+12 | function foo(bool $a): bool {
+   |                        ^^^^ [2]
+13 |   return ~$a;
+   |          ^^^ [1]
+14 | }
+
+2 errors found

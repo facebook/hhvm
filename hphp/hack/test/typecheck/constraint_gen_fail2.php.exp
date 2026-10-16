@@ -1,10 +1,21 @@
-ERROR: File "constraint_gen_fail2.php", line 21, characters 7-12:
-Invalid argument (Typing[4323])
-  File "constraint_gen_fail2.php", line 16, characters 14-14:
-  `T` is a constrained type parameter
-  File "constraint_gen_fail2.php", line 16, characters 19-19:
-  This type constraint is violated
-  File "constraint_gen_fail2.php", line 16, characters 19-19:
-  Expected `A`
-  File "constraint_gen_fail2.php", line 21, characters 7-12:
-  But got `string`
+error: Typing[4323] Invalid argument [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `A` [3]
+-> But got `string` [1]
+
+constraint_gen_fail2.php:21:7
+14 | }
+15 | 
+16 | function foo<T as A>(T $x): void {
+   |              ^ [2]
+   |                   ^ [3]
+17 |   $x->render();
+18 | }
+19 | 
+20 | function test(): void {
+21 |   foo('test');
+   |       ^^^^^^ [1]
+22 | }
+
+1 error found

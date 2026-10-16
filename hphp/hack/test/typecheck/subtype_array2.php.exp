@@ -1,6 +1,22 @@
-ERROR: File "subtype_array2.php", line 20, characters 11-12:
-Invalid argument (Typing[4110])
-  File "subtype_array2.php", line 16, characters 25-28:
-  Expected `bool`
-  File "subtype_array2.php", line 12, characters 28-30:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+subtype_array2.php:20:11
+10 |  */
+11 | 
+12 | function get_arr(): varray<int> {
+   |                            ^^^ [3]
+13 |   return vec[1, 2, 3];
+14 | }
+15 | 
+16 | function use_arr(varray<bool> $arr): void {}
+   |                         ^^^^ [2]
+17 | 
+18 | function test(): void {
+19 |   $a = get_arr();
+20 |   use_arr($a);
+   |           ^^ [1]
+21 | }
+
+1 error found

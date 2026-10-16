@@ -1,6 +1,23 @@
-ERROR: File "subtype_pair2.php", line 21, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtype_pair2.php", line 16, characters 31-36:
-  Expected `string`
-  File "subtype_pair2.php", line 12, characters 35-38:
-  But got `bool`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+subtype_pair2.php:21:12
+10 |  */
+11 | 
+12 | function get_pair(): Pair<string, bool> {
+   |                                   ^^^^ [3]
+13 |   return Pair {'foo', true};
+14 | }
+15 | 
+16 | function use_pair(Pair<mixed, string> $p): void {
+   |                               ^^^^^^ [2]
+17 | }
+18 | 
+19 | function test(): void {
+20 |   $p = get_pair();
+21 |   use_pair($p);
+   |            ^^ [1]
+22 | }
+
+1 error found

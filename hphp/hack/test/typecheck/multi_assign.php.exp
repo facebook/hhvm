@@ -1,2 +1,11 @@
-ERROR: File "multi_assign.php", line 17, characters 10-11:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+multi_assign.php:17:10
+15 |     $y = 1;
+16 |   } else {
+17 |     $x = $y = 1;
+   |          ^^ [1]
+18 |   }
+19 | 
+
+1 error found

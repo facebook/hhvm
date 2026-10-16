@@ -1,4 +1,17 @@
-ERROR: File "final_private_trait.php", line 10, characters 20-22:
-You cannot override this method (Typing[4070])
-  File "final_private_trait.php", line 5, characters 26-28:
-  It was declared as final
+error: Typing[4070] You cannot override this method [1]
+-> It was declared as final [2]
+
+final_private_trait.php:10:20
+ 3 | trait MyTrait {
+ 4 |   public function foo(): void { $this->bar(); }
+ 5 |   final private function bar(): void {}
+   |                          ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | class MyClass {
+ 9 |   use MyTrait;
+10 |   private function bar(): void {} // should error, clobbering trait internals
+   |                    ^^^ [1]
+11 | }
+
+1 error found

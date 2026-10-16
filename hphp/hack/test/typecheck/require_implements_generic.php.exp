@@ -1,2 +1,10 @@
-ERROR: File "require_implements_generic.php", line 6, characters 22-22:
-Unbound name: `T` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `T` (an object type) [1]
+
+require_implements_generic.php:6:22
+4 | 
+5 | trait MyTrait<T as Foo> {
+6 |   require implements T;
+  |                      ^ [1]
+7 | }
+
+1 error found

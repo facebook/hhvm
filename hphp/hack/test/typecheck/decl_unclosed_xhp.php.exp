@@ -1,6 +1,26 @@
-ERROR: File "decl_unclosed_xhp.php", line 13, characters 3-7:
-XHP: mismatched tag: `` not the same as `a` (Parsing[1002])
-ERROR: File "decl_unclosed_xhp.php", line 15, characters 1-1:
-A closing XHP tag is expected here. (Parsing[1002])
-ERROR: File "decl_unclosed_xhp.php", line 13, characters 4-4:
-Unbound name: `:a` (an object type) (Naming[2049])
+error: Parsing[1002] XHP: mismatched tag: `` not the same as `a` [1]
+
+decl_unclosed_xhp.php:13:3
+11 | 
+12 | function f(): void {
+13 |   <a>
+   |   ^^^ [1]
+14 | }
+   | ^ [1]
+
+error: Parsing[1002] A closing XHP tag is expected here. [1]
+
+decl_unclosed_xhp.php:15:1
+13 |   <a>
+14 | }
+
+error: Naming[2049] Unbound name: `:a` (an object type) [1]
+
+decl_unclosed_xhp.php:13:4
+11 | 
+12 | function f(): void {
+13 |   <a>
+   |    ^ [1]
+14 | }
+
+3 errors found

@@ -1,6 +1,16 @@
-ERROR: File "map_set_mixed.php", line 5, characters 11-12:
-Invalid argument (Typing[4110])
-  File "map_set_mixed.php", line 4, characters 8-13:
-  Expected `arraykey`
-  File "map_set_mixed.php", line 3, characters 12-16:
-  But got `mixed`
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `mixed` [3]
+
+map_set_mixed.php:5:11
+1 | <?hh
+2 | 
+3 | function f(mixed $x) : void {
+  |            ^^^^^ [3]
+4 |   $m = Map {};
+  |        ^^^^^^ [2]
+5 |   $m->set($x, $x);
+  |           ^^ [1]
+6 | }
+
+1 error found

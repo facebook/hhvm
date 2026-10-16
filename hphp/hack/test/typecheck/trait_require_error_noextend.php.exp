@@ -1,6 +1,21 @@
-ERROR: File "trait_require_error_noextend.php", line 22, characters 16-17:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_error_noextend.php", line 23, characters 7-12:
-  This requires to extend or implement Super
-  File "trait_require_error_noextend.php", line 15, characters 19-23:
-  Required here
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+
+trait_require_error_noextend.php:22:16
+13 | 
+14 | trait Trait1 {
+15 |   require extends Super;
+   |                   ^^^^^ [3]
+16 | }
+17 | 
+   :
+20 | }
+21 | 
+22 | abstract class C1 {
+   |                ^^ [1]
+23 |   use Trait1;
+   |       ^^^^^^ [2]
+24 | }
+
+1 error found

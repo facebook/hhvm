@@ -1,10 +1,18 @@
-ERROR: File "well_formed_where_constraints_on_functions.php", line 5, characters 40-46:
-Some type arguments violate their constraints (Typing[4323])
-  File "well_formed_where_constraints_on_functions.php", line 3, characters 9-9:
-  `T` is a constrained type parameter
-  File "well_formed_where_constraints_on_functions.php", line 3, characters 14-21:
-  This type constraint is violated
-  File "well_formed_where_constraints_on_functions.php", line 3, characters 14-21:
-  Expected `arraykey`
-  File "well_formed_where_constraints_on_functions.php", line 5, characters 42-45:
-  But got `null`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `null` [4]
+
+well_formed_where_constraints_on_functions.php:5:40
+1 | <?hh
+2 | 
+3 | class G<T as arraykey> {}
+  |         ^ [2]
+  |              ^^^^^^^^ [3]
+4 | 
+5 | function on_g<T>(T $_): void where T = G<null> {}
+  |                                        ^^^^^^^ [1]
+  |                                          ^^^^ [4]
+
+1 error found

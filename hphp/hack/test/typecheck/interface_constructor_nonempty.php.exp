@@ -1,4 +1,19 @@
-ERROR: File "interface_constructor_nonempty.php", line 3, characters 19-29:
-This method is declared as abstract, but has a body (NastCheck[3002])
-ERROR: File "interface_constructor_nonempty.php", line 3, characters 19-29:
-This method shouldn't have a body (NastCheck[3001])
+error: NastCheck[3002] This method is declared as abstract, but has a body [1]
+
+interface_constructor_nonempty.php:3:19
+1 | <?hh
+2 | interface Foo {
+3 |   public function __construct() {}
+  |                   ^^^^^^^^^^^ [1]
+4 | }
+
+error: NastCheck[3001] This method shouldn't have a body [1]
+
+interface_constructor_nonempty.php:3:19
+1 | <?hh
+2 | interface Foo {
+3 |   public function __construct() {}
+  |                   ^^^^^^^^^^^ [1]
+4 | }
+
+2 errors found

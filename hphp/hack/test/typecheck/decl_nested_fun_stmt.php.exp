@@ -1,6 +1,28 @@
-ERROR: File "decl_nested_fun_stmt.php", line 13, characters 3-16:
-Declarations are not supported outside global scope (Parsing[1002])
-ERROR: File "decl_nested_fun_stmt.php", line 13, characters 3-20:
-Encountered unexpected text `function g($a) { }`, was expecting a statement. (Parsing[1002])
-ERROR: File "decl_nested_fun_stmt.php", line 13, characters 21-21:
-Inline function definitions are not supported in Hack (Parsing[1002])
+error: Parsing[1002] Declarations are not supported outside global scope [1]
+
+decl_nested_fun_stmt.php:13:3
+11 | 
+12 | function f(): void {
+13 |   function g($a) { }
+   |   ^^^^^^^^^^^^^^ [1]
+14 | }
+
+error: Parsing[1002] Encountered unexpected text `function g($a) { }`, was expecting a statement. [1]
+
+decl_nested_fun_stmt.php:13:3
+11 | 
+12 | function f(): void {
+13 |   function g($a) { }
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+14 | }
+
+error: Parsing[1002] Inline function definitions are not supported in Hack [1]
+
+decl_nested_fun_stmt.php:13:21
+11 | 
+12 | function f(): void {
+13 |   function g($a) { }
+   |                     ^ [1]
+14 | }
+
+3 errors found

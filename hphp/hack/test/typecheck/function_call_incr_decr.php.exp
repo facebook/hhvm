@@ -1,4 +1,20 @@
-ERROR: File "function_call_incr_decr.php", line 8, characters 3-12:
-You cannot use this syntax with an increment or decrement statement. (Parsing[1002])
-ERROR: File "function_call_incr_decr.php", line 9, characters 3-12:
-You cannot use this syntax with an increment or decrement statement. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax with an increment or decrement statement. [1]
+
+function_call_incr_decr.php:8:3
+ 6 | 
+ 7 | function foobar(): void {
+ 8 |   get_dict()['lol']--;
+   |   ^^^^^^^^^^ [1]
+ 9 |   get_dict()['hah']++;
+10 | }
+
+error: Parsing[1002] You cannot use this syntax with an increment or decrement statement. [1]
+
+function_call_incr_decr.php:9:3
+ 7 | function foobar(): void {
+ 8 |   get_dict()['lol']--;
+ 9 |   get_dict()['hah']++;
+   |   ^^^^^^^^^^ [1]
+10 | }
+
+2 errors found

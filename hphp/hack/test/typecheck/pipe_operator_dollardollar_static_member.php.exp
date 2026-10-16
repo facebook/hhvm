@@ -1,6 +1,21 @@
-ERROR: File "pipe_operator_dollardollar_static_member.php", line 14, characters 15-25:
-No class variable `$notAMember` in `Foo` (Typing[4090])
-  File "pipe_operator_dollardollar_static_member.php", line 4, characters 17-19:
-  Did you mean `$myInt` instead?
-  File "pipe_operator_dollardollar_static_member.php", line 3, characters 7-9:
-  Declaration of `Foo` is here
+error: Typing[4090] No class variable `$notAMember` in `Foo` [1]
+-> Did you mean `$myInt` instead? [2]
+-> Declaration of `Foo` is here [3]
+
+pipe_operator_dollardollar_static_member.php:14:15
+ 1 | <?hh
+ 2 | 
+ 3 | class Foo {
+   |       ^^^ [3]
+ 4 |   public static int $myInt = 0;
+   |                 ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+12 |   $foo |> $$::$myInt; // make sure we can access static members...
+13 |   $foo |> takes_an_int($$::$myInt); // and that they have the right type...
+14 |   $foo |> $$::$notAMember; // but this fails.
+   |               ^^^^^^^^^^^ [1]
+15 | }
+
+1 error found

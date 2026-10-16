@@ -1,4 +1,12 @@
-ERROR: File "invalid_is_nothing.php", line 5, characters 13-19:
-Invalid `is` expression hint (Typing[4195])
-  File "invalid_is_nothing.php", line 5, characters 13-19:
-  The `is` operator cannot be used with the `nothing` type
+error: Typing[4195] Invalid `is` expression hint [1]
+-> The `is` operator cannot be used with the `nothing` type [1]
+
+invalid_is_nothing.php:5:13
+3 | 
+4 | function foo(mixed $m): void {
+5 |   if ($m is nothing) {
+  |             ^^^^^^^ [1]
+6 |     echo "pointless!\n";
+7 |   }
+
+1 error found

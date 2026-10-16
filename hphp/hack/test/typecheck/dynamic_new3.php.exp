@@ -1,2 +1,10 @@
-ERROR: File "dynamic_new3.php", line 19, characters 15-17:
-Cannot use dynamic `new`. (Naming[2060])
+error: Naming[2060] Cannot use dynamic `new`. [1]
+
+dynamic_new3.php:19:15
+17 | 
+18 | function g(): C {
+19 |   return new (f())();
+   |               ^^^ [1]
+20 | }
+
+1 error found

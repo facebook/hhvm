@@ -1,4 +1,13 @@
-ERROR: File "assing_array_get_pair_component_bad.php", line 5, characters 3-19:
-You cannot mutate this (Typing[4011])
-  File "assing_array_get_pair_component_bad.php", line 4, characters 15-42:
-  This is an object of type Pair<int, dict<string, int>>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type Pair<int, dict<string, int>> [2]
+
+assing_array_get_pair_component_bad.php:5:3
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test(Pair<int, dict<string, int>> $p): void {
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 |   $p[1]['foo'] = 42;
+  |   ^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

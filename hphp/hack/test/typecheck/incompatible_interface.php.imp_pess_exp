@@ -1,18 +1,37 @@
-ERROR: File "incompatible_interface.php", line 18, characters 19-21:
-Invalid return type (Typing[4336])
-  File "incompatible_interface.php", line 18, characters 26-26:
-  Expected `T`
-  File "incompatible_interface.php", line 18, characters 19-21:
-  But got `void` because this function does not always return a value
-ERROR: File "incompatible_interface.php", line 18, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "incompatible_interface.php", line 18, characters 19-21:
-  Method `foo` has type `(function(): ~T)` in `B`
-  File "incompatible_interface.php", line 13, characters 19-21:
-  But it has type `(function(): ~int)` in parent `A`
-  File "incompatible_interface.php", line 18, characters 19-21:
-  Type `(function(): ~T)` is not a subtype of `(function(): ~int)`
-  File "incompatible_interface.php", line 13, characters 26-28:
-  Expected `int`
-  File "incompatible_interface.php", line 18, characters 26-26:
-  But got `T`
+error: Typing[4336] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `void` because this function does not always return a value [1]
+
+incompatible_interface.php:18:19
+16 | class B<T> implements A {
+17 | 
+18 |   public function foo(): T {
+   |                   ^^^ [1]
+   |                          ^ [2]
+19 |     // UNSAFE
+20 |   }
+
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method `foo` has type `(function(): ~T)` in `B` [1]
+-> But it has type `(function(): ~int)` in parent `A` [2]
+-> Type `(function(): ~T)` is not a subtype of `(function(): ~int)` [1]
+-> Expected `int` [3]
+-> But got `T` [4]
+
+incompatible_interface.php:18:19
+11 | 
+12 | interface A {
+13 |   public function foo(): int;
+   |                   ^^^ [2]
+   |                          ^^^ [3]
+14 | }
+15 | 
+16 | class B<T> implements A {
+17 | 
+18 |   public function foo(): T {
+   |                   ^^^ [1]
+   |                          ^ [4]
+19 |     // UNSAFE
+20 |   }
+
+2 errors found

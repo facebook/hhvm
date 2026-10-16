@@ -1,6 +1,22 @@
-ERROR: File "type_param_shadow2_fail.php", line 13, characters 32-32:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "type_param_shadow2_fail.php", line 12, characters 20-20:
-  `T` is already bound here
-ERROR: File "type_param_shadow2_fail.php", line 13, characters 32-32:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+type_param_shadow2_fail.php:13:32
+10 |  */
+11 | 
+12 | abstract class Foo<T> {
+   |                    ^ [2]
+13 |   public abstract function bar<T>(): T;
+   |                                ^ [1]
+14 | }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+type_param_shadow2_fail.php:13:32
+11 | 
+12 | abstract class Foo<T> {
+13 |   public abstract function bar<T>(): T;
+   |                                ^ [1]
+14 | }
+
+2 errors found

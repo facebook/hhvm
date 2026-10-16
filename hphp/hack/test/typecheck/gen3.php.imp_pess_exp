@@ -1,4 +1,21 @@
-ERROR: File "gen3.php", line 13, characters 23-23:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "gen3.php", line 20, characters 23-23:
-This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+gen3.php:13:23
+11 | 
+12 | class A {
+13 |   public function foo<T as A>(): T {
+   |                       ^ [1]
+14 |     return $this->foo();
+15 |   }
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+gen3.php:20:23
+18 | class B extends A {
+19 | 
+20 |   public function foo<T as A>(): T {
+   |                       ^ [1]
+21 |     return $this->foo();
+22 |   }
+
+2 errors found

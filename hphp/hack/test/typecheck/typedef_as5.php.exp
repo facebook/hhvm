@@ -1,14 +1,34 @@
-ERROR: File "typedef_as5.php--file1.php", line 15, characters 9-19:
-Invalid constraint on `newtype` (Typing[4332])
-  File "typedef_as5.php--file1.php", line 15, characters 24-24:
-  Expected `Y`
-  File "typedef_as5.php--file1.php", line 15, characters 28-31:
-  But got `Duck`
-ERROR: File "typedef_as5.php--file2.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "typedef_as5.php--file2.php", line 3, characters 32-35:
-  Expected `Duck`
-  File "typedef_as5.php--file2.php", line 3, characters 15-25:
-  But got `Y`
-  File "typedef_as5.php--file1.php", line 15, characters 24-24:
-    by the definition of `opaque_duck`
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `Y` [2]
+-> But got `Duck` [3]
+
+typedef_as5.php--file1.php:15:9
+13 | class Y {}
+14 | 
+15 | newtype opaque_duck as Y = Duck;
+   |         ^^^^^^^^^^^ [1]
+   |                        ^ [2]
+   |                            ^^^^ [3]
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Duck` [2]
+-> But got `Y` [3]
+->   by the definition of `opaque_duck` [4]
+
+typedef_as5.php--file2.php:4:10
+ 1 | <?hh
+ 2 | 
+ 3 | function test(opaque_duck $x): Duck {
+   |               ^^^^^^^^^^^ [3]
+   |                                ^^^^ [2]
+ 4 |   return $x;
+   |          ^^ [1]
+ 5 | }
+
+typedef_as5.php--file1.php:15:24
+13 | class Y {}
+14 | 
+15 | newtype opaque_duck as Y = Duck;
+   |                        ^ [4]
+
+2 errors found

@@ -1,4 +1,18 @@
-ERROR: File "unused_awaitable2.php", line 18, characters 5-16:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable2.php", line 13, characters 42-45:
-  This is why I think it is `Awaitable`
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable2.php:18:5
+11 | 
+12 | abstract class C {
+13 |   public async function gen(): Awaitable<void> {}
+   |                                          ^^^^ [2]
+14 | 
+15 |   public function f(): void {
+16 |     foreach (vec[] as $_) {
+17 |     }
+18 |     $this->gen();
+   |     ^^^^^^^^^^^^ [1]
+19 |   }
+20 | }
+
+1 error found

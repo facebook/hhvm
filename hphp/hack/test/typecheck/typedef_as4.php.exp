@@ -1,8 +1,21 @@
-ERROR: File "typedef_as4.php", line 12, characters 9-12:
-Cyclic type definition (Typing[4014])
-  File "typedef_as4.php", line 12, characters 20-26:
-  Cyclic use is here
-ERROR: File "typedef_as4.php", line 12, characters 9-12:
-Cyclic type definition (Typing[4014])
-  File "typedef_as4.php", line 12, characters 30-36:
-  Cyclic use is here
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_as4.php:12:9
+10 |  */
+11 | 
+12 | newtype fbid<T> as fbid<T> = fbid<T>;
+   |         ^^^^ [1]
+   |                    ^^^^^^^ [2]
+
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+typedef_as4.php:12:9
+10 |  */
+11 | 
+12 | newtype fbid<T> as fbid<T> = fbid<T>;
+   |         ^^^^ [1]
+   |                              ^^^^^^^ [2]
+
+2 errors found

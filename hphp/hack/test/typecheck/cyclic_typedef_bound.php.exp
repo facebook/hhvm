@@ -1,12 +1,34 @@
-ERROR: File "cyclic_typedef_bound.php--defines.php", line 3, characters 9-9:
-Cyclic type definition (Typing[4014])
-  File "cyclic_typedef_bound.php--defines.php", line 3, characters 14-14:
-  Cyclic use is here
-ERROR: File "cyclic_typedef_bound.php--uses.php", line 6, characters 17-18:
-Invalid argument (Typing[4110])
-  File "cyclic_typedef_bound.php--uses.php", line 3, characters 24-29:
-  Expected `string`
-  File "cyclic_typedef_bound.php--uses.php", line 5, characters 15-15:
-  But got `mixed`
-  File "cyclic_typedef_bound.php--defines.php", line 3, characters 14-14:
-    by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
+error: Typing[4014] Cyclic type definition [1]
+-> Cyclic use is here [2]
+
+cyclic_typedef_bound.php--defines.php:3:9
+1 | <?hh
+2 | newtype B = int;
+3 | newtype A as A = int;
+  |         ^ [1]
+  |              ^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+->   by the definition of `A`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A [4]
+
+cyclic_typedef_bound.php--uses.php:6:17
+1 | <?hh
+2 | 
+3 | function expect_string(string $x): void {}
+  |                        ^^^^^^ [2]
+4 | 
+5 | function test(A $a): void {
+  |               ^ [3]
+6 |   expect_string($a);
+  |                 ^^ [1]
+7 | }
+
+cyclic_typedef_bound.php--defines.php:3:14
+1 | <?hh
+2 | newtype B = int;
+3 | newtype A as A = int;
+  |              ^ [4]
+
+2 errors found

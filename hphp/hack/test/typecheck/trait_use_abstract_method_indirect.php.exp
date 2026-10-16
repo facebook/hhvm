@@ -1,4 +1,19 @@
-ERROR: File "trait_use_abstract_method_indirect.php", line 11, characters 11-13:
-Cannot call `self::foo()`; it is abstract. Did you mean `static::foo()`? (Typing[4073])
-  File "trait_use_abstract_method_indirect.php", line 4, characters 35-37:
-  Declaration is here
+error: Typing[4073] Cannot call `self::foo()`; it is abstract. Did you mean `static::foo()`? [1]
+-> Declaration is here [2]
+
+trait_use_abstract_method_indirect.php:11:11
+ 2 | 
+ 3 | trait OtherTrait {
+ 4 |   abstract static public function foo(): void;
+   |                                   ^^^ [2]
+ 5 | }
+ 6 | 
+   :
+ 9 | 
+10 |   public static function bar(): void {
+11 |     self::foo();
+   |           ^^^ [1]
+12 |   }
+13 | }
+
+1 error found

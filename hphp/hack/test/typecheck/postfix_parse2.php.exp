@@ -1,6 +1,14 @@
-ERROR: File "postfix_parse2.php", line 4, characters 3-6:
-Typing error (Typing[4427])
-  File "postfix_parse2.php", line 4, characters 3-6:
-  Expected `num` because this is used in an arithmetic operation
-  File "postfix_parse2.php", line 3, characters 12-17:
-  But got `string`
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `string` [2]
+
+postfix_parse2.php:4:3
+1 | <?hh
+2 | 
+3 | function f(string $a): void {
+  |            ^^^^^^ [2]
+4 |   $a++;
+  |   ^^^^ [1]
+5 | }
+
+1 error found

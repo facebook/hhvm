@@ -1,6 +1,26 @@
-ERROR: File "constructor_method_call_complex.php", line 9, characters 9-15:
-Method call following immediate constructor call requires parentheses around constructor call. (Parsing[1002])
-ERROR: File "constructor_method_call_complex.php", line 9, characters 9-23:
-You are using the return value of a `void` function (Typing[4119])
-  File "constructor_method_call_complex.php", line 4, characters 26-29:
-  A `void` function doesn't return a value.
+error: Parsing[1002] Method call following immediate constructor call requires parentheses around constructor call. [1]
+
+constructor_method_call_complex.php:9:9
+ 7 | 
+ 8 | function main(?A $a): void {
+ 9 |   $a ?? new A() ->foo();
+   |         ^^^^^^^ [1]
+10 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+constructor_method_call_complex.php:9:9
+ 2 | 
+ 3 | class A {
+ 4 |   public function foo(): void {
+   |                          ^^^^ [2]
+ 5 |   }
+ 6 | }
+ 7 | 
+ 8 | function main(?A $a): void {
+ 9 |   $a ?? new A() ->foo();
+   |         ^^^^^^^^^^^^^^^ [1]
+10 | }
+
+2 errors found

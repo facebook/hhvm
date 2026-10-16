@@ -1,10 +1,46 @@
-ERROR: File "switch_change_type2.php", line 17, characters 3-112:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_change_type2.php", line 17, characters 11-11:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "switch_change_type2.php", line 22, characters 14-15:
-Invalid argument (Typing[4110])
-  File "switch_change_type2.php", line 12, characters 12-14:
-  Expected `int`
-  File "switch_change_type2.php", line 12, characters 21-24:
-  But got `bool`
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_change_type2.php:17:3
+15 | 
+16 | function test(int $x): void {
+17 |   switch (1) {
+   |   ^^^^^^^^^^^^ [1]
+   |           ^ [2]
+18 |     case 1:
+   |     ^^^^^^^ [1]
+19 |       $x = f($x);
+   |       ^^^^^^^^^^^ [1]
+20 |       // FALLTHROUGH
+   |       ^^^^^^^^^^^^^^ [1]
+21 |     case 2:
+   |     ^^^^^^^ [1]
+22 |       $x = f($x);
+   |       ^^^^^^^^^^^ [1]
+23 |       break;
+   |       ^^^^^^ [1]
+24 |   }
+   |   ^ [1]
+25 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+switch_change_type2.php:22:14
+10 |  */
+11 | 
+12 | function f(int $x): bool {
+   |            ^^^ [2]
+   |                     ^^^^ [3]
+13 |   return true;
+14 | }
+   :
+20 |       // FALLTHROUGH
+21 |     case 2:
+22 |       $x = f($x);
+   |              ^^ [1]
+23 |       break;
+24 |   }
+
+2 errors found

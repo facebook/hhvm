@@ -1,2 +1,11 @@
-ERROR: File "async_function_explicit_return_type_error.php", line 16, characters 36-36:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+async_function_explicit_return_type_error.php:16:36
+14 | }
+15 | 
+16 | async function foo_error<T>(T $x): T {
+   |                                    ^ [1]
+17 |   return $x;
+18 | }
+
+1 error found

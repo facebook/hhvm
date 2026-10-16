@@ -1,2 +1,11 @@
-ERROR: File "foreach_bad_lvalue.php", line 13, characters 22-23:
-You cannot use this syntax as the iterator variable in a `foreach` loop. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax as the iterator variable in a `foreach` loop. [1]
+
+foreach_bad_lvalue.php:13:22
+11 | 
+12 | function f(): void {
+13 |   foreach (vec[1] as 42) {
+   |                      ^^ [1]
+14 |   }
+15 | }
+
+1 error found

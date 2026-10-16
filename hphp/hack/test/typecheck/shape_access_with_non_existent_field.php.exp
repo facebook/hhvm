@@ -1,4 +1,13 @@
-ERROR: File "shape_access_with_non_existent_field.php", line 5, characters 3-17:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_access_with_non_existent_field.php", line 4, characters 15-21:
-  The field `f` is not defined in this shape
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `f` is not defined in this shape [2]
+
+shape_access_with_non_existent_field.php:5:3
+2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+3 | 
+4 | function test(shape() $s): void {
+  |               ^^^^^^^ [2]
+5 |   $s['f'] ?? null;
+  |   ^^^^^^^^^^^^^^^ [1]
+6 | }
+
+1 error found

@@ -1,6 +1,15 @@
-ERROR: File "this_tparam2.php", line 27, characters 10-24:
-Invalid return type (Typing[4110])
-  File "this_tparam2.php", line 26, characters 48-62:
-  Expected `OtherPreparable`
-  File "this_tparam2.php", line 26, characters 20-31:
-  But got `MyPreparable`
+error: Typing[4110] Invalid return type [1]
+-> Expected `OtherPreparable` [2]
+-> But got `MyPreparable` [3]
+
+this_tparam2.php:27:10
+24 | class OtherPreparable extends Preparable {}
+25 | 
+26 | async function foo(MyPreparable $x): Awaitable<OtherPreparable> {
+   |                    ^^^^^^^^^^^^ [3]
+   |                                                ^^^^^^^^^^^^^^^ [2]
+27 |   return await $x->run();
+   |          ^^^^^^^^^^^^^^^ [1]
+28 | }
+
+1 error found

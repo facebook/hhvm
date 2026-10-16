@@ -1,12 +1,35 @@
-ERROR: File "async_function_implicit_return_wrong_type3.php", line 14, characters 1-230:
-This function can exit with and without returning a value (Typing[4421])
-  File "async_function_implicit_return_wrong_type3.php", line 16, characters 22-31:
-  Returning a value here.
-  File "async_function_implicit_return_wrong_type3.php", line 14, characters 1-230:
-  This function does not always return a value
-ERROR: File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
-Invalid return type (Typing[4336])
-  File "async_function_implicit_return_wrong_type3.php", line 14, characters 63-66:
-  Expected `Awaitable<void>`
-  File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
-  But got `void` because this function does not always return a value
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> This function does not always return a value [1]
+
+async_function_implicit_return_wrong_type3.php:14:1
+12 | function coin_flip(): bool { return false; }
+13 | 
+14 | function f(Awaitable<void> $a, Awaitable<void> $b): Awaitable<void> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   if (coin_flip()) { return $a; }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   if (coin_flip()) { return $b; }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                      ^^^^^^^^^^ [2]
+17 |   // Implicit return null in a normal function is not compatible with
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   // Awaitable<void>
+   |   ^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+   | ^ [1]
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `Awaitable<void>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+async_function_implicit_return_wrong_type3.php:14:10
+12 | function coin_flip(): bool { return false; }
+13 | 
+14 | function f(Awaitable<void> $a, Awaitable<void> $b): Awaitable<void> {
+   |          ^ [1]
+   |                                                               ^^^^ [2]
+15 |   if (coin_flip()) { return $a; }
+16 |   if (coin_flip()) { return $b; }
+
+2 errors found

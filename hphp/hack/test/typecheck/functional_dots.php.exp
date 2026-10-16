@@ -1,12 +1,48 @@
-ERROR: File "functional_dots.php", line 20, characters 5-85:
-Invalid argument (Typing[4041])
-  File "functional_dots.php", line 20, characters 5-85:
-  Too many mandatory arguments (expected 1 but got 2)
-  File "functional_dots.php", line 12, characters 12-44:
-  Because of this definition
-ERROR: File "functional_dots.php", line 20, characters 5-85:
-Invalid argument (Typing[4110])
-  File "functional_dots.php", line 20, characters 22-27:
-  Expected `string`
-  File "functional_dots.php", line 12, characters 27-31:
-  But got `float`
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+functional_dots.php:20:5
+10 |  */
+11 | 
+12 | function f((function(int, float...): string) $g): string {
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+13 |   return $g(5, 23.3);
+14 | }
+   :
+18 |   // Should not accept this!
+19 |   f(
+20 |     function(int $x, string $y, float ...$args): string {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |       return $x."<-";
+   |       ^^^^^^^^^^^^^^^ [1]
+22 |     },
+   |     ^ [1]
+23 |   );
+24 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `float` [3]
+
+functional_dots.php:20:5
+10 |  */
+11 | 
+12 | function f((function(int, float...): string) $g): string {
+   |                           ^^^^^ [3]
+13 |   return $g(5, 23.3);
+14 | }
+   :
+18 |   // Should not accept this!
+19 |   f(
+20 |     function(int $x, string $y, float ...$args): string {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                      ^^^^^^ [2]
+21 |       return $x."<-";
+   |       ^^^^^^^^^^^^^^^ [1]
+22 |     },
+   |     ^ [1]
+23 |   );
+24 | }
+
+2 errors found

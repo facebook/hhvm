@@ -1,4 +1,15 @@
-ERROR: File "typedef6.php", line 17, characters 3-11:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "typedef6.php", line 14, characters 6-14:
-  Alias definition is here.
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+typedef6.php:17:3
+12 | class A {}
+13 | 
+14 | type MyTypedef = A;
+   |      ^^^^^^^^^ [2]
+15 | 
+16 | function foo(): void {
+17 |   MyTypedef::foo();
+   |   ^^^^^^^^^ [1]
+18 | }
+
+1 error found

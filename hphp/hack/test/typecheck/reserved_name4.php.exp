@@ -1,2 +1,10 @@
-ERROR: File "reserved_name4.php", line 4, characters 13-20:
-`__FILE__` cannot be used as it is reserved. (Naming[2068])
+error: Naming[2068] `__FILE__` cannot be used as it is reserved. [1]
+
+reserved_name4.php:4:13
+2 | 
+3 | namespace X {
+4 |   const int __FILE__ = 1;
+  |             ^^^^^^^^ [1]
+5 | }
+
+1 error found

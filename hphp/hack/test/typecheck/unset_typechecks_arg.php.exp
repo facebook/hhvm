@@ -1,6 +1,14 @@
-ERROR: File "unset_typechecks_arg.php", line 4, characters 12-12:
-Invalid index type for this dict (Typing[4449])
-  File "unset_typechecks_arg.php", line 3, characters 19-24:
-  This is a string
-  File "unset_typechecks_arg.php", line 4, characters 12-12:
-  It is incompatible with an int
+error: Typing[4449] Invalid index type for this dict [1]
+-> This is a string [2]
+-> It is incompatible with an int [1]
+
+unset_typechecks_arg.php:4:12
+1 | <?hh
+2 | 
+3 | function f(darray<string, string> $a): void {
+  |                   ^^^^^^ [2]
+4 |   unset($a[0]);
+  |            ^ [1]
+5 | }
+
+1 error found

@@ -1,4 +1,13 @@
-ERROR: File "collection_missing_argl1.php", line 5, characters 8-12:
-You cannot use this `Vector` (Typing[4008])
-  File "collection_missing_argl1.php", line 4, characters 12-17:
-  It is missing its type parameters
+error: Typing[4008] You cannot use this `Vector` [1]
+-> It is missing its type parameters [2]
+
+collection_missing_argl1.php:5:8
+2 | 
+3 | /* HH_FIXME[4101] */
+4 | function f(Vector $x): void {
+  |            ^^^^^^ [2]
+5 |   $y = $x[0];
+  |        ^^^^^ [1]
+6 | }
+
+1 error found

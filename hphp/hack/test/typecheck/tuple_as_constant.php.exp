@@ -1,8 +1,23 @@
-ERROR: File "tuple_as_constant.php", line 16, characters 12-28:
-Invalid return type (Typing[4110])
-  File "tuple_as_constant.php", line 15, characters 35-51:
-  Expected `dict<string, int>`
-  File "tuple_as_constant.php", line 16, characters 12-28:
-  But got `vec<string>`
-  File "tuple_as_constant.php", line 5, characters 23-33:
-    from this definition
+error: Typing[4110] Invalid return type [1]
+-> Expected `dict<string, int>` [2]
+-> But got `vec<string>` [1]
+->   from this definition [3]
+
+tuple_as_constant.php:16:12
+ 3 | 
+ 4 | class A {
+ 5 |   const (int, string, vec<string>) MY_TUPLE = tuple(0, "foo", vec["b", "bc"]);
+   |                       ^^^^^^^^^^^ [3]
+ 6 | 
+ 7 |   public function return_int(): int {
+   :
+13 |   }
+14 | 
+15 |   public function return_wrong(): dict<string, int> {
+   |                                   ^^^^^^^^^^^^^^^^^ [2]
+16 |     return self::MY_TUPLE[2];
+   |            ^^^^^^^^^^^^^^^^^ [1]
+17 |   }
+18 | }
+
+1 error found

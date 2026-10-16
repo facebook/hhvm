@@ -1,2 +1,11 @@
-ERROR: File "toplevel_switch_continue.php", line 15, characters 7-15:
-In PHP, `continue;` inside a switch statement is equivalent to `break;`. Hack does not support this; use `break` if that is what you meant. (NastCheck[3006])
+error: NastCheck[3006] In PHP, `continue;` inside a switch statement is equivalent to `break;`. Hack does not support this; use `break` if that is what you meant. [1]
+
+toplevel_switch_continue.php:15:7
+13 |   switch ($a) {
+14 |     default:
+15 |       continue;
+   |       ^^^^^^^^^ [1]
+16 |   }
+17 | }
+
+1 error found

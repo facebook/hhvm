@@ -1,4 +1,17 @@
-ERROR: File "global_const13.php", line 5, characters 13-19:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "global_const13.php", line 5, characters 13-19:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+global_const13.php:5:13
+3 | class A {}
+4 | 
+5 | const A X = $x is A;
+  |             ^^^^^^^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+global_const13.php:5:13
+3 | class A {}
+4 | 
+5 | const A X = $x is A;
+  |             ^^^^^^^ [1]
+
+2 errors found

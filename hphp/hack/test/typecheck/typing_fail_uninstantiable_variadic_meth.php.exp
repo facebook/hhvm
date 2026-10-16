@@ -1,4 +1,16 @@
-ERROR: File "typing_fail_uninstantiable_variadic_meth.php", line 15, characters 33-60:
-`CannotBeInstantiatedWithT` is uninstantiable (Typing[4002])
-  File "typing_fail_uninstantiable_variadic_meth.php", line 11, characters 22-46:
-  Declaration is here
+error: Typing[4002] `CannotBeInstantiatedWithT` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_fail_uninstantiable_variadic_meth.php:15:33
+ 9 |  */
+10 | 
+11 | abstract final class CannotBeInstantiatedWithT<T> {
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+12 | }
+13 | 
+14 | class Factory {
+15 |   public function errorWithT<T>(CannotBeInstantiatedWithT<T> ...$args): void {}
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+
+1 error found

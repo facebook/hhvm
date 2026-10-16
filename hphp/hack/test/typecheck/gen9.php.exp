@@ -1,20 +1,53 @@
-ERROR: File "gen9.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-  File "gen9.php", line 21, characters 15-17:
-  Expected `int`
-  File "gen9.php", line 23, characters 39-40:
-  But got `T3`
-ERROR: File "gen9.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-  File "gen9.php", line 21, characters 15-17:
-  Expected `int`
-  File "gen9.php", line 23, characters 39-40:
-  But got `mixed`
-  File "gen9.php", line 23, characters 39-40:
-    by the definition of `T3` arising from an implicit `as mixed` constraint on this type
-ERROR: File "gen9.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-  File "gen9.php", line 23, characters 44-45:
-  Expected `T3`
-  File "gen9.php", line 21, characters 24-26:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `T3` [3]
+
+gen9.php:25:10
+19 | }
+20 | 
+21 | function foo3(int $x): int { return 0; }
+   |               ^^^ [2]
+22 | 
+23 | function test<T3>(bool $b): (function(T3): T3) {
+   |                                       ^^ [3]
+24 |   $x = $b? foo1<>: foo3<>;
+25 |   return $x;
+   |          ^^ [1]
+26 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+->   by the definition of `T3` arising from an implicit `as mixed` constraint on this type [3]
+
+gen9.php:25:10
+19 | }
+20 | 
+21 | function foo3(int $x): int { return 0; }
+   |               ^^^ [2]
+22 | 
+23 | function test<T3>(bool $b): (function(T3): T3) {
+   |                                       ^^ [3]
+24 |   $x = $b? foo1<>: foo3<>;
+25 |   return $x;
+   |          ^^ [1]
+26 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T3` [2]
+-> But got `int` [3]
+
+gen9.php:25:10
+19 | }
+20 | 
+21 | function foo3(int $x): int { return 0; }
+   |                        ^^^ [3]
+22 | 
+23 | function test<T3>(bool $b): (function(T3): T3) {
+   |                                            ^^ [2]
+24 |   $x = $b? foo1<>: foo3<>;
+25 |   return $x;
+   |          ^^ [1]
+26 | }
+
+3 errors found

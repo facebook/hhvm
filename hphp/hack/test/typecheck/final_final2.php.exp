@@ -1,2 +1,9 @@
-ERROR: File "final_final2.php", line 12, characters 7-11:
-Classes, interfaces, and traits cannot have duplicate modifiers (Parsing[1002])
+error: Parsing[1002] Classes, interfaces, and traits cannot have duplicate modifiers [1]
+
+final_final2.php:12:7
+10 |  */
+11 | 
+12 | final final abstract class FinalFinalTest {}
+   |       ^^^^^ [1]
+
+1 error found

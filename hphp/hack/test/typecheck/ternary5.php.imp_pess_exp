@@ -1,2 +1,10 @@
-ERROR: File "ternary5.php", line 14, characters 10-31:
-Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses (Parsing[1002])
+error: Parsing[1002] Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses [1]
+
+ternary5.php:14:10
+12 | // This should be disallowed -- PHP will parse it wrong.
+13 | function bar(bool $x) : bool {
+14 |   return $x ? $x : $x ? $x : $x;
+   |          ^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | }
+
+1 error found

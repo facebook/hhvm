@@ -1,6 +1,18 @@
-ERROR: File "foreach_union_dynamic.php", line 8, characters 11-12:
-Invalid `foreach` (Typing[4110])
-  File "foreach_union_dynamic.php", line 8, characters 11-12:
-  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
-  File "foreach_union_dynamic.php", line 4, characters 27-30:
-  But got `bool`
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected an array that can be traversed with foreach because this is used in a `foreach` statement [1]
+-> But got `bool` [2]
+
+foreach_union_dynamic.php:8:11
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function doit(dynamic $d, bool $p):void {
+   |                           ^^^^ [2]
+ 5 |   if ($p) {
+ 6 |     $d = $p;
+ 7 |   }
+ 8 |   foreach($d as $e) {
+   |           ^^ [1]
+ 9 |   }
+10 | }
+
+1 error found

@@ -1,4 +1,15 @@
-ERROR: File "typing_fail_uninstantiable_as_tparam_typedef.php", line 13, characters 12-14:
-`Bar` is uninstantiable (Typing[4002])
-  File "typing_fail_uninstantiable_as_tparam_typedef.php", line 11, characters 22-24:
-  Declaration is here
+error: Typing[4002] `Bar` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_fail_uninstantiable_as_tparam_typedef.php:13:12
+ 9 |  */
+10 | 
+11 | abstract final class Bar {}
+   |                      ^^^ [2]
+12 | 
+13 | type Baz = Bar;  // TODO: why uninstantiability error point to this line?
+   |            ^^^ [1]
+14 | 
+15 | class C<T as Baz> {}
+
+1 error found

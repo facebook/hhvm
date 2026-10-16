@@ -1,9 +1,27 @@
-ERROR: File "fake_members6.php", line 25, characters 14-21:
-Invalid return type (Typing[4110])
-  File "fake_members6.php", line 22, characters 27-29:
-  Expected `int`
-  File "fake_members6.php", line 16, characters 11-15:
-  But got `mixed`
-  File "fake_members6.php", line 24, characters 7-20:
-  All the local information about `$this->x` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> All the local information about `$this->x` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+fake_members6.php:25:14
+14 | 
+15 | class X {
+16 |   private mixed $x;
+   |           ^^^^^ [3]
+17 | 
+18 |   public function __construct() {
+19 |     $this->x = '';
+20 |   }
+21 | 
+22 |   public function getX(): int {
+   |                           ^^^ [2]
+23 |     if($this->x is int) {
+24 |       do_something();
+   |       ^^^^^^^^^^^^^^ [4]
+25 |       return $this->x;
+   |              ^^^^^^^^ [1]
+26 |     }
+27 |     return 0;
+
+1 error found

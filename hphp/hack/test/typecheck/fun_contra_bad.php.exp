@@ -1,6 +1,19 @@
-ERROR: File "fun_contra_bad.php", line 8, characters 11-12:
-Invalid argument (Typing[4110])
-  File "fun_contra_bad.php", line 7, characters 25-27:
-  Expected `int`
-  File "fun_contra_bad.php", line 4, characters 28-35:
-  But got `arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+fun_contra_bad.php:8:11
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function TakeFun((function(arraykey): arraykey) $f): void {
+   |                            ^^^^^^^^ [3]
+ 5 |   ($f)(3);
+ 6 | }
+ 7 | function Pass((function(int): int) $g): void {
+   |                         ^^^ [2]
+ 8 |   TakeFun($g);
+   |           ^^ [1]
+ 9 | }
+10 | function DoIt(): void {
+
+1 error found

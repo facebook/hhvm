@@ -1,6 +1,21 @@
-ERROR: File "pipe_operator_dollardollar_static_call.php", line 11, characters 15-26:
-No static method `doesNotExist` in `Foo` (Typing[4090])
-  File "pipe_operator_dollardollar_static_call.php", line 4, characters 26-32:
-  Did you mean `fooMeth` instead?
-  File "pipe_operator_dollardollar_static_call.php", line 3, characters 7-9:
-  Declaration of `Foo` is here
+error: Typing[4090] No static method `doesNotExist` in `Foo` [1]
+-> Did you mean `fooMeth` instead? [2]
+-> Declaration of `Foo` is here [3]
+
+pipe_operator_dollardollar_static_call.php:11:15
+ 1 | <?hh
+ 2 | 
+ 3 | class Foo {
+   |       ^^^ [3]
+ 4 |   public static function fooMeth(): void {}
+   |                          ^^^^^^^ [2]
+ 5 | }
+ 6 | 
+   :
+ 9 | 
+10 |   $foo |> $$::fooMeth(); // this is a legal call
+11 |   $foo |> $$::doesNotExist(); // ...and this one doesn't exist
+   |               ^^^^^^^^^^^^ [1]
+12 | }
+
+1 error found

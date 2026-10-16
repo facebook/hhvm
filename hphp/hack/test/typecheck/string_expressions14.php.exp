@@ -1,6 +1,19 @@
-ERROR: File "string_expressions14.php", line 20, characters 9-13:
-Only string and int values can be used in string interpolation (Typing[4110])
-  File "string_expressions14.php", line 20, characters 9-13:
-  Expected `string` or `int`
-  File "string_expressions14.php", line 13, characters 38-38:
-  But got `A`
+error: Typing[4110] Only string and int values can be used in string interpolation [1]
+-> Expected `string` or `int` [1]
+-> But got `A` [2]
+
+string_expressions14.php:20:9
+11 | 
+12 | class A {
+13 |   public function __construct(public A $x) {}
+   |                                      ^ [2]
+14 |   public function __toString(): string {
+15 |     return "A";
+   :
+18 | 
+19 | function test(A $x): void {
+20 |   $x = "$x->x->x";
+   |         ^^^^^ [1]
+21 | }
+
+1 error found

@@ -1,6 +1,28 @@
-ERROR: File "encapsed4.php", line 7, characters 10-17:
-The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
-ERROR: File "encapsed4.php", line 7, characters 11-11:
-Unbound name: `c` (a global constant) (Naming[2049])
-ERROR: File "encapsed4.php", line 7, characters 11-11:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. [1]
+
+encapsed4.php:7:10
+5 | function f(): void {
+6 |   $c = new C();
+7 |   $s = "${c->x()}";
+  |          ^^^^^^^^ [1]
+8 | }
+
+error: Naming[2049] Unbound name: `c` (a global constant) [1]
+
+encapsed4.php:7:11
+5 | function f(): void {
+6 |   $c = new C();
+7 |   $s = "${c->x()}";
+  |           ^ [1]
+8 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+encapsed4.php:7:11
+5 | function f(): void {
+6 |   $c = new C();
+7 |   $s = "${c->x()}";
+  |           ^ [1]
+8 | }
+
+3 errors found

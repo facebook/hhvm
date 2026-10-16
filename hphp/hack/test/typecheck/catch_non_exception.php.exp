@@ -1,6 +1,13 @@
-ERROR: File "catch_non_exception.php", line 10, characters 12-23:
-Invalid exception (Typing[4110])
-  File "catch_non_exception.php", line 10, characters 12-23:
-  Expected `Throwable` because it is used as an exception
-  File "catch_non_exception.php", line 10, characters 12-23:
-  But got `NonException`
+error: Typing[4110] Invalid exception [1]
+-> Expected `Throwable` because it is used as an exception [1]
+-> But got `NonException` [1]
+
+catch_non_exception.php:10:12
+ 8 |   try {
+ 9 |     might_throw();
+10 |   } catch (NonException $m) {
+   |            ^^^^^^^^^^^^ [1]
+11 |   }
+12 | }
+
+1 error found

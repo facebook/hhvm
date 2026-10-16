@@ -1,6 +1,14 @@
-ERROR: File "set_keybound.php", line 6, characters 11-14:
-Invalid argument (Typing[4110])
-  File "set_keybound.php", line 5, characters 8-13:
-  Expected `arraykey`
-  File "set_keybound.php", line 6, characters 11-14:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` [2]
+-> But got `null` [1]
+
+set_keybound.php:6:11
+3 | <<__EntryPoint>>
+4 | function f() : void {
+5 |   $s = Set {};
+  |        ^^^^^^ [2]
+6 |   $s->add(null);
+  |           ^^^^ [1]
+7 | }
+
+1 error found

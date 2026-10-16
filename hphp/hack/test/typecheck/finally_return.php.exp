@@ -1,2 +1,11 @@
-ERROR: File "finally_return.php", line 16, characters 5-14:
-Don't use `return` in a `finally` block; there's nothing to receive the return value (NastCheck[3018])
+error: NastCheck[3018] Don't use `return` in a `finally` block; there's nothing to receive the return value [1]
+
+finally_return.php:16:5
+14 |     return 42;
+15 |   } finally {
+16 |     return 24;
+   |     ^^^^^^^^^^ [1]
+17 |   }
+18 | }
+
+1 error found

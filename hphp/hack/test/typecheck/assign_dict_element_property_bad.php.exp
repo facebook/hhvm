@@ -1,6 +1,17 @@
-ERROR: File "assign_dict_element_property_bad.php", line 9, characters 22-26:
-Invalid assignment (Typing[4110])
-  File "assign_dict_element_property_bad.php", line 5, characters 14-16:
-  Expected `int`
-  File "assign_dict_element_property_bad.php", line 9, characters 22-26:
-  But got `string`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+assign_dict_element_property_bad.php:9:22
+ 3 | 
+ 4 | class C {
+ 5 |   public vec<int> $vs = vec[];
+   |              ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | function test(dict<string, C> $d): void {
+ 9 |   $d['foo']->vs[0] = 'bar';
+   |                      ^^^^^ [1]
+10 | }
+
+1 error found

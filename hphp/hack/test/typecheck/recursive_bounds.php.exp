@@ -1,14 +1,30 @@
-ERROR: File "recursive_bounds.php", line 11, characters 10-11:
-Invalid return type (Typing[4110])
-  File "recursive_bounds.php", line 10, characters 26-34:
-  Expected `Contra<T>`
-  File "recursive_bounds.php", line 10, characters 51-51:
-  But got `T as Contra<Contra<T>>`
-  File "recursive_bounds.php", line 10, characters 51-51:
-  This type argument to `Contra` only allows supertypes (it is contravariant)
-ERROR: File "recursive_bounds.php", line 11, characters 10-11:
-Invalid return type (Typing[4110])
-  File "recursive_bounds.php", line 10, characters 44-52:
-  Expected `Contra<T>`
-  File "recursive_bounds.php", line 10, characters 38-38:
-  But got `T as Contra<Contra<T>>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `Contra<T>` [2]
+-> But got `T as Contra<Contra<T>>` [3]
+-> This type argument to `Contra` only allows supertypes (it is contravariant) [3]
+
+recursive_bounds.php:11:10
+ 8 | 
+ 9 | class Contra<-TN> { }
+10 | function bar<T as Contra<Contra<T>>>(T $x):Contra<T> {
+   |                          ^^^^^^^^^ [2]
+   |                                                   ^ [3]
+11 |   return $x;
+   |          ^^ [1]
+12 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Contra<T>` [2]
+-> But got `T as Contra<Contra<T>>` [3]
+
+recursive_bounds.php:11:10
+ 8 | 
+ 9 | class Contra<-TN> { }
+10 | function bar<T as Contra<Contra<T>>>(T $x):Contra<T> {
+   |                                      ^ [3]
+   |                                            ^^^^^^^^^ [2]
+11 |   return $x;
+   |          ^^ [1]
+12 | }
+
+2 errors found

@@ -1,6 +1,18 @@
-ERROR: File "anon11.php", line 16, characters 10-13:
-Invalid return type (Typing[4110])
-  File "anon11.php", line 12, characters 18-23:
-  Expected `string`
-  File "anon11.php", line 13, characters 22-22:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+anon11.php:16:10
+10 |  */
+11 | 
+12 | function test(): string {
+   |                  ^^^^^^ [2]
+13 |   $f = function($x = 0) {
+   |                      ^ [3]
+14 |     return $x;
+15 |   };
+16 |   return $f();
+   |          ^^^^ [1]
+17 | }
+
+1 error found

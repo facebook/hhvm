@@ -1,8 +1,26 @@
-ERROR: File "typing_fail_implement_abstract.php", line 13, characters 28-28:
-This method is declared as abstract, but has a body (NastCheck[3002])
-ERROR: File "typing_fail_implement_abstract.php", line 16, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract method `f` (Typing[4047])
-  File "typing_fail_implement_abstract.php", line 16, characters 17-17:
-  `B` uses `A`
-  File "typing_fail_implement_abstract.php", line 13, characters 28-28:
-  The method is defined here
+error: NastCheck[3002] This method is declared as abstract, but has a body [1]
+
+typing_fail_implement_abstract.php:13:28
+11 | 
+12 | abstract class A {
+13 |   public abstract function f(): void {}
+   |                            ^ [1]
+14 | }
+15 | 
+
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `f` [1]
+-> `B` uses `A` [2]
+-> The method is defined here [3]
+
+typing_fail_implement_abstract.php:16:7
+11 | 
+12 | abstract class A {
+13 |   public abstract function f(): void {}
+   |                            ^ [3]
+14 | }
+15 | 
+16 | class B extends A {}
+   |       ^ [1]
+   |                 ^ [2]
+
+2 errors found

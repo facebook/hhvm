@@ -1,2 +1,10 @@
-ERROR: File "override_with_generic.php", line 11, characters 21-21:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+override_with_generic.php:11:21
+ 9 | class B extends A {
+10 |     <<__Override>>
+11 |   public function f<T>(Contra<T> $_): void where T as num {}
+   |                     ^ [1]
+12 | }
+
+1 error found

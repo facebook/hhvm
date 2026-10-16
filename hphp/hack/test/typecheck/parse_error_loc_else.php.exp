@@ -1,26 +1,103 @@
-ERROR: File "parse_error_loc_else.php", line 22, characters 14-23:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "parse_error_loc_else.php", line 22, characters 14-23:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-ERROR: File "parse_error_loc_else.php", line 13, characters 7-8:
-Variable `$v` is undefined, or not always defined. (Naming[2050])
-ERROR: File "parse_error_loc_else.php", line 14, characters 5-14:
-Variable `$outputRow` is undefined, or not always defined. (Naming[2050])
-  File "parse_error_loc_else.php", line 13, characters 7-8:
-  Did you mean `$v` instead?
-ERROR: File "parse_error_loc_else.php", line 14, characters 16-19:
-Variable `$key` is undefined, or not always defined. (Naming[2050])
-  File "parse_error_loc_else.php", line 13, characters 7-8:
-  Did you mean `$v` instead?
-ERROR: File "parse_error_loc_else.php", line 14, characters 28-44:
-Unbound name: `sps_DBResultField` (an object type) (Naming[2049])
-ERROR: File "parse_error_loc_else.php", line 19, characters 5-14:
-Variable `$outputRow` is undefined, or not always defined. (Naming[2050])
-  File "parse_error_loc_else.php", line 18, characters 14-15:
-  Did you mean `$v` instead?
-ERROR: File "parse_error_loc_else.php", line 19, characters 16-19:
-Variable `$key` is undefined, or not always defined. (Naming[2050])
-  File "parse_error_loc_else.php", line 18, characters 14-15:
-  Did you mean `$v` instead?
-ERROR: File "parse_error_loc_else.php", line 19, characters 28-44:
-Unbound name: `sps_DBResultField` (an object type) (Naming[2049])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+parse_error_loc_else.php:22:14
+20 |       dict[
+21 |         'isNull' => false,
+22 |         0 => 'intValue' = 'foo',
+   |              ^^^^^^^^^^ [1]
+23 |       ]);
+24 |   }
+
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+parse_error_loc_else.php:22:14
+20 |       dict[
+21 |         'isNull' => false,
+22 |         0 => 'intValue' = 'foo',
+   |              ^^^^^^^^^^ [1]
+23 |       ]);
+24 |   }
+
+error: Naming[2050] Variable `$v` is undefined, or not always defined. [1]
+
+parse_error_loc_else.php:13:7
+11 | 
+12 | function meh(): void {
+13 |   if ($v === null) {
+   |       ^^ [1]
+14 |     $outputRow[$key] = new sps_DBResultField(
+15 |       dict[
+
+error: Naming[2050] Variable `$outputRow` is undefined, or not always defined. [1]
+-> Did you mean `$v` instead? [2]
+
+parse_error_loc_else.php:14:5
+11 | 
+12 | function meh(): void {
+13 |   if ($v === null) {
+   |       ^^ [2]
+14 |     $outputRow[$key] = new sps_DBResultField(
+   |     ^^^^^^^^^^ [1]
+15 |       dict[
+16 |         'isNull' => true,
+
+error: Naming[2050] Variable `$key` is undefined, or not always defined. [1]
+-> Did you mean `$v` instead? [2]
+
+parse_error_loc_else.php:14:16
+11 | 
+12 | function meh(): void {
+13 |   if ($v === null) {
+   |       ^^ [2]
+14 |     $outputRow[$key] = new sps_DBResultField(
+   |                ^^^^ [1]
+15 |       dict[
+16 |         'isNull' => true,
+
+error: Naming[2049] Unbound name: `sps_DBResultField` (an object type) [1]
+
+parse_error_loc_else.php:14:28
+12 | function meh(): void {
+13 |   if ($v === null) {
+14 |     $outputRow[$key] = new sps_DBResultField(
+   |                            ^^^^^^^^^^^^^^^^^ [1]
+15 |       dict[
+16 |         'isNull' => true,
+
+error: Naming[2050] Variable `$outputRow` is undefined, or not always defined. [1]
+-> Did you mean `$v` instead? [2]
+
+parse_error_loc_else.php:19:5
+16 |         'isNull' => true,
+17 |       ]);
+18 |   } else if ($v is int) {
+   |              ^^ [2]
+19 |     $outputRow[$key] = new sps_DBResultField(
+   |     ^^^^^^^^^^ [1]
+20 |       dict[
+21 |         'isNull' => false,
+
+error: Naming[2050] Variable `$key` is undefined, or not always defined. [1]
+-> Did you mean `$v` instead? [2]
+
+parse_error_loc_else.php:19:16
+16 |         'isNull' => true,
+17 |       ]);
+18 |   } else if ($v is int) {
+   |              ^^ [2]
+19 |     $outputRow[$key] = new sps_DBResultField(
+   |                ^^^^ [1]
+20 |       dict[
+21 |         'isNull' => false,
+
+error: Naming[2049] Unbound name: `sps_DBResultField` (an object type) [1]
+
+parse_error_loc_else.php:19:28
+17 |       ]);
+18 |   } else if ($v is int) {
+19 |     $outputRow[$key] = new sps_DBResultField(
+   |                            ^^^^^^^^^^^^^^^^^ [1]
+20 |       dict[
+21 |         'isNull' => false,
+
+9 errors found

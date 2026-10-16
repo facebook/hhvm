@@ -1,12 +1,44 @@
-ERROR: File "akempty_tuple_bad.php", line 6, characters 10-11:
-Invalid return type (Typing[4110])
-  File "akempty_tuple_bad.php", line 4, characters 17-38:
-  Expected `(?string, vec<int>)`
-  File "akempty_tuple_bad.php", line 5, characters 8-12:
-  But got `vec<nothing>`
-ERROR: File "akempty_tuple_bad.php", line 12, characters 8-9:
-Invalid argument (Typing[4110])
-  File "pseudofunctions.hhi", line 44, characters 29-33:
-  Expected `arraykey` (variadic argument)
-  File "akempty_tuple_bad.php", line 4, characters 18-24:
-  But got `?string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `(?string, vec<int>)` [2]
+-> But got `vec<nothing>` [3]
+
+akempty_tuple_bad.php:6:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function omg(): (?string, varray<int>) {
+  |                 ^^^^^^^^^^^^^^^^^^^^^^ [2]
+5 |   $x = vec[];
+  |        ^^^^^ [3]
+6 |   return $x;
+  |          ^^ [1]
+7 | }
+8 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `arraykey` (variadic argument) [2]
+-> But got `?string` [3]
+
+akempty_tuple_bad.php:12:8
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | function omg(): (?string, varray<int>) {
+   |                  ^^^^^^^ [3]
+ 5 |   $x = vec[];
+ 6 |   return $x;
+   :
+10 |   $x = omg();
+11 |   list($y, $z) = $x;
+12 |   echo $y;
+   |        ^^ [1]
+13 | }
+14 | 
+
+pseudofunctions.hhi:44:29
+42 |    */
+43 |   <<__SupportDynamicType>>
+44 |   function echo(arraykey ...$args): void;
+   |                             ^^^^^ [2]
+45 | }
+46 | 
+
+2 errors found

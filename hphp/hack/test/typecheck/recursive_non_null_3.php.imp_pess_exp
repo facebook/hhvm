@@ -1,6 +1,21 @@
-ERROR: File "recursive_non_null_3.php", line 20, characters 10-13:
-Invalid return type (Typing[4110])
-  File "recursive_non_null_3.php", line 11, characters 50-50:
-  Expected `A`
-  File "recursive_non_null_3.php", line 11, characters 49-50:
-  But got `nonnull`
+error: Typing[4110] Invalid return type [1]
+-> Expected `A` [2]
+-> But got `nonnull` [3]
+
+recursive_non_null_3.php:20:10
+ 9 | class B {}
+10 | 
+11 | function Foo(bool $b, bool $c, mixed $m, A $i): ?A {
+   |                                                 ^^ [3]
+   |                                                  ^ [2]
+12 |   $res = null;
+13 |   if ($b) {
+   :
+18 |     $res = $i;
+19 |   }
+20 |   return $res;
+   |          ^^^^ [1]
+21 | }
+22 | 
+
+1 error found

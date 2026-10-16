@@ -1,8 +1,26 @@
-ERROR: File "namespace_collections3.php", line 14, characters 15-18:
-Unbound name: `Map` (Naming[2049])
-ERROR: File "namespace_collections3.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "namespace_collections3.php", line 14, characters 15-28:
-  Expected `Map<int, int>`
-  File "namespace_collections3.php", line 15, characters 8-13:
-  But got `Map<(arraykey & _), _>`
+error: Naming[2049] Unbound name: `Map` [1]
+
+namespace_collections3.php:14:15
+12 | namespace N;
+13 | 
+14 | function f(): \Map<int, int> {
+   |               ^^^^ [1]
+15 |   $m = Map {};
+16 |   return $m;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Map<int, int>` [2]
+-> But got `Map<(arraykey & _), _>` [3]
+
+namespace_collections3.php:16:10
+12 | namespace N;
+13 | 
+14 | function f(): \Map<int, int> {
+   |               ^^^^^^^^^^^^^^ [2]
+15 |   $m = Map {};
+   |        ^^^^^^ [3]
+16 |   return $m;
+   |          ^^ [1]
+17 | }
+
+2 errors found

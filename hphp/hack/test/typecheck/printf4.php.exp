@@ -1,4 +1,16 @@
-ERROR: File "printf4.php", line 22, characters 3-11:
-Too many positional arguments (expected 1 but got 2) (Typing[4105])
-  File "printf4.php", line 18, characters 10-10:
-  Definition is here
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+printf4.php:22:3
+16 | }
+17 | 
+18 | function f(\HH\FormatString<Dummy> $x, mixed...$args) : void {
+   |          ^ [2]
+19 | }
+20 | 
+21 | function _(string $x) : void {
+22 |   f('', $x);
+   |   ^^^^^^^^^ [1]
+23 | }
+
+1 error found

@@ -1,6 +1,26 @@
-ERROR: File "enum_eq_bad.php", line 17, characters 7-15:
-This equality test has incompatible types (Typing[4157])
-  File "enum_eq_bad.php", line 4, characters 9-11:
-  This is a value of type E
-  File "enum_eq_bad.php", line 9, characters 9-11:
-  This is a value of type F
+error: Typing[4157] This equality test has incompatible types [1]
+-> This is a value of type E [2]
+-> This is a value of type F [3]
+
+enum_eq_bad.php:17:7
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | enum E: int {
+   |         ^^^ [2]
+ 5 |   A = 1;
+ 6 |   B = 2;
+ 7 | }
+ 8 | 
+ 9 | enum F: int {
+   |         ^^^ [3]
+10 |   C = 2;
+11 |   D = 3;
+   :
+15 |   $x = E::A;
+16 |   $y = F::C;
+17 |   if ($x === $y) {
+   |       ^^^^^^^^^ [1]
+18 |     echo 'same';
+19 |   }
+
+1 error found

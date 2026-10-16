@@ -1,6 +1,20 @@
-WARN: File "sound_dynamic_marker_types_is_as.php", line 4, characters 3-37:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `string`. (Warn[12012])
-ERROR: File "sound_dynamic_marker_types_is_as.php", line 4, characters 8-37:
-Invalid `as` expression hint (Typing[4195])
-  File "sound_dynamic_marker_types_is_as.php", line 4, characters 8-37:
-  The `as` operator cannot be used with a type with generics, because generics are erased at runtime
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `string`. [1]
+
+sound_dynamic_marker_types_is_as.php:4:3
+2 | 
+3 | function f(): void {
+4 |   4 as HH\FIXME\POISON_MARKER<string>;
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4195] Invalid `as` expression hint [1]
+-> The `as` operator cannot be used with a type with generics, because generics are erased at runtime [1]
+
+sound_dynamic_marker_types_is_as.php:4:8
+2 | 
+3 | function f(): void {
+4 |   4 as HH\FIXME\POISON_MARKER<string>;
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+2 errors found

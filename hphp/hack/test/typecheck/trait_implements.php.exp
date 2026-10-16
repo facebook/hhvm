@@ -1,8 +1,26 @@
-ERROR: File "trait_implements.php", line 22, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract method `bar` (Typing[4047])
-  File "trait_implements.php", line 23, characters 7-7:
-  `Y` uses `X`
-  File "trait_implements.php", line 16, characters 20-20:
-  `X` uses `I`
-  File "trait_implements.php", line 13, characters 19-21:
-  The method is defined here
+error: Typing[4047] This class must be declared `abstract`, or provide an implementation for the abstract method `bar` [1]
+-> `Y` uses `X` [2]
+-> `X` uses `I` [3]
+-> The method is defined here [4]
+
+trait_implements.php:22:7
+11 | 
+12 | interface I {
+13 |   public function bar(): void;
+   |                   ^^^ [4]
+14 | }
+15 | 
+16 | trait X implements I {
+   |                    ^ [3]
+17 |   public function foo(): void {
+18 |     $this->bar();
+19 |   }
+20 | }
+21 | 
+22 | class Y {
+   |       ^ [1]
+23 |   use X;
+   |       ^ [2]
+24 | }
+
+1 error found

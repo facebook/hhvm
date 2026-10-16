@@ -8,7 +8,22 @@ File "readonly_shapes_hhi.php", line 12, characters 3-13:
   dict<string, int>
 File "readonly_shapes_hhi.php", line 14, characters 3-13:
   int
-ERROR: File "readonly_shapes_hhi.php", line 17, characters 3-28:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "stdlib/builtins_readonly.hhi", line 55, characters 28-33:
-  The function call is defined here.
+error: Typing[4412] This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. [1]
+-> The function call is defined here. [2]
+
+readonly_shapes_hhi.php:17:3
+15 | 
+16 |   // error, this function returns readonly, must be wrapped
+17 |   HH\Readonly\Shapes::toDict($x);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 | }
+
+stdlib/builtins_readonly.hhi:55:28
+53 |     )[]: readonly darray<arraykey, mixed>;
+54 | 
+55 |     public static function toDict(
+   |                            ^^^^^^ [2]
+56 |       readonly shape(...) $shape,
+57 |     )[]: readonly dict<arraykey, mixed>;
+
+1 error found

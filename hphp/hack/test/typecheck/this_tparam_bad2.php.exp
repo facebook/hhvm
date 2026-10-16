@@ -1,14 +1,31 @@
-ERROR: File "this_tparam_bad2.php", line 26, characters 12-15:
-Invalid argument (Typing[4110])
-  File "this_tparam_bad2.php", line 14, characters 36-39:
-  Expected `<expr#2> as Foo`
-  File "this_tparam_bad2.php", line 26, characters 12-15:
-    where `<expr#2>` is a reference to this expression
-  File "this_tparam_bad2.php", line 18, characters 33-35:
-  But got `Foo`
-  File "this_tparam_bad2.php", line 18, characters 33-35:
-  This type argument to `SomethingElse` must match exactly (it is invariant)
-  File "this_tparam_bad2.php", line 20, characters 15-17:
-  Since `Foo` is not final
-  File "this_tparam_bad2.php", line 18, characters 33-35:
-  this might not be a `Foo`
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2> as Foo` [2]
+->   where `<expr#2>` is a reference to this expression [1]
+-> But got `Foo` [3]
+-> This type argument to `SomethingElse` must match exactly (it is invariant) [3]
+-> Since `Foo` is not final [4]
+-> this might not be a `Foo` [3]
+
+this_tparam_bad2.php:26:12
+12 | interface SomethingElse<T> {}
+13 | 
+14 | class Foo implements SomethingElse<this> {}
+   |                                    ^^^^ [2]
+15 | 
+16 | function expects1<T as Foo>(SomethingElse<T> $foo): void {}
+17 | 
+18 | function expects2(SomethingElse<Foo> $foo): void {}
+   |                                 ^^^ [3]
+19 | 
+20 | function test(Foo $foo): void {
+   |               ^^^ [4]
+21 |   // No error since Foo is an 'as' constraint on a generic
+22 |   expects1($foo);
+23 | 
+24 |   // Error because SomethingElse<expression_dependent<Foo>> is different than
+25 |   // SomethingElse<Foo>
+26 |   expects2($foo);
+   |            ^^^^ [1]
+27 | }
+
+1 error found

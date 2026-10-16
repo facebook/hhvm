@@ -1,6 +1,19 @@
-ERROR: File "instance_property_as_class_constant.php", line 17, characters 17-19:
-No class constant `foo` in `X` (Typing[4090])
-  File "instance_property_as_class_constant.php", line 13, characters 12-18:
-  Did you mean instance property `foo` instead?
-  File "instance_property_as_class_constant.php", line 12, characters 7-7:
-  Declaration of `X` is here
+error: Typing[4090] No class constant `foo` in `X` [1]
+-> Did you mean instance property `foo` instead? [2]
+-> Declaration of `X` is here [3]
+
+instance_property_as_class_constant.php:17:17
+10 |  */
+11 | 
+12 | class X {
+   |       ^ [3]
+13 |     public ?string $foo;
+   |            ^^^^^^^ [2]
+14 | }
+15 | 
+16 | function main(): void {
+17 |     var_dump(X::foo);
+   |                 ^^^ [1]
+18 | }
+
+1 error found

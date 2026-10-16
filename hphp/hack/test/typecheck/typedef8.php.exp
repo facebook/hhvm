@@ -1,4 +1,12 @@
-ERROR: File "typedef8.php", line 15, characters 6-6:
-Name already bound: `A` (Naming[2012])
-  File "typedef8.php", line 14, characters 7-7:
-  Previous definition is here
+error: Naming[2012] Name already bound: `A` [1]
+-> Previous definition is here [2]
+
+typedef8.php:15:6
+12 | // Typedefs are in the same namespace as classes.
+13 | 
+14 | class A {}
+   |       ^ [2]
+15 | type A = int;
+   |      ^ [1]
+
+1 error found

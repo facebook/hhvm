@@ -1,6 +1,19 @@
-ERROR: File "postfix_parse.php", line 15, characters 3-9:
-Typing error (Typing[4427])
-  File "postfix_parse.php", line 15, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "postfix_parse.php", line 5, characters 12-17:
-  But got `string`
+error: Typing[4427] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [1]
+-> But got `string` [2]
+
+postfix_parse.php:15:3
+ 3 | class Foo {
+ 4 |   public function __construct(
+ 5 |     public string $a = 'a',
+   |            ^^^^^^ [2]
+ 6 |   ) {}
+ 7 | }
+   :
+13 |   // There used to be a bug where postfix operators were dropped when
+14 |   // they appeared after higher-precedence operators like '->'.
+15 |   $x->a++;
+   |   ^^^^^^^ [1]
+16 | }
+
+1 error found

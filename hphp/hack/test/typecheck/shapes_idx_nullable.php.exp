@@ -1,8 +1,31 @@
-ERROR: File "shapes_idx_nullable.php", line 5, characters 19-21:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shapes_idx_nullable.php", line 3, characters 13-29:
-  The field `b` is not defined in this shape
-ERROR: File "shapes_idx_nullable.php", line 8, characters 19-21:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shapes_idx_nullable.php", line 3, characters 13-29:
-  The field `b` is not defined in this shape
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `b` is not defined in this shape [2]
+
+shapes_idx_nullable.php:5:19
+1 | <?hh
+2 | 
+3 | function f(?shape('a' => int) $s): void {
+  |             ^^^^^^^^^^^^^^^^^ [2]
+4 |   Shapes::idx($s, 'a'); // Fine
+5 |   Shapes::idx($s, 'b'); // Not fine
+  |                   ^^^ [1]
+6 |   $s as nonnull;
+7 |   Shapes::idx($s, 'a'); // Fine
+
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `b` is not defined in this shape [2]
+
+shapes_idx_nullable.php:8:19
+1 | <?hh
+2 | 
+3 | function f(?shape('a' => int) $s): void {
+  |             ^^^^^^^^^^^^^^^^^ [2]
+4 |   Shapes::idx($s, 'a'); // Fine
+5 |   Shapes::idx($s, 'b'); // Not fine
+6 |   $s as nonnull;
+7 |   Shapes::idx($s, 'a'); // Fine
+8 |   Shapes::idx($s, 'b'); // Not fine
+  |                   ^^^ [1]
+9 | }
+
+2 errors found

@@ -1,10 +1,37 @@
-ERROR: File "typing_fail_inherit2.php", line 18, characters 3-30:
-Redeclared method `Baz::bar` (Parsing[1002])
-ERROR: File "typing_fail_inherit2.php", line 18, characters 19-21:
-Method name already bound: `bar` (Naming[2033])
-ERROR: File "typing_fail_inherit2.php", line 16, characters 7-9:
-This class overrides some members with a different staticness (Typing[4091])
-  File "typing_fail_inherit2.php", line 13, characters 19-21:
-  The method `bar` is declared as non-static here
-  File "typing_fail_inherit2.php", line 17, characters 26-28:
-  But it conflicts with an inherited static declaration here
+error: Parsing[1002] Redeclared method `Baz::bar` [1]
+
+typing_fail_inherit2.php:18:3
+16 | class Baz implements Foo {
+17 |   public static function bar() : void { } // ERROR
+18 |   public function bar() : void { }
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+error: Naming[2033] Method name already bound: `bar` [1]
+
+typing_fail_inherit2.php:18:19
+16 | class Baz implements Foo {
+17 |   public static function bar() : void { } // ERROR
+18 |   public function bar() : void { }
+   |                   ^^^ [1]
+19 | }
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The method `bar` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+typing_fail_inherit2.php:16:7
+11 | 
+12 | interface Foo {
+13 |   public function bar() : void;
+   |                   ^^^ [2]
+14 | }
+15 | 
+16 | class Baz implements Foo {
+   |       ^^^ [1]
+17 |   public static function bar() : void { } // ERROR
+   |                          ^^^ [3]
+18 |   public function bar() : void { }
+19 | }
+
+3 errors found

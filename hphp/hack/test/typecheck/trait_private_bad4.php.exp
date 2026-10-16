@@ -1,8 +1,37 @@
-WARN: File "trait_private_bad4.php", line 24, characters 21-23:
-Static method call on a trait: `MyTrait::foo` (Warn[12020])
-  File "trait_private_bad4.php", line 12, characters 7-13:
-  `MyTrait` is defined here
-ERROR: File "trait_private_bad4.php", line 24, characters 21-23:
-You cannot access protected members using the trait's name (did you mean to use static:: or self::?) (Typing[4112])
-  File "trait_private_bad4.php", line 13, characters 29-31:
-  This member is protected
+warning: Warn[12020] Static method call on a trait: `MyTrait::foo` [1]
+-> `MyTrait` is defined here [2]
+
+trait_private_bad4.php:24:21
+10 |  */
+11 | 
+12 | trait MyTrait {
+   |       ^^^^^^^ [2]
+13 |   protected static function foo(): int {
+14 |     return 4;
+   :
+22 |     self::foo();
+23 |     static::foo();
+24 |     return MyTrait::foo();
+   |                     ^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4112] You cannot access protected members using the trait's name (did you mean to use static:: or self::?) [1]
+-> This member is protected [2]
+
+trait_private_bad4.php:24:21
+11 | 
+12 | trait MyTrait {
+13 |   protected static function foo(): int {
+   |                             ^^^ [2]
+14 |     return 4;
+15 |   }
+   :
+22 |     self::foo();
+23 |     static::foo();
+24 |     return MyTrait::foo();
+   |                     ^^^ [1]
+25 |   }
+26 | }
+
+2 errors found

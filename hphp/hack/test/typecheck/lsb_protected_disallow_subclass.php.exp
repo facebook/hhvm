@@ -1,4 +1,19 @@
-ERROR: File "lsb_protected_disallow_subclass.php", line 12, characters 15-16:
-Cannot access this protected member, you don't extend A (Typing[4112])
-  File "lsb_protected_disallow_subclass.php", line 4, characters 30-35:
-  This member is protected
+error: Typing[4112] Cannot access this protected member, you don't extend A [1]
+-> This member is protected [2]
+
+lsb_protected_disallow_subclass.php:12:15
+ 2 | 
+ 3 | class A {
+ 4 |   <<__LSB>> protected static string $y = "!";
+   |                              ^^^^^^ [2]
+ 5 | }
+ 6 | 
+   :
+10 | class C {
+11 |   public static function foo(): string {
+12 |     return B::$y;
+   |               ^^ [1]
+13 |   }
+14 | }
+
+1 error found

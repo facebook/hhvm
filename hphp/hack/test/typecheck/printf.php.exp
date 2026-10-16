@@ -1,6 +1,13 @@
-ERROR: File "printf.php", line 32, characters 16-18:
-Invalid argument (Typing[4110])
-  File "printf.php", line 32, characters 5-13:
-  Expected `string` because of the `%s` format specifier
-  File "printf.php", line 32, characters 16-18:
-  But got `float`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` because of the `%s` format specifier [2]
+-> But got `float` [1]
+
+printf.php:32:16
+30 |   f('%..$^...s %%', 42, 'foo');
+31 |   f('%f', 0.1);
+32 |   f('%' . 's', 0.1);
+   |     ^^^^^^^^^ [2]
+   |                ^^^ [1]
+33 | }
+
+1 error found

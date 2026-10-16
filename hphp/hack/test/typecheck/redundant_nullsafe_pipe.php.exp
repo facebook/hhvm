@@ -1,2 +1,10 @@
-WARN: File "redundant_nullsafe_pipe.php", line 6, characters 3-16:
-You are using the `|?>` operator but this expression is of type int which cannot be null. You can use the `|>` operator instead. (Warn[12031])
+warning: Warn[12031] You are using the `|?>` operator but this expression is of type int which cannot be null. You can use the `|>` operator instead. [1]
+
+redundant_nullsafe_pipe.php:6:3
+4 |   $x |?> $$ + 42; // OK
+5 |   $y |> $$ + 42; // OK
+6 |   $y |?> $$ + 42; // Not OK since $y is not nullable
+  |   ^^^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

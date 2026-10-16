@@ -1,24 +1,85 @@
-ERROR: File "refinement_fixpoint_bare_this.php", line 17, characters 19-31:
-Invalid argument (Typing[4110])
-  File "refinement_fixpoint_bare_this.php", line 5, characters 24-29:
-  Expected `Banana`
-  File "refinement_fixpoint_bare_this.php", line 9, characters 23-38:
-  But got `Ok with { type TChainable = this::TChainable } where this::TChainable as Ok::TChainable`
-  File "refinement_fixpoint_bare_this.php", line 12, characters 37-52:
-    resulting from expanding the type constant `this::TChainable::TChainable`
-ERROR: File "refinement_fixpoint_bare_this.php", line 17, characters 19-31:
-Invalid argument (Typing[4110])
-  File "refinement_fixpoint_bare_this.php", line 5, characters 24-29:
-  Expected `Banana`
-  File "refinement_fixpoint_bare_this.php", line 9, characters 23-38:
-  But got `Ok::TChainable where \Ok::TChainable super this::TChainable, \Ok::TChainable as Ok with { type TChainable = this::TChainable }`
-  File "refinement_fixpoint_bare_this.php", line 12, characters 37-52:
-    resulting from expanding the type constant `this::TChainable::TChainable`
-ERROR: File "refinement_fixpoint_bare_this.php", line 17, characters 19-31:
-Invalid argument (Typing[4110])
-  File "refinement_fixpoint_bare_this.php", line 5, characters 24-29:
-  Expected `Banana`
-  File "refinement_fixpoint_bare_this.php", line 9, characters 23-38:
-  But got `this::TChainable as Ok::TChainable`
-  File "refinement_fixpoint_bare_this.php", line 12, characters 37-52:
-    resulting from expanding the type constant `this::TChainable::TChainable`
+error: Typing[4110] Invalid argument [1]
+-> Expected `Banana` [2]
+-> But got `Ok with { type TChainable = this::TChainable } where this::TChainable as Ok::TChainable` [3]
+->   resulting from expanding the type constant `this::TChainable::TChainable` [4]
+
+refinement_fixpoint_bare_this.php:17:19
+ 3 | abstract class Banana {}
+ 4 | 
+ 5 | function take_a_banana(Banana $_): void {}
+   |                        ^^^^^^ [2]
+ 6 | 
+ 7 | abstract class Ok {
+ 8 |   abstract const type TChainable as Ok with {
+ 9 |     type TChainable = this::TChainable;
+   |                       ^^^^^^^^^^^^^^^^ [3]
+10 |   };
+11 | 
+12 |   public abstract function chain(): this::TChainable;
+   |                                     ^^^^^^^^^^^^^^^^ [4]
+13 | 
+14 |   public function repro(): void {
+15 |     $chainable = $this->chain();
+16 |     $not_a_banana = $chainable->chain();
+17 |     take_a_banana($not_a_banana);
+   |                   ^^^^^^^^^^^^^ [1]
+18 |   }
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Banana` [2]
+-> But got `Ok::TChainable where \Ok::TChainable super this::TChainable, \Ok::TChainable as Ok with { type TChainable = this::TChainable }` [3]
+->   resulting from expanding the type constant `this::TChainable::TChainable` [4]
+
+refinement_fixpoint_bare_this.php:17:19
+ 3 | abstract class Banana {}
+ 4 | 
+ 5 | function take_a_banana(Banana $_): void {}
+   |                        ^^^^^^ [2]
+ 6 | 
+ 7 | abstract class Ok {
+ 8 |   abstract const type TChainable as Ok with {
+ 9 |     type TChainable = this::TChainable;
+   |                       ^^^^^^^^^^^^^^^^ [3]
+10 |   };
+11 | 
+12 |   public abstract function chain(): this::TChainable;
+   |                                     ^^^^^^^^^^^^^^^^ [4]
+13 | 
+14 |   public function repro(): void {
+15 |     $chainable = $this->chain();
+16 |     $not_a_banana = $chainable->chain();
+17 |     take_a_banana($not_a_banana);
+   |                   ^^^^^^^^^^^^^ [1]
+18 |   }
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Banana` [2]
+-> But got `this::TChainable as Ok::TChainable` [3]
+->   resulting from expanding the type constant `this::TChainable::TChainable` [4]
+
+refinement_fixpoint_bare_this.php:17:19
+ 3 | abstract class Banana {}
+ 4 | 
+ 5 | function take_a_banana(Banana $_): void {}
+   |                        ^^^^^^ [2]
+ 6 | 
+ 7 | abstract class Ok {
+ 8 |   abstract const type TChainable as Ok with {
+ 9 |     type TChainable = this::TChainable;
+   |                       ^^^^^^^^^^^^^^^^ [3]
+10 |   };
+11 | 
+12 |   public abstract function chain(): this::TChainable;
+   |                                     ^^^^^^^^^^^^^^^^ [4]
+13 | 
+14 |   public function repro(): void {
+15 |     $chainable = $this->chain();
+16 |     $not_a_banana = $chainable->chain();
+17 |     take_a_banana($not_a_banana);
+   |                   ^^^^^^^^^^^^^ [1]
+18 |   }
+19 | }
+
+3 errors found

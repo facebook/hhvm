@@ -1,8 +1,30 @@
-ERROR: File "shapes_cc_7.php", line 20, characters 3-7:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "shapes_cc_7.php", line 14, characters 9-12:
-  Not a bool
-ERROR: File "shapes_cc_7.php", line 20, characters 3-7:
-Shape field name is a bool class constant (Typing[4086])
-  File "shapes_cc_7.php", line 19, characters 3-7:
-  But expected a string
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a bool [2]
+
+shapes_cc_7.php:20:3
+12 | class X {
+13 |   const string X1 = 'field1';
+14 |   const bool X2 = true;
+   |         ^^^^ [2]
+15 | }
+16 | 
+17 | // Should fail for using a non int/string key
+18 | type myshape = shape(
+19 |   X::X1 => int,
+20 |   X::X2 => bool,
+   |   ^^^^^ [1]
+21 | );
+
+error: Typing[4086] Shape field name is a bool class constant [1]
+-> But expected a string [2]
+
+shapes_cc_7.php:20:3
+17 | // Should fail for using a non int/string key
+18 | type myshape = shape(
+19 |   X::X1 => int,
+   |   ^^^^^ [2]
+20 |   X::X2 => bool,
+   |   ^^^^^ [1]
+21 | );
+
+2 errors found

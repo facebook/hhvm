@@ -1,4 +1,18 @@
-ERROR: File "naming_fail_test10.php", line 9, characters 3-4:
-Variable `$B` is undefined, or not always defined. (Naming[2050])
-  File "naming_fail_test10.php", line 3, characters 20-21:
-  Did you mean `$~~b~~` instead (which only differs by case)?
+error: Naming[2050] Variable `$B` is undefined, or not always defined. [1]
+-> Did you mean `$~~b~~` instead (which only differs by case)? [2]
+
+naming_fail_test10.php:9:3
+ 1 | <?hh
+ 2 | 
+ 3 | function stmt(bool $b): void {
+   |                    ^^ [2]
+ 4 |   if ($b) {
+ 5 |     $x = 0;
+ 6 |   }
+ 7 |   else {
+ 8 |   }
+ 9 |   $B += 1;
+   |   ^^ [1]
+10 | }
+
+1 error found

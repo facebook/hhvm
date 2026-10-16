@@ -1,8 +1,32 @@
-ERROR: File "noreturn_usage.php", line 10, characters 24-26:
-You are using the return value of a `noreturn` function (Typing[4133])
-  File "noreturn_usage.php", line 3, characters 15-22:
-  A `noreturn` function always throws or exits.
-ERROR: File "noreturn_usage.php", line 10, characters 29-31:
-You are using the return value of a `void` function (Typing[4119])
-  File "noreturn_usage.php", line 7, characters 15-18:
-  A `void` function doesn't return a value.
+error: Typing[4133] You are using the return value of a `noreturn` function [1]
+-> A `noreturn` function always throws or exits. [2]
+
+noreturn_usage.php:10:24
+ 1 | <?hh
+ 2 | 
+ 3 | function n(): noreturn {
+   |               ^^^^^^^^ [2]
+ 4 |   throw new Exception('nope');
+ 5 | }
+   :
+ 8 | 
+ 9 | function test(): void {
+10 |   list($x, $y) = tuple(n(), v());
+   |                        ^^^ [1]
+11 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+noreturn_usage.php:10:29
+ 5 | }
+ 6 | 
+ 7 | function v(): void {}
+   |               ^^^^ [2]
+ 8 | 
+ 9 | function test(): void {
+10 |   list($x, $y) = tuple(n(), v());
+   |                             ^^^ [1]
+11 | }
+
+2 errors found

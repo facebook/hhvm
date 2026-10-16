@@ -1,4 +1,16 @@
-ERROR: File "private_static1.php", line 7, characters 20-24:
-Private members cannot be accessed with static:: since a child class may also have an identically named private member (Typing[4112])
-  File "private_static1.php", line 4, characters 18-20:
-  This member is private
+error: Typing[4112] Private members cannot be accessed with static:: since a child class may also have an identically named private member [1]
+-> This member is private [2]
+
+private_static1.php:7:20
+2 | 
+3 | class X {
+4 |   private static int $prop = 10;
+  |                  ^^^ [2]
+5 | 
+6 |   public function test(): int {
+7 |     return static::$prop;
+  |                    ^^^^^ [1]
+8 |   }
+9 | }
+
+1 error found

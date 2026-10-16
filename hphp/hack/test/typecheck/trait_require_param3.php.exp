@@ -1,76 +1,150 @@
-ERROR: File "trait_require_param3.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param3.php", line 14, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param3.php", line 6, characters 19-28:
-  Required here
-  File "trait_require_param3.php", line 6, characters 25-27:
-  Expected `int`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  But got `T`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  This type argument to `Super` must match exactly (it is invariant)
-ERROR: File "trait_require_param3.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param3.php", line 14, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param3.php", line 6, characters 19-28:
-  Required here
-  File "trait_require_param3.php", line 6, characters 25-27:
-  Expected `int`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  But got `mixed`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  This type argument to `Super` must match exactly (it is invariant)
-  File "trait_require_param3.php", line 13, characters 26-26:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
-ERROR: File "trait_require_param3.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param3.php", line 14, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param3.php", line 6, characters 19-28:
-  Required here
-  File "trait_require_param3.php", line 13, characters 26-26:
-  Expected `T`
-  File "trait_require_param3.php", line 6, characters 25-27:
-  But got `int`
-  File "trait_require_param3.php", line 6, characters 25-27:
-  This type argument to `Super` must match exactly (it is invariant)
-ERROR: File "trait_require_param3.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param3.php", line 15, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param3.php", line 10, characters 19-30:
-  Required here
-  File "trait_require_param3.php", line 10, characters 25-29:
-  Expected `float`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  But got `T`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  This type argument to `Super` must match exactly (it is invariant)
-ERROR: File "trait_require_param3.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param3.php", line 15, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param3.php", line 10, characters 19-30:
-  Required here
-  File "trait_require_param3.php", line 10, characters 25-29:
-  Expected `float`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  But got `mixed`
-  File "trait_require_param3.php", line 13, characters 26-26:
-  This type argument to `Super` must match exactly (it is invariant)
-  File "trait_require_param3.php", line 13, characters 26-26:
-    by the definition of `T` arising from an implicit `as mixed` constraint on this type
-ERROR: File "trait_require_param3.php", line 13, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "trait_require_param3.php", line 15, characters 7-8:
-  This requires to extend or implement Super
-  File "trait_require_param3.php", line 10, characters 19-30:
-  Required here
-  File "trait_require_param3.php", line 13, characters 26-26:
-  Expected `T`
-  File "trait_require_param3.php", line 10, characters 25-29:
-  But got `float`
-  File "trait_require_param3.php", line 10, characters 25-29:
-  This type argument to `Super` must match exactly (it is invariant)
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `int` [4]
+-> But got `T` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+trait_require_param3.php:13:7
+ 4 | 
+ 5 | trait T1 {
+ 6 |   require extends Super<int>;
+   |                   ^^^^^^^^^^ [3]
+   |                         ^^^ [4]
+ 7 | }
+ 8 | 
+   :
+11 | }
+12 | 
+13 | class C<T> extends Super<T> {
+   |       ^ [1]
+   |                          ^ [5]
+14 |   use T1;
+   |       ^^ [2]
+15 |   use T2;
+16 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `int` [4]
+-> But got `mixed` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [5]
+
+trait_require_param3.php:13:7
+ 4 | 
+ 5 | trait T1 {
+ 6 |   require extends Super<int>;
+   |                   ^^^^^^^^^^ [3]
+   |                         ^^^ [4]
+ 7 | }
+ 8 | 
+   :
+11 | }
+12 | 
+13 | class C<T> extends Super<T> {
+   |       ^ [1]
+   |                          ^ [5]
+14 |   use T1;
+   |       ^^ [2]
+15 |   use T2;
+16 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `T` [4]
+-> But got `int` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+trait_require_param3.php:13:7
+ 4 | 
+ 5 | trait T1 {
+ 6 |   require extends Super<int>;
+   |                   ^^^^^^^^^^ [3]
+   |                         ^^^ [5]
+ 7 | }
+ 8 | 
+   :
+11 | }
+12 | 
+13 | class C<T> extends Super<T> {
+   |       ^ [1]
+   |                          ^ [4]
+14 |   use T1;
+   |       ^^ [2]
+15 |   use T2;
+16 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `float` [4]
+-> But got `T` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+trait_require_param3.php:13:7
+ 8 | 
+ 9 | trait T2 {
+10 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [4]
+11 | }
+12 | 
+13 | class C<T> extends Super<T> {
+   |       ^ [1]
+   |                          ^ [5]
+14 |   use T1;
+15 |   use T2;
+   |       ^^ [2]
+16 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `float` [4]
+-> But got `mixed` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+->   by the definition of `T` arising from an implicit `as mixed` constraint on this type [5]
+
+trait_require_param3.php:13:7
+ 8 | 
+ 9 | trait T2 {
+10 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [4]
+11 | }
+12 | 
+13 | class C<T> extends Super<T> {
+   |       ^ [1]
+   |                          ^ [5]
+14 |   use T1;
+15 |   use T2;
+   |       ^^ [2]
+16 | }
+
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `T` [4]
+-> But got `float` [5]
+-> This type argument to `Super` must match exactly (it is invariant) [5]
+
+trait_require_param3.php:13:7
+ 8 | 
+ 9 | trait T2 {
+10 |   require extends Super<float>;
+   |                   ^^^^^^^^^^^^ [3]
+   |                         ^^^^^ [5]
+11 | }
+12 | 
+13 | class C<T> extends Super<T> {
+   |       ^ [1]
+   |                          ^ [4]
+14 |   use T1;
+15 |   use T2;
+   |       ^^ [2]
+16 | }
+
+6 errors found

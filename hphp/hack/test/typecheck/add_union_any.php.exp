@@ -1,8 +1,41 @@
-WARN: File "add_union_any.php", line 12, characters 11-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "add_union_any.php", line 12, characters 11-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "add_union_any.php", line 12, characters 16-24:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "add_union_any.php", line 13, characters 8-9:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+add_union_any.php:12:11
+10 | 
+11 | function testit(bool $f, int $z):void {
+12 |   if ($f) $z = makeAny();
+   |           ^^ [1]
+13 |   $w = $z + 1;
+14 |   expectInt($w);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+add_union_any.php:12:11
+10 | 
+11 | function testit(bool $f, int $z):void {
+12 |   if ($f) $z = makeAny();
+   |           ^^^^^^^^^^^^^^ [1]
+13 |   $w = $z + 1;
+14 |   expectInt($w);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+add_union_any.php:12:16
+10 | 
+11 | function testit(bool $f, int $z):void {
+12 |   if ($f) $z = makeAny();
+   |                ^^^^^^^^^ [1]
+13 |   $w = $z + 1;
+14 |   expectInt($w);
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+add_union_any.php:13:8
+11 | function testit(bool $f, int $z):void {
+12 |   if ($f) $z = makeAny();
+13 |   $w = $z + 1;
+   |        ^^ [1]
+14 |   expectInt($w);
+15 | }
+
+4 errors found

@@ -1,4 +1,19 @@
-ERROR: File "finally_tyvars.php", line 14, characters 21-25:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "finally_tyvars.php", line 4, characters 45-51:
-  The field `foo` is not defined in this shape
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `foo` is not defined in this shape [2]
+
+finally_tyvars.php:14:21
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | async function gen_empty_shape(): Awaitable<shape()> {
+   |                                             ^^^^^^^ [2]
+ 5 |   return shape();
+ 6 | }
+   :
+12 |   } finally {
+13 |     $s = await gen_empty_shape();
+14 |     Shapes::idx($s, 'foo');
+   |                     ^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

@@ -1,4 +1,15 @@
-ERROR: File "shape_remove_key2.php", line 24, characters 20-22:
-You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "shape_remove_key2.php", line 22, characters 3-35:
-  The field `x` is not defined in this shape
+error: Typing[4251] You are calling `Shapes::idx()` on a field known to not exist [1]
+-> The field `x` is not defined in this shape [2]
+
+shape_remove_key2.php:24:20
+20 | 
+21 |   Shapes::idx($st, 'x'); // no error
+22 |   Shapes::removeKey(inout $st, 'x');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+23 |   Shapes::idx($st, 'y'); // no error
+24 |   Shapes::idx($st, 'x'); // this will always return null, but it's safe from
+   |                    ^^^ [1]
+25 |   // type checking perspective, so no error
+26 | }
+
+1 error found

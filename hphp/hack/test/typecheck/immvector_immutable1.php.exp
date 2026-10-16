@@ -1,6 +1,23 @@
-ERROR: File "immvector_immutable1.php", line 14, characters 10-12:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "immvector_immutable1.php", line 16, characters 3-12:
-an object of type ImmVector<int> does not allow array append (Typing[4006])
-  File "immvector_immutable1.php", line 15, characters 9-29:
-  Definition is here
+error: Typing[4030] Was expecting a return type hint [1]
+
+immvector_immutable1.php:14:10
+12 | // Test that we can't append to a FV.
+13 | 
+14 | function bad() {
+   |          ^^^ [1]
+15 |   $fv = ImmVector { 1, 2, 3 };
+16 |   $fv[] = 42;
+
+error: Typing[4006] an object of type ImmVector<int> does not allow array append [1]
+-> Definition is here [2]
+
+immvector_immutable1.php:16:3
+13 | 
+14 | function bad() {
+15 |   $fv = ImmVector { 1, 2, 3 };
+   |         ^^^^^^^^^^^^^^^^^^^^^ [2]
+16 |   $fv[] = 42;
+   |   ^^^^^^^^^^ [1]
+17 | }
+
+2 errors found

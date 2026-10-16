@@ -1,4 +1,21 @@
-ERROR: File "class_get_nested.php", line 5, characters 5-18:
-Only classnames and variables are allowed before `::`. (Parsing[1002])
-ERROR: File "class_get_nested.php", line 5, characters 5-14:
-Cannot use dynamic class or method name in strict mode (Naming[2078])
+error: Parsing[1002] Only classnames and variables are allowed before `::`. [1]
+
+class_get_nested.php:5:5
+3 | final class Foo {
+4 |   public function bar(): void {
+5 |     self::self::$x;
+  |     ^^^^^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+error: Naming[2078] Cannot use dynamic class or method name in strict mode [1]
+
+class_get_nested.php:5:5
+3 | final class Foo {
+4 |   public function bar(): void {
+5 |     self::self::$x;
+  |     ^^^^^^^^^^ [1]
+6 |   }
+7 | }
+
+2 errors found

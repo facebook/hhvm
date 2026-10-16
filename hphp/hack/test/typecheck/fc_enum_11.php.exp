@@ -1,2 +1,9 @@
-ERROR: File "fc_enum_11.php", line 4, characters 19-33:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+error: Naming[2053] `HH\BuiltinEnum` is an implementation internal class that cannot be used directly [1]
+
+fc_enum_11.php:4:19
+2 | 
+3 | // No using HH\BuiltinEnum
+4 | class Foo extends \HH\BuiltinEnum<int> {}
+  |                   ^^^^^^^^^^^^^^^ [1]
+
+1 error found

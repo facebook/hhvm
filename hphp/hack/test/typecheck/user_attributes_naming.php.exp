@@ -1,2 +1,10 @@
-ERROR: File "user_attributes_naming.php", line 3, characters 3-12:
-Unrecognized user attribute: `__Whatever` starts with __ but is not a standard attribute (Naming[2049])
+error: Naming[2049] Unrecognized user attribute: `__Whatever` starts with __ but is not a standard attribute [1]
+
+user_attributes_naming.php:3:3
+1 | <?hh
+2 | 
+3 | <<__Whatever>>
+  |   ^^^^^^^^^^ [1]
+4 | class C {}
+
+1 error found

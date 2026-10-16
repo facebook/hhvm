@@ -1,6 +1,17 @@
-ERROR: File "null_type.php", line 15, characters 8-9:
-Typing error (Typing[4429])
-  File "null_type.php", line 15, characters 8-14:
-  Expected `num` because this is used in an arithmetic operation
-  File "null_type.php", line 12, characters 14-17:
-  But got `?int`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `?int` [3]
+
+null_type.php:15:8
+10 |  */
+11 | 
+12 | function foo(?int $x): void {
+   |              ^^^^ [3]
+13 |   if ($x === null) {
+14 |   }
+15 |   $a = $x + 10;
+   |        ^^ [1]
+   |        ^^^^^^^ [2]
+16 | }
+
+1 error found

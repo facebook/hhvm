@@ -1,4 +1,17 @@
-ERROR: File "global_const11.php", line 3, characters 15-23:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "global_const11.php", line 3, characters 15-23:
-Illegal constant value (Naming[2023])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+global_const11.php:3:15
+1 | <?hh
+2 | 
+3 | const int X = (int)null;
+  |               ^^^^^^^^^ [1]
+
+error: Naming[2023] Illegal constant value [1]
+
+global_const11.php:3:15
+1 | <?hh
+2 | 
+3 | const int X = (int)null;
+  |               ^^^^^^^^^ [1]
+
+2 errors found

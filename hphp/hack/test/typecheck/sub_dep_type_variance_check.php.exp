@@ -1,16 +1,34 @@
-ERROR: File "sub_dep_type_variance_check.php", line 32, characters 14-22:
-Invalid assignment (Typing[4110])
-  File "sub_dep_type_variance_check.php", line 17, characters 33-36:
-  Expected `<expr#2> as C<arraykey>`
-  File "sub_dep_type_variance_check.php", line 31, characters 8-9:
-    where `<expr#2>` is a reference to this expression
-  File "sub_dep_type_variance_check.php", line 27, characters 38-38:
-    via this generic `T`
-  File "sub_dep_type_variance_check.php", line 32, characters 18-18:
-  But got `C<int>`
-  File "sub_dep_type_variance_check.php", line 32, characters 18-18:
-    where the class `C` was referenced here
-  File "sub_dep_type_variance_check.php", line 30, characters 15-15:
-  Since `C` is not final
-  File "sub_dep_type_variance_check.php", line 32, characters 18-18:
-  this might not be a `C`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `<expr#2> as C<arraykey>` [2]
+->   where `<expr#2>` is a reference to this expression [3]
+->   via this generic `T` [4]
+-> But got `C<int>` [5]
+->   where the class `C` was referenced here [5]
+-> Since `C` is not final [6]
+-> this might not be a `C` [5]
+
+sub_dep_type_variance_check.php:32:14
+15 |   }
+16 | 
+17 |   public function getBox(): Box<this> {
+   |                                 ^^^^ [2]
+18 |     return $this->mybox as nonnull;
+19 |   }
+   :
+25 | 
+26 | class Box<T> {
+27 |   public function __construct(public T $data) {}
+   |                                      ^ [4]
+28 | }
+29 | 
+30 | function test(C<arraykey> $x): void {
+   |               ^ [6]
+31 |   $y = $x->getBox();
+   |        ^^ [3]
+32 |   $y->data = new C(42);
+   |              ^^^^^^^^^ [1]
+   |                  ^ [5]
+33 | }
+34 | 
+
+1 error found

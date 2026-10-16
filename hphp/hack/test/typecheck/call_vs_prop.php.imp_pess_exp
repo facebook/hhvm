@@ -1,2 +1,11 @@
-ERROR: File "call_vs_prop.php", line 6, characters 41-43:
-Expected constant expression for initializer (Parsing[1002])
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+call_vs_prop.php:6:41
+4 | function g():int { return 3; }
+5 | class C {
+6 |   public static (function():int) $bar = g<>;
+  |                                         ^^^ [1]
+7 |   public function __construct(public (function():int) $foo) { }
+8 |   public function foo():string { return "a"; }
+
+1 error found

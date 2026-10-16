@@ -1,6 +1,16 @@
-ERROR: File "global_const.php", line 5, characters 10-10:
-Invalid return type (Typing[4110])
-  File "global_const.php", line 4, characters 18-21:
-  Expected `bool`
-  File "global_const.php", line 3, characters 7-9:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+global_const.php:5:10
+1 | <?hh
+2 | 
+3 | const int X = 0;
+  |       ^^^ [3]
+4 | function test(): bool {
+  |                  ^^^^ [2]
+5 |   return X;
+  |          ^ [1]
+6 | }
+
+1 error found

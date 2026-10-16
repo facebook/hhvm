@@ -1,6 +1,29 @@
-ERROR: File "decl_unclosed_xhp_nested.php", line 14, characters 12-22:
-XHP: mismatched tag: `` not the same as `a` (Parsing[1002])
-ERROR: File "decl_unclosed_xhp_nested.php", line 17, characters 1-1:
-A closing XHP tag is expected here. (Parsing[1002])
-ERROR: File "decl_unclosed_xhp_nested.php", line 14, characters 13-13:
-Unbound name: `:a` (an object type) (Naming[2049])
+error: Parsing[1002] XHP: mismatched tag: `` not the same as `a` [1]
+
+decl_unclosed_xhp_nested.php:14:12
+12 | function f(): void {
+13 |   $g = function() {
+14 |     return <a>;
+   |            ^^^^ [1]
+15 |   };
+   |   ^^ [1]
+16 | }
+   | ^ [1]
+
+error: Parsing[1002] A closing XHP tag is expected here. [1]
+
+decl_unclosed_xhp_nested.php:17:1
+15 |   };
+16 | }
+
+error: Naming[2049] Unbound name: `:a` (an object type) [1]
+
+decl_unclosed_xhp_nested.php:14:13
+12 | function f(): void {
+13 |   $g = function() {
+14 |     return <a>;
+   |             ^ [1]
+15 |   };
+16 | }
+
+3 errors found

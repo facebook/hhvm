@@ -1,2 +1,9 @@
-ERROR: File "ignore_readonly_bad.php", line 5, characters 16-36:
-This attribute exists in an unapproved file. The set of approved files is in .hhconfig. Please talk to someone from the Hack team before changing this. (Naming[2130])
+error: Naming[2130] This attribute exists in an unapproved file. The set of approved files is in .hhconfig. Please talk to someone from the Hack team before changing this. [1]
+
+ignore_readonly_bad.php:5:16
+3 | type TF = (readonly function(int):string);
+4 | 
+5 | function foo(<<__IgnoreReadonlyError>> TF $f):void { }
+  |                ^^^^^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

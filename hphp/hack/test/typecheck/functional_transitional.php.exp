@@ -1,4 +1,13 @@
-ERROR: File "functional_transitional.php", line 14, characters 7-7:
-You are trying to access the method `f` but this is a tuple of size 2 (Typing[4062])
-  File "functional_transitional.php", line 13, characters 8-18:
-  Definition is here
+error: Typing[4062] You are trying to access the method `f` but this is a tuple of size 2 [1]
+-> Definition is here [2]
+
+functional_transitional.php:14:7
+11 | 
+12 | function f((int, int) $x): void {
+13 |   $x = tuple(1, 2);
+   |        ^^^^^^^^^^^ [2]
+14 |   $x->f();
+   |       ^ [1]
+15 | }
+
+1 error found

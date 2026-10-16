@@ -1,8 +1,31 @@
-ERROR: File "class_const_already_bound.php", line 5, characters 3-16:
-Cannot redeclare `Foo::bar` (Parsing[1002])
-ERROR: File "class_const_already_bound.php", line 5, characters 9-15:
-Cannot redeclare `Foo::bar` (Parsing[1002])
-ERROR: File "class_const_already_bound.php", line 5, characters 9-11:
-Name already bound: `bar` (Naming[2012])
-  File "class_const_already_bound.php", line 4, characters 9-11:
-  Previous definition is here
+error: Parsing[1002] Cannot redeclare `Foo::bar` [1]
+
+class_const_already_bound.php:5:3
+3 | class Foo {
+4 |   const bar = 1;
+5 |   const bar = 2;
+  |   ^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Parsing[1002] Cannot redeclare `Foo::bar` [1]
+
+class_const_already_bound.php:5:9
+3 | class Foo {
+4 |   const bar = 1;
+5 |   const bar = 2;
+  |         ^^^^^^^ [1]
+6 | }
+
+error: Naming[2012] Name already bound: `bar` [1]
+-> Previous definition is here [2]
+
+class_const_already_bound.php:5:9
+2 | 
+3 | class Foo {
+4 |   const bar = 1;
+  |         ^^^ [2]
+5 |   const bar = 2;
+  |         ^^^ [1]
+6 | }
+
+3 errors found

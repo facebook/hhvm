@@ -1,2 +1,10 @@
-ERROR: File "constructor_method_call.php", line 9, characters 3-9:
-Method call following immediate constructor call requires parentheses around constructor call. (Parsing[1002])
+error: Parsing[1002] Method call following immediate constructor call requires parentheses around constructor call. [1]
+
+constructor_method_call.php:9:3
+ 7 | 
+ 8 | function main(): void {
+ 9 |   new A()->foo();
+   |   ^^^^^^^ [1]
+10 | }
+
+1 error found

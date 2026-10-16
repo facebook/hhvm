@@ -1,18 +1,80 @@
-ERROR: File "abstract_override_concrete1.php", line 31, characters 26-26:
-Some members in class `B` are incompatible with those declared in type `C` (Typing[4113])
-  File "abstract_override_concrete1.php", line 10, characters 20-23:
-  This member visibility is: `private`
-  File "abstract_override_concrete1.php", line 24, characters 19-22:
-  `public` was expected
-ERROR: File "abstract_override_concrete1.php", line 34, characters 23-24:
-Cannot re-declare this type constant as abstract (Typing[4142])
-  File "abstract_override_concrete1.php", line 18, characters 23-24:
-  Previously defined here
-ERROR: File "abstract_override_concrete1.php", line 36, characters 28-30:
-Cannot re-declare this method as abstract (Typing[4142])
-  File "abstract_override_concrete1.php", line 22, characters 19-21:
-  Previously defined here
-ERROR: File "abstract_override_concrete1.php", line 38, characters 20-23:
-This member visibility is: `private` (Typing[4113])
-  File "abstract_override_concrete1.php", line 26, characters 19-22:
-  `public` was expected
+error: Typing[4113] Some members in class `B` are incompatible with those declared in type `C` [1]
+-> This member visibility is: `private` [2]
+-> `public` was expected [3]
+
+abstract_override_concrete1.php:31:26
+ 8 |   abstract public function foo(): void;
+ 9 | 
+10 |   private function baz1(): void {}
+   |                    ^^^^ [2]
+11 | }
+12 | 
+   :
+22 |   public function bar(): void {}
+23 | 
+24 |   public function baz1(): void {}
+   |                   ^^^^ [3]
+25 | 
+26 |   public function baz2(): void {}
+   :
+29 | class C extends A {}
+30 | 
+31 | abstract class B extends C {
+   |                          ^ [1]
+32 |   use T1;
+33 | 
+
+error: Typing[4142] Cannot re-declare this type constant as abstract [1]
+-> Previously defined here [2]
+
+abstract_override_concrete1.php:34:23
+16 |   const type Tb = arraykey;
+17 | 
+18 |   abstract const type Tc as num = int;
+   |                       ^^ [2]
+19 | 
+20 |   public function foo(): void {}
+   :
+32 |   use T1;
+33 | 
+34 |   abstract const type Tc as num = float;
+   |                       ^^ [1]
+35 | 
+36 |   abstract public function bar(): void;
+
+error: Typing[4142] Cannot re-declare this method as abstract [1]
+-> Previously defined here [2]
+
+abstract_override_concrete1.php:36:28
+20 |   public function foo(): void {}
+21 | 
+22 |   public function bar(): void {}
+   |                   ^^^ [2]
+23 | 
+24 |   public function baz1(): void {}
+   :
+34 |   abstract const type Tc as num = float;
+35 | 
+36 |   abstract public function bar(): void;
+   |                            ^^^ [1]
+37 | 
+38 |   private function baz2(): void {}
+
+error: Typing[4113] This member visibility is: `private` [1]
+-> `public` was expected [2]
+
+abstract_override_concrete1.php:38:20
+24 |   public function baz1(): void {}
+25 | 
+26 |   public function baz2(): void {}
+   |                   ^^^^ [2]
+27 | }
+28 | 
+   :
+36 |   abstract public function bar(): void;
+37 | 
+38 |   private function baz2(): void {}
+   |                    ^^^^ [1]
+39 | }
+
+4 errors found

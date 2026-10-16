@@ -1,6 +1,18 @@
-ERROR: File "chained_arrows.php", line 18, characters 10-32:
-Invalid return type (Typing[4110])
-  File "chained_arrows.php", line 17, characters 18-21:
-  Expected `bool`
-  File "chained_arrows.php", line 14, characters 26-28:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+chained_arrows.php:18:10
+12 | class A {
+13 |   public function foo(): this { return $this; }
+14 |   public function bar(): int { return 0; }
+   |                          ^^^ [3]
+15 | }
+16 | 
+17 | function test(): bool {
+   |                  ^^^^ [2]
+18 |   return (new A())->foo()->bar();
+   |          ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+19 | }
+
+1 error found

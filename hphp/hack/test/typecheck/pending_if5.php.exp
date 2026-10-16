@@ -1,6 +1,23 @@
-ERROR: File "pending_if5.php", line 21, characters 10-11:
-Invalid return type (Typing[4110])
-  File "pending_if5.php", line 12, characters 31-33:
-  Expected `int`
-  File "pending_if5.php", line 18, characters 10-14:
-  But got `bool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+pending_if5.php:21:10
+10 |  */
+11 | 
+12 | function f(bool $b, bool $c): int {
+   |                               ^^^ [2]
+13 |   if ($b) {
+14 |     $x = 1;
+15 |   } else if ($c) {
+16 |     $x = 2;
+17 |   } else {
+18 |     $x = false;
+   |          ^^^^^ [3]
+19 |   }
+20 | 
+21 |   return $x;
+   |          ^^ [1]
+22 | }
+
+1 error found

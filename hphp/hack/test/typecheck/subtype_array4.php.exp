@@ -1,16 +1,49 @@
-ERROR: File "subtype_array4.php", line 19, characters 18-35:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "subtype_array4.php", line 19, characters 25-29:
-  But got `mixed`
-ERROR: File "subtype_array4.php", line 24, characters 11-12:
-Invalid argument (Typing[4110])
-  File "subtype_array4.php", line 19, characters 32-34:
-  Expected `int`
-  File "subtype_array4.php", line 12, characters 36-39:
-  But got `bool`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+subtype_array4.php:19:18
+17 | }
+18 | 
+19 | function use_arr(darray<mixed, int> $arr): void {
+   |                  ^^^^^^^^^^^^^^^^^^ [1]
+   |                         ^^^^^ [4]
+20 | }
+21 | 
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+subtype_array4.php:24:11
+10 |  */
+11 | 
+12 | function get_arr(): darray<string, bool> {
+   |                                    ^^^^ [3]
+13 |   return dict[
+14 |     'foo' => true,
+   :
+17 | }
+18 | 
+19 | function use_arr(darray<mixed, int> $arr): void {
+   |                                ^^^ [2]
+20 | }
+21 | 
+22 | function test(): void {
+23 |   $a = get_arr();
+24 |   use_arr($a);
+   |           ^^ [1]
+25 | }
+
+2 errors found

@@ -1,4 +1,14 @@
-ERROR: File "assign_key_refinement_soundness.php", line 7, characters 26-30:
-You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
-  File "assign_key_refinement_soundness.php", line 6, characters 27-30:
-  This is what makes me believe it can be `null`
+error: Typing[4063] You are trying to access an element of this container but the container could be `null`.  [1]
+-> This is what makes me believe it can be `null` [2]
+
+assign_key_refinement_soundness.php:7:26
+4 | function main(): void {
+5 |   $v = vec[vec[0]];
+6 |   $u = 1 === 2 ? vec[0] : null;
+  |                           ^^^^ [2]
+7 |   $v[($u as nonnull)[0]][$u[0]] = 42;
+  |                          ^^^^^ [1]
+8 |   echo $v[0][0];
+9 | }
+
+1 error found

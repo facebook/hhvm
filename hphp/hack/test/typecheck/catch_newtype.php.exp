@@ -1,4 +1,19 @@
-ERROR: File "catch_newtype.php", line 9, characters 12-25:
-Expected a `class` but got a type alias. (Naming[2052])
-  File "catch_newtype.php", line 3, characters 9-22:
-  Alias definition is here.
+error: Naming[2052] Expected a `class` but got a type alias. [1]
+-> Alias definition is here. [2]
+
+catch_newtype.php:9:12
+ 1 | <?hh
+ 2 | 
+ 3 | newtype ExceptionAlias = Exception;
+   |         ^^^^^^^^^^^^^^ [2]
+ 4 | 
+ 5 | <<__EntryPoint>>
+ 6 | function my_main(): void {
+ 7 |   try {
+ 8 |     throw new Exception();
+ 9 |   } catch (ExceptionAlias $a) {
+   |            ^^^^^^^^^^^^^^ [1]
+10 |     echo "never executed";
+11 |   }
+
+1 error found

@@ -1,6 +1,23 @@
-ERROR: File "pending_switch3.php", line 32, characters 10-11:
-Invalid return type (Typing[4110])
-  File "pending_switch3.php", line 12, characters 15-17:
-  Expected `int`
-  File "pending_switch3.php", line 15, characters 12-16:
-  But got `bool`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+pending_switch3.php:32:10
+10 |  */
+11 | 
+12 | function f(): int {
+   |               ^^^ [2]
+13 |   switch (1) {
+14 |     case 1:
+15 |       $x = false;
+   |            ^^^^^ [3]
+16 |       break;
+17 |     case 2:
+   :
+30 |   }
+31 | 
+32 |   return $x;
+   |          ^^ [1]
+33 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "trait_require_error_trait.php", line 6, characters 19-20:
-`T1` is not a class. It is a trait. (NastCheck[3017])
+error: NastCheck[3017] `T1` is not a class. It is a trait. [1]
+
+trait_require_error_trait.php:6:19
+4 | trait T1 {}
+5 | trait T2 {
+6 |   require extends T1;
+  |                   ^^ [1]
+7 | }
+
+1 error found

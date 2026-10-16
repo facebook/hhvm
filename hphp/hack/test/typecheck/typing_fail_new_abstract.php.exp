@@ -1,4 +1,18 @@
-ERROR: File "typing_fail_new_abstract.php", line 20, characters 12-14:
-`Meh` is uninstantiable (Typing[4002])
-  File "typing_fail_new_abstract.php", line 12, characters 16-18:
-  Declaration is here
+error: Typing[4002] `Meh` is uninstantiable [1]
+-> Declaration is here [2]
+
+typing_fail_new_abstract.php:20:12
+10 |  */
+11 | 
+12 | abstract class Meh {
+   |                ^^^ [2]
+13 | 
+14 |   public function blah(): void {
+   :
+18 | 
+19 | function magic_meh_builder(): void {
+20 |   $x = new Meh();
+   |            ^^^ [1]
+21 | }
+
+1 error found

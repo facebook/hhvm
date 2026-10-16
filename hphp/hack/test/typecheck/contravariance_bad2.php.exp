@@ -1,14 +1,35 @@
-ERROR: File "contravariance_bad2.php", line 10, characters 25-34:
-Invalid return type (Typing[4336])
-  File "contravariance_bad2.php", line 10, characters 60-60:
-  Expected `T`
-  File "contravariance_bad2.php", line 10, characters 25-34:
-  But got `void` because this function does not always return a value
-ERROR: File "contravariance_bad2.php", line 19, characters 34-35:
-Invalid argument (Typing[4110])
-  File "contravariance_bad2.php", line 12, characters 40-40:
-  Expected `I`
-  File "contravariance_bad2.php", line 12, characters 24-25:
-  But got `null`
-  File "contravariance_bad2.php", line 12, characters 24-25:
-  This type argument to `Contra` only allows supertypes (it is contravariant)
+error: Typing[4336] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `void` because this function does not always return a value [1]
+
+contravariance_bad2.php:10:25
+ 8 |   // Return something so we can see the type that's inferred for the parameters
+ 9 |   /* HH_FIXME[4110] */
+10 |   final public function testContra<T>(T $x, Contra<T> $y): T {
+   |                         ^^^^^^^^^^ [1]
+   |                                                            ^ [2]
+11 |   }
+12 |   public function main(?I $ent, Contra<I> $p): void {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `I` [2]
+-> But got `null` [3]
+-> This type argument to `Contra` only allows supertypes (it is contravariant) [3]
+
+contravariance_bad2.php:19:34
+10 |   final public function testContra<T>(T $x, Contra<T> $y): T {
+11 |   }
+12 |   public function main(?I $ent, Contra<I> $p): void {
+   |                        ^^ [3]
+   |                                        ^ [2]
+13 |     // Must have following constraints
+14 |     //   (1) ?I <: T
+   :
+17 |     //  * Consider T = I. NO, because we don't have ?I <: I for (1)
+18 |     //  * Consider T = ?I. NO, because we don't have ?I <: I for (2)
+19 |     $r = $this->testContra($ent, $p);
+   |                                  ^^ [1]
+20 |     //    hh_show_env();
+21 |   }
+
+2 errors found

@@ -1,6 +1,20 @@
-ERROR: File "shape_idx_newtype.php--use.php", line 4, characters 22-23:
-Invalid argument (Typing[4110])
-  File "shape_idx_newtype.php--use.php", line 3, characters 22-24:
-  Expected `int`
-  File "shape_idx_newtype.php--def.php", line 4, characters 27-30:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+shape_idx_newtype.php--use.php:4:22
+1 | <?hh
+2 | 
+3 | function test(N $s): int {
+  |                      ^^^ [2]
+4 |   return Shapes::idx($s, 'x', 0);
+  |                      ^^ [1]
+5 | }
+
+shape_idx_newtype.php--def.php:4:27
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | newtype N as shape('x' => ?int, ...) = shape('x' => ?int, 'y' => string);
+  |                           ^^^^ [3]
+
+1 error found

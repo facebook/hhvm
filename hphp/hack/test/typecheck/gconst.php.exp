@@ -1,12 +1,38 @@
-ERROR: File "gconst.php--gconst.hhi", line 7, characters 7-9:
-Wrong type hint (Typing[4110])
-  File "gconst.php--gconst.hhi", line 7, characters 7-9:
-  Expected `int`
-  File "gconst.php--gconst.hhi", line 7, characters 17-23:
-  But got `string`
-ERROR: File "gconst.php--gconst.php", line 14, characters 12-13:
-Invalid argument (Typing[4110])
-  File "gconst.php--gconst.php", line 5, characters 3-8:
-  Expected `string`
-  File "gconst.php--gconst.hhi", line 4, characters 7-9:
-  But got `int`
+error: Typing[4110] Wrong type hint [1]
+-> Expected `int` [1]
+-> But got `string` [2]
+
+gconst.php--gconst.hhi:7:7
+5 | const string Y;
+6 | const FunctionCredential Z;
+7 | const int BAD = 'hello';
+  |       ^^^ [1]
+  |                 ^^^^^^^ [2]
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+gconst.php--gconst.php:14:12
+ 3 | function test(
+ 4 |   int $i,
+ 5 |   string $s,
+   |   ^^^^^^ [2]
+ 6 |   FunctionCredential $fc,
+ 7 | ): void {}
+   :
+12 |   test(X1, Y, Z);
+13 | 
+14 |   test(X1, X2, Z);
+   |            ^^ [1]
+15 | }
+
+gconst.php--gconst.hhi:4:7
+ 2 | 
+ 3 | const int X1 = 0;
+ 4 | const int X2;
+   |       ^^^ [3]
+ 5 | const string Y;
+ 6 | const FunctionCredential Z;
+
+2 errors found

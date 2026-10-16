@@ -1,6 +1,13 @@
-ERROR: File "functional_generator.php", line 27, characters 20-30:
-Invalid return type (Typing[4110])
-  File "functional_generator.php", line 27, characters 20-30:
-  Expected `Stream<int>`
-  File "functional_generator.php", line 27, characters 20-30:
-  But got `Generator<_, _, _>` (result of function containing a `yield`)
+error: Typing[4110] Invalid return type [1]
+-> Expected `Stream<int>` [1]
+-> But got `Generator<_, _, _>` (result of function containing a `yield`) [1]
+
+functional_generator.php:27:20
+25 | }
+26 | 
+27 | function intgen(): Stream<int> {
+   |                    ^^^^^^^^^^^ [1]
+28 |   yield 1;
+29 |   yield 2;
+
+1 error found

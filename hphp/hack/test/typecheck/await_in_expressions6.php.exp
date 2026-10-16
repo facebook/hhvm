@@ -1,2 +1,10 @@
-ERROR: File "await_in_expressions6.php", line 5, characters 12-19:
-Cannot use unstable feature: `allow_conditional_await_syntax` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `allow_conditional_await_syntax` [1]
+
+await_in_expressions6.php:5:12
+3 | async function f1(Awaitable<bool> $a): Awaitable<void> {
+4 |   do {
+5 |   } while (await $a);
+  |            ^^^^^^^^ [1]
+6 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "shapes_cc_12.php", line 8, characters 3-4:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "shapes_cc_12.php", line 8, characters 3-4:
-A shape field name cannot be an empty string (Typing[4136])
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+shapes_cc_12.php:8:3
+ 6 | 
+ 7 | type myshape = shape(
+ 8 |   '' => int,
+   |   ^^ [1]
+ 9 |   'field2' => bool,
+10 | );
+
+error: Typing[4136] A shape field name cannot be an empty string [1]
+
+shapes_cc_12.php:8:3
+ 6 | 
+ 7 | type myshape = shape(
+ 8 |   '' => int,
+   |   ^^ [1]
+ 9 |   'field2' => bool,
+10 | );
+
+2 errors found

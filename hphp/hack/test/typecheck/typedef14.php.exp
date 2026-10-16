@@ -1,6 +1,31 @@
-ERROR: File "typedef14.php", line 15, characters 17-17:
-Encountered unexpected token `0`. (Parsing[1002])
-ERROR: File "typedef14.php", line 15, characters 11-15:
-Unbound name: `myint` (a global constant) (Naming[2049])
-ERROR: File "typedef14.php", line 15, characters 11-15:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Encountered unexpected token `0`. [1]
+
+typedef14.php:15:17
+13 | 
+14 | function foo(): myint {
+15 |   return (myint)0;
+   |                 ^ [1]
+16 | }
+17 | 
+
+error: Naming[2049] Unbound name: `myint` (a global constant) [1]
+
+typedef14.php:15:11
+13 | 
+14 | function foo(): myint {
+15 |   return (myint)0;
+   |           ^^^^^ [1]
+16 | }
+17 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+typedef14.php:15:11
+13 | 
+14 | function foo(): myint {
+15 |   return (myint)0;
+   |           ^^^^^ [1]
+16 | }
+17 | 
+
+3 errors found

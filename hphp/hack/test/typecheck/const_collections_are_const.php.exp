@@ -1,2 +1,11 @@
-ERROR: File "const_collections_are_const.php", line 8, characters 5-13:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+const_collections_are_const.php:8:5
+ 6 | 
+ 7 |   public function modify_const(): void {
+ 8 |     self::FOO[0] = 'invalid';
+   |     ^^^^^^^^^ [1]
+ 9 |   }
+10 | }
+
+1 error found

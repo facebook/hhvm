@@ -1,12 +1,54 @@
-ERROR: File "shape_nullsafe.php", line 23, characters 9-21:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_nullsafe.php", line 11, characters 3-8:
-  The field `x` is not defined in this shape
-ERROR: File "shape_nullsafe.php", line 24, characters 9-23:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_nullsafe.php", line 11, characters 3-8:
-  The field `y` is not defined in this shape
-ERROR: File "shape_nullsafe.php", line 25, characters 9-23:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_nullsafe.php", line 12, characters 3-8:
-  The field `y` is not defined in this shape
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `x` is not defined in this shape [2]
+
+shape_nullsafe.php:23:9
+ 9 | 
+10 | function testshapes(
+11 |   Shape0 $s0,
+   |   ^^^^^^ [2]
+12 |   Shape1 $s1,
+13 |   Shape2 $s2,
+   :
+21 |   $x1 = $s1['x'] ?? 5;
+22 |   $y2 = $s2['y'] ?? "a";
+23 |   $x0 = $s0['x'] ?? 5;
+   |         ^^^^^^^^^^^^^ [1]
+24 |   $y0 = $s0['y'] ?? "a";
+25 |   $y1 = $s1['y'] ?? "a";
+
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `y` is not defined in this shape [2]
+
+shape_nullsafe.php:24:9
+ 9 | 
+10 | function testshapes(
+11 |   Shape0 $s0,
+   |   ^^^^^^ [2]
+12 |   Shape1 $s1,
+13 |   Shape2 $s2,
+   :
+22 |   $y2 = $s2['y'] ?? "a";
+23 |   $x0 = $s0['x'] ?? 5;
+24 |   $y0 = $s0['y'] ?? "a";
+   |         ^^^^^^^^^^^^^^^ [1]
+25 |   $y1 = $s1['y'] ?? "a";
+26 | }
+
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `y` is not defined in this shape [2]
+
+shape_nullsafe.php:25:9
+10 | function testshapes(
+11 |   Shape0 $s0,
+12 |   Shape1 $s1,
+   |   ^^^^^^ [2]
+13 |   Shape2 $s2,
+14 | ):void {
+   :
+23 |   $x0 = $s0['x'] ?? 5;
+24 |   $y0 = $s0['y'] ?? "a";
+25 |   $y1 = $s1['y'] ?? "a";
+   |         ^^^^^^^^^^^^^^^ [1]
+26 | }
+
+3 errors found

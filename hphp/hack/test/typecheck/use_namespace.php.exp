@@ -1,2 +1,11 @@
-ERROR: File "use_namespace.php", line 16, characters 9-12:
-Unbound name: `derp` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `derp` (an object type) [1]
+
+use_namespace.php:16:9
+14 |   function main(): void {
+15 |     derp\foo();
+16 |     new derp();
+   |         ^^^^ [1]
+17 |   }
+18 | }
+
+1 error found

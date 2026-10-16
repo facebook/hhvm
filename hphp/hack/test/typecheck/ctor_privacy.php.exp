@@ -1,4 +1,17 @@
-ERROR: File "ctor_privacy.php", line 17, characters 14-16:
-You cannot access this method (Typing[4112])
-  File "ctor_privacy.php", line 13, characters 20-30:
-  This member is private
+error: Typing[4112] You cannot access this method [1]
+-> This member is private [2]
+
+ctor_privacy.php:17:14
+11 | 
+12 | class Foo {
+13 |   private function __construct() {}
+   |                    ^^^^^^^^^^^ [2]
+14 | }
+15 | 
+16 | function test(): void {
+17 |   $foo = new Foo();
+   |              ^^^ [1]
+18 | }
+19 | 
+
+1 error found

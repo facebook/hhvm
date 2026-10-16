@@ -1,6 +1,14 @@
-ERROR: File "subtype_bug_1.php", line 6, characters 46-47:
-Invalid argument (Typing[4110])
-  File "subtype_bug_1.php", line 5, characters 14-25:
-  Expected `ImmVector<B>`
-  File "subtype_bug_1.php", line 6, characters 15-28:
-  But got `ConstVector<C>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `ImmVector<B>` [2]
+-> But got `ConstVector<C>` [3]
+
+subtype_bug_1.php:6:46
+3 | class C extends B {}
+4 | 
+5 | function foo(ImmVector<B> $x): void {}
+  |              ^^^^^^^^^^^^ [2]
+6 | function test(ConstVector<C> $x): void { foo($x); }
+  |               ^^^^^^^^^^^^^^ [3]
+  |                                              ^^ [1]
+
+1 error found

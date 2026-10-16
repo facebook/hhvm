@@ -1,6 +1,14 @@
-ERROR: File "fc_enum_2.php", line 11, characters 10-10:
-Invalid return type (Typing[4110])
-  File "fc_enum_2.php", line 10, characters 18-20:
-  Expected `Foo`
-  File "fc_enum_2.php", line 11, characters 10-10:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `Foo` [2]
+-> But got `int` [1]
+
+fc_enum_2.php:11:10
+ 8 | 
+ 9 | // Foo can be used as int, but not the reverse
+10 | function test(): Foo {
+   |                  ^^^ [2]
+11 |   return 1;
+   |          ^ [1]
+12 | }
+
+1 error found

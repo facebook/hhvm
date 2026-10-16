@@ -1,2 +1,10 @@
-ERROR: File "async_last.php", line 9, characters 3-21:
-The `async` modifier must be directly before the `function` keyword. (Parsing[1002])
+error: Parsing[1002] The `async` modifier must be directly before the `function` keyword. [1]
+
+async_last.php:9:3
+ 7 | 
+ 8 |   // this one will cause an error because async is not last
+ 9 |   public async static function baz(): Awaitable<void> {}
+   |   ^^^^^^^^^^^^^^^^^^^ [1]
+10 | }
+
+1 error found

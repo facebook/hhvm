@@ -1,4 +1,21 @@
-ERROR: File "try_finally_continue_break.php", line 8, characters 7-15:
-`continue;` is not allowed as a top-level statement in a `finally` block (Parsing[1002])
-ERROR: File "try_finally_continue_break.php", line 9, characters 7-12:
-`break;` is not allowed as a top-level statement in a `finally` block (Parsing[1002])
+error: Parsing[1002] `continue;` is not allowed as a top-level statement in a `finally` block [1]
+
+try_finally_continue_break.php:8:7
+ 6 |     try {
+ 7 |     } finally {
+ 8 |       continue;
+   |       ^^^^^^^^^ [1]
+ 9 |       break;
+10 |     }
+
+error: Parsing[1002] `break;` is not allowed as a top-level statement in a `finally` block [1]
+
+try_finally_continue_break.php:9:7
+ 7 |     } finally {
+ 8 |       continue;
+ 9 |       break;
+   |       ^^^^^^ [1]
+10 |     }
+11 |   }
+
+2 errors found

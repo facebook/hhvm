@@ -1,12 +1,55 @@
-ERROR: File "not_cast.php", line 15, characters 20-20:
-An expression is expected here. (Parsing[1002])
-ERROR: File "not_cast.php", line 15, characters 9-14:
-Casts are only supported for `bool`, `int`, `float` and `string`. (Naming[2055])
-ERROR: File "not_cast.php", line 15, characters 9-14:
-No such type `double`, did you mean `float`? (Naming[2123])
-ERROR: File "not_cast.php", line 15, characters 9-14:
-Unbound name: `double` (Naming[2049])
-ERROR: File "not_cast.php", line 15, characters 17-18:
-Unbound name: `>>` (a global constant) (Naming[2049])
-ERROR: File "not_cast.php", line 15, characters 17-18:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] An expression is expected here. [1]
+
+not_cast.php:15:20
+13 | 
+14 | function f(): void {
+15 |   $a = (double) >> 1;
+   |                    ^ [1]
+16 | }
+
+error: Naming[2055] Casts are only supported for `bool`, `int`, `float` and `string`. [1]
+
+not_cast.php:15:9
+13 | 
+14 | function f(): void {
+15 |   $a = (double) >> 1;
+   |         ^^^^^^ [1]
+16 | }
+
+error: Naming[2123] No such type `double`, did you mean `float`? [1]
+
+not_cast.php:15:9
+13 | 
+14 | function f(): void {
+15 |   $a = (double) >> 1;
+   |         ^^^^^^ [1]
+16 | }
+
+error: Naming[2049] Unbound name: `double` [1]
+
+not_cast.php:15:9
+13 | 
+14 | function f(): void {
+15 |   $a = (double) >> 1;
+   |         ^^^^^^ [1]
+16 | }
+
+error: Naming[2049] Unbound name: `>>` (a global constant) [1]
+
+not_cast.php:15:17
+13 | 
+14 | function f(): void {
+15 |   $a = (double) >> 1;
+   |                 ^^ [1]
+16 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+not_cast.php:15:17
+13 | 
+14 | function f(): void {
+15 |   $a = (double) >> 1;
+   |                 ^^ [1]
+16 | }
+
+6 errors found

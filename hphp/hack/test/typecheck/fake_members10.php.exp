@@ -1,7 +1,23 @@
-ERROR: File "fake_members10.php", line 27, characters 19-22:
-You are trying to access the method `frob` but this object can be null. (Typing[4064])
-  File "fake_members10.php", line 18, characters 11-15:
-  This can be null
-  File "fake_members10.php", line 26, characters 7-29:
-  All the local information about `$this->foo` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4064] You are trying to access the method `frob` but this object can be null. [1]
+-> This can be null [2]
+-> All the local information about `$this->foo` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [3]
+
+fake_members10.php:27:19
+16 | 
+17 | class Bar1 {
+18 |   private ?Foo1 $foo;
+   |           ^^^^^ [2]
+19 | 
+20 |   public function __construct(?Foo1 $foo) {
+   :
+24 |   public function f(): void {
+25 |     if ($this->foo !== null) {
+26 |       random_other_function();
+   |       ^^^^^^^^^^^^^^^^^^^^^^^ [3]
+27 |       $this->foo->frob();
+   |                   ^^^^ [1]
+28 |     }
+29 |   }
+
+1 error found

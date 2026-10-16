@@ -1,8 +1,22 @@
-ERROR: File "typing_fail_this.php", line 58, characters 5-9:
-Typing error (Typing[4053])
-  File "typing_fail_this.php", line 58, characters 12-12:
-  No property `l` in `MyDoubleList`
-  File "typing_fail_this.php", line 51, characters 7-18:
-  This is why I think it is an object of type MyDoubleList
-  File "typing_fail_this.php", line 51, characters 7-18:
-  Declaration of `MyDoubleList` is here
+error: Typing[4053] Typing error [1]
+-> No property `l` in `MyDoubleList` [2]
+-> This is why I think it is an object of type MyDoubleList [3]
+-> Declaration of `MyDoubleList` is here [3]
+
+typing_fail_this.php:58:5
+49 | }
+50 | 
+51 | class MyDoubleList<T1, T2> extends MyList<(T1, T2)> {
+   |       ^^^^^^^^^^^^ [3]
+52 | 
+53 |   public function get_head_twice(): (T1, T2) {
+   :
+56 | 
+57 |   public function set_head(T1 $x, T2 $y): void {
+58 |     $this->l[] = tuple($x, $y);
+   |     ^^^^^ [1]
+   |            ^ [2]
+59 |   }
+60 | }
+
+1 error found

@@ -1,4 +1,19 @@
-ERROR: File "protected_in_interface2.php", line 12, characters 17-19:
-You cannot invoke a protected method on an interface (Typing[4112])
-  File "protected_in_interface2.php", line 5, characters 22-24:
-  This member is protected
+error: Typing[4112] You cannot invoke a protected method on an interface [1]
+-> This member is protected [2]
+
+protected_in_interface2.php:12:17
+ 3 | 
+ 4 | interface IInterface {
+ 5 |   protected function foo(): void;
+   |                      ^^^ [2]
+ 6 | }
+ 7 | 
+   :
+10 |     // This is a typehole because BaseClass does not necessarily
+11 |     // have visibility on this protected method.
+12 |     $interface->foo();
+   |                 ^^^ [1]
+13 |   }
+14 | }
+
+1 error found

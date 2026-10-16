@@ -1,6 +1,21 @@
-ERROR: File "list_destructuring_cross_file.php--file2.php", line 5, characters 3-19:
-Invalid assignment (Typing[4105])
-  File "list_destructuring_cross_file.php--file2.php", line 5, characters 3-14:
-  Too many positional arguments (expected 2 but got 3)
-  File "list_destructuring_cross_file.php--file1.php", line 3, characters 16-34:
-  Definition is here
+error: Typing[4105] Invalid assignment [1]
+-> Too many positional arguments (expected 2 but got 3) [2]
+-> Definition is here [3]
+
+list_destructuring_cross_file.php--file2.php:5:3
+3 | function f2(): void {
+4 |   $c = f1();
+5 |   list($a, $b) = $c;
+  |   ^^^^^^^^^^^^^^^^^ [1]
+  |   ^^^^^^^^^^^^ [2]
+6 | }
+
+list_destructuring_cross_file.php--file1.php:3:16
+1 | <?hh
+2 | 
+3 | function f1(): (int, string, bool) {
+  |                ^^^^^^^^^^^^^^^^^^^ [3]
+4 |   throw new Exception();
+5 | }
+
+1 error found

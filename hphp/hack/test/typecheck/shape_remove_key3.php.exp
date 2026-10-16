@@ -1,6 +1,17 @@
-ERROR: File "shape_remove_key3.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "shape_remove_key3.php", line 5, characters 18-23:
-  Expected `string`
-  File "shape_remove_key3.php", line 7, characters 3-34:
-  But got `shape('y' => string)`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `shape('y' => string)` [3]
+
+shape_remove_key3.php:8:10
+3 | // Reason for shape type should point to the last operation that modified it
+4 | 
+5 | function test(): string {
+  |                  ^^^^^^ [2]
+6 |   $s = shape('x' => 4, 'y' => 'aaa');
+7 |   Shapes::removeKey(inout $s, 'x');
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+8 |   return $s;
+  |          ^^ [1]
+9 | }
+
+1 error found

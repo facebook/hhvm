@@ -1,6 +1,13 @@
-ERROR: File "typedef_as1.php", line 12, characters 9-12:
-Invalid constraint on `newtype` (Typing[4332])
-  File "typedef_as1.php", line 12, characters 17-19:
-  Expected `int`
-  File "typedef_as1.php", line 12, characters 23-26:
-  But got `bool`
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+typedef_as1.php:12:9
+10 |  */
+11 | 
+12 | newtype fbid as int = bool;
+   |         ^^^^ [1]
+   |                 ^^^ [2]
+   |                       ^^^^ [3]
+
+1 error found

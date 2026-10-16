@@ -1,6 +1,23 @@
-ERROR: File "foreach_kv_list_async2.php", line 20, characters 9-10:
-Invalid argument (Typing[4110])
-  File "foreach_kv_list_async2.php", line 12, characters 14-19:
-  Expected `string`
-  File "foreach_kv_list_async2.php", line 14, characters 48-50:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+foreach_kv_list_async2.php:20:9
+10 |  */
+11 | 
+12 | function foo(string $x): void {}
+   |              ^^^^^^ [2]
+13 | 
+14 | async function bar(): AsyncKeyedIterator<int, (int, int)> {
+   |                                                ^^^ [3]
+15 |   yield 1 => tuple(1, 1);
+16 | }
+17 | 
+18 | async function test(): Awaitable<void> {
+19 |   foreach (bar() await as $k => list($x, $y)) {
+20 |     foo($x);
+   |         ^^ [1]
+21 |   }
+22 | }
+
+1 error found

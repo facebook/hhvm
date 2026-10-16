@@ -1,6 +1,17 @@
-ERROR: File "assign_vec_property_bad.php", line 9, characters 15-19:
-Invalid assignment (Typing[4110])
-  File "assign_vec_property_bad.php", line 5, characters 14-16:
-  Expected `int`
-  File "assign_vec_property_bad.php", line 9, characters 15-19:
-  But got `string`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+assign_vec_property_bad.php:9:15
+ 3 | 
+ 4 | class C {
+ 5 |   public vec<int> $vs = vec[];
+   |              ^^^ [2]
+ 6 | }
+ 7 | 
+ 8 | function test(C $c): void {
+ 9 |   $c->vs[0] = 'foo';
+   |               ^^^^^ [1]
+10 | }
+
+1 error found

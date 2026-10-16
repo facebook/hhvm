@@ -2,5 +2,14 @@ File "type_structure9.php", line 9, characters 3-26:
   classname<C>
 File "type_structure9.php", line 20, characters 3-26:
   classname<Foo\D>
-ERROR: File "type_structure9.php", line 12, characters 1-14:
-Namespace declaration statement has to be the very first statement in the script (Parsing[1002])
+error: Parsing[1002] Namespace declaration statement has to be the very first statement in the script [1]
+
+type_structure9.php:12:1
+10 | }
+11 | 
+12 | namespace Foo;
+   | ^^^^^^^^^^^^^^ [1]
+13 | 
+14 | class D {
+
+1 error found

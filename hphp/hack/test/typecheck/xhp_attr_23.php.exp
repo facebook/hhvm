@@ -1,8 +1,26 @@
-ERROR: File "xhp_attr_23.php", line 6, characters 13-15:
-No property `:bar` in `:foo` (Typing[4053])
-  File "XHPTest.hhi", line 6, characters 12-24:
-  Did you mean `_children` instead?
-  File "xhp_attr_23.php", line 6, characters 9-11:
-  This is why I think it is an object of type :foo
-  File "xhp_attr_23.php", line 3, characters 7-10:
-  Declaration of `:foo` is here
+error: Typing[4053] No property `:bar` in `:foo` [1]
+-> Did you mean `_children` instead? [2]
+-> This is why I think it is an object of type :foo [3]
+-> Declaration of `:foo` is here [4]
+
+xhp_attr_23.php:6:13
+1 | <?hh
+2 | 
+3 | class :foo extends XHPTest {}
+  |       ^^^^ [4]
+4 | 
+5 | function main(): void {
+6 |   $x = <foo bar="baz" />; // undefined attribute
+  |         ^^^ [3]
+  |             ^^^ [1]
+7 | }
+
+XHPTest.hhi:6:12
+4 |   public function __construct(
+5 |     public darray<string,mixed> $_attributes,
+6 |     public varray<mixed> $_children,
+  |            ^^^^^^^^^^^^^ [2]
+7 |     public string $_filename,
+8 |     public int $_line_number,
+
+1 error found

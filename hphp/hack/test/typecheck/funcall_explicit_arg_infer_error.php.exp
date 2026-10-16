@@ -1,6 +1,15 @@
-ERROR: File "funcall_explicit_arg_infer_error.php", line 7, characters 16-17:
-Invalid argument (Typing[4110])
-  File "funcall_explicit_arg_infer_error.php", line 6, characters 35-40:
-  Expected `string`
-  File "funcall_explicit_arg_infer_error.php", line 6, characters 26-28:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+funcall_explicit_arg_infer_error.php:7:16
+4 | function id<T>(T $x): T { return $x; }
+5 | 
+6 | function infer_and_error(int $x): string {
+  |                          ^^^ [3]
+  |                                   ^^^^^^ [2]
+7 |   return id<_>($x);
+  |                ^^ [1]
+8 | }
+
+1 error found

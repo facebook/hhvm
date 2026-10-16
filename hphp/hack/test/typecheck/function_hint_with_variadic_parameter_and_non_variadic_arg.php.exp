@@ -1,24 +1,73 @@
-ERROR: File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
-Invalid argument (Typing[4042])
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 10-21:
-  Should have a variadic argument
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 24-49:
-  Because of this definition
-ERROR: File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
-Invalid argument (Typing[4041])
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 10-21:
-  Too many mandatory arguments (expected 0 but got 2)
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 24-49:
-  Because of this definition
-ERROR: File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
-Invalid argument (Typing[4110])
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 23-25:
-  Expected `int`
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 34-38:
-  But got `mixed`
-ERROR: File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
-Invalid argument (Typing[4110])
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 31-36:
-  Expected `string`
-  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 34-38:
-  But got `mixed`
+error: Typing[4042] Invalid argument [1]
+-> Should have a variadic argument [2]
+-> Because of this definition [3]
+
+function_hint_with_variadic_parameter_and_non_variadic_arg.php:8:17
+1 | <?hh
+2 | 
+3 | function non_variadic(int $a, string $y): void {}
+  |          ^^^^^^^^^^^^ [2]
+4 | 
+5 | function hint_variadic((function(mixed...): void) $f): void {}
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+6 | 
+7 | function test(): void {
+8 |   hint_variadic(non_variadic<>);
+  |                 ^^^^^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 0 but got 2) [2]
+-> Because of this definition [3]
+
+function_hint_with_variadic_parameter_and_non_variadic_arg.php:8:17
+1 | <?hh
+2 | 
+3 | function non_variadic(int $a, string $y): void {}
+  |          ^^^^^^^^^^^^ [2]
+4 | 
+5 | function hint_variadic((function(mixed...): void) $f): void {}
+  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+6 | 
+7 | function test(): void {
+8 |   hint_variadic(non_variadic<>);
+  |                 ^^^^^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+function_hint_with_variadic_parameter_and_non_variadic_arg.php:8:17
+1 | <?hh
+2 | 
+3 | function non_variadic(int $a, string $y): void {}
+  |                       ^^^ [2]
+4 | 
+5 | function hint_variadic((function(mixed...): void) $f): void {}
+  |                                  ^^^^^ [3]
+6 | 
+7 | function test(): void {
+8 |   hint_variadic(non_variadic<>);
+  |                 ^^^^^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `mixed` [3]
+
+function_hint_with_variadic_parameter_and_non_variadic_arg.php:8:17
+1 | <?hh
+2 | 
+3 | function non_variadic(int $a, string $y): void {}
+  |                               ^^^^^^ [2]
+4 | 
+5 | function hint_variadic((function(mixed...): void) $f): void {}
+  |                                  ^^^^^ [3]
+6 | 
+7 | function test(): void {
+8 |   hint_variadic(non_variadic<>);
+  |                 ^^^^^^^^^^^^^^ [1]
+9 | }
+
+4 errors found

@@ -1,4 +1,16 @@
-ERROR: File "shape5.php", line 23, characters 13-19:
-This shape doesn't have a field `field` (Typing[4108])
-  File "shape5.php", line 19, characters 10-29:
-  The shape is defined here
+error: Typing[4108] This shape doesn't have a field `field` [1]
+-> The shape is defined here [2]
+
+shape5.php:23:13
+17 | function test(): int {
+18 |   if (true) {
+19 |     $x = shape('field1' => 0);
+   |          ^^^^^^^^^^^^^^^^^^^^ [2]
+20 |   } else {
+21 |     $x = shape('field1' => 0);
+22 |   }
+23 |   return $x['field'];
+   |             ^^^^^^^ [1]
+24 | }
+
+1 error found

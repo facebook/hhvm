@@ -1,2 +1,10 @@
-ERROR: File "deprecated_attr_bad_arity.php", line 3, characters 3-14:
-The attribute `__Deprecated` expects at least 1 argument (Typing[4153])
+error: Typing[4153] The attribute `__Deprecated` expects at least 1 argument [1]
+
+deprecated_attr_bad_arity.php:3:3
+1 | <?hh
+2 | 
+3 | <<__Deprecated>>
+  |   ^^^^^^^^^^^^ [1]
+4 | function f(): void {}
+
+1 error found

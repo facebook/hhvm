@@ -1,2 +1,11 @@
-ERROR: File "namespace_global_class2.php--local.php", line 5, characters 9-9:
-Unbound name: `N\C` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `N\C` (an object type) [1]
+
+namespace_global_class2.php--local.php:5:9
+3 | namespace N {
+4 |   function f(): void {
+5 |     new C();
+  |         ^ [1]
+6 |   }
+7 | }
+
+1 error found

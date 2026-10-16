@@ -1,2 +1,9 @@
-ERROR: File "primitive_type_arguments_dynamic.php", line 3, characters 12-18:
-Type arguments are not expected for this type (Naming[2064])
+error: Naming[2064] Type arguments are not expected for this type [1]
+
+primitive_type_arguments_dynamic.php:3:12
+1 | <?hh
+2 | 
+3 | function f(dynamic<T> $_): void {}
+  |            ^^^^^^^ [1]
+
+1 error found

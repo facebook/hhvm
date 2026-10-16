@@ -1,2 +1,9 @@
-ERROR: File "class_02.php", line 16, characters 23-23:
-Cannot implement `A` - it is not an interface (NastCheck[3013])
+error: NastCheck[3013] Cannot implement `A` - it is not an interface [1]
+
+class_02.php:16:23
+14 | interface I {}
+15 | 
+16 | class B implements I, A {}
+   |                       ^ [1]
+
+1 error found

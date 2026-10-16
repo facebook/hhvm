@@ -1,4 +1,18 @@
-ERROR: File "shapes_cc_11.php--use.php", line 4, characters 3-10:
-A shape field name must be an `int` or `string` (Typing[4052])
-  File "shapes_cc_11.php--def.php", line 5, characters 9-13:
-  Not a value of type blah2
+error: Typing[4052] A shape field name must be an `int` or `string` [1]
+-> Not a value of type blah2 [2]
+
+shapes_cc_11.php--use.php:4:3
+2 | 
+3 | newtype blah = shape(
+4 |   Foo::BAR => int,
+  |   ^^^^^^^^ [1]
+5 | );
+
+shapes_cc_11.php--def.php:5:9
+3 | newtype blah2 = string;
+4 | class Foo {
+5 |   const blah2 BAR = 'bar';
+  |         ^^^^^ [2]
+6 | }
+
+1 error found

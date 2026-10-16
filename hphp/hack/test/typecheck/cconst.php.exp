@@ -1,12 +1,40 @@
-ERROR: File "cconst.php--cconst.hhi", line 7, characters 13-15:
-Wrong type hint (Typing[4338])
-  File "cconst.php--cconst.hhi", line 7, characters 9-11:
-  Expected `int`
-  File "cconst.php--cconst.hhi", line 7, characters 19-25:
-  But got `string`
-ERROR: File "cconst.php--cconst.php", line 13, characters 19-27:
-Invalid argument (Typing[4110])
-  File "cconst.php--cconst.php", line 5, characters 3-8:
-  Expected `string`
-  File "cconst.php--cconst.hhi", line 5, characters 9-11:
-  But got `int`
+error: Typing[4338] Wrong type hint [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+cconst.php--cconst.hhi:7:13
+5 |   const int X2;
+6 |   const string Y;
+7 |   const int BAD = 'hello';
+  |         ^^^ [2]
+  |             ^^^ [1]
+  |                   ^^^^^^^ [3]
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+cconst.php--cconst.php:13:19
+ 3 | function test(
+ 4 |   int $i,
+ 5 |   string $s,
+   |   ^^^^^^ [2]
+ 6 | ): void {}
+ 7 | 
+   :
+11 |   test(Klass::X1, Klass::Y);
+12 | 
+13 |   test(Klass::X1, Klass::X2);
+   |                   ^^^^^^^^^ [1]
+14 | }
+
+cconst.php--cconst.hhi:5:9
+ 3 | class Klass {
+ 4 |   const int X1 = 0;
+ 5 |   const int X2;
+   |         ^^^ [3]
+ 6 |   const string Y;
+ 7 |   const int BAD = 'hello';
+
+2 errors found

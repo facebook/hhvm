@@ -1,6 +1,14 @@
-ERROR: File "infinite_loop_terminal_bad.php", line 3, characters 10-10:
-Invalid return type (Typing[4336])
-  File "infinite_loop_terminal_bad.php", line 3, characters 15-17:
-  Expected `int`
-  File "infinite_loop_terminal_bad.php", line 3, characters 10-10:
-  But got `void` because this function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+infinite_loop_terminal_bad.php:3:10
+1 | <?hh
+2 | 
+3 | function f(): int {
+  |          ^ [1]
+  |               ^^^ [2]
+4 |   while (true) {
+5 |     break;
+
+1 error found

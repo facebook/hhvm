@@ -1,6 +1,18 @@
-ERROR: File "iface_require_incompat3.php", line 11, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "iface_require_incompat3.php", line 11, characters 20-21:
-  This requires to extend or implement Super
-  File "iface_require_incompat3.php", line 6, characters 19-28:
-  Required here
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+
+iface_require_incompat3.php:11:7
+ 4 | 
+ 5 | interface I1 {
+ 6 |   require extends Super<int>;
+   |                   ^^^^^^^^^^ [3]
+ 7 | }
+ 8 | 
+ 9 | interface I2 extends I1 {}
+10 | 
+11 | class C implements I2 {}
+   |       ^ [1]
+   |                    ^^ [2]
+
+1 error found

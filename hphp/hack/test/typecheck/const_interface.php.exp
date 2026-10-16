@@ -1,6 +1,20 @@
-ERROR: File "const_interface.php", line 18, characters 12-15:
-Invalid return type (Typing[4110])
-  File "const_interface.php", line 17, characters 26-31:
-  Expected `string`
-  File "const_interface.php", line 13, characters 9-11:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+const_interface.php:18:12
+11 | 
+12 | interface X {
+13 |   const int V = 0;
+   |         ^^^ [3]
+14 | }
+15 | 
+16 | class Y implements X {
+17 |   public function foo(): string {
+   |                          ^^^^^^ [2]
+18 |     return X::V;
+   |            ^^^^ [1]
+19 |   }
+20 | }
+
+1 error found

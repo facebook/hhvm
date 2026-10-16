@@ -1,6 +1,24 @@
-ERROR: File "shape_modified3.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-  File "shape_modified3.php", line 14, characters 10-13:
-  Expected `bool`
-  File "shape_modified3.php", line 20, characters 15-15:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+shape_modified3.php:24:10
+12 | type my_shape = shape(
+13 |   'x' => int,
+14 |   'y' => bool,
+   |          ^^^^ [2]
+15 | );
+16 | 
+17 | function foo(bool $cond): my_shape {
+18 |   $s = shape('x' => 0);
+19 |   if ($cond) {
+20 |     $s['y'] = 0;
+   |               ^ [3]
+21 |   } else {
+22 |     $s['y'] = false;
+23 |   }
+24 |   return $s;
+   |          ^^ [1]
+25 | }
+
+1 error found

@@ -1,10 +1,25 @@
-ERROR: File "covariance8.php--file2.php", line 8, characters 12-13:
-Invalid argument (Typing[4110])
-  File "covariance8.php--file2.php", line 7, characters 19-19:
-  Expected `B`
-  File "covariance8.php--file1.php", line 4, characters 22-22:
-    via this generic `T`
-  File "covariance8.php--file2.php", line 6, characters 22-22:
-  But got `A`
-  File "covariance8.php--file2.php", line 6, characters 22-22:
-  This type argument to `ID` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` [2]
+->   via this generic `T` [3]
+-> But got `A` [4]
+-> This type argument to `ID` must match exactly (it is invariant) [4]
+
+covariance8.php--file2.php:8:12
+4 | class B extends A {}
+5 | 
+6 | function takesIDA(ID<A> $x): void {}
+  |                      ^ [4]
+7 | function test(UID<B> $x): void {
+  |                   ^ [2]
+8 |   takesIDA($x);
+  |            ^^ [1]
+9 | }
+
+covariance8.php--file1.php:4:22
+2 | 
+3 | newtype ID<T> = int;
+4 | newtype UID<T> as ID<T> = int;
+  |                      ^ [3]
+5 | newtype OID<T> as ID<T> = int;
+
+1 error found

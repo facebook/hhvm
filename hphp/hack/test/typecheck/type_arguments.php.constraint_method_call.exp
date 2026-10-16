@@ -1,12 +1,33 @@
-ERROR: File "type_arguments.php", line 20, characters 27-36:
-Invalid argument (Typing[4110])
-  File "type_arguments.php", line 20, characters 23-24:
-  Expected `()`
-  File "type_arguments.php", line 20, characters 27-36:
-  But got `(nothing)`
-ERROR: File "type_arguments.php", line 20, characters 31-34:
-No instance method `haha` in `X` (Typing[4053])
-  File "type_arguments.php", line 19, characters 12-12:
-  This is why I think it is an object of type X
-  File "type_arguments.php", line 12, characters 7-7:
-  Declaration of `X` is here
+error: Typing[4110] Invalid argument [1]
+-> Expected `()` [2]
+-> But got `(nothing)` [1]
+
+type_arguments.php:20:27
+18 | function bar(): void {
+19 |   $x = new X();
+20 |   invariant_violation('', $x->haha());
+   |                       ^^ [2]
+   |                           ^^^^^^^^^^ [1]
+21 | }
+
+error: Typing[4053] No instance method `haha` in `X` [1]
+-> This is why I think it is an object of type X [2]
+-> Declaration of `X` is here [3]
+
+type_arguments.php:20:31
+10 |  */
+11 | 
+12 | class X {
+   |       ^ [3]
+13 | }
+14 | 
+   :
+17 | 
+18 | function bar(): void {
+19 |   $x = new X();
+   |            ^ [2]
+20 |   invariant_violation('', $x->haha());
+   |                               ^^^^ [1]
+21 | }
+
+2 errors found

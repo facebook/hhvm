@@ -1,6 +1,29 @@
-WARN: File "unused_awaitable12.php", line 11, characters 7-27:
-This `is` check is always `false`. The expression on the left has type `Awaitable<int>` which shares no values with `NonAwaitable<T#1>`. (Warn[12010])
-ERROR: File "unused_awaitable12.php", line 11, characters 7-8:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable12.php", line 5, characters 21-34:
-  This is why I think it is `Awaitable`
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `Awaitable<int>` which shares no values with `NonAwaitable<T#1>`. [1]
+
+unused_awaitable12.php:11:7
+ 9 | function g(): void {
+10 |   $f = f();
+11 |   if ($f is NonAwaitable<_>) {
+   |       ^^^^^^^^^^^^^^^^^^^^^ [1]
+12 |   }
+13 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable12.php:11:7
+ 3 | class NonAwaitable<T> {}
+ 4 | 
+ 5 | async function f(): Awaitable<int> {
+   |                     ^^^^^^^^^^^^^^ [2]
+ 6 |   return 1;
+ 7 | }
+ 8 | 
+ 9 | function g(): void {
+10 |   $f = f();
+11 |   if ($f is NonAwaitable<_>) {
+   |       ^^ [1]
+12 |   }
+13 | }
+
+2 errors found

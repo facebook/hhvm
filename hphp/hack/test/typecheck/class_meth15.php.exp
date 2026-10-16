@@ -1,2 +1,10 @@
-ERROR: File "class_meth15.php", line 4, characters 3-6:
-`self` is undefined outside of a class (Typing[4059])
+error: Typing[4059] `self` is undefined outside of a class [1]
+
+class_meth15.php:4:3
+2 | 
+3 | function test(): void {
+4 |   self::foo<>;
+  |   ^^^^ [1]
+5 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "await_in_expressions2.php", line 5, characters 9-10:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+await_in_expressions2.php:5:9
+3 | async function f1(Awaitable<int> $a): Awaitable<void> {
+4 |   $x = 1;
+5 |   $b = ($x = await $a);
+  |         ^^ [1]
+6 | }
+
+1 error found

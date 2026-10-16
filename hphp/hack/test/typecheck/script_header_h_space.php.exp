@@ -1,12 +1,39 @@
-ERROR: File "script_header_h_space.php", line 1, characters 3-3:
-`<?h` is not a valid script marker. Use `<?hh` to start a Hack file. (Parsing[1002])
-ERROR: File "script_header_h_space.php", line 1, characters 6-6:
-A semicolon `;` is expected here. (Parsing[1002])
-ERROR: File "script_header_h_space.php", line 1, characters 5-5:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "script_header_h_space.php", line 4, characters 10-21:
-Invalid return type (Typing[4110])
-  File "script_header_h_space.php", line 3, characters 40-42:
-  Expected `int`
-  File "script_header_h_space.php", line 4, characters 10-21:
-  But got `string`
+error: Parsing[1002] `<?h` is not a valid script marker. Use `<?hh` to start a Hack file. [1]
+
+script_header_h_space.php:1:3
+1 | <?h h
+  |   ^ [1]
+2 | 
+3 | function script_header_h_space_test(): int {
+
+error: Parsing[1002] A semicolon `;` is expected here. [1]
+
+script_header_h_space.php:1:6
+1 | <?h h
+  |      ^ [1]
+2 | 
+3 | function script_header_h_space_test(): int {
+4 |   return "not an int";
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+script_header_h_space.php:1:5
+1 | <?h h
+  |     ^ [1]
+2 | 
+3 | function script_header_h_space_test(): int {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+script_header_h_space.php:4:10
+1 | <?h h
+2 | 
+3 | function script_header_h_space_test(): int {
+  |                                        ^^^ [2]
+4 |   return "not an int";
+  |          ^^^^^^^^^^^^ [1]
+5 | }
+
+4 errors found

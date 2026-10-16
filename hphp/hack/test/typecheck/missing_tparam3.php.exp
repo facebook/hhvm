@@ -1,4 +1,17 @@
-ERROR: File "missing_tparam3.php", line 22, characters 17-17:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "missing_tparam3.php", line 12, characters 7-7:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+missing_tparam3.php:22:17
+10 |  */
+11 | 
+12 | class A<T> {
+   |       ^ [2]
+13 |   private T $x;
+14 |   public function __construct(T $x) {
+   :
+20 | }
+21 | 
+22 | class B extends A {}
+   |                 ^ [1]
+
+1 error found

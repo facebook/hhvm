@@ -1,14 +1,46 @@
-ERROR: File "repetition.php", line 3, characters 43-44:
-Argument already bound: `$x` (Naming[2036])
-ERROR: File "repetition.php", line 7, characters 32-32:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "repetition.php", line 7, characters 29-29:
-  `T` is already bound here
-ERROR: File "repetition.php", line 9, characters 35-35:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "repetition.php", line 9, characters 32-32:
-  `T` is already bound here
-ERROR: File "repetition.php", line 12, characters 46-46:
-You cannot re-bind the type parameter `T` (Naming[2041])
-  File "repetition.php", line 12, characters 43-43:
-  `T` is already bound here
+error: Naming[2036] Argument already bound: `$x` [1]
+
+repetition.php:3:43
+1 | <?hh
+2 | 
+3 | function repetition_fun_param(int $x, int $x): void {}
+  |                                           ^^ [1]
+4 | 
+5 | function repetition_fun_param_placeholder(int $_, int $_): void {}
+
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+repetition.php:7:32
+5 | function repetition_fun_param_placeholder(int $_, int $_): void {}
+6 | 
+7 | class RepetitionClassTparam<T, T> {}
+  |                             ^ [2]
+  |                                ^ [1]
+8 | 
+9 | function repetition_fun_tparam<T, T>(): void {}
+
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+repetition.php:9:35
+ 7 | class RepetitionClassTparam<T, T> {}
+ 8 | 
+ 9 | function repetition_fun_tparam<T, T>(): void {}
+   |                                ^ [2]
+   |                                   ^ [1]
+10 | 
+11 | class ABCD {
+
+error: Naming[2041] You cannot re-bind the type parameter `T` [1]
+-> `T` is already bound here [2]
+
+repetition.php:12:46
+10 | 
+11 | class ABCD {
+12 |   public function repetition_method_param<T, T>(): void {}
+   |                                           ^ [2]
+   |                                              ^ [1]
+13 | }
+
+4 errors found

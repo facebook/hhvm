@@ -1,4 +1,26 @@
-ERROR: File "fc_enum_case_6.php", line 11, characters 3-118:
-This `switch` statement is nonexhaustive. At least the following cases are missing: `Bar::FOO` (Typing[4019])
-  File "fc_enum_case_6.php", line 11, characters 11-12:
-  The scrutinee has type `Bar`.
+error: Typing[4019] This `switch` statement is nonexhaustive. At least the following cases are missing: `Bar::FOO` [1]
+-> The scrutinee has type `Bar`. [2]
+
+fc_enum_case_6.php:11:3
+ 9 | function do_case(Bar $x): int {
+10 |   $z = Bar::FOO;
+11 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+12 |     case $z:
+   |     ^^^^^^^^ [1]
+13 |       return 0;
+   |       ^^^^^^^^^ [1]
+14 |     case Bar::BAR:
+   |     ^^^^^^^^^^^^^^ [1]
+15 |       return 1;
+   |       ^^^^^^^^^ [1]
+16 |     case Bar::BAZ:
+   |     ^^^^^^^^^^^^^^ [1]
+17 |       return 2;
+   |       ^^^^^^^^^ [1]
+18 |   }
+   |   ^ [1]
+19 | }
+
+1 error found

@@ -1,10 +1,47 @@
-ERROR: File "string_no_new.php", line 4, characters 7-12:
-`string` is uninstantiable (Typing[4002])
-  File "string.hhi", line 6, characters 15-20:
-  Declaration is here
-ERROR: File "string_no_new.php", line 5, characters 7-12:
-This constructor expects no argument (Typing[4012])
-ERROR: File "string_no_new.php", line 5, characters 7-12:
-`string` is uninstantiable (Typing[4002])
-  File "string.hhi", line 6, characters 15-20:
-  Declaration is here
+error: Typing[4002] `string` is uninstantiable [1]
+-> Declaration is here [2]
+
+string_no_new.php:4:7
+2 | 
+3 | function f() : void {
+4 |   new string();
+  |       ^^^^^^ [1]
+5 |   new string('123');
+6 | }
+
+string.hhi:6:15
+4 | 
+5 |   <<__SupportDynamicType>>
+6 |   final class string {
+  |               ^^^^^^ [2]
+7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4012] This constructor expects no argument [1]
+
+string_no_new.php:5:7
+3 | function f() : void {
+4 |   new string();
+5 |   new string('123');
+  |       ^^^^^^ [1]
+6 | }
+
+error: Typing[4002] `string` is uninstantiable [1]
+-> Declaration is here [2]
+
+string_no_new.php:5:7
+3 | function f() : void {
+4 |   new string();
+5 |   new string('123');
+  |       ^^^^^^ [1]
+6 | }
+
+string.hhi:6:15
+4 | 
+5 |   <<__SupportDynamicType>>
+6 |   final class string {
+  |               ^^^^^^ [2]
+7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+3 errors found

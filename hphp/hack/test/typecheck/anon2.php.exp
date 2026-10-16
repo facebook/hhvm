@@ -1,6 +1,15 @@
-ERROR: File "anon2.php", line 17, characters 6-7:
-Invalid argument (Typing[4110])
-  File "anon2.php", line 15, characters 17-18:
-  Expected `int` because this is used in an arithmetic operation
-  File "anon2.php", line 17, characters 6-7:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` because this is used in an arithmetic operation [2]
+-> But got `string` [1]
+
+anon2.php:17:6
+13 |   $x = 0;
+14 |   $f = function($y) use ($x) {
+15 |     return $x + $y;
+   |                 ^^ [2]
+16 |   };
+17 |   $f('');
+   |      ^^ [1]
+18 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "variablevariable.php", line 7, characters 10-10:
-A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores (Parsing[1002])
+error: Parsing[1002] A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores [1]
+
+variablevariable.php:7:10
+5 |   $x = "n";
+6 |   // We don't track the types of variable-variable, so it is Tany.
+7 |   return $$x;
+  |          ^ [1]
+8 | }
+
+1 error found

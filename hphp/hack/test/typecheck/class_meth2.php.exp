@@ -1,2 +1,11 @@
-ERROR: File "class_meth2.php", line 13, characters 8-8:
-Unbound name: `A` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `A` (an object type) [1]
+
+class_meth2.php:13:8
+11 | 
+12 | function foo(): int {
+13 |   $p = A::f1<>;
+   |        ^ [1]
+14 |   return $p('moo');
+15 | }
+
+1 error found

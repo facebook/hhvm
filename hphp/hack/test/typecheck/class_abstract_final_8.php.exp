@@ -1,4 +1,18 @@
-ERROR: File "class_abstract_final_8.php", line 8, characters 12-14:
-`Foo` is uninstantiable (Typing[4002])
-  File "class_abstract_final_8.php", line 3, characters 22-24:
-  Declaration is here
+error: Typing[4002] `Foo` is uninstantiable [1]
+-> Declaration is here [2]
+
+class_abstract_final_8.php:8:12
+ 1 | <?hh
+ 2 | 
+ 3 | abstract final class Foo extends Exception {}
+   |                      ^^^ [2]
+ 4 | 
+ 5 | function f(mixed $x): void {
+ 6 |   try {
+ 7 |     throw new Exception('');
+ 8 |   } catch (Foo $y) {
+   |            ^^^ [1]
+ 9 |   }
+10 | }
+
+1 error found

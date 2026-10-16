@@ -1,9 +1,25 @@
-ERROR: File "fake_members3.php", line 22, characters 12-16:
-Invalid return type (Typing[4110])
-  File "fake_members3.php", line 17, characters 27-29:
-  Expected `~int`
-  File "fake_members3.php", line 15, characters 18-21:
-  But got `?int`
-  File "fake_members3.php", line 21, characters 5-18:
-  All the local information about `X::$x` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid return type [1]
+-> Expected `~int` [2]
+-> But got `?int` [3]
+-> All the local information about `X::$x` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+fake_members3.php:22:12
+13 | 
+14 | class X {
+15 |   private static ?int $x = null;
+   |                  ^^^^ [3]
+16 | 
+17 |   public function getX(): int {
+   |                           ^^^ [2]
+18 |     if (X::$x === null) {
+19 |       X::$x = 0;
+20 |     }
+21 |     do_something();
+   |     ^^^^^^^^^^^^^^ [4]
+22 |     return X::$x;
+   |            ^^^^^ [1]
+23 |   }
+24 | }
+
+1 error found

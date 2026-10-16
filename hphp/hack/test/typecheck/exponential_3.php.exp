@@ -1,6 +1,19 @@
-ERROR: File "exponential_3.php", line 12, characters 16-22:
-Invalid argument (Typing[4110])
-  File "exponential_3.php", line 3, characters 22-26:
-  Expected `float`
-  File "exponential_3.php", line 12, characters 16-22:
-  But got `num` because this is the result of an arithmetic operation
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `num` because this is the result of an arithmetic operation [1]
+
+exponential_3.php:12:16
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_float(float $f): void { }
+   |                      ^^^^^ [2]
+ 4 | 
+ 5 | function test_ok(): void {
+   :
+10 | 
+11 | function test_error(): void {
+12 |   takes_float( 10 ** 2 );
+   |                ^^^^^^^ [1]
+13 | }
+
+1 error found

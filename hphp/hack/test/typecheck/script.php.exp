@@ -1,6 +1,12 @@
-ERROR: File "script.php", line 4, characters 31-32:
-Invalid return type (Typing[4110])
-  File "script.php", line 4, characters 18-20:
-  Expected `int`
-  File "script.php", line 4, characters 31-32:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+script.php:4:31
+2 | <?hh
+3 | 
+4 | function test(): int { return ''; }
+  |                  ^^^ [2]
+  |                               ^^ [1]
+
+1 error found

@@ -1,8 +1,33 @@
-ERROR: File "uninitialised_this4.bad.php", line 6, characters 18-30:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because `$this->i` can still potentially be null (NastCheck[3004])
-ERROR: File "uninitialised_this4.bad.php", line 7, characters 7-11:
-Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
-The initialization is not over because `$this->i` can still potentially be null (NastCheck[3004])
-ERROR: File "uninitialised_this4.bad.php", line 6, characters 42-42:
-Read access to `$this->i` before initialization (Typing[4083])
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->i` can still potentially be null [1]
+
+uninitialised_this4.bad.php:6:18
+4 |   public int $i;
+5 |   public function __construct() {
+6 |     for ($i = 0; $this->isGood(); $this->i++) {
+  |                  ^^^^^^^^^^^^^ [1]
+7 |       $this;
+8 |     }
+
+error: NastCheck[3004] Until the initialization of `$this` is over, you can only call private methods that are not exposed with `<<__TestsBypassVisibility>>`
+The initialization is not over because `$this->i` can still potentially be null [1]
+
+uninitialised_this4.bad.php:7:7
+5 |   public function __construct() {
+6 |     for ($i = 0; $this->isGood(); $this->i++) {
+7 |       $this;
+  |       ^^^^^ [1]
+8 |     }
+9 |     $this->i = 1;
+
+error: Typing[4083] Read access to `$this->i` before initialization [1]
+
+uninitialised_this4.bad.php:6:42
+4 |   public int $i;
+5 |   public function __construct() {
+6 |     for ($i = 0; $this->isGood(); $this->i++) {
+  |                                          ^ [1]
+7 |       $this;
+8 |     }
+
+3 errors found

@@ -1,10 +1,57 @@
-ERROR: File "switch_case_fallthrough_with_break.php", line 12, characters 3-160:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "switch_case_fallthrough_with_break.php", line 12, characters 11-12:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
-ERROR: File "switch_case_fallthrough_with_break.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-  File "switch_case_fallthrough_with_break.php", line 10, characters 21-21:
-  Expected `C`
-  File "switch_case_fallthrough_with_break.php", line 15, characters 18-18:
-  But got `B`
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+switch_case_fallthrough_with_break.php:12:3
+10 | function f(int $c): C {
+11 |   $x = new C();
+12 |   switch ($c) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+13 |     case 1:
+   |     ^^^^^^^ [1]
+14 |       if (true) {
+   |       ^^^^^^^^^^^ [1]
+15 |         $x = new B();
+   |         ^^^^^^^^^^^^^ [1]
+16 |         break;
+   |         ^^^^^^ [1]
+17 |       }
+   |       ^ [1]
+18 |       $x = new C();
+   |       ^^^^^^^^^^^^^ [1]
+19 |       // FALLTHROUGH
+   |       ^^^^^^^^^^^^^^ [1]
+20 |     case 2:
+   |     ^^^^^^^ [1]
+21 |       break;
+   |       ^^^^^^ [1]
+22 |   }
+   |   ^ [1]
+23 | 
+24 |   return $x;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `C` [2]
+-> But got `B` [3]
+
+switch_case_fallthrough_with_break.php:24:10
+ 8 |   }
+ 9 | }
+10 | function f(int $c): C {
+   |                     ^ [2]
+11 |   $x = new C();
+12 |   switch ($c) {
+13 |     case 1:
+14 |       if (true) {
+15 |         $x = new B();
+   |                  ^ [3]
+16 |         break;
+17 |       }
+   :
+22 |   }
+23 | 
+24 |   return $x;
+   |          ^^ [1]
+25 | }
+
+2 errors found

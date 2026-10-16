@@ -1,12 +1,27 @@
-ERROR: File "ambiguous_distant_constructor.php", line 13, characters 7-8:
-Some members in class `C` are incompatible with those declared in type `T1` (Typing[4341])
-  File "ambiguous_distant_constructor.php", line 9, characters 19-29:
-  The method `__construct` is not compatible with the overridden method
-  File "ambiguous_distant_constructor.php", line 9, characters 19-29:
-  `T2` and `TX` both declare ambiguous implementations of `__construct`.
-  File "ambiguous_distant_constructor.php", line 9, characters 19-29:
-  `T2`'s definition is here.
-  File "ambiguous_distant_constructor.php", line 3, characters 19-29:
-  `TX`'s definition is here.
-  File "ambiguous_distant_constructor.php", line 9, characters 19-29:
-  Redeclare `__construct` in `C` with a compatible signature.
+error: Typing[4341] Some members in class `C` are incompatible with those declared in type `T1` [1]
+-> The method `__construct` is not compatible with the overridden method [2]
+-> `T2` and `TX` both declare ambiguous implementations of `__construct`. [2]
+-> `T2`'s definition is here. [2]
+-> `TX`'s definition is here. [3]
+-> Redeclare `__construct` in `C` with a compatible signature. [2]
+
+ambiguous_distant_constructor.php:13:7
+ 1 | <?hh
+ 2 | trait TX {
+ 3 |   public function __construct() {}
+   |                   ^^^^^^^^^^^ [3]
+ 4 | }
+ 5 | trait T1 {
+ 6 |   use TX;
+ 7 | }
+ 8 | trait T2 {
+ 9 |   public function __construct() {}
+   |                   ^^^^^^^^^^^ [2]
+10 | }
+11 | 
+12 | class C {
+13 |   use T1, T2;
+   |       ^^ [1]
+14 | }
+
+1 error found

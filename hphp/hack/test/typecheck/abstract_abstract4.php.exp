@@ -1,2 +1,9 @@
-ERROR: File "abstract_abstract4.php", line 12, characters 16-23:
-Classes, interfaces, and traits cannot have duplicate modifiers (Parsing[1002])
+error: Parsing[1002] Classes, interfaces, and traits cannot have duplicate modifiers [1]
+
+abstract_abstract4.php:12:16
+10 |  */
+11 | 
+12 | final abstract abstract class AbstractAbstractTest {}
+   |                ^^^^^^^^ [1]
+
+1 error found

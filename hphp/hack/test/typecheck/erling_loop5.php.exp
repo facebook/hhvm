@@ -1,6 +1,23 @@
-ERROR: File "erling_loop5.php", line 35, characters 10-11:
-Invalid return type (Typing[4110])
-  File "erling_loop5.php", line 22, characters 18-20:
-  Expected `int`
-  File "erling_loop5.php", line 32, characters 15-21:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+erling_loop5.php:35:10
+20 | }
+21 | 
+22 | function test(): int {
+   |                  ^^^ [2]
+23 |   $obj = new X(0);
+24 |   $x = 0;
+   :
+30 |     $obj->set($z);
+31 |     $y = $obj->get();
+32 |     $obj->set('hello');
+   |               ^^^^^^^ [3]
+33 |     $z = $obj->get();
+34 |   }
+35 |   return $x;
+   |          ^^ [1]
+36 | }
+
+1 error found

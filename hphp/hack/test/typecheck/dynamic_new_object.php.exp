@@ -1,8 +1,28 @@
-ERROR: File "dynamic_new_object.php", line 6, characters 12-15:
-Was expecting a class, but got a string (Typing[4026])
-ERROR: File "dynamic_new_object.php", line 7, characters 13-14:
-Invalid argument (Typing[4110])
-  File "dynamic_new_object.php", line 3, characters 20-22:
-  Expected `int`
-  File "dynamic_new_object.php", line 6, characters 12-15:
-  But got `dynamic`, the result of constructing an object with a `dynamic` type
+error: Typing[4026] Was expecting a class, but got a string [1]
+
+dynamic_new_object.php:6:12
+4 | 
+5 | function f(string $str): void {
+6 |   $o = new $str(); // Type error
+  |            ^^^^ [1]
+7 |   takes_int($o); // Terr passes as int
+8 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `dynamic`, the result of constructing an object with a `dynamic` type [3]
+
+dynamic_new_object.php:7:13
+1 | <?hh
+2 | 
+3 | function takes_int(int $_): void {}
+  |                    ^^^ [2]
+4 | 
+5 | function f(string $str): void {
+6 |   $o = new $str(); // Type error
+  |            ^^^^ [3]
+7 |   takes_int($o); // Terr passes as int
+  |             ^^ [1]
+8 | }
+
+2 errors found

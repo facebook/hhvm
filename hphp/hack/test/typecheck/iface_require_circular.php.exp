@@ -1,10 +1,22 @@
-ERROR: File "iface_require_circular.php", line 17, characters 7-9:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "iface_require_circular.php", line 17, characters 41-43:
-  This requires to extend or implement Super
-  File "iface_require_circular.php", line 12, characters 19-27:
-  Required here
-  File "iface_require_circular.php", line 12, characters 25-26:
-  Expected `KK`
-  File "iface_require_circular.php", line 17, characters 25-27:
-  But got `Super<Qux>`
+error: Typing[4111] This class does not satisfy all the requirements of its traits or interfaces. [1]
+-> This requires to extend or implement Super [2]
+-> Required here [3]
+-> Expected `KK` [4]
+-> But got `Super<Qux>` [5]
+
+iface_require_circular.php:17:7
+10 | 
+11 | interface Bar {
+12 |   require extends Super<KK>;
+   |                   ^^^^^^^^^ [3]
+   |                         ^^ [4]
+13 | }
+14 | 
+15 | interface Qux extends Foo, Bar {}
+16 | 
+17 | class Baz extends Super<Qux> implements Qux {}
+   |       ^^^ [1]
+   |                         ^^^ [5]
+   |                                         ^^^ [2]
+
+1 error found

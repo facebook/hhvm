@@ -1,6 +1,15 @@
-WARN: File "sketchy_equality1.php", line 4, characters 3-11:
-This expression is likely always `false` (Warn[12001])
-  File "sketchy_equality1.php", line 3, characters 18-23:
-  This is a string
-  File "sketchy_equality1.php", line 3, characters 30-32:
-  This is an int
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is a string [2]
+-> This is an int [3]
+
+sketchy_equality1.php:4:3
+1 | <?hh
+2 | 
+3 | function fasdfj(?string $x, ?int $y): void {
+  |                  ^^^^^^ [2]
+  |                              ^^^ [3]
+4 |   $x === $y;
+  |   ^^^^^^^^^ [1]
+5 | }
+
+1 error found

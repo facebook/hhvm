@@ -1,6 +1,28 @@
-ERROR: File "array_ref_var.php", line 13, characters 13-13:
-An expression is expected here. (Parsing[1002])
-ERROR: File "array_ref_var.php", line 13, characters 12-12:
-Unbound name: `&` (a global constant) (Naming[2049])
-ERROR: File "array_ref_var.php", line 13, characters 12-12:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] An expression is expected here. [1]
+
+array_ref_var.php:13:13
+11 | 
+12 | function foo(int $var): void {
+13 |   $a = vec[&$var];
+   |             ^ [1]
+14 | }
+
+error: Naming[2049] Unbound name: `&` (a global constant) [1]
+
+array_ref_var.php:13:12
+11 | 
+12 | function foo(int $var): void {
+13 |   $a = vec[&$var];
+   |            ^ [1]
+14 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+array_ref_var.php:13:12
+11 | 
+12 | function foo(int $var): void {
+13 |   $a = vec[&$var];
+   |            ^ [1]
+14 | }
+
+3 errors found

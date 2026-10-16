@@ -1,16 +1,61 @@
-ERROR: File "foreach_vector.php", line 21, characters 10-13:
-Typing error (Typing[4429])
-  File "foreach_vector.php", line 21, characters 10-17:
-  Expected `num` because this is used in an arithmetic operation
-  File "foreach_vector.php", line 18, characters 19-21:
-  But got `Foo`
-  File "collections/Vector.hhi", line 48, characters 52-53:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 575, characters 25-26:
-    via this generic `Tv`
-  File "collections/interfaces.hhi", line 305, characters 27-28:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 23-24:
-    via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 66-67:
-    via this generic `Tv`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `Foo` [3]
+->   via this generic `Tv` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+->   via this generic `Tv` [7]
+->   via this generic `Tv` [8]
+
+foreach_vector.php:21:10
+ 16 | }
+ 17 | 
+ 18 | function f(Vector<Foo> $v): void {
+    |                   ^^^ [3]
+ 19 |   foreach ($v as $foo) {
+ 20 |     $foo->bar();
+ 21 |     $x = $foo + 5;
+    |          ^^^^ [1]
+    |          ^^^^^^^^ [2]
+ 22 |   }
+ 23 | }
+
+collections/Vector.hhi:48:52
+ 46 |    * @guide /hack/collections/classes
+ 47 |    */
+ 48 |   final class Vector<Tv> implements \MutableVector<Tv> {
+    |                                                    ^^ [4]
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
+collections/interfaces.hhi:575:25
+303 |   interface ConstVector<+Tv>
+304 |     extends
+305 |       KeyedContainer<int, Tv>,
+    |                           ^^ [6]
+306 |       ConstCollection<Tv>,
+307 |       ConstIndexAccess<int, Tv>,
+    :
+573 |   <<__Sealed(Vector::class)>>
+574 |   interface MutableVector<Tv>
+575 |     extends ConstVector<Tv>, Collection<Tv>, IndexAccess<int, Tv> {
+    |                         ^^ [5]
+576 |     /**
+577 |      * Returns a `MutableVector` containing the values of the current
+
+interfaces.hhi:115:23
+ 90 |    */
+ 91 |   <<__Sealed(KeyedContainer::class)>>
+ 92 |   interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
+    |                                                                  ^^ [8]
+ 93 | 
+ 94 |   }
+    :
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                       ^^ [7]
+116 | 
+117 |   /**
+
+1 error found

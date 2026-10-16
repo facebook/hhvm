@@ -1,2 +1,11 @@
-ERROR: File "class_meth14.php", line 6, characters 5-8:
-Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity.  (Naming[2113])
+error: Naming[2113] Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity.  [1]
+
+class_meth14.php:6:5
+4 | trait Whoops {
+5 |   public static function bar(): void {
+6 |     self::bar<>;
+  |     ^^^^ [1]
+7 |   }
+8 | }
+
+1 error found

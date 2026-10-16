@@ -1,2 +1,11 @@
-ERROR: File "missing_param_typehint.php", line 3, characters 15-20:
-Was expecting a type hint (Typing[4032])
+error: Typing[4032] Was expecting a type hint [1]
+
+missing_param_typehint.php:3:15
+1 | <?hh
+2 | 
+3 | function test($param): int {
+  |               ^^^^^^ [1]
+4 |   return 0;
+5 | }
+
+1 error found

@@ -1,2 +1,11 @@
-WARN: File "nullsafe_pipe_on_null.php", line 6, characters 5-18:
-You are using the `|?>` operator but this expression is always null. It's likely you did not intend this value to be always null. (Warn[12032])
+warning: Warn[12032] You are using the `|?>` operator but this expression is always null. It's likely you did not intend this value to be always null. [1]
+
+nullsafe_pipe_on_null.php:6:5
+4 |   $x |?> $$ + 42; // OK
+5 |   if ($x is null) {
+6 |     $x |?> $$ + 42; // Not OK since $x is known to be null
+  |     ^^^^^^^^^^^^^^ [1]
+7 |   }
+8 | }
+
+1 error found

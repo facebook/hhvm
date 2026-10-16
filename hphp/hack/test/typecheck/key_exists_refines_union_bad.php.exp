@@ -1,8 +1,24 @@
-ERROR: File "key_exists_refines_union_bad.php", line 12, characters 16-22:
-Invalid argument (Typing[4110])
-  File "key_exists_refines_union_bad.php", line 3, characters 21-23:
-  Expected `int`
-  File "key_exists_refines_union_bad.php", line 12, characters 16-22:
-  But got `mixed`
-  File "key_exists_refines_union_bad.php", line 5, characters 48-57:
-    from this definition because the field `x` may be set to any type in this shape
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [1]
+->   from this definition because the field `x` may be set to any type in this shape [3]
+
+key_exists_refines_union_bad.php:12:16
+ 1 | <?hh
+ 2 | 
+ 3 | function expect_int(int $_): void {}
+   |                     ^^^ [2]
+ 4 | 
+ 5 | function test(bool $b, shape(?'x' => int) $s1, shape(...) $s2): void {
+   |                                                ^^^^^^^^^^ [3]
+ 6 |   if ($b) {
+ 7 |     $s = $s1;
+   :
+10 |   }
+11 |   if (Shapes::keyExists($s, 'x')) {
+12 |     expect_int($s['x']);
+   |                ^^^^^^^ [1]
+13 |   }
+14 | }
+
+1 error found

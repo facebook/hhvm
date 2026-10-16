@@ -1,8 +1,25 @@
-ERROR: File "await_preserves_nullability.php", line 17, characters 17-18:
-Invalid argument (Typing[4110])
-  File "await_preserves_nullability.php", line 12, characters 11-11:
-  Expected `T`
-  File "await_preserves_nullability.php", line 20, characters 25-25:
-    via this generic `T`
-  File "await_preserves_nullability.php", line 16, characters 10-20:
-  But got `?T where T as arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `T` [2]
+->   via this generic `T` [3]
+-> But got `?T where T as arraykey` [4]
+
+await_preserves_nullability.php:17:17
+10 |  */
+11 | 
+12 | class Foo<T as arraykey> {
+   |           ^ [2]
+13 |   public async function print_if_possible(
+14 |     ?Awaitable<T> $blah,
+15 |   ): Awaitable<void> {
+16 |     $x = await $blah;
+   |          ^^^^^^^^^^^ [4]
+17 |     $this->doer($x);
+   |                 ^^ [1]
+18 |   }
+19 | 
+20 |   private function doer(T $_): void {
+   |                         ^ [3]
+21 |   }
+22 | }
+
+1 error found

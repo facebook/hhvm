@@ -1,30 +1,100 @@
-ERROR: File "this_tparam_static.php", line 13, characters 19-22:
-The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable (Naming[2043])
-ERROR: File "this_tparam_static.php", line 19, characters 23-28:
-Can't use `new static()` for `BadClass`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-  File "this_tparam_static.php", line 12, characters 7-14:
-  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
-ERROR: File "this_tparam_static.php", line 20, characters 7-33:
-Invalid assignment (Typing[4110])
-  File "this_tparam_static.php", line 13, characters 19-22:
-  Expected `BadClass`
-  File "this_tparam_static.php", line 20, characters 7-10:
-    where the class `BadClass` was referenced here via the keyword `self`
-  File "this_tparam_static.php", line 19, characters 23-28:
-  But got `this as BadClass`
-ERROR: File "this_tparam_static.php", line 20, characters 7-33:
-Invalid assignment (Typing[4110])
-  File "this_tparam_static.php", line 13, characters 19-22:
-  Expected exactly the type `BadClass`
-  File "this_tparam_static.php", line 20, characters 7-10:
-    where the class `BadClass` was referenced here via the keyword `self`
-  File "this_tparam_static.php", line 19, characters 23-28:
-  But got the nonexact type `BadClass`
-ERROR: File "this_tparam_static.php", line 22, characters 12-20:
-Invalid return type (Typing[4110])
-  File "this_tparam_static.php", line 16, characters 41-44:
-  Expected `this`
-  File "this_tparam_static.php", line 13, characters 19-22:
-  But got `BadClass`
-  File "this_tparam_static.php", line 17, characters 17-20:
-    where the class `BadClass` was referenced here via the keyword `self`
+error: Naming[2043] The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable [1]
+
+this_tparam_static.php:13:19
+11 | 
+12 | class BadClass {
+13 |   private static ?this $instance;
+   |                   ^^^^ [1]
+14 | 
+15 |   <<__NeedsConcrete>>
+
+error: Typing[4060] Can't use `new static()` for `BadClass`; `__construct` arguments are not guaranteed to be consistent in child classes [1]
+-> This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute [2]
+
+this_tparam_static.php:19:23
+10 |  */
+11 | 
+12 | class BadClass {
+   |       ^^^^^^^^ [2]
+13 |   private static ?this $instance;
+14 | 
+   :
+17 |     $instance = self::$instance;
+18 |     if ($instance === null) {
+19 |       $instance = new static();
+   |                       ^^^^^^ [1]
+20 |       self::$instance = $instance;
+21 |     }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `BadClass` [2]
+->   where the class `BadClass` was referenced here via the keyword `self` [3]
+-> But got `this as BadClass` [4]
+
+this_tparam_static.php:20:7
+11 | 
+12 | class BadClass {
+13 |   private static ?this $instance;
+   |                   ^^^^ [2]
+14 | 
+15 |   <<__NeedsConcrete>>
+16 |   public static function getInstance(): this {
+17 |     $instance = self::$instance;
+18 |     if ($instance === null) {
+19 |       $instance = new static();
+   |                       ^^^^^^ [4]
+20 |       self::$instance = $instance;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |       ^^^^ [3]
+21 |     }
+22 |     return $instance;
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected exactly the type `BadClass` [2]
+->   where the class `BadClass` was referenced here via the keyword `self` [3]
+-> But got the nonexact type `BadClass` [4]
+
+this_tparam_static.php:20:7
+11 | 
+12 | class BadClass {
+13 |   private static ?this $instance;
+   |                   ^^^^ [2]
+14 | 
+15 |   <<__NeedsConcrete>>
+16 |   public static function getInstance(): this {
+17 |     $instance = self::$instance;
+18 |     if ($instance === null) {
+19 |       $instance = new static();
+   |                       ^^^^^^ [4]
+20 |       self::$instance = $instance;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |       ^^^^ [3]
+21 |     }
+22 |     return $instance;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `this` [2]
+-> But got `BadClass` [3]
+->   where the class `BadClass` was referenced here via the keyword `self` [4]
+
+this_tparam_static.php:22:12
+11 | 
+12 | class BadClass {
+13 |   private static ?this $instance;
+   |                   ^^^^ [3]
+14 | 
+15 |   <<__NeedsConcrete>>
+16 |   public static function getInstance(): this {
+   |                                         ^^^^ [2]
+17 |     $instance = self::$instance;
+   |                 ^^^^ [4]
+18 |     if ($instance === null) {
+19 |       $instance = new static();
+20 |       self::$instance = $instance;
+21 |     }
+22 |     return $instance;
+   |            ^^^^^^^^^ [1]
+23 |   }
+24 | }
+
+5 errors found

@@ -1,6 +1,24 @@
-ERROR: File "nullsafe_pipe_catch.php", line 11, characters 10-11:
-Pipe variables must occur only in the RHS of pipe expressions (Parsing[1002])
-ERROR: File "nullsafe_pipe_catch.php", line 11, characters 10-11:
-Variable `$$` is undefined, or not always defined. (Naming[2050])
-  File "nullsafe_pipe_catch.php", line 10, characters 20-21:
-  Did you mean `$_` instead?
+error: Parsing[1002] Pipe variables must occur only in the RHS of pipe expressions [1]
+
+nullsafe_pipe_catch.php:11:10
+ 9 |   }
+10 |   catch (Exception $_) {
+11 |     echo($$);
+   |          ^^ [1]
+12 |   }
+13 | }
+
+error: Naming[2050] Variable `$$` is undefined, or not always defined. [1]
+-> Did you mean `$_` instead? [2]
+
+nullsafe_pipe_catch.php:11:10
+ 8 |     $x = getit() |?> $$ / 0;
+ 9 |   }
+10 |   catch (Exception $_) {
+   |                    ^^ [2]
+11 |     echo($$);
+   |          ^^ [1]
+12 |   }
+13 | }
+
+2 errors found

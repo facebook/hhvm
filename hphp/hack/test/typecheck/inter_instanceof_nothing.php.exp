@@ -1,2 +1,11 @@
-WARN: File "inter_instanceof_nothing.php", line 20, characters 6-12:
-This `is` check is always `false`. The expression on the left has type `null` which shares no values with `A`. (Warn[12010])
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `null` which shares no values with `A`. [1]
+
+inter_instanceof_nothing.php:20:6
+18 |   $x[] = null;
+19 |   $y = $x[0];
+20 |   if($y is A) {
+   |      ^^^^^^^ [1]
+21 |     $y->get();
+22 |   }
+
+1 error found

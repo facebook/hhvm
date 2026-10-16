@@ -1,60 +1,165 @@
-ERROR: File "tconst_unsoundness.php", line 12, characters 44-45:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_unsoundness.php", line 14, characters 60-61:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_unsoundness.php", line 14, characters 26-29:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 40-42:
-  But got `A::T super B::Ta::T`
-  File "tconst_unsoundness.php", line 14, characters 60-68:
-    by the definition of `Tin`
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 40-42:
-  But got `B::Ta::T where \B::Ta::T super Tb::Ta::T, \B::Ta::T as A::T`
-  File "tconst_unsoundness.php", line 14, characters 60-68:
-    by the definition of `Tin`
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 40-42:
-  But got `Tb::Ta::T = Tin`
-  File "tconst_unsoundness.php", line 14, characters 60-68:
-    by the definition of `Tin`
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 40-42:
-  But got `Tin = Tb::Ta::T`
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 40-42:
-  But got `Tin = Tb::Ta::T`
-  File "tconst_unsoundness.php", line 14, characters 60-68:
-    by the definition of `Tin`
-ERROR: File "tconst_unsoundness.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "tconst_unsoundness.php", line 14, characters 49-52:
-  Expected `Tout`
-  File "tconst_unsoundness.php", line 14, characters 40-42:
-  But got `mixed`
-  File "tconst_unsoundness.php", line 14, characters 60-68:
-    by the definition of `Tin`
-ERROR: File "tconst_unsoundness.php", line 19, characters 29-32:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "tconst_unsoundness.php", line 20, characters 10-10:
-Can't access a type constant T from an unresolved type (Typing[4436])
-  File "tconst_unsoundness.php", line 14, characters 68-68:
-  Access happens here
-  File "tconst_unsoundness.php", line 20, characters 10-10:
-  Disambiguate the types using explicit type annotations here.
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_unsoundness.php:12:44
+10 | }
+11 | 
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+   |                                            ^^ [1]
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_unsoundness.php:14:60
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                                            ^^ [1]
+15 |   f($b);
+16 |   return $x;
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tconst_unsoundness.php:14:26
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                          ^^^^ [1]
+15 |   f($b);
+16 |   return $x;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tout` [2]
+-> But got `A::T super B::Ta::T` [3]
+->   by the definition of `Tin` [4]
+
+tconst_unsoundness.php:16:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                        ^^^ [3]
+   |                                                 ^^^^ [2]
+   |                                                            ^^^^^^^^^ [4]
+15 |   f($b);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tout` [2]
+-> But got `B::Ta::T where \B::Ta::T super Tb::Ta::T, \B::Ta::T as A::T` [3]
+->   by the definition of `Tin` [4]
+
+tconst_unsoundness.php:16:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                        ^^^ [3]
+   |                                                 ^^^^ [2]
+   |                                                            ^^^^^^^^^ [4]
+15 |   f($b);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tout` [2]
+-> But got `Tb::Ta::T = Tin` [3]
+->   by the definition of `Tin` [4]
+
+tconst_unsoundness.php:16:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                        ^^^ [3]
+   |                                                 ^^^^ [2]
+   |                                                            ^^^^^^^^^ [4]
+15 |   f($b);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tout` [2]
+-> But got `Tin = Tb::Ta::T` [3]
+
+tconst_unsoundness.php:16:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                        ^^^ [3]
+   |                                                 ^^^^ [2]
+15 |   f($b);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tout` [2]
+-> But got `Tin = Tb::Ta::T` [3]
+->   by the definition of `Tin` [4]
+
+tconst_unsoundness.php:16:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                        ^^^ [3]
+   |                                                 ^^^^ [2]
+   |                                                            ^^^^^^^^^ [4]
+15 |   f($b);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tout` [2]
+-> But got `mixed` [3]
+->   by the definition of `Tin` [4]
+
+tconst_unsoundness.php:16:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                        ^^^ [3]
+   |                                                 ^^^^ [2]
+   |                                                            ^^^^^^^^^ [4]
+15 |   f($b);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+tconst_unsoundness.php:19:29
+17 | }
+18 | 
+19 | function unsafe_coerce<Tin, Tout>(Tin $x): Tout {
+   |                             ^^^^ [1]
+20 |   return g(null, $x);
+21 | }
+
+error: Typing[4436] Can't access a type constant T from an unresolved type [1]
+-> Access happens here [2]
+-> Disambiguate the types using explicit type annotations here. [1]
+
+tconst_unsoundness.php:20:10
+12 | function f<Tb as B, T>(?Tb $_): void where Tb::Ta::T = T {}
+13 | 
+14 | function g<Tb as B, Tin, Tout>(?Tb $b, Tin $x): Tout where Tb::Ta::T = Tin {
+   |                                                                    ^ [2]
+15 |   f($b);
+16 |   return $x;
+17 | }
+18 | 
+19 | function unsafe_coerce<Tin, Tout>(Tin $x): Tout {
+20 |   return g(null, $x);
+   |          ^ [1]
+21 | }
+
+11 errors found

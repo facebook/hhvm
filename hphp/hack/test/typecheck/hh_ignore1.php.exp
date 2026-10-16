@@ -1,10 +1,48 @@
-WARN: File "hh_ignore1.php", line 6, characters 3-47:
-You cannot use `HH_FIXME` comments to suppress warnings. Use `HH_IGNORE[12009]` instead. (Warn[12009])
-WARN: File "hh_ignore1.php", line 7, characters 3-11:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. (Warn[12009])
-ERROR: File "hh_ignore1.php", line 8, characters 3-46:
-You cannot use `HH_IGNORE` to suppress non-warning code 2050. Hack errors should not be suppressed. You should try your best to fix the code causing the error, or incidents will happen. (Naming[2050])
-ERROR: File "hh_ignore1.php", line 9, characters 3-4:
-Variable `$y` is undefined, or not always defined. (Naming[2050])
-  File "hh_ignore1.php", line 3, characters 17-18:
-  Did you mean `$x` instead?
+warning: Warn[12009] You cannot use `HH_FIXME` comments to suppress warnings. Use `HH_IGNORE[12009]` instead. [1]
+
+hh_ignore1.php:6:3
+4 |   /* HH_IGNORE[12009] ignore on warning -> ok */
+5 |   $x is int;
+6 |   /* HH_FIXME[12009] fixme on warning -> nok */
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 |   $x is int;
+8 |   /* HH_IGNORE[2050] ignore on error -> nok */
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. [1]
+
+hh_ignore1.php:7:3
+5 |   $x is int;
+6 |   /* HH_FIXME[12009] fixme on warning -> nok */
+7 |   $x is int;
+  |   ^^^^^^^^^ [1]
+8 |   /* HH_IGNORE[2050] ignore on error -> nok */
+9 |   $y;
+
+error: Naming[2050] You cannot use `HH_IGNORE` to suppress non-warning code 2050. Hack errors should not be suppressed. You should try your best to fix the code causing the error, or incidents will happen. [1]
+
+hh_ignore1.php:8:3
+ 6 |   /* HH_FIXME[12009] fixme on warning -> nok */
+ 7 |   $x is int;
+ 8 |   /* HH_IGNORE[2050] ignore on error -> nok */
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 |   $y;
+10 | }
+
+error: Naming[2050] Variable `$y` is undefined, or not always defined. [1]
+-> Did you mean `$x` instead? [2]
+
+hh_ignore1.php:9:3
+ 1 | <?hh
+ 2 | 
+ 3 | function f9(int $x): void {
+   |                 ^^ [2]
+ 4 |   /* HH_IGNORE[12009] ignore on warning -> ok */
+ 5 |   $x is int;
+ 6 |   /* HH_FIXME[12009] fixme on warning -> nok */
+ 7 |   $x is int;
+ 8 |   /* HH_IGNORE[2050] ignore on error -> nok */
+ 9 |   $y;
+   |   ^^ [1]
+10 | }
+
+4 errors found

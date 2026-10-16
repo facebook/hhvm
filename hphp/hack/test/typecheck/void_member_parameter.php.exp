@@ -1,4 +1,19 @@
-ERROR: File "void_member_parameter.php", line 13, characters 21-24:
-You can only use the `void` type as the return type of a function or method (Naming[2063])
-ERROR: File "void_member_parameter.php", line 13, characters 19-19:
-Was expecting a return type hint (Typing[4030])
+error: Naming[2063] You can only use the `void` type as the return type of a function or method [1]
+
+void_member_parameter.php:13:21
+11 | 
+12 | class C {
+13 |   public function f(void $x) {}
+   |                     ^^^^ [1]
+14 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+void_member_parameter.php:13:19
+11 | 
+12 | class C {
+13 |   public function f(void $x) {}
+   |                   ^ [1]
+14 | }
+
+2 errors found

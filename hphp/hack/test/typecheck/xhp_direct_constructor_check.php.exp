@@ -1,6 +1,17 @@
-ERROR: File "xhp_direct_constructor_check.php", line 8, characters 10-13:
-Invalid argument (Typing[4110])
-  File "xhp_direct_constructor_check.php", line 4, characters 31-33:
-  Expected `int`
-  File "xhp_direct_constructor_check.php", line 8, characters 10-13:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+xhp_direct_constructor_check.php:8:10
+2 | 
+3 | class :c {
+4 |   public function __construct(int $i) {}
+  |                               ^^^ [2]
+5 | }
+6 | 
+7 | function f(): void {
+8 |   new :c('Hi');
+  |          ^^^^ [1]
+9 | }
+
+1 error found

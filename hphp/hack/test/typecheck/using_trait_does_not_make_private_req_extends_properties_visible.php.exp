@@ -1,8 +1,17 @@
-ERROR: File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 13, characters 37-41:
-Typing error (Typing[4053])
-  File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 13, characters 44-44:
-  No property `x` in `Child`
-  File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 11, characters 7-11:
-  This is why I think it is an object of type Child
-  File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 11, characters 7-11:
-  Declaration of `Child` is here
+error: Typing[4053] Typing error [1]
+-> No property `x` in `Child` [2]
+-> This is why I think it is an object of type Child [3]
+-> Declaration of `Child` is here [3]
+
+using_trait_does_not_make_private_req_extends_properties_visible.php:13:37
+ 9 | }
+10 | 
+11 | class Child extends Base {
+   |       ^^^^^ [3]
+12 |   use T;
+13 |   public function f(): int { return $this->x; }
+   |                                     ^^^^^ [1]
+   |                                            ^ [2]
+14 | }
+
+1 error found

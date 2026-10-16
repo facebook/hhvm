@@ -1,10 +1,23 @@
-ERROR: File "must_be_arraykey.php", line 5, characters 14-22:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 50-50:
-  `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 55-62:
-  This type constraint is violated
-  File "hackarray.hhi", line 43, characters 55-62:
-  Expected `arraykey`
-  File "must_be_arraykey.php", line 5, characters 21-21:
-  But got `I`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `I` [4]
+
+must_be_arraykey.php:5:14
+ 3 | interface I {}
+ 4 | 
+ 5 | function foo(keyset<I> $k): void {}
+   |              ^^^^^^^^^ [1]
+   |                     ^ [4]
+
+hackarray.hhi:43:50
+41 |    */
+42 |   <<__SupportDynamicType>>
+43 |   abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
+   |                                                  ^ [2]
+   |                                                       ^^^^^^^^ [3]
+44 |     extends AnyArray<T, T> {}
+45 | 
+
+1 error found

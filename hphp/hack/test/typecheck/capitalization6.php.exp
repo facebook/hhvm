@@ -1,4 +1,15 @@
-ERROR: File "capitalization6.php", line 6, characters 7-15:
-Could not find `CamelCAse`. (Naming[2006])
-  File "capitalization6.php", line 3, characters 7-15:
-  Did you mean `CamelC~~a~~se` instead (which only differs by case)?
+error: Naming[2006] Could not find `CamelCAse`. [1]
+-> Did you mean `CamelC~~a~~se` instead (which only differs by case)? [2]
+
+capitalization6.php:6:7
+1 | <?hh
+2 | 
+3 | class CamelCase {}
+  |       ^^^^^^^^^ [2]
+4 | 
+5 | function foo(): void {
+6 |   new CamelCAse();
+  |       ^^^^^^^^^ [1]
+7 | }
+
+1 error found

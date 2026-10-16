@@ -1,18 +1,82 @@
-ERROR: File "string_no_members.php", line 4, characters 11-15:
-No class constant `class` in `string` (Typing[4090])
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "string_no_members.php", line 5, characters 11-11:
-No class constant `T` in `string` (Typing[4090])
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "string_no_members.php", line 6, characters 11-11:
-No static method `m` in `string` (Typing[4090])
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
-ERROR: File "string_no_members.php", line 7, characters 7-12:
-No instance method `length` in `string` (Typing[4053])
-  File "string_no_members.php", line 3, characters 12-17:
-  This is why I think it is an object of type HH\string
-  File "string.hhi", line 6, characters 15-20:
-  Declaration of `string` is here
+error: Typing[4090] No class constant `class` in `string` [1]
+-> Declaration of `string` is here [2]
+
+string_no_members.php:4:11
+2 | 
+3 | function f(string $s) : void {
+4 |   string::class;
+  |           ^^^^^ [1]
+5 |   string::T;
+6 |   string::m();
+
+string.hhi:6:15
+4 | 
+5 |   <<__SupportDynamicType>>
+6 |   final class string {
+  |               ^^^^^^ [2]
+7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4090] No class constant `T` in `string` [1]
+-> Declaration of `string` is here [2]
+
+string_no_members.php:5:11
+3 | function f(string $s) : void {
+4 |   string::class;
+5 |   string::T;
+  |           ^ [1]
+6 |   string::m();
+7 |   $s->length();
+
+string.hhi:6:15
+4 | 
+5 |   <<__SupportDynamicType>>
+6 |   final class string {
+  |               ^^^^^^ [2]
+7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4090] No static method `m` in `string` [1]
+-> Declaration of `string` is here [2]
+
+string_no_members.php:6:11
+4 |   string::class;
+5 |   string::T;
+6 |   string::m();
+  |           ^ [1]
+7 |   $s->length();
+8 | }
+
+string.hhi:6:15
+4 | 
+5 |   <<__SupportDynamicType>>
+6 |   final class string {
+  |               ^^^^^^ [2]
+7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+error: Typing[4053] No instance method `length` in `string` [1]
+-> This is why I think it is an object of type HH\string [2]
+-> Declaration of `string` is here [3]
+
+string_no_members.php:7:7
+1 | <?hh
+2 | 
+3 | function f(string $s) : void {
+  |            ^^^^^^ [2]
+4 |   string::class;
+5 |   string::T;
+6 |   string::m();
+7 |   $s->length();
+  |       ^^^^^^ [1]
+8 | }
+
+string.hhi:6:15
+4 | 
+5 |   <<__SupportDynamicType>>
+6 |   final class string {
+  |               ^^^^^^ [3]
+7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+
+4 errors found

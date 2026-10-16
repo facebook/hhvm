@@ -1,6 +1,31 @@
-ERROR: File "no_unset_in_strict_mode.php", line 5, characters 9-10:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
-ERROR: File "no_unset_in_strict_mode.php", line 13, characters 11-18:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
-ERROR: File "no_unset_in_strict_mode.php", line 14, characters 11-15:
-`unset` is only supported on container elements, e.g. `unset($x[$k]);` (Parsing[1002])
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+no_unset_in_strict_mode.php:5:9
+3 | function f(): void {
+4 |   $a = "hello";
+5 |   unset($a);
+  |         ^^ [1]
+6 | }
+7 | 
+
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+no_unset_in_strict_mode.php:13:11
+11 | 
+12 |   public function f(): void {
+13 |     unset($this->i);
+   |           ^^^^^^^^ [1]
+14 |     unset(C::$s);
+15 |   }
+
+error: Parsing[1002] `unset` is only supported on container elements, e.g. `unset($x[$k]);` [1]
+
+no_unset_in_strict_mode.php:14:11
+12 |   public function f(): void {
+13 |     unset($this->i);
+14 |     unset(C::$s);
+   |           ^^^^^ [1]
+15 |   }
+16 | 
+
+3 errors found

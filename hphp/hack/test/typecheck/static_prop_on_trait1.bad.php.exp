@@ -1,8 +1,34 @@
-ERROR: File "static_prop_on_trait1.bad.php", line 7, characters 14-18:
-Static property access on a trait: `MyTrait::$ints` (Typing[4497])
-  File "static_prop_on_trait1.bad.php", line 3, characters 7-13:
-  MyTrait is defined here
-ERROR: File "static_prop_on_trait1.bad.php", line 19, characters 22-26:
-Static property access on a trait: `MyTrait::$ints` (Typing[4497])
-  File "static_prop_on_trait1.bad.php", line 3, characters 7-13:
-  MyTrait is defined here
+error: Typing[4497] Static property access on a trait: `MyTrait::$ints` [1]
+-> MyTrait is defined here [2]
+
+static_prop_on_trait1.bad.php:7:14
+1 | <?hh
+2 | 
+3 | trait MyTrait {
+  |       ^^^^^^^ [2]
+4 |   public static vec<int> $ints = vec[];
+5 | 
+6 |   public static function addInt(int $i): void {
+7 |     MyTrait::$ints[] = $i;
+  |              ^^^^^ [1]
+8 |   }
+9 | }
+
+error: Typing[4497] Static property access on a trait: `MyTrait::$ints` [1]
+-> MyTrait is defined here [2]
+
+static_prop_on_trait1.bad.php:19:22
+ 1 | <?hh
+ 2 | 
+ 3 | trait MyTrait {
+   |       ^^^^^^^ [2]
+ 4 |   public static vec<int> $ints = vec[];
+ 5 | 
+   :
+17 |   C::addInt(42);
+18 |   \var_dump(C::$ints); // vec[] !!!
+19 |   \var_dump(MyTrait::$ints); // vec[42]
+   |                      ^^^^^ [1]
+20 | }
+
+2 errors found

@@ -1,12 +1,25 @@
-ERROR: File "type__toString4.php", line 21, characters 18-22:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "type__toString4.php", line 21, characters 18-22:
-  Expected `string` or `int`
-  File "type__toString4.php", line 21, characters 18-22:
-  But got `ToS`
-ERROR: File "type__toString4.php", line 21, characters 18-22:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "type__toString4.php", line 21, characters 18-22:
-  Expected `string` or `int`
-  File "type__toString4.php", line 21, characters 18-22:
-  But got `this as ToS`
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `ToS` [1]
+
+type__toString4.php:21:18
+19 |   public function f(): string {
+20 |     if ($this->i === null) {}
+21 |     return 'x' . $this;
+   |                  ^^^^^ [1]
+22 |   }
+23 | }
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `this as ToS` [1]
+
+type__toString4.php:21:18
+19 |   public function f(): string {
+20 |     if ($this->i === null) {}
+21 |     return 'x' . $this;
+   |                  ^^^^^ [1]
+22 |   }
+23 | }
+
+2 errors found

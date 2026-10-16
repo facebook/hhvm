@@ -1,28 +1,131 @@
-ERROR: File "type-refinement.php", line 8, characters 13-38:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 9, characters 16-42:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 10, characters 17-53:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 11, characters 16-45:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 12, characters 17-59:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 14, characters 18-54:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 20, characters 16-45:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 21, characters 17-51:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 22, characters 29-66:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 23, characters 29-73:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 25, characters 19-68:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 26, characters 27-77:
-Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
-ERROR: File "type-refinement.php", line 4, characters 23-24:
-Type constant `Tb` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "type-refinement.php", line 3, characters 7-9:
-  Or make the class abstract.
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:8:13
+ 6 | }
+ 7 | 
+ 8 | type IBox = Box with { type Tb = int };
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | type SubIBox = Box with { type Tb as int };
+10 | type SubISBox = Box with { type Tb as int as string };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:9:16
+ 7 | 
+ 8 | type IBox = Box with { type Tb = int };
+ 9 | type SubIBox = Box with { type Tb as int };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 | type SubISBox = Box with { type Tb as int as string };
+11 | type SupIBox = Box with { type Tb super int };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:10:17
+ 8 | type IBox = Box with { type Tb = int };
+ 9 | type SubIBox = Box with { type Tb as int };
+10 | type SubISBox = Box with { type Tb as int as string };
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 | type SupIBox = Box with { type Tb super int };
+12 | type SupISBox = Box with { type Tb super int super string };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:11:16
+ 9 | type SubIBox = Box with { type Tb as int };
+10 | type SubISBox = Box with { type Tb as int as string };
+11 | type SupIBox = Box with { type Tb super int };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+12 | type SupISBox = Box with { type Tb super int super string };
+13 | 
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:12:17
+10 | type SubISBox = Box with { type Tb as int as string };
+11 | type SupIBox = Box with { type Tb super int };
+12 | type SupISBox = Box with { type Tb super int super string };
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 | 
+14 | type SubSupBox = Box with { type Tb as int super int };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:14:18
+12 | type SupISBox = Box with { type Tb super int super string };
+13 | 
+14 | type SubSupBox = Box with { type Tb as int super int };
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 | 
+16 | abstract class BoxWithCtx extends Box {
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:20:16
+18 | }
+19 | 
+20 | type PureBox = BoxWithCtx with { ctx C = [] };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 | type ZonedBox = BoxWithCtx with { ctx C = [zoned] };
+22 | type BoxThatWritesGlobals = BoxWithCtx with { ctx C as [globals] };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:21:17
+19 | 
+20 | type PureBox = BoxWithCtx with { ctx C = [] };
+21 | type ZonedBox = BoxWithCtx with { ctx C = [zoned] };
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+22 | type BoxThatWritesGlobals = BoxWithCtx with { ctx C as [globals] };
+23 | type WritePropsOrPurerBox = BoxWithCtx with { ctx C super [write_props] };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:22:29
+20 | type PureBox = BoxWithCtx with { ctx C = [] };
+21 | type ZonedBox = BoxWithCtx with { ctx C = [zoned] };
+22 | type BoxThatWritesGlobals = BoxWithCtx with { ctx C as [globals] };
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 | type WritePropsOrPurerBox = BoxWithCtx with { ctx C super [write_props] };
+24 | 
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:23:29
+21 | type ZonedBox = BoxWithCtx with { ctx C = [zoned] };
+22 | type BoxThatWritesGlobals = BoxWithCtx with { ctx C as [globals] };
+23 | type WritePropsOrPurerBox = BoxWithCtx with { ctx C super [write_props] };
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+24 | 
+25 | type WritingBox = BoxWithCtx with { ctx C = [globals, write_props] };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:25:19
+23 | type WritePropsOrPurerBox = BoxWithCtx with { ctx C super [write_props] };
+24 | 
+25 | type WritingBox = BoxWithCtx with { ctx C = [globals, write_props] };
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 | type BoxThatWritesStuff = BoxWithCtx with { ctx C as [globals, write_props] };
+
+error: NastCheck[3101] Type refinements cannot appear on the right-hand side of a type alias. [1]
+
+type-refinement.php:26:27
+24 | 
+25 | type WritingBox = BoxWithCtx with { ctx C = [globals, write_props] };
+26 | type BoxThatWritesStuff = BoxWithCtx with { ctx C as [globals, write_props] };
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+error: Typing[4465] Type constant `Tb` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+type-refinement.php:4:23
+1 | <?hh
+2 | 
+3 | class Box {
+  |       ^^^ [2]
+4 |   abstract const type Tb as mixed;
+  |                       ^^ [1]
+5 |   public function __construct(public this::Tb $val) {}
+6 | }
+
+13 errors found

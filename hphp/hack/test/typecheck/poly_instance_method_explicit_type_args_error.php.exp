@@ -1,8 +1,22 @@
-ERROR: File "poly_instance_method_explicit_type_args_error.php", line 11, characters 25-29:
-Invalid argument (Typing[4110])
-  File "poly_instance_method_explicit_type_args_error.php", line 11, characters 20-22:
-  Expected `int`
-  File "poly_instance_method_explicit_type_args_error.php", line 4, characters 27-28:
-    via this generic `T1`
-  File "poly_instance_method_explicit_type_args_error.php", line 11, characters 25-29:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `T1` [3]
+-> But got `string` [1]
+
+poly_instance_method_explicit_type_args_error.php:11:25
+ 2 | 
+ 3 | class Foo {
+ 4 |   public function bar<T1>(T1 $x): T1 {
+   |                           ^^ [3]
+ 5 |     return $x;
+ 6 |   }
+   :
+ 9 | function f(): int {
+10 |   $foo = new Foo();
+11 |   $res = $foo->bar<int>("foo");
+   |                    ^^^ [2]
+   |                         ^^^^^ [1]
+12 |   return 1;
+13 | }
+
+1 error found

@@ -1,4 +1,18 @@
-ERROR: File "parent_abstract_construct.php", line 9, characters 13-23:
-Cannot call `parent::__construct()`; it is abstract (Typing[4073])
-  File "parent_abstract_construct.php", line 4, characters 28-38:
-  Declaration is here
+error: Typing[4073] Cannot call `parent::__construct()`; it is abstract [1]
+-> Declaration is here [2]
+
+parent_abstract_construct.php:9:13
+ 2 | 
+ 3 | abstract class BaseClass {
+ 4 |   public abstract function __construct(string $x);
+   |                            ^^^^^^^^^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | class ChildClass extends BaseClass {
+ 8 |   public function __construct(string $y) {
+ 9 |     parent::__construct('string!');
+   |             ^^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+1 error found

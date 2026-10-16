@@ -1,26 +1,89 @@
-ERROR: File "variadic_args8.php", line 7, characters 18-21:
-Invalid argument (Typing[4110])
-  File "variadic_args8.php", line 3, characters 23-28:
-  Expected `string`
-  File "variadic_args8.php", line 5, characters 19-23:
-  But got `int` (variadic argument)
-  File "hackarray.hhi", line 52, characters 72-72:
-    via this generic `T`
-  File "hackarray.hhi", line 22, characters 35-36:
-    via this generic `Tv`
-  File "interfaces.hhi", line 115, characters 23-24:
-    via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 66-67:
-    via this generic `Tv`
-ERROR: File "variadic_args8.php", line 12, characters 5-9:
-Invalid argument (Typing[4110])
-  File "variadic_args8.php", line 5, characters 19-23:
-  Expected `int` (variadic argument)
-  File "variadic_args8.php", line 12, characters 5-9:
-  But got `string`
-ERROR: File "variadic_args8.php", line 12, characters 12-16:
-Invalid argument (Typing[4110])
-  File "variadic_args8.php", line 5, characters 19-23:
-  Expected `int` (variadic argument)
-  File "variadic_args8.php", line 12, characters 12-16:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` (variadic argument) [3]
+->   via this generic `T` [4]
+->   via this generic `Tv` [5]
+->   via this generic `Tv` [6]
+->   via this generic `Tv` [7]
+
+variadic_args8.php:7:18
+  1 | <?hh
+  2 | 
+  3 | function takes_string(string $s): void {}
+    |                       ^^^^^^ [2]
+  4 | 
+  5 | function f(int ...$args): void {
+    |                   ^^^^^ [3]
+  6 |   foreach ($args as $arg) {
+  7 |     takes_string($arg);
+    |                  ^^^^ [1]
+  8 |   }
+  9 | }
+
+hackarray.hhi:52:72
+ 20 |     <<__NoAutoBound>> +Tk as arraykey,
+ 21 |     <<__NoAutoBound>> +Tv,
+ 22 |   > implements KeyedContainer<Tk, Tv>, \XHPChild {
+    |                                   ^^ [5]
+ 23 | 
+ 24 |   }
+    :
+ 50 |    */
+ 51 |   <<__SupportDynamicType>>
+ 52 |   abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
+    |                                                                        ^ [4]
+ 53 | 
+ 54 | } // namespace HH
+
+interfaces.hhi:115:23
+ 90 |    */
+ 91 |   <<__Sealed(KeyedContainer::class)>>
+ 92 |   interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
+    |                                                                  ^^ [7]
+ 93 | 
+ 94 |   }
+    :
+113 |   )>>
+114 |   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
+115 |     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+    |                       ^^ [6]
+116 | 
+117 |   /**
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `string` [1]
+
+variadic_args8.php:12:5
+ 3 | function takes_string(string $s): void {}
+ 4 | 
+ 5 | function f(int ...$args): void {
+   |                   ^^^^^ [2]
+ 6 |   foreach ($args as $arg) {
+ 7 |     takes_string($arg);
+   :
+10 | 
+11 | function test(): void {
+12 |   f('str', 'str', 20);
+   |     ^^^^^ [1]
+13 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `string` [1]
+
+variadic_args8.php:12:12
+ 3 | function takes_string(string $s): void {}
+ 4 | 
+ 5 | function f(int ...$args): void {
+   |                   ^^^^^ [2]
+ 6 |   foreach ($args as $arg) {
+ 7 |     takes_string($arg);
+   :
+10 | 
+11 | function test(): void {
+12 |   f('str', 'str', 20);
+   |            ^^^^^ [1]
+13 | }
+
+3 errors found

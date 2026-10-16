@@ -1,10 +1,28 @@
-ERROR: File "ddd.php", line 14, characters 16-20:
-Typing error (Typing[4053])
-  File "ddd.php", line 14, characters 23-25:
-  No property `WtF` in `X`
-  File "ddd.php", line 12, characters 7-7:
-  This is why I think it is an object of type X
-  File "ddd.php", line 12, characters 7-7:
-  Declaration of `X` is here
-ERROR: File "ddd.php", line 16, characters 26-27:
-Was expecting a type hint on this variadic parameter (Typing[4033])
+error: Typing[4053] Typing error [1]
+-> No property `WtF` in `X` [2]
+-> This is why I think it is an object of type X [3]
+-> Declaration of `X` is here [3]
+
+ddd.php:14:16
+10 |  */
+11 | 
+12 | class X {
+   |       ^ [3]
+13 |   public function foo(): void {
+14 |     $this->bar($this->WtF);
+   |                ^^^^^ [1]
+   |                       ^^^ [2]
+15 |   }
+16 |   public function bar(...$_): void {
+
+error: Typing[4033] Was expecting a type hint on this variadic parameter [1]
+
+ddd.php:16:26
+14 |     $this->bar($this->WtF);
+15 |   }
+16 |   public function bar(...$_): void {
+   |                          ^^ [1]
+17 |   }
+18 | }
+
+2 errors found

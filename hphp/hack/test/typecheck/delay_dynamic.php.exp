@@ -1,10 +1,25 @@
-WARN: File "delay_dynamic.php", line 5, characters 14-15:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "delay_dynamic.php", line 4, characters 20-26:
-  This expression has type `dynamic`
-ERROR: File "delay_dynamic.php", line 5, characters 8-17:
-`delay` can only operate on an `Awaitable` (Typing[4110])
-  File "delay_dynamic.php", line 5, characters 8-17:
-  Expected `Awaitable<mixed>`
-  File "delay_dynamic.php", line 5, characters 14-17:
-  But got `dynamic`, the result of calling a `dynamic` type as a function
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+delay_dynamic.php:5:14
+2 | // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+3 | 
+4 | async function foo(dynamic $f): Awaitable<void> {
+  |                    ^^^^^^^ [2]
+5 |   $_ = delay $f();
+  |              ^^ [1]
+6 | }
+
+error: Typing[4110] `delay` can only operate on an `Awaitable` [1]
+-> Expected `Awaitable<mixed>` [1]
+-> But got `dynamic`, the result of calling a `dynamic` type as a function [2]
+
+delay_dynamic.php:5:8
+3 | 
+4 | async function foo(dynamic $f): Awaitable<void> {
+5 |   $_ = delay $f();
+  |        ^^^^^^^^^^ [1]
+  |              ^^^^ [2]
+6 | }
+
+2 errors found

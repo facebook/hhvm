@@ -1,30 +1,63 @@
-ERROR: File "stringish.php", line 29, characters 28-29:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "stringish.php", line 29, characters 28-29:
-  Expected `string` or `int`
-  File "stringish.php", line 28, characters 13-21:
-  But got `Stringish`
-ERROR: File "stringish.php", line 53, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "stringish.php", line 53, characters 16-20:
-  Expected `string` or `int`
-  File "stringish.php", line 53, characters 16-20:
-  But got `TStringish`
-ERROR: File "stringish.php", line 53, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "stringish.php", line 53, characters 16-20:
-  Expected `string` or `int`
-  File "stringish.php", line 53, characters 16-20:
-  But got `this as TStringish`
-ERROR: File "stringish.php", line 61, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "stringish.php", line 61, characters 16-20:
-  Expected `string` or `int`
-  File "stringish.php", line 61, characters 16-20:
-  But got `TReq`
-ERROR: File "stringish.php", line 61, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "stringish.php", line 61, characters 16-20:
-  Expected `string` or `int`
-  File "stringish.php", line 61, characters 16-20:
-  But got `this as TReq`
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `Stringish` [2]
+
+stringish.php:29:28
+26 | }
+27 | 
+28 | function f1(Stringish $x): string {
+   |             ^^^^^^^^^ [2]
+29 |   return __FUNCTION__.': '.$x;
+   |                            ^^ [1]
+30 | }
+31 | 
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `TStringish` [1]
+
+stringish.php:53:16
+51 | 
+52 |   private function foo(): void {
+53 |     echo 'foo'.$this;
+   |                ^^^^^ [1]
+54 |   }
+55 | }
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `this as TStringish` [1]
+
+stringish.php:53:16
+51 | 
+52 |   private function foo(): void {
+53 |     echo 'foo'.$this;
+   |                ^^^^^ [1]
+54 |   }
+55 | }
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `TReq` [1]
+
+stringish.php:61:16
+59 | 
+60 |   private function foo(): void {
+61 |     echo 'foo'.$this;
+   |                ^^^^^ [1]
+62 |   }
+63 | }
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `this as TReq` [1]
+
+stringish.php:61:16
+59 | 
+60 |   private function foo(): void {
+61 |     echo 'foo'.$this;
+   |                ^^^^^ [1]
+62 |   }
+63 | }
+
+5 errors found

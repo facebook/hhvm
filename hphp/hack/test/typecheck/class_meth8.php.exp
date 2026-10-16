@@ -1,4 +1,21 @@
-ERROR: File "class_meth8.php", line 19, characters 11-12:
-Function pointer syntax requires a static method. Use `meth_caller(A::class, 'f1')` to create a function pointer to the instance method (Typing[4407])
-ERROR: File "class_meth8.php", line 24, characters 11-12:
-Function pointer syntax requires a static method. Use `meth_caller(A::class, 'f1')` to create a function pointer to the instance method (Typing[4407])
+error: Typing[4407] Function pointer syntax requires a static method. Use `meth_caller(A::class, 'f1')` to create a function pointer to the instance method [1]
+
+class_meth8.php:19:11
+17 | 
+18 | function foo(): int {
+19 |   $p = A::f1<>;
+   |           ^^ [1]
+20 |   return $p('moo');
+21 | }
+
+error: Typing[4407] Function pointer syntax requires a static method. Use `meth_caller(A::class, 'f1')` to create a function pointer to the instance method [1]
+
+class_meth8.php:24:11
+22 | 
+23 | function bar(): int {
+24 |   $p = A::f1<>;
+   |           ^^ [1]
+25 |   return $p('moo');
+26 | }
+
+2 errors found

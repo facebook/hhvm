@@ -1,8 +1,36 @@
-WARN: File "unused_awaitable14.php", line 9, characters 17-31:
-Casting Awaitable<string> to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-ERROR: File "unused_awaitable14.php", line 9, characters 17-31:
-Cannot cast a value of type `Awaitable<string>` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
-ERROR: File "unused_awaitable14.php", line 9, characters 25-31:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable14.php", line 3, characters 21-37:
-  This is why I think it is `Awaitable`
+warning: Warn[12005] Casting Awaitable<string> to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? [1]
+
+unused_awaitable14.php:9:17
+ 7 | async function g(): Awaitable<string> {
+ 8 |   $output = f();
+ 9 |   return '$foo'.(string)$output.'bar';
+   |                 ^^^^^^^^^^^^^^^ [1]
+10 | }
+
+error: Typing[4281] Cannot cast a value of type `Awaitable<string>` to string. Only primitives may be used in a `(string)` cast. [1]
+
+unused_awaitable14.php:9:17
+ 7 | async function g(): Awaitable<string> {
+ 8 |   $output = f();
+ 9 |   return '$foo'.(string)$output.'bar';
+   |                 ^^^^^^^^^^^^^^^ [1]
+10 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable14.php:9:25
+ 1 | <?hh
+ 2 | 
+ 3 | async function f(): Awaitable<string> {
+   |                     ^^^^^^^^^^^^^^^^^ [2]
+ 4 |   return 'foobar';
+ 5 | }
+ 6 | 
+ 7 | async function g(): Awaitable<string> {
+ 8 |   $output = f();
+ 9 |   return '$foo'.(string)$output.'bar';
+   |                         ^^^^^^^ [1]
+10 | }
+
+3 errors found

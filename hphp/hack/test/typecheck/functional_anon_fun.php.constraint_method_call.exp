@@ -1,10 +1,42 @@
-ERROR: File "functional_anon_fun.php", line 23, characters 13-25:
-You are using the return value of a `void` function (Typing[4119])
-  File "functional_anon_fun.php", line 14, characters 30-33:
-  A `void` function doesn't return a value.
-ERROR: File "functional_anon_fun.php", line 24, characters 10-16:
-Invalid return type (Typing[4110])
-  File "functional_anon_fun.php", line 19, characters 21-23:
-  Expected `int`
-  File "functional_anon_fun.php", line 14, characters 30-33:
-  But got `void`
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+functional_anon_fun.php:23:13
+12 | class A {
+13 | 
+14 |   public function doStuff(): void {
+   |                              ^^^^ [2]
+15 |     return;
+16 |   }
+   :
+21 |     return $y->doStuff();
+22 |   };
+23 |   $result = ($f)(new A());
+   |             ^^^^^^^^^^^^^ [1]
+24 |   return $result;
+25 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` [3]
+
+functional_anon_fun.php:24:10
+12 | class A {
+13 | 
+14 |   public function doStuff(): void {
+   |                              ^^^^ [3]
+15 |     return;
+16 |   }
+17 | }
+18 | 
+19 | function f(int $x): int {
+   |                     ^^^ [2]
+20 |   $f = function($y) use ($x) {
+21 |     return $y->doStuff();
+22 |   };
+23 |   $result = ($f)(new A());
+24 |   return $result;
+   |          ^^^^^^^ [1]
+25 | }
+
+2 errors found

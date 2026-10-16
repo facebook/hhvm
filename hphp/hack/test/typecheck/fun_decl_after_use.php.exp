@@ -1,2 +1,9 @@
-ERROR: File "fun_decl_after_use.php", line 4, characters 10-12:
-Cannot declare `foo` because the name was explicitly used earlier via a `use` statement on line 2 (Parsing[1002])
+error: Parsing[1002] Cannot declare `foo` because the name was explicitly used earlier via a `use` statement on line 2 [1]
+
+fun_decl_after_use.php:4:10
+2 | use function SomeNS\foo;
+3 | 
+4 | function foo(): void {}
+  |          ^^^ [1]
+
+1 error found

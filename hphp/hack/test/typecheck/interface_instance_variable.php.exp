@@ -1,2 +1,10 @@
-ERROR: File "interface_instance_variable.php", line 13, characters 14-15:
-Interfaces cannot have member variables (NastCheck[3009])
+error: NastCheck[3009] Interfaces cannot have member variables [1]
+
+interface_instance_variable.php:13:14
+11 | 
+12 | interface I {
+13 |   public int $x = 123;
+   |              ^^ [1]
+14 | }
+
+1 error found

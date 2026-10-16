@@ -1,12 +1,30 @@
-ERROR: File "trait_ambiguous_multi.php--file3.php", line 3, characters 7-8:
-Some members in class `C` are incompatible with those declared in type `T1` (Typing[4341])
-  File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
-  The method `f` is not compatible with the overridden method
-  File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
-  `T2` and `T1` both declare ambiguous implementations of `f`.
-  File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
-  `T2`'s definition is here.
-  File "trait_ambiguous_multi.php--file1.php", line 5, characters 20-20:
-  `T1`'s definition is here.
-  File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
-  Redeclare `f` in `C` with a compatible signature.
+error: Typing[4341] Some members in class `C` are incompatible with those declared in type `T1` [1]
+-> The method `f` is not compatible with the overridden method [2]
+-> `T2` and `T1` both declare ambiguous implementations of `f`. [2]
+-> `T2`'s definition is here. [2]
+-> `T1`'s definition is here. [3]
+-> Redeclare `f` in `C` with a compatible signature. [2]
+
+trait_ambiguous_multi.php--file3.php:3:7
+1 | <?hh
+2 | class C {
+3 |   use T1;
+  |       ^^ [1]
+4 |   use T2;
+5 | }
+
+trait_ambiguous_multi.php--file2.php:3:19
+1 | <?hh
+2 | trait T2 {
+3 |   public function f(): int { return 4; }
+  |                   ^ [2]
+4 | }
+
+trait_ambiguous_multi.php--file1.php:5:20
+3 | 
+4 | trait T1 {
+5 |   private function f(): int { return 3; }
+  |                    ^ [3]
+6 | }
+
+1 error found

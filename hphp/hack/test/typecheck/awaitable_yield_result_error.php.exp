@@ -1,2 +1,11 @@
-ERROR: File "awaitable_yield_result_error.php", line 16, characters 29-32:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+awaitable_yield_result_error.php:16:29
+14 | }
+15 | 
+16 | async function foo_error(): ?int {
+   |                             ^^^^ [1]
+17 |   return null;
+18 | }
+
+1 error found

@@ -1,8 +1,26 @@
-ERROR: File "forbid_await_in_sync_functions4.php", line 16, characters 10-23:
-`await` can only be used inside `async` functions (NastCheck[3003])
-ERROR: File "forbid_await_in_sync_functions4.php", line 16, characters 10-23:
-Invalid return type (Typing[4110])
-  File "forbid_await_in_sync_functions4.php", line 15, characters 4-17:
-  Expected `Awaitable<int>`
-  File "forbid_await_in_sync_functions4.php", line 13, characters 13-15:
-  But got `int`
+error: NastCheck[3003] `await` can only be used inside `async` functions [1]
+
+forbid_await_in_sync_functions4.php:16:10
+14 |   Awaitable<string> $watergirl,
+15 | ): Awaitable<int> {
+16 |   return await $fireboy;
+   |          ^^^^^^^^^^^^^^ [1]
+17 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Awaitable<int>` [2]
+-> But got `int` [3]
+
+forbid_await_in_sync_functions4.php:16:10
+11 | 
+12 | function char_select(
+13 |   Awaitable<int> $fireboy,
+   |             ^^^ [3]
+14 |   Awaitable<string> $watergirl,
+15 | ): Awaitable<int> {
+   |    ^^^^^^^^^^^^^^ [2]
+16 |   return await $fireboy;
+   |          ^^^^^^^^^^^^^^ [1]
+17 | }
+
+2 errors found

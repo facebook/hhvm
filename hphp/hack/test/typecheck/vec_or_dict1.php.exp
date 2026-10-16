@@ -1,12 +1,30 @@
-ERROR: File "vec_or_dict1.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "vec_or_dict1.php", line 3, characters 50-55:
-  Expected `string`
-  File "vec_or_dict1.php", line 3, characters 18-25:
-  But got `arraykey`
-ERROR: File "vec_or_dict1.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "vec_or_dict1.php", line 7, characters 50-55:
-  Expected `string`
-  File "vec_or_dict1.php", line 7, characters 28-30:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+
+vec_or_dict1.php:4:10
+1 | <?hh
+2 | 
+3 | function tk(dict<arraykey, int> $v): vec_or_dict<string, int> {
+  |                  ^^^^^^^^ [3]
+  |                                                  ^^^^^^ [2]
+4 |   return $v;
+  |          ^^ [1]
+5 | }
+6 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+vec_or_dict1.php:8:10
+5 | }
+6 | 
+7 | function tv(dict<arraykey, int> $v): vec_or_dict<string> {
+  |                            ^^^ [3]
+  |                                                  ^^^^^^ [2]
+8 |   return $v;
+  |          ^^ [1]
+9 | }
+
+2 errors found

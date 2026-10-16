@@ -1,4 +1,21 @@
-ERROR: File "tconst_localize_where_clauses.php", line 10, characters 16-19:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_localize_where_clauses.php", line 22, characters 16-19:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_localize_where_clauses.php:10:16
+ 8 |   public function genx<TBox as Box, T>(
+ 9 |     TBox $box,
+10 |   ): T where T=TBox::TResult {
+   |                ^^^^ [1]
+11 |     return $box->getValue();
+12 |   }
+
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+tconst_localize_where_clauses.php:22:16
+20 |   public function genx<TBox as Box, T>(
+21 |     TBox $box,
+22 |   ): T where T=TBox::TResult {
+   |                ^^^^ [1]
+23 |     return $box->getValue();
+24 |   }
+
+2 errors found

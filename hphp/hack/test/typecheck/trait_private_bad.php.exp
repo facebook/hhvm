@@ -1,8 +1,18 @@
-ERROR: File "trait_private_bad.php", line 24, characters 19-21:
-No instance method `foo` in `B` (Typing[4053])
-  File "trait_private_bad.php", line 23, characters 19-21:
-  Did you mean `bar` instead?
-  File "trait_private_bad.php", line 22, characters 7-7:
-  This is why I think it is an object of type B
-  File "trait_private_bad.php", line 22, characters 7-7:
-  Declaration of `B` is here
+error: Typing[4053] No instance method `foo` in `B` [1]
+-> Did you mean `bar` instead? [2]
+-> This is why I think it is an object of type B [3]
+-> Declaration of `B` is here [3]
+
+trait_private_bad.php:24:19
+20 | }
+21 | 
+22 | class B extends A {
+   |       ^ [3]
+23 |   public function bar(): int {
+   |                   ^^^ [2]
+24 |     return $this->foo();
+   |                   ^^^ [1]
+25 |   }
+26 | }
+
+1 error found

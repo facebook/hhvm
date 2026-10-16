@@ -1,18 +1,46 @@
-ERROR: File "this_param.php", line 24, characters 16-19:
-Invalid argument (Typing[4110])
-  File "this_param.php", line 24, characters 5-9:
-  Expected `this`
-  File "this_param.php", line 18, characters 23-26:
-    via this generic `this`
-  File "this_param.php", line 22, characters 24-26:
-  But got `<expr#7> as Foo`
-  File "this_param.php", line 24, characters 16-19:
-    where `<expr#7>` is a reference to this expression
-ERROR: File "this_param.php", line 24, characters 16-19:
-Invalid argument (Typing[4110])
-  File "this_param.php", line 24, characters 5-9:
-  Expected `this`
-  File "this_param.php", line 18, characters 23-26:
-    via this generic `this`
-  File "this_param.php", line 22, characters 24-26:
-  But got `Foo`
+error: Typing[4110] Invalid argument [1]
+-> Expected `this` [2]
+->   via this generic `this` [3]
+-> But got `<expr#7> as Foo` [4]
+->   where `<expr#7>` is a reference to this expression [1]
+
+this_param.php:24:16
+16 |   }
+17 | 
+18 |   public function set(this $x): this {
+   |                       ^^^^ [3]
+19 |     return $x;
+20 |   }
+21 | 
+22 |   public function test(Foo $foo): void {
+   |                        ^^^ [4]
+23 |     $this->set(new static());
+24 |     $this->set($foo);
+   |     ^^^^^ [2]
+   |                ^^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `this` [2]
+->   via this generic `this` [3]
+-> But got `Foo` [4]
+
+this_param.php:24:16
+16 |   }
+17 | 
+18 |   public function set(this $x): this {
+   |                       ^^^^ [3]
+19 |     return $x;
+20 |   }
+21 | 
+22 |   public function test(Foo $foo): void {
+   |                        ^^^ [4]
+23 |     $this->set(new static());
+24 |     $this->set($foo);
+   |     ^^^^^ [2]
+   |                ^^^^ [1]
+25 |   }
+26 | }
+
+2 errors found

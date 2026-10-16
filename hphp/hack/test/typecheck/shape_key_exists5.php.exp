@@ -1,4 +1,21 @@
-ERROR: File "shape_key_exists5.php", line 15, characters 3-29:
-This `Shapes::keyExists()` check is always false (Typing[4250])
-  File "shape_key_exists5.php", line 10, characters 3-54:
-  The field `z` is not defined in this shape
+error: Typing[4250] This `Shapes::keyExists()` check is always false [1]
+-> The field `z` is not defined in this shape [2]
+
+shape_key_exists5.php:15:3
+ 8 |   $t = shape('y' => 'aaa');
+ 9 | 
+10 |   if ($b) {
+   |   ^^^^^^^^^ [2]
+11 |     $st = $s;
+   |     ^^^^^^^^^ [2]
+12 |   } else {
+   |   ^^^^^^^^ [2]
+13 |     $st = $t;
+   |     ^^^^^^^^^ [2]
+14 |   }
+   |   ^ [2]
+15 |   Shapes::keyExists($st, 'z');
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+
+1 error found

@@ -1,2 +1,15 @@
-ERROR: File "global_const25.php", line 3, characters 1-40:
-No code may exist outside of namespace {} (Parsing[1002])
+error: Parsing[1002] No code may exist outside of namespace {} [1]
+
+global_const25.php:3:1
+1 | <?hh
+2 | 
+3 | namespace NS1\NS2 {
+  | ^^^^^^^^^^^^^^^^^^^ [1]
+4 |   const int X = 0;
+  |   ^^^^^^^^^^^^^^^^ [1]
+5 | }
+  | ^ [1]
+6 | 
+7 | function test(): int {
+
+1 error found

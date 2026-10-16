@@ -1,4 +1,17 @@
-ERROR: File "this_tparam_error1.php", line 12, characters 14-17:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
-ERROR: File "this_tparam_error1.php", line 12, characters 14-17:
-The type parameter `this` is reserved (Naming[2046])
+error: Naming[2042] Please make your type parameter start with the letter `T` (capital) [1]
+
+this_tparam_error1.php:12:14
+10 |  */
+11 | 
+12 | function foo<this>(): void {}
+   |              ^^^^ [1]
+
+error: Naming[2046] The type parameter `this` is reserved [1]
+
+this_tparam_error1.php:12:14
+10 |  */
+11 | 
+12 | function foo<this>(): void {}
+   |              ^^^^ [1]
+
+2 errors found

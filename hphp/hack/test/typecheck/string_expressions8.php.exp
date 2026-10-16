@@ -1,6 +1,35 @@
-ERROR: File "string_expressions8.php", line 14, characters 11-18:
-Malformed String2 SyntaxList (Parsing[1002])
-ERROR: File "string_expressions8.php", line 14, characters 20-29:
-The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
-ERROR: File "string_expressions8.php", line 14, characters 21-29:
-This string literal is not terminated. (Parsing[1002])
+error: Parsing[1002] Malformed String2 SyntaxList [1]
+
+string_expressions8.php:14:11
+12 | class Meh {
+13 |   public static function foo(Vector<Meh> $x): void {
+14 |     print "Hello, ${";
+   |           ^^^^^^^ [1]
+15 |   }
+16 | }
+
+error: Parsing[1002] The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. [1]
+
+string_expressions8.php:14:20
+12 | class Meh {
+13 |   public static function foo(Vector<Meh> $x): void {
+14 |     print "Hello, ${";
+   |                    ^^^ [1]
+15 |   }
+   |   ^ [1]
+16 | }
+   | ^ [1]
+
+error: Parsing[1002] This string literal is not terminated. [1]
+
+string_expressions8.php:14:21
+12 | class Meh {
+13 |   public static function foo(Vector<Meh> $x): void {
+14 |     print "Hello, ${";
+   |                     ^^ [1]
+15 |   }
+   |   ^ [1]
+16 | }
+   | ^ [1]
+
+3 errors found

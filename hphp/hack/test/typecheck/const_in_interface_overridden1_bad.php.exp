@@ -1,6 +1,17 @@
-ERROR: File "const_in_interface_overridden1_bad.php", line 6, characters 29-29:
-Some members in class `C` are incompatible with those declared in type `I` (Typing[4374])
-  File "const_in_interface_overridden1_bad.php", line 7, characters 12-21:
-  Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface.
-  File "const_in_interface_overridden1_bad.php", line 4, characters 13-22:
-  You could make `SOME_CONST` abstract in `I`.
+error: Typing[4374] Some members in class `C` are incompatible with those declared in type `I` [1]
+-> Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface. [2]
+-> You could make `SOME_CONST` abstract in `I`. [3]
+
+const_in_interface_overridden1_bad.php:6:29
+2 | 
+3 | interface I {
+4 |   const int SOME_CONST = 1;
+  |             ^^^^^^^^^^ [3]
+5 | }
+6 | abstract class C implements I {
+  |                             ^ [1]
+7 |  const int SOME_CONST = 2;
+  |            ^^^^^^^^^^ [2]
+8 | }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "docs_url_bad_arity.php", line 3, characters 3-8:
-The attribute `__Docs` expects exactly 1 argument (Typing[4126])
+error: Typing[4126] The attribute `__Docs` expects exactly 1 argument [1]
+
+docs_url_bad_arity.php:3:3
+1 | <?hh
+2 | 
+3 | <<__Docs("http://example.com", "foo")>>
+  |   ^^^^^^ [1]
+4 | class Foo {}
+
+1 error found

@@ -1,14 +1,36 @@
-ERROR: File "multiple_concrete_consts.php", line 8, characters 11-11:
-Constant X is defined concretely in multiple ancestors (Typing[4374])
-  File "multiple_concrete_consts.php", line 3, characters 13-13:
-  One conflicting definition is here
-  File "multiple_concrete_consts.php", line 6, characters 13-13:
-  Another conflicting definition is here
-ERROR: File "multiple_concrete_consts.php", line 8, characters 25-26:
-Some members in class `I` are incompatible with those declared in type `I2` (Typing[4374])
-  File "multiple_concrete_consts.php", line 3, characters 13-13:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "multiple_concrete_consts.php", line 6, characters 13-13:
-  `X` inherited from `I2`
-  File "multiple_concrete_consts.php", line 3, characters 13-13:
-  conflicts with constant `X` inherited from `I1`.
+error: Typing[4374] Constant X is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here [2]
+-> Another conflicting definition is here [3]
+
+multiple_concrete_consts.php:8:11
+1 | <?hh
+2 | interface I1 {
+3 |   const int X = 7;
+  |             ^ [2]
+4 | }
+5 | interface I2 {
+6 |   const int X = 5;
+  |             ^ [3]
+7 | }
+8 | interface I extends I1, I2 {}
+  |           ^ [1]
+
+error: Typing[4374] Some members in class `I` are incompatible with those declared in type `I2` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `X` inherited from `I2` [3]
+-> conflicts with constant `X` inherited from `I1`. [2]
+
+multiple_concrete_consts.php:8:25
+1 | <?hh
+2 | interface I1 {
+3 |   const int X = 7;
+  |             ^ [2]
+4 | }
+5 | interface I2 {
+6 |   const int X = 5;
+  |             ^ [3]
+7 | }
+8 | interface I extends I1, I2 {}
+  |                         ^^ [1]
+
+2 errors found

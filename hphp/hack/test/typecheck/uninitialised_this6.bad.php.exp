@@ -1,2 +1,11 @@
-ERROR: File "uninitialised_this6.bad.php", line 9, characters 12-12:
-Read access to `$this->i` before initialization (Typing[4083])
+error: Typing[4083] Read access to `$this->i` before initialization [1]
+
+uninitialised_this6.bad.php:9:12
+ 7 | class C extends D {
+ 8 |   public function __construct() {
+ 9 |     $this->i;
+   |            ^ [1]
+10 |     $this->i = 0;
+11 |   }
+
+1 error found

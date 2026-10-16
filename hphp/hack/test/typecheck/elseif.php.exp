@@ -1,6 +1,31 @@
-ERROR: File "elseif.php", line 15, characters 20-20:
-A semicolon `;` is expected here. (Parsing[1002])
-ERROR: File "elseif.php", line 15, characters 5-10:
-Unbound name: `elseif` (a global function) (Naming[2049])
-ERROR: File "elseif.php", line 15, characters 5-10:
-Unbound name (typing): `elseif` (Typing[4107])
+error: Parsing[1002] A semicolon `;` is expected here. [1]
+
+elseif.php:15:20
+13 |   if (true) {
+14 |     return;
+15 |   } elseif (false) {
+   |                    ^ [1]
+16 |     return;
+17 |   }
+
+error: Naming[2049] Unbound name: `elseif` (a global function) [1]
+
+elseif.php:15:5
+13 |   if (true) {
+14 |     return;
+15 |   } elseif (false) {
+   |     ^^^^^^ [1]
+16 |     return;
+17 |   }
+
+error: Typing[4107] Unbound name (typing): `elseif` [1]
+
+elseif.php:15:5
+13 |   if (true) {
+14 |     return;
+15 |   } elseif (false) {
+   |     ^^^^^^ [1]
+16 |     return;
+17 |   }
+
+3 errors found

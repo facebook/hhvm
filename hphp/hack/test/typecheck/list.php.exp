@@ -1,10 +1,30 @@
-ERROR: File "list.php", line 16, characters 5-23:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-ERROR: File "list.php", line 16, characters 12-15:
-No instance method `list` in `A` (Typing[4053])
-  File "list.php", line 13, characters 19-21:
-  Did you mean `foo` instead?
-  File "list.php", line 12, characters 7-7:
-  This is why I think it is an object of type A
-  File "list.php", line 12, characters 7-7:
-  Declaration of `A` is here
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+list.php:16:5
+14 |     $x = 1;
+15 |     $y = 2;
+16 |     $this->list($x, $y) = 10;
+   |     ^^^^^^^^^^^^^^^^^^^ [1]
+17 |   }
+18 | }
+
+error: Typing[4053] No instance method `list` in `A` [1]
+-> Did you mean `foo` instead? [2]
+-> This is why I think it is an object of type A [3]
+-> Declaration of `A` is here [3]
+
+list.php:16:12
+10 |  */
+11 | 
+12 | class A {
+   |       ^ [3]
+13 |   public function foo(): void {
+   |                   ^^^ [2]
+14 |     $x = 1;
+15 |     $y = 2;
+16 |     $this->list($x, $y) = 10;
+   |            ^^^^ [1]
+17 |   }
+18 | }
+
+2 errors found

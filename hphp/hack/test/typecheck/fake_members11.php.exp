@@ -1,4 +1,19 @@
-ERROR: File "fake_members11.php", line 22, characters 7-23:
-This is not an object of type `KeyedContainer`, this is a nullable type (Typing[4370])
-  File "fake_members11.php", line 13, characters 11-22:
-  Definition is here
+error: Typing[4370] This is not an object of type `KeyedContainer`, this is a nullable type [1]
+-> Definition is here [2]
+
+fake_members11.php:22:7
+11 | 
+12 | class Bar1 {
+13 |   private ?Vector<int> $foo;
+   |           ^^^^^^^^^^^^ [2]
+14 | 
+15 |   public function __construct(?Vector<int> $foo) {
+   :
+20 |     if ($this->foo !== null) {
+21 |       random_other_function();
+22 |       $this->foo[0] = 0;
+   |       ^^^^^^^^^^^^^^^^^ [1]
+23 |     }
+24 |   }
+
+1 error found

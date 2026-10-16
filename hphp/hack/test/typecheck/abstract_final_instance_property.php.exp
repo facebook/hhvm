@@ -1,2 +1,10 @@
-ERROR: File "abstract_final_instance_property.php", line 3, characters 14-20:
-Abstract final classes cannot have instance properties. (NastCheck[3088])
+error: NastCheck[3088] Abstract final classes cannot have instance properties. [1]
+
+abstract_final_instance_property.php:3:14
+1 | <?hh
+2 | abstract final class Foo {
+3 |   public int $foobar;
+  |              ^^^^^^^ [1]
+4 | }
+
+1 error found

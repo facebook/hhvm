@@ -1,4 +1,19 @@
-ERROR: File "shape_typedef_with_multiple_optional_tokens.php", line 4, characters 3-11:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "shape_typedef_with_multiple_optional_tokens.php", line 4, characters 5-5:
-An expression is expected here. (Parsing[1002])
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+shape_typedef_with_multiple_optional_tokens.php:4:3
+2 | 
+3 | type ShapeWithOptionalField = shape(
+4 |   ???'a' => int
+  |   ^^^^^^^^^ [1]
+5 | );
+
+error: Parsing[1002] An expression is expected here. [1]
+
+shape_typedef_with_multiple_optional_tokens.php:4:5
+2 | 
+3 | type ShapeWithOptionalField = shape(
+4 |   ???'a' => int
+  |     ^ [1]
+5 | );
+
+2 errors found

@@ -1,10 +1,26 @@
-ERROR: File "void_usage_placeholder_param.php", line 10, characters 16-17:
-Invalid argument (Typing[4110])
-  File "void_usage_placeholder_param.php", line 7, characters 25-26:
-  Expected `C2`
-  File "void_usage_placeholder_param.php", line 10, characters 16-17:
-  But got `void` (`$_` is a placeholder variable not meant to be used)
-ERROR: File "void_usage_placeholder_param.php", line 10, characters 16-17:
-You are using the return value of a `void` function (Typing[4119])
-  File "void_usage_placeholder_param.php", line 10, characters 16-17:
-  A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+error: Typing[4110] Invalid argument [1]
+-> Expected `C2` [2]
+-> But got `void` (`$_` is a placeholder variable not meant to be used) [1]
+
+void_usage_placeholder_param.php:10:16
+ 5 | class C2 {}
+ 6 | 
+ 7 | function test_ok(C1 $_, C2 $_): void {}
+   |                         ^^ [2]
+ 8 | 
+ 9 | function test_improper_usage(C1 $c1, C2 $_): void {
+10 |   test_ok($c1, $_);
+   |                ^^ [1]
+11 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used) [1]
+
+void_usage_placeholder_param.php:10:16
+ 8 | 
+ 9 | function test_improper_usage(C1 $c1, C2 $_): void {
+10 |   test_ok($c1, $_);
+   |                ^^ [1]
+11 | }
+
+2 errors found

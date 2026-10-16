@@ -1,4 +1,19 @@
-ERROR: File "use_list_trailing_comma_bad.php", line 9, characters 7-7:
-A name is expected here. (Parsing[1002])
-ERROR: File "use_list_trailing_comma_bad.php", line 10, characters 1-1:
-Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+error: Parsing[1002] A name is expected here. [1]
+
+use_list_trailing_comma_bad.php:9:7
+ 7 |   use
+ 8 |     B,
+ 9 |     C,
+   |       ^ [1]
+10 |     ;
+11 | }
+
+error: Parsing[1002] Encountered unexpected text ``, was expecting a type hint. [1]
+
+use_list_trailing_comma_bad.php:10:1
+ 8 |     B,
+ 9 |     C,
+10 |     ;
+11 | }
+
+2 errors found

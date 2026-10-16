@@ -1,2 +1,11 @@
-ERROR: File "capture_this2.php", line 5, characters 26-30:
-Cannot use `$this` as lexical variable (Naming[2077])
+error: Naming[2077] Cannot use `$this` as lexical variable [1]
+
+capture_this2.php:5:26
+3 | class A {
+4 |   public function g(): void {
+5 |     $a = function() use ($this) {};
+  |                          ^^^^^ [1]
+6 |   }
+7 | }
+
+1 error found

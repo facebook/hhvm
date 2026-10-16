@@ -1,2 +1,11 @@
-ERROR: File "variadic_param_with_default.php", line 9, characters 31-51:
-A variadic parameter `...` must not have a default value. (Parsing[1002])
+error: Parsing[1002] A variadic parameter `...` must not have a default value. [1]
+
+variadic_param_with_default.php:9:31
+ 7 | final class Foos {
+ 8 |   private vec<IFoo> $foos;
+ 9 |   public function __construct(IFoo ...$foos = vec[]) {
+   |                               ^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     $this->foos = vec($foos);
+11 |   }
+
+1 error found

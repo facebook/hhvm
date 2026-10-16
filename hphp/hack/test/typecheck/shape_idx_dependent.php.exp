@@ -1,12 +1,40 @@
-ERROR: File "shape_idx_dependent.php", line 8, characters 24-25:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 42, characters 19-24:
-  Expected `shape(?'x' => _, ...)`
-  File "shape_idx_dependent.php", line 7, characters 24-30:
-  But got `this::T as C::T`
-ERROR: File "shape_idx_dependent.php", line 8, characters 24-25:
-Invalid argument (Typing[4110])
-  File "shape_idx_dependent.php", line 7, characters 37-39:
-  Expected `int`
-  File "shape_idx_dependent.php", line 5, characters 41-44:
-  But got `null`
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape(?'x' => _, ...)` [2]
+-> But got `this::T as C::T` [3]
+
+shape_idx_dependent.php:8:24
+ 5 |   abstract const type T as shape('x' => ?int, ...);
+ 6 | 
+ 7 |   public function test(this::T $s): int {
+   |                        ^^^^^^^ [3]
+ 8 |     return Shapes::idx($s, 'x', 0);
+   |                        ^^ [1]
+ 9 |   }
+10 | }
+
+Shapes.hhi:42:19
+40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+41 |     public static function idx<Tv>(
+42 |       ?shape(...) $shape,
+   |                   ^^^^^^ [2]
+43 |       arraykey $index,
+44 |       ?Tv $default = null,
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+shape_idx_dependent.php:8:24
+ 3 | 
+ 4 | abstract class C {
+ 5 |   abstract const type T as shape('x' => ?int, ...);
+   |                                         ^^^^ [3]
+ 6 | 
+ 7 |   public function test(this::T $s): int {
+   |                                     ^^^ [2]
+ 8 |     return Shapes::idx($s, 'x', 0);
+   |                        ^^ [1]
+ 9 |   }
+10 | }
+
+2 errors found

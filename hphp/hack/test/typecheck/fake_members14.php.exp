@@ -1,9 +1,28 @@
-ERROR: File "fake_members14.php", line 16, characters 27-33:
-Invalid argument (Typing[4110])
-  File "fake_members14.php", line 12, characters 21-23:
-  Expected `int`
-  File "fake_members14.php", line 5, characters 17-20:
-  But got `?int`
-  File "fake_members14.php", line 16, characters 9-34:
-  All the local information about `C::$fld` has been invalidated by this lambda function.
-This is a limitation of the type-checker; use a local if that's the problem.
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+-> All the local information about `C::$fld` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem. [4]
+
+fake_members14.php:16:27
+ 3 | 
+ 4 | class C {
+ 5 |   public static ?int $fld = 42;
+   |                 ^^^^ [3]
+ 6 | }
+ 7 | 
+   :
+10 |   $f();
+11 | }
+12 | function expect_int(int $x):void { }
+   |                     ^^^ [2]
+13 | <<__EntryPoint>>
+14 | function testit():void {
+15 |   if (C::$fld !== null) {
+16 |     foo(() ==> expect_int(C::$fld));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ [4]
+   |                           ^^^^^^^ [1]
+17 |   }
+18 | }
+
+1 error found

@@ -1,6 +1,26 @@
-ERROR: File "fc_enum_12.php", line 4, characters 14-27:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
-ERROR: File "fc_enum_12.php", line 4, characters 14-27:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "BuiltinEnum.hhi", line 27, characters 18-28:
-  Definition is here
+error: Naming[2053] `HH\BuiltinEnum` is an implementation internal class that cannot be used directly [1]
+
+fc_enum_12.php:4:14
+2 | 
+3 | // No using HH\BuiltinEnum
+4 | function foo(HH\BuiltinEnum $foo): void {}
+  |              ^^^^^^^^^^^^^^ [1]
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+fc_enum_12.php:4:14
+ 2 | 
+ 3 | // No using HH\BuiltinEnum
+ 4 | function foo(HH\BuiltinEnum $foo): void {}
+   |              ^^^^^^^^^^^^^^ [1]
+
+BuiltinEnum.hhi:27:18
+25 |    * provided for the typechecker and for developer reference.
+26 |    */
+27 |   abstract class BuiltinEnum<+T> {
+   |                  ^^^^^^^^^^^ [2]
+28 |     /**
+29 |      * Get the values of the public consts defined on this class,
+
+2 errors found

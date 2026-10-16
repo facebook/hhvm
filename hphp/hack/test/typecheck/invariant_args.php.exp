@@ -2,5 +2,14 @@ File "invariant_args.php", line 13, characters 3-13:
   ?C
 File "invariant_args.php", line 15, characters 3-13:
   C
-WARN: File "invariant_args.php", line 14, characters 45-50:
-You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
+warning: Warn[12030] You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. [1]
+
+invariant_args.php:14:45
+12 |   $c = opt_c();
+13 |   hh_show($c);
+14 |   invariant($c is C, 'format: %s', (string)($c?->y()));
+   |                                             ^^^^^^ [1]
+15 |   hh_show($c);
+16 | }
+
+1 error found

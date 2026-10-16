@@ -1,14 +1,50 @@
-ERROR: File "parent_override_trait3.php", line 18, characters 7-7:
-Constant FOO1 is defined concretely in multiple ancestors (Typing[4374])
-  File "parent_override_trait3.php", line 8, characters 9-12:
-  One conflicting definition is here, inherited through B
-  File "parent_override_trait3.php", line 4, characters 9-12:
-  Another conflicting definition is here
-ERROR: File "parent_override_trait3.php", line 18, characters 17-17:
-Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
-  File "parent_override_trait3.php", line 4, characters 9-12:
-  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
-  File "parent_override_trait3.php", line 8, characters 9-12:
-  `FOO1` inherited from `I2`
-  File "parent_override_trait3.php", line 4, characters 9-12:
-  conflicts with constant `FOO1` inherited from `T1`.
+error: Typing[4374] Constant FOO1 is defined concretely in multiple ancestors [1]
+-> One conflicting definition is here, inherited through B [2]
+-> Another conflicting definition is here [3]
+
+parent_override_trait3.php:18:7
+ 2 | 
+ 3 | trait T1 {
+ 4 |   const FOO1 = "one";
+   |         ^^^^ [3]
+ 5 | }
+ 6 | 
+ 7 | interface I2 {
+ 8 |   const FOO1 = "two";
+   |         ^^^^ [2]
+ 9 | }
+10 | 
+   :
+16 | }
+17 | 
+18 | class A extends B {
+   |       ^ [1]
+19 |   use T1;
+20 | }
+
+error: Typing[4374] Some members in class `A` are incompatible with those declared in type `B` [1]
+-> Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants. [2]
+-> `FOO1` inherited from `I2` [3]
+-> conflicts with constant `FOO1` inherited from `T1`. [2]
+
+parent_override_trait3.php:18:17
+ 2 | 
+ 3 | trait T1 {
+ 4 |   const FOO1 = "one";
+   |         ^^^^ [2]
+ 5 | }
+ 6 | 
+ 7 | interface I2 {
+ 8 |   const FOO1 = "two";
+   |         ^^^^ [3]
+ 9 | }
+10 | 
+   :
+16 | }
+17 | 
+18 | class A extends B {
+   |                 ^ [1]
+19 |   use T1;
+20 | }
+
+2 errors found

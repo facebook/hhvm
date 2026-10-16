@@ -1,4 +1,11 @@
-ERROR: File "void_usage_placeholder.php", line 6, characters 15-16:
-You are using the return value of a `void` function (Typing[4119])
-  File "void_usage_placeholder.php", line 6, characters 15-16:
-  A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used) [1]
+
+void_usage_placeholder.php:6:15
+4 | 
+5 | function test(): void {
+6 |   takes_mixed($_);
+  |               ^^ [1]
+7 | }
+
+1 error found

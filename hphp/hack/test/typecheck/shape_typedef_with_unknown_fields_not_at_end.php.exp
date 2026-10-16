@@ -1,12 +1,58 @@
-ERROR: File "shape_typedef_with_unknown_fields_not_at_end.php", line 5, characters 6-6:
-A right parenthesis `)` is expected here. (Parsing[1002])
-ERROR: File "shape_typedef_with_unknown_fields_not_at_end.php", line 5, characters 6-6:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 3-5:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 7-8:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 10-12:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 13-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Parsing[1002] A right parenthesis `)` is expected here. [1]
+
+shape_typedef_with_unknown_fields_not_at_end.php:5:6
+3 | type ShapeWithUnknownFieldsNotAtEnd = shape(
+4 |   'a' => int,
+5 |   ...,
+  |      ^ [1]
+6 |   'b' => int,
+7 | );
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+shape_typedef_with_unknown_fields_not_at_end.php:5:6
+3 | type ShapeWithUnknownFieldsNotAtEnd = shape(
+4 |   'a' => int,
+5 |   ...,
+  |      ^ [1]
+6 |   'b' => int,
+7 | );
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+shape_typedef_with_unknown_fields_not_at_end.php:6:3
+4 |   'a' => int,
+5 |   ...,
+6 |   'b' => int,
+  |   ^^^ [1]
+7 | );
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+shape_typedef_with_unknown_fields_not_at_end.php:6:7
+4 |   'a' => int,
+5 |   ...,
+6 |   'b' => int,
+  |       ^^ [1]
+7 | );
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+shape_typedef_with_unknown_fields_not_at_end.php:6:10
+4 |   'a' => int,
+5 |   ...,
+6 |   'b' => int,
+  |          ^^^ [1]
+7 | );
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+shape_typedef_with_unknown_fields_not_at_end.php:6:13
+4 |   'a' => int,
+5 |   ...,
+6 |   'b' => int,
+  |             ^ [1]
+7 | );
+  | ^^ [1]
+
+6 errors found

@@ -1,2 +1,11 @@
-ERROR: File "unknown_xhp_class.php", line 6, characters 11-15:
-Unbound name: `:hello` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `:hello` (an object type) [1]
+
+unknown_xhp_class.php:6:11
+4 | 
+5 | function f(): void {
+6 |   $xhp = <hello />; // There is no XHP class named :hello
+  |           ^^^^^ [1]
+7 |   takes_int($xhp); // Prevent cascading errors
+8 | }
+
+1 error found

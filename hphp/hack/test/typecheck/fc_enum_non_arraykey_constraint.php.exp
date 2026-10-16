@@ -1,2 +1,11 @@
-ERROR: File "fc_enum_non_arraykey_constraint.php", line 4, characters 6-9:
-Enums must be `int` or `string` or `arraykey`, not `?string` (Typing[4024])
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `?string` [1]
+
+fc_enum_non_arraykey_constraint.php:4:6
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | enum Enum: string as ?string {
+  |      ^^^^ [1]
+5 |   VALUE = 'value';
+6 | }
+
+1 error found

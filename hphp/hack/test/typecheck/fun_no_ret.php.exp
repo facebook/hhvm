@@ -1,6 +1,16 @@
-ERROR: File "fun_no_ret.php", line 14, characters 10-13:
-Invalid return type (Typing[4110])
-  File "fun_no_ret.php", line 12, characters 17-19:
-  Expected `int`
-  File "fun_no_ret.php", line 13, characters 8-21:
-  But got `void` because this function does not always return a value
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [3]
+
+fun_no_ret.php:14:10
+10 |  */
+11 | 
+12 | function foo(): int {
+   |                 ^^^ [2]
+13 |   $x = function() { };
+   |        ^^^^^^^^^^^^^^ [3]
+14 |   return $x();
+   |          ^^^^ [1]
+15 | }
+
+1 error found

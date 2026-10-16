@@ -1,6 +1,28 @@
-ERROR: File "collection_missing_arrow_legacy.php", line 5, characters 8-25:
-Cannot use value initializer for `Map`. It requires `key => value`. (Parsing[1002])
-ERROR: File "collection_missing_arrow_legacy.php", line 5, characters 13-24:
-Keys must be specified for `\HH\Map` initialization (Naming[2034])
-ERROR: File "collection_missing_arrow_legacy.php", line 5, characters 13-24:
-Variable `__internal_placeholder` is undefined, or not always defined. (Naming[2050])
+error: Parsing[1002] Cannot use value initializer for `Map`. It requires `key => value`. [1]
+
+collection_missing_arrow_legacy.php:5:8
+3 | function test(): void {
+4 |   // Missing arrow in a key-value collection (Map)
+5 |   $x = Map {'just_value'};
+  |        ^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Naming[2034] Keys must be specified for `\HH\Map` initialization [1]
+
+collection_missing_arrow_legacy.php:5:13
+3 | function test(): void {
+4 |   // Missing arrow in a key-value collection (Map)
+5 |   $x = Map {'just_value'};
+  |             ^^^^^^^^^^^^ [1]
+6 | }
+
+error: Naming[2050] Variable `__internal_placeholder` is undefined, or not always defined. [1]
+
+collection_missing_arrow_legacy.php:5:13
+3 | function test(): void {
+4 |   // Missing arrow in a key-value collection (Map)
+5 |   $x = Map {'just_value'};
+  |             ^^^^^^^^^^^^ [1]
+6 | }
+
+3 errors found

@@ -1,10 +1,31 @@
-ERROR: File "fake_members13.php", line 8, characters 19-29:
-Class `Test` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "fake_members13.php", line 7, characters 12-13:
-  `$this->c` is not initialized.
-ERROR: File "fake_members13.php", line 14, characters 17-21:
-Invalid argument (Typing[4110])
-  File "fake_members13.php", line 18, characters 22-27:
-  Expected `string`
-  File "fake_members13.php", line 13, characters 16-16:
-  But got `D` from this `is` expression test
+error: NastCheck[3015] Class `Test` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->c` is not initialized. [2]
+
+fake_members13.php:8:19
+ 5 | 
+ 6 | class Test {
+ 7 |   public C $c;
+   |            ^^ [2]
+ 8 |   public function __construct() {
+   |                   ^^^^^^^^^^^ [1]
+ 9 |     //UNSAFE
+10 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `D` from this `is` expression test [3]
+
+fake_members13.php:14:17
+11 | }
+12 | function test(Test $t): void {
+13 |   if ($t->c is D) {
+   |                ^ [3]
+14 |     take_string($t->c);
+   |                 ^^^^^ [1]
+15 |   }
+16 | }
+17 | 
+18 | function take_string(string $s): void {}
+   |                      ^^^^^^ [2]
+
+2 errors found

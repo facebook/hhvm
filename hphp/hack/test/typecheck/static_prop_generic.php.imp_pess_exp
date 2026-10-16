@@ -1,18 +1,55 @@
-ERROR: File "static_prop_generic.php--fileb.php", line 7, characters 33-33:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_prop_generic.php--fileb.php", line 7, characters 33-33:
-  This is where the type of the static property was declared
-  File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
-  This is the class containing the static property
-ERROR: File "static_prop_generic.php--fileb.php", line 8, characters 10-10:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_prop_generic.php--filea.php", line 6, characters 33-33:
-  This is where the type of the static property was declared
-  File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
-  This is the class containing the static property
-ERROR: File "static_prop_generic.php--fileb.php", line 9, characters 10-10:
-A generic parameter cannot be used in the type of a static property (Typing[4279])
-  File "static_prop_generic.php--fileb.php", line 4, characters 33-33:
-  This is where the type of the static property was declared
-  File "static_prop_generic.php--fileb.php", line 6, characters 16-16:
-  This is the class containing the static property
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [1]
+-> This is the class containing the static property [2]
+
+static_prop_generic.php--fileb.php:7:33
+4 |   <<__LateInit>> private static T $p3;
+5 | }
+6 | abstract class A<T as X> {
+  |                ^ [2]
+7 |   <<__LateInit>> private static T $p1;
+  |                                 ^ [1]
+8 |   use T1<T>;
+9 |   use T2<T>;
+
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_prop_generic.php--fileb.php:8:10
+ 4 |   <<__LateInit>> private static T $p3;
+ 5 | }
+ 6 | abstract class A<T as X> {
+   |                ^ [3]
+ 7 |   <<__LateInit>> private static T $p1;
+ 8 |   use T1<T>;
+   |          ^ [1]
+ 9 |   use T2<T>;
+10 | }
+
+static_prop_generic.php--filea.php:6:33
+ 4 | 
+ 5 | trait T1<T as X> {
+ 6 |   <<__LateInit>> private static T $p2;
+   |                                 ^ [2]
+ 7 | }
+
+error: Typing[4279] A generic parameter cannot be used in the type of a static property [1]
+-> This is where the type of the static property was declared [2]
+-> This is the class containing the static property [3]
+
+static_prop_generic.php--fileb.php:9:10
+ 2 | 
+ 3 | trait T2<T as X> {
+ 4 |   <<__LateInit>> private static T $p3;
+   |                                 ^ [2]
+ 5 | }
+ 6 | abstract class A<T as X> {
+   |                ^ [3]
+ 7 |   <<__LateInit>> private static T $p1;
+ 8 |   use T1<T>;
+ 9 |   use T2<T>;
+   |          ^ [1]
+10 | }
+
+3 errors found

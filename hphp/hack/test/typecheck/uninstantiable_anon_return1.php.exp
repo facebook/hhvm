@@ -1,4 +1,16 @@
-ERROR: File "uninstantiable_anon_return1.php", line 7, characters 21-21:
-`C` is uninstantiable (Typing[4002])
-  File "uninstantiable_anon_return1.php", line 4, characters 22-22:
-  Declaration is here
+error: Typing[4002] `C` is uninstantiable [1]
+-> Declaration is here [2]
+
+uninstantiable_anon_return1.php:7:21
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | abstract final class C {}
+  |                      ^ [2]
+5 | 
+6 | function foo(): void {
+7 |   $_ = function(): ?C {
+  |                     ^ [1]
+8 |     return null;
+9 |   };
+
+1 error found

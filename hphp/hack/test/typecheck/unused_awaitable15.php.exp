@@ -1,12 +1,56 @@
-WARN: File "unused_awaitable15.php", line 8, characters 8-17:
-Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "unused_awaitable15.php", line 9, characters 8-17:
-Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-ERROR: File "unused_awaitable15.php", line 8, characters 15-17:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable15.php", line 3, characters 21-37:
-  This is why I think it is `Awaitable`
-ERROR: File "unused_awaitable15.php", line 9, characters 15-17:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable15.php", line 3, characters 21-37:
-  This is why I think it is `Awaitable`
+warning: Warn[12005] Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? [1]
+
+unused_awaitable15.php:8:8
+ 6 | 
+ 7 | function g(): (float, float) {
+ 8 |   $a = (float)f();
+   |        ^^^^^^^^^^ [1]
+ 9 |   $b = (float)f();
+10 |   return tuple($a, $b);
+
+warning: Warn[12005] Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? [1]
+
+unused_awaitable15.php:9:8
+ 7 | function g(): (float, float) {
+ 8 |   $a = (float)f();
+ 9 |   $b = (float)f();
+   |        ^^^^^^^^^^ [1]
+10 |   return tuple($a, $b);
+11 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable15.php:8:15
+ 1 | <?hh
+ 2 | 
+ 3 | async function f(): Awaitable<?float> {
+   |                     ^^^^^^^^^^^^^^^^^ [2]
+ 4 |   return 1.0;
+ 5 | }
+ 6 | 
+ 7 | function g(): (float, float) {
+ 8 |   $a = (float)f();
+   |               ^^^ [1]
+ 9 |   $b = (float)f();
+10 |   return tuple($a, $b);
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable15.php:9:15
+ 1 | <?hh
+ 2 | 
+ 3 | async function f(): Awaitable<?float> {
+   |                     ^^^^^^^^^^^^^^^^^ [2]
+ 4 |   return 1.0;
+ 5 | }
+ 6 | 
+ 7 | function g(): (float, float) {
+ 8 |   $a = (float)f();
+ 9 |   $b = (float)f();
+   |               ^^^ [1]
+10 |   return tuple($a, $b);
+11 | }
+
+4 errors found

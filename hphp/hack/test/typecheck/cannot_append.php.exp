@@ -1,4 +1,13 @@
-ERROR: File "cannot_append.php", line 4, characters 3-16:
-an object of type dict<int, string> does not allow array append (Typing[4006])
-  File "cannot_append.php", line 3, characters 14-30:
-  Definition is here
+error: Typing[4006] an object of type dict<int, string> does not allow array append [1]
+-> Definition is here [2]
+
+cannot_append.php:4:3
+1 | <?hh
+2 | 
+3 | function foo(dict<int, string> $x): void {
+  |              ^^^^^^^^^^^^^^^^^ [2]
+4 |   $x[] = "hello";
+  |   ^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

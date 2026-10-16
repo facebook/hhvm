@@ -1,26 +1,131 @@
-ERROR: File "class_constant_cycle.php", line 5, characters 13-13:
-Cannot declare self-referencing constant A in C0 (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 6, characters 13-13:
-Cannot declare self-referencing constant B in C0 (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 10, characters 13-13:
-Cannot declare self-referencing constant A in D0 (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 11, characters 13-13:
-Cannot declare self-referencing constant B in D0 (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 12, characters 13-13:
-Cannot declare self-referencing constant C in D0 (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 16, characters 13-13:
-Cannot declare self-referencing constant A in C (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 17, characters 13-13:
-Cannot declare self-referencing constant B in C (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 22, characters 13-18:
-Cannot declare self-referencing constant C_SELF in C (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 23, characters 13-19:
-Cannot declare self-referencing constant C_SELF2 in C (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 32, characters 13-13:
-Cannot declare self-referencing constant X in D (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 37, characters 13-13:
-Cannot declare self-referencing constant X in CE (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 48, characters 15-15:
-Cannot declare self-referencing constant A in E_KO (Typing[4424])
-ERROR: File "class_constant_cycle.php", line 49, characters 15-15:
-Cannot declare self-referencing constant B in E_KO (Typing[4424])
+error: Typing[4424] Cannot declare self-referencing constant A in C0 [1]
+
+class_constant_cycle.php:5:13
+3 | /* cycles without inheritance */
+4 | class C0 {
+5 |   const int A = C0::B;
+  |             ^ [1]
+6 |   const int B = C0::A;
+7 | }
+
+error: Typing[4424] Cannot declare self-referencing constant B in C0 [1]
+
+class_constant_cycle.php:6:13
+4 | class C0 {
+5 |   const int A = C0::B;
+6 |   const int B = C0::A;
+  |             ^ [1]
+7 | }
+8 | 
+
+error: Typing[4424] Cannot declare self-referencing constant A in D0 [1]
+
+class_constant_cycle.php:10:13
+ 8 | 
+ 9 | class D0 {
+10 |   const int A = self::C;
+   |             ^ [1]
+11 |   const int B = self::A;
+12 |   const int C = self::B;
+
+error: Typing[4424] Cannot declare self-referencing constant B in D0 [1]
+
+class_constant_cycle.php:11:13
+ 9 | class D0 {
+10 |   const int A = self::C;
+11 |   const int B = self::A;
+   |             ^ [1]
+12 |   const int C = self::B;
+13 | }
+
+error: Typing[4424] Cannot declare self-referencing constant C in D0 [1]
+
+class_constant_cycle.php:12:13
+10 |   const int A = self::C;
+11 |   const int B = self::A;
+12 |   const int C = self::B;
+   |             ^ [1]
+13 | }
+14 | 
+
+error: Typing[4424] Cannot declare self-referencing constant A in C [1]
+
+class_constant_cycle.php:16:13
+14 | 
+15 | class C {
+16 |   const int A = D::X + Z::L;
+   |             ^ [1]
+17 |   const int B = self::A;
+18 | 
+
+error: Typing[4424] Cannot declare self-referencing constant B in C [1]
+
+class_constant_cycle.php:17:13
+15 | class C {
+16 |   const int A = D::X + Z::L;
+17 |   const int B = self::A;
+   |             ^ [1]
+18 | 
+19 |   const int W = self::WW;
+
+error: Typing[4424] Cannot declare self-referencing constant C_SELF in C [1]
+
+class_constant_cycle.php:22:13
+20 |   const int WW = Z::L + Z::Y;
+21 | 
+22 |   const int C_SELF = self::C_SELF;
+   |             ^^^^^^ [1]
+23 |   const int C_SELF2 = C::C_SELF2;
+24 | }
+
+error: Typing[4424] Cannot declare self-referencing constant C_SELF2 in C [1]
+
+class_constant_cycle.php:23:13
+21 | 
+22 |   const int C_SELF = self::C_SELF;
+23 |   const int C_SELF2 = C::C_SELF2;
+   |             ^^^^^^^ [1]
+24 | }
+25 | 
+
+error: Typing[4424] Cannot declare self-referencing constant X in D [1]
+
+class_constant_cycle.php:32:13
+30 | 
+31 | class D {
+32 |   const int X = C::B;
+   |             ^ [1]
+33 | }
+34 | 
+
+error: Typing[4424] Cannot declare self-referencing constant X in CE [1]
+
+class_constant_cycle.php:37:13
+35 | /* cycles with inheritance */
+36 | class CE {
+37 |   const int X = CF::X;
+   |             ^ [1]
+38 | }
+39 | 
+
+error: Typing[4424] Cannot declare self-referencing constant A in E_KO [1]
+
+class_constant_cycle.php:48:15
+46 | /* Indirect cycle: we report only in E_KO, not in F_OK */
+47 | class E_KO {
+48 |     const int A = E_KO::B; // Error here
+   |               ^ [1]
+49 |     const int B = E_KO::A; // Error here
+50 | }
+
+error: Typing[4424] Cannot declare self-referencing constant B in E_KO [1]
+
+class_constant_cycle.php:49:15
+47 | class E_KO {
+48 |     const int A = E_KO::B; // Error here
+49 |     const int B = E_KO::A; // Error here
+   |               ^ [1]
+50 | }
+51 | 
+
+13 errors found

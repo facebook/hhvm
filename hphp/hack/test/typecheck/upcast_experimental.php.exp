@@ -1,2 +1,10 @@
-ERROR: File "upcast_experimental.php", line 4, characters 3-15:
-Cannot use unstable feature: `upcast_expression` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `upcast_expression` [1]
+
+upcast_experimental.php:4:3
+2 | 
+3 | function f(int $x) : void {
+4 |   $x upcast num;
+  |   ^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

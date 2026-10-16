@@ -1,14 +1,70 @@
-ERROR: File "number_literal.php", line 13, characters 10-28:
-9223372036854775808 is out of the range of 64-bit float values (Parsing[1002])
-ERROR: File "number_literal.php", line 13, characters 10-28:
-Decimal number is too big: `9223372036854775808` (Parsing[1002])
-ERROR: File "number_literal.php", line 14, characters 10-27:
-0x8000000000000000 is out of the range of 64-bit float values (Parsing[1002])
-ERROR: File "number_literal.php", line 15, characters 10-75:
-0b1000000000000000000000000000000000000000000000000000000000000000 is out of the range of 64-bit float values (Parsing[1002])
-ERROR: File "number_literal.php", line 16, characters 10-32:
-01000000000000000000000 is out of the range of 64-bit float values (Parsing[1002])
-ERROR: File "number_literal.php", line 18, characters 10-12:
-Invalid digit for octal integers (Parsing[1002])
-ERROR: File "number_literal.php", line 19, characters 13-13:
-Encountered unexpected token `2`. (Parsing[1002])
+error: Parsing[1002] 9223372036854775808 is out of the range of 64-bit float values [1]
+
+number_literal.php:13:10
+11 | 
+12 | function f(): void {
+13 |   $dec = 9223372036854775808;
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+14 |   $hex = 0x8000000000000000;
+15 |   $bin = 0b1000000000000000000000000000000000000000000000000000000000000000;
+
+error: Parsing[1002] Decimal number is too big: `9223372036854775808` [1]
+
+number_literal.php:13:10
+11 | 
+12 | function f(): void {
+13 |   $dec = 9223372036854775808;
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+14 |   $hex = 0x8000000000000000;
+15 |   $bin = 0b1000000000000000000000000000000000000000000000000000000000000000;
+
+error: Parsing[1002] 0x8000000000000000 is out of the range of 64-bit float values [1]
+
+number_literal.php:14:10
+12 | function f(): void {
+13 |   $dec = 9223372036854775808;
+14 |   $hex = 0x8000000000000000;
+   |          ^^^^^^^^^^^^^^^^^^ [1]
+15 |   $bin = 0b1000000000000000000000000000000000000000000000000000000000000000;
+16 |   $oct = 01000000000000000000000;
+
+error: Parsing[1002] 0b1000000000000000000000000000000000000000000000000000000000000000 is out of the range of 64-bit float values [1]
+
+number_literal.php:15:10
+13 |   $dec = 9223372036854775808;
+14 |   $hex = 0x8000000000000000;
+15 |   $bin = 0b1000000000000000000000000000000000000000000000000000000000000000;
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |   $oct = 01000000000000000000000;
+17 | 
+
+error: Parsing[1002] 01000000000000000000000 is out of the range of 64-bit float values [1]
+
+number_literal.php:16:10
+14 |   $hex = 0x8000000000000000;
+15 |   $bin = 0b1000000000000000000000000000000000000000000000000000000000000000;
+16 |   $oct = 01000000000000000000000;
+   |          ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 | 
+18 |   $oct = 018;
+
+error: Parsing[1002] Invalid digit for octal integers [1]
+
+number_literal.php:18:10
+16 |   $oct = 01000000000000000000000;
+17 | 
+18 |   $oct = 018;
+   |          ^^^ [1]
+19 |   $bin = 0b12;
+20 | }
+
+error: Parsing[1002] Encountered unexpected token `2`. [1]
+
+number_literal.php:19:13
+17 | 
+18 |   $oct = 018;
+19 |   $bin = 0b12;
+   |             ^ [1]
+20 | }
+
+7 errors found

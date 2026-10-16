@@ -1,2 +1,11 @@
-ERROR: File "list_array_assign.php", line 4, characters 8-19:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+list_array_assign.php:4:8
+2 | 
+3 | function test(varray<int> $v): (varray<int>, int, int) {
+4 |   $a = list($x, $y) = $v; // list returns an array, so the $a = list() is ok.
+  |        ^^^^^^^^^^^^ [1]
+5 |   return tuple($a, $x, $y);
+6 | }
+
+1 error found

@@ -1,10 +1,53 @@
-ERROR: File "invalid_php7_anon_fn.php", line 4, characters 20-20:
-Bad signature: use(...) should occur after the type (Parsing[1002])
-ERROR: File "invalid_php7_anon_fn.php", line 4, characters 22-37:
-Cannot use collection initialization for non-collection class. (Parsing[1002])
-ERROR: File "invalid_php7_anon_fn.php", line 4, characters 20-20:
-Unbound name: `:` (a global constant) (Naming[2049])
-ERROR: File "invalid_php7_anon_fn.php", line 4, characters 22-24:
-Unexpected collection type `int` (Naming[2013])
-ERROR: File "invalid_php7_anon_fn.php", line 4, characters 20-20:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Bad signature: use(...) should occur after the type [1]
+
+invalid_php7_anon_fn.php:4:20
+2 | 
+3 | function f(): int {
+4 |   function() use (): int {
+  |                    ^ [1]
+5 |     return 1;
+6 |   };
+
+error: Parsing[1002] Cannot use collection initialization for non-collection class. [1]
+
+invalid_php7_anon_fn.php:4:22
+2 | 
+3 | function f(): int {
+4 |   function() use (): int {
+  |                      ^^^^^ [1]
+5 |     return 1;
+  |     ^^^^^^ [1]
+6 |   };
+7 |   return 1;
+
+error: Naming[2049] Unbound name: `:` (a global constant) [1]
+
+invalid_php7_anon_fn.php:4:20
+2 | 
+3 | function f(): int {
+4 |   function() use (): int {
+  |                    ^ [1]
+5 |     return 1;
+6 |   };
+
+error: Naming[2013] Unexpected collection type `int` [1]
+
+invalid_php7_anon_fn.php:4:22
+2 | 
+3 | function f(): int {
+4 |   function() use (): int {
+  |                      ^^^ [1]
+5 |     return 1;
+6 |   };
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+invalid_php7_anon_fn.php:4:20
+2 | 
+3 | function f(): int {
+4 |   function() use (): int {
+  |                    ^ [1]
+5 |     return 1;
+6 |   };
+
+5 errors found

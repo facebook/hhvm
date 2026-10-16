@@ -1,6 +1,14 @@
-ERROR: File "arg_null.php", line 12, characters 18-19:
-Wrong type hint (Typing[4331])
-  File "arg_null.php", line 12, characters 14-16:
-  Expected `int`
-  File "arg_null.php", line 12, characters 23-26:
-  But got `null`
+error: Typing[4331] Wrong type hint [1]
+-> Expected `int` [2]
+-> But got `null` [3]
+
+arg_null.php:12:18
+10 |  */
+11 | 
+12 | function foo(int $x = null): void {
+   |              ^^^ [2]
+   |                  ^^ [1]
+   |                       ^^^^ [3]
+13 | }
+
+1 error found

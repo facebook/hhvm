@@ -1,6 +1,19 @@
-ERROR: File "function_hint_with_variadic_parameter_not_covariant_2.php", line 12, characters 19-30:
-Invalid argument (Typing[4110])
-  File "function_hint_with_variadic_parameter_not_covariant_2.php", line 7, characters 26-27:
-  Expected `B` (variadic argument)
-  File "function_hint_with_variadic_parameter_not_covariant_2.php", line 9, characters 36-36:
-  But got `A`
+error: Typing[4110] Invalid argument [1]
+-> Expected `B` (variadic argument) [2]
+-> But got `A` [3]
+
+function_hint_with_variadic_parameter_not_covariant_2.php:12:19
+ 5 | class B extends A {}
+ 6 | 
+ 7 | function variadic_B(B ...$y): void {}
+   |                          ^^ [2]
+ 8 | 
+ 9 | function hint_variadic_A((function(A...): void) $f): void {}
+   |                                    ^ [3]
+10 | 
+11 | function test(): void {
+12 |   hint_variadic_A(variadic_B<>);
+   |                   ^^^^^^^^^^^^ [1]
+13 | }
+
+1 error found

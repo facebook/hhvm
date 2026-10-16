@@ -1,4 +1,17 @@
-ERROR: File "naming_fail_test7.php", line 18, characters 3-4:
-Variable `$k` is undefined, or not always defined. (Naming[2050])
-  File "naming_fail_test7.php", line 14, characters 27-28:
-  Did you mean `$x` instead?
+error: Naming[2050] Variable `$k` is undefined, or not always defined. [1]
+-> Did you mean `$x` instead? [2]
+
+naming_fail_test7.php:18:3
+12 | // testing loops scoping
+13 | 
+14 | function stmt(Vector<int> $x): void {
+   |                           ^^ [2]
+15 |   foreach($x as $k => $v) {
+16 |   }
+17 | 
+18 |   $k++;
+   |   ^^ [1]
+19 | 
+20 | }
+
+1 error found

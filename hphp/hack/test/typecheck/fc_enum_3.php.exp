@@ -1,8 +1,25 @@
-ERROR: File "fc_enum_3.php", line 18, characters 9-16:
-Invalid argument (Typing[4110])
-  File "fc_enum_3.php", line 15, characters 16-18:
-  Expected `int`
-  File "fc_enum_3.php", line 5, characters 11-13:
-  But got `arraykey`
-  File "fc_enum_3.php", line 5, characters 6-8:
-    by the definition of `Foo` arising from an implicit `as arraykey` constraint on this type
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+->   by the definition of `Foo` arising from an implicit `as arraykey` constraint on this type [4]
+
+fc_enum_3.php:18:9
+ 3 | // Should fail because no constraint
+ 4 | 
+ 5 | enum Foo: int {
+   |      ^^^ [4]
+   |           ^^^ [3]
+ 6 |   FOO = 1;
+ 7 |   BAR = 2;
+   :
+13 | }
+14 | 
+15 | function test2(int $x): void {}
+   |                ^^^ [2]
+16 | 
+17 | function lurr(): void {
+18 |   test2(Foo::BAR);
+   |         ^^^^^^^^ [1]
+19 | }
+
+1 error found

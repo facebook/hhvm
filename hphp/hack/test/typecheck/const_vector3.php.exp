@@ -1,4 +1,13 @@
-ERROR: File "const_vector3.php", line 13, characters 3-14:
-an object of type ConstVector<string> does not allow array append (Typing[4006])
-  File "const_vector3.php", line 12, characters 14-32:
-  Definition is here
+error: Typing[4006] an object of type ConstVector<string> does not allow array append [1]
+-> Definition is here [2]
+
+const_vector3.php:13:3
+10 |  */
+11 | 
+12 | function foo(ConstVector<string> $v): void {
+   |              ^^^^^^^^^^^^^^^^^^^ [2]
+13 |   $v[] = "foo";
+   |   ^^^^^^^^^^^^ [1]
+14 | }
+
+1 error found

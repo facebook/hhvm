@@ -1,8 +1,37 @@
-ERROR: File "string_expressions17.php", line 14, characters 17-24:
-The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
-ERROR: File "string_expressions17.php", line 14, characters 18-24:
-Cannot use collection initialization for non-collection class. (Parsing[1002])
-ERROR: File "string_expressions17.php", line 14, characters 25-25:
-A right brace `}` is expected here. (Parsing[1002])
-ERROR: File "string_expressions17.php", line 14, characters 18-22:
-Unexpected collection type `error` (Naming[2013])
+error: Parsing[1002] The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. [1]
+
+string_expressions17.php:14:17
+12 | function f(): string {
+13 |   $x = 'error';
+14 |   return "I am ${error{}";
+   |                 ^^^^^^^^ [1]
+15 | }
+
+error: Parsing[1002] Cannot use collection initialization for non-collection class. [1]
+
+string_expressions17.php:14:18
+12 | function f(): string {
+13 |   $x = 'error';
+14 |   return "I am ${error{}";
+   |                  ^^^^^^^ [1]
+15 | }
+
+error: Parsing[1002] A right brace `}` is expected here. [1]
+
+string_expressions17.php:14:25
+12 | function f(): string {
+13 |   $x = 'error';
+14 |   return "I am ${error{}";
+   |                         ^ [1]
+15 | }
+
+error: Naming[2013] Unexpected collection type `error` [1]
+
+string_expressions17.php:14:18
+12 | function f(): string {
+13 |   $x = 'error';
+14 |   return "I am ${error{}";
+   |                  ^^^^^ [1]
+15 | }
+
+4 errors found

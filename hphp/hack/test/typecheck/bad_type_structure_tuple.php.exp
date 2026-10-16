@@ -42,47 +42,305 @@ File "bad_type_structure_tuple.php", line 33, characters 3-31:
   vec<mixed>
 File "bad_type_structure_tuple.php", line 36, characters 3-22:
   TypeStructureKind
-ERROR: File "bad_type_structure_tuple.php", line 10, characters 15-25:
-The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-16:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 11, characters 15-24:
-The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 61, characters 6-15:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 12, characters 15-22:
-This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
-ERROR: File "bad_type_structure_tuple.php", line 13, characters 15-27:
-The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 69, characters 6-18:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 14, characters 15-27:
-The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 68, characters 6-18:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 15, characters 15-29:
-The field `generic_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 70, characters 6-20:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 28, characters 15-25:
-The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 64, characters 6-16:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 29, characters 15-24:
-The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 61, characters 6-15:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 30, characters 15-22:
-This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 60, characters 31-829:
-  The shape is defined here
-ERROR: File "bad_type_structure_tuple.php", line 31, characters 15-27:
-The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 69, characters 6-18:
-  This is where the field was declared as optional.
-ERROR: File "bad_type_structure_tuple.php", line 32, characters 15-27:
-The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "typestructure.hhi", line 68, characters 6-18:
-  This is where the field was declared as optional.
+error: Typing[4165] The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:10:15
+ 8 | 
+ 9 |   // any other field will fail
+10 |   hh_show($ts['classname']);
+   |               ^^^^^^^^^^^ [1]
+11 |   hh_show($ts['nullable']);
+12 |   hh_show($ts['fields']);
+
+typestructure.hhi:64:6
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |      ^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+error: Typing[4165] The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:11:15
+ 9 |   // any other field will fail
+10 |   hh_show($ts['classname']);
+11 |   hh_show($ts['nullable']);
+   |               ^^^^^^^^^^ [1]
+12 |   hh_show($ts['fields']);
+13 |   hh_show($ts['param_types']);
+
+typestructure.hhi:61:6
+59 |   // additional fields other than those specified here.
+60 |   newtype TypeStructure<T> as shape(
+61 |     ?'nullable' => bool,
+   |      ^^^^^^^^^^ [2]
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+
+error: Typing[4108] This shape doesn't have a field `fields` [1]
+-> The shape is defined here [2]
+
+bad_type_structure_tuple.php:12:15
+10 |   hh_show($ts['classname']);
+11 |   hh_show($ts['nullable']);
+12 |   hh_show($ts['fields']);
+   |               ^^^^^^^^ [1]
+13 |   hh_show($ts['param_types']);
+14 |   hh_show($ts['return_type']);
+
+typestructure.hhi:60:31
+58 |   // should be considered optional. Additionally, shapes of this type may contain
+59 |   // additional fields other than those specified here.
+60 |   newtype TypeStructure<T> as shape(
+   |                               ^^^^^^ [2]
+61 |     ?'nullable' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^ [2]
+62 |     'kind' => TypeStructureKind,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+63 |     ?'name' => string,
+   |     ^^^^^^^^^^^^^^^^^^ [2]
+64 |     ?'classname' => classname<T>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+66 |     ?'optional_elem_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+67 |     ?'variadic_type' => mixed,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+68 |     ?'return_type' => mixed,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+69 |     ?'param_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+70 |     ?'generic_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+71 |     ?'root_name' => string,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+72 |     ?'access_list' => varray<string>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+73 |     'fields' => ?darray<arraykey, mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+74 |     ?'allows_unknown_fields' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+75 |     ?'is_cls_cns' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [2]
+76 |     ?'optional_shape_field' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+77 |     ?'value' => mixed,
+   |     ^^^^^^^^^^^^^^^^^^ [2]
+78 |     ?'typevars' => string,
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [2]
+79 |     ?'alias' => string,
+   |     ^^^^^^^^^^^^^^^^^^^ [2]
+80 |     ?'exact' => bool,
+   |     ^^^^^^^^^^^^^^^^^ [2]
+81 |     ?'like' => bool,
+   |     ^^^^^^^^^^^^^^^^ [2]
+82 |     ?'with_refinements' => dict<string, shape('is_ctx' => bool, ?'equals' => mixed, ?'as' => vec<mixed>, ?'super' => vec<mixed>)>
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+83 |   ) = shape(
+   |   ^ [2]
+84 |     ?'nullable' => bool,
+85 |     'kind' => TypeStructureKind,
+
+error: Typing[4165] The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:13:15
+11 |   hh_show($ts['nullable']);
+12 |   hh_show($ts['fields']);
+13 |   hh_show($ts['param_types']);
+   |               ^^^^^^^^^^^^^ [1]
+14 |   hh_show($ts['return_type']);
+15 |   hh_show($ts['generic_types']);
+
+typestructure.hhi:69:6
+67 |     ?'variadic_type' => mixed,
+68 |     ?'return_type' => mixed,
+69 |     ?'param_types' => varray<mixed>,
+   |      ^^^^^^^^^^^^^ [2]
+70 |     ?'generic_types' => varray<mixed>,
+71 |     ?'root_name' => string,
+
+error: Typing[4165] The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:14:15
+12 |   hh_show($ts['fields']);
+13 |   hh_show($ts['param_types']);
+14 |   hh_show($ts['return_type']);
+   |               ^^^^^^^^^^^^^ [1]
+15 |   hh_show($ts['generic_types']);
+16 | 
+
+typestructure.hhi:68:6
+66 |     ?'optional_elem_types' => varray<mixed>,
+67 |     ?'variadic_type' => mixed,
+68 |     ?'return_type' => mixed,
+   |      ^^^^^^^^^^^^^ [2]
+69 |     ?'param_types' => varray<mixed>,
+70 |     ?'generic_types' => varray<mixed>,
+
+error: Typing[4165] The field `generic_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:15:15
+13 |   hh_show($ts['param_types']);
+14 |   hh_show($ts['return_type']);
+15 |   hh_show($ts['generic_types']);
+   |               ^^^^^^^^^^^^^^^ [1]
+16 | 
+17 |   // make sure kind still works
+
+typestructure.hhi:70:6
+68 |     ?'return_type' => mixed,
+69 |     ?'param_types' => varray<mixed>,
+70 |     ?'generic_types' => varray<mixed>,
+   |      ^^^^^^^^^^^^^^^ [2]
+71 |     ?'root_name' => string,
+72 |     ?'access_list' => varray<string>,
+
+error: Typing[4165] The field `classname` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:28:15
+26 | 
+27 |   // any other field will fail
+28 |   hh_show($ts['classname']);
+   |               ^^^^^^^^^^^ [1]
+29 |   hh_show($ts['nullable']);
+30 |   hh_show($ts['fields']);
+
+typestructure.hhi:64:6
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+64 |     ?'classname' => classname<T>,
+   |      ^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+66 |     ?'optional_elem_types' => varray<mixed>,
+
+error: Typing[4165] The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:29:15
+27 |   // any other field will fail
+28 |   hh_show($ts['classname']);
+29 |   hh_show($ts['nullable']);
+   |               ^^^^^^^^^^ [1]
+30 |   hh_show($ts['fields']);
+31 |   hh_show($ts['param_types']);
+
+typestructure.hhi:61:6
+59 |   // additional fields other than those specified here.
+60 |   newtype TypeStructure<T> as shape(
+61 |     ?'nullable' => bool,
+   |      ^^^^^^^^^^ [2]
+62 |     'kind' => TypeStructureKind,
+63 |     ?'name' => string,
+
+error: Typing[4108] This shape doesn't have a field `fields` [1]
+-> The shape is defined here [2]
+
+bad_type_structure_tuple.php:30:15
+28 |   hh_show($ts['classname']);
+29 |   hh_show($ts['nullable']);
+30 |   hh_show($ts['fields']);
+   |               ^^^^^^^^ [1]
+31 |   hh_show($ts['param_types']);
+32 |   hh_show($ts['return_type']);
+
+typestructure.hhi:60:31
+58 |   // should be considered optional. Additionally, shapes of this type may contain
+59 |   // additional fields other than those specified here.
+60 |   newtype TypeStructure<T> as shape(
+   |                               ^^^^^^ [2]
+61 |     ?'nullable' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^ [2]
+62 |     'kind' => TypeStructureKind,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+63 |     ?'name' => string,
+   |     ^^^^^^^^^^^^^^^^^^ [2]
+64 |     ?'classname' => classname<T>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+65 |     ?'elem_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+66 |     ?'optional_elem_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+67 |     ?'variadic_type' => mixed,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+68 |     ?'return_type' => mixed,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+69 |     ?'param_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+70 |     ?'generic_types' => varray<mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+71 |     ?'root_name' => string,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ [2]
+72 |     ?'access_list' => varray<string>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+73 |     'fields' => ?darray<arraykey, mixed>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+74 |     ?'allows_unknown_fields' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+75 |     ?'is_cls_cns' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [2]
+76 |     ?'optional_shape_field' => bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+77 |     ?'value' => mixed,
+   |     ^^^^^^^^^^^^^^^^^^ [2]
+78 |     ?'typevars' => string,
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [2]
+79 |     ?'alias' => string,
+   |     ^^^^^^^^^^^^^^^^^^^ [2]
+80 |     ?'exact' => bool,
+   |     ^^^^^^^^^^^^^^^^^ [2]
+81 |     ?'like' => bool,
+   |     ^^^^^^^^^^^^^^^^ [2]
+82 |     ?'with_refinements' => dict<string, shape('is_ctx' => bool, ?'equals' => mixed, ?'as' => vec<mixed>, ?'super' => vec<mixed>)>
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+83 |   ) = shape(
+   |   ^ [2]
+84 |     ?'nullable' => bool,
+85 |     'kind' => TypeStructureKind,
+
+error: Typing[4165] The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:31:15
+29 |   hh_show($ts['nullable']);
+30 |   hh_show($ts['fields']);
+31 |   hh_show($ts['param_types']);
+   |               ^^^^^^^^^^^^^ [1]
+32 |   hh_show($ts['return_type']);
+33 |   hh_show($ts['generic_types']);
+
+typestructure.hhi:69:6
+67 |     ?'variadic_type' => mixed,
+68 |     ?'return_type' => mixed,
+69 |     ?'param_types' => varray<mixed>,
+   |      ^^^^^^^^^^^^^ [2]
+70 |     ?'generic_types' => varray<mixed>,
+71 |     ?'root_name' => string,
+
+error: Typing[4165] The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. [1]
+-> This is where the field was declared as optional. [2]
+
+bad_type_structure_tuple.php:32:15
+30 |   hh_show($ts['fields']);
+31 |   hh_show($ts['param_types']);
+32 |   hh_show($ts['return_type']);
+   |               ^^^^^^^^^^^^^ [1]
+33 |   hh_show($ts['generic_types']);
+34 | 
+
+typestructure.hhi:68:6
+66 |     ?'optional_elem_types' => varray<mixed>,
+67 |     ?'variadic_type' => mixed,
+68 |     ?'return_type' => mixed,
+   |      ^^^^^^^^^^^^^ [2]
+69 |     ?'param_types' => varray<mixed>,
+70 |     ?'generic_types' => varray<mixed>,
+
+11 errors found

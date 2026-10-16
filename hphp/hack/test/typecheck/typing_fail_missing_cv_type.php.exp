@@ -1,14 +1,71 @@
-WARN: File "typing_fail_missing_cv_type.php", line 18, characters 12-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "typing_fail_missing_cv_type.php", line 18, characters 19-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "typing_fail_missing_cv_type.php", line 22, characters 12-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "typing_fail_missing_cv_type.php", line 22, characters 19-19:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "typing_fail_missing_cv_type.php", line 13, characters 11-12:
-Please add a type hint `private SomeType $a` (Naming[2001])
-ERROR: File "typing_fail_missing_cv_type.php", line 14, characters 13-14:
-Please add a type hint `protected SomeType $b` (Naming[2001])
-ERROR: File "typing_fail_missing_cv_type.php", line 15, characters 10-11:
-Please add a type hint `public SomeType $c` (Naming[2001])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+typing_fail_missing_cv_type.php:18:12
+16 | 
+17 |   public function x(): int {
+18 |     return $this->c;
+   |            ^^^^^^^^ [1]
+19 |   }
+20 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+typing_fail_missing_cv_type.php:18:19
+16 | 
+17 |   public function x(): int {
+18 |     return $this->c;
+   |                   ^ [1]
+19 |   }
+20 | 
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+typing_fail_missing_cv_type.php:22:12
+20 | 
+21 |   public function x2(): string {
+22 |     return $this->c;
+   |            ^^^^^^^^ [1]
+23 |   }
+24 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+typing_fail_missing_cv_type.php:22:19
+20 | 
+21 |   public function x2(): string {
+22 |     return $this->c;
+   |                   ^ [1]
+23 |   }
+24 | }
+
+error: Naming[2001] Please add a type hint `private SomeType $a` [1]
+
+typing_fail_missing_cv_type.php:13:11
+11 | 
+12 | class Foo {
+13 |   private $a;
+   |           ^^ [1]
+14 |   protected $b;
+15 |   public $c;
+
+error: Naming[2001] Please add a type hint `protected SomeType $b` [1]
+
+typing_fail_missing_cv_type.php:14:13
+12 | class Foo {
+13 |   private $a;
+14 |   protected $b;
+   |             ^^ [1]
+15 |   public $c;
+16 | 
+
+error: Naming[2001] Please add a type hint `public SomeType $c` [1]
+
+typing_fail_missing_cv_type.php:15:10
+13 |   private $a;
+14 |   protected $b;
+15 |   public $c;
+   |          ^^ [1]
+16 | 
+17 |   public function x(): int {
+
+7 errors found

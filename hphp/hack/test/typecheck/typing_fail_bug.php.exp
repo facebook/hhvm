@@ -1,6 +1,20 @@
-ERROR: File "typing_fail_bug.php", line 18, characters 5-8:
-Invalid argument (Typing[4110])
-  File "typing_fail_bug.php", line 21, characters 12-17:
-  Expected `string`
-  File "typing_fail_bug.php", line 14, characters 12-12:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+typing_fail_bug.php:18:5
+12 | function f(mixed $arg): void {
+13 |   if ($arg is int) {
+14 |     $tmp = 0;
+   |            ^ [3]
+15 |   } else {
+16 |     throw new Exception('');
+17 |   }
+18 |   g($tmp);
+   |     ^^^^ [1]
+19 | }
+20 | 
+21 | function g(string $s): void {}
+   |            ^^^^^^ [2]
+
+1 error found

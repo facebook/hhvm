@@ -1,6 +1,20 @@
-ERROR: File "hh_log_level_example.php", line 4, characters 23-25:
-Invalid argument (Typing[4110])
-  File "hh_single_type_check_magic.hhi", line 7, characters 56-58:
-  Expected `int`
-  File "hh_log_level_example.php", line 4, characters 23-25:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+hh_log_level_example.php:4:23
+2 | 
+3 | function f(): void {
+4 |   hh_log_level("sub", "1");
+  |                       ^^^ [1]
+5 | }
+
+hh_single_type_check_magic.hhi:7:56
+5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+  |                                                        ^^^ [2]
+8 | <<__NoAutoDynamic>> function hh_force_solve()[]:void {}<<__NoAutoDynamic>> function hh_time(string $command, string $tag = '_'):void {}
+9 | <<__NoAutoDynamic>> function hh_sleep(int $seconds)[]:void {}
+
+1 error found

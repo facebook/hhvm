@@ -1,8 +1,27 @@
-ERROR: File "super_constraint_2.php", line 27, characters 12-26:
-Invalid return type (Typing[4110])
-  File "super_constraint_2.php", line 26, characters 6-18:
-  Expected `FooDerived123`
-  File "super_constraint_2.php", line 23, characters 10-15:
-  But got `Foo123`
-  File "super_constraint_2.php", line 10, characters 52-53:
-    via this generic `Tu`
+error: Typing[4110] Invalid return type [1]
+-> Expected `FooDerived123` [2]
+-> But got `Foo123` [3]
+->   via this generic `Tu` [4]
+
+super_constraint_2.php:27:12
+ 8 |     return $this->x;
+ 9 |   }
+10 |   public function foo<Tu super T>(Tu $x, bool $b): Tu {
+   |                                                    ^^ [4]
+11 |     if ($b) {
+12 |       return $this->x;
+   :
+21 | class Woo {
+22 |   public function test1(
+23 |     C123<Foo123> $c,
+   |          ^^^^^^ [3]
+24 |     FooDerived123 $x,
+25 |     bool $b,
+26 |   ): FooDerived123 {
+   |      ^^^^^^^^^^^^^ [2]
+27 |     return $c->foo($x, $b);
+   |            ^^^^^^^^^^^^^^^ [1]
+28 |   }
+29 | }
+
+1 error found

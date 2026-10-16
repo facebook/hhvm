@@ -1,6 +1,13 @@
-ERROR: File "printf_opt_2.php", line 21, characters 17-17:
-Invalid argument (Typing[4110])
-  File "printf_opt_2.php", line 21, characters 11-14:
-  Expected `string` because of the `%s` format specifier
-  File "printf_opt_2.php", line 21, characters 17-17:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` because of the `%s` format specifier [2]
+-> But got `int` [1]
+
+printf_opt_2.php:21:17
+19 | }
+20 | function _() : void {
+21 |   takesFS('%s', 1);
+   |           ^^^^ [2]
+   |                 ^ [1]
+22 | }
+
+1 error found

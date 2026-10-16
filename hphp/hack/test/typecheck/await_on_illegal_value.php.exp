@@ -1,14 +1,36 @@
-ERROR: File "await_on_illegal_value.php", line 12, characters 21-24:
-`async` functions must have an `Awaitable` return type. (Parsing[1002])
-ERROR: File "await_on_illegal_value.php", line 12, characters 16-16:
-Invalid return type (Typing[4336])
-  File "await_on_illegal_value.php", line 12, characters 21-24:
-  Expected `void`
-  File "await_on_illegal_value.php", line 12, characters 16-16:
-  But got `Awaitable<void>` because this function does not always return a value
-ERROR: File "await_on_illegal_value.php", line 13, characters 3-10:
-`await` can only operate on an `Awaitable` (Typing[4110])
-  File "await_on_illegal_value.php", line 13, characters 3-10:
-  Expected `Awaitable<nothing>`
-  File "await_on_illegal_value.php", line 13, characters 9-10:
-  But got `int`
+error: Parsing[1002] `async` functions must have an `Awaitable` return type. [1]
+
+await_on_illegal_value.php:12:21
+10 |  */
+11 | 
+12 | async function f(): void {
+   |                     ^^^^ [1]
+13 |   await 42;
+14 | }
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `Awaitable<void>` because this function does not always return a value [1]
+
+await_on_illegal_value.php:12:16
+10 |  */
+11 | 
+12 | async function f(): void {
+   |                ^ [1]
+   |                     ^^^^ [2]
+13 |   await 42;
+14 | }
+
+error: Typing[4110] `await` can only operate on an `Awaitable` [1]
+-> Expected `Awaitable<nothing>` [1]
+-> But got `int` [2]
+
+await_on_illegal_value.php:13:3
+11 | 
+12 | async function f(): void {
+13 |   await 42;
+   |   ^^^^^^^^ [1]
+   |         ^^ [2]
+14 | }
+
+3 errors found

@@ -1,6 +1,27 @@
-ERROR: File "trait_override_final.php--file3.php", line 3, characters 17-17:
-Some members in class `C` are incompatible with those declared in type `B` (Typing[4070])
-  File "trait_override_final.php--file1.php", line 4, characters 25-25:
-  You cannot override this method
-  File "trait_override_final.php--file2.php", line 4, characters 25-25:
-  It was declared as final
+error: Typing[4070] Some members in class `C` are incompatible with those declared in type `B` [1]
+-> You cannot override this method [2]
+-> It was declared as final [3]
+
+trait_override_final.php--file3.php:3:17
+1 | <?hh
+2 | 
+3 | class C extends B {
+  |                 ^ [1]
+4 |   use S;
+5 | }
+
+trait_override_final.php--file1.php:4:25
+2 | 
+3 | trait S {
+4 |   final public function f(): void {}
+  |                         ^ [2]
+5 | }
+
+trait_override_final.php--file2.php:4:25
+2 | 
+3 | class B {
+4 |   final public function f(): void {}
+  |                         ^ [3]
+5 | }
+
+1 error found

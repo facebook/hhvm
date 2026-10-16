@@ -1,8 +1,27 @@
-ERROR: File "double_opaque_newtype.regression.php--usage.php", line 4, characters 10-34:
-Invalid return type (Typing[4110])
-  File "double_opaque_newtype.regression.php--usage.php", line 3, characters 32-34:
-  Expected `int`
-  File "double_opaque_newtype.regression.php--n.php", line 6, characters 58-61:
-  But got `nonnull`
-  File "double_opaque_newtype.regression.php--n.php", line 3, characters 22-28:
-    by the definition of `N`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `nonnull` [3]
+->   by the definition of `N` [4]
+
+double_opaque_newtype.regression.php--usage.php:4:10
+1 | <?hh
+2 | 
+3 | function usage(mixed $result): int {
+  |                                ^^^ [2]
+4 |   return Utils::to<mixed>($result);
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+double_opaque_newtype.regression.php--n.php:6:58
+1 | <?hh
+2 | 
+3 | newtype N<+Thint> as nonnull = M<Thint>;
+  |                      ^^^^^^^ [4]
+4 | 
+5 | final class Utils {
+6 |   public static function to<<<__Explicit>> T>(mixed $_): N<T> {
+  |                                                          ^^^^ [3]
+7 |     return mk_m<T>();
+8 |   }
+
+1 error found

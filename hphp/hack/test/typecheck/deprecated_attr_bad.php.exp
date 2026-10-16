@@ -1,8 +1,37 @@
-ERROR: File "deprecated_attr_bad.php", line 3, characters 16-18:
-Attribute arguments must be literals (Parsing[1002])
-ERROR: File "deprecated_attr_bad.php", line 3, characters 16-18:
-Unbound name: `FOO` (a global constant) (Naming[2049])
-ERROR: File "deprecated_attr_bad.php", line 3, characters 16-18:
-This attribute parameter should be static string literal (Typing[4127])
-ERROR: File "deprecated_attr_bad.php", line 3, characters 16-18:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] Attribute arguments must be literals [1]
+
+deprecated_attr_bad.php:3:16
+1 | <?hh
+2 | 
+3 | <<__Deprecated(FOO)>>
+  |                ^^^ [1]
+4 | function f(): void {}
+
+error: Naming[2049] Unbound name: `FOO` (a global constant) [1]
+
+deprecated_attr_bad.php:3:16
+1 | <?hh
+2 | 
+3 | <<__Deprecated(FOO)>>
+  |                ^^^ [1]
+4 | function f(): void {}
+
+error: Typing[4127] This attribute parameter should be static string literal [1]
+
+deprecated_attr_bad.php:3:16
+1 | <?hh
+2 | 
+3 | <<__Deprecated(FOO)>>
+  |                ^^^ [1]
+4 | function f(): void {}
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+deprecated_attr_bad.php:3:16
+1 | <?hh
+2 | 
+3 | <<__Deprecated(FOO)>>
+  |                ^^^ [1]
+4 | function f(): void {}
+
+4 errors found

@@ -1,8 +1,26 @@
-ERROR: File "shape_modified4.php", line 22, characters 10-11:
-Invalid return type (Typing[4163])
-  File "shape_modified4.php", line 19, characters 3-38:
-  The field `y` is **optional**
-  File "shape_modified4.php", line 17, characters 27-34:
-  The field `y` is defined as **required**
-  File "shape_modified4.php", line 14, characters 10-13:
-  `y` is defined here
+error: Typing[4163] Invalid return type [1]
+-> The field `y` is **optional** [2]
+-> The field `y` is defined as **required** [3]
+-> `y` is defined here [4]
+
+shape_modified4.php:22:10
+12 | type my_shape = shape(
+13 |   'x' => int,
+14 |   'y' => bool,
+   |          ^^^^ [4]
+15 | );
+16 | 
+17 | function foo(bool $cond): my_shape {
+   |                           ^^^^^^^^ [3]
+18 |   $s = shape('x' => 0);
+19 |   if ($cond) {
+   |   ^^^^^^^^^^^^ [2]
+20 |     $s['y'] = true;
+   |     ^^^^^^^^^^^^^^^ [2]
+21 |   }
+   |   ^ [2]
+22 |   return $s;
+   |          ^^ [1]
+23 | }
+
+1 error found

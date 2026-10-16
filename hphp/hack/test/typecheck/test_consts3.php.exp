@@ -1,4 +1,20 @@
-WARN: File "test_consts3.php", line 21, characters 10-13:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "test_consts3.php", line 17, characters 9-9:
-Please add a type hint (Naming[2035])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+test_consts3.php:21:10
+19 | 
+20 | function foo(): bool {
+21 |   return A::X;
+   |          ^^^^ [1]
+22 | }
+
+error: Naming[2035] Please add a type hint [1]
+
+test_consts3.php:17:9
+15 | 
+16 | class A {
+17 |   const X = B::Y;
+   |         ^ [1]
+18 | }
+19 | 
+
+2 errors found

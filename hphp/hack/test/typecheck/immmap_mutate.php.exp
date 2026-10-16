@@ -1,4 +1,13 @@
-ERROR: File "immmap_mutate.php", line 13, characters 3-11:
-You cannot mutate this (Typing[4011])
-  File "immmap_mutate.php", line 12, characters 17-32:
-  This is an object of type ImmMap<int, int>
+error: Typing[4011] You cannot mutate this [1]
+-> This is an object of type ImmMap<int, int> [2]
+
+immmap_mutate.php:13:3
+10 |  */
+11 | 
+12 | function mutate(ImmMap<int, int> $m): void {
+   |                 ^^^^^^^^^^^^^^^^ [2]
+13 |   $m[1] = 2;
+   |   ^^^^^^^^^ [1]
+14 | }
+
+1 error found

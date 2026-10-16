@@ -1,24 +1,102 @@
-ERROR: File "trait_bad_override.php", line 20, characters 7-14:
-This class overrides some members with a different staticness (Typing[4091])
-  File "trait_bad_override.php", line 5, characters 10-12:
-  The property `$x` is declared as non-static here
-  File "trait_bad_override.php", line 13, characters 20-22:
-  But it conflicts with an inherited static declaration here
-ERROR: File "trait_bad_override.php", line 20, characters 7-14:
-This class overrides some members with a different staticness (Typing[4091])
-  File "trait_bad_override.php", line 5, characters 10-12:
-  The property `x` is declared as non-static here
-  File "trait_bad_override.php", line 13, characters 20-22:
-  But it conflicts with an inherited static declaration here
-ERROR: File "trait_bad_override.php", line 20, characters 7-14:
-This class overrides some members with a different staticness (Typing[4091])
-  File "trait_bad_override.php", line 9, characters 22-24:
-  The method `lol` is declared as non-static here
-  File "trait_bad_override.php", line 17, characters 26-28:
-  But it conflicts with an inherited static declaration here
-ERROR: File "trait_bad_override.php", line 20, characters 7-14:
-This class overrides some members with a different staticness (Typing[4091])
-  File "trait_bad_override.php", line 14, characters 22-25:
-  The method `func` is declared as non-static here
-  File "trait_bad_override.php", line 6, characters 26-29:
-  But it conflicts with an inherited static declaration here
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The property `$x` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+trait_bad_override.php:20:7
+ 3 | 
+ 4 | abstract class BaseClass {
+ 5 |   public int $x = 0;
+   |          ^^^ [2]
+ 6 |   public static function func(): int {
+ 7 |     return 0;
+   :
+11 | 
+12 | trait TTrait {
+13 |   protected static int $x = 0;
+   |                    ^^^ [3]
+14 |   protected function func(): int {
+15 |     return 0;
+   :
+18 | }
+19 | 
+20 | class SubClass extends BaseClass {
+   |       ^^^^^^^^ [1]
+21 |   use TTrait;
+22 | }
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The property `x` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+trait_bad_override.php:20:7
+ 3 | 
+ 4 | abstract class BaseClass {
+ 5 |   public int $x = 0;
+   |          ^^^ [2]
+ 6 |   public static function func(): int {
+ 7 |     return 0;
+   :
+11 | 
+12 | trait TTrait {
+13 |   protected static int $x = 0;
+   |                    ^^^ [3]
+14 |   protected function func(): int {
+15 |     return 0;
+   :
+18 | }
+19 | 
+20 | class SubClass extends BaseClass {
+   |       ^^^^^^^^ [1]
+21 |   use TTrait;
+22 | }
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The method `lol` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+trait_bad_override.php:20:7
+ 7 |     return 0;
+ 8 |   }
+ 9 |   protected function lol(): void {}
+   |                      ^^^ [2]
+10 | }
+11 | 
+   :
+15 |     return 0;
+16 |   }
+17 |   public static function lol(): void {}
+   |                          ^^^ [3]
+18 | }
+19 | 
+20 | class SubClass extends BaseClass {
+   |       ^^^^^^^^ [1]
+21 |   use TTrait;
+22 | }
+
+error: Typing[4091] This class overrides some members with a different staticness [1]
+-> The method `func` is declared as non-static here [2]
+-> But it conflicts with an inherited static declaration here [3]
+
+trait_bad_override.php:20:7
+ 4 | abstract class BaseClass {
+ 5 |   public int $x = 0;
+ 6 |   public static function func(): int {
+   |                          ^^^^ [3]
+ 7 |     return 0;
+ 8 |   }
+   :
+12 | trait TTrait {
+13 |   protected static int $x = 0;
+14 |   protected function func(): int {
+   |                      ^^^^ [2]
+15 |     return 0;
+16 |   }
+17 |   public static function lol(): void {}
+18 | }
+19 | 
+20 | class SubClass extends BaseClass {
+   |       ^^^^^^^^ [1]
+21 |   use TTrait;
+22 | }
+
+4 errors found

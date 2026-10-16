@@ -1,6 +1,20 @@
-ERROR: File "array_set_might_throw.php", line 16, characters 3-4:
-Typing error (Typing[4429])
-  File "array_set_might_throw.php", line 16, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "array_set_might_throw.php", line 8, characters 12-14:
-  But got `Foo`
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `Foo` [3]
+
+array_set_might_throw.php:16:3
+ 6 | <<__EntryPoint>>
+ 7 | function test(): void {
+ 8 |   $x = new Foo();
+   |            ^^^ [3]
+ 9 |   try {
+10 |     $y = vec[];
+   :
+14 |   }
+15 | 
+16 |   $x += 5; // boom
+   |   ^^ [1]
+   |   ^^^^^^^ [2]
+17 | }
+
+1 error found

@@ -1,8 +1,32 @@
-ERROR: File "condition_isset_local.php", line 18, characters 7-15:
-`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
-ERROR: File "condition_isset_local.php", line 19, characters 12-13:
-Invalid return type (Typing[4110])
-  File "condition_isset_local.php", line 16, characters 21-23:
-  Expected `int`
-  File "condition_isset_local.php", line 12, characters 26-29:
-  But got `?int`
+error: Typing[4016] `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode [1]
+
+condition_isset_local.php:18:7
+16 | function get_int(): int {
+17 |   $x = get_nullable();
+18 |   if (isset($x)) {
+   |       ^^^^^^^^^ [1]
+19 |     return $x;
+20 |   } else {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `?int` [3]
+
+condition_isset_local.php:19:12
+10 |  */
+11 | 
+12 | function get_nullable(): ?int {
+   |                          ^^^^ [3]
+13 |   return null;
+14 | }
+15 | 
+16 | function get_int(): int {
+   |                     ^^^ [2]
+17 |   $x = get_nullable();
+18 |   if (isset($x)) {
+19 |     return $x;
+   |            ^^ [1]
+20 |   } else {
+21 |     return 0;
+
+2 errors found

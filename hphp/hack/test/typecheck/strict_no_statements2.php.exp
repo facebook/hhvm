@@ -1,2 +1,9 @@
-ERROR: File "strict_no_statements2.php", line 3, characters 1-7:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+strict_no_statements2.php:3:1
+1 | <?hh
+2 | 
+3 | $f = 1;
+  | ^^^^^^^ [1]
+
+1 error found

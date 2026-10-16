@@ -1,2 +1,11 @@
-ERROR: File "T89344857.php", line 13, characters 26-28:
-Read access to `$this->str` before initialization (Typing[4083])
+error: Typing[4083] Read access to `$this->str` before initialization [1]
+
+T89344857.php:13:26
+11 | final class MySubClass extends IntermClass {
+12 |   public function __construct(string $str) {
+13 |     accept_string($this->str);
+   |                          ^^^ [1]
+14 |     parent::__construct($str);
+15 |   }
+
+1 error found

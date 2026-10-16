@@ -1,18 +1,66 @@
-ERROR: File "shape_modified5.php", line 17, characters 1-163:
-This function can exit with and without returning a value (Typing[4421])
-  File "shape_modified5.php", line 23, characters 5-14:
-  Returning a value here.
-  File "shape_modified5.php", line 17, characters 1-163:
-  This function does not always return a value
-ERROR: File "shape_modified5.php", line 17, characters 10-12:
-Invalid return type (Typing[4336])
-  File "shape_modified5.php", line 17, characters 27-34:
-  Expected `shape('x' => int, 'y' => bool)`
-  File "shape_modified5.php", line 17, characters 10-12:
-  But got `void` because this function does not always return a value
-ERROR: File "shape_modified5.php", line 23, characters 12-13:
-Invalid return type (Typing[4057])
-  File "shape_modified5.php", line 18, characters 8-22:
-  The field `y` is missing
-  File "shape_modified5.php", line 14, characters 3-5:
-  The field `y` is required here
+error: Typing[4421] This function can exit with and without returning a value [1]
+-> Returning a value here. [2]
+-> This function does not always return a value [1]
+
+shape_modified5.php:17:1
+15 | );
+16 | 
+17 | function foo(bool $cond): my_shape {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |   $s = shape('x' => 0);
+   |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+19 |   try {
+   |   ^^^^^ [1]
+20 |     careful_I_can_throw();
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 |     $s['y'] = true;
+   |     ^^^^^^^^^^^^^^^ [1]
+22 |   } catch (Exception $e) {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+23 |     return $s;
+   |     ^^^^^^^^^^ [1]
+   |     ^^^^^^^^^^ [2]
+24 |   }
+   |   ^ [1]
+25 | }
+   | ^ [1]
+26 | 
+27 | function careful_I_can_throw(): void {
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `shape('x' => int, 'y' => bool)` [2]
+-> But got `void` because this function does not always return a value [1]
+
+shape_modified5.php:17:10
+15 | );
+16 | 
+17 | function foo(bool $cond): my_shape {
+   |          ^^^ [1]
+   |                           ^^^^^^^^ [2]
+18 |   $s = shape('x' => 0);
+19 |   try {
+
+error: Typing[4057] Invalid return type [1]
+-> The field `y` is missing [2]
+-> The field `y` is required here [3]
+
+shape_modified5.php:23:12
+12 | type my_shape = shape(
+13 |   'x' => int,
+14 |   'y' => bool,
+   |   ^^^ [3]
+15 | );
+16 | 
+17 | function foo(bool $cond): my_shape {
+18 |   $s = shape('x' => 0);
+   |        ^^^^^^^^^^^^^^^ [2]
+19 |   try {
+20 |     careful_I_can_throw();
+21 |     $s['y'] = true;
+22 |   } catch (Exception $e) {
+23 |     return $s;
+   |            ^^ [1]
+24 |   }
+25 | }
+
+3 errors found

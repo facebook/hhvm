@@ -1,6 +1,19 @@
-ERROR: File "pipe_operator_nested_wrong_type.php", line 16, characters 51-52:
-Invalid argument (Typing[4110])
-  File "pipe_operator_nested_wrong_type.php", line 11, characters 17-19:
-  Expected `int`
-  File "pipe_operator_nested_wrong_type.php", line 11, characters 26-31:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+pipe_operator_nested_wrong_type.php:16:51
+ 9 | }
+10 | 
+11 | function say_it(int $a): string {
+   |                 ^^^ [2]
+   |                          ^^^^^^ [3]
+12 |   return sprintf("%d", $a);
+13 | }
+14 | 
+15 | function piped(): string {
+16 |   return foo() |> concat_it((say_it($$) |> say_it($$)), $$);
+   |                                                   ^^ [1]
+17 | }
+
+1 error found

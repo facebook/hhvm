@@ -1,2 +1,11 @@
-ERROR: File "parse_error_visibility.php", line 14, characters 12-15:
-Methods need to be marked `public`, `private`, `protected`, or `internal`. (Naming[2086])
+error: Naming[2086] Methods need to be marked `public`, `private`, `protected`, or `internal`. [1]
+
+parse_error_visibility.php:14:12
+12 | class Blah {
+13 | 
+14 |   function blah(): void {
+   |            ^^^^ [1]
+15 |     print "I don't know who can see me";
+16 |   }
+
+1 error found

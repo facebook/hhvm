@@ -1,4 +1,13 @@
-ERROR: File "nested_key_existence_inside_coalesce2.php", line 6, characters 8-30:
-You are accessing a field known to not exist (Typing[4321])
-  File "nested_key_existence_inside_coalesce2.php", line 5, characters 8-51:
-  The field `b` is not defined in this shape
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `b` is not defined in this shape [2]
+
+nested_key_existence_inside_coalesce2.php:6:8
+3 | <<__EntryPoint>>
+4 | function main(): void {
+5 |   $s = shape('a' => shape('b' => shape('c' => 42)));
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+6 |   $a = $s['b']['b']['c'] ?? 42;
+  |        ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+7 | }
+
+1 error found

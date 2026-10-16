@@ -1,2 +1,11 @@
-ERROR: File "typing_fail_missing_ret_type.php", line 13, characters 19-19:
-Was expecting a return type hint (Typing[4030])
+error: Typing[4030] Was expecting a return type hint [1]
+
+typing_fail_missing_ret_type.php:13:19
+11 | 
+12 | class A {
+13 |   public function f() {
+   |                   ^ [1]
+14 |     return 0;
+15 |   }
+
+1 error found

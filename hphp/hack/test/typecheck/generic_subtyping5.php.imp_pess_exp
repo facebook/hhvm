@@ -1,12 +1,52 @@
-ERROR: File "generic_subtyping5.php", line 49, characters 14-20:
-Invalid argument (Typing[4110])
-  File "generic_subtyping5.php", line 38, characters 19-22:
-  Expected `bool`
-  File "generic_subtyping5.php", line 25, characters 10-18:
-  But got `dynamic` because the type of this property is implicitly a like-type due to unenforced generic type arguments
-ERROR: File "generic_subtyping5.php", line 49, characters 14-20:
-Invalid argument (Typing[4110])
-  File "generic_subtyping5.php", line 38, characters 19-22:
-  Expected `bool`
-  File "generic_subtyping5.php", line 43, characters 21-21:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `dynamic` because the type of this property is implicitly a like-type due to unenforced generic type arguments [3]
+
+generic_subtyping5.php:49:14
+23 | 
+24 | class X<T, Tc as TestGeneric<T> > {
+25 |   public Vector<T> $vec;
+   |          ^^^^^^^^^ [3]
+26 | 
+27 |   public function __construct(Vector<Tc> $tests) {
+   :
+36 | }
+37 | 
+38 | function testBool(bool $arg): void {}
+   |                   ^^^^ [2]
+39 | 
+40 | function test(): void {
+   :
+47 |   foreach ($results as $result) {
+48 |     // Hack should complain it's an int !
+49 |     testBool($result);
+   |              ^^^^^^^ [1]
+50 |   }
+51 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+generic_subtyping5.php:49:14
+36 | }
+37 | 
+38 | function testBool(bool $arg): void {}
+   |                   ^^^^ [2]
+39 | 
+40 | function test(): void {
+41 |   $objs = Vector {
+42 |     new TestGeneric(1),
+43 |     new TestGeneric(2),
+   |                     ^ [3]
+44 |   };
+45 |   
+46 |   $results = (new X($objs))->vec;
+47 |   foreach ($results as $result) {
+48 |     // Hack should complain it's an int !
+49 |     testBool($result);
+   |              ^^^^^^^ [1]
+50 |   }
+51 | }
+
+2 errors found

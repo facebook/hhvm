@@ -1,48 +1,118 @@
-ERROR: File "super_constraint_5.php", line 9, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_5.php", line 5, characters 38-40:
-  Expected `Foo`
-  File "super_constraint_5.php", line 6, characters 3-4:
-  But got `Ty as Ty1`
-ERROR: File "super_constraint_5.php", line 9, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_5.php", line 5, characters 38-40:
-  Expected `Foo`
-  File "super_constraint_5.php", line 6, characters 3-4:
-  But got `Ty1 where Ty1 super Ty, Ty1 super Foo`
-  File "super_constraint_5.php", line 5, characters 49-51:
-    by the definition of `Ty`
-ERROR: File "super_constraint_5.php", line 9, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_5.php", line 5, characters 38-40:
-  Expected `Foo`
-  File "super_constraint_5.php", line 6, characters 3-4:
-  But got `mixed`
-  File "super_constraint_5.php", line 5, characters 49-51:
-    by the definition of `Ty`
-  File "super_constraint_5.php", line 5, characters 49-51:
-    by the definition of `Ty1` arising from an implicit `as mixed` constraint on this type
-ERROR: File "super_constraint_5.php", line 9, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_5.php", line 8, characters 4-5:
-  Expected `Tx`
-  File "super_constraint_5.php", line 6, characters 3-4:
-  But got `Ty as Ty1`
-ERROR: File "super_constraint_5.php", line 9, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_5.php", line 8, characters 4-5:
-  Expected `Tx`
-  File "super_constraint_5.php", line 6, characters 3-4:
-  But got `Ty1 where Ty1 super Ty, Ty1 super Foo`
-  File "super_constraint_5.php", line 5, characters 49-51:
-    by the definition of `Ty`
-ERROR: File "super_constraint_5.php", line 9, characters 10-13:
-Invalid return type (Typing[4110])
-  File "super_constraint_5.php", line 8, characters 4-5:
-  Expected `Tx`
-  File "super_constraint_5.php", line 6, characters 3-4:
-  But got `mixed`
-  File "super_constraint_5.php", line 5, characters 49-51:
-    by the definition of `Ty`
-  File "super_constraint_5.php", line 5, characters 49-51:
-    by the definition of `Ty1` arising from an implicit `as mixed` constraint on this type
+error: Typing[4110] Invalid return type [1]
+-> Expected `Foo` [2]
+-> But got `Ty as Ty1` [3]
+
+super_constraint_5.php:9:10
+ 3 | class Foo extends FooBase {}
+ 4 | class FooDerived extends Foo {}
+ 5 | function bar<Tx super Tx1, Tx1 super Foo, Ty as Ty1, Ty1 super Foo>(
+   |                                      ^^^ [2]
+ 6 |   Ty $val,
+   |   ^^ [3]
+ 7 |   Tx $dummy,
+ 8 | ): Tx {
+ 9 |   return $val;
+   |          ^^^^ [1]
+10 | }
+11 | function test(FooBase $foo_base, FooDerived $foo_derived): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Foo` [2]
+-> But got `Ty1 where Ty1 super Ty, Ty1 super Foo` [3]
+->   by the definition of `Ty` [4]
+
+super_constraint_5.php:9:10
+ 3 | class Foo extends FooBase {}
+ 4 | class FooDerived extends Foo {}
+ 5 | function bar<Tx super Tx1, Tx1 super Foo, Ty as Ty1, Ty1 super Foo>(
+   |                                      ^^^ [2]
+   |                                                 ^^^ [4]
+ 6 |   Ty $val,
+   |   ^^ [3]
+ 7 |   Tx $dummy,
+ 8 | ): Tx {
+ 9 |   return $val;
+   |          ^^^^ [1]
+10 | }
+11 | function test(FooBase $foo_base, FooDerived $foo_derived): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Foo` [2]
+-> But got `mixed` [3]
+->   by the definition of `Ty` [4]
+->   by the definition of `Ty1` arising from an implicit `as mixed` constraint on this type [4]
+
+super_constraint_5.php:9:10
+ 3 | class Foo extends FooBase {}
+ 4 | class FooDerived extends Foo {}
+ 5 | function bar<Tx super Tx1, Tx1 super Foo, Ty as Ty1, Ty1 super Foo>(
+   |                                      ^^^ [2]
+   |                                                 ^^^ [4]
+ 6 |   Ty $val,
+   |   ^^ [3]
+ 7 |   Tx $dummy,
+ 8 | ): Tx {
+ 9 |   return $val;
+   |          ^^^^ [1]
+10 | }
+11 | function test(FooBase $foo_base, FooDerived $foo_derived): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tx` [2]
+-> But got `Ty as Ty1` [3]
+
+super_constraint_5.php:9:10
+ 4 | class FooDerived extends Foo {}
+ 5 | function bar<Tx super Tx1, Tx1 super Foo, Ty as Ty1, Ty1 super Foo>(
+ 6 |   Ty $val,
+   |   ^^ [3]
+ 7 |   Tx $dummy,
+ 8 | ): Tx {
+   |    ^^ [2]
+ 9 |   return $val;
+   |          ^^^^ [1]
+10 | }
+11 | function test(FooBase $foo_base, FooDerived $foo_derived): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tx` [2]
+-> But got `Ty1 where Ty1 super Ty, Ty1 super Foo` [3]
+->   by the definition of `Ty` [4]
+
+super_constraint_5.php:9:10
+ 3 | class Foo extends FooBase {}
+ 4 | class FooDerived extends Foo {}
+ 5 | function bar<Tx super Tx1, Tx1 super Foo, Ty as Ty1, Ty1 super Foo>(
+   |                                                 ^^^ [4]
+ 6 |   Ty $val,
+   |   ^^ [3]
+ 7 |   Tx $dummy,
+ 8 | ): Tx {
+   |    ^^ [2]
+ 9 |   return $val;
+   |          ^^^^ [1]
+10 | }
+11 | function test(FooBase $foo_base, FooDerived $foo_derived): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tx` [2]
+-> But got `mixed` [3]
+->   by the definition of `Ty` [4]
+->   by the definition of `Ty1` arising from an implicit `as mixed` constraint on this type [4]
+
+super_constraint_5.php:9:10
+ 3 | class Foo extends FooBase {}
+ 4 | class FooDerived extends Foo {}
+ 5 | function bar<Tx super Tx1, Tx1 super Foo, Ty as Ty1, Ty1 super Foo>(
+   |                                                 ^^^ [4]
+ 6 |   Ty $val,
+   |   ^^ [3]
+ 7 |   Tx $dummy,
+ 8 | ): Tx {
+   |    ^^ [2]
+ 9 |   return $val;
+   |          ^^^^ [1]
+10 | }
+11 | function test(FooBase $foo_base, FooDerived $foo_derived): void {
+
+6 errors found

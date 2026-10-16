@@ -1,4 +1,19 @@
-ERROR: File "shape_idx2.php", line 9, characters 3-17:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "Shapes.hhi", line 41, characters 28-30:
-  Definition is here
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+shape_idx2.php:9:3
+ 7 |  */
+ 8 | function test(s $s): void {
+ 9 |   Shapes::idx($s);
+   |   ^^^^^^^^^^^^^^^ [1]
+10 | }
+
+Shapes.hhi:41:28
+39 |      */
+40 |     <<__NoAutoDynamic, __SupportDynamicType>>
+41 |     public static function idx<Tv>(
+   |                            ^^^ [2]
+42 |       ?shape(...) $shape,
+43 |       arraykey $index,
+
+1 error found

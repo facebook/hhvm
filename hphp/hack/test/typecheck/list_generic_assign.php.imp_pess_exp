@@ -1,12 +1,29 @@
-ERROR: File "list_generic_assign.php", line 5, characters 3-19:
-Invalid assignment (Typing[4110])
-  File "list_generic_assign.php", line 5, characters 3-14:
-  Expected `list(nothing, nothing)` resulting from a list destructuring assignment or a splat
-  File "list_generic_assign.php", line 4, characters 18-18:
-  But got `T`
-ERROR: File "list_generic_assign.php", line 5, characters 3-19:
-Invalid assignment (Typing[4357])
-  File "list_generic_assign.php", line 5, characters 3-14:
-  This expression cannot be destructured with a `list(...)` expression
-  File "list_generic_assign.php", line 4, characters 15-15:
-  This is `mixed`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `list(nothing, nothing)` resulting from a list destructuring assignment or a splat [2]
+-> But got `T` [3]
+
+list_generic_assign.php:5:3
+2 | 
+3 | // It's illegal to assign a generic to a tuple
+4 | function test<T>(T $v): void {
+  |                  ^ [3]
+5 |   list($x, $y) = $v;
+  |   ^^^^^^^^^^^^^^^^^ [1]
+  |   ^^^^^^^^^^^^ [2]
+6 | }
+
+error: Typing[4357] Invalid assignment [1]
+-> This expression cannot be destructured with a `list(...)` expression [2]
+-> This is `mixed` [3]
+
+list_generic_assign.php:5:3
+2 | 
+3 | // It's illegal to assign a generic to a tuple
+4 | function test<T>(T $v): void {
+  |               ^ [3]
+5 |   list($x, $y) = $v;
+  |   ^^^^^^^^^^^^^^^^^ [1]
+  |   ^^^^^^^^^^^^ [2]
+6 | }
+
+2 errors found

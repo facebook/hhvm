@@ -1,2 +1,11 @@
-ERROR: File "pipe_lambda.php", line 8, characters 32-33:
-Cannot use unstable feature: `capture_pipe_variables` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `capture_pipe_variables` [1]
+
+pipe_lambda.php:8:32
+ 6 | <<__EntryPoint>>
+ 7 | function testit():void {
+ 8 |   $f = getit() |> ($z ==> $z + $$);
+   |                                ^^ [1]
+ 9 |   $w = $f(100);
+10 |   echo $w;
+
+1 error found

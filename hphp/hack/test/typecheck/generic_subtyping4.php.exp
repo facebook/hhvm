@@ -1,6 +1,26 @@
-ERROR: File "generic_subtyping4.php", line 52, characters 14-20:
-Invalid argument (Typing[4110])
-  File "generic_subtyping4.php", line 41, characters 19-22:
-  Expected `bool`
-  File "generic_subtyping4.php", line 46, characters 21-21:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+generic_subtyping4.php:52:14
+39 | }
+40 | 
+41 | function testBool(bool $arg): void {}
+   |                   ^^^^ [2]
+42 | 
+43 | function test(): void {
+44 |   $objs = Vector {
+45 |     new TestGeneric(1),
+46 |     new TestGeneric(2),
+   |                     ^ [3]
+47 |   };
+48 |   
+49 |   $results = (new X($objs))->getVector();
+50 |   foreach ($results as $result) {
+51 |     // Hack should complain it's an int !
+52 |     testBool($result);
+   |              ^^^^^^^ [1]
+53 |   }
+54 | }
+
+1 error found

@@ -1,6 +1,13 @@
-ERROR: File "newtype_super_indirect_error.php--file2.php", line 6, characters 9-11:
-Invalid constraint on `newtype` (Typing[4332])
-  File "newtype_super_indirect_error.php--file2.php", line 6, characters 16-16:
-  Expected `X`
-  File "newtype_super_indirect_error.php--file2.php", line 6, characters 20-23:
-  But got `bool`
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `X` [2]
+-> But got `bool` [3]
+
+newtype_super_indirect_error.php--file2.php:6:9
+4 | newtype Ok1 as X = X;
+5 | newtype Ok2 as X = float;
+6 | newtype Bad as X = bool;
+  |         ^^^ [1]
+  |                ^ [2]
+  |                    ^^^^ [3]
+
+1 error found

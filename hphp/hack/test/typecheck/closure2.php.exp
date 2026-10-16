@@ -1,6 +1,14 @@
-ERROR: File "closure2.php", line 14, characters 6-7:
-Invalid argument (Typing[4110])
-  File "closure2.php", line 13, characters 17-19:
-  Expected `int`
-  File "closure2.php", line 14, characters 6-7:
-  But got `string`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+closure2.php:14:6
+11 | 
+12 | function test(): void {
+13 |   $f = function(int $x): int { return 0; };
+   |                 ^^^ [2]
+14 |   $f('');
+   |      ^^ [1]
+15 | }
+
+1 error found

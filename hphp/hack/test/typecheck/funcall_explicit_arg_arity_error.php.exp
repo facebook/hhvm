@@ -1,4 +1,17 @@
-ERROR: File "funcall_explicit_arg_arity_error.php", line 8, characters 10-12:
-Expected 2 type parameters (Typing[4029])
-  File "funcall_explicit_arg_arity_error.php", line 3, characters 10-12:
-  Definition is here
+error: Typing[4029] Expected 2 type parameters [1]
+-> Definition is here [2]
+
+funcall_explicit_arg_arity_error.php:8:10
+1 | <?hh
+2 | 
+3 | function foo<T1, T2>(T1 $x) : T1 {
+  |          ^^^ [2]
+4 |   return $x;
+5 | }
+6 | 
+7 | function bar() : int {
+8 |   return foo<int>(5);
+  |          ^^^ [1]
+9 | }
+
+1 error found

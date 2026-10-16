@@ -1,6 +1,33 @@
-ERROR: File "global_const26.php", line 3, characters 1-40:
-No code may exist outside of namespace {} (Parsing[1002])
-ERROR: File "global_const26.php", line 8, characters 10-19:
-Unbound name: `NS1\NS2\Y` (a global constant) (Naming[2049])
-ERROR: File "global_const26.php", line 8, characters 10-19:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] No code may exist outside of namespace {} [1]
+
+global_const26.php:3:1
+1 | <?hh
+2 | 
+3 | namespace NS1\NS2 {
+  | ^^^^^^^^^^^^^^^^^^^ [1]
+4 |   const int X = 0;
+  |   ^^^^^^^^^^^^^^^^ [1]
+5 | }
+  | ^ [1]
+6 | 
+7 | function test(): int {
+
+error: Naming[2049] Unbound name: `NS1\NS2\Y` (a global constant) [1]
+
+global_const26.php:8:10
+6 | 
+7 | function test(): int {
+8 |   return \NS1\NS2\Y;
+  |          ^^^^^^^^^^ [1]
+9 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+global_const26.php:8:10
+6 | 
+7 | function test(): int {
+8 |   return \NS1\NS2\Y;
+  |          ^^^^^^^^^^ [1]
+9 | }
+
+3 errors found

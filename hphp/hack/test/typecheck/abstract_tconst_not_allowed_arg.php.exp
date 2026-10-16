@@ -1,6 +1,16 @@
-ERROR: File "abstract_tconst_not_allowed_arg.php", line 8, characters 12-15:
-Invalid type hint (Typing[4352])
-  File "abstract_tconst_not_allowed_arg.php", line 8, characters 15-15:
-  An abstract type constant is not allowed in this position. Did you mean `this::T`?
-  File "abstract_tconst_not_allowed_arg.php", line 5, characters 23-23:
-  `T` is abstract here.
+error: Typing[4352] Invalid type hint [1]
+-> An abstract type constant is not allowed in this position. Did you mean `this::T`? [2]
+-> `T` is abstract here. [3]
+
+abstract_tconst_not_allowed_arg.php:8:12
+3 | 
+4 | abstract class C {
+5 |   abstract const type T;
+  |                       ^ [3]
+6 | }
+7 | 
+8 | function f(C::T $_): void {}
+  |            ^^^^ [1]
+  |               ^ [2]
+
+1 error found

@@ -1,14 +1,56 @@
-ERROR: File "hh_fixme13.php", line 10, characters 8-11:
-XHP children must be compatible with XHPChild (Typing[4193])
-  File "hh_fixme13.php", line 3, characters 24-27:
-  This is void
-ERROR: File "hh_fixme13.php", line 10, characters 8-11:
-You are using the return value of a `void` function (Typing[4119])
-  File "hh_fixme13.php", line 3, characters 24-27:
-  A `void` function doesn't return a value.
-ERROR: File "hh_fixme13.php", line 10, characters 10-10:
-Invalid argument (Typing[4110])
-  File "hh_fixme13.php", line 3, characters 12-17:
-  Expected `string`
-  File "hh_fixme13.php", line 10, characters 10-10:
-  But got `int`
+error: Typing[4193] XHP children must be compatible with XHPChild [1]
+-> This is void [2]
+
+hh_fixme13.php:10:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(string $s): void {}
+   |                        ^^^^ [2]
+ 4 | 
+ 5 | function g(): void {
+   :
+ 8 |       /* HH_FIXME[4110] This is actually part of the XHP and will be rendered to
+ 9 |          the page, and so is not safe and shouldn't be accepted as a FIXME! */
+10 |       {f(1)}
+   |        ^^^^ [1]
+11 |     </p>;
+12 | }
+
+error: Typing[4119] You are using the return value of a `void` function [1]
+-> A `void` function doesn't return a value. [2]
+
+hh_fixme13.php:10:8
+ 1 | <?hh
+ 2 | 
+ 3 | function f(string $s): void {}
+   |                        ^^^^ [2]
+ 4 | 
+ 5 | function g(): void {
+   :
+ 8 |       /* HH_FIXME[4110] This is actually part of the XHP and will be rendered to
+ 9 |          the page, and so is not safe and shouldn't be accepted as a FIXME! */
+10 |       {f(1)}
+   |        ^^^^ [1]
+11 |     </p>;
+12 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+hh_fixme13.php:10:10
+ 1 | <?hh
+ 2 | 
+ 3 | function f(string $s): void {}
+   |            ^^^^^^ [2]
+ 4 | 
+ 5 | function g(): void {
+   :
+ 8 |       /* HH_FIXME[4110] This is actually part of the XHP and will be rendered to
+ 9 |          the page, and so is not safe and shouldn't be accepted as a FIXME! */
+10 |       {f(1)}
+   |          ^ [1]
+11 |     </p>;
+12 | }
+
+3 errors found

@@ -1,2 +1,11 @@
-ERROR: File "parent_missing.php", line 14, characters 5-10:
-parent is undefined (Typing[4076])
+error: Typing[4076] parent is undefined [1]
+
+parent_missing.php:14:5
+12 | class X {
+13 |   public function foo(): void {
+14 |     parent::bar();
+   |     ^^^^^^ [1]
+15 |   }
+16 | }
+
+1 error found

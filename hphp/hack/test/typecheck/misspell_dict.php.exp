@@ -1,10 +1,46 @@
-ERROR: File "misspell_dict.php", line 4, characters 19-19:
-A closing square bracket `]` is expected here. (Parsing[1002])
-ERROR: File "misspell_dict.php", line 4, characters 8-11:
-Unbound name: `Dict` (a global constant) (Naming[2049])
-ERROR: File "misspell_dict.php", line 4, characters 19-20:
-Unbound name: `=>` (a global constant) (Naming[2049])
-ERROR: File "misspell_dict.php", line 4, characters 8-11:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "misspell_dict.php", line 4, characters 19-20:
-Unbound global constant (Typing) (Typing[4106])
+error: Parsing[1002] A closing square bracket `]` is expected here. [1]
+
+misspell_dict.php:4:19
+2 | 
+3 | function foo(): void {
+4 |   $x = Dict['foo' => 'bar'];
+  |                   ^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `Dict` (a global constant) [1]
+
+misspell_dict.php:4:8
+2 | 
+3 | function foo(): void {
+4 |   $x = Dict['foo' => 'bar'];
+  |        ^^^^ [1]
+5 | }
+
+error: Naming[2049] Unbound name: `=>` (a global constant) [1]
+
+misspell_dict.php:4:19
+2 | 
+3 | function foo(): void {
+4 |   $x = Dict['foo' => 'bar'];
+  |                   ^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+misspell_dict.php:4:8
+2 | 
+3 | function foo(): void {
+4 |   $x = Dict['foo' => 'bar'];
+  |        ^^^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+misspell_dict.php:4:19
+2 | 
+3 | function foo(): void {
+4 |   $x = Dict['foo' => 'bar'];
+  |                   ^^ [1]
+5 | }
+
+5 errors found

@@ -1,8 +1,37 @@
-WARN: File "trait_private_bad3.php", line 22, characters 21-23:
-Static method call on a trait: `MyTrait::foo` (Warn[12020])
-  File "trait_private_bad3.php", line 12, characters 7-13:
-  `MyTrait` is defined here
-ERROR: File "trait_private_bad3.php", line 22, characters 21-23:
-You cannot access private members using the trait's name (did you mean to use self::?) (Typing[4112])
-  File "trait_private_bad3.php", line 13, characters 27-29:
-  This member is private
+warning: Warn[12020] Static method call on a trait: `MyTrait::foo` [1]
+-> `MyTrait` is defined here [2]
+
+trait_private_bad3.php:22:21
+10 |  */
+11 | 
+12 | trait MyTrait {
+   |       ^^^^^^^ [2]
+13 |   private static function foo(): int {
+14 |     return 4;
+   :
+20 | 
+21 |   public function bar(): int {
+22 |     return MyTrait::foo();
+   |                     ^^^ [1]
+23 |   }
+24 | }
+
+error: Typing[4112] You cannot access private members using the trait's name (did you mean to use self::?) [1]
+-> This member is private [2]
+
+trait_private_bad3.php:22:21
+11 | 
+12 | trait MyTrait {
+13 |   private static function foo(): int {
+   |                           ^^^ [2]
+14 |     return 4;
+15 |   }
+   :
+20 | 
+21 |   public function bar(): int {
+22 |     return MyTrait::foo();
+   |                     ^^^ [1]
+23 |   }
+24 | }
+
+2 errors found

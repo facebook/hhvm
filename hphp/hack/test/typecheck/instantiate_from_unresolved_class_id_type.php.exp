@@ -1,4 +1,18 @@
-ERROR: File "instantiate_from_unresolved_class_id_type.php", line 15, characters 21-26:
-It is no longer allowed to use a `classname<this::TConstType>` in this position. Please use a `class<this::TConstType>` instead. (Typing[4482])
-  File "instantiate_from_unresolved_class_id_type.php", line 20, characters 54-65:
-  Definition is here
+error: Typing[4482] It is no longer allowed to use a `classname<this::TConstType>` in this position. Please use a `class<this::TConstType>` instead. [1]
+-> Definition is here [2]
+
+instantiate_from_unresolved_class_id_type.php:15:21
+13 |     $class = getClassname("dummy", $ts['classname']);
+14 |     // This should not be a dynamic class.
+15 |     $instance = new $class($request);
+   |                     ^^^^^^ [1]
+16 |     return $instance;
+17 |   }
+18 | }
+19 | 
+20 | function getClassname<T>(mixed $x, classname<T> $y): classname<T> {
+   |                                                      ^^^^^^^^^^^^ [2]
+21 |   return $y;
+22 | }
+
+1 error found

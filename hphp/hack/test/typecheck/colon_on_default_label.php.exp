@@ -1,2 +1,11 @@
-ERROR: File "colon_on_default_label.php", line 6, characters 12-12:
-A colon `:` is expected here. (Parsing[1002])
+error: Parsing[1002] A colon `:` is expected here. [1]
+
+colon_on_default_label.php:6:12
+4 | 
+5 |   switch ($x) {
+6 |     default;
+  |            ^ [1]
+7 |       echo "bye";
+8 |   }
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "use_class_as_trait_fail.php", line 14, characters 7-7:
-`A` is not a trait. It is a class. (NastCheck[3024])
+error: NastCheck[3024] `A` is not a trait. It is a class. [1]
+
+use_class_as_trait_fail.php:14:7
+12 | class A {}
+13 | class B {
+14 |   use A; // Hack should not allow this
+   |       ^ [1]
+15 | }
+
+1 error found

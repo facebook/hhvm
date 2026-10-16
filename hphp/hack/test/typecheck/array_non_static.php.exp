@@ -1,8 +1,28 @@
-ERROR: File "array_non_static.php", line 8, characters 33-37:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "array_non_static.php", line 8, characters 33-35:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "array_non_static.php", line 8, characters 29-41:
-  From this declaration, the context of this function body provides the capability set {}
-  File "array_non_static.php", line 3, characters 10-12:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+array_non_static.php:8:33
+6 | 
+7 | class Foo {
+8 |   public varray<int> $vec = vec[get(), 2];
+  |                                 ^^^^^ [1]
+9 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+array_non_static.php:8:33
+1 | <?hh
+2 | 
+3 | function get(): int {
+  |          ^^^ [3]
+4 |   return 1;
+5 | }
+6 | 
+7 | class Foo {
+8 |   public varray<int> $vec = vec[get(), 2];
+  |                             ^^^^^^^^^^^^^ [2]
+  |                                 ^^^ [1]
+9 | }
+
+2 errors found

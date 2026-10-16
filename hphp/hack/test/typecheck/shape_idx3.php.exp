@@ -6,9 +6,25 @@ File "shape_idx3.php", line 16, characters 3-36:
   arraykey
 File "shape_idx3.php", line 17, characters 3-36:
   arraykey
-ERROR: File "shape_idx3.php", line 21, characters 32-33:
-Invalid argument (Typing[4110])
-  File "shape_idx3.php", line 13, characters 4-6:
-  Expected `int`
-  File "shape_idx3.php", line 11, characters 3-10:
-  But got `arraykey`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+shape_idx3.php:21:32
+ 9 |   darray<string, arraykey> $a1,
+10 |   darray<string, int> $a2,
+11 |   arraykey $a,
+   |   ^^^^^^^^ [3]
+12 |   int $b,
+13 | ): int {
+   |    ^^^ [2]
+14 |   hh_show(idx($a1, 'x', $b));
+15 |   hh_show(idx($a2, 'x', $a));
+   :
+19 |   // Using "wrong" default type will be reported when trying to use the result
+20 |   // in incompatible way
+21 |   return Shapes::idx($s2, 'x', $a);
+   |                                ^^ [1]
+22 | }
+
+1 error found

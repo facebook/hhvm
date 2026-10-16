@@ -1,14 +1,33 @@
-ERROR: File "check_override_synthesized_traits.php", line 24, characters 17-17:
-Some members in class `B` are incompatible with those declared in type `A` (Typing[4341])
-  File "check_override_synthesized_traits.php", line 17, characters 19-21:
-  The method `foo` is not compatible with the overridden method
-  File "check_override_synthesized_traits.php", line 17, characters 19-21:
-  Method `foo` has type `(function(string $_): void)` in `B` and comes from ancestor or trait `T2`
-  File "check_override_synthesized_traits.php", line 4, characters 19-21:
-  But it has type `(function(int $_): void)` in parent `A`
-  File "check_override_synthesized_traits.php", line 17, characters 19-21:
-  Type `(function(string $_): void)` is not a subtype of `(function(int $_): void)`
-  File "check_override_synthesized_traits.php", line 17, characters 23-28:
-  Expected `string`
-  File "check_override_synthesized_traits.php", line 4, characters 23-25:
-  But got `int`
+error: Typing[4341] Some members in class `B` are incompatible with those declared in type `A` [1]
+-> The method `foo` is not compatible with the overridden method [2]
+-> Method `foo` has type `(function(string $_): void)` in `B` and comes from ancestor or trait `T2` [2]
+-> But it has type `(function(int $_): void)` in parent `A` [3]
+-> Type `(function(string $_): void)` is not a subtype of `(function(int $_): void)` [2]
+-> Expected `string` [4]
+-> But got `int` [5]
+
+check_override_synthesized_traits.php:24:17
+ 2 | 
+ 3 | class A {
+ 4 |   public function foo(int $_): void {}
+   |                   ^^^ [3]
+   |                       ^^^ [5]
+ 5 | }
+ 6 | 
+   :
+15 |   use T1;
+16 | 
+17 |   public function foo(string $_): void {}
+   |                   ^^^ [2]
+   |                       ^^^^^^ [4]
+18 |   public function baz(string $x): void {
+19 |     $this->foo($x);
+   :
+22 | }
+23 | 
+24 | class B extends A {
+   |                 ^ [1]
+25 |   use T2;
+26 | }
+
+1 error found

@@ -1,4 +1,21 @@
-WARN: File "fake_nullable.php", line 29, characters 7-12:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "fake_nullable.php", line 17, characters 10-13:
-Was expecting a return type hint (Typing[4030])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+fake_nullable.php:29:7
+27 |     $this->fld = await genak<_,_>(
+28 |       async (int $id) : Awaitable<?I> ==> await gennull(),
+29 |       tany(),
+   |       ^^^^^^ [1]
+30 |     );
+31 |     $x = darray_filter_falsy<int,_>($this->fld);
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+fake_nullable.php:17:10
+15 | interface I { }
+16 | 
+17 | function tany() /* : TAny */ {
+   |          ^^^^ [1]
+18 |   return null;
+19 | }
+
+2 errors found

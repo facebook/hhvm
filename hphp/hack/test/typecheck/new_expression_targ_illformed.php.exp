@@ -1,4 +1,15 @@
-ERROR: File "new_expression_targ_illformed.php", line 6, characters 12-15:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "new_expression_targ_illformed.php", line 3, characters 7-10:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+new_expression_targ_illformed.php:6:12
+1 | <?hh
+2 | 
+3 | class Test<T> {}
+  |       ^^^^ [2]
+4 | 
+5 | function test() : void {
+6 |   new Test<Test>(); //bad, missing type arg on inner Test
+  |            ^^^^ [1]
+7 | }
+
+1 error found

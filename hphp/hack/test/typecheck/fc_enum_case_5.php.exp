@@ -1,2 +1,11 @@
-WARN: File "fc_enum_case_5.php", line 17, characters 5-12:
-All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+warning: Warn[12019] All cases are already covered. Redundant `default` cases prevent detection of future errors. [1]
+
+fc_enum_case_5.php:17:5
+15 |     case Bar::BAZ:
+16 |       return 2;
+17 |     default:
+   |     ^^^^^^^^ [1]
+18 |       return 3;
+19 |   }
+
+1 error found

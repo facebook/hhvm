@@ -1,10 +1,48 @@
-WARN: File "dynamic_props2.php", line 10, characters 3-4:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "dynamic_props2.php", line 10, characters 3-13:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "dynamic_props2.php", line 10, characters 8-13:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "dynamic_props2.php", line 5, characters 17-19:
-Please add a type hint `public SomeType $f1` (Naming[2001])
-ERROR: File "dynamic_props2.php", line 8, characters 10-10:
-Was expecting a return type hint (Typing[4030])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+dynamic_props2.php:10:3
+ 8 | function f() {
+ 9 |   $a = A::c; // no errors
+10 |   $b = A::$f1; // no errors
+   |   ^^ [1]
+11 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+dynamic_props2.php:10:3
+ 8 | function f() {
+ 9 |   $a = A::c; // no errors
+10 |   $b = A::$f1; // no errors
+   |   ^^^^^^^^^^^ [1]
+11 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+dynamic_props2.php:10:8
+ 8 | function f() {
+ 9 |   $a = A::c; // no errors
+10 |   $b = A::$f1; // no errors
+   |        ^^^^^^ [1]
+11 | }
+
+error: Naming[2001] Please add a type hint `public SomeType $f1` [1]
+
+dynamic_props2.php:5:17
+3 | class A  {
+4 |   const c = 1;
+5 |   public static $f1 = "42";
+  |                 ^^^ [1]
+6 | }
+7 | 
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+dynamic_props2.php:8:10
+ 6 | }
+ 7 | 
+ 8 | function f() {
+   |          ^ [1]
+ 9 |   $a = A::c; // no errors
+10 |   $b = A::$f1; // no errors
+
+5 errors found

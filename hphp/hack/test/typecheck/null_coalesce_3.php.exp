@@ -1,12 +1,57 @@
-WARN: File "null_coalesce_3.php", line 9, characters 7-17:
-This `is` check is always `false`. The expression on the left has type `nonnull` which shares no values with `null`. (Warn[12010])
-WARN: File "null_coalesce_3.php", line 11, characters 8-15:
-This null coalesce will always evaluate to its left-hand side. (Warn[12023])
-  File "null_coalesce_3.php", line 4, characters 3-9:
-  The expression on the left has type `nonnull` which can never be `null`.
-WARN: File "null_coalesce_3.php", line 13, characters 7-16:
-This `is` check is always `true`. The expression on the left has type `null` which is a subtype of `null`. (Warn[12009])
-WARN: File "null_coalesce_3.php", line 15, characters 8-14:
-This null coalesce will always evaluate to its right-hand side. (Warn[12023])
-  File "null_coalesce_3.php", line 5, characters 3-6:
-  The expression on the left has type `null` which is always `null`.
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `nonnull` which shares no values with `null`. [1]
+
+null_coalesce_3.php:9:7
+ 7 |   dict<string, null> $dn,
+ 8 | ): void {
+ 9 |   if ($nn is null) {}
+   |       ^^^^^^^^^^^ [1]
+10 | 
+11 |   $x = $nn ?? 4;
+
+warning: Warn[12023] This null coalesce will always evaluate to its left-hand side. [1]
+-> The expression on the left has type `nonnull` which can never be `null`. [2]
+
+null_coalesce_3.php:11:8
+ 2 | 
+ 3 | function f(
+ 4 |   nonnull $nn,
+   |   ^^^^^^^ [2]
+ 5 |   null $n,
+ 6 |   dict<string, nonnull> $dnn,
+   :
+ 9 |   if ($nn is null) {}
+10 | 
+11 |   $x = $nn ?? 4;
+   |        ^^^^^^^^ [1]
+12 | 
+13 |   if ($n is null) {}
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `null` which is a subtype of `null`. [1]
+
+null_coalesce_3.php:13:7
+11 |   $x = $nn ?? 4;
+12 | 
+13 |   if ($n is null) {}
+   |       ^^^^^^^^^^ [1]
+14 | 
+15 |   $y = $n ?? 5;
+
+warning: Warn[12023] This null coalesce will always evaluate to its right-hand side. [1]
+-> The expression on the left has type `null` which is always `null`. [2]
+
+null_coalesce_3.php:15:8
+ 3 | function f(
+ 4 |   nonnull $nn,
+ 5 |   null $n,
+   |   ^^^^ [2]
+ 6 |   dict<string, nonnull> $dnn,
+ 7 |   dict<string, null> $dn,
+   :
+13 |   if ($n is null) {}
+14 | 
+15 |   $y = $n ?? 5;
+   |        ^^^^^^^ [1]
+16 | 
+17 |   $_ok = $dnn['a'] ?? 6;
+
+4 errors found

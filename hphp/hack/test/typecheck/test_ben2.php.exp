@@ -1,6 +1,18 @@
-ERROR: File "test_ben2.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "test_ben2.php", line 12, characters 25-28:
-  Expected `bool`
-  File "test_ben2.php", line 12, characters 14-18:
-  But got `?not int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `?not int` [3]
+
+test_ben2.php:16:10
+10 |  */
+11 | 
+12 | function foo(mixed $x): bool {
+   |              ^^^^^ [3]
+   |                         ^^^^ [2]
+13 |   if ($x is int) {
+14 |     $x = false;
+15 |   }
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+
+1 error found

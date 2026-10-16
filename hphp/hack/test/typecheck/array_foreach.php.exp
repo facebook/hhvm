@@ -1,6 +1,27 @@
-ERROR: File "array_foreach.php", line 20, characters 8-11:
-Invalid argument (Typing[4110])
-  File "array_foreach.php", line 30, characters 15-33:
-  Expected `dict<int, string>`
-  File "array_foreach.php", line 12, characters 15-28:
-  But got `vec<string>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<int, string>` [2]
+-> But got `vec<string>` [3]
+
+array_foreach.php:20:8
+10 |  */
+11 | 
+12 | function foo3(varray<string> $arr): void {
+   |               ^^^^^^^^^^^^^^ [3]
+13 |   foreach ($arr as $v) {
+14 |     f2($v);
+   :
+18 |   f2($arr[10]);
+19 |   foo3($arr);
+20 |   foo5($arr);
+   |        ^^^^ [1]
+21 | }
+22 | 
+   :
+28 | }
+29 | 
+30 | function foo5(darray<int, string> $arr): void {
+   |               ^^^^^^^^^^^^^^^^^^^ [2]
+31 |   foreach ($arr as $v) {
+32 |     f2($v);
+
+1 error found

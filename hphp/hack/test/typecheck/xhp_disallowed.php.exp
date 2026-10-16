@@ -1,10 +1,36 @@
-ERROR: File "xhp_disallowed.php", line 15, characters 29-31:
-Unbound name: `Xhp` (Naming[2049])
-ERROR: File "xhp_disallowed.php", line 15, characters 29-31:
-`Xhp` is not a valid type. Use `:xhp` or `XHPChild`. (Naming[2008])
-ERROR: File "xhp_disallowed.php", line 16, characters 12-22:
-Invalid return type (Typing[4110])
-  File "xhp_disallowed.php", line 15, characters 29-31:
-  Expected `Xhp`
-  File "xhp_disallowed.php", line 16, characters 13-15:
-  But got `:div`
+error: Naming[2049] Unbound name: `Xhp` [1]
+
+xhp_disallowed.php:15:29
+13 | 
+14 | class Meh {
+15 |   protected function foo(): Xhp {
+   |                             ^^^ [1]
+16 |     return <div></div>;
+17 |   }
+
+error: Naming[2008] `Xhp` is not a valid type. Use `:xhp` or `XHPChild`. [1]
+
+xhp_disallowed.php:15:29
+13 | 
+14 | class Meh {
+15 |   protected function foo(): Xhp {
+   |                             ^^^ [1]
+16 |     return <div></div>;
+17 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Xhp` [2]
+-> But got `:div` [3]
+
+xhp_disallowed.php:16:12
+13 | 
+14 | class Meh {
+15 |   protected function foo(): Xhp {
+   |                             ^^^ [2]
+16 |     return <div></div>;
+   |            ^^^^^^^^^^^ [1]
+   |             ^^^ [3]
+17 |   }
+18 | }
+
+3 errors found

@@ -1,6 +1,21 @@
-ERROR: File "parent_static.php", line 18, characters 13-14:
-No static method `f1` in `A` (Typing[4090])
-  File "parent_static.php", line 13, characters 19-20:
-  Did you mean instance method `f1` instead?
-  File "parent_static.php", line 12, characters 7-7:
-  Declaration of `A` is here
+error: Typing[4090] No static method `f1` in `A` [1]
+-> Did you mean instance method `f1` instead? [2]
+-> Declaration of `A` is here [3]
+
+parent_static.php:18:13
+10 |  */
+11 | 
+12 | class A {
+   |       ^ [3]
+13 |   public function f1(): void {}
+   |                   ^^ [2]
+14 | }
+15 | 
+16 | class B extends A {
+17 |   public static function f2(): void {
+18 |     parent::f1();
+   |             ^^ [1]
+19 |   }
+20 | }
+
+1 error found

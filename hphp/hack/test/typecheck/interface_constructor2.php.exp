@@ -1,12 +1,22 @@
-ERROR: File "interface_constructor2.php", line 17, characters 19-29:
-The method `__construct` is not compatible with the overridden method (Typing[4341])
-  File "interface_constructor2.php", line 17, characters 19-29:
-  Method `__construct` has type `(function(bool $x): void)` in `A`
-  File "interface_constructor2.php", line 13, characters 19-29:
-  But it has type `(function(int $x): void)` in parent `Foo`
-  File "interface_constructor2.php", line 17, characters 19-29:
-  Type `(function(bool $x): void)` is not a subtype of `(function(int $x): void)`
-  File "interface_constructor2.php", line 17, characters 31-34:
-  Expected `bool`
-  File "interface_constructor2.php", line 13, characters 31-33:
-  But got `int`
+error: Typing[4341] The method `__construct` is not compatible with the overridden method [1]
+-> Method `__construct` has type `(function(bool $x): void)` in `A` [1]
+-> But it has type `(function(int $x): void)` in parent `Foo` [2]
+-> Type `(function(bool $x): void)` is not a subtype of `(function(int $x): void)` [1]
+-> Expected `bool` [3]
+-> But got `int` [4]
+
+interface_constructor2.php:17:19
+11 | 
+12 | interface Foo {
+13 |   public function __construct(int $x);
+   |                   ^^^^^^^^^^^ [2]
+   |                               ^^^ [4]
+14 | }
+15 | 
+16 | class A implements Foo {
+17 |   public function __construct(bool $x) {}
+   |                   ^^^^^^^^^^^ [1]
+   |                               ^^^^ [3]
+18 | }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "typing_fail_abstract.php", line 15, characters 28-28:
-This method is declared as abstract, but has a body (NastCheck[3002])
+error: NastCheck[3002] This method is declared as abstract, but has a body [1]
+
+typing_fail_abstract.php:15:28
+13 | 
+14 | abstract class A {
+15 |   abstract public function f(): int {
+   |                            ^ [1]
+16 |     return 0;
+17 |   }
+
+1 error found

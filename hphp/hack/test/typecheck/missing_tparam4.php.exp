@@ -1,4 +1,14 @@
-ERROR: File "missing_tparam4.php", line 5, characters 11-13:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "missing_tparam4.php", line 3, characters 9-11:
-  Definition is here
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+missing_tparam4.php:5:11
+1 | <?hh
+2 | 
+3 | newtype Foo<T> as string = string;
+  |         ^^^ [2]
+4 | 
+5 | enum Bar: Foo {
+  |           ^^^ [1]
+6 | }
+
+1 error found

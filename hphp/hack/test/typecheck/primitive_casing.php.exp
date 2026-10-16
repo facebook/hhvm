@@ -1,12 +1,44 @@
-ERROR: File "primitive_casing.php", line 3, characters 23-28:
-Keyword `String` must be written in lowercase (Parsing[1002])
-ERROR: File "primitive_casing.php", line 3, characters 12-14:
-Unbound name: `Vec` (Naming[2049])
-ERROR: File "primitive_casing.php", line 3, characters 23-28:
-Unbound name: `String` (Naming[2049])
-ERROR: File "primitive_casing.php", line 4, characters 10-12:
-Invalid return type (Typing[4110])
-  File "primitive_casing.php", line 3, characters 23-28:
-  Expected `String`
-  File "primitive_casing.php", line 4, characters 10-12:
-  But got `string`
+error: Parsing[1002] Keyword `String` must be written in lowercase [1]
+
+primitive_casing.php:3:23
+1 | <?hh
+2 | 
+3 | function f(Vec $arr): String {
+  |                       ^^^^^^ [1]
+4 |   return 's';
+5 | }
+
+error: Naming[2049] Unbound name: `Vec` [1]
+
+primitive_casing.php:3:12
+1 | <?hh
+2 | 
+3 | function f(Vec $arr): String {
+  |            ^^^ [1]
+4 |   return 's';
+5 | }
+
+error: Naming[2049] Unbound name: `String` [1]
+
+primitive_casing.php:3:23
+1 | <?hh
+2 | 
+3 | function f(Vec $arr): String {
+  |                       ^^^^^^ [1]
+4 |   return 's';
+5 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `String` [2]
+-> But got `string` [1]
+
+primitive_casing.php:4:10
+1 | <?hh
+2 | 
+3 | function f(Vec $arr): String {
+  |                       ^^^^^^ [2]
+4 |   return 's';
+  |          ^^^ [1]
+5 | }
+
+4 errors found

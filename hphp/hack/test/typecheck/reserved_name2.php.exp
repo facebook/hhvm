@@ -1,2 +1,9 @@
-ERROR: File "reserved_name2.php", line 5, characters 7-10:
-Cannot use `void` as a type name as it is reserved (Parsing[1002])
+error: Parsing[1002] Cannot use `void` as a type name as it is reserved [1]
+
+reserved_name2.php:5:7
+3 | namespace Foo;
+4 | 
+5 | class void {}
+  |       ^^^^ [1]
+
+1 error found

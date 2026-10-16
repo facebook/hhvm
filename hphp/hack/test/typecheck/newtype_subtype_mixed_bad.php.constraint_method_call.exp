@@ -1,16 +1,46 @@
-ERROR: File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 15-15:
-This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "newtype_subtype_mixed_bad.php--use.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-  File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 26-26:
-  Expected `T`
-  File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 18-18:
-  But got `N`
-ERROR: File "newtype_subtype_mixed_bad.php--use.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-  File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 26-26:
-  Expected `T`
-  File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 18-18:
-  But got `mixed`
-  File "newtype_subtype_mixed_bad.php--def.php", line 4, characters 9-9:
-    by the definition of `N` arising from an implicit `as ?nonnull` constraint on this type
+error: Typing[4366] This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter [1]
+
+newtype_subtype_mixed_bad.php--use.php:4:15
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test<T>(N $x): ?T {
+  |               ^ [1]
+5 |   return $x;
+6 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `N` [3]
+
+newtype_subtype_mixed_bad.php--use.php:5:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test<T>(N $x): ?T {
+  |                  ^ [3]
+  |                          ^ [2]
+5 |   return $x;
+  |          ^^ [1]
+6 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `mixed` [3]
+->   by the definition of `N` arising from an implicit `as ?nonnull` constraint on this type [4]
+
+newtype_subtype_mixed_bad.php--use.php:5:10
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | function test<T>(N $x): ?T {
+  |                  ^ [3]
+  |                          ^ [2]
+5 |   return $x;
+  |          ^^ [1]
+6 | }
+
+newtype_subtype_mixed_bad.php--def.php:4:9
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | newtype N = mixed;
+  |         ^ [4]
+
+3 errors found

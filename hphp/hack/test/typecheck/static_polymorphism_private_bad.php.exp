@@ -1,4 +1,16 @@
-ERROR: File "static_polymorphism_private_bad.php", line 7, characters 19-20:
-Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
-  File "static_polymorphism_private_bad.php", line 4, characters 18-20:
-  This member is private
+error: Typing[4112] Private members cannot be accessed dynamically. Did you mean to use 'self::'? [1]
+-> This member is private [2]
+
+static_polymorphism_private_bad.php:7:19
+2 | 
+3 | class A {
+4 |   private static int $a = 1;
+  |                  ^^^ [2]
+5 | 
+6 |   public function f(): int {
+7 |     return $this::$a;
+  |                   ^^ [1]
+8 |   }
+9 | }
+
+1 error found

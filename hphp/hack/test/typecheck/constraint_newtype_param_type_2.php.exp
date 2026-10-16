@@ -1,12 +1,23 @@
-ERROR: File "constraint_newtype_param_type_2.php", line 7, characters 15-21:
-Some type arguments violate their constraints (Typing[4323])
-  File "constraint_newtype_param_type_2.php", line 4, characters 11-11:
-  `T` is a constrained type parameter
-  File "constraint_newtype_param_type_2.php", line 4, characters 16-23:
-  This type constraint is violated
-  File "constraint_newtype_param_type_2.php", line 4, characters 16-23:
-  Expected `arraykey`
-  File "constraint_newtype_param_type_2.php", line 7, characters 17-20:
-  But got `bool`
-  File "constraint_newtype_param_type_2.php", line 5, characters 15-15:
-    via this generic `T`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `T` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `bool` [4]
+->   via this generic `T` [5]
+
+constraint_newtype_param_type_2.php:7:15
+2 | 
+3 | newtype A = int;
+4 | newtype X<T as arraykey> = T;
+  |           ^ [2]
+  |                ^^^^^^^^ [3]
+5 | type Y<T> = X<T>;
+  |               ^ [5]
+6 | 
+7 | function make(Y<bool> $_): Y<A> {
+  |               ^^^^^^^ [1]
+  |                 ^^^^ [4]
+8 |   return 0;
+9 | }
+
+1 error found

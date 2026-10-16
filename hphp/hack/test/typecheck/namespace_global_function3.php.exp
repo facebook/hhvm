@@ -1,4 +1,21 @@
-ERROR: File "namespace_global_function3.php--local.php", line 5, characters 5-8:
-Unbound name: `N\NN\f` (a global function) (Naming[2049])
-ERROR: File "namespace_global_function3.php--local.php", line 5, characters 5-8:
-Unbound name (typing): `N\NN\f` (Typing[4107])
+error: Naming[2049] Unbound name: `N\NN\f` (a global function) [1]
+
+namespace_global_function3.php--local.php:5:5
+3 | namespace N {
+4 |   function g(): void {
+5 |     NN\f();
+  |     ^^^^ [1]
+6 |   }
+7 | }
+
+error: Typing[4107] Unbound name (typing): `N\NN\f` [1]
+
+namespace_global_function3.php--local.php:5:5
+3 | namespace N {
+4 |   function g(): void {
+5 |     NN\f();
+  |     ^^^^ [1]
+6 |   }
+7 | }
+
+2 errors found

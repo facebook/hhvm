@@ -1,16 +1,39 @@
-ERROR: File "T142810099-2.php", line 18, characters 15-17:
-Invalid assignment (Typing[4110])
-  File "T142810099-2.php", line 14, characters 15-17:
-  Expected `int`
-  File "T142810099-2.php", line 16, characters 15-22:
-  But got `arraykey`
-  File "T142810099-2.php", line 16, characters 15-22:
-  This type argument to `C` must match exactly (it is invariant)
-ERROR: File "T142810099-2.php", line 19, characters 34-36:
-Invalid assignment (Typing[4110])
-  File "T142810099-2.php", line 15, characters 15-20:
-  Expected `string`
-  File "T142810099-2.php", line 16, characters 15-22:
-  But got `arraykey`
-  File "T142810099-2.php", line 16, characters 15-22:
-  This type argument to `C` must match exactly (it is invariant)
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+T142810099-2.php:18:15
+12 | <<__EntryPoint>>
+13 | function entry(): int {
+14 |   $ci = new C<int>(42);
+   |               ^^^ [2]
+15 |   $cs = new C<string>("hi");
+16 |   $ca = new C<arraykey>("hi");
+   |               ^^^^^^^^ [3]
+17 |   /* hh_show_env(); */
+18 |   $ca->self = $ci;
+   |               ^^^ [1]
+19 |   ($ca->self as nonnull)->self = $cs;
+20 |   return ($ci->self as nonnull)->get();
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `string` [2]
+-> But got `arraykey` [3]
+-> This type argument to `C` must match exactly (it is invariant) [3]
+
+T142810099-2.php:19:34
+13 | function entry(): int {
+14 |   $ci = new C<int>(42);
+15 |   $cs = new C<string>("hi");
+   |               ^^^^^^ [2]
+16 |   $ca = new C<arraykey>("hi");
+   |               ^^^^^^^^ [3]
+17 |   /* hh_show_env(); */
+18 |   $ca->self = $ci;
+19 |   ($ca->self as nonnull)->self = $cs;
+   |                                  ^^^ [1]
+20 |   return ($ci->self as nonnull)->get();
+21 | }
+
+2 errors found

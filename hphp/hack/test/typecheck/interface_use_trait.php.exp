@@ -1,2 +1,10 @@
-ERROR: File "interface_use_trait.php", line 4, characters 7-11:
-Interfaces cannot use traits (NastCheck[3073])
+error: NastCheck[3073] Interfaces cannot use traits [1]
+
+interface_use_trait.php:4:7
+2 | trait Hello {}
+3 | interface I {
+4 |   use Hello;
+  |       ^^^^^ [1]
+5 | }
+
+1 error found

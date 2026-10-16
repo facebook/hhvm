@@ -1,6 +1,16 @@
-ERROR: File "list_varray.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-  File "list_varray.php", line 22, characters 33-36:
-  Expected `bool`
-  File "list_varray.php", line 22, characters 23-25:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+list_varray.php:24:10
+20 | }
+21 | 
+22 | function test3(varray<int> $x): bool {
+   |                       ^^^ [3]
+   |                                 ^^^^ [2]
+23 |   list($x, $y) = $x;
+24 |   return $x;
+   |          ^^ [1]
+25 | }
+
+1 error found

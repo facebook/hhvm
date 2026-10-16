@@ -1,8 +1,20 @@
-ERROR: File "encapsed2.php", line 7, characters 9-10:
-Typing error (Typing[4053])
-  File "encapsed2.php", line 7, characters 13-13:
-  No property `x` in `C`
-  File "encapsed2.php", line 6, characters 12-12:
-  This is why I think it is an object of type C
-  File "encapsed2.php", line 3, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4053] Typing error [1]
+-> No property `x` in `C` [2]
+-> This is why I think it is an object of type C [3]
+-> Declaration of `C` is here [4]
+
+encapsed2.php:7:9
+1 | <?hh
+2 | 
+3 | class C {}
+  |       ^ [4]
+4 | 
+5 | function f(): void {
+6 |   $c = new C();
+  |            ^ [3]
+7 |   $s = "$c->x()";
+  |         ^^ [1]
+  |             ^ [2]
+8 | }
+
+1 error found

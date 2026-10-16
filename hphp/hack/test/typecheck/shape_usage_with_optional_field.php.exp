@@ -1,6 +1,35 @@
-ERROR: File "shape_usage_with_optional_field.php", line 4, characters 3-12:
-Optional field syntax `?` is only valid in shape destructuring patterns (Parsing[1002])
-ERROR: File "shape_usage_with_optional_field.php", line 4, characters 3-12:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "shape_usage_with_optional_field.php", line 3, characters 1-27:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Parsing[1002] Optional field syntax `?` is only valid in shape destructuring patterns [1]
+
+shape_usage_with_optional_field.php:4:3
+2 | 
+3 | $x = shape(
+4 |   ?'a' => 42
+  |   ^^^^^^^^^^ [1]
+5 | );
+6 | 
+
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+shape_usage_with_optional_field.php:4:3
+2 | 
+3 | $x = shape(
+4 |   ?'a' => 42
+  |   ^^^^^^^^^^ [1]
+5 | );
+6 | 
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+shape_usage_with_optional_field.php:3:1
+1 | <?hh
+2 | 
+3 | $x = shape(
+  | ^^^^^^^^^^^ [1]
+4 |   ?'a' => 42
+  |   ^^^^^^^^^^ [1]
+5 | );
+  | ^^ [1]
+6 | 
+7 | //
+
+3 errors found

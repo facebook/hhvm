@@ -1,6 +1,12 @@
-ERROR: File "xhp_attr_spread_1.php", line 8, characters 22-36:
-An XHP instance was expected (Typing[4191])
-  File "xhp_attr_spread_1.php", line 8, characters 22-36:
-  The attribute spread operator cannot be called on non-XHP
-  File "xhp_attr_spread_1.php", line 8, characters 22-36:
-  This is a shape
+error: Typing[4191] An XHP instance was expected [1]
+-> The attribute spread operator cannot be called on non-XHP [1]
+-> This is a shape [1]
+
+xhp_attr_spread_1.php:8:22
+6 | function spread(): void {
+7 |   // Non-XHP is not legal to spread
+8 |   <foo bar="baz" {...shape('a' => 1)} />;
+  |                      ^^^^^^^^^^^^^^^ [1]
+9 | }
+
+1 error found

@@ -1,4 +1,16 @@
-ERROR: File "test_consts15.php", line 8, characters 22-22:
-Cannot re-declare this constant as abstract (Typing[4142])
-  File "test_consts15.php", line 4, characters 9-9:
-  Previously defined here
+error: Typing[4142] Cannot re-declare this constant as abstract [1]
+-> Previously defined here [2]
+
+test_consts15.php:8:22
+2 | 
+3 | class C {
+4 |   const X = 4;
+  |         ^ [2]
+5 | }
+6 | 
+7 | abstract class D extends C {
+8 |   abstract const int X;
+  |                      ^ [1]
+9 | }
+
+1 error found

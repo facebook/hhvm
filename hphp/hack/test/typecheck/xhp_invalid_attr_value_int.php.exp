@@ -1,2 +1,10 @@
-ERROR: File "xhp_invalid_attr_value_int.php", line 9, characters 19-19:
-Invalid value for `size`, expected one of `1`, `2`. (Typing[4483])
+error: Typing[4483] Invalid value for `size`, expected one of `1`, `2`. [1]
+
+xhp_invalid_attr_value_int.php:9:19
+ 7 | 
+ 8 | function bad_attr_value(): void {
+ 9 |   $x = <foo size={3} />;
+   |                   ^ [1]
+10 | }
+
+1 error found

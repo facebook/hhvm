@@ -1,10 +1,51 @@
-WARN: File "compile_test_cast.php", line 26, characters 9-18:
-Casting A to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-ERROR: File "compile_test_cast.php", line 28, characters 12-14:
-Encountered unexpected token `$x3`. (Parsing[1002])
-ERROR: File "compile_test_cast.php", line 28, characters 10-10:
-Unbound name: `A` (a global constant) (Naming[2049])
-ERROR: File "compile_test_cast.php", line 26, characters 9-18:
-Cannot cast a value of type `A` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
-ERROR: File "compile_test_cast.php", line 28, characters 10-10:
-Unbound global constant (Typing) (Typing[4106])
+warning: Warn[12005] Casting A to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? [1]
+
+compile_test_cast.php:26:9
+24 |   $y = (int)$x;
+25 |   $z = new A();
+26 |   $x2 = (string)$z;
+   |         ^^^^^^^^^^ [1]
+27 |   $x3 = new B();
+28 |   $x4 = (A)$x3;
+
+error: Parsing[1002] Encountered unexpected token `$x3`. [1]
+
+compile_test_cast.php:28:12
+26 |   $x2 = (string)$z;
+27 |   $x3 = new B();
+28 |   $x4 = (A)$x3;
+   |            ^^^ [1]
+29 |   $x5 = (false && (true)); // (true) is not a cast.
+30 |   if($y === 11 && $x2 === 'Afda') {
+
+error: Naming[2049] Unbound name: `A` (a global constant) [1]
+
+compile_test_cast.php:28:10
+26 |   $x2 = (string)$z;
+27 |   $x3 = new B();
+28 |   $x4 = (A)$x3;
+   |          ^ [1]
+29 |   $x5 = (false && (true)); // (true) is not a cast.
+30 |   if($y === 11 && $x2 === 'Afda') {
+
+error: Typing[4281] Cannot cast a value of type `A` to string. Only primitives may be used in a `(string)` cast. [1]
+
+compile_test_cast.php:26:9
+24 |   $y = (int)$x;
+25 |   $z = new A();
+26 |   $x2 = (string)$z;
+   |         ^^^^^^^^^^ [1]
+27 |   $x3 = new B();
+28 |   $x4 = (A)$x3;
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+compile_test_cast.php:28:10
+26 |   $x2 = (string)$z;
+27 |   $x3 = new B();
+28 |   $x4 = (A)$x3;
+   |          ^ [1]
+29 |   $x5 = (false && (true)); // (true) is not a cast.
+30 |   if($y === 11 && $x2 === 'Afda') {
+
+5 errors found

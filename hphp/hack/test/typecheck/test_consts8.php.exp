@@ -1,6 +1,17 @@
-ERROR: File "test_consts8.php", line 6, characters 12-20:
-Invalid return type (Typing[4110])
-  File "test_consts8.php", line 5, characters 24-29:
-  Expected `string`
-  File "test_consts8.php", line 4, characters 18-20:
-  But got `int`
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+test_consts8.php:6:12
+2 | 
+3 | abstract class C1 {
+4 |   abstract const int X;
+  |                  ^^^ [3]
+5 |   public function f(): string {
+  |                        ^^^^^^ [2]
+6 |     return static::X;
+  |            ^^^^^^^^^ [1]
+7 |   }
+8 | }
+
+1 error found

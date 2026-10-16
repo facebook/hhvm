@@ -1,4 +1,13 @@
-ERROR: File "shapes_cc_3.php", line 20, characters 3-10:
-Shape uses literal string as field name (Typing[4050])
-  File "shapes_cc_3.php", line 19, characters 3-7:
-  But expected a class constant. Shape fields cannot be a mix of literals and constants.
+error: Typing[4050] Shape uses literal string as field name [1]
+-> But expected a class constant. Shape fields cannot be a mix of literals and constants. [2]
+
+shapes_cc_3.php:20:3
+17 | // Should fail for mixing class const and string literal
+18 | type myshape = shape(
+19 |   X::X1 => int,
+   |   ^^^^^ [2]
+20 |   'field2' => bool,
+   |   ^^^^^^^^ [1]
+21 | );
+
+1 error found

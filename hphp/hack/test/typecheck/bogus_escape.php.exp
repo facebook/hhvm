@@ -1,2 +1,10 @@
-ERROR: File "bogus_escape.php", line 4, characters 8-18:
-Malformed string literal <<\u{1000 k>> (Parsing[1002])
+error: Parsing[1002] Malformed string literal <<\u{1000 k>> [1]
+
+bogus_escape.php:4:8
+2 | 
+3 | function foo(): void {
+4 |   $s = "\u{1000 k";
+  |        ^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "use_integer_instead_of_int.php", line 12, characters 23-29:
-No such type `integer`, did you mean `int`? (Naming[2123])
-ERROR: File "use_integer_instead_of_int.php", line 12, characters 23-29:
-Unbound name: `integer` (Naming[2049])
+error: Naming[2123] No such type `integer`, did you mean `int`? [1]
+
+use_integer_instead_of_int.php:12:23
+10 |  */
+11 | class Foo {
+12 |   public function bar(integer $i): int {
+   |                       ^^^^^^^ [1]
+13 |     return 1;
+14 |   }
+
+error: Naming[2049] Unbound name: `integer` [1]
+
+use_integer_instead_of_int.php:12:23
+10 |  */
+11 | class Foo {
+12 |   public function bar(integer $i): int {
+   |                       ^^^^^^^ [1]
+13 |     return 1;
+14 |   }
+
+2 errors found

@@ -1,4 +1,19 @@
-ERROR: File "ctor_privacy3.php", line 20, characters 16-18:
-Cannot access this protected member, you don't extend Foo (Typing[4112])
-  File "ctor_privacy3.php", line 13, characters 22-32:
-  This member is protected
+error: Typing[4112] Cannot access this protected member, you don't extend Foo [1]
+-> This member is protected [2]
+
+ctor_privacy3.php:20:16
+11 | 
+12 | class Foo {
+13 |   protected function __construct() {}
+   |                      ^^^^^^^^^^^ [2]
+14 | 
+15 | }
+   :
+18 | 
+19 |   public function test(): void {
+20 |     $foo = new Foo();
+   |                ^^^ [1]
+21 |   }
+22 | 
+
+1 error found

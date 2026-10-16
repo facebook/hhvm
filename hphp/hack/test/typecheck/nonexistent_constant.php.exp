@@ -1,4 +1,19 @@
-ERROR: File "nonexistent_constant.php", line 4, characters 10-23:
-Unbound name: `NoSuchConstant` (a global constant) (Naming[2049])
-ERROR: File "nonexistent_constant.php", line 4, characters 10-23:
-Unbound global constant (Typing) (Typing[4106])
+error: Naming[2049] Unbound name: `NoSuchConstant` (a global constant) [1]
+
+nonexistent_constant.php:4:10
+2 | 
+3 | function foo(): mixed {
+4 |   return NoSuchConstant;
+  |          ^^^^^^^^^^^^^^ [1]
+5 | }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+nonexistent_constant.php:4:10
+2 | 
+3 | function foo(): mixed {
+4 |   return NoSuchConstant;
+  |          ^^^^^^^^^^^^^^ [1]
+5 | }
+
+2 errors found

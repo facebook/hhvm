@@ -1,14 +1,62 @@
-ERROR: File "decl_async_expr_hints.php", line 16, characters 11-13:
-Encountered unexpected token `100`. (Parsing[1002])
-ERROR: File "decl_async_expr_hints.php", line 16, characters 5-14:
-`break` can only be used inside loops or `switch` statements (NastCheck[3022])
-ERROR: File "decl_async_expr_hints.php", line 13, characters 3-185:
-You cannot return a value (Typing[4084])
-  File "decl_async_expr_hints.php", line 12, characters 15-18:
-  This is a `void` function
-ERROR: File "decl_async_expr_hints.php", line 13, characters 10-184:
-Invalid return type (Typing[4110])
-  File "decl_async_expr_hints.php", line 12, characters 15-18:
-  Expected `void`
-  File "decl_async_expr_hints.php", line 13, characters 10-184:
-  But got `(function(vec<int> $a): Awaitable<~vec<int>>)`
+error: Parsing[1002] Encountered unexpected token `100`. [1]
+
+decl_async_expr_hints.php:16:11
+14 |     // This statement will not parse in Hack, but we should not raise an error
+15 |     // in decl mode.
+16 |     break 100;
+   |           ^^^ [1]
+17 |   };
+18 | }
+
+error: NastCheck[3022] `break` can only be used inside loops or `switch` statements [1]
+
+decl_async_expr_hints.php:16:5
+14 |     // This statement will not parse in Hack, but we should not raise an error
+15 |     // in decl mode.
+16 |     break 100;
+   |     ^^^^^^^^^^ [1]
+17 |   };
+18 | }
+
+error: Typing[4084] You cannot return a value [1]
+-> This is a `void` function [2]
+
+decl_async_expr_hints.php:13:3
+10 |  */
+11 | 
+12 | function f(): void {
+   |               ^^^^ [2]
+13 |   return async function(varray<int> $a): Awaitable<varray<int>> {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     // This statement will not parse in Hack, but we should not raise an error
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |     // in decl mode.
+   |     ^^^^^^^^^^^^^^^^ [1]
+16 |     break 100;
+   |     ^^^^^^^^^^ [1]
+17 |   };
+   |   ^^ [1]
+18 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `void` [2]
+-> But got `(function(vec<int> $a): Awaitable<~vec<int>>)` [1]
+
+decl_async_expr_hints.php:13:10
+10 |  */
+11 | 
+12 | function f(): void {
+   |               ^^^^ [2]
+13 |   return async function(varray<int> $a): Awaitable<varray<int>> {
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     // This statement will not parse in Hack, but we should not raise an error
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |     // in decl mode.
+   |     ^^^^^^^^^^^^^^^^ [1]
+16 |     break 100;
+   |     ^^^^^^^^^^ [1]
+17 |   };
+   |   ^ [1]
+18 | }
+
+4 errors found

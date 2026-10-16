@@ -1,8 +1,30 @@
 File "class_constant_concretization.php", line 11, characters 3-13:
   int
-ERROR: File "class_constant_concretization.php", line 4, characters 22-26:
-Cannot use unstable feature: `class_const_default` (Parsing[1002])
-ERROR: File "class_constant_concretization.php", line 12, characters 14-14:
-Cannot reference abstract constant `A::X` directly (Typing[4129])
-  File "class_constant_concretization.php", line 4, characters 22-22:
-  Declaration is here
+error: Parsing[1002] Cannot use unstable feature: `class_const_default` [1]
+
+class_constant_concretization.php:4:22
+2 | 
+3 | abstract class A {
+4 |   abstract const int X = 4;
+  |                      ^^^^^ [1]
+5 | }
+6 | 
+
+error: Typing[4129] Cannot reference abstract constant `A::X` directly [1]
+-> Declaration is here [2]
+
+class_constant_concretization.php:12:14
+ 2 | 
+ 3 | abstract class A {
+ 4 |   abstract const int X = 4;
+   |                      ^ [2]
+ 5 | }
+ 6 | 
+   :
+10 |   $x = C::X;
+11 |   hh_show($x);
+12 |   $fail = A::X;
+   |              ^ [1]
+13 | }
+
+2 errors found

@@ -1,12 +1,44 @@
-ERROR: File "xhp_attribute_coeffect.php", line 8, characters 4-6:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "xhp_attribute_coeffect.php", line 7, characters 17-18:
-  From this declaration, the context of this function body provides the capability set {}
-  File "XHPTest.hhi", line 4, characters 19-29:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
-ERROR: File "xhp_attribute_coeffect.php", line 12, characters 3-13:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "xhp_attribute_coeffect.php", line 11, characters 26-27:
-  From this declaration, the context of this function body provides the capability set {}
-  File "XHPTest.hhi", line 11, characters 19-30:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+xhp_attribute_coeffect.php:8:4
+ 5 | }
+ 6 | 
+ 7 | function main1()[]:void {
+   |                 ^^ [2]
+ 8 |   <xhp />;
+   |    ^^^ [1]
+ 9 | }
+10 | 
+
+XHPTest.hhi:4:19
+ 2 | 
+ 3 | abstract class XHPTest {
+ 4 |   public function __construct(
+   |                   ^^^^^^^^^^^ [3]
+ 5 |     public darray<string,mixed> $_attributes,
+ 6 |     public varray<mixed> $_children,
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability set {} [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+xhp_attribute_coeffect.php:12:3
+ 9 | }
+10 | 
+11 | function main2(:xhp $xhp)[]:void {
+   |                          ^^ [2]
+12 |   $xhp->:attr;
+   |   ^^^^^^^^^^^ [1]
+13 | }
+
+XHPTest.hhi:11:19
+ 9 |   );
+10 | 
+11 |   public function getAttribute(
+   |                   ^^^^^^^^^^^^ [3]
+12 |     string $_attribute,
+13 |     mixed $_default = null
+
+2 errors found

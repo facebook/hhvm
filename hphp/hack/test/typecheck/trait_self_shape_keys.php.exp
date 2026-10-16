@@ -1,10 +1,51 @@
-ERROR: File "trait_self_shape_keys.php", line 6, characters 33-41:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys.php", line 7, characters 18-26:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys.php", line 11, characters 15-23:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys.php", line 15, characters 8-16:
-`self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "trait_self_shape_keys.php", line 23, characters 15-25:
-Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys.php:6:33
+4 |   const string KEY = 'key';
+5 | 
+6 |   public function make(): shape(self::KEY => int) {
+  |                                 ^^^^^^^^^ [1]
+7 |     return shape(self::KEY => 1);
+8 |   }
+
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys.php:7:18
+5 | 
+6 |   public function make(): shape(self::KEY => int) {
+7 |     return shape(self::KEY => 1);
+  |                  ^^^^^^^^^ [1]
+8 |   }
+9 | 
+
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys.php:11:15
+ 9 | 
+10 |   public function read(shape(SelfKey::KEY => int) $s): int {
+11 |     return $s[self::KEY];
+   |               ^^^^^^^^^ [1]
+12 |   }
+13 | 
+
+error: Naming[2137] `self::KEY` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+trait_self_shape_keys.php:15:8
+13 | 
+14 |   public function write(shape(SelfKey::KEY => int) $s): void {
+15 |     $s[self::KEY] = 2;
+   |        ^^^^^^^^^ [1]
+16 |   }
+17 | 
+
+error: Typing[4482] Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` [1]
+
+trait_self_shape_keys.php:23:15
+21 | 
+22 |   public function class_name(shape(...) $s): mixed {
+23 |     return $s[self::class];
+   |               ^^^^^^^^^^^ [1]
+24 |   }
+25 | }
+
+5 errors found

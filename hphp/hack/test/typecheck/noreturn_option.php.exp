@@ -1,2 +1,11 @@
-ERROR: File "noreturn_option.php", line 12, characters 15-23:
-`?noreturn` is a nonsensical typehint; a function cannot both never return and return null. (Typing[4066])
+error: Typing[4066] `?noreturn` is a nonsensical typehint; a function cannot both never return and return null. [1]
+
+noreturn_option.php:12:15
+10 |  */
+11 | 
+12 | function f(): ?noreturn {
+   |               ^^^^^^^^^ [1]
+13 |   throw new Exception('nope');
+14 | }
+
+1 error found

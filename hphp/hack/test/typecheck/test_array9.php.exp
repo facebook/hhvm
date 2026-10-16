@@ -1,10 +1,30 @@
-ERROR: File "test_array9.php", line 16, characters 16-30:
-No instance method `unknownFunction` in `A` (Typing[4053])
-  File "test_array9.php", line 15, characters 43-43:
-  This is why I think it is an object of type A
-  File "test_array9.php", line 12, characters 7-7:
-  Declaration of `A` is here
-ERROR: File "test_array9.php", line 16, characters 16-30:
-You are trying to access the method `unknownFunction` but this is an int (Typing[4062])
-  File "test_array9.php", line 15, characters 24-24:
-  Definition is here
+error: Typing[4053] No instance method `unknownFunction` in `A` [1]
+-> This is why I think it is an object of type A [2]
+-> Declaration of `A` is here [3]
+
+test_array9.php:16:16
+10 |  */
+11 | 
+12 | class A {}
+   |       ^ [3]
+13 | 
+14 | function test(string $field1): void {
+15 |   $v = dict[$field1 => 1, 'field2' => new A()];
+   |                                           ^ [2]
+16 |   $v[$field1]->unknownFunction();
+   |                ^^^^^^^^^^^^^^^ [1]
+17 | }
+
+error: Typing[4062] You are trying to access the method `unknownFunction` but this is an int [1]
+-> Definition is here [2]
+
+test_array9.php:16:16
+13 | 
+14 | function test(string $field1): void {
+15 |   $v = dict[$field1 => 1, 'field2' => new A()];
+   |                        ^ [2]
+16 |   $v[$field1]->unknownFunction();
+   |                ^^^^^^^^^^^^^^^ [1]
+17 | }
+
+2 errors found

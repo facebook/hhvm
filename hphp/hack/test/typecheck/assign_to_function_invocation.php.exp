@@ -1,4 +1,21 @@
-ERROR: File "assign_to_function_invocation.php", line 4, characters 19-33:
-Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-ERROR: File "assign_to_function_invocation.php", line 4, characters 19-33:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+assign_to_function_invocation.php:4:19
+2 | 
+3 | function do_stuff(int $elapsed_time, int $start_time): void {
+4 |   $elapsed_time = Time::nowInMS() = $start_time;
+  |                   ^^^^^^^^^^^^^^^ [1]
+5 | }
+6 | class Time {
+
+error: Parsing[1002] You cannot use this syntax on the left-hand side of an assignment. [1]
+
+assign_to_function_invocation.php:4:19
+2 | 
+3 | function do_stuff(int $elapsed_time, int $start_time): void {
+4 |   $elapsed_time = Time::nowInMS() = $start_time;
+  |                   ^^^^^^^^^^^^^^^ [1]
+5 | }
+6 | class Time {
+
+2 errors found

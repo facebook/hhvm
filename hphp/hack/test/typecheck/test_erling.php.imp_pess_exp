@@ -1,16 +1,36 @@
-ERROR: File "test_erling.php", line 15, characters 7-8:
-Invalid argument (Typing[4110])
-  File "test_erling.php", line 12, characters 21-21:
-  Expected `A`
-  File "test_erling.php", line 14, characters 21-22:
-  But got `?A`
-  File "test_erling.php", line 14, characters 21-22:
-  This type argument to `Vector` must match exactly (it is invariant)
-ERROR: File "test_erling.php", line 16, characters 10-11:
-Invalid return type (Typing[4110])
-  File "test_erling.php", line 14, characters 37-37:
-  Expected `~A`
-  File "test_erling.php", line 14, characters 21-22:
-  But got `?A`
-  File "test_erling.php", line 14, characters 21-22:
-  This type argument to `Vector` must match exactly (it is invariant)
+error: Typing[4110] Invalid argument [1]
+-> Expected `A` [2]
+-> But got `?A` [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+test_erling.php:15:7
+10 |  */
+11 | 
+12 | function bar(Vector<A> $x): void {}
+   |                     ^ [2]
+13 | 
+14 | function foo(Vector<?A> $x): Vector<A> {
+   |                     ^^ [3]
+15 |   bar($x);
+   |       ^^ [1]
+16 |   return $x;
+17 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `~A` [2]
+-> But got `?A` [3]
+-> This type argument to `Vector` must match exactly (it is invariant) [3]
+
+test_erling.php:16:10
+12 | function bar(Vector<A> $x): void {}
+13 | 
+14 | function foo(Vector<?A> $x): Vector<A> {
+   |                     ^^ [3]
+   |                                     ^ [2]
+15 |   bar($x);
+16 |   return $x;
+   |          ^^ [1]
+17 | }
+18 | 
+
+2 errors found

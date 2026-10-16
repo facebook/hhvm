@@ -1,48 +1,201 @@
-ERROR: File "abstract_constant_shape_keys.php", line 38, characters 44-54:
-`self::MAGIC` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "abstract_constant_shape_keys.php", line 39, characters 18-28:
-`self::MAGIC` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly (Naming[2137])
-ERROR: File "abstract_constant_shape_keys.php", line 6, characters 37-47:
-Abstract constant `MagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 4, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 12, characters 37-55:
-Abstract constant `MagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 4, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 13, characters 18-36:
-Abstract constant `MagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 4, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 20, characters 44-54:
-Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 21, characters 18-28:
-Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 29, characters 5-31:
-Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 31, characters 18-44:
-Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 18, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 38, characters 44-54:
-Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 39, characters 18-28:
-Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 49, characters 5-28:
-Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
-  Declaration is here
-ERROR: File "abstract_constant_shape_keys.php", line 51, characters 18-41:
-Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key (Typing[4129])
-  File "abstract_constant_shape_keys.php", line 36, characters 25-29:
-  Declaration is here
+error: Naming[2137] `self::MAGIC` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+abstract_constant_shape_keys.php:38:44
+36 |   abstract const string MAGIC;
+37 | 
+38 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   |                                            ^^^^^^^^^^^ [1]
+39 |     return shape(self::MAGIC => 'magic');
+40 |   }
+
+error: Naming[2137] `self::MAGIC` cannot be used as a shape key inside a trait; qualify the declaring class, trait, or interface explicitly [1]
+
+abstract_constant_shape_keys.php:39:18
+37 | 
+38 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+39 |     return shape(self::MAGIC => 'magic');
+   |                  ^^^^^^^^^^^ [1]
+40 |   }
+41 | }
+
+error: Typing[4129] Abstract constant `MagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:6:37
+2 | 
+3 | interface MagicFactory {
+4 |   abstract const string MAGIC;
+  |                         ^^^^^ [2]
+5 | 
+6 |   public function getShape(): shape(self::MAGIC => string);
+  |                                     ^^^^^^^^^^^ [1]
+7 | }
+8 | 
+
+error: Typing[4129] Abstract constant `MagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:12:37
+ 2 | 
+ 3 | interface MagicFactory {
+ 4 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+ 5 | 
+ 6 |   public function getShape(): shape(self::MAGIC => string);
+   :
+10 |   const string MAGIC = 'magic';
+11 | 
+12 |   public function getShape(): shape(MagicFactory::MAGIC => string) {
+   |                                     ^^^^^^^^^^^^^^^^^^^ [1]
+13 |     return shape(MagicFactory::MAGIC => 'magic');
+14 |   }
+
+error: Typing[4129] Abstract constant `MagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:13:18
+ 2 | 
+ 3 | interface MagicFactory {
+ 4 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+ 5 | 
+ 6 |   public function getShape(): shape(self::MAGIC => string);
+   :
+11 | 
+12 |   public function getShape(): shape(MagicFactory::MAGIC => string) {
+13 |     return shape(MagicFactory::MAGIC => 'magic');
+   |                  ^^^^^^^^^^^^^^^^^^^ [1]
+14 |   }
+15 | }
+
+error: Typing[4129] Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:20:44
+16 | 
+17 | abstract class AbstractMagicFactory {
+18 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+19 | 
+20 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   |                                            ^^^^^^^^^^^ [1]
+21 |     return shape(self::MAGIC => 'magic');
+22 |   }
+
+error: Typing[4129] Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:21:18
+16 | 
+17 | abstract class AbstractMagicFactory {
+18 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+19 | 
+20 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+21 |     return shape(self::MAGIC => 'magic');
+   |                  ^^^^^^^^^^^ [1]
+22 |   }
+23 | }
+
+error: Typing[4129] Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:29:5
+16 | 
+17 | abstract class AbstractMagicFactory {
+18 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+19 | 
+20 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   :
+27 | 
+28 |   public function getShapeViaBaseName(): shape(
+29 |     AbstractMagicFactory::MAGIC => string,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+30 |   ) {
+31 |     return shape(AbstractMagicFactory::MAGIC => 'magic');
+
+error: Typing[4129] Abstract constant `AbstractMagicFactory::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:31:18
+16 | 
+17 | abstract class AbstractMagicFactory {
+18 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+19 | 
+20 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   :
+29 |     AbstractMagicFactory::MAGIC => string,
+30 |   ) {
+31 |     return shape(AbstractMagicFactory::MAGIC => 'magic');
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+32 |   }
+33 | }
+
+error: Typing[4129] Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:38:44
+34 | 
+35 | trait MagicFactoryTrait {
+36 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+37 | 
+38 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   |                                            ^^^^^^^^^^^ [1]
+39 |     return shape(self::MAGIC => 'magic');
+40 |   }
+
+error: Typing[4129] Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:39:18
+34 | 
+35 | trait MagicFactoryTrait {
+36 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+37 | 
+38 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+39 |     return shape(self::MAGIC => 'magic');
+   |                  ^^^^^^^^^^^ [1]
+40 |   }
+41 | }
+
+error: Typing[4129] Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:49:5
+34 | 
+35 | trait MagicFactoryTrait {
+36 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+37 | 
+38 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   :
+47 | 
+48 |   public function getShapeViaTraitName(): shape(
+49 |     MagicFactoryTrait::MAGIC => string,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+50 |   ) {
+51 |     return shape(MagicFactoryTrait::MAGIC => 'magic');
+
+error: Typing[4129] Abstract constant `MagicFactoryTrait::MAGIC` cannot be used as a shape key [1]
+-> Declaration is here [2]
+
+abstract_constant_shape_keys.php:51:18
+34 | 
+35 | trait MagicFactoryTrait {
+36 |   abstract const string MAGIC;
+   |                         ^^^^^ [2]
+37 | 
+38 |   public function getShapeViaSelf(): shape(self::MAGIC => string) {
+   :
+49 |     MagicFactoryTrait::MAGIC => string,
+50 |   ) {
+51 |     return shape(MagicFactoryTrait::MAGIC => 'magic');
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 |   }
+53 | }
+
+13 errors found

@@ -1,6 +1,20 @@
-ERROR: File "foreach_list2.php", line 17, characters 9-10:
-Invalid argument (Typing[4110])
-  File "foreach_list2.php", line 12, characters 14-19:
-  Expected `string`
-  File "foreach_list2.php", line 15, characters 18-18:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+foreach_list2.php:17:9
+10 |  */
+11 | 
+12 | function foo(string $x): void {}
+   |              ^^^^^^ [2]
+13 | 
+14 | function test(): void {
+15 |   $arr = vec[vec[1, 2], vec[3, 4]];
+   |                  ^ [3]
+16 |   foreach ($arr as list($x, $y)) {
+17 |     foo($x);
+   |         ^^ [1]
+18 |   }
+19 | }
+
+1 error found

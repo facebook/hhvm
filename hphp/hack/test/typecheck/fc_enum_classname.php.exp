@@ -1,8 +1,38 @@
-ERROR: File "fc_enum_classname.php", line 10, characters 9-18:
-Using `Foo::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Foo` (Typing[4482])
-ERROR: File "fc_enum_classname.php", line 11, characters 9-18:
-Using `Bar::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Bar` (Typing[4482])
-ERROR: File "fc_enum_classname.php", line 16, characters 3-6:
-It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. (Typing[4482])
-  File "fc_enum_classname.php", line 9, characters 9-22:
-  Definition is here
+error: Typing[4482] Using `Foo::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Foo` [1]
+
+fc_enum_classname.php:10:9
+ 8 | 
+ 9 | enum E: classname<Foo> as classname<Foo> {
+10 |   FOO = Foo::class;
+   |         ^^^^^^^^^^ [1]
+11 |   Bar = Bar::class;
+12 | }
+
+error: Typing[4482] Using `Bar::class` in this position will trigger an implicit runtime conversion to string, please use `nameof Bar` [1]
+
+fc_enum_classname.php:11:9
+ 9 | enum E: classname<Foo> as classname<Foo> {
+10 |   FOO = Foo::class;
+11 |   Bar = Bar::class;
+   |         ^^^^^^^^^^ [1]
+12 | }
+13 | 
+
+error: Typing[4482] It is no longer allowed to use a `classname<Foo>` in this position. Please use a `class<Foo>` instead. [1]
+-> Definition is here [2]
+
+fc_enum_classname.php:16:3
+ 7 | class Bar extends Foo {}
+ 8 | 
+ 9 | enum E: classname<Foo> as classname<Foo> {
+   |         ^^^^^^^^^^^^^^ [2]
+10 |   FOO = Foo::class;
+11 |   Bar = Bar::class;
+   :
+14 | function f(): void {
+15 |   $cls = E::FOO;
+16 |   $cls::x();
+   |   ^^^^ [1]
+17 | }
+
+3 errors found

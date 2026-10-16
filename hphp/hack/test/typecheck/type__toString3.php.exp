@@ -1,2 +1,11 @@
-ERROR: File "type__toString3.php", line 13, characters 26-35:
-`__toString` must have public visibility and cannot be static (NastCheck[3021])
+error: NastCheck[3021] `__toString` must have public visibility and cannot be static [1]
+
+type__toString3.php:13:26
+11 | 
+12 | class Foo {
+13 |   public static function __toString(): string {
+   |                          ^^^^^^^^^^ [1]
+14 |     return "foo";
+15 |   }
+
+1 error found

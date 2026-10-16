@@ -1,6 +1,54 @@
-ERROR: File "pending_switch7.php", line 31, characters 10-11:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-ERROR: File "pending_switch7.php", line 13, characters 3-241:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "pending_switch7.php", line 13, characters 11-11:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: Naming[2050] Variable `$x` is undefined, or not always defined. [1]
+
+pending_switch7.php:31:10
+29 |   }
+30 | 
+31 |   return $x;
+   |          ^^ [1]
+32 | }
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+pending_switch7.php:13:3
+11 | 
+12 | function f(): int {
+13 |   switch (1) {
+   |   ^^^^^^^^^^^^ [1]
+   |           ^ [2]
+14 |     case 1:
+   |     ^^^^^^^ [1]
+15 |       break;
+   |       ^^^^^^ [1]
+16 |     case 2:
+   |     ^^^^^^^ [1]
+17 |       switch ('x') {
+   |       ^^^^^^^^^^^^^^ [1]
+18 |         case 'x':
+   |         ^^^^^^^^^ [1]
+19 |           $x = 2;
+   |           ^^^^^^^ [1]
+20 |           break;
+   |           ^^^^^^ [1]
+21 |         default:
+   |         ^^^^^^^^ [1]
+22 |           $x = 4;
+   |           ^^^^^^^ [1]
+23 |           break;
+   |           ^^^^^^ [1]
+24 |       }
+   |       ^ [1]
+25 |       break;
+   |       ^^^^^^ [1]
+26 |     case 3:
+   |     ^^^^^^^ [1]
+27 |       $x = 8;
+   |       ^^^^^^^ [1]
+28 |       break;
+   |       ^^^^^^ [1]
+29 |   }
+   |   ^ [1]
+30 | 
+31 |   return $x;
+
+2 errors found

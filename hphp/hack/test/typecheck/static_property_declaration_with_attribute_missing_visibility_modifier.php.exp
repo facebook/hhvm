@@ -1,2 +1,12 @@
-ERROR: File "static_property_declaration_with_attribute_missing_visibility_modifier.php", line 3, characters 3-33:
-Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])
+error: Parsing[1002] Property declarations require a visibility modifier such as `public`, `private` or `protected`. [1]
+
+static_property_declaration_with_attribute_missing_visibility_modifier.php:3:3
+1 | <?hh
+2 | class C {
+3 |   <<__LSB>>
+  |   ^^^^^^^^^ [1]
+4 |   static int $x = 42;
+  |   ^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

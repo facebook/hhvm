@@ -1,22 +1,45 @@
-ERROR: File "constraint_gen_fail3.php", line 24, characters 19-21:
-The method `get` is not compatible with the overridden method (Typing[4341])
-  File "constraint_gen_fail3.php", line 24, characters 19-21:
-  Method `get` has type `(function(): ~?T)` in `U`
-  File "constraint_gen_fail3.php", line 20, characters 19-21:
-  But it has type `(function(): ~?A)` in parent `L<A>`
-  File "constraint_gen_fail3.php", line 24, characters 19-21:
-  Type `(function(): ~?T)` is not a subtype of `(function(): ~?A)`
-  File "constraint_gen_fail3.php", line 23, characters 22-22:
-  Expected `A`
-  File "constraint_gen_fail3.php", line 20, characters 27-27:
-    via this generic `T`
-  File "constraint_gen_fail3.php", line 24, characters 27-27:
-  But got `T`
-ERROR: File "constraint_gen_fail3.php", line 24, characters 38-50:
-Invalid return type (Typing[4110])
-  File "constraint_gen_fail3.php", line 24, characters 27-27:
-  Expected `T`
-  File "constraint_gen_fail3.php", line 23, characters 22-22:
-  But got `A`
-  File "constraint_gen_fail3.php", line 20, characters 27-27:
-    via this generic `T`
+error: Typing[4341] The method `get` is not compatible with the overridden method [1]
+-> Method `get` has type `(function(): ~?T)` in `U` [1]
+-> But it has type `(function(): ~?A)` in parent `L<A>` [2]
+-> Type `(function(): ~?T)` is not a subtype of `(function(): ~?A)` [1]
+-> Expected `A` [3]
+->   via this generic `T` [4]
+-> But got `T` [5]
+
+constraint_gen_fail3.php:24:19
+18 |   
+19 |   public function set(T $x): void { $this->data = $x; }
+20 |   public function get(): ?T { return $this->data; }
+   |                   ^^^ [2]
+   |                           ^ [4]
+21 | }
+22 | 
+23 | class U<T> extends L<A> {
+   |                      ^ [3]
+24 |   public function get(): ?T { return parent::get(); }
+   |                   ^^^ [1]
+   |                           ^ [5]
+25 | }
+26 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `A` [3]
+->   via this generic `T` [4]
+
+constraint_gen_fail3.php:24:38
+18 |   
+19 |   public function set(T $x): void { $this->data = $x; }
+20 |   public function get(): ?T { return $this->data; }
+   |                           ^ [4]
+21 | }
+22 | 
+23 | class U<T> extends L<A> {
+   |                      ^ [3]
+24 |   public function get(): ?T { return parent::get(); }
+   |                           ^ [2]
+   |                                      ^^^^^^^^^^^^^ [1]
+25 | }
+26 | 
+
+2 errors found

@@ -1,8 +1,35 @@
-WARN: File "unused_awaitable13.php", line 15, characters 8-15:
-This null coalesce will always evaluate to its left-hand side. (Warn[12023])
-  File "unused_awaitable13.php", line 3, characters 21-34:
-  The expression on the left has type `Awaitable<int>` which can never be `null`.
-ERROR: File "unused_awaitable13.php", line 15, characters 8-9:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable13.php", line 3, characters 21-34:
-  This is why I think it is `Awaitable`
+warning: Warn[12023] This null coalesce will always evaluate to its left-hand side. [1]
+-> The expression on the left has type `Awaitable<int>` which can never be `null`. [2]
+
+unused_awaitable13.php:15:8
+ 1 | <?hh
+ 2 | 
+ 3 | async function f(): Awaitable<int> {
+   |                     ^^^^^^^^^^^^^^ [2]
+ 4 |   return 1;
+ 5 | }
+   :
+13 |   $g = g();
+14 | 
+15 |   $x = $f ?? $g;
+   |        ^^^^^^^^ [1]
+16 | }
+
+error: Typing[4015] This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited [1]
+-> This is why I think it is `Awaitable` [2]
+
+unused_awaitable13.php:15:8
+ 1 | <?hh
+ 2 | 
+ 3 | async function f(): Awaitable<int> {
+   |                     ^^^^^^^^^^^^^^ [2]
+ 4 |   return 1;
+ 5 | }
+   :
+13 |   $g = g();
+14 | 
+15 |   $x = $f ?? $g;
+   |        ^^ [1]
+16 | }
+
+2 errors found

@@ -1,12 +1,41 @@
-ERROR: File "printf_crash.php--printf.php", line 5, characters 10-19:
-Invalid return type (Typing[4336])
-  File "printf_crash.php--printf.php", line 5, characters 70-75:
-  Expected `string`
-  File "printf_crash.php--printf.php", line 5, characters 10-19:
-  But got `void` because this function does not always return a value
-ERROR: File "printf_crash.php--use.php", line 4, characters 21-36:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "typenames.hhi", line 4, characters 11-22:
-  Definition is here
-ERROR: File "printf_crash.php--use.php", line 5, characters 16-17:
-This argument must be a literal format string (Typing[4027])
+error: Typing[4336] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `void` because this function does not always return a value [1]
+
+printf_crash.php--printf.php:5:10
+3 | }
+4 | 
+5 | function my_sprintf(\HH\FormatString<PlainSprintf> $f, mixed ...$_): string {}
+  |          ^^^^^^^^^^ [1]
+  |                                                                      ^^^^^^ [2]
+
+error: Typing[4101] Wrong number of type arguments (expected 1, got 0) [1]
+-> Definition is here [2]
+
+printf_crash.php--use.php:4:21
+2 | 
+3 | final class Foo {
+4 |   public function f(\HH\FormatString $s): void {
+  |                     ^^^^^^^^^^^^^^^^ [1]
+5 |     my_sprintf($s);
+6 |   }
+
+typenames.hhi:4:11
+2 | 
+3 | namespace HH {
+4 |   newtype FormatString<T> as TypedFormatString<T, (mixed...)> = string;
+  |           ^^^^^^^^^^^^ [2]
+5 | 
+6 |   newtype TypedFormatString<T, Targs as (mixed...)> as string = string;
+
+error: Typing[4027] This argument must be a literal format string [1]
+
+printf_crash.php--use.php:5:16
+3 | final class Foo {
+4 |   public function f(\HH\FormatString $s): void {
+5 |     my_sprintf($s);
+  |                ^^ [1]
+6 |   }
+7 | }
+
+3 errors found

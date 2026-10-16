@@ -1,6 +1,22 @@
-ERROR: File "eq_constraint.php", line 34, characters 20-30:
-You are trying to access the method `assertIsFoo` but this object can be null. (Typing[4064])
-  File "eq_constraint.php", line 31, characters 40-43:
-  This can be null
-  File "eq_constraint.php", line 27, characters 30-35:
-    via this generic `Tclass`
+error: Typing[4064] You are trying to access the method `assertIsFoo` but this object can be null. [1]
+-> This can be null [2]
+->   via this generic `Tclass` [3]
+
+eq_constraint.php:34:20
+25 |   }
+26 | 
+27 |   public function getAsIs(): Tclass {
+   |                              ^^^^^^ [3]
+28 |     return $this->member;
+29 |   }
+30 | 
+31 |   public static function caller(Boxing<?Foo> $c, Foo $f): void {
+   |                                        ^^^^ [2]
+32 |     $c->getWithDefault($f)->assertIsFoo(); // Must succeed
+33 |     $c->getOrExcept()->assertIsFoo();      // Must succeed
+34 |     $c->getAsIs()->assertIsFoo();          // Must fail, because may be null
+   |                    ^^^^^^^^^^^ [1]
+35 |   }
+36 | }
+
+1 error found

@@ -1,12 +1,25 @@
-ERROR: File "mixed_subtype.php", line 11, characters 19-19:
-The method `A` is not compatible with the overridden method (Typing[4341])
-  File "mixed_subtype.php", line 11, characters 19-19:
-  Method `A` has type `(function(): mixed)` in `Bar`
-  File "mixed_subtype.php", line 5, characters 19-19:
-  But it has type `(function(): nothing)` in parent `Foo`
-  File "mixed_subtype.php", line 11, characters 19-19:
-  Type `(function(): mixed)` is not a subtype of `(function(): nothing)`
-  File "mixed_subtype.php", line 5, characters 24-30:
-  Expected `nothing`
-  File "mixed_subtype.php", line 11, characters 24-28:
-  But got `mixed`
+error: Typing[4341] The method `A` is not compatible with the overridden method [1]
+-> Method `A` has type `(function(): mixed)` in `Bar` [1]
+-> But it has type `(function(): nothing)` in parent `Foo` [2]
+-> Type `(function(): mixed)` is not a subtype of `(function(): nothing)` [1]
+-> Expected `nothing` [3]
+-> But got `mixed` [4]
+
+mixed_subtype.php:11:19
+ 3 | 
+ 4 | class Foo {
+ 5 |   public function A(): nothing {
+   |                   ^ [2]
+   |                        ^^^^^^^ [3]
+ 6 |     throw new Exception();
+ 7 |   }
+ 8 | }
+ 9 | 
+10 | class Bar extends Foo {
+11 |   public function A(): mixed {
+   |                   ^ [1]
+   |                        ^^^^^ [4]
+12 |     throw new Exception();
+13 |   }
+
+1 error found

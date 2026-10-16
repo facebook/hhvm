@@ -1,78 +1,195 @@
-ERROR: File "super_constraint_9.php", line 7, characters 10-10:
-Invalid return type (Typing[4336])
-  File "super_constraint_9.php", line 7, characters 59-66:
-  Expected `Foo<Tk2>`
-  File "super_constraint_9.php", line 7, characters 10-10:
-  But got `void` because this function does not always return a value
-ERROR: File "super_constraint_9.php", line 12, characters 16-17:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 10, characters 32-34:
-  Expected `int`
-  File "super_constraint_9.php", line 10, characters 16-21:
-  But got `string`
-  File "super_constraint_9.php", line 10, characters 16-21:
-  This type argument to `Foo` must match exactly (it is invariant)
-ERROR: File "super_constraint_9.php", line 12, characters 16-17:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 10, characters 32-34:
-  Expected `int`
-  File "super_constraint_9.php", line 10, characters 46-50:
-  But got `mixed`
-  File "super_constraint_9.php", line 10, characters 46-50:
-  This type argument to `Foo` must match exactly (it is invariant)
-  File "super_constraint_9.php", line 10, characters 46-50:
-  This type argument to `Foo` must match exactly (it is invariant)
-ERROR: File "super_constraint_9.php", line 16, characters 10-12:
-Invalid return type (Typing[4336])
-  File "super_constraint_9.php", line 16, characters 17-24:
-  Expected `Foo<int>`
-  File "super_constraint_9.php", line 16, characters 10-12:
-  But got `void` because this function does not always return a value
-ERROR: File "super_constraint_9.php", line 21, characters 16-20:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 7, characters 45-52:
-  Expected `~Foo<_>`
-  File "super_constraint_9.php", line 16, characters 17-24:
-  But got `Foo<int>`
-ERROR: File "super_constraint_9.php", line 21, characters 16-20:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 16, characters 21-23:
-  Expected `int`
-  File "super_constraint_9.php", line 4, characters 7-9:
-  But got `mixed`
-ERROR: File "super_constraint_9.php", line 21, characters 16-20:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 16, characters 21-23:
-  Expected `int`
-  File "super_constraint_9.php", line 19, characters 16-21:
-  But got `string`
-  File "super_constraint_9.php", line 19, characters 16-21:
-  This type argument to `Foo` must match exactly (it is invariant)
-ERROR: File "super_constraint_9.php", line 21, characters 16-20:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 16, characters 21-23:
-  Expected `int`
-  File "super_constraint_9.php", line 19, characters 33-37:
-  But got `mixed`
-  File "super_constraint_9.php", line 19, characters 33-37:
-  This type argument to `Foo` must match exactly (it is invariant)
-ERROR: File "super_constraint_9.php", line 21, characters 16-20:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 16, characters 21-23:
-  Expected `int`
-  File "super_constraint_9.php", line 19, characters 33-37:
-  But got `mixed`
-  File "super_constraint_9.php", line 19, characters 33-37:
-  This type argument to `Foo` must match exactly (it is invariant)
-  File "super_constraint_9.php", line 19, characters 33-37:
-  This type argument to `Foo` must match exactly (it is invariant)
-ERROR: File "super_constraint_9.php", line 21, characters 16-20:
-Invalid argument (Typing[4110])
-  File "super_constraint_9.php", line 16, characters 21-23:
-  Expected `int`
-  File "super_constraint_9.php", line 21, characters 10-10:
-  But got `(~_ & mixed)` because type parameter `Tk2` of `f` could not be determined. Please add explicit type parameters to the invocation of `f`
-  File "super_constraint_9.php", line 7, characters 49-51:
-    via this generic `Tk2`
-  File "super_constraint_9.php", line 21, characters 10-10:
-  This type argument to `Foo` must match exactly (it is invariant)
+error: Typing[4336] Invalid return type [1]
+-> Expected `Foo<Tk2>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+super_constraint_9.php:7:10
+5 | 
+6 | /* HH_FIXME[4110] */
+7 | function f<Tk1, Tk2 super Tk1>(Foo<Tk1> $x, Foo<Tk2> $y): Foo<Tk2> {
+  |          ^ [1]
+  |                                                           ^^^^^^^^ [2]
+8 | }
+9 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+
+super_constraint_9.php:12:16
+ 8 | }
+ 9 | 
+10 | function g(Foo<string> $x, Foo<int> $y): Foo<mixed> {
+   |                ^^^^^^ [3]
+   |                                ^^^ [2]
+11 |   // This should fail to check because Tk1=string and Tk2=int
+12 |   return f($x, $y);
+   |                ^^ [1]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+
+super_constraint_9.php:12:16
+ 8 | }
+ 9 | 
+10 | function g(Foo<string> $x, Foo<int> $y): Foo<mixed> {
+   |                                ^^^ [2]
+   |                                              ^^^^^ [3]
+11 |   // This should fail to check because Tk1=string and Tk2=int
+12 |   return f($x, $y);
+   |                ^^ [1]
+13 | }
+14 | 
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `Foo<int>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+super_constraint_9.php:16:10
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |          ^^^ [1]
+   |                 ^^^^^^^^ [2]
+17 | }
+18 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `~Foo<_>` [2]
+-> But got `Foo<int>` [3]
+
+super_constraint_9.php:21:16
+ 5 | 
+ 6 | /* HH_FIXME[4110] */
+ 7 | function f<Tk1, Tk2 super Tk1>(Foo<Tk1> $x, Foo<Tk2> $y): Foo<Tk2> {
+   |                                             ^^^^^^^^ [2]
+ 8 | }
+ 9 | 
+   :
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |                 ^^^^^^^^ [3]
+17 | }
+18 | 
+19 | function h(Foo<string> $x): Foo<mixed> {
+20 |   // This should fail to check because Tk1=string and Tk2=int
+21 |   return f($x, bar());
+   |                ^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+
+super_constraint_9.php:21:16
+ 2 | 
+ 3 | // Notice that foo is invariant in T
+ 4 | class Foo<T> {}
+   |       ^^^ [3]
+ 5 | 
+ 6 | /* HH_FIXME[4110] */
+   :
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |                     ^^^ [2]
+17 | }
+18 | 
+19 | function h(Foo<string> $x): Foo<mixed> {
+20 |   // This should fail to check because Tk1=string and Tk2=int
+21 |   return f($x, bar());
+   |                ^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+
+super_constraint_9.php:21:16
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |                     ^^^ [2]
+17 | }
+18 | 
+19 | function h(Foo<string> $x): Foo<mixed> {
+   |                ^^^^^^ [3]
+20 |   // This should fail to check because Tk1=string and Tk2=int
+21 |   return f($x, bar());
+   |                ^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+
+super_constraint_9.php:21:16
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |                     ^^^ [2]
+17 | }
+18 | 
+19 | function h(Foo<string> $x): Foo<mixed> {
+   |                                 ^^^^^ [3]
+20 |   // This should fail to check because Tk1=string and Tk2=int
+21 |   return f($x, bar());
+   |                ^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+
+super_constraint_9.php:21:16
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |                     ^^^ [2]
+17 | }
+18 | 
+19 | function h(Foo<string> $x): Foo<mixed> {
+   |                                 ^^^^^ [3]
+20 |   // This should fail to check because Tk1=string and Tk2=int
+21 |   return f($x, bar());
+   |                ^^^^^ [1]
+22 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `(~_ & mixed)` because type parameter `Tk2` of `f` could not be determined. Please add explicit type parameters to the invocation of `f` [3]
+->   via this generic `Tk2` [4]
+-> This type argument to `Foo` must match exactly (it is invariant) [3]
+
+super_constraint_9.php:21:16
+ 5 | 
+ 6 | /* HH_FIXME[4110] */
+ 7 | function f<Tk1, Tk2 super Tk1>(Foo<Tk1> $x, Foo<Tk2> $y): Foo<Tk2> {
+   |                                                 ^^^ [4]
+ 8 | }
+ 9 | 
+   :
+14 | 
+15 | /* HH_FIXME[4110] */
+16 | function bar(): Foo<int> {
+   |                     ^^^ [2]
+17 | }
+18 | 
+19 | function h(Foo<string> $x): Foo<mixed> {
+20 |   // This should fail to check because Tk1=string and Tk2=int
+21 |   return f($x, bar());
+   |          ^ [3]
+   |                ^^^^^ [1]
+22 | }
+
+10 errors found

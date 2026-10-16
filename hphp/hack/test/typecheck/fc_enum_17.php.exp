@@ -1,6 +1,27 @@
-WARN: File "fc_enum_17.php", line 9, characters 3-15:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "fc_enum_17.php", line 3, characters 11-13:
-  This expression has type `dynamic`
-ERROR: File "fc_enum_17.php", line 9, characters 3-4:
-Was expecting a class, but got a value of type Foo (Typing[4026])
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+fc_enum_17.php:9:3
+ 1 | <?hh
+ 2 | 
+ 3 | enum Foo: int {
+   |           ^^^ [2]
+ 4 |   X = 1;
+ 5 | }
+ 6 | 
+ 7 | function f(): void {
+ 8 |   $v = Foo::X;
+ 9 |   $v::getValues();
+   |   ^^^^^^^^^^^^^ [1]
+10 | }
+
+error: Typing[4026] Was expecting a class, but got a value of type Foo [1]
+
+fc_enum_17.php:9:3
+ 7 | function f(): void {
+ 8 |   $v = Foo::X;
+ 9 |   $v::getValues();
+   |   ^^ [1]
+10 | }
+
+2 errors found

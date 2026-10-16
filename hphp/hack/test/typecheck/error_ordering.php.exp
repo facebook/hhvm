@@ -1,40 +1,129 @@
-WARN: File "error_ordering.php--a.php", line 10, characters 7-15:
-This expression is likely always `false` (Warn[12001])
-  File "error_ordering.php--a.php", line 9, characters 13-15:
-  This is an int
-  File "error_ordering.php--a.php", line 9, characters 22-27:
-  This is a string
-WARN: File "error_ordering.php--b.php", line 10, characters 7-15:
-This expression is likely always `false` (Warn[12001])
-  File "error_ordering.php--b.php", line 9, characters 14-16:
-  This is an int
-  File "error_ordering.php--b.php", line 9, characters 23-28:
-  This is a string
-ERROR: File "error_ordering.php--a.php", line 7, characters 12-18:
-No such type `integer`, did you mean `int`? (Naming[2123])
-ERROR: File "error_ordering.php--a.php", line 7, characters 12-18:
-Unbound name: `integer` (Naming[2049])
-ERROR: File "error_ordering.php--a.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "error_ordering.php--a.php", line 3, characters 21-26:
-  Expected `string`
-  File "error_ordering.php--a.php", line 3, characters 12-14:
-  But got `int`
-ERROR: File "error_ordering.php--a.php", line 12, characters 3-10:
-a nullable type does not allow array append (Typing[4006])
-  File "error_ordering.php--a.php", line 9, characters 12-15:
-  Definition is here
-ERROR: File "error_ordering.php--b.php", line 7, characters 13-19:
-No such type `integer`, did you mean `int`? (Naming[2123])
-ERROR: File "error_ordering.php--b.php", line 7, characters 13-19:
-Unbound name: `integer` (Naming[2049])
-ERROR: File "error_ordering.php--b.php", line 4, characters 10-11:
-Invalid return type (Typing[4110])
-  File "error_ordering.php--b.php", line 3, characters 22-27:
-  Expected `string`
-  File "error_ordering.php--b.php", line 3, characters 13-15:
-  But got `int`
-ERROR: File "error_ordering.php--b.php", line 12, characters 3-10:
-a nullable type does not allow array append (Typing[4006])
-  File "error_ordering.php--b.php", line 9, characters 13-16:
-  Definition is here
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is an int [2]
+-> This is a string [3]
+
+error_ordering.php--a.php:10:7
+ 7 | function h(integer $_): void {}
+ 8 | 
+ 9 | function j(?int $i, ?string $s): void {
+   |             ^^^ [2]
+   |                      ^^^^^^ [3]
+10 |   if ($i === $s) {
+   |       ^^^^^^^^^ [1]
+11 |   }
+12 |   $i[] = 1;
+
+warning: Warn[12001] This expression is likely always `false` [1]
+-> This is an int [2]
+-> This is a string [3]
+
+error_ordering.php--b.php:10:7
+ 7 | function h2(integer $_): void {}
+ 8 | 
+ 9 | function j2(?int $i, ?string $s): void {
+   |              ^^^ [2]
+   |                       ^^^^^^ [3]
+10 |   if ($i === $s) {
+   |       ^^^^^^^^^ [1]
+11 |   }
+12 |   $i[] = 1;
+
+error: Naming[2123] No such type `integer`, did you mean `int`? [1]
+
+error_ordering.php--a.php:7:12
+5 | }
+6 | 
+7 | function h(integer $_): void {}
+  |            ^^^^^^^ [1]
+8 | 
+9 | function j(?int $i, ?string $s): void {
+
+error: Naming[2049] Unbound name: `integer` [1]
+
+error_ordering.php--a.php:7:12
+5 | }
+6 | 
+7 | function h(integer $_): void {}
+  |            ^^^^^^^ [1]
+8 | 
+9 | function j(?int $i, ?string $s): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+error_ordering.php--a.php:4:10
+1 | <?hh
+2 | 
+3 | function g(int $x): string {
+  |            ^^^ [3]
+  |                     ^^^^^^ [2]
+4 |   return $x;
+  |          ^^ [1]
+5 | }
+6 | 
+
+error: Typing[4006] a nullable type does not allow array append [1]
+-> Definition is here [2]
+
+error_ordering.php--a.php:12:3
+ 7 | function h(integer $_): void {}
+ 8 | 
+ 9 | function j(?int $i, ?string $s): void {
+   |            ^^^^ [2]
+10 |   if ($i === $s) {
+11 |   }
+12 |   $i[] = 1;
+   |   ^^^^^^^^ [1]
+13 | }
+
+error: Naming[2123] No such type `integer`, did you mean `int`? [1]
+
+error_ordering.php--b.php:7:13
+5 | }
+6 | 
+7 | function h2(integer $_): void {}
+  |             ^^^^^^^ [1]
+8 | 
+9 | function j2(?int $i, ?string $s): void {
+
+error: Naming[2049] Unbound name: `integer` [1]
+
+error_ordering.php--b.php:7:13
+5 | }
+6 | 
+7 | function h2(integer $_): void {}
+  |             ^^^^^^^ [1]
+8 | 
+9 | function j2(?int $i, ?string $s): void {
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+error_ordering.php--b.php:4:10
+1 | <?hh
+2 | 
+3 | function g2(int $x): string {
+  |             ^^^ [3]
+  |                      ^^^^^^ [2]
+4 |   return $x;
+  |          ^^ [1]
+5 | }
+6 | 
+
+error: Typing[4006] a nullable type does not allow array append [1]
+-> Definition is here [2]
+
+error_ordering.php--b.php:12:3
+ 7 | function h2(integer $_): void {}
+ 8 | 
+ 9 | function j2(?int $i, ?string $s): void {
+   |             ^^^^ [2]
+10 |   if ($i === $s) {
+11 |   }
+12 |   $i[] = 1;
+   |   ^^^^^^^^ [1]
+13 | }
+
+10 errors found

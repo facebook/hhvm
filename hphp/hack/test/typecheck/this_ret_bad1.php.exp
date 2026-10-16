@@ -1,8 +1,20 @@
-ERROR: File "this_ret_bad1.php", line 12, characters 17-20:
-Cannot use `this` outside of a class (Naming[2045])
-ERROR: File "this_ret_bad1.php", line 12, characters 31-31:
-Invalid return type (Typing[4110])
-  File "this_ret_bad1.php", line 12, characters 17-20:
-  Expected `this`
-  File "this_ret_bad1.php", line 12, characters 31-31:
-  But got `int`
+error: Naming[2045] Cannot use `this` outside of a class [1]
+
+this_ret_bad1.php:12:17
+10 |  */
+11 | 
+12 | function foo(): this { return 4; }
+   |                 ^^^^ [1]
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `this` [2]
+-> But got `int` [1]
+
+this_ret_bad1.php:12:31
+10 |  */
+11 | 
+12 | function foo(): this { return 4; }
+   |                 ^^^^ [2]
+   |                               ^ [1]
+
+2 errors found

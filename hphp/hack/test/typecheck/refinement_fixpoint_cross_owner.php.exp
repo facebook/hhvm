@@ -1,24 +1,97 @@
-ERROR: File "refinement_fixpoint_cross_owner.php", line 24, characters 19-31:
-Invalid argument (Typing[4110])
-  File "refinement_fixpoint_cross_owner.php", line 5, characters 24-29:
-  Expected `Banana`
-  File "refinement_fixpoint_cross_owner.php", line 15, characters 23-29:
-  But got `IBuilder with { type TChainable = this::T } where this::T as Repro::T`
-  File "refinement_fixpoint_cross_owner.php", line 10, characters 28-43:
-    resulting from expanding the type constant `this::T::TChainable`
-ERROR: File "refinement_fixpoint_cross_owner.php", line 24, characters 19-31:
-Invalid argument (Typing[4110])
-  File "refinement_fixpoint_cross_owner.php", line 5, characters 24-29:
-  Expected `Banana`
-  File "refinement_fixpoint_cross_owner.php", line 15, characters 23-29:
-  But got `Repro::T where \Repro::T super this::T, \Repro::T as IBuilder with { type TChainable = this::T }`
-  File "refinement_fixpoint_cross_owner.php", line 10, characters 28-43:
-    resulting from expanding the type constant `this::T::TChainable`
-ERROR: File "refinement_fixpoint_cross_owner.php", line 24, characters 19-31:
-Invalid argument (Typing[4110])
-  File "refinement_fixpoint_cross_owner.php", line 5, characters 24-29:
-  Expected `Banana`
-  File "refinement_fixpoint_cross_owner.php", line 15, characters 23-29:
-  But got `this::T as Repro::T`
-  File "refinement_fixpoint_cross_owner.php", line 10, characters 28-43:
-    resulting from expanding the type constant `this::T::TChainable`
+error: Typing[4110] Invalid argument [1]
+-> Expected `Banana` [2]
+-> But got `IBuilder with { type TChainable = this::T } where this::T as Repro::T` [3]
+->   resulting from expanding the type constant `this::T::TChainable` [4]
+
+refinement_fixpoint_cross_owner.php:24:19
+ 3 | abstract class Banana {}
+ 4 | 
+ 5 | function take_a_banana(Banana $_): void {}
+   |                        ^^^^^^ [2]
+ 6 | 
+ 7 | interface IBuilder {
+ 8 |   abstract const type TChainable as IBuilder;
+ 9 | 
+10 |   public function chain(): this::TChainable;
+   |                            ^^^^^^^^^^^^^^^^ [4]
+11 | }
+12 | 
+13 | abstract class Repro {
+14 |   abstract const type T as IBuilder with {
+15 |     type TChainable = this::T;
+   |                       ^^^^^^^ [3]
+16 |   };
+17 | 
+   :
+22 |     $chainable = $builder->chain();
+23 |     $not_a_banana = $chainable->chain();
+24 |     take_a_banana($not_a_banana);
+   |                   ^^^^^^^^^^^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Banana` [2]
+-> But got `Repro::T where \Repro::T super this::T, \Repro::T as IBuilder with { type TChainable = this::T }` [3]
+->   resulting from expanding the type constant `this::T::TChainable` [4]
+
+refinement_fixpoint_cross_owner.php:24:19
+ 3 | abstract class Banana {}
+ 4 | 
+ 5 | function take_a_banana(Banana $_): void {}
+   |                        ^^^^^^ [2]
+ 6 | 
+ 7 | interface IBuilder {
+ 8 |   abstract const type TChainable as IBuilder;
+ 9 | 
+10 |   public function chain(): this::TChainable;
+   |                            ^^^^^^^^^^^^^^^^ [4]
+11 | }
+12 | 
+13 | abstract class Repro {
+14 |   abstract const type T as IBuilder with {
+15 |     type TChainable = this::T;
+   |                       ^^^^^^^ [3]
+16 |   };
+17 | 
+   :
+22 |     $chainable = $builder->chain();
+23 |     $not_a_banana = $chainable->chain();
+24 |     take_a_banana($not_a_banana);
+   |                   ^^^^^^^^^^^^^ [1]
+25 |   }
+26 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Banana` [2]
+-> But got `this::T as Repro::T` [3]
+->   resulting from expanding the type constant `this::T::TChainable` [4]
+
+refinement_fixpoint_cross_owner.php:24:19
+ 3 | abstract class Banana {}
+ 4 | 
+ 5 | function take_a_banana(Banana $_): void {}
+   |                        ^^^^^^ [2]
+ 6 | 
+ 7 | interface IBuilder {
+ 8 |   abstract const type TChainable as IBuilder;
+ 9 | 
+10 |   public function chain(): this::TChainable;
+   |                            ^^^^^^^^^^^^^^^^ [4]
+11 | }
+12 | 
+13 | abstract class Repro {
+14 |   abstract const type T as IBuilder with {
+15 |     type TChainable = this::T;
+   |                       ^^^^^^^ [3]
+16 |   };
+17 | 
+   :
+22 |     $chainable = $builder->chain();
+23 |     $not_a_banana = $chainable->chain();
+24 |     take_a_banana($not_a_banana);
+   |                   ^^^^^^^^^^^^^ [1]
+25 |   }
+26 | }
+
+3 errors found

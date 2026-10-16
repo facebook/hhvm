@@ -1,6 +1,25 @@
-ERROR: File "try_catch_bad1.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-  File "try_catch_bad1.php", line 13, characters 17-19:
-  Expected `int`
-  File "try_catch_bad1.php", line 20, characters 10-15:
-  But got `string`
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+try_catch_bad1.php:24:10
+11 | function f(): void {}
+12 | 
+13 | function foo(): int {
+   |                 ^^^ [2]
+14 |   $a = 23;
+15 |   try {
+   :
+18 |   } catch (MyException $e) {
+19 |     // Now that this is a non-terminal, this is bad
+20 |     $a = 'duck';
+   |          ^^^^^^ [3]
+21 |   } catch (Exception $e) {
+22 |     $a = 123;
+23 |   }
+24 |   return $a;
+   |          ^^ [1]
+25 | }
+26 | 
+
+1 error found

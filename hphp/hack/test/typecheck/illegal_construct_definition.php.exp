@@ -1,2 +1,11 @@
-ERROR: File "illegal_construct_definition.php", line 12, characters 10-20:
-Illegal function name: `__construct` (NastCheck[3025])
+error: NastCheck[3025] Illegal function name: `__construct` [1]
+
+illegal_construct_definition.php:12:10
+10 |  */
+11 | 
+12 | function __construct() : void {
+   |          ^^^^^^^^^^^ [1]
+13 | 
+14 | }
+
+1 error found

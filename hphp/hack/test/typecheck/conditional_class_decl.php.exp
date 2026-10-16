@@ -1,6 +1,40 @@
-ERROR: File "conditional_class_decl.php", line 12, characters 12-12:
-Declarations are not supported outside global scope (Parsing[1002])
-ERROR: File "conditional_class_decl.php", line 13, characters 3-12:
-Encountered unexpected text `class A {}`, was expecting a statement. (Parsing[1002])
-ERROR: File "conditional_class_decl.php", line 12, characters 1-62:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+error: Parsing[1002] Declarations are not supported outside global scope [1]
+
+conditional_class_decl.php:12:12
+10 |  */
+11 | 
+12 | if (true) {
+   |            ^ [1]
+13 |   class A {} // bad
+14 | } else {
+15 |   class B {} // bad
+
+error: Parsing[1002] Encountered unexpected text `class A {}`, was expecting a statement. [1]
+
+conditional_class_decl.php:13:3
+11 | 
+12 | if (true) {
+13 |   class A {} // bad
+   |   ^^^^^^^^^^ [1]
+14 | } else {
+15 |   class B {} // bad
+
+error: Naming[2128] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead [1]
+
+conditional_class_decl.php:12:1
+10 |  */
+11 | 
+12 | if (true) {
+   | ^^^^^^^^^^^ [1]
+13 |   class A {} // bad
+   |   ^^^^^^^^^^^^^^^^^ [1]
+14 | } else {
+   | ^^^^^^^^ [1]
+15 |   class B {} // bad
+   |   ^^^^^^^^^^^^^^^^^ [1]
+16 | }
+   | ^ [1]
+17 | 
+18 | class C {} // good
+
+3 errors found

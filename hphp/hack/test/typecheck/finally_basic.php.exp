@@ -1,12 +1,39 @@
-ERROR: File "finally_basic.php", line 19, characters 12-19:
-Invalid return type (Typing[4110])
-  File "finally_basic.php", line 12, characters 27-29:
-  Expected `int`
-  File "finally_basic.php", line 19, characters 12-19:
-  But got `bool` because this is the result of a comparison
-ERROR: File "finally_basic.php", line 21, characters 12-20:
-Invalid return type (Typing[4110])
-  File "finally_basic.php", line 12, characters 27-29:
-  Expected `int`
-  File "finally_basic.php", line 21, characters 12-20:
-  But got `bool` because this is the result of a comparison
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` because this is the result of a comparison [1]
+
+finally_basic.php:19:12
+10 |  */
+11 | 
+12 | function finally_basic(): int {
+   |                           ^^^ [2]
+13 |   $a = 23;
+14 |   try {
+   :
+17 |     $a = 28;
+18 |   } catch (SomeException $e) {
+19 |     return $a == 23;
+   |            ^^^^^^^^ [1]
+20 |   } catch (Exception $e) {
+21 |     return $a == 456;
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `bool` because this is the result of a comparison [1]
+
+finally_basic.php:21:12
+10 |  */
+11 | 
+12 | function finally_basic(): int {
+   |                           ^^^ [2]
+13 |   $a = 23;
+14 |   try {
+   :
+19 |     return $a == 23;
+20 |   } catch (Exception $e) {
+21 |     return $a == 456;
+   |            ^^^^^^^^^ [1]
+22 |   } finally {
+23 |     echo $a;
+
+2 errors found

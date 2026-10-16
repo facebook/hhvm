@@ -1,8 +1,32 @@
-ERROR: File "abstract_final.php", line 12, characters 7-9:
-Class `Foo` contains an abstract method and must therefore be declared `abstract` (Parsing[1002])
-ERROR: File "abstract_final.php", line 13, characters 3-7:
-Cannot declare abstract method `Foo::bar` `final` (Parsing[1002])
-ERROR: File "abstract_final.php", line 13, characters 44-46:
-Method `bar` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "abstract_final.php", line 12, characters 7-9:
-  Or make the class abstract.
+error: Parsing[1002] Class `Foo` contains an abstract method and must therefore be declared `abstract` [1]
+
+abstract_final.php:12:7
+10 |  */
+11 | 
+12 | class Foo {
+   |       ^^^ [1]
+13 |   final static abstract protected function bar(): void;
+14 | }
+
+error: Parsing[1002] Cannot declare abstract method `Foo::bar` `final` [1]
+
+abstract_final.php:13:3
+11 | 
+12 | class Foo {
+13 |   final static abstract protected function bar(): void;
+   |   ^^^^^ [1]
+14 | }
+
+error: Typing[4465] Method `bar` is abstract but the class is concrete. Either provide an implementation here. [1]
+-> Or make the class abstract. [2]
+
+abstract_final.php:13:44
+10 |  */
+11 | 
+12 | class Foo {
+   |       ^^^ [2]
+13 |   final static abstract protected function bar(): void;
+   |                                            ^^^ [1]
+14 | }
+
+3 errors found

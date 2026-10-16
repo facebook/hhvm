@@ -1,14 +1,35 @@
-ERROR: File "this_tparam_bad1.php", line 36, characters 13-21:
-Invalid argument (Typing[4110])
-  File "this_tparam_bad1.php", line 29, characters 17-20:
-  Expected `<expr#2> as Foo`
-  File "this_tparam_bad1.php", line 18, characters 23-23:
-    via this generic `T`
-  File "this_tparam_bad1.php", line 36, characters 3-6:
-    where `<expr#2>` is a reference to this expression
-  File "this_tparam_bad1.php", line 36, characters 17-19:
-  But got `Foo`
-  File "this_tparam_bad1.php", line 34, characters 14-16:
-  Since `Foo` is not final
-  File "this_tparam_bad1.php", line 36, characters 17-19:
-  this might not be a `Foo`
+error: Typing[4110] Invalid argument [1]
+-> Expected `<expr#2> as Foo` [2]
+->   via this generic `T` [3]
+->   where `<expr#2>` is a reference to this expression [4]
+-> But got `Foo` [5]
+-> Since `Foo` is not final [6]
+-> this might not be a `Foo` [5]
+
+this_tparam_bad1.php:36:13
+16 |   private ?T $x;
+17 | 
+18 |   public function set(T $x): this {
+   |                       ^ [3]
+19 |     $this->x = $x;
+20 |     return $this;
+   :
+27 | 
+28 | class Foo {
+29 |   use SomeTrait<this>;
+   |                 ^^^^ [2]
+30 | }
+31 | 
+32 | class FooTwo extends Foo {}
+33 | 
+34 | function foo(Foo $foo): void {
+   |              ^^^ [6]
+35 |   // Uh oh, we set the member variable to a Foo inside a Foo2
+36 |   $foo->set(new Foo());
+   |   ^^^^ [4]
+   |             ^^^^^^^^^ [1]
+   |                 ^^^ [5]
+37 | }
+38 | 
+
+1 error found

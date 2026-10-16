@@ -1,6 +1,21 @@
-ERROR: File "for_loop.php", line 21, characters 10-13:
-Invalid return type (Typing[4110])
-  File "for_loop.php", line 14, characters 20-20:
-  Expected `A`
-  File "for_loop.php", line 15, characters 10-13:
-  But got `?A`
+error: Typing[4110] Invalid return type [1]
+-> Expected `A` [2]
+-> But got `?A` [3]
+
+for_loop.php:21:10
+12 | class A {}
+13 | 
+14 | function myFunc(): A {
+   |                    ^ [2]
+15 |   $var = null;
+   |          ^^^^ [3]
+16 | 
+17 |   // Hack assumes that this loop might or might not run.
+18 |   for ($i = 0; $i < 1; $i++) {
+19 |     $var = new A();
+20 |   }
+21 |   return $var;
+   |          ^^^^ [1]
+22 | }
+
+1 error found

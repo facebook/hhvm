@@ -2,15 +2,31 @@ File "class_prop_as_this.php", line 12, characters 5-23:
   this as C
 File "class_prop_as_this.php", line 13, characters 5-21:
   this as C
-ERROR: File "class_prop_as_this.php", line 17, characters 14-19:
-Invalid assignment (Typing[4110])
-  File "class_prop_as_this.php", line 7, characters 38-41:
-  Expected `<expr#9> as C`
-  File "class_prop_as_this.php", line 17, characters 5-10:
-    where `<expr#9>` is a reference to this expression
-  File "class_prop_as_this.php", line 9, characters 31-31:
-  But got `C`
-  File "class_prop_as_this.php", line 9, characters 24-24:
-  Since `C` is not final
-  File "class_prop_as_this.php", line 9, characters 31-31:
-  this might not be a `C`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `<expr#9> as C` [2]
+->   where `<expr#9>` is a reference to this expression [3]
+-> But got `C` [4]
+-> Since `C` is not final [5]
+-> this might not be a `C` [4]
+
+class_prop_as_this.php:17:14
+ 5 | // if they are not the same expression dependent type.
+ 6 | abstract class C {
+ 7 |   public function __construct(public this $x) {}
+   |                                      ^^^^ [2]
+ 8 | 
+ 9 |   public function test(C $c1, C $c2, this $static): void {
+   |                        ^ [5]
+   |                               ^ [4]
+10 |     // This works because both are known to be of type <static>
+11 |     $static->x = $this->x;
+   :
+15 |     // But since we don't know if $c1 and $c2 refer to the same type this is an
+16 |     // error.
+17 |     $c1->x = $c2->x;
+   |     ^^^^^^ [3]
+   |              ^^^^^^ [1]
+18 |   }
+19 | }
+
+1 error found

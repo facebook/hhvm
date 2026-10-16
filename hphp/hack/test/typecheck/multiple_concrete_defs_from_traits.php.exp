@@ -1,10 +1,41 @@
-WARN: File "multiple_concrete_defs_from_traits.php", line 16, characters 7-7:
-Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime (Warn[12008])
-WARN: File "multiple_concrete_defs_from_traits.php", line 17, characters 7-8:
-Static property is overridden: `$p` (Warn[12021])
-  File "multiple_concrete_defs_from_traits.php", line 13, characters 17-19:
-  Overriding static property is here
-WARN: File "multiple_concrete_defs_from_traits.php", line 17, characters 11-12:
-Static property is overridden: `$p` (Warn[12021])
-  File "multiple_concrete_defs_from_traits.php", line 13, characters 17-19:
-  Overriding static property is here
+warning: Warn[12008] Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime [1]
+
+multiple_concrete_defs_from_traits.php:16:7
+14 | }
+15 | 
+16 | class C {
+   |       ^ [1]
+17 |   use T1, T2, T3;
+18 | }
+
+warning: Warn[12021] Static property is overridden: `$p` [1]
+-> Overriding static property is here [2]
+
+multiple_concrete_defs_from_traits.php:17:7
+11 | 
+12 | trait T3 {
+13 |   public static num $p = 4;
+   |                 ^^^ [2]
+14 | }
+15 | 
+16 | class C {
+17 |   use T1, T2, T3;
+   |       ^^ [1]
+18 | }
+
+warning: Warn[12021] Static property is overridden: `$p` [1]
+-> Overriding static property is here [2]
+
+multiple_concrete_defs_from_traits.php:17:11
+11 | 
+12 | trait T3 {
+13 |   public static num $p = 4;
+   |                 ^^^ [2]
+14 | }
+15 | 
+16 | class C {
+17 |   use T1, T2, T3;
+   |           ^^ [1]
+18 | }
+
+3 errors found

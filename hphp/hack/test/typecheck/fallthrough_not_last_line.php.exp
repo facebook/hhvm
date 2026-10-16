@@ -1,8 +1,39 @@
-ERROR: File "fallthrough_not_last_line.php", line 4, characters 11-12:
-This `switch` has a `case` that implicitly falls through and is not annotated with `// FALLTHROUGH` (NastCheck[3005])
-  File "fallthrough_not_last_line.php", line 5, characters 10-10:
-  This `case` implicitly falls through. Did you forget to add `break` or `return`?
-ERROR: File "fallthrough_not_last_line.php", line 4, characters 3-93:
-This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
-  File "fallthrough_not_last_line.php", line 4, characters 11-12:
-  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+error: NastCheck[3005] This `switch` has a `case` that implicitly falls through and is not annotated with `// FALLTHROUGH` [1]
+-> This `case` implicitly falls through. Did you forget to add `break` or `return`? [2]
+
+fallthrough_not_last_line.php:4:11
+2 | 
+3 | function foo(int $x): void {
+4 |   switch ($x) {
+  |           ^^ [1]
+5 |     case 1: // FALLTHROUGH
+  |          ^ [2]
+6 |       3;
+7 |     case 2:
+
+error: Typing[4489] This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. [1]
+-> The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types. [2]
+
+fallthrough_not_last_line.php:4:3
+ 2 | 
+ 3 | function foo(int $x): void {
+ 4 |   switch ($x) {
+   |   ^^^^^^^^^^^^^ [1]
+   |           ^^ [2]
+ 5 |     case 1: // FALLTHROUGH
+   |     ^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 6 |       3;
+   |       ^^ [1]
+ 7 |     case 2:
+   |     ^^^^^^^ [1]
+ 8 |     case 3:
+   |     ^^^^^^^ [1]
+ 9 |       break;
+   |       ^^^^^^ [1]
+10 | 
+11 |   }
+   |   ^ [1]
+12 | 
+13 | }
+
+2 errors found

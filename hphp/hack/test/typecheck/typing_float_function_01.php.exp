@@ -1,6 +1,17 @@
-ERROR: File "typing_float_function_01.php", line 16, characters 6-6:
-Invalid argument (Typing[4110])
-  File "typing_float_function_01.php", line 12, characters 13-17:
-  Expected `float`
-  File "typing_float_function_01.php", line 16, characters 6-6:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `float` [2]
+-> But got `int` [1]
+
+typing_float_function_01.php:16:6
+10 |  */
+11 | 
+12 | function f1(float $x): void {
+   |             ^^^^^ [2]
+13 | }
+14 | 
+15 | function f2(): void {
+16 |   f1(1);
+   |      ^ [1]
+17 | }
+
+1 error found

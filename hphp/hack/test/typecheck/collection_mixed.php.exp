@@ -1,10 +1,25 @@
-ERROR: File "collection_mixed.php", line 18, characters 23-40:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "collection_mixed.php", line 18, characters 30-34:
-  But got `mixed`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+collection_mixed.php:18:23
+16 | }
+17 | 
+18 | function testarray(): darray<mixed, int> {
+   |                       ^^^^^^^^^^^^^^^^^^ [1]
+   |                              ^^^^^ [4]
+19 |   $a = dict["s" => 1, "t" => 2];
+20 |   $a[2] = 100;
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+1 error found

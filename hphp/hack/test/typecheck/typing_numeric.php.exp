@@ -1,6 +1,14 @@
-ERROR: File "typing_numeric.php", line 13, characters 10-16:
-Invalid return type (Typing[4110])
-  File "typing_numeric.php", line 12, characters 30-34:
-  Expected `float`
-  File "typing_numeric.php", line 13, characters 10-16:
-  But got `num` because it is the result of a division `/`
+error: Typing[4110] Invalid return type [1]
+-> Expected `float` [2]
+-> But got `num` because it is the result of a division `/` [1]
+
+typing_numeric.php:13:10
+10 |  */
+11 | 
+12 | function f1(int $x, int $y): float {
+   |                              ^^^^^ [2]
+13 |   return $x / $y;
+   |          ^^^^^^^ [1]
+14 | }
+
+1 error found

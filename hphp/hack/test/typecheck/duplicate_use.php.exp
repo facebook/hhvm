@@ -1,2 +1,10 @@
-ERROR: File "duplicate_use.php", line 10, characters 16-20:
-Cannot use function `B\foo` as `foo` because the name is already in use (Parsing[1002])
+error: Parsing[1002] Cannot use function `B\foo` as `foo` because the name is already in use [1]
+
+duplicate_use.php:10:16
+ 8 | namespace C {
+ 9 |   use function A\foo;
+10 |   use function B\foo;
+   |                ^^^^^ [1]
+11 | }
+
+1 error found

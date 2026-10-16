@@ -1,12 +1,23 @@
-ERROR: File "abstract_implement8.php", line 16, characters 19-27:
-The method `getMyName` is not compatible with the overridden method (Typing[4341])
-  File "abstract_implement8.php", line 16, characters 19-27:
-  Method `getMyName` has type `(function(): int)` in `A`
-  File "abstract_implement8.php", line 12, characters 19-27:
-  But it has type `(function(): string)` in parent `Alpha`
-  File "abstract_implement8.php", line 16, characters 19-27:
-  Type `(function(): int)` is not a subtype of `(function(): string)`
-  File "abstract_implement8.php", line 12, characters 32-37:
-  Expected `string`
-  File "abstract_implement8.php", line 16, characters 32-34:
-  But got `int`
+error: Typing[4341] The method `getMyName` is not compatible with the overridden method [1]
+-> Method `getMyName` has type `(function(): int)` in `A` [1]
+-> But it has type `(function(): string)` in parent `Alpha` [2]
+-> Type `(function(): int)` is not a subtype of `(function(): string)` [1]
+-> Expected `string` [3]
+-> But got `int` [4]
+
+abstract_implement8.php:16:19
+10 |  */
+11 | interface Alpha {
+12 |   public function getMyName(): string;
+   |                   ^^^^^^^^^ [2]
+   |                                ^^^^^^ [3]
+13 | }
+14 | 
+15 | abstract class A implements Alpha {
+16 |   public function getMyName(): int {
+   |                   ^^^^^^^^^ [1]
+   |                                ^^^ [4]
+17 |     return 5;
+18 |   }
+
+1 error found

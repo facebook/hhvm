@@ -1,2 +1,11 @@
-ERROR: File "new_generic_bad.php", line 5, characters 16-16:
-Erased generics can only be used in type hints because they do not exist at runtime (Parsing[1002])
+error: Parsing[1002] Erased generics can only be used in type hints because they do not exist at runtime [1]
+
+new_generic_bad.php:5:16
+3 | class T<T> {
+4 |   public static function f(): T {
+5 |     return new T();
+  |                ^ [1]
+6 |   }
+7 | }
+
+1 error found

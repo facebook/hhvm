@@ -1,4 +1,19 @@
-ERROR: File "collection_unexpected_arrow_immvector_legacy.php", line 5, characters 8-35:
-Cannot use key value initializer for `ImmVector`. It does not allow keys. (Parsing[1002])
-ERROR: File "collection_unexpected_arrow_immvector_legacy.php", line 5, characters 19-23:
-Keys may not be specified for \HH\ImmVector initialization (Naming[2051])
+error: Parsing[1002] Cannot use key value initializer for `ImmVector`. It does not allow keys. [1]
+
+collection_unexpected_arrow_immvector_legacy.php:5:8
+3 | function test(): void {
+4 |   // Using key => value in a value-only collection (ImmVector)
+5 |   $x = ImmVector {'key' => 'value'};
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 | }
+
+error: Naming[2051] Keys may not be specified for \HH\ImmVector initialization [1]
+
+collection_unexpected_arrow_immvector_legacy.php:5:19
+3 | function test(): void {
+4 |   // Using key => value in a value-only collection (ImmVector)
+5 |   $x = ImmVector {'key' => 'value'};
+  |                   ^^^^^ [1]
+6 | }
+
+2 errors found

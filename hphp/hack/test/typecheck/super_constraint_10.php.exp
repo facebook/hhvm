@@ -1,50 +1,112 @@
-ERROR: File "super_constraint_10.php", line 8, characters 26-30:
-Invalid return type (Typing[4336])
-  File "super_constraint_10.php", line 11, characters 6-18:
-  Expected `Map<Tk1, Tv1>`
-  File "super_constraint_10.php", line 8, characters 26-30:
-  But got `void` because this function does not always return a value
-ERROR: File "super_constraint_10.php", line 19, characters 34-38:
-Invalid argument (Typing[4110])
-  File "super_constraint_10.php", line 16, characters 14-16:
-  Expected `Tk1`
-  File "super_constraint_10.php", line 17, characters 14-16:
-  But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey`
-  File "super_constraint_10.php", line 17, characters 14-16:
-  This type argument to `ConstMap` must match exactly (it is invariant)
-ERROR: File "super_constraint_10.php", line 19, characters 34-38:
-Invalid argument (Typing[4110])
-  File "super_constraint_10.php", line 16, characters 14-16:
-  Expected `Tk1`
-  File "super_constraint_10.php", line 17, characters 14-16:
-  But got `arraykey`
-  File "super_constraint_10.php", line 17, characters 14-16:
-  This type argument to `ConstMap` must match exactly (it is invariant)
-  File "super_constraint_10.php", line 15, characters 79-86:
-    by the definition of `Tk2`
-ERROR: File "super_constraint_10.php", line 20, characters 12-18:
-Invalid return type (Typing[4110])
-  File "super_constraint_10.php", line 16, characters 14-16:
-  Expected `Tk1`
-  File "super_constraint_10.php", line 16, characters 14-16:
-  This type argument to `ConstMap` must match exactly (it is invariant)
-  File "super_constraint_10.php", line 11, characters 10-12:
-    via this generic `Tk1`
-  File "super_constraint_10.php", line 18, characters 10-12:
-  But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey`
-  File "super_constraint_10.php", line 18, characters 10-12:
-  This type argument to `Map` must match exactly (it is invariant)
-ERROR: File "super_constraint_10.php", line 20, characters 12-18:
-Invalid return type (Typing[4110])
-  File "super_constraint_10.php", line 16, characters 14-16:
-  Expected `Tk1`
-  File "super_constraint_10.php", line 16, characters 14-16:
-  This type argument to `ConstMap` must match exactly (it is invariant)
-  File "super_constraint_10.php", line 11, characters 10-12:
-    via this generic `Tk1`
-  File "super_constraint_10.php", line 18, characters 10-12:
-  But got `arraykey`
-  File "super_constraint_10.php", line 18, characters 10-12:
-  This type argument to `Map` must match exactly (it is invariant)
-  File "super_constraint_10.php", line 15, characters 79-86:
-    by the definition of `Tk2`
+error: Typing[4336] Invalid return type [1]
+-> Expected `Map<Tk1, Tv1>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+super_constraint_10.php:8:26
+ 6 | 
+ 7 |   /* HH_FIXME[4110] */
+ 8 |   public static function merge<Tk2 as arraykey, Tv2, Tk1 super Tk2 as arraykey, Tv1 super Tv2>(
+   |                          ^^^^^ [1]
+ 9 |     ConstMap<Tk1, Tv1> $map1,
+10 |     ConstMap<Tk2, Tv2> $map2,
+11 |   ): Map<Tk1, Tv1> {
+   |      ^^^^^^^^^^^^^ [2]
+12 |   }
+13 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Tk1` [2]
+-> But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey` [3]
+-> This type argument to `ConstMap` must match exactly (it is invariant) [3]
+
+super_constraint_10.php:19:34
+14 |   // This should fail to check
+15 |   public static function mergeDisjoint<Tk1 as arraykey, Tv1, Tk2 super Tk1 as arraykey, Tv2 super Tv1>(
+16 |     ConstMap<Tk1, Tv1> $map1,
+   |              ^^^ [2]
+17 |     ConstMap<Tk2, Tv2> $map2,
+   |              ^^^ [3]
+18 |   ): Map<Tk2, Tv2> {
+19 |     $result = self::merge($map1, $map2);
+   |                                  ^^^^^ [1]
+20 |     return $result;
+21 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `Tk1` [2]
+-> But got `arraykey` [3]
+-> This type argument to `ConstMap` must match exactly (it is invariant) [3]
+->   by the definition of `Tk2` [4]
+
+super_constraint_10.php:19:34
+13 | 
+14 |   // This should fail to check
+15 |   public static function mergeDisjoint<Tk1 as arraykey, Tv1, Tk2 super Tk1 as arraykey, Tv2 super Tv1>(
+   |                                                                               ^^^^^^^^ [4]
+16 |     ConstMap<Tk1, Tv1> $map1,
+   |              ^^^ [2]
+17 |     ConstMap<Tk2, Tv2> $map2,
+   |              ^^^ [3]
+18 |   ): Map<Tk2, Tv2> {
+19 |     $result = self::merge($map1, $map2);
+   |                                  ^^^^^ [1]
+20 |     return $result;
+21 |   }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tk1` [2]
+-> This type argument to `ConstMap` must match exactly (it is invariant) [2]
+->   via this generic `Tk1` [3]
+-> But got `Tk2 where Tk2 super Tk1, Tk2 as arraykey` [4]
+-> This type argument to `Map` must match exactly (it is invariant) [4]
+
+super_constraint_10.php:20:12
+ 9 |     ConstMap<Tk1, Tv1> $map1,
+10 |     ConstMap<Tk2, Tv2> $map2,
+11 |   ): Map<Tk1, Tv1> {
+   |          ^^^ [3]
+12 |   }
+13 | 
+14 |   // This should fail to check
+15 |   public static function mergeDisjoint<Tk1 as arraykey, Tv1, Tk2 super Tk1 as arraykey, Tv2 super Tv1>(
+16 |     ConstMap<Tk1, Tv1> $map1,
+   |              ^^^ [2]
+17 |     ConstMap<Tk2, Tv2> $map2,
+18 |   ): Map<Tk2, Tv2> {
+   |          ^^^ [4]
+19 |     $result = self::merge($map1, $map2);
+20 |     return $result;
+   |            ^^^^^^^ [1]
+21 |   }
+22 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `Tk1` [2]
+-> This type argument to `ConstMap` must match exactly (it is invariant) [2]
+->   via this generic `Tk1` [3]
+-> But got `arraykey` [4]
+-> This type argument to `Map` must match exactly (it is invariant) [4]
+->   by the definition of `Tk2` [5]
+
+super_constraint_10.php:20:12
+ 9 |     ConstMap<Tk1, Tv1> $map1,
+10 |     ConstMap<Tk2, Tv2> $map2,
+11 |   ): Map<Tk1, Tv1> {
+   |          ^^^ [3]
+12 |   }
+13 | 
+14 |   // This should fail to check
+15 |   public static function mergeDisjoint<Tk1 as arraykey, Tv1, Tk2 super Tk1 as arraykey, Tv2 super Tv1>(
+   |                                                                               ^^^^^^^^ [5]
+16 |     ConstMap<Tk1, Tv1> $map1,
+   |              ^^^ [2]
+17 |     ConstMap<Tk2, Tv2> $map2,
+18 |   ): Map<Tk2, Tv2> {
+   |          ^^^ [4]
+19 |     $result = self::merge($map1, $map2);
+20 |     return $result;
+   |            ^^^^^^^ [1]
+21 |   }
+22 | }
+
+5 errors found

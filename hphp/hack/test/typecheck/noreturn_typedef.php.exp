@@ -1,2 +1,9 @@
-ERROR: File "noreturn_typedef.php", line 4, characters 15-22:
-You can only use the `noreturn` type as the return type of a function or method (Naming[2063])
+error: Naming[2063] You can only use the `noreturn` type as the return type of a function or method [1]
+
+noreturn_typedef.php:4:15
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | type talias = noreturn;
+  |               ^^^^^^^^ [1]
+
+1 error found

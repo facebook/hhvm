@@ -1,6 +1,20 @@
-ERROR: File "contravariance_unresolved_bad_2.php", line 38, characters 12-13:
-Invalid argument (Typing[4110])
-  File "contravariance_unresolved_bad_2.php", line 8, characters 30-35:
-  Expected `string`
-  File "contravariance_unresolved_bad_2.php", line 38, characters 12-13:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+contravariance_unresolved_bad_2.php:38:12
+ 6 | }
+ 7 | 
+ 8 | final class C1 implements I1<string> {
+   |                              ^^^^^^ [2]
+ 9 |   public function f(string $t): int {
+10 |     return 42;
+   :
+36 | 
+37 |     // the following line fails in runtime
+38 |     $c2->f(42);
+   |            ^^ [1]
+39 |   }
+40 | }
+
+1 error found

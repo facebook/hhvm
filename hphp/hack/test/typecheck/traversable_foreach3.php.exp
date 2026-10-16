@@ -1,6 +1,15 @@
-ERROR: File "traversable_foreach3.php", line 13, characters 12-13:
-Invalid `foreach` (Typing[4110])
-  File "traversable_foreach3.php", line 13, characters 12-13:
-  Expected `KeyedTraversable<_, _>` because this is used in a `foreach` statement
-  File "traversable_foreach3.php", line 12, characters 15-33:
-  But got `Traversable<string>`
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected `KeyedTraversable<_, _>` because this is used in a `foreach` statement [1]
+-> But got `Traversable<string>` [2]
+
+traversable_foreach3.php:13:12
+10 |  */
+11 | 
+12 | function foo2(Traversable<string> $p): void {
+   |               ^^^^^^^^^^^^^^^^^^^ [2]
+13 |   foreach ($p as $k => $v) {
+   |            ^^ [1]
+14 |     f1($k);
+15 |     f2($v);
+
+1 error found

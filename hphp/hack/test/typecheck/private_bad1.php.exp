@@ -1,4 +1,19 @@
-ERROR: File "private_bad1.php", line 12, characters 9-12:
-You cannot access this member (Typing[4112])
-  File "private_bad1.php", line 4, characters 20-23:
-  This member is private
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+private_bad1.php:12:9
+ 2 | 
+ 3 | class Foo {
+ 4 |   private function test(): string {
+   |                    ^^^^ [2]
+ 5 |     return "test was called";
+ 6 |   }
+   :
+10 |   private function blarg(): void {
+11 |     $a = new Foo();
+12 |     $a->test();
+   |         ^^^^ [1]
+13 |   }
+14 | }
+
+1 error found

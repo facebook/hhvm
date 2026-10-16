@@ -1,6 +1,17 @@
-ERROR: File "keys.php", line 9, characters 26-27:
-Invalid argument (Typing[4110])
-  File "keys.php", line 12, characters 37-54:
-  Expected `dict<string, _>`
-  File "keys.php", line 8, characters 8-16:
-  But got `vec<bool>`
+error: Typing[4110] Invalid argument [1]
+-> Expected `dict<string, _>` [2]
+-> But got `vec<bool>` [3]
+
+keys.php:9:26
+ 6 | 
+ 7 | function test(): void {
+ 8 |   $a = vec[true];
+   |        ^^^^^^^^^ [3]
+ 9 |   take_int_indexed_array($a);
+   |                          ^^ [1]
+10 | }
+11 | 
+12 | function take_int_indexed_array<Tv>(darray<string, Tv> $a): void {}
+   |                                     ^^^^^^^^^^^^^^^^^^ [2]
+
+1 error found

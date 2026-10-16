@@ -1,8 +1,33 @@
-ERROR: File "static_meth_with_class_generics.php", line 5, characters 3-58:
-Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
-  File "static_meth_with_class_generics.php", line 5, characters 30-30:
-  Class-level reified generic used here.
-ERROR: File "static_meth_with_class_generics.php", line 5, characters 3-58:
-Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
-  File "static_meth_with_class_generics.php", line 5, characters 37-37:
-  Class-level reified generic used here.
+error: Typing[4358] Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. [1]
+-> Class-level reified generic used here. [2]
+
+static_meth_with_class_generics.php:5:3
+3 | 
+4 | class C1<reify T as nonnull> {
+5 |   public static function foo(T $x): T {
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                              ^ [2]
+6 |     return $x;
+  |     ^^^^^^^^^^ [1]
+7 |   }
+  |   ^ [1]
+8 | }
+9 | 
+
+error: Typing[4358] Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. [1]
+-> Class-level reified generic used here. [2]
+
+static_meth_with_class_generics.php:5:3
+3 | 
+4 | class C1<reify T as nonnull> {
+5 |   public static function foo(T $x): T {
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                     ^ [2]
+6 |     return $x;
+  |     ^^^^^^^^^^ [1]
+7 |   }
+  |   ^ [1]
+8 | }
+9 | 
+
+2 errors found

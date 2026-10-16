@@ -1,18 +1,44 @@
-ERROR: File "new_classname1.bad.php", line 8, characters 12-21:
-Invalid return type (Typing[4110])
-  File "new_classname1.bad.php", line 6, characters 27-29:
-  Expected `int`
-  File "new_classname1.bad.php", line 3, characters 15-16:
-  But got `T1`
-  File "new_classname1.bad.php", line 4, characters 45-46:
-    via this generic `T1`
-ERROR: File "new_classname1.bad.php", line 8, characters 12-21:
-Invalid return type (Typing[4110])
-  File "new_classname1.bad.php", line 6, characters 27-29:
-  Expected `int`
-  File "new_classname1.bad.php", line 3, characters 15-16:
-  But got `mixed`
-  File "new_classname1.bad.php", line 4, characters 45-46:
-    via this generic `T1`
-  File "new_classname1.bad.php", line 3, characters 15-16:
-    by the definition of `T1` arising from an implicit `as mixed` constraint on this type
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `T1` [3]
+->   via this generic `T1` [4]
+
+new_classname1.bad.php:8:12
+ 1 | <?hh
+ 2 | 
+ 3 | final class C<T1> {
+   |               ^^ [3]
+ 4 |   public function __construct(private class<T1> $kls1) {}
+   |                                             ^^ [4]
+ 5 | 
+ 6 |   public function main(): int {
+   |                           ^^^ [2]
+ 7 |     $kls = $this->kls1;
+ 8 |     return new $kls();
+   |            ^^^^^^^^^^ [1]
+ 9 |   }
+10 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `mixed` [3]
+->   via this generic `T1` [4]
+->   by the definition of `T1` arising from an implicit `as mixed` constraint on this type [3]
+
+new_classname1.bad.php:8:12
+ 1 | <?hh
+ 2 | 
+ 3 | final class C<T1> {
+   |               ^^ [3]
+ 4 |   public function __construct(private class<T1> $kls1) {}
+   |                                             ^^ [4]
+ 5 | 
+ 6 |   public function main(): int {
+   |                           ^^^ [2]
+ 7 |     $kls = $this->kls1;
+ 8 |     return new $kls();
+   |            ^^^^^^^^^^ [1]
+ 9 |   }
+10 | }
+
+2 errors found

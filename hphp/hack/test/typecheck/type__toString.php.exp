@@ -1,2 +1,11 @@
-ERROR: File "type__toString.php", line 13, characters 33-35:
-`__toString` should return a string (NastCheck[3020])
+error: NastCheck[3020] `__toString` should return a string [1]
+
+type__toString.php:13:33
+11 | 
+12 | class Foo {
+13 |   public function __toString(): int {
+   |                                 ^^^ [1]
+14 |     return 5;
+15 |   }
+
+1 error found

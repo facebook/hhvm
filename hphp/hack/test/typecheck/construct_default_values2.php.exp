@@ -1,12 +1,51 @@
-ERROR: File "construct_default_values2.php", line 11, characters 20-26:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "construct_default_values2.php", line 12, characters 14-28:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "construct_default_values2.php", line 12, characters 21-21:
-Read access to `$this->b` before initialization (Typing[4083])
-ERROR: File "construct_default_values2.php", line 12, characters 24-26:
-This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "construct_default_values2.php", line 12, characters 9-10:
-  From this declaration, the context of this function body provides the capability AccessGlobals
-  File "construct_default_values2.php", line 5, characters 19-21:
-  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+construct_default_values2.php:11:20
+ 9 | class C {
+10 |   public function __construct(
+11 |     private B $b = new B(),
+   |                    ^^^^^^^ [1]
+12 |     int $x = $this->b->foo(),
+13 |   ) {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+construct_default_values2.php:12:14
+10 |   public function __construct(
+11 |     private B $b = new B(),
+12 |     int $x = $this->b->foo(),
+   |              ^^^^^^^^^^^^^^^ [1]
+13 |   ) {}
+14 | }
+
+error: Typing[4083] Read access to `$this->b` before initialization [1]
+
+construct_default_values2.php:12:21
+10 |   public function __construct(
+11 |     private B $b = new B(),
+12 |     int $x = $this->b->foo(),
+   |                     ^ [1]
+13 |   ) {}
+14 | }
+
+error: Typing[4390] This call is not allowed because its capabilities are incompatible with the context [1]
+-> From this declaration, the context of this function body provides the capability AccessGlobals [2]
+-> But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty} [3]
+
+construct_default_values2.php:12:24
+ 3 | 
+ 4 | class B {
+ 5 |   public function foo(): int {
+   |                   ^^^ [3]
+ 6 |     return 2;
+ 7 |   }
+   :
+10 |   public function __construct(
+11 |     private B $b = new B(),
+12 |     int $x = $this->b->foo(),
+   |         ^^ [2]
+   |                        ^^^ [1]
+13 |   ) {}
+14 | }
+
+4 errors found

@@ -1,8 +1,38 @@
-WARN: File "strict_call_tany2.php", line 18, characters 3-11:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany2.php", line 18, characters 3-16:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-WARN: File "strict_call_tany2.php", line 18, characters 14-16:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "strict_call_tany2.php", line 13, characters 19-21:
-Was expecting a return type hint (Typing[4030])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany2.php:18:3
+16 | function f(): void {
+17 |   $c = new C();
+18 |   $c->any()->foo();
+   |   ^^^^^^^^^ [1]
+19 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany2.php:18:3
+16 | function f(): void {
+17 |   $c = new C();
+18 |   $c->any()->foo();
+   |   ^^^^^^^^^^^^^^ [1]
+19 | }
+
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+strict_call_tany2.php:18:14
+16 | function f(): void {
+17 |   $c = new C();
+18 |   $c->any()->foo();
+   |              ^^^ [1]
+19 | }
+
+error: Typing[4030] Was expecting a return type hint [1]
+
+strict_call_tany2.php:13:19
+11 | 
+12 | class C {
+13 |   public function any() /* : TAny */ {}
+   |                   ^^^ [1]
+14 | }
+15 | 
+
+4 errors found

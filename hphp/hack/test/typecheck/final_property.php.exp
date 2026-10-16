@@ -1,14 +1,41 @@
-ERROR: File "final_property.php", line 4, characters 11-15:
-Properties cannot be declared `final` (Parsing[1002])
-ERROR: File "final_property.php", line 5, characters 10-14:
-Properties cannot be declared `final` (Parsing[1002])
-ERROR: File "final_property.php", line 3, characters 7-7:
-Class `A` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "final_property.php", line 4, characters 21-27:
-  `$this->value1` is not initialized.
-  File "final_property.php", line 4, characters 30-36:
-  `$this->value2` is not initialized.
-  File "final_property.php", line 5, characters 20-26:
-  `$this->value3` is not initialized.
-  File "final_property.php", line 6, characters 15-21:
-  `$this->value4` is not initialized.
+error: Parsing[1002] Properties cannot be declared `final` [1]
+
+final_property.php:4:11
+2 | 
+3 | class A {
+4 |   private final int $value1, $value2;
+  |           ^^^^^ [1]
+5 |   public final int $value3;
+6 |   private int $value4;
+
+error: Parsing[1002] Properties cannot be declared `final` [1]
+
+final_property.php:5:10
+3 | class A {
+4 |   private final int $value1, $value2;
+5 |   public final int $value3;
+  |          ^^^^^ [1]
+6 |   private int $value4;
+7 | }
+
+error: NastCheck[3015] Class `A` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->value1` is not initialized. [2]
+-> `$this->value2` is not initialized. [3]
+-> `$this->value3` is not initialized. [4]
+-> `$this->value4` is not initialized. [5]
+
+final_property.php:3:7
+1 | <?hh
+2 | 
+3 | class A {
+  |       ^ [1]
+4 |   private final int $value1, $value2;
+  |                     ^^^^^^^ [2]
+  |                              ^^^^^^^ [3]
+5 |   public final int $value3;
+  |                    ^^^^^^^ [4]
+6 |   private int $value4;
+  |               ^^^^^^^ [5]
+7 | }
+
+3 errors found

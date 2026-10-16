@@ -1,2 +1,9 @@
-ERROR: File "multiple_inheritance.php", line 6, characters 19-26:
-A class may extend at most **one** other class. (Parsing[1002])
+error: Parsing[1002] A class may extend at most **one** other class. [1]
+
+multiple_inheritance.php:6:19
+4 | class Baz {}
+5 | 
+6 | class Foo extends Bar, Baz {}
+  |                   ^^^^^^^^ [1]
+
+1 error found

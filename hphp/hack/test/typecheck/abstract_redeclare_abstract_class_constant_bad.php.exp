@@ -1,6 +1,21 @@
-ERROR: File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 3, characters 26-26:
-Some members in class `B` are incompatible with those declared in type `A` (Typing[4348])
-  File "abstract_redeclare_abstract_class_constant_bad.php--file1.php", line 5, characters 18-20:
-  Expected `int`
-  File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 4, characters 18-25:
-  But got `arraykey`
+error: Typing[4348] Some members in class `B` are incompatible with those declared in type `A` [1]
+-> Expected `int` [2]
+-> But got `arraykey` [3]
+
+abstract_redeclare_abstract_class_constant_bad.php--file2.php:3:26
+1 | <?hh
+2 | 
+3 | abstract class B extends A {
+  |                          ^ [1]
+4 |   abstract const arraykey P;
+  |                  ^^^^^^^^ [3]
+5 | }
+
+abstract_redeclare_abstract_class_constant_bad.php--file1.php:5:18
+3 | 
+4 | abstract class A {
+5 |   abstract const int P;
+  |                  ^^^ [2]
+6 | }
+
+1 error found

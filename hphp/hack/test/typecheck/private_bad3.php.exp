@@ -1,4 +1,19 @@
-ERROR: File "private_bad3.php", line 11, characters 20-22:
-You cannot access this member (Typing[4112])
-  File "private_bad3.php", line 4, characters 20-22:
-  This member is private
+error: Typing[4112] You cannot access this member [1]
+-> This member is private [2]
+
+private_bad3.php:11:20
+ 2 | 
+ 3 | class A {
+ 4 |   private function foo(): int {
+   |                    ^^^ [2]
+ 5 |     return 4;
+ 6 |   }
+   :
+ 9 | class B extends A {
+10 |   public function bar(): int {
+11 |     return parent::foo();
+   |                    ^^^ [1]
+12 |   }
+13 | }
+
+1 error found

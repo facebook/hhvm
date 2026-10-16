@@ -1,8 +1,28 @@
-ERROR: File "default_with_type_error.php", line 7, characters 38-44:
-Expected constant expression for initializer (Parsing[1002])
-ERROR: File "default_with_type_error.php", line 10, characters 9-10:
-Typing error (Typing[4429])
-  File "default_with_type_error.php", line 10, characters 9-14:
-  Expected `num` because this is used in an arithmetic operation
-  File "default_with_type_error.php", line 7, characters 14-19:
-  But got `string`
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+default_with_type_error.php:7:38
+5 |   public function bar():int { return 3; }
+6 | }
+7 | function foo(string $y = 'a', C $z = new C()):void {
+  |                                      ^^^^^^^ [1]
+8 |   // Parameters get types "_ | string" and "_ | C"
+9 |   // This is illegal, because we try and add a string to an integer
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `string` [3]
+
+default_with_type_error.php:10:9
+ 5 |   public function bar():int { return 3; }
+ 6 | }
+ 7 | function foo(string $y = 'a', C $z = new C()):void {
+   |              ^^^^^^ [3]
+ 8 |   // Parameters get types "_ | string" and "_ | C"
+ 9 |   // This is illegal, because we try and add a string to an integer
+10 |   $yy = $y + 3;
+   |         ^^ [1]
+   |         ^^^^^^ [2]
+11 |   // This is legal
+12 |   $zz = $z->bar();
+
+2 errors found

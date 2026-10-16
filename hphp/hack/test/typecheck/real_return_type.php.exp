@@ -1,10 +1,34 @@
-ERROR: File "real_return_type.php", line 11, characters 17-20:
-No such type `real`, did you mean `float`? (Naming[2123])
-ERROR: File "real_return_type.php", line 11, characters 17-20:
-Unbound name: `real` (Naming[2049])
-ERROR: File "real_return_type.php", line 12, characters 10-12:
-Invalid return type (Typing[4110])
-  File "real_return_type.php", line 11, characters 17-20:
-  Expected `real`
-  File "real_return_type.php", line 12, characters 10-12:
-  But got `float`
+error: Naming[2123] No such type `real`, did you mean `float`? [1]
+
+real_return_type.php:11:17
+ 9 |  *
+10 |  */
+11 | function foo(): real {
+   |                 ^^^^ [1]
+12 |   return 3.2;
+13 | }
+
+error: Naming[2049] Unbound name: `real` [1]
+
+real_return_type.php:11:17
+ 9 |  *
+10 |  */
+11 | function foo(): real {
+   |                 ^^^^ [1]
+12 |   return 3.2;
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `real` [2]
+-> But got `float` [1]
+
+real_return_type.php:12:10
+ 9 |  *
+10 |  */
+11 | function foo(): real {
+   |                 ^^^^ [2]
+12 |   return 3.2;
+   |          ^^^ [1]
+13 | }
+
+3 errors found

@@ -1,6 +1,20 @@
-ERROR: File "variadic_args6.php", line 9, characters 16-20:
-Invalid argument (Typing[4110])
-  File "variadic_args6.php", line 3, characters 23-28:
-  Expected `string`
-  File "variadic_args6.php", line 5, characters 23-27:
-  But got `vec<string>` (variadic argument)
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `vec<string>` (variadic argument) [3]
+
+variadic_args6.php:9:16
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_string(string $s): void {}
+   |                       ^^^^^^ [2]
+ 4 | 
+ 5 | function f1(string ...$args): void {
+   |                       ^^^^^ [3]
+ 6 |   foreach ($args as $arg) {
+ 7 |     echo $arg;
+ 8 |   }
+ 9 |   takes_string($args); // error, args is array
+   |                ^^^^^ [1]
+10 | }
+
+1 error found

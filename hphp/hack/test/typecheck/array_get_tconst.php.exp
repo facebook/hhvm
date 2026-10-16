@@ -1,16 +1,43 @@
-ERROR: File "array_get_tconst.php", line 4, characters 34-53:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "array_get_tconst.php", line 4, characters 41-45:
-  But got `mixed`
-ERROR: File "array_get_tconst.php", line 8, characters 12-13:
-Invalid return type (Typing[4110])
-  File "array_get_tconst.php", line 6, characters 43-55:
-  Expected `this::MyArray`
-  File "array_get_tconst.php", line 4, characters 34-53:
-  But got `dict<mixed, mixed>`
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> `Tk` is a constrained type parameter [2]
+-> This type constraint is violated [3]
+-> Expected `arraykey` [3]
+-> But got `mixed` [4]
+
+array_get_tconst.php:4:34
+ 2 | 
+ 3 | abstract class C {
+ 4 |   abstract const type MyArray as darray<mixed, mixed>;
+   |                                  ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                         ^^^^^ [4]
+ 5 | 
+ 6 |   protected function f(this::MyArray $a): this::MyArray {
+
+hackarray.hhi:33:24
+31 |   <<__SupportDynamicType>>
+32 |   abstract final class dict<
+33 |     <<__NoAutoBound>> +Tk as arraykey,
+   |                        ^^ [2]
+   |                              ^^^^^^^^ [3]
+34 |     <<__NoAutoBound>> +Tv,
+35 |   > extends AnyArray<Tk, Tv> {}
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `this::MyArray` [2]
+-> But got `dict<mixed, mixed>` [3]
+
+array_get_tconst.php:8:12
+ 2 | 
+ 3 | abstract class C {
+ 4 |   abstract const type MyArray as darray<mixed, mixed>;
+   |                                  ^^^^^^^^^^^^^^^^^^^^ [3]
+ 5 | 
+ 6 |   protected function f(this::MyArray $a): this::MyArray {
+   |                                           ^^^^^^^^^^^^^ [2]
+ 7 |     $a['a'] = 4;
+ 8 |     return $a;
+   |            ^^ [1]
+ 9 |   }
+10 | }
+
+2 errors found

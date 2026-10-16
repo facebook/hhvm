@@ -1,12 +1,54 @@
-WARN: File "trait_static_method.php", line 33, characters 12-15:
-Static method call on a trait: `R_Trait::good` (Warn[12020])
-  File "trait_static_method.php", line 21, characters 7-13:
-  `R_Trait` is defined here
-WARN: File "trait_static_method.php", line 36, characters 12-16:
-Static method call on a trait: `R_Trait::good2` (Warn[12020])
-  File "trait_static_method.php", line 21, characters 7-13:
-  `R_Trait` is defined here
-ERROR: File "trait_static_method.php", line 42, characters 12-14:
-Cannot call `R_Trait::bad()`; `bad` is not defined in `R_Trait` (Typing[4185])
-  File "trait_static_method.php", line 4, characters 26-28:
-  Declaration is here
+warning: Warn[12020] Static method call on a trait: `R_Trait::good` [1]
+-> `R_Trait` is defined here [2]
+
+trait_static_method.php:33:12
+19 | }
+20 | 
+21 | trait R_Trait {
+   |       ^^^^^^^ [2]
+22 |   require extends R_Base;
+23 | 
+   :
+31 | function test(): void {
+32 |   // Calling something directly on the trait should pass.
+33 |   R_Trait::good();
+   |            ^^^^ [1]
+34 | 
+35 |   // Calling something brought in from trait composition should pass.
+
+warning: Warn[12020] Static method call on a trait: `R_Trait::good2` [1]
+-> `R_Trait` is defined here [2]
+
+trait_static_method.php:36:12
+19 | }
+20 | 
+21 | trait R_Trait {
+   |       ^^^^^^^ [2]
+22 |   require extends R_Base;
+23 | 
+   :
+34 | 
+35 |   // Calling something brought in from trait composition should pass.
+36 |   R_Trait::good2();
+   |            ^^^^^ [1]
+37 | 
+38 |   // Make sure we don't accidentally flag class inheritance.
+
+error: Typing[4185] Cannot call `R_Trait::bad()`; `bad` is not defined in `R_Trait` [1]
+-> Declaration is here [2]
+
+trait_static_method.php:42:12
+ 2 | 
+ 3 | class R_Base {
+ 4 |   public static function bad(): void {
+   |                          ^^^ [2]
+ 5 |     print "bad\n";
+ 6 |   }
+   :
+40 | 
+41 |   // This should fail since it's not truly defined.
+42 |   R_Trait::bad();
+   |            ^^^ [1]
+43 | }
+
+3 errors found

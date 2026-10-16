@@ -1,12 +1,29 @@
-ERROR: File "constraint_gen_fail4.php", line 14, characters 12-16:
-Invalid return type (Typing[4110])
-  File "constraint_gen_fail4.php", line 13, characters 26-26:
-  Expected `T`
-  File "constraint_gen_fail4.php", line 14, characters 12-16:
-  But got `B<T> where T as B<A>`
-ERROR: File "constraint_gen_fail4.php", line 14, characters 12-16:
-Invalid return type (Typing[4110])
-  File "constraint_gen_fail4.php", line 13, characters 26-26:
-  Expected `T`
-  File "constraint_gen_fail4.php", line 14, characters 12-16:
-  But got `this as B<T>`
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `B<T> where T as B<A>` [1]
+
+constraint_gen_fail4.php:14:12
+11 | class A extends B<A> {}
+12 | class B<T as B<A>> {
+13 |   public function get(): T {
+   |                          ^ [2]
+14 |     return $this;
+   |            ^^^^^ [1]
+15 |   }
+16 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `T` [2]
+-> But got `this as B<T>` [1]
+
+constraint_gen_fail4.php:14:12
+11 | class A extends B<A> {}
+12 | class B<T as B<A>> {
+13 |   public function get(): T {
+   |                          ^ [2]
+14 |     return $this;
+   |            ^^^^^ [1]
+15 |   }
+16 | }
+
+2 errors found

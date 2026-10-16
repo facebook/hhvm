@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-reader.h"
+#include "hphp/runtime/vm/jit/cprof-replay.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
@@ -360,6 +361,10 @@ void consumeContProfAtStartup() noexcept {
     VMWorker([&] {
       ProfileNonVMThread nonVM;
       HphpSession session{Treadmill::SessionKind::TranslateWorker};
+
+      ContProfReplayGuard replay{Cfg::Jit::ContProfCheckpointDirectory};
+      if (!replay.active()) return;
+      SCOPE_SUCCESS { replay.complete(); };
 
       auto const input = [&] {
         BootStats::Block timer{"cont_prof_read", Cfg::Server::Mode, true};

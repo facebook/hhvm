@@ -89,6 +89,8 @@ val set_max_procs : options -> int -> options
 
 val set_no_load : options -> bool -> options
 
+val clear_precomputed_saved_state : options -> options
+
 val set_config : options -> (string * string) list -> options
 
 val set_from : options -> string -> options

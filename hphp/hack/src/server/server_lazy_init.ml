@@ -1291,7 +1291,10 @@ let post_saved_state_initialization
     loaded_info
   in
   if genv.local_config.SLC.hg_aware then
-    if Server_args.is_using_precomputed_saved_state genv.options then begin
+    if
+      Server_args.is_using_precomputed_saved_state genv.options
+      && not genv.local_config.SLC.allow_restart_from_precomputed_saved_state
+    then begin
       Hack_event_logger
       .tried_to_be_hg_aware_with_precomputed_saved_state_warning
         ();

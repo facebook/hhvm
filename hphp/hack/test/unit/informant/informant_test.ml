@@ -34,7 +34,10 @@ module Tools = struct
 end
 
 (** Create XDB table entries for rev 5 and 200. Start Informant. *)
-let basic_setup_rev_5_and_200_and_start_informant_watchman temp_dir =
+let basic_setup_rev_5_and_200_and_start_informant_watchman
+    ?(initial_saved_state_is_precomputed = false)
+    ?(allow_restart_from_precomputed_saved_state = false)
+    temp_dir =
   Tools.set_hg_to_global_rev_map ();
 
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
@@ -52,14 +55,19 @@ let basic_setup_rev_5_and_200_and_start_informant_watchman temp_dir =
         watchman_debug_logging = false;
         use_eden = false;
         ignore_hh_version = false;
-        is_saved_state_precomputed = false;
+        initial_saved_state_is_precomputed;
+        allow_restart_from_precomputed_saved_state;
       }
   in
   let report = Informant.report informant Informant.Server_alive in
   Report_asserter.assert_equals Informant.Move_along report "no distance moved";
   informant
 
-let basic_setup_rev_5_and_200_and_start_informant_eden ?delay_rev_5 temp_dir =
+let basic_setup_rev_5_and_200_and_start_informant_eden
+    ?delay_rev_5
+    ?(initial_saved_state_is_precomputed = false)
+    ?(allow_restart_from_precomputed_saved_state = false)
+    temp_dir =
   Tools.set_hg_to_global_rev_map ?delay_rev_5 ();
 
   Hg.Mocking.current_working_copy_base_rev_returns
@@ -75,7 +83,8 @@ let basic_setup_rev_5_and_200_and_start_informant_eden ?delay_rev_5 temp_dir =
         watchman_debug_logging = false;
         use_eden = true;
         ignore_hh_version = false;
-        is_saved_state_precomputed = false;
+        initial_saved_state_is_precomputed;
+        allow_restart_from_precomputed_saved_state;
       }
   in
   let report = Informant.report informant Informant.Server_alive in
@@ -434,6 +443,145 @@ let test_eden_preprocess_early_decision temp_dir =
     "rev_230 insignificant from new base 200";
   true
 
+let assert_watchman_move informant hg_rev expected_report =
+  (* Watchman's SCM-aware mergebase notification follows state-leave. *)
+  List.iter [Tools.State_enter; Tools.State_leave] ~f:(fun transition ->
+      Tools.test_transition_watchman
+        informant
+        transition
+        hg_rev
+        Informant.Server_alive
+        Informant.Move_along
+        "wait for the mergebase notification");
+  Tools.test_transition_watchman
+    informant
+    Tools.Changed_merge_base
+    hg_rev
+    Informant.Server_alive
+    expected_report
+    "restart policy after Watchman's mergebase notification"
+
+let assert_eden_move informant hg_rev expected_report =
+  Tools.set_next_eden_state_transitions
+    [Tools.State_enter; Tools.Commit_transition; Tools.State_leave]
+    hg_rev;
+  Report_asserter.assert_equals
+    expected_report
+    (Informant.report informant Informant.Server_alive)
+    "restart policy after Eden's complete hg.update batch"
+
+(** Deliver a complete update whose globalrev lookup is delayed, then verify
+    the decision when polling resolves that lookup without further events. *)
+let assert_queued_eden_move informant expected_report =
+  Tools.set_hg_to_global_rev_map ~delay_rev_200:10 ();
+  assert_eden_move informant Tools.hg_rev_200 Informant.Move_along;
+
+  Edenfs_watcher.Mocking.get_changes_async_returns [];
+  let report = ref Informant.Move_along in
+  for _ = 1 to 10 do
+    match Informant.report informant Informant.Server_alive with
+    | Informant.Restart_server -> report := Informant.Restart_server
+    | Informant.Move_along -> ()
+  done;
+  Report_asserter.assert_equals
+    expected_report
+    !report
+    "queued revision changes obey the precomputed-state policy"
+
+(** Watchman must suppress significant moves for a precomputed start by default. *)
+let test_watchman_precomputed_default_restart_policy temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_watchman
+      ~initial_saved_state_is_precomputed:true
+      ~allow_restart_from_precomputed_saved_state:false
+      temp_dir
+  in
+  assert_watchman_move informant Tools.hg_rev_5 Informant.Move_along;
+  assert_watchman_move informant Tools.hg_rev_200 Informant.Move_along;
+  true
+
+(** Opting in lets Watchman restart a precomputed server only for significant moves. *)
+let test_watchman_precomputed_opt_in_restart_policy temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_watchman
+      ~initial_saved_state_is_precomputed:true
+      ~allow_restart_from_precomputed_saved_state:true
+      temp_dir
+  in
+  assert_watchman_move informant Tools.hg_rev_5 Informant.Move_along;
+  assert_watchman_move informant Tools.hg_rev_200 Informant.Restart_server;
+  true
+
+(** The permission flag preserves Watchman's distance checks for native starts. *)
+let test_watchman_native_opt_in_restart_policy temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_watchman
+      ~initial_saved_state_is_precomputed:false
+      ~allow_restart_from_precomputed_saved_state:true
+      temp_dir
+  in
+  assert_watchman_move informant Tools.hg_rev_5 Informant.Move_along;
+  assert_watchman_move informant Tools.hg_rev_200 Informant.Restart_server;
+  true
+
+(** Eden must suppress significant moves for a precomputed start by default. *)
+let test_eden_precomputed_default_restart_policy temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_eden
+      ~initial_saved_state_is_precomputed:true
+      ~allow_restart_from_precomputed_saved_state:false
+      temp_dir
+  in
+  assert_eden_move informant Tools.hg_rev_5 Informant.Move_along;
+  assert_eden_move informant Tools.hg_rev_200 Informant.Move_along;
+  true
+
+(** Opting in lets Eden restart a precomputed server only for significant moves. *)
+let test_eden_precomputed_opt_in_restart_policy temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_eden
+      ~initial_saved_state_is_precomputed:true
+      ~allow_restart_from_precomputed_saved_state:true
+      temp_dir
+  in
+  assert_eden_move informant Tools.hg_rev_5 Informant.Move_along;
+  assert_eden_move informant Tools.hg_rev_200 Informant.Restart_server;
+  true
+
+(** The permission flag preserves Eden's distance checks for native starts. *)
+let test_eden_native_opt_in_restart_policy temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_eden
+      ~initial_saved_state_is_precomputed:false
+      ~allow_restart_from_precomputed_saved_state:true
+      temp_dir
+  in
+  assert_eden_move informant Tools.hg_rev_5 Informant.Move_along;
+  assert_eden_move informant Tools.hg_rev_200 Informant.Restart_server;
+  true
+
+(** A delayed revision lookup must still suppress precomputed restarts by default. *)
+let test_precomputed_queued_restart_default temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_eden
+      ~initial_saved_state_is_precomputed:true
+      ~allow_restart_from_precomputed_saved_state:false
+      temp_dir
+  in
+  assert_queued_eden_move informant Informant.Move_along;
+  true
+
+(** Opting in permits a precomputed restart after a delayed revision lookup. *)
+let test_precomputed_queued_restart_opt_in temp_dir =
+  let informant =
+    basic_setup_rev_5_and_200_and_start_informant_eden
+      ~initial_saved_state_is_precomputed:true
+      ~allow_restart_from_precomputed_saved_state:true
+      temp_dir
+  in
+  assert_queued_eden_move informant Informant.Restart_server;
+  true
+
 let () =
   Event_logger.init_fake ();
   Relative_path.(set_path_prefix Root (Path.make "/tmp"));
@@ -456,4 +604,30 @@ let () =
         (fun () -> Tempfile.with_tempdir test_eden_batch_ordering) );
       ( "test_eden_preprocess_early_decision",
         (fun () -> Tempfile.with_tempdir test_eden_preprocess_early_decision) );
+      ( "test_watchman_precomputed_default_restart_policy",
+        fun () ->
+          Tempfile.with_tempdir test_watchman_precomputed_default_restart_policy
+      );
+      ( "test_watchman_precomputed_opt_in_restart_policy",
+        fun () ->
+          Tempfile.with_tempdir test_watchman_precomputed_opt_in_restart_policy
+      );
+      ( "test_watchman_native_opt_in_restart_policy",
+        fun () ->
+          Tempfile.with_tempdir test_watchman_native_opt_in_restart_policy );
+      ( "test_eden_precomputed_default_restart_policy",
+        fun () ->
+          Tempfile.with_tempdir test_eden_precomputed_default_restart_policy );
+      ( "test_eden_precomputed_opt_in_restart_policy",
+        fun () ->
+          Tempfile.with_tempdir test_eden_precomputed_opt_in_restart_policy );
+      ( "test_eden_native_opt_in_restart_policy",
+        (fun () -> Tempfile.with_tempdir test_eden_native_opt_in_restart_policy)
+      );
+      ( "test_precomputed_queued_restart_default",
+        (fun () -> Tempfile.with_tempdir test_precomputed_queued_restart_default)
+      );
+      ( "test_precomputed_queued_restart_opt_in",
+        (fun () -> Tempfile.with_tempdir test_precomputed_queued_restart_opt_in)
+      );
     ]

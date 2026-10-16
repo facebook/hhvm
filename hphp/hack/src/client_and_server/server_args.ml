@@ -389,6 +389,9 @@ let set_max_procs options procs = { options with max_procs = Some procs }
 
 let set_no_load options is_no_load = { options with no_load = is_no_load }
 
+let clear_precomputed_saved_state options =
+  { options with with_saved_state = None }
+
 let set_config options config = { options with config }
 
 let set_from options from = { options with from }

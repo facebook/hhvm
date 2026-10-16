@@ -562,6 +562,9 @@ module Hhconf = struct
 
   let hg_aware = hhconf_key "hg_aware"
 
+  let allow_restart_from_precomputed_saved_state =
+    hhconf_key "allow_restart_from_precomputed_saved_state"
+
   let hg_aware_parsing_restart_threshold =
     hhconf_key "hg_aware_parsing_restart_threshold"
 

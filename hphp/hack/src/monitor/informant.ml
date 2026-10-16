@@ -31,7 +31,8 @@ type options = {
   watchman_debug_logging: bool;
   use_eden: bool;
   ignore_hh_version: bool;
-  is_saved_state_precomputed: bool;
+  initial_saved_state_is_precomputed: bool;
+  allow_restart_from_precomputed_saved_state: bool;
 }
 
 type init_env = options
@@ -131,7 +132,8 @@ module Revision_tracker = struct
     notifier: Informant_notifier.t;
     root: Path.t;
     min_distance_restart: int;
-    is_saved_state_precomputed: bool;
+    initial_saved_state_is_precomputed: bool;
+    allow_restart_from_precomputed_saved_state: bool;
   }
 
   type env = {
@@ -178,9 +180,20 @@ module Revision_tracker = struct
   let is_hg_updating env =
     !(env.is_in_hg_update_state) || !(env.is_in_hg_transaction_state)
 
-  let init ~min_distance_restart ~is_saved_state_precomputed notifier root =
+  let init
+      ~min_distance_restart
+      ~initial_saved_state_is_precomputed
+      ~allow_restart_from_precomputed_saved_state
+      notifier
+      root =
     let init_settings =
-      { notifier; root; min_distance_restart; is_saved_state_precomputed }
+      {
+        notifier;
+        root;
+        min_distance_restart;
+        initial_saved_state_is_precomputed;
+        allow_restart_from_precomputed_saved_state;
+      }
     in
     ref
     @@ Initializing
@@ -257,12 +270,15 @@ module Revision_tracker = struct
       Move_along
     | (true, Changed_merge_base _, _)
     | (true, Changed_commit _, _) ->
-      (* If the current server was started using a precomputed saved-state,
-       * we don't want to relaunch the server. If we do, it'll reuse
-       * the previously used saved-state for the new mergebase and more
-       * importantly the **same list of changed files!!!** which is
-       * totally wrong *)
-      if env.inits.is_saved_state_precomputed then begin
+      (* When using a precomputed saved-state, we only restart if explicitly
+       * allowed to. Note that [initial_saved_state_is_precomputed] does not tell
+       * us whether the *current* server used a precomputed saved state.
+       * But it doesn't matter: If we already restarted the server before, then
+       * [allow_restart_from_precomputed_saved_state] must be true anyway. *)
+      if
+        env.inits.initial_saved_state_is_precomputed
+        && not env.inits.allow_restart_from_precomputed_saved_state
+      then begin
         Hh_logger.log
           "Server was started using a precomputed saved-state, not restarting.";
         Move_along
@@ -544,7 +560,8 @@ let init
       watchman_debug_logging;
       use_eden;
       ignore_hh_version = _;
-      is_saved_state_precomputed;
+      initial_saved_state_is_precomputed;
+      allow_restart_from_precomputed_saved_state;
     } =
   if use_dummy then
     let () = Printf.eprintf "Informant using dummy - resigning\n" in
@@ -570,7 +587,8 @@ let init
           revision_tracker =
             Revision_tracker.init
               ~min_distance_restart
-              ~is_saved_state_precomputed
+              ~initial_saved_state_is_precomputed
+              ~allow_restart_from_precomputed_saved_state
               notifier
               root;
         }

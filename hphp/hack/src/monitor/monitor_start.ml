@@ -136,10 +136,13 @@ let monitor_daemon_main
         min_distance_restart =
           local_config.Server_local_config.informant_min_distance_restart;
         ignore_hh_version = Server_args.ignore_hh_version options;
-        is_saved_state_precomputed =
+        initial_saved_state_is_precomputed =
           (match Server_args.with_saved_state options with
           | Some (Server_args.Saved_state_target_info _) -> true
           | _ -> false);
+        allow_restart_from_precomputed_saved_state =
+          local_config
+            .Server_local_config.allow_restart_from_precomputed_saved_state;
       }
     in
     Utils.try_finally

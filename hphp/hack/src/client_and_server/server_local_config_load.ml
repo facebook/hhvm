@@ -61,6 +61,7 @@ let default =
     longlived_workers = false;
     block_client_connections_while_deferring = true;
     hg_aware = false;
+    allow_restart_from_precomputed_saved_state = false;
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
     hg_aware_recheck_restart_threshold = 0;
@@ -603,6 +604,13 @@ let load_
     bool_if_min_version
       Config_keys.Hhconf.hg_aware
       ~default:default.hg_aware
+      ~current_version
+      config
+  in
+  let allow_restart_from_precomputed_saved_state =
+    bool_if_min_version
+      Config_keys.Hhconf.allow_restart_from_precomputed_saved_state
+      ~default:default.allow_restart_from_precomputed_saved_state
       ~current_version
       config
   in
@@ -1221,6 +1229,7 @@ let load_
     longlived_workers;
     block_client_connections_while_deferring;
     hg_aware;
+    allow_restart_from_precomputed_saved_state;
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;
     hg_aware_recheck_restart_threshold;

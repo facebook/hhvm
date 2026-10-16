@@ -41,8 +41,10 @@ type options = {
   use_eden: bool;
       (** Informant should ignore the hh_version when doing version checks. *)
   ignore_hh_version: bool;
-      (** Was the server initialized with a precomputed saved-state? *)
-  is_saved_state_precomputed: bool;
+      (** Whether the first server is started with a precomputed saved-state. *)
+  initial_saved_state_is_precomputed: bool;
+      (** Allow restarting with the precomputed state and changed-file list discarded. *)
+  allow_restart_from_precomputed_saved_state: bool;
 }
 
 type init_env = options

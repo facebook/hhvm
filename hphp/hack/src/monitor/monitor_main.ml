@@ -122,6 +122,7 @@ type env = {
   informant: Informant.t;
   server: Server_process.server_process;
   server_start_options: Server_controller.server_start_options;
+  allow_restart_from_precomputed_saved_state: bool;
   (* How many times have we tried to relaunch it? *)
   retries: int;
   sql_retries: int;
@@ -279,7 +280,10 @@ let kill_and_maybe_restart_server (env : env msg_update) exit_status :
   kill_server_with_check_and_wait env.server;
 
   let version_matches = is_config_version_matching env in
-  if Server_controller.is_saved_state_precomputed env.server_start_options then begin
+  if
+    Server_controller.is_saved_state_precomputed env.server_start_options
+    && not env.allow_restart_from_precomputed_saved_state
+  then begin
     let reason =
       "Not restarting server as requested, server was launched using a "
       ^ "precomputed saved-state. Exiting monitor"
@@ -291,6 +295,18 @@ let kill_and_maybe_restart_server (env : env msg_update) exit_status :
       ~version_matches;
     Exit.exit Exit_status.Not_restarting_server_with_precomputed_saved_state
   end;
+  let env =
+    if Server_controller.is_saved_state_precomputed env.server_start_options
+    then begin
+      let server_start_options =
+        Server_args.clear_precomputed_saved_state env.server_start_options
+      in
+      Hh_logger.log
+        "Discarding precomputed saved-state for server restart; using configured saved-state loading";
+      { env with server_start_options }
+    end else
+      env
+  in
   match (env.server, version_matches) with
   | (Died_config_changed, _) ->
     (* Now we can start a new instance safely.
@@ -1093,6 +1109,8 @@ let start_monitor
       purgatory_clients = Queue.create ();
       server = server_process;
       server_start_options;
+      allow_restart_from_precomputed_saved_state =
+        informant_init_env.Informant.allow_restart_from_precomputed_saved_state;
       retries = 0;
       sql_retries = 0;
       watchman_retries = 0;

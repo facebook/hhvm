@@ -503,6 +503,8 @@ module Hhconf : sig
 
   val hg_aware : string
 
+  val allow_restart_from_precomputed_saved_state : string
+
   val hg_aware_parsing_restart_threshold : string
 
   val hg_aware_redecl_restart_threshold : string

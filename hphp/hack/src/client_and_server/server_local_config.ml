@@ -271,6 +271,10 @@ type t = {
       (** Block client admission while Eden defers file changes. Hg states only
           block when [hg_aware] is also enabled. *)
   hg_aware: bool;
+  allow_restart_from_precomputed_saved_state: bool;
+      (** Allow restarting a server started with a precomputed saved state.
+          For example, restarts may be triggered by the Informant or
+          [Server_revision_tracker]. *)
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
   hg_aware_recheck_restart_threshold: int;

@@ -38,7 +38,6 @@ load_state_natively_v4 = false
 lazy_decl = true
 lazy_init2 = true
 max_workers = 1
-remote_type_check_enabled = false
 EOF
 
 # start hh_server.

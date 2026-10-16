@@ -30,8 +30,6 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "hg_aware=false",
     "--config",
-    "remote_type_check_enabled=false",
-    "--config",
     "use_dummy_informant=true",
     "--config",
     "experiments_config_enabled=false",

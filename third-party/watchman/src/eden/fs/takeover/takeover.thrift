@@ -23,6 +23,13 @@ struct TakeoverVersionQuery {
   // The set of capabilities supported by the client. This will be the longer
   // term scheme that we use.
   2: ui64 capabilities;
+  // The client asks the server to cancel the Thrift requests it is serving
+  // instead of refusing the takeover while one of them has run for long.
+  3: optional bool force;
+  // The client asks the server to refuse the takeover while it has served a
+  // checkout or a mount recently, as an unattended restart does, on top of
+  // refusing while a request is in flight.
+  4: optional bool onlyIfIdle;
 }
 
 struct SerializedInodeMapEntry {

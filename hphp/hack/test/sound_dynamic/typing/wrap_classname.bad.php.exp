@@ -1,10 +1,27 @@
-WARN: File "wrap_classname.bad.php", line 11, characters 10-28:
-Returning a value of type `dynamic` through a non-fully-enforced return type `~vec<int>` (Warn[12044])
-  File "wrap_classname.bad.php", line 10, characters 22-30:
-  This return type is not fully enforced at runtime
-ERROR: File "wrap_classname.bad.php", line 6, characters 48-50:
-Method  `__construct` in class `Wrap` is not dynamically callable. (Typing[4426])
-  File "wrap_classname.bad.php", line 6, characters 48-50:
-  Cannot write to property `vi` through dynamic type because private property in `Wrap` does not have an enforceable type
-  File "wrap_classname.bad.php", line 6, characters 39-46:
-  Property `vi` has type `vec<int>`
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `~vec<int>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+wrap_classname.bad.php:11:10
+ 8 | }
+ 9 | 
+10 | function getVecInt():~vec<int> {
+   |                      ^^^^^^^^^ [2]
+11 |   return vec["a"] as dynamic;
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+12 |   }
+13 | 
+
+error: Typing[4426] Method  `__construct` in class `Wrap` is not dynamically callable. [1]
+-> Cannot write to property `vi` through dynamic type because private property in `Wrap` does not have an enforceable type [1]
+-> Property `vi` has type `vec<int>` [2]
+
+wrap_classname.bad.php:6:48
+4 | <<__SupportDynamicType>>
+5 | class Wrap {
+6 |   public function __construct(private vec<int> $vi) { }
+  |                                       ^^^^^^^^ [2]
+  |                                                ^^^ [1]
+7 |   public function get():vec<int> { return $this->vi; }
+8 | }
+
+2 errors found

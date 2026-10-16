@@ -1,2 +1,9 @@
-ERROR: File "disabled.php", line 5, characters 1-23:
-Cannot use unstable feature: `class_aliases_everywhere` (Parsing[1002])
+error: Parsing[1002] Cannot use unstable feature: `class_aliases_everywhere` [1]
+
+disabled.php:5:1
+3 | class Original {}
+4 | 
+5 | class Alias = Original;
+  | ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+
+1 error found

@@ -1,2 +1,10 @@
-ERROR: File "test_class.php", line 4, characters 12-19:
-Unbound name: `MCRouter` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `MCRouter` (an object type) [1]
+
+test_class.php:4:12
+2 | 
+3 | function test() : void {
+4 |   $x = new MCRouter();
+  |            ^^^^^^^^ [1]
+5 | }
+
+1 error found

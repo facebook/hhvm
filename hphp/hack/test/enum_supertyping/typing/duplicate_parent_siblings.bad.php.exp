@@ -1,16 +1,56 @@
-ERROR: File "duplicate_parent_siblings.bad.php", line 14, characters 7-8:
-F1 cannot re-inherit constant A from E2 (Typing[4389])
-  File "duplicate_parent_siblings.bad.php", line 12, characters 6-7:
-  because it already inherited it via E1
-ERROR: File "duplicate_parent_siblings.bad.php", line 15, characters 3-3:
-F1 cannot re-declare constant A (Typing[4389])
-  File "duplicate_parent_siblings.bad.php", line 12, characters 6-7:
-  because it already inherited it via E1
-ERROR: File "duplicate_parent_siblings.bad.php", line 19, characters 11-12:
-F2 cannot re-inherit constant A from E2 (Typing[4389])
-  File "duplicate_parent_siblings.bad.php", line 18, characters 6-7:
-  because it already inherited it via E1
-ERROR: File "duplicate_parent_siblings.bad.php", line 20, characters 3-3:
-F2 cannot re-declare constant A (Typing[4389])
-  File "duplicate_parent_siblings.bad.php", line 18, characters 6-7:
-  because it already inherited it via E1
+error: Typing[4389] F1 cannot re-inherit constant A from E2 [1]
+-> because it already inherited it via E1 [2]
+
+duplicate_parent_siblings.bad.php:14:7
+10 | }
+11 | 
+12 | enum F1: int {
+   |      ^^ [2]
+13 |   use E1;
+14 |   use E2;
+   |       ^^ [1]
+15 |   A = 2;
+16 | }
+
+error: Typing[4389] F1 cannot re-declare constant A [1]
+-> because it already inherited it via E1 [2]
+
+duplicate_parent_siblings.bad.php:15:3
+10 | }
+11 | 
+12 | enum F1: int {
+   |      ^^ [2]
+13 |   use E1;
+14 |   use E2;
+15 |   A = 2;
+   |   ^ [1]
+16 | }
+17 | 
+
+error: Typing[4389] F2 cannot re-inherit constant A from E2 [1]
+-> because it already inherited it via E1 [2]
+
+duplicate_parent_siblings.bad.php:19:11
+16 | }
+17 | 
+18 | enum F2: int {
+   |      ^^ [2]
+19 |   use E1, E2;
+   |           ^^ [1]
+20 |   A = 2;
+21 | }
+
+error: Typing[4389] F2 cannot re-declare constant A [1]
+-> because it already inherited it via E1 [2]
+
+duplicate_parent_siblings.bad.php:20:3
+16 | }
+17 | 
+18 | enum F2: int {
+   |      ^^ [2]
+19 |   use E1, E2;
+20 |   A = 2;
+   |   ^ [1]
+21 | }
+
+4 errors found

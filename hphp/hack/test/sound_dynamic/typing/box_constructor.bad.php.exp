@@ -1,10 +1,29 @@
-WARN: File "box_constructor.bad.php", line 15, characters 10-28:
-Returning a value of type `dynamic` through a non-fully-enforced return type `~vec<int>` (Warn[12044])
-  File "box_constructor.bad.php", line 14, characters 22-30:
-  This return type is not fully enforced at runtime
-ERROR: File "box_constructor.bad.php", line 7, characters 12-13:
-Method  `__construct` in class `Box` is not dynamically callable. (Typing[4426])
-  File "box_constructor.bad.php", line 7, characters 12-13:
-  Cannot write to property `vi` through dynamic type because private property in `Box` does not have an enforceable type
-  File "box_constructor.bad.php", line 5, characters 11-18:
-  Property `vi` has type `vec<int>`
+warning: Warn[12044] Returning a value of type `dynamic` through a non-fully-enforced return type `~vec<int>` [1]
+-> This return type is not fully enforced at runtime [2]
+
+box_constructor.bad.php:15:10
+12 | }
+13 | 
+14 | function getVecInt():~vec<int> {
+   |                      ^^^^^^^^^ [2]
+15 |   return vec["a"] as dynamic;
+   |          ^^^^^^^^^^^^^^^^^^^ [1]
+16 | }
+17 | 
+
+error: Typing[4426] Method  `__construct` in class `Box` is not dynamically callable. [1]
+-> Cannot write to property `vi` through dynamic type because private property in `Box` does not have an enforceable type [1]
+-> Property `vi` has type `vec<int>` [2]
+
+box_constructor.bad.php:7:12
+3 | <<__SupportDynamicType>>
+4 | class Box {
+5 |   private vec<int> $vi;
+  |           ^^^^^^^^ [2]
+6 |   public function __construct(vec<int> $vi) {
+7 |     $this->vi = $vi;
+  |            ^^ [1]
+8 |   }
+9 |   public function getVecInt(): vec<int> {
+
+2 errors found

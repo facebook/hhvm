@@ -1,6 +1,17 @@
-ERROR: File "implemented_by_wrong_params.hhi", line 5, characters 21-40:
-The method must be implemented by a function with a compatible type. (Typing[4110])
-  File "implemented_by_wrong_params.hhi", line 2, characters 35-40:
-  Expected `string`
-  File "implemented_by_wrong_params.hhi", line 6, characters 28-30:
-  But got `int`
+error: Typing[4110] The method must be implemented by a function with a compatible type. [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+implemented_by_wrong_params.hhi:5:21
+1 | <?hh
+2 | function my_implementation(C $c, ~string $x): int;
+  |                                   ^^^^^^ [2]
+3 | 
+4 | final class C {
+5 |   <<__ImplementedBy('\my_implementation')>>
+  |                     ^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   public function myMethod(int $x): int;
+  |                            ^^^ [3]
+7 | }
+
+1 error found

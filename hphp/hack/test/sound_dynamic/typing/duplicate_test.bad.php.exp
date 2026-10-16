@@ -1,8 +1,31 @@
-ERROR: File "duplicate_test.bad.php", line 6, characters 13-13:
-No class constant `A` in `C` (Typing[4090])
-  File "duplicate_test.bad.php", line 10, characters 7-7:
-  Declaration of `C` is here
-ERROR: File "duplicate_test.bad.php", line 12, characters 15-15:
-No class constant `A` in `C` (Typing[4090])
-  File "duplicate_test.bad.php", line 10, characters 7-7:
-  Declaration of `C` is here
+error: Typing[4090] No class constant `A` in `C` [1]
+-> Declaration of `C` is here [2]
+
+duplicate_test.bad.php:6:13
+ 4 | <<__SupportDynamicType>>
+ 5 | function toplevel(vec<int> $vi):int {
+ 6 |   return C::A;
+   |             ^ [1]
+ 7 | }
+ 8 | 
+ 9 | <<__SupportDynamicType>>
+10 | class C {
+   |       ^ [2]
+11 |   public function foo(vec<int> $vi):int {
+12 |     return C::A;
+
+error: Typing[4090] No class constant `A` in `C` [1]
+-> Declaration of `C` is here [2]
+
+duplicate_test.bad.php:12:15
+ 8 | 
+ 9 | <<__SupportDynamicType>>
+10 | class C {
+   |       ^ [2]
+11 |   public function foo(vec<int> $vi):int {
+12 |     return C::A;
+   |               ^ [1]
+13 |   }
+14 | }
+
+2 errors found

@@ -1,36 +1,98 @@
-WARN: File "meth_call.bad.php", line 7, characters 7-7:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "meth_call.bad.php", line 5, characters 12-18:
-  This expression has type `dynamic`
-WARN: File "meth_call.bad.php", line 8, characters 7-7:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "meth_call.bad.php", line 5, characters 12-18:
-  This expression has type `dynamic`
-WARN: File "meth_call.bad.php", line 9, characters 7-7:
-Method invoked on a value of type `dynamic` (Warn[12038])
-  File "meth_call.bad.php", line 5, characters 12-18:
-  This expression has type `dynamic`
-ERROR: File "meth_call.bad.php", line 7, characters 3-16:
-Invalid argument (Typing[4110])
-  File "meth_call.bad.php", line 7, characters 3-16:
-  Expected `dynamic`, the result of calling a `dynamic` type as a function
-  File "meth_call.bad.php", line 7, characters 13-13:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "meth_call.bad.php", line 7, characters 3-16:
-Typing error (Typing[4110])
-  File "meth_call.bad.php", line 7, characters 3-16:
-  Expected `dynamic`, the result of calling a `dynamic` type as a function
-  File "meth_call.bad.php", line 7, characters 13-13:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "meth_call.bad.php", line 8, characters 3-11:
-Typing error (Typing[4110])
-  File "meth_call.bad.php", line 8, characters 3-11:
-  Expected `dynamic`, the result of calling a `dynamic` type as a function
-  File "meth_call.bad.php", line 6, characters 12-12:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "meth_call.bad.php", line 9, characters 3-16:
-Typing error (Typing[4110])
-  File "meth_call.bad.php", line 9, characters 3-16:
-  Expected `dynamic`, the result of calling a `dynamic` type as a function
-  File "meth_call.bad.php", line 9, characters 9-15:
-  Type `vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+meth_call.bad.php:7:7
+3 | class C {}
+4 | 
+5 | function f(dynamic $d) : void {
+  |            ^^^^^^^ [2]
+6 |   $c = new C();
+7 |   $d->m(new C());
+  |       ^ [1]
+8 |   $d->m($c);
+9 |   $d->m(vec[$c]);
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+meth_call.bad.php:8:7
+ 3 | class C {}
+ 4 | 
+ 5 | function f(dynamic $d) : void {
+   |            ^^^^^^^ [2]
+ 6 |   $c = new C();
+ 7 |   $d->m(new C());
+ 8 |   $d->m($c);
+   |       ^ [1]
+ 9 |   $d->m(vec[$c]);
+10 | }
+
+warning: Warn[12038] Method invoked on a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+meth_call.bad.php:9:7
+ 3 | class C {}
+ 4 | 
+ 5 | function f(dynamic $d) : void {
+   |            ^^^^^^^ [2]
+ 6 |   $c = new C();
+ 7 |   $d->m(new C());
+ 8 |   $d->m($c);
+ 9 |   $d->m(vec[$c]);
+   |       ^ [1]
+10 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic`, the result of calling a `dynamic` type as a function [1]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+meth_call.bad.php:7:3
+5 | function f(dynamic $d) : void {
+6 |   $c = new C();
+7 |   $d->m(new C());
+  |   ^^^^^^^^^^^^^^ [1]
+  |             ^ [2]
+8 |   $d->m($c);
+9 |   $d->m(vec[$c]);
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic`, the result of calling a `dynamic` type as a function [1]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+meth_call.bad.php:7:3
+5 | function f(dynamic $d) : void {
+6 |   $c = new C();
+7 |   $d->m(new C());
+  |   ^^^^^^^^^^^^^^ [1]
+  |             ^ [2]
+8 |   $d->m($c);
+9 |   $d->m(vec[$c]);
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic`, the result of calling a `dynamic` type as a function [1]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+meth_call.bad.php:8:3
+ 4 | 
+ 5 | function f(dynamic $d) : void {
+ 6 |   $c = new C();
+   |            ^ [2]
+ 7 |   $d->m(new C());
+ 8 |   $d->m($c);
+   |   ^^^^^^^^^ [1]
+ 9 |   $d->m(vec[$c]);
+10 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic`, the result of calling a `dynamic` type as a function [1]
+-> Type `vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+meth_call.bad.php:9:3
+ 7 |   $d->m(new C());
+ 8 |   $d->m($c);
+ 9 |   $d->m(vec[$c]);
+   |   ^^^^^^^^^^^^^^ [1]
+   |         ^^^^^^^ [2]
+10 | }
+
+7 errors found

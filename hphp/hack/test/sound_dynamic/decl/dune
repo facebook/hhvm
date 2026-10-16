@@ -20,7 +20,7 @@
    --batch
    --flags
    --error-format
-   plain
+   plain_highlighted
    --enable-supportdyn-hint)))
 
 (alias

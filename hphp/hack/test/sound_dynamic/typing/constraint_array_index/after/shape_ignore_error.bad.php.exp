@@ -1,4 +1,12 @@
-ERROR: File "shape_ignore_error.bad.php", line 3, characters 8-27:
-You are accessing a field known to not exist (Typing[4321])
-  File "shape_ignore_error.bad.php", line 2, characters 27-33:
-  The field `a` is not defined in this shape
+error: Typing[4321] You are accessing a field known to not exist [1]
+-> The field `a` is not defined in this shape [2]
+
+shape_ignore_error.bad.php:3:8
+1 | <?hh
+2 | function f(~shape("a" => ?shape()) $a): void {
+  |                           ^^^^^^^ [2]
+3 |   $x = $a["a"]["a"] ?? null;
+  |        ^^^^^^^^^^^^^^^^^^^^ [1]
+4 | }
+
+1 error found

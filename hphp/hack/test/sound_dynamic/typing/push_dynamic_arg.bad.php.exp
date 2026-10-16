@@ -1,8 +1,16 @@
-ERROR: File "push_dynamic_arg.bad.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "push_dynamic_arg.bad.php", line 7, characters 20-26:
-  Expected `dynamic`
-  File "push_dynamic_arg.bad.php", line 7, characters 38-40:
-  But got `int`
-  File "push_dynamic_arg.bad.php", line 7, characters 38-40:
-  This type argument to `Inv` must match exactly (it is invariant)
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `int` [3]
+-> This type argument to `Inv` must match exactly (it is invariant) [3]
+
+push_dynamic_arg.bad.php:8:10
+5 | class Inv<T> { }
+6 | 
+7 | function test1(Inv<dynamic> $c):~Inv<int> {
+  |                    ^^^^^^^ [2]
+  |                                      ^^^ [3]
+8 |   return $c;
+  |          ^^ [1]
+9 | }
+
+1 error found

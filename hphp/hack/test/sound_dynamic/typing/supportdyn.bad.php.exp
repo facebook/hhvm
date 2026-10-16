@@ -1,96 +1,311 @@
-WARN: File "supportdyn.bad.php", line 9, characters 3-8:
-Value of type `dynamic` called as a function (Warn[12039])
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  This expression has type `dynamic`
-WARN: File "supportdyn.bad.php", line 11, characters 3-9:
-You are using the `?->` operator but this object is of type nonnull which cannot be null. You can use the `->` operator instead. (Warn[12029])
-WARN: File "supportdyn.bad.php", line 13, characters 3-9:
-You are using the `?->` operator but this object is of type supportdyn<nonnull> which cannot be null. You can use the `->` operator instead. (Warn[12029])
-ERROR: File "supportdyn.bad.php", line 7, characters 3-8:
-Typing error (Typing[4110])
-  File "supportdyn.bad.php", line 7, characters 3-8:
-  Expected an array that can be indexed
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
-ERROR: File "supportdyn.bad.php", line 8, characters 3-11:
-a nonnull value does not allow array append (Typing[4006])
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  Definition is here
-ERROR: File "supportdyn.bad.php", line 9, characters 3-5:
-Was expecting a class, but got a nonnull value (Typing[4026])
-ERROR: File "supportdyn.bad.php", line 10, characters 8-8:
-You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  Definition is here
-ERROR: File "supportdyn.bad.php", line 11, characters 9-9:
-You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  Definition is here
-ERROR: File "supportdyn.bad.php", line 12, characters 3-5:
-Typing error (Typing[4062])
-  File "supportdyn.bad.php", line 12, characters 8-8:
-  You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  Definition is here
-ERROR: File "supportdyn.bad.php", line 13, characters 3-5:
-Typing error (Typing[4062])
-  File "supportdyn.bad.php", line 13, characters 9-9:
-  You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  Definition is here
-ERROR: File "supportdyn.bad.php", line 14, characters 9-11:
-String concatenation can only be performed on string and int arguments (Typing[4110])
-  File "supportdyn.bad.php", line 14, characters 9-11:
-  Expected `string` or `int`
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
-ERROR: File "supportdyn.bad.php", line 15, characters 3-5:
-Typing error (Typing[4429])
-  File "supportdyn.bad.php", line 15, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
-ERROR: File "supportdyn.bad.php", line 19, characters 12-14:
-Invalid `foreach` (Typing[4110])
-  File "supportdyn.bad.php", line 19, characters 12-14:
-  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
-  File "supportdyn.bad.php", line 18, characters 21-39:
-  But got `nonnull`
-ERROR: File "supportdyn.bad.php", line 20, characters 12-14:
-Invalid `foreach` (Typing[4110])
-  File "supportdyn.bad.php", line 20, characters 12-14:
-  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
-  File "supportdyn.bad.php", line 18, characters 21-39:
-  But got `nonnull`
-ERROR: File "supportdyn.bad.php", line 21, characters 3-11:
-`await` can only operate on an `Awaitable` (Typing[4110])
-  File "supportdyn.bad.php", line 21, characters 3-11:
-  Expected `Awaitable<nothing>`
-  File "supportdyn.bad.php", line 18, characters 32-38:
-  But got `nonnull`
-ERROR: File "supportdyn.bad.php", line 26, characters 27-30:
-Invalid type hint (Typing[4062])
-  File "supportdyn.bad.php", line 26, characters 30-30:
-  You are trying to access the type constant `C` but this is a nonnull value
-  File "supportdyn.bad.php", line 24, characters 21-27:
-  Definition is here
-ERROR: File "supportdyn.bad.php", line 28, characters 6-6:
-Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
-ERROR: File "supportdyn.bad.php", line 38, characters 10-18:
-Invalid return type (Typing[4110])
-  File "supportdyn.bad.php", line 37, characters 42-48:
-  Expected `nonnull`
-  File "supportdyn.bad.php", line 36, characters 20-23:
-  But got `void`
-ERROR: File "supportdyn.bad.php", line 42, characters 10-19:
-Invalid return type (Typing[4110])
-  File "supportdyn.bad.php", line 41, characters 38-56:
-  Expected `dynamic`
-  File "supportdyn.bad.php", line 4, characters 29-35:
-  Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "supportdyn.bad.php", line 49, characters 48-49:
-Invalid argument (Typing[4110])
-  File "supportdyn.bad.php", line 45, characters 34-52:
-  Expected `dynamic`
-  File "supportdyn.bad.php", line 48, characters 30-34:
-  Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping
+warning: Warn[12039] Value of type `dynamic` called as a function [1]
+-> This expression has type `dynamic` [2]
+
+supportdyn.bad.php:9:3
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [2]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+ 9 |   $sd::f();
+   |   ^^^^^^ [1]
+10 |   $sd->m();
+11 |   $sd?->m();
+
+warning: Warn[12029] You are using the `?->` operator but this object is of type nonnull which cannot be null. You can use the `->` operator instead. [1]
+
+supportdyn.bad.php:11:3
+ 9 |   $sd::f();
+10 |   $sd->m();
+11 |   $sd?->m();
+   |   ^^^^^^^ [1]
+12 |   $sd->p;
+13 |   $sd?->p;
+
+warning: Warn[12029] You are using the `?->` operator but this object is of type supportdyn<nonnull> which cannot be null. You can use the `->` operator instead. [1]
+
+supportdyn.bad.php:13:3
+11 |   $sd?->m();
+12 |   $sd->p;
+13 |   $sd?->p;
+   |   ^^^^^^^ [1]
+14 |   'str'.$sd;
+15 |   $sd + 1;
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `nonnull` [2]
+
+supportdyn.bad.php:7:3
+4 |   const type T = supportdyn<nonnull>;
+5 | }
+6 | function expr(supportdyn<nonnull> $sd): void {
+  |                          ^^^^^^^ [2]
+7 |   $sd[0];
+  |   ^^^^^^ [1]
+8 |   $sd[] = 0;
+9 |   $sd::f();
+
+error: Typing[4006] a nonnull value does not allow array append [1]
+-> Definition is here [2]
+
+supportdyn.bad.php:8:3
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [2]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+   |   ^^^^^^^^^ [1]
+ 9 |   $sd::f();
+10 |   $sd->m();
+
+error: Typing[4026] Was expecting a class, but got a nonnull value [1]
+
+supportdyn.bad.php:9:3
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+ 9 |   $sd::f();
+   |   ^^^ [1]
+10 |   $sd->m();
+11 |   $sd?->m();
+
+error: Typing[4062] You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+supportdyn.bad.php:10:8
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [2]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+ 9 |   $sd::f();
+10 |   $sd->m();
+   |        ^ [1]
+11 |   $sd?->m();
+12 |   $sd->p;
+
+error: Typing[4062] You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+supportdyn.bad.php:11:9
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [2]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+ 9 |   $sd::f();
+10 |   $sd->m();
+11 |   $sd?->m();
+   |         ^ [1]
+12 |   $sd->p;
+13 |   $sd?->p;
+
+error: Typing[4062] Typing error [1]
+-> You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name. [2]
+-> Definition is here [3]
+
+supportdyn.bad.php:12:3
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [3]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+ 9 |   $sd::f();
+10 |   $sd->m();
+11 |   $sd?->m();
+12 |   $sd->p;
+   |   ^^^ [1]
+   |        ^ [2]
+13 |   $sd?->p;
+14 |   'str'.$sd;
+
+error: Typing[4062] Typing error [1]
+-> You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name. [2]
+-> Definition is here [3]
+
+supportdyn.bad.php:13:3
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [3]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+   :
+11 |   $sd?->m();
+12 |   $sd->p;
+13 |   $sd?->p;
+   |   ^^^ [1]
+   |         ^ [2]
+14 |   'str'.$sd;
+15 |   $sd + 1;
+
+error: Typing[4110] String concatenation can only be performed on string and int arguments [1]
+-> Expected `string` or `int` [1]
+-> But got `nonnull` [2]
+
+supportdyn.bad.php:14:9
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [2]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+   :
+12 |   $sd->p;
+13 |   $sd?->p;
+14 |   'str'.$sd;
+   |         ^^^ [1]
+15 |   $sd + 1;
+16 | }
+
+error: Typing[4429] Typing error [1]
+-> Expected `num` because this is used in an arithmetic operation [2]
+-> But got `nonnull` [3]
+
+supportdyn.bad.php:15:3
+ 4 |   const type T = supportdyn<nonnull>;
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   |                          ^^^^^^^ [3]
+ 7 |   $sd[0];
+ 8 |   $sd[] = 0;
+   :
+13 |   $sd?->p;
+14 |   'str'.$sd;
+15 |   $sd + 1;
+   |   ^^^ [1]
+   |   ^^^^^^^ [2]
+16 | }
+17 | 
+
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected an array that can be traversed with foreach because this is used in a `foreach` statement [1]
+-> But got `nonnull` [2]
+
+supportdyn.bad.php:19:12
+16 | }
+17 | 
+18 | async function stmt(supportdyn<nonnull> $sd): Awaitable<void> {
+   |                     ^^^^^^^^^^^^^^^^^^^ [2]
+19 |   foreach ($sd as $_) {}
+   |            ^^^ [1]
+20 |   foreach ($sd as $_k => $_v) {}
+21 |   await $sd;
+
+error: Typing[4110] Invalid `foreach` [1]
+-> Expected an array that can be traversed with foreach because this is used in a `foreach` statement [1]
+-> But got `nonnull` [2]
+
+supportdyn.bad.php:20:12
+16 | }
+17 | 
+18 | async function stmt(supportdyn<nonnull> $sd): Awaitable<void> {
+   |                     ^^^^^^^^^^^^^^^^^^^ [2]
+19 |   foreach ($sd as $_) {}
+20 |   foreach ($sd as $_k => $_v) {}
+   |            ^^^ [1]
+21 |   await $sd;
+22 | }
+
+error: Typing[4110] `await` can only operate on an `Awaitable` [1]
+-> Expected `Awaitable<nothing>` [1]
+-> But got `nonnull` [2]
+
+supportdyn.bad.php:21:3
+16 | }
+17 | 
+18 | async function stmt(supportdyn<nonnull> $sd): Awaitable<void> {
+   |                                ^^^^^^^ [2]
+19 |   foreach ($sd as $_) {}
+20 |   foreach ($sd as $_k => $_v) {}
+21 |   await $sd;
+   |   ^^^^^^^^^ [1]
+22 | }
+23 | 
+
+error: Typing[4062] Invalid type hint [1]
+-> You are trying to access the type constant `C` but this is a nonnull value [2]
+-> Definition is here [3]
+
+supportdyn.bad.php:26:27
+22 | }
+23 | 
+24 | type N = supportdyn<nonnull>;
+   |                     ^^^^^^^ [3]
+25 | 
+26 | function access_typeconst(N::C $_): void {}
+   |                           ^^^^ [1]
+   |                              ^ [2]
+27 | function cname(classname<supportdyn<nonnull>> $_): void {}
+28 | enum E: supportdyn<nonnull> {}
+
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` [1]
+
+supportdyn.bad.php:28:6
+26 | function access_typeconst(N::C $_): void {}
+27 | function cname(classname<supportdyn<nonnull>> $_): void {}
+28 | enum E: supportdyn<nonnull> {}
+   |      ^ [1]
+29 | 
+30 | function expectDyn(dynamic $d):void { }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `nonnull` [2]
+-> But got `void` [3]
+
+supportdyn.bad.php:38:10
+34 | }
+35 | 
+36 | function voidfun():void { }
+   |                    ^^^^ [3]
+37 | function void_to_supportdyn():supportdyn<nonnull> {
+   |                                          ^^^^^^^ [2]
+38 |   return voidfun();
+   |          ^^^^^^^^^ [1]
+39 | }
+40 | 
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+supportdyn.bad.php:42:10
+ 2 | 
+ 3 | class C {
+ 4 |   const type T = supportdyn<nonnull>;
+   |                             ^^^^^^^ [3]
+ 5 | }
+ 6 | function expr(supportdyn<nonnull> $sd): void {
+   :
+39 | }
+40 | 
+41 | function ignore_supportdyn(mixed $m):supportdyn<nonnull> {
+   |                                      ^^^^^^^^^^^^^^^^^^^ [2]
+42 |   return $m as C::T;
+   |          ^^^^^^^^^^ [1]
+43 | }
+44 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+supportdyn.bad.php:49:48
+43 | }
+44 | 
+45 | function expectSupportDynNonNull(supportdyn<nonnull> $_):bool {
+   |                                  ^^^^^^^^^^^^^^^^^^^ [2]
+46 |   return false;
+47 | }
+48 | function ignore_supportdyn_2(mixed $m):bool {
+   |                              ^^^^^ [3]
+49 |   return $m is C::T && expectSupportDynNonNull($m);
+   |                                                ^^ [1]
+50 | }
+
+20 errors found

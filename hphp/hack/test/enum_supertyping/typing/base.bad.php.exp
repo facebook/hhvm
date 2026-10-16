@@ -1,2 +1,10 @@
-ERROR: File "base.bad.php", line 7, characters 7-7:
-Enum B includes enum A but their base types are incompatible (Typing[4388])
+error: Typing[4388] Enum B includes enum A but their base types are incompatible [1]
+
+base.bad.php:7:7
+5 | 
+6 | enum B : string {
+7 |   use A;
+  |       ^ [1]
+8 | }
+
+1 error found

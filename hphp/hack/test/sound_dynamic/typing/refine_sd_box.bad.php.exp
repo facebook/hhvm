@@ -1,4 +1,18 @@
-ERROR: File "refine_sd_box.bad.php", line 14, characters 7-11:
-You are trying to access the method `bogus` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "refine_sd_box.bad.php", line 4, characters 20-36:
-  Definition is here
+error: Typing[4064] You are trying to access the method `bogus` but this is a mixed value. Use a **specific** class or interface name. [1]
+-> Definition is here [2]
+
+refine_sd_box.bad.php:14:7
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | class MyBox<+Tv as supportdyn<mixed>> {
+   |                    ^^^^^^^^^^^^^^^^^ [2]
+ 5 |   public function __construct(private Tv $item) { }
+ 6 |   public function get():Tv {
+   :
+12 |   $x as MyBox<_>;
+13 |   $y = $x->get();
+14 |   $y->bogus();
+   |       ^^^^^ [1]
+15 | }
+
+1 error found

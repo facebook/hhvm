@@ -1,8 +1,22 @@
-ERROR: File "bidirectional.bad.php", line 8, characters 17-18:
-Function  `;anonymous` is not dynamically callable. (Typing[4110])
-  File "bidirectional.bad.php", line 8, characters 17-18:
-  Invalid argument
-  File "bidirectional.bad.php", line 14, characters 22-28:
-  Expected `shape()`
-  File "bidirectional.bad.php", line 6, characters 19-20:
-  But got `dynamic` because method must be callable in a dynamic context
+error: Typing[4110] Function  `;anonymous` is not dynamically callable. [1]
+-> Invalid argument [1]
+-> Expected `shape()` [2]
+-> But got `dynamic` because method must be callable in a dynamic context [3]
+
+bidirectional.bad.php:8:17
+ 4 | function f(): (function (int, shape()): void) {
+ 5 |   // during SDT pass when `expected` type is dynamic
+ 6 |   return (int $i, $s) ==> {
+   |                   ^^ [3]
+ 7 |     nosdt_int($i);   // $i: (dynamic & int) ; OK
+ 8 |     nosdt_shape($s); // $s: dynamic         ; error
+   |                 ^^ [1]
+ 9 |   };
+10 | }
+11 | 
+12 | function nosdt_int(int $i): void {}
+13 | 
+14 | function nosdt_shape(shape() $s): void {}
+   |                      ^^^^^^^ [2]
+
+1 error found

@@ -1,2 +1,10 @@
-WARN: File "05-vec-keyset-and-dict-06.hack", line 58, characters 3-22:
-This `is` check is always `true`. The expression on the left has type `dict<string, int>` which is a subtype of `dict<string, int>`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `dict<string, int>` which is a subtype of `dict<string, int>`. [1]
+
+05-vec-keyset-and-dict-06.hack:58:3
+56 |   
+57 |   // Type checks.
+58 |   $items is dict<_, _>; // true
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+59 | }
+
+1 error found

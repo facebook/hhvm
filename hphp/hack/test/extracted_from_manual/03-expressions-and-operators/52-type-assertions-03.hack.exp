@@ -1,4 +1,20 @@
-WARN: File "52-type-assertions-03.hack", line 5, characters 3-27:
-This `is` check is always `true`. The expression on the left has type `(int, float, null)` which is a subtype of `(int, float, ?bool)`. (Warn[12009])
-WARN: File "52-type-assertions-03.hack", line 8, characters 3-27:
-This `is` check is always `true`. The expression on the left has type `shape('foo' => int)` which is a subtype of `shape('foo' => int)`. (Warn[12009])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `(int, float, null)` which is a subtype of `(int, float, ?bool)`. [1]
+
+52-type-assertions-03.hack:5:3
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   $x = tuple(1, 2.0, null);
+5 |   $x is (int, float, ?bool); // true
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   
+7 |   $y = shape('foo' => 1);
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `shape('foo' => int)` which is a subtype of `shape('foo' => int)`. [1]
+
+52-type-assertions-03.hack:8:3
+6 |   
+7 |   $y = shape('foo' => 1);
+8 |   $y is shape('foo' => int); // true
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+9 | }
+
+2 errors found

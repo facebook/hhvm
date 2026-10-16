@@ -1,4 +1,20 @@
-WARN: File "52-type-assertions-05.hack", line 4, characters 3-10:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-WARN: File "52-type-assertions-05.hack", line 5, characters 3-14:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. (Warn[12012])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+52-type-assertions-05.hack:4:3
+2 | // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   1 as int;        // 1
+  |   ^^^^^^^^ [1]
+5 |   'foo' as int;    // TypeAssertionException
+6 | }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. [1]
+
+52-type-assertions-05.hack:5:3
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   1 as int;        // 1
+5 |   'foo' as int;    // TypeAssertionException
+  |   ^^^^^^^^^^^^ [1]
+6 | }
+
+2 errors found

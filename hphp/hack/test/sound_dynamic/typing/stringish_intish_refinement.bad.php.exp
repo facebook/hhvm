@@ -1,144 +1,492 @@
-ERROR: File "stringish_intish_refinement.bad.php", line 12, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 10, characters 8-9:
-  But got `int`
-ERROR: File "stringish_intish_refinement.bad.php", line 12, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 11, characters 13-13:
-  But got `(~E & int)` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 12, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 11, characters 13-13:
-  But got `dynamic` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 17, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 15, characters 8-11:
-  But got `string`
-ERROR: File "stringish_intish_refinement.bad.php", line 17, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 16, characters 13-13:
-  But got `(~E & string)` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 17, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 16, characters 13-13:
-  But got `dynamic` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 23, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 22, characters 8-9:
-  But got `(~E & int)` from this "as" assertion
-ERROR: File "stringish_intish_refinement.bad.php", line 23, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 22, characters 8-9:
-  But got `int`
-ERROR: File "stringish_intish_refinement.bad.php", line 23, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 22, characters 14-14:
-  But got `dynamic`
-ERROR: File "stringish_intish_refinement.bad.php", line 26, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 25, characters 8-11:
-  But got `(~E & string)` from this "as" assertion
-ERROR: File "stringish_intish_refinement.bad.php", line 26, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 25, characters 8-11:
-  But got `string`
-ERROR: File "stringish_intish_refinement.bad.php", line 26, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 7, characters 18-18:
-  Expected `E`
-  File "stringish_intish_refinement.bad.php", line 25, characters 16-16:
-  But got `dynamic`
-ERROR: File "stringish_intish_refinement.bad.php", line 38, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 36, characters 8-9:
-  But got `int`
-ERROR: File "stringish_intish_refinement.bad.php", line 38, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 37, characters 13-13:
-  But got `(~F & int)` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 38, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 37, characters 13-13:
-  But got `dynamic` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 43, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 41, characters 8-11:
-  But got `string`
-ERROR: File "stringish_intish_refinement.bad.php", line 43, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 42, characters 13-13:
-  But got `(string & dynamic)` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 43, characters 13-14:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 42, characters 13-13:
-  But got `dynamic` from this `is` expression test
-ERROR: File "stringish_intish_refinement.bad.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 48, characters 8-9:
-  But got `(~F & int)` from this "as" assertion
-ERROR: File "stringish_intish_refinement.bad.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 48, characters 8-9:
-  But got `int`
-ERROR: File "stringish_intish_refinement.bad.php", line 49, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 48, characters 14-14:
-  But got `dynamic`
-ERROR: File "stringish_intish_refinement.bad.php", line 52, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 51, characters 8-11:
-  But got `(string & dynamic)` from this "as" assertion
-ERROR: File "stringish_intish_refinement.bad.php", line 52, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 51, characters 8-11:
-  But got `string`
-ERROR: File "stringish_intish_refinement.bad.php", line 52, characters 11-12:
-Invalid argument (Typing[4110])
-  File "stringish_intish_refinement.bad.php", line 33, characters 18-18:
-  Expected `F`
-  File "stringish_intish_refinement.bad.php", line 51, characters 16-16:
-  But got `dynamic`
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `int` [3]
+
+stringish_intish_refinement.bad.php:12:13
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+10 |   $e = 42;
+   |        ^^ [3]
+11 |   if ($e is E) {
+12 |     takes_e($e);
+   |             ^^ [1]
+13 |   }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `(~E & int)` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:12:13
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+10 |   $e = 42;
+11 |   if ($e is E) {
+   |             ^ [3]
+12 |     takes_e($e);
+   |             ^^ [1]
+13 |   }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:12:13
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+10 |   $e = 42;
+11 |   if ($e is E) {
+   |             ^ [3]
+12 |     takes_e($e);
+   |             ^^ [1]
+13 |   }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `string` [3]
+
+stringish_intish_refinement.bad.php:17:13
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+13 |   }
+14 | 
+15 |   $e = "42";
+   |        ^^^^ [3]
+16 |   if ($e is E) {
+17 |     takes_e($e);
+   |             ^^ [1]
+18 |   }
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `(~E & string)` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:17:13
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+14 | 
+15 |   $e = "42";
+16 |   if ($e is E) {
+   |             ^ [3]
+17 |     takes_e($e);
+   |             ^^ [1]
+18 |   }
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:17:13
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+14 | 
+15 |   $e = "42";
+16 |   if ($e is E) {
+   |             ^ [3]
+17 |     takes_e($e);
+   |             ^^ [1]
+18 |   }
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `(~E & int)` from this "as" assertion [3]
+
+stringish_intish_refinement.bad.php:23:11
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+20 | 
+21 | function test_opaque_as_stringish(): void {
+22 |   $e = 42 as E;
+   |        ^^ [3]
+23 |   takes_e($e);
+   |           ^^ [1]
+24 | 
+25 |   $e = "42" as E;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `int` [3]
+
+stringish_intish_refinement.bad.php:23:11
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+20 | 
+21 | function test_opaque_as_stringish(): void {
+22 |   $e = 42 as E;
+   |        ^^ [3]
+23 |   takes_e($e);
+   |           ^^ [1]
+24 | 
+25 |   $e = "42" as E;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `dynamic` [3]
+
+stringish_intish_refinement.bad.php:23:11
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+20 | 
+21 | function test_opaque_as_stringish(): void {
+22 |   $e = 42 as E;
+   |              ^ [3]
+23 |   takes_e($e);
+   |           ^^ [1]
+24 | 
+25 |   $e = "42" as E;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `(~E & string)` from this "as" assertion [3]
+
+stringish_intish_refinement.bad.php:26:11
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+23 |   takes_e($e);
+24 | 
+25 |   $e = "42" as E;
+   |        ^^^^ [3]
+26 |   takes_e($e);
+   |           ^^ [1]
+27 | }
+28 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `string` [3]
+
+stringish_intish_refinement.bad.php:26:11
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+23 |   takes_e($e);
+24 | 
+25 |   $e = "42" as E;
+   |        ^^^^ [3]
+26 |   takes_e($e);
+   |           ^^ [1]
+27 | }
+28 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `E` [2]
+-> But got `dynamic` [3]
+
+stringish_intish_refinement.bad.php:26:11
+ 5 | }
+ 6 | 
+ 7 | function takes_e(E $_): void {}
+   |                  ^ [2]
+ 8 | 
+ 9 | function test_opaque_is_stringish(): void {
+   :
+23 |   takes_e($e);
+24 | 
+25 |   $e = "42" as E;
+   |                ^ [3]
+26 |   takes_e($e);
+   |           ^^ [1]
+27 | }
+28 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `int` [3]
+
+stringish_intish_refinement.bad.php:38:13
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+36 |   $e = 42;
+   |        ^^ [3]
+37 |   if ($e is F) {
+38 |     takes_f($e);
+   |             ^^ [1]
+39 |   }
+40 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `(~F & int)` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:38:13
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+36 |   $e = 42;
+37 |   if ($e is F) {
+   |             ^ [3]
+38 |     takes_f($e);
+   |             ^^ [1]
+39 |   }
+40 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:38:13
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+36 |   $e = 42;
+37 |   if ($e is F) {
+   |             ^ [3]
+38 |     takes_f($e);
+   |             ^^ [1]
+39 |   }
+40 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `string` [3]
+
+stringish_intish_refinement.bad.php:43:13
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+39 |   }
+40 | 
+41 |   $e = "42";
+   |        ^^^^ [3]
+42 |   if ($e is F) {
+43 |     takes_f($e);
+   |             ^^ [1]
+44 |   }
+45 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `(string & dynamic)` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:43:13
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+40 | 
+41 |   $e = "42";
+42 |   if ($e is F) {
+   |             ^ [3]
+43 |     takes_f($e);
+   |             ^^ [1]
+44 |   }
+45 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+stringish_intish_refinement.bad.php:43:13
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+40 | 
+41 |   $e = "42";
+42 |   if ($e is F) {
+   |             ^ [3]
+43 |     takes_f($e);
+   |             ^^ [1]
+44 |   }
+45 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `(~F & int)` from this "as" assertion [3]
+
+stringish_intish_refinement.bad.php:49:11
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+46 | 
+47 | function test_transparent_as_stringish(): void {
+48 |   $e = 42 as F;
+   |        ^^ [3]
+49 |   takes_f($e);
+   |           ^^ [1]
+50 | 
+51 |   $e = "42" as F;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `int` [3]
+
+stringish_intish_refinement.bad.php:49:11
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+46 | 
+47 | function test_transparent_as_stringish(): void {
+48 |   $e = 42 as F;
+   |        ^^ [3]
+49 |   takes_f($e);
+   |           ^^ [1]
+50 | 
+51 |   $e = "42" as F;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `dynamic` [3]
+
+stringish_intish_refinement.bad.php:49:11
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+46 | 
+47 | function test_transparent_as_stringish(): void {
+48 |   $e = 42 as F;
+   |              ^ [3]
+49 |   takes_f($e);
+   |           ^^ [1]
+50 | 
+51 |   $e = "42" as F;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `(string & dynamic)` from this "as" assertion [3]
+
+stringish_intish_refinement.bad.php:52:11
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+49 |   takes_f($e);
+50 | 
+51 |   $e = "42" as F;
+   |        ^^^^ [3]
+52 |   takes_f($e);
+   |           ^^ [1]
+53 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `string` [3]
+
+stringish_intish_refinement.bad.php:52:11
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+49 |   takes_f($e);
+50 | 
+51 |   $e = "42" as F;
+   |        ^^^^ [3]
+52 |   takes_f($e);
+   |           ^^ [1]
+53 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `dynamic` [3]
+
+stringish_intish_refinement.bad.php:52:11
+31 | }
+32 | 
+33 | function takes_f(F $_): void {}
+   |                  ^ [2]
+34 | 
+35 | function test_transparent_is_stringish(): void {
+   :
+49 |   takes_f($e);
+50 | 
+51 |   $e = "42" as F;
+   |                ^ [3]
+52 |   takes_f($e);
+   |           ^^ [1]
+53 | }
+
+24 errors found

@@ -1,2 +1,11 @@
-ERROR: File "interfaces_5.bad.php", line 9, characters 7-7:
-Class `C` must declare <<__SupportDynamicType>> because it implements interface `I` which does (Typing[4402])
+error: Typing[4402] Class `C` must declare <<__SupportDynamicType>> because it implements interface `I` which does [1]
+
+interfaces_5.bad.php:9:7
+ 7 | trait T implements I {}
+ 8 | 
+ 9 | class C {
+   |       ^ [1]
+10 |   use T;
+11 | }
+
+1 error found

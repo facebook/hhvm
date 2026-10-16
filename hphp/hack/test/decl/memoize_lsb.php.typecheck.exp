@@ -1,6 +1,15 @@
-ERROR: File "memoize_lsb.php", line 4, characters 5-16:
-The attribute `__MemoizeLSB` is unnecessary (Typing[4392])
-  File "memoize_lsb.php", line 3, characters 13-13:
-  It is unnecessary because the class `C` is final
-  File "memoize_lsb.php", line 4, characters 5-16:
-  Try using the attribute `__Memoize` instead
+error: Typing[4392] The attribute `__MemoizeLSB` is unnecessary [1]
+-> It is unnecessary because the class `C` is final [2]
+-> Try using the attribute `__Memoize` instead [1]
+
+memoize_lsb.php:4:5
+1 | <?hh
+2 | 
+3 | final class C {
+  |             ^ [2]
+4 |   <<__MemoizeLSB>>
+  |     ^^^^^^^^^^^^ [1]
+5 |   public static function f(): int { return 0; }
+6 | }
+
+1 error found

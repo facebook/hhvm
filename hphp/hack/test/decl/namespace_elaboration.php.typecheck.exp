@@ -1,12 +1,61 @@
-ERROR: File "namespace_elaboration.php", line 31, characters 13-18:
-Unbound name: `MyNamespace\MyType` (Naming[2049])
-ERROR: File "namespace_elaboration.php", line 31, characters 25-31:
-Unbound name: `MyNamespace\MyType` (Naming[2049])
-ERROR: File "namespace_elaboration.php", line 35, characters 19-29:
-Unbound name: `MyNamespace\MyOtherType` (Naming[2049])
-ERROR: File "namespace_elaboration.php", line 35, characters 36-47:
-Unbound name: `MyNamespace\MyOtherType` (Naming[2049])
-ERROR: File "namespace_elaboration.php", line 39, characters 20-31:
-Unbound name: `MyNamespace\MyBracedType` (Naming[2049])
-ERROR: File "namespace_elaboration.php", line 39, characters 38-50:
-Unbound name: `MyNamespace\MyBracedType` (Naming[2049])
+error: Naming[2049] Unbound name: `MyNamespace\MyType` [1]
+
+namespace_elaboration.php:31:13
+29 | };
+30 | 
+31 | function id(MyType $x): MyType2 {
+   |             ^^^^^^ [1]
+32 |   return $x;
+33 | }
+
+error: Naming[2049] Unbound name: `MyNamespace\MyType` [1]
+
+namespace_elaboration.php:31:25
+29 | };
+30 | 
+31 | function id(MyType $x): MyType2 {
+   |                         ^^^^^^^ [1]
+32 |   return $x;
+33 | }
+
+error: Naming[2049] Unbound name: `MyNamespace\MyOtherType` [1]
+
+namespace_elaboration.php:35:19
+33 | }
+34 | 
+35 | function other_id(MyOtherType $x): MyOtherType2 {
+   |                   ^^^^^^^^^^^ [1]
+36 |   return $x;
+37 | }
+
+error: Naming[2049] Unbound name: `MyNamespace\MyOtherType` [1]
+
+namespace_elaboration.php:35:36
+33 | }
+34 | 
+35 | function other_id(MyOtherType $x): MyOtherType2 {
+   |                                    ^^^^^^^^^^^^ [1]
+36 |   return $x;
+37 | }
+
+error: Naming[2049] Unbound name: `MyNamespace\MyBracedType` [1]
+
+namespace_elaboration.php:39:20
+37 | }
+38 | 
+39 | function braced_id(MyBracedType $x): MyBracedType2 {
+   |                    ^^^^^^^^^^^^ [1]
+40 |   return $x;
+41 | }
+
+error: Naming[2049] Unbound name: `MyNamespace\MyBracedType` [1]
+
+namespace_elaboration.php:39:38
+37 | }
+38 | 
+39 | function braced_id(MyBracedType $x): MyBracedType2 {
+   |                                      ^^^^^^^^^^^^^ [1]
+40 |   return $x;
+41 | }
+
+6 errors found

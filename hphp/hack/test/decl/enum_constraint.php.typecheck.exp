@@ -1,18 +1,59 @@
-ERROR: File "enum_constraint.php", line 5, characters 17-20:
-Unbound name: `IdOf` (Naming[2049])
-ERROR: File "enum_constraint.php", line 5, characters 22-22:
-Unbound name: `X` (Naming[2049])
-ERROR: File "enum_constraint.php", line 5, characters 6-6:
-Enums must be `int` or `string` or `arraykey`, not `IdOf<X>` (Typing[4024])
-ERROR: File "enum_constraint.php", line 5, characters 6-6:
-Underlying type for enum is incompatible with constraint (Typing[4330])
-  File "enum_constraint.php", line 5, characters 17-23:
-  Expected `IdOf<X>`
-  File "enum_constraint.php", line 5, characters 10-12:
-  But got `int`
-ERROR: File "enum_constraint.php", line 11, characters 25-25:
-Constant does not match the type of the enum it is in (Typing[4328])
-  File "enum_constraint.php", line 11, characters 10-12:
-  Expected `int`
-  File "enum_constraint.php", line 11, characters 27-29:
-  But got `string`
+error: Naming[2049] Unbound name: `IdOf` [1]
+
+enum_constraint.php:5:17
+3 | enum A : string as string {X='a';}
+4 | 
+5 | enum B : int as IdOf<X> {X=1;}
+  |                 ^^^^ [1]
+6 | 
+7 | enum C : int as arraykey {X=1;}
+
+error: Naming[2049] Unbound name: `X` [1]
+
+enum_constraint.php:5:22
+3 | enum A : string as string {X='a';}
+4 | 
+5 | enum B : int as IdOf<X> {X=1;}
+  |                      ^ [1]
+6 | 
+7 | enum C : int as arraykey {X=1;}
+
+error: Typing[4024] Enums must be `int` or `string` or `arraykey`, not `IdOf<X>` [1]
+
+enum_constraint.php:5:6
+3 | enum A : string as string {X='a';}
+4 | 
+5 | enum B : int as IdOf<X> {X=1;}
+  |      ^ [1]
+6 | 
+7 | enum C : int as arraykey {X=1;}
+
+error: Typing[4330] Underlying type for enum is incompatible with constraint [1]
+-> Expected `IdOf<X>` [2]
+-> But got `int` [3]
+
+enum_constraint.php:5:6
+3 | enum A : string as string {X='a';}
+4 | 
+5 | enum B : int as IdOf<X> {X=1;}
+  |      ^ [1]
+  |          ^^^ [3]
+  |                 ^^^^^^^ [2]
+6 | 
+7 | enum C : int as arraykey {X=1;}
+
+error: Typing[4328] Constant does not match the type of the enum it is in [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+enum_constraint.php:11:25
+ 9 | newtype N as arraykey = int;
+10 | 
+11 | enum D : int as N {X=1; Y="a";}
+   |          ^^^ [2]
+   |                         ^ [1]
+   |                           ^^^ [3]
+12 | 
+13 | enum E : C as C {X=C::X;}
+
+5 errors found

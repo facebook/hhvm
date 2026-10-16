@@ -1,6 +1,16 @@
-ERROR: File "override_sound_dynamic.bad.php", line 9, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "override_sound_dynamic.bad.php", line 9, characters 19-21:
-  Method foo must be declared <<__SupportDynamicType>> because it overrides method in class C which does.
-  File "override_sound_dynamic.bad.php", line 6, characters 19-21:
-  Overridden method is defined here.
+error: Typing[4341] The method `foo` is not compatible with the overridden method [1]
+-> Method foo must be declared <<__SupportDynamicType>> because it overrides method in class C which does. [1]
+-> Overridden method is defined here. [2]
+
+override_sound_dynamic.bad.php:9:19
+ 4 | class C {
+ 5 |   <<__SupportDynamicType>>
+ 6 |   public function foo(int $_):void { }
+   |                   ^^^ [2]
+ 7 | }
+ 8 | class D extends C {
+ 9 |   public function foo(int $_):void { }
+   |                   ^^^ [1]
+10 | }
+
+1 error found

@@ -1,2 +1,11 @@
-ERROR: File "86-with-refinement-box-with-type+ctx.hack", line 51, characters 7-10:
-Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+error: Naming[2129] Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. [1]
+
+86-with-refinement-box-with-type+ctx.hack:51:7
+49 | 
+50 | function weigh_bulk_unsafe<TBox as MeasuredBox>(TBox $box): float
+51 | where TBox::TQuantity = float {
+   |       ^^^^ [1]
+52 |   return $box->getQuantity();
+53 | }
+
+1 error found

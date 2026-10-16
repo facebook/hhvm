@@ -1,4 +1,21 @@
-ERROR: File "unnamed_variadic_method_parameter.php", line 4, characters 34-34:
-A variable name is expected here. (Parsing[1002])
-ERROR: File "unnamed_variadic_method_parameter.php", line 4, characters 31-33:
-Was expecting a type hint on this variadic parameter (Typing[4033])
+error: Parsing[1002] A variable name is expected here. [1]
+
+unnamed_variadic_method_parameter.php:4:34
+2 | 
+3 | class C {
+4 |   public function f(int $foo, ...): void {
+  |                                  ^ [1]
+5 |     throw new Exception();
+6 |   }
+
+error: Typing[4033] Was expecting a type hint on this variadic parameter [1]
+
+unnamed_variadic_method_parameter.php:4:31
+2 | 
+3 | class C {
+4 |   public function f(int $foo, ...): void {
+  |                               ^^^ [1]
+5 |     throw new Exception();
+6 |   }
+
+2 errors found

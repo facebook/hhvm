@@ -1,18 +1,62 @@
-ERROR: File "return_like_enforced.bad.php", line 8, characters 1-30:
-Cannot redeclare `get()` (previously declared in return_like_enforced.bad.php:5) (Parsing[1002])
-ERROR: File "return_like_enforced.bad.php", line 8, characters 10-12:
-Name already bound: `get` (Naming[2012])
-  File "return_like_enforced.bad.php", line 5, characters 10-12:
-  Previous definition is here
-ERROR: File "return_like_enforced.bad.php", line 13, characters 10-11:
-Invalid return type (Typing[4110])
-  File "return_like_enforced.bad.php", line 11, characters 24-31:
-  Expected `vec<int>`
-  File "return_like_enforced.bad.php", line 5, characters 22-24:
-  But got `int`
-ERROR: File "return_like_enforced.bad.php", line 13, characters 10-11:
-Invalid return type (Typing[4110])
-  File "return_like_enforced.bad.php", line 11, characters 24-31:
-  Expected `vec<int>`
-  File "return_like_enforced.bad.php", line 12, characters 8-16:
-  But got `dynamic`
+error: Parsing[1002] Cannot redeclare `get()` (previously declared in return_like_enforced.bad.php:5) [1]
+
+return_like_enforced.bad.php:8:1
+ 6 | 
+ 7 | <<__SupportDynamicType>>
+ 8 | function get(): ~vec<vec<int>> { return vec[vec[3]]; }
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 9 | 
+10 | <<__SupportDynamicType>>
+
+error: Naming[2012] Name already bound: `get` [1]
+-> Previous definition is here [2]
+
+return_like_enforced.bad.php:8:10
+ 3 | 
+ 4 | // No SDT
+ 5 | function get(): ~vec<int> { return vec[3]; }
+   |          ^^^ [2]
+ 6 | 
+ 7 | <<__SupportDynamicType>>
+ 8 | function get(): ~vec<vec<int>> { return vec[vec[3]]; }
+   |          ^^^ [1]
+ 9 | 
+10 | <<__SupportDynamicType>>
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `vec<int>` [2]
+-> But got `int` [3]
+
+return_like_enforced.bad.php:13:10
+ 3 | 
+ 4 | // No SDT
+ 5 | function get(): ~vec<int> { return vec[3]; }
+   |                      ^^^ [3]
+ 6 | 
+ 7 | <<__SupportDynamicType>>
+ 8 | function get(): ~vec<vec<int>> { return vec[vec[3]]; }
+ 9 | 
+10 | <<__SupportDynamicType>>
+11 | function test(~int $x):vec<int> {
+   |                        ^^^^^^^^ [2]
+12 |   $y = get()[$x];
+13 |   return $y;
+   |          ^^ [1]
+14 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `vec<int>` [2]
+-> But got `dynamic` [3]
+
+return_like_enforced.bad.php:13:10
+ 9 | 
+10 | <<__SupportDynamicType>>
+11 | function test(~int $x):vec<int> {
+   |                        ^^^^^^^^ [2]
+12 |   $y = get()[$x];
+   |        ^^^^^^^^^ [3]
+13 |   return $y;
+   |          ^^ [1]
+14 | }
+
+4 errors found

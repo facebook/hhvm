@@ -1,8 +1,26 @@
-ERROR: File "function_argument_2.bad.php", line 17, characters 12-15:
-Invalid argument (Typing[4110])
-  File "function_argument_2.bad.php", line 13, characters 14-14:
-  Expected `G`
-  File "function_argument_2.bad.php", line 4, characters 9-11:
-  But got `int`
-  File "function_argument_2.bad.php", line 4, characters 16-18:
-    by the definition of `F`
+error: Typing[4110] Invalid argument [1]
+-> Expected `G` [2]
+-> But got `int` [3]
+->   by the definition of `F` [4]
+
+function_argument_2.bad.php:17:12
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | enum F: int as int {
+   |         ^^^ [3]
+   |                ^^^ [4]
+ 5 |   A = 0;
+ 6 | }
+   :
+11 | }
+12 | 
+13 | function foo(G $e) : G { return $e; }
+   |              ^ [2]
+14 | 
+15 | <<__EntryPoint>>
+16 | function main(): void {
+17 |   echo foo(F::A);
+   |            ^^^^ [1]
+18 | }
+
+1 error found

@@ -1,5 +1,21 @@
 @list_logger:{"bucket":"Pair","type_string":"Pair<int, string>","has_complex_lvalue":false,"pos":{"filename":"pair_basic.php","line":4,"char_start":18,"char_end":19},"lhs_code":"list($a, $b)","total_lvalue_count":2,"is_generated":false}
-WARN: File "pair_basic.php", line 5, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-WARN: File "pair_basic.php", line 6, characters 3-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `string` which is a subtype of `string`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+pair_basic.php:5:3
+3 | function test_pair(Pair<int, string> $p): void {
+4 |   list($a, $b) = $p;
+5 |   $a as int;
+  |   ^^^^^^^^^ [1]
+6 |   $b as string;
+7 | }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `string` which is a subtype of `string`. [1]
+
+pair_basic.php:6:3
+4 |   list($a, $b) = $p;
+5 |   $a as int;
+6 |   $b as string;
+  |   ^^^^^^^^^^^^ [1]
+7 | }
+
+2 errors found

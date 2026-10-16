@@ -1,8 +1,21 @@
-ERROR: File "top_level_1.bad.php", line 10, characters 9-10:
-Method  `bar` in class `C` is not dynamically callable. (Typing[4110])
-  File "top_level_1.bad.php", line 10, characters 9-10:
-  Invalid argument
-  File "top_level_1.bad.php", line 5, characters 14-19:
-  Expected `A<int>`
-  File "top_level_1.bad.php", line 9, characters 30-31:
-  But got `dynamic` because method must be callable in a dynamic context
+error: Typing[4110] Method  `bar` in class `C` is not dynamically callable. [1]
+-> Invalid argument [1]
+-> Expected `A<int>` [2]
+-> But got `dynamic` because method must be callable in a dynamic context [3]
+
+top_level_1.bad.php:10:9
+ 3 | class A<T> {}
+ 4 | 
+ 5 | function foo(A<int> $a) : void {}
+   |              ^^^^^^ [2]
+ 6 | 
+ 7 | <<__SupportDynamicType>>
+ 8 | class C {
+ 9 |   public function bar(A<int> $v) : void {
+   |                              ^^ [3]
+10 |     foo($v);
+   |         ^^ [1]
+11 |   }
+12 | }
+
+1 error found

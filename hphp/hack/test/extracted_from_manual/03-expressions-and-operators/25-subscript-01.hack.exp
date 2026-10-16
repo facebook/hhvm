@@ -1,2 +1,10 @@
-WARN: File "25-subscript-01.hack", line 17, characters 8-17:
-Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+warning: Warn[12034] Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. [1]
+
+25-subscript-01.hack:17:8
+15 |   
+16 |   $k = keyset["red", "blue", "green"];
+17 |   $e = $k["blue"];  // designates the element with key "blue" value "blue"
+   |        ^^^^^^^^^^ [1]
+18 | }
+
+1 error found

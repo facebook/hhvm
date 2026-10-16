@@ -1,8 +1,21 @@
-ERROR: File "static_method_1.bad.php", line 13, characters 12-24:
-Method  `bar` in class `C` is not dynamically callable. (Typing[4110])
-  File "static_method_1.bad.php", line 13, characters 12-24:
-  Invalid return type
-  File "static_method_1.bad.php", line 12, characters 39-47:
-  Expected `dynamic` because method or function was called on dynamic or like-type
-  File "static_method_1.bad.php", line 8, characters 46-54:
-  Type `Evil<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4110] Method  `bar` in class `C` is not dynamically callable. [1]
+-> Invalid return type [1]
+-> Expected `dynamic` because method or function was called on dynamic or like-type [2]
+-> Type `Evil<int>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+static_method_1.bad.php:13:12
+ 6 | <<__SupportDynamicType>>
+ 7 | class C {
+ 8 |   public static function foo(Evil<int> $v) : Evil<int> {
+   |                                              ^^^^^^^^^ [3]
+ 9 |     return $v;
+10 |   }
+11 | 
+12 |   public function bar(Evil<int> $v) : Evil<int> {
+   |                                       ^^^^^^^^^ [2]
+13 |     return self::foo($v);
+   |            ^^^^^^^^^^^^^ [1]
+14 |   }
+15 | }
+
+1 error found

@@ -1,4 +1,19 @@
-ERROR: File "81-recursive-case-types-02.hack", line 4, characters 11-11:
-This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])
-ERROR: File "81-recursive-case-types-02.hack", line 7, characters 11-11:
-This recursive case type is not supported. `B` should not be at the top-level. (Typing[4485])
+error: Typing[4485] This recursive case type is not supported. `A` should not be at the top-level. [1]
+
+81-recursive-case-types-02.hack:4:11
+2 | // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
+3 | // Bare self-reference
+4 | case type A = A;
+  |           ^ [1]
+5 | 
+6 | // Nullable is not a type constructor
+
+error: Typing[4485] This recursive case type is not supported. `B` should not be at the top-level. [1]
+
+81-recursive-case-types-02.hack:7:11
+5 | 
+6 | // Nullable is not a type constructor
+7 | case type B = ?B;
+  |           ^ [1]
+
+2 errors found

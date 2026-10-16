@@ -1,2 +1,15 @@
-ERROR: File "typedefs.php", line 6, characters 1-51:
-No code may exist outside of namespace {} (Parsing[1002])
+error: Parsing[1002] No code may exist outside of namespace {} [1]
+
+typedefs.php:6:1
+ 4 | // to be more accepting than the typechecker.
+ 5 | 
+ 6 | namespace MyNamespace {
+   | ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 7 |   type MyString = string;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+ 8 | }
+   | ^ [1]
+ 9 | 
+10 | 
+
+1 error found

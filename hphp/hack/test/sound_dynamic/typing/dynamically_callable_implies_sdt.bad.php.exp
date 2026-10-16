@@ -1,6 +1,16 @@
-ERROR: File "dynamically_callable_implies_sdt.bad.php", line 9, characters 10-16:
-Invalid return type (Typing[4110])
-  File "dynamically_callable_implies_sdt.bad.php", line 7, characters 16-16:
-  Expected `dynamic` because method or function was called on dynamic or like-type
-  File "dynamically_callable_implies_sdt.bad.php", line 9, characters 14-14:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4110] Invalid return type [1]
+-> Expected `dynamic` because method or function was called on dynamic or like-type [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+dynamically_callable_implies_sdt.bad.php:9:10
+ 5 | 
+ 6 | <<__DynamicallyCallable>>
+ 7 | function foo():C {
+   |                ^ [2]
+ 8 |   // Expect error because C is not dynamic
+ 9 |   return new C();
+   |          ^^^^^^^ [1]
+   |              ^ [3]
+10 | }
+
+1 error found

@@ -1,8 +1,41 @@
-ERROR: File "deprecated.php", line 7, characters 5-16:
-The attribute `__Deprecated` expects at least 1 argument (Typing[4153])
-ERROR: File "deprecated.php", line 10, characters 5-16:
-The attribute `__Deprecated` expects at least 1 argument (Typing[4153])
-ERROR: File "deprecated.php", line 20, characters 3-14:
-The attribute `__Deprecated` expects at least 1 argument (Typing[4153])
-ERROR: File "deprecated.php", line 23, characters 3-14:
-The attribute `__Deprecated` expects at least 1 argument (Typing[4153])
+error: Typing[4153] The attribute `__Deprecated` expects at least 1 argument [1]
+
+deprecated.php:7:5
+5 |   public function foo(): void {}
+6 | 
+7 |   <<__Deprecated()>>
+  |     ^^^^^^^^^^^^ [1]
+8 |   public function bar(): void {}
+9 | 
+
+error: Typing[4153] The attribute `__Deprecated` expects at least 1 argument [1]
+
+deprecated.php:10:5
+ 8 |   public function bar(): void {}
+ 9 | 
+10 |   <<__Deprecated>>
+   |     ^^^^^^^^^^^^ [1]
+11 |   public function baz(): void {}
+12 | 
+
+error: Typing[4153] The attribute `__Deprecated` expects at least 1 argument [1]
+
+deprecated.php:20:3
+18 | function foo(): void {}
+19 | 
+20 | <<__Deprecated()>>
+   |   ^^^^^^^^^^^^ [1]
+21 | function bar(): void {}
+22 | 
+
+error: Typing[4153] The attribute `__Deprecated` expects at least 1 argument [1]
+
+deprecated.php:23:3
+21 | function bar(): void {}
+22 | 
+23 | <<__Deprecated>>
+   |   ^^^^^^^^^^^^ [1]
+24 | function baz(): void {}
+25 | 
+
+4 errors found

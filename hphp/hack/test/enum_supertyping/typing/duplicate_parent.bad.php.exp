@@ -1,4 +1,14 @@
-ERROR: File "duplicate_parent.bad.php", line 10, characters 3-3:
-F cannot re-declare constant A (Typing[4389])
-  File "duplicate_parent.bad.php", line 8, characters 6-6:
-  because it already inherited it via E
+error: Typing[4389] F cannot re-declare constant A [1]
+-> because it already inherited it via E [2]
+
+duplicate_parent.bad.php:10:3
+ 6 | }
+ 7 | 
+ 8 | enum F: int {
+   |      ^ [2]
+ 9 |   use E;
+10 |   A = 42;
+   |   ^ [1]
+11 | }
+
+1 error found

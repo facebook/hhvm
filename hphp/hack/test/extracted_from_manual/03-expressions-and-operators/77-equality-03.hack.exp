@@ -1,6 +1,23 @@
-WARN: File "77-equality-03.hack", line 4, characters 3-12:
-Invalid comparison: This expression will always return `false`.
-A value of type `int` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "77-equality-03.hack", line 5, characters 3-22:
-Invalid comparison: This expression will always return `false`.
-A value of type `vec<int>` can never be equal to a value of type `keyset<int>` (Warn[12007])
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `null` [1]
+
+77-equality-03.hack:4:3
+2 | // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   0 === null; // false
+  |   ^^^^^^^^^^ [1]
+5 |   vec[1] === keyset[1]; // false
+6 |   
+
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `vec<int>` can never be equal to a value of type `keyset<int>` [1]
+
+77-equality-03.hack:5:3
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   0 === null; // false
+5 |   vec[1] === keyset[1]; // false
+  |   ^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   
+7 |   // Tip: if you want to compare an integer with a float,
+
+2 errors found

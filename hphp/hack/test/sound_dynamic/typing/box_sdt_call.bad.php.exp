@@ -1,12 +1,29 @@
-ERROR: File "box_sdt_call.bad.php", line 14, characters 41-42:
-Method  `__construct` in class `ROBox` is not dynamically callable. (Typing[4426])
-  File "box_sdt_call.bad.php", line 14, characters 41-42:
-  Cannot write to property `x` through dynamic type because private property in `ROBox` does not have an enforceable type
-  File "box_sdt_call.bad.php", line 14, characters 39-39:
-  Property `x` has type `T`
-ERROR: File "box_sdt_call.bad.php", line 27, characters 5-7:
-Typing error (Typing[4110])
-  File "box_sdt_call.bad.php", line 25, characters 13-15:
-  Expected `dynamic`
-  File "box_sdt_call.bad.php", line 25, characters 13-15:
-  Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4426] Method  `__construct` in class `ROBox` is not dynamically callable. [1]
+-> Cannot write to property `x` through dynamic type because private property in `ROBox` does not have an enforceable type [1]
+-> Property `x` has type `T` [2]
+
+box_sdt_call.bad.php:14:41
+12 | <<__SupportDynamicType>>
+13 | class ROBox<T> {
+14 |   public function __construct(private T $x) {}
+   |                                       ^ [2]
+   |                                         ^^ [1]
+15 |   public function get() : T { return $this->x; }
+16 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+box_sdt_call.bad.php:27:5
+23 | <<__EntryPoint>>
+24 | function main() : void {
+25 |   $v1 = new Box<int>(1);
+   |             ^^^ [2]
+26 |   $v2 = new ROBox<string>("abcd") upcast dynamic;
+27 |   f($v1, $v2);
+   |     ^^^ [1]
+28 |   print $v1->get();
+29 | }
+
+2 errors found

@@ -1,6 +1,31 @@
-ERROR: File "classes_const_attribute.php", line 4, characters 16-16:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-ERROR: File "classes_const_attribute.php", line 8, characters 7-7:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-ERROR: File "classes_const_attribute.php", line 5, characters 22-29:
-Properties cannot be declared `abstract` (Parsing[1002])
+error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
+
+classes_const_attribute.php:4:16
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | abstract class A {
+  |                ^ [1]
+5 |   <<__Const>> public abstract arraykey $p;
+6 | }
+
+error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
+
+classes_const_attribute.php:8:7
+ 6 | }
+ 7 | 
+ 8 | class B extends A {
+   |       ^ [1]
+ 9 |   <<__Const>> public int $p = 1;
+10 | }
+
+error: Parsing[1002] Properties cannot be declared `abstract` [1]
+
+classes_const_attribute.php:5:22
+3 | 
+4 | abstract class A {
+5 |   <<__Const>> public abstract arraykey $p;
+  |                      ^^^^^^^^ [1]
+6 | }
+7 | 
+
+3 errors found

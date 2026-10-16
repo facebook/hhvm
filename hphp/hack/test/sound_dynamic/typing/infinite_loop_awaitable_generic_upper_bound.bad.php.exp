@@ -1,16 +1,59 @@
-WARN: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 15, characters 5-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `G<T>` which is a subtype of `G<T>`. (Warn[12011])
-ERROR: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 9, characters 16-18:
-Lacking `__construct`, class `Inf` does not initialize its private member(s): `t` (NastCheck[3030])
-ERROR: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
-Invalid return type (Typing[4336])
-  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 42-45:
-  Expected `G<T>`
-  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
-  But got `void` because this function does not always return a value
-ERROR: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 16, characters 15-21:
-No instance method `noexist` in `Tupper` (Typing[4053])
-  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 9, characters 46-51:
-  This is why I think it is an object of type Tupper
-  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 4, characters 16-21:
-  Declaration of `Tupper` is here
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `G<T>` which is a subtype of `G<T>`. [1]
+
+infinite_loop_awaitable_generic_upper_bound.bad.php:15:5
+13 |   private async function infinite(): Awaitable<void> {
+14 |     $f = await $this->f();
+15 |     $f as G<_>;
+   |     ^^^^^^^^^^ [1]
+16 |     $this->t->noexist();
+17 |   }
+
+error: NastCheck[3030] Lacking `__construct`, class `Inf` does not initialize its private member(s): `t` [1]
+
+infinite_loop_awaitable_generic_upper_bound.bad.php:9:16
+ 7 | abstract class G<T as supportdyn<mixed> as Tupper> {}
+ 8 | 
+ 9 | abstract class Inf<T as supportdyn<mixed> as Tupper> {
+   |                ^^^ [1]
+10 |   private ~T $t;
+11 |   private async function f(): Awaitable<~G<T>> {}
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `G<T>` [2]
+-> But got `void` because this function does not always return a value [1]
+
+infinite_loop_awaitable_generic_upper_bound.bad.php:11:26
+ 9 | abstract class Inf<T as supportdyn<mixed> as Tupper> {
+10 |   private ~T $t;
+11 |   private async function f(): Awaitable<~G<T>> {}
+   |                          ^ [1]
+   |                                          ^^^^ [2]
+12 | 
+13 |   private async function infinite(): Awaitable<void> {
+
+error: Typing[4053] No instance method `noexist` in `Tupper` [1]
+-> This is why I think it is an object of type Tupper [2]
+-> Declaration of `Tupper` is here [3]
+
+infinite_loop_awaitable_generic_upper_bound.bad.php:16:15
+ 2 | // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+ 3 | 
+ 4 | abstract class Tupper {}
+   |                ^^^^^^ [3]
+ 5 | 
+ 6 | <<__SupportDynamicType>>
+ 7 | abstract class G<T as supportdyn<mixed> as Tupper> {}
+ 8 | 
+ 9 | abstract class Inf<T as supportdyn<mixed> as Tupper> {
+   |                                              ^^^^^^ [2]
+10 |   private ~T $t;
+11 |   private async function f(): Awaitable<~G<T>> {}
+   :
+14 |     $f = await $this->f();
+15 |     $f as G<_>;
+16 |     $this->t->noexist();
+   |               ^^^^^^^ [1]
+17 |   }
+18 | }
+
+4 errors found

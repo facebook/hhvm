@@ -1,14 +1,58 @@
-ERROR: File "shape_type_key_types.php", line 4, characters 3-3:
-Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "shape_type_key_types.php", line 6, characters 25-25:
-Unbound name: `C` (Naming[2049])
-ERROR: File "shape_type_key_types.php", line 7, characters 3-3:
-Unbound name: `C` (an object type) (Naming[2049])
-ERROR: File "shape_type_key_types.php", line 6, characters 10-10:
-Shape uses class constant as field name (Typing[4049])
-  File "shape_type_key_types.php", line 4, characters 3-3:
-  But expected a literal string. Shape fields cannot be a mix of literals and constants.
-ERROR: File "shape_type_key_types.php", line 7, characters 3-8:
-Shape uses class constant as field name (Typing[4049])
-  File "shape_type_key_types.php", line 4, characters 3-3:
-  But expected a literal string. Shape fields cannot be a mix of literals and constants.
+error: Parsing[1002] Shape field name must be a nonempty single-quoted string or a class constant [1]
+
+shape_type_key_types.php:4:3
+2 | 
+3 | type Shape = shape(
+4 |   0 => int,
+  |   ^ [1]
+5 |   's' => string,
+6 |   nameof C => classname<C>,
+
+error: Naming[2049] Unbound name: `C` [1]
+
+shape_type_key_types.php:6:25
+4 |   0 => int,
+5 |   's' => string,
+6 |   nameof C => classname<C>,
+  |                         ^ [1]
+7 |   C::KEY => string,
+8 | );
+
+error: Naming[2049] Unbound name: `C` (an object type) [1]
+
+shape_type_key_types.php:7:3
+5 |   's' => string,
+6 |   nameof C => classname<C>,
+7 |   C::KEY => string,
+  |   ^ [1]
+8 | );
+
+error: Typing[4049] Shape uses class constant as field name [1]
+-> But expected a literal string. Shape fields cannot be a mix of literals and constants. [2]
+
+shape_type_key_types.php:6:10
+2 | 
+3 | type Shape = shape(
+4 |   0 => int,
+  |   ^ [2]
+5 |   's' => string,
+6 |   nameof C => classname<C>,
+  |          ^ [1]
+7 |   C::KEY => string,
+8 | );
+
+error: Typing[4049] Shape uses class constant as field name [1]
+-> But expected a literal string. Shape fields cannot be a mix of literals and constants. [2]
+
+shape_type_key_types.php:7:3
+2 | 
+3 | type Shape = shape(
+4 |   0 => int,
+  |   ^ [2]
+5 |   's' => string,
+6 |   nameof C => classname<C>,
+7 |   C::KEY => string,
+  |   ^^^^^^ [1]
+8 | );
+
+5 errors found

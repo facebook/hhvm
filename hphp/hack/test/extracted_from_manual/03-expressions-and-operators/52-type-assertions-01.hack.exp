@@ -1,10 +1,50 @@
-WARN: File "52-type-assertions-01.hack", line 4, characters 3-10:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. (Warn[12009])
-WARN: File "52-type-assertions-01.hack", line 5, characters 3-14:
-This `is` check is always `false`. The expression on the left has type `string` which shares no values with `int`. (Warn[12010])
-WARN: File "52-type-assertions-01.hack", line 7, characters 3-10:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `num`. (Warn[12009])
-WARN: File "52-type-assertions-01.hack", line 8, characters 3-12:
-This `is` check is always `true`. The expression on the left has type `float` which is a subtype of `num`. (Warn[12009])
-WARN: File "52-type-assertions-01.hack", line 9, characters 3-14:
-This `is` check is always `false`. The expression on the left has type `string` which shares no values with `num`. (Warn[12010])
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. [1]
+
+52-type-assertions-01.hack:4:3
+2 | // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   1 is int;        // true
+  |   ^^^^^^^^ [1]
+5 |   'foo' is int;    // false
+6 |   
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `string` which shares no values with `int`. [1]
+
+52-type-assertions-01.hack:5:3
+3 | async function example_snippet_wrapper(): Awaitable<void> {
+4 |   1 is int;        // true
+5 |   'foo' is int;    // false
+  |   ^^^^^^^^^^^^ [1]
+6 |   
+7 |   1 is num;        // true
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `num`. [1]
+
+52-type-assertions-01.hack:7:3
+5 |   'foo' is int;    // false
+6 |   
+7 |   1 is num;        // true
+  |   ^^^^^^^^ [1]
+8 |   1.5 is num;      // true
+9 |   'foo' is num;    // false
+
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `float` which is a subtype of `num`. [1]
+
+52-type-assertions-01.hack:8:3
+ 6 |   
+ 7 |   1 is num;        // true
+ 8 |   1.5 is num;      // true
+   |   ^^^^^^^^^^ [1]
+ 9 |   'foo' is num;    // false
+10 | }
+
+warning: Warn[12010] This `is` check is always `false`. The expression on the left has type `string` which shares no values with `num`. [1]
+
+52-type-assertions-01.hack:9:3
+ 7 |   1 is num;        // true
+ 8 |   1.5 is num;      // true
+ 9 |   'foo' is num;    // false
+   |   ^^^^^^^^^^^^ [1]
+10 | }
+
+5 errors found

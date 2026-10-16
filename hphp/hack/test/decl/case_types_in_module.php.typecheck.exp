@@ -1,6 +1,29 @@
-ERROR: File "case_types_in_module.php", line 4, characters 8-15:
-Unbound name: `some.mod` (a module) (Naming[2049])
-ERROR: File "case_types_in_module.php", line 10, characters 3-10:
-Unbound name: `SomeAttr` (an object type) (Naming[2049])
-ERROR: File "case_types_in_module.php", line 10, characters 3-10:
-Unrecognized user attribute: `SomeAttr` does not have a class. Please declare a class for the attribute. (Naming[2049])
+error: Naming[2049] Unbound name: `some.mod` (a module) [1]
+
+case_types_in_module.php:4:8
+2 | <<file:__EnableUnstableFeatures('case_types')>>
+3 | 
+4 | module some.mod;
+  |        ^^^^^^^^ [1]
+5 | 
+6 | internal case type CT1 = int;
+
+error: Naming[2049] Unbound name: `SomeAttr` (an object type) [1]
+
+case_types_in_module.php:10:3
+ 8 | public case type CT2 = int;
+ 9 | 
+10 | <<SomeAttr>>
+   |   ^^^^^^^^ [1]
+11 | case type CT3 = int;
+
+error: Naming[2049] Unrecognized user attribute: `SomeAttr` does not have a class. Please declare a class for the attribute. [1]
+
+case_types_in_module.php:10:3
+ 8 | public case type CT2 = int;
+ 9 | 
+10 | <<SomeAttr>>
+   |   ^^^^^^^^ [1]
+11 | case type CT3 = int;
+
+3 errors found

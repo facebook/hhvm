@@ -1,2 +1,10 @@
-ERROR: File "includes-not-enum.bad.php", line 7, characters 7-7:
-Enum A includes C which is not an enum (Typing[4388])
+error: Typing[4388] Enum A includes C which is not an enum [1]
+
+includes-not-enum.bad.php:7:7
+5 | 
+6 | enum A : int {
+7 |   use C;
+  |       ^ [1]
+8 | }
+
+1 error found

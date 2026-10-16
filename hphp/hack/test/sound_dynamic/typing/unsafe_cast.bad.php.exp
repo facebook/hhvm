@@ -1,24 +1,80 @@
-ERROR: File "unsafe_cast.bad.php", line 10, characters 3-22:
-Some type arguments violate their constraints (Typing[4323])
-  File "soundness.hhi", line 31, characters 44-60:
-  Expected `dynamic`
-  File "unsafe_cast.bad.php", line 10, characters 24-24:
-  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "unsafe_cast.bad.php", line 15, characters 3-22:
-Some type arguments violate their constraints (Typing[4323])
-  File "soundness.hhi", line 31, characters 86-102:
-  Expected `dynamic`
-  File "unsafe_cast.bad.php", line 15, characters 33-33:
-  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "unsafe_cast.bad.php", line 20, characters 10-50:
-Invalid return type (Typing[4110])
-  File "unsafe_cast.bad.php", line 18, characters 33-33:
-  Expected `C`
-  File "soundness.hhi", line 34, characters 6-10:
-  But got `dynamic`
-ERROR: File "unsafe_cast.bad.php", line 20, characters 10-50:
-Some elements in this collection are incompatible (Typing[4110])
-  File "unsafe_cast.bad.php", line 18, characters 33-33:
-  Expected `C`
-  File "unsafe_cast.bad.php", line 20, characters 14-49:
-  But got `dynamic` because the expression went through a `HH\FIXME\UNSAFE_CAST`. The type might be a lie!
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+unsafe_cast.bad.php:10:3
+ 8 | function test1(D $d): void {
+ 9 |   // D is not SDT so should fail
+10 |   HH\FIXME\UNSAFE_CAST<D, dynamic>($d);
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                        ^ [3]
+11 | }
+12 | 
+
+soundness.hhi:31:44
+29 |  * expression.
+30 |  */
+31 | function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
+   |                                            ^^^^^^^^^^^^^^^^^ [2]
+32 |   Tin $t,
+33 |   ?\HH\FormatString<nothing> $msg = null,
+
+error: Typing[4323] Some type arguments violate their constraints [1]
+-> Expected `dynamic` [2]
+-> Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+unsafe_cast.bad.php:15:3
+13 | function test2(dynamic $d): void {
+14 |   // D is not SDT so should fail
+15 |   HH\FIXME\UNSAFE_CAST<dynamic, D>($d);
+   |   ^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                 ^ [3]
+16 | }
+17 | 
+
+soundness.hhi:31:86
+29 |  * expression.
+30 |  */
+31 | function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
+   |                                                                                      ^^^^^^^^^^^^^^^^^ [2]
+32 |   Tin $t,
+33 |   ?\HH\FormatString<nothing> $msg = null,
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `C` [2]
+-> But got `dynamic` [3]
+
+unsafe_cast.bad.php:20:10
+16 | }
+17 | 
+18 | function test3(dynamic $d): vec<C> {
+   |                                 ^ [2]
+19 |   // Type is vec<~C> so should fail
+20 |   return vec[HH\FIXME\UNSAFE_CAST<dynamic, C>($d)];
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+21 | }
+
+soundness.hhi:34:6
+32 |   Tin $t,
+33 |   ?\HH\FormatString<nothing> $msg = null,
+34 | )[]: ~Tout;
+   |      ^^^^^ [3]
+35 | 
+36 | /**
+
+error: Typing[4110] Some elements in this collection are incompatible [1]
+-> Expected `C` [2]
+-> But got `dynamic` because the expression went through a `HH\FIXME\UNSAFE_CAST`. The type might be a lie! [3]
+
+unsafe_cast.bad.php:20:10
+16 | }
+17 | 
+18 | function test3(dynamic $d): vec<C> {
+   |                                 ^ [2]
+19 |   // Type is vec<~C> so should fail
+20 |   return vec[HH\FIXME\UNSAFE_CAST<dynamic, C>($d)];
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [3]
+21 | }
+
+4 errors found

@@ -1,32 +1,93 @@
-ERROR: File "union_fun.bad.php", line 6, characters 16-17:
-Invalid argument (Typing[4110])
-  File "union_fun.bad.php", line 6, characters 11-13:
-  Expected `int`
-  File "collections/Set.hhi", line 199, characters 25-26:
-    via this generic `Tu`
-  File "union_fun.bad.php", line 5, characters 39-41:
-  But got `Awaitable<int>` (result of an `async` function)
-ERROR: File "union_fun.bad.php", line 6, characters 16-17:
-Invalid argument (Typing[4110])
-  File "union_fun.bad.php", line 6, characters 11-13:
-  Expected `int`
-  File "collections/Vector.hhi", line 188, characters 47-48:
-    via this generic `Tu`
-  File "union_fun.bad.php", line 5, characters 39-41:
-  But got `Awaitable<int>` (result of an `async` function)
-ERROR: File "union_fun.bad.php", line 7, characters 16-66:
-Invalid argument (Typing[4110])
-  File "union_fun.bad.php", line 7, characters 11-13:
-  Expected `int`
-  File "collections/Set.hhi", line 199, characters 25-26:
-    via this generic `Tu`
-  File "union_fun.bad.php", line 7, characters 48-50:
-  But got `Awaitable<int>` (result of an `async` function)
-ERROR: File "union_fun.bad.php", line 7, characters 16-66:
-Invalid argument (Typing[4110])
-  File "union_fun.bad.php", line 7, characters 11-13:
-  Expected `int`
-  File "collections/Vector.hhi", line 188, characters 47-48:
-    via this generic `Tu`
-  File "union_fun.bad.php", line 7, characters 48-50:
-  But got `Awaitable<int>` (result of an `async` function)
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `Tu` [3]
+-> But got `Awaitable<int>` (result of an `async` function) [4]
+
+union_fun.bad.php:6:16
+  3 | function test(bool $b): void {
+  4 |   $c = $b ? Vector<int>{} : Set<int> {};
+  5 |   $f = async function ($_): Awaitable<int> { return 42; };
+    |                                       ^^^ [4]
+  6 |   $c->map<int>($f);
+    |           ^^^ [2]
+    |                ^^ [1]
+  7 |   $c->map<int>(async function ($_) : Awaitable<int> { return 42; });
+  8 | }
+
+collections/Set.hhi:199:25
+197 |      */
+198 |     public function map<Tu as arraykey>(
+199 |       (function(Tv)[_]: Tu) $fn,
+    |                         ^^ [3]
+200 |     )[ctx $fn]: Set<Tu>;
+201 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `Tu` [3]
+-> But got `Awaitable<int>` (result of an `async` function) [4]
+
+union_fun.bad.php:6:16
+  3 | function test(bool $b): void {
+  4 |   $c = $b ? Vector<int>{} : Set<int> {};
+  5 |   $f = async function ($_): Awaitable<int> { return 42; };
+    |                                       ^^^ [4]
+  6 |   $c->map<int>($f);
+    |           ^^^ [2]
+    |                ^^ [1]
+  7 |   $c->map<int>(async function ($_) : Awaitable<int> { return 42; });
+  8 | }
+
+collections/Vector.hhi:188:47
+186 |      * @guide /hack/collections/examples
+187 |      */
+188 |     public function map<Tu>((function(Tv)[_]: Tu) $fn)[ctx $fn]: Vector<Tu>;
+    |                                               ^^ [3]
+189 | 
+190 |     /**
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `Tu` [3]
+-> But got `Awaitable<int>` (result of an `async` function) [4]
+
+union_fun.bad.php:7:16
+  5 |   $f = async function ($_): Awaitable<int> { return 42; };
+  6 |   $c->map<int>($f);
+  7 |   $c->map<int>(async function ($_) : Awaitable<int> { return 42; });
+    |           ^^^ [2]
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                                                ^^^ [4]
+  8 | }
+
+collections/Set.hhi:199:25
+197 |      */
+198 |     public function map<Tu as arraykey>(
+199 |       (function(Tv)[_]: Tu) $fn,
+    |                         ^^ [3]
+200 |     )[ctx $fn]: Set<Tu>;
+201 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+->   via this generic `Tu` [3]
+-> But got `Awaitable<int>` (result of an `async` function) [4]
+
+union_fun.bad.php:7:16
+  5 |   $f = async function ($_): Awaitable<int> { return 42; };
+  6 |   $c->map<int>($f);
+  7 |   $c->map<int>(async function ($_) : Awaitable<int> { return 42; });
+    |           ^^^ [2]
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                                                ^^^ [4]
+  8 | }
+
+collections/Vector.hhi:188:47
+186 |      * @guide /hack/collections/examples
+187 |      */
+188 |     public function map<Tu>((function(Tv)[_]: Tu) $fn)[ctx $fn]: Vector<Tu>;
+    |                                               ^^ [3]
+189 | 
+190 |     /**
+
+4 errors found

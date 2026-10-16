@@ -1,12 +1,39 @@
-ERROR: File "as.bad.php", line 10, characters 18-19:
-Invalid argument (Typing[4110])
-  File "as.bad.php", line 6, characters 23-28:
-  Expected `D<int>`
-  File "as.bad.php", line 9, characters 13-16:
-  But got `dynamic` from this `is` expression test
-ERROR: File "as.bad.php", line 13, characters 16-17:
-Invalid argument (Typing[4110])
-  File "as.bad.php", line 6, characters 23-28:
-  Expected `D<int>`
-  File "as.bad.php", line 12, characters 3-4:
-  But got `dynamic` from this "as" assertion
+error: Typing[4110] Invalid argument [1]
+-> Expected `D<int>` [2]
+-> But got `dynamic` from this `is` expression test [3]
+
+as.bad.php:10:18
+ 4 | <<__SupportDynamicType>> class D<T> extends C<T> {}
+ 5 | 
+ 6 | function expect_d_int(D<int> $d) : void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function test(~C<int> $x) : void {
+ 9 |   if ($x is D<_>) {
+   |             ^^^^ [3]
+10 |     expect_d_int($x);
+   |                  ^^ [1]
+11 |   }
+12 |   $x as D<_>;
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `D<int>` [2]
+-> But got `dynamic` from this "as" assertion [3]
+
+as.bad.php:13:16
+ 4 | <<__SupportDynamicType>> class D<T> extends C<T> {}
+ 5 | 
+ 6 | function expect_d_int(D<int> $d) : void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function test(~C<int> $x) : void {
+ 9 |   if ($x is D<_>) {
+10 |     expect_d_int($x);
+11 |   }
+12 |   $x as D<_>;
+   |   ^^ [3]
+13 |   expect_d_int($x);
+   |                ^^ [1]
+14 | }
+
+2 errors found

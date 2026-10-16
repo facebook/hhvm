@@ -20,6 +20,6 @@
    --batch
    --flags
    --error-format
-   plain
+   plain_highlighted
    --out-extension
    .legacy.out)))

@@ -1,8 +1,22 @@
-ERROR: File "expected_sd_function.bad.php", line 18, characters 13-14:
-Function  `;anonymous` is not dynamically callable. (Typing[4110])
-  File "expected_sd_function.bad.php", line 18, characters 13-14:
-  Invalid argument
-  File "expected_sd_function.bad.php", line 12, characters 18-18:
-  Expected `D`
-  File "expected_sd_function.bad.php", line 16, characters 10-21:
-  But got `dynamic`, the result of calling a `dynamic` type as a function
+error: Typing[4110] Function  `;anonymous` is not dynamically callable. [1]
+-> Invalid argument [1]
+-> Expected `D` [2]
+-> But got `dynamic`, the result of calling a `dynamic` type as a function [3]
+
+expected_sd_function.bad.php:18:13
+10 | }
+11 | 
+12 | function expectD(D $n):void { }
+   |                  ^ [2]
+13 | 
+14 | function testit():void {
+15 |   expectSDTfun(($v) ==> {
+16 |     $x = $v[0]->foo();
+   |          ^^^^^^^^^^^^ [3]
+17 |     // should be an error in check under dynamic
+18 |     expectD($x);
+   |             ^^ [1]
+19 |     return $x;
+20 |   });
+
+1 error found

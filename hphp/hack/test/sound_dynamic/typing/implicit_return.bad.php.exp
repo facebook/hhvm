@@ -1,24 +1,51 @@
-ERROR: File "implicit_return.bad.php", line 3, characters 10-10:
-Invalid return type (Typing[4336])
-  File "implicit_return.bad.php", line 3, characters 16-18:
-  Expected `int`
-  File "implicit_return.bad.php", line 3, characters 10-10:
-  But got `void` because this function does not always return a value
-ERROR: File "implicit_return.bad.php", line 5, characters 16-17:
-Invalid return type (Typing[4336])
-  File "implicit_return.bad.php", line 5, characters 33-35:
-  Expected `int`
-  File "implicit_return.bad.php", line 5, characters 16-17:
-  But got `void` because this function does not always return a value
-ERROR: File "implicit_return.bad.php", line 7, characters 10-24:
-Invalid return type (Typing[4336])
-  File "implicit_return.bad.php", line 7, characters 30-36:
-  Expected `dynamic`
-  File "implicit_return.bad.php", line 7, characters 10-24:
-  But got `void` because this function does not always return a value
-ERROR: File "implicit_return.bad.php", line 9, characters 16-36:
-Invalid return type (Typing[4336])
-  File "implicit_return.bad.php", line 9, characters 51-57:
-  Expected `dynamic`
-  File "implicit_return.bad.php", line 9, characters 16-36:
-  But got `void` because this function does not always return a value
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+implicit_return.bad.php:3:10
+1 | <?hh
+2 | 
+3 | function f(): ~int {}
+  |          ^ [1]
+  |                ^^^ [2]
+4 | 
+5 | async function af(): Awaitable<~int> {}
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `int` [2]
+-> But got `void` because this function does not always return a value [1]
+
+implicit_return.bad.php:5:16
+3 | function f(): ~int {}
+4 | 
+5 | async function af(): Awaitable<~int> {}
+  |                ^^ [1]
+  |                                 ^^^ [2]
+6 | 
+7 | function implicit_return() : dynamic {}
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `void` because this function does not always return a value [1]
+
+implicit_return.bad.php:7:10
+5 | async function af(): Awaitable<~int> {}
+6 | 
+7 | function implicit_return() : dynamic {}
+  |          ^^^^^^^^^^^^^^^ [1]
+  |                              ^^^^^^^ [2]
+8 | 
+9 | async function async_implicit_return(): Awaitable<dynamic> {}
+
+error: Typing[4336] Invalid return type [1]
+-> Expected `dynamic` [2]
+-> But got `void` because this function does not always return a value [1]
+
+implicit_return.bad.php:9:16
+7 | function implicit_return() : dynamic {}
+8 | 
+9 | async function async_implicit_return(): Awaitable<dynamic> {}
+  |                ^^^^^^^^^^^^^^^^^^^^^ [1]
+  |                                                   ^^^^^^^ [2]
+
+4 errors found

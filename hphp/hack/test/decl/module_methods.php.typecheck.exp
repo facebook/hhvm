@@ -1,4 +1,18 @@
-ERROR: File "module_methods.php--main.php", line 6, characters 7-7:
-Cannot access an internal element from module `A` in the default module (Typing[4444])
-  File "module_methods.php--A.php", line 8, characters 21-21:
-  This is from module `A`
+error: Typing[4444] Cannot access an internal element from module `A` in the default module [1]
+-> This is from module `A` [2]
+
+module_methods.php--main.php:6:7
+4 | function main(): void {
+5 |   $a = new A();
+6 |   $a->f();
+  |       ^ [1]
+7 | }
+
+module_methods.php--A.php:8:21
+6 | 
+7 | class A {
+8 |   internal function f(): void {}
+  |                     ^ [2]
+9 | }
+
+1 error found

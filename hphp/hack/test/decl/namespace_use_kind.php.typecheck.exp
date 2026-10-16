@@ -1,8 +1,38 @@
-ERROR: File "namespace_use_kind.php", line 8, characters 10-12:
-Unbound name: `Foo` (Naming[2049])
-ERROR: File "namespace_use_kind.php", line 9, characters 10-12:
-Unbound name: `UseNS\Bar` (Naming[2049])
-ERROR: File "namespace_use_kind.php", line 10, characters 10-12:
-Unbound name: `Baz` (Naming[2049])
-ERROR: File "namespace_use_kind.php", line 11, characters 10-15:
-Unbound name: `UseNS\NS\Qux` (Naming[2049])
+error: Naming[2049] Unbound name: `Foo` [1]
+
+namespace_use_kind.php:8:10
+ 6 | use namespace UseNS\NS;
+ 7 | 
+ 8 | type A = Foo;
+   |          ^^^ [1]
+ 9 | type B = Bar;
+10 | type C = Baz;
+
+error: Naming[2049] Unbound name: `UseNS\Bar` [1]
+
+namespace_use_kind.php:9:10
+ 7 | 
+ 8 | type A = Foo;
+ 9 | type B = Bar;
+   |          ^^^ [1]
+10 | type C = Baz;
+11 | type D = NS\Qux;
+
+error: Naming[2049] Unbound name: `Baz` [1]
+
+namespace_use_kind.php:10:10
+ 8 | type A = Foo;
+ 9 | type B = Bar;
+10 | type C = Baz;
+   |          ^^^ [1]
+11 | type D = NS\Qux;
+
+error: Naming[2049] Unbound name: `UseNS\NS\Qux` [1]
+
+namespace_use_kind.php:11:10
+ 9 | type B = Bar;
+10 | type C = Baz;
+11 | type D = NS\Qux;
+   |          ^^^^^^ [1]
+
+4 errors found

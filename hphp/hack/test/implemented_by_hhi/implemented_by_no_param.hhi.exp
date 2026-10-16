@@ -1,2 +1,11 @@
-ERROR: File "implemented_by_no_param.hhi", line 3, characters 5-19:
-The attribute `__ImplementedBy` expects at least 1 argument (Typing[4153])
+error: Typing[4153] The attribute `__ImplementedBy` expects at least 1 argument [1]
+
+implemented_by_no_param.hhi:3:5
+1 | <?hh
+2 | final class C {
+3 |   <<__ImplementedBy()>>
+  |     ^^^^^^^^^^^^^^^ [1]
+4 |   public function myMethod(): int;
+5 | }
+
+1 error found

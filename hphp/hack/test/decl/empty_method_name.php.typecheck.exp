@@ -1,2 +1,10 @@
-ERROR: File "empty_method_name.php", line 4, characters 19-19:
-Expected a method name (Parsing[1002])
+error: Parsing[1002] Expected a method name [1]
+
+empty_method_name.php:4:19
+2 | 
+3 | class A {
+4 |   public function () : void {}
+  |                   ^ [1]
+5 | }
+
+1 error found

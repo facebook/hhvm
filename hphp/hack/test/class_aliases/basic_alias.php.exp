@@ -1,2 +1,10 @@
-ERROR: File "basic_alias.php", line 10, characters 7-11:
-Unbound name: `Alias` (an object type) (Naming[2049])
+error: Naming[2049] Unbound name: `Alias` (an object type) [1]
+
+basic_alias.php:10:7
+ 8 | function foo(): void {
+ 9 |   new Original();
+10 |   new Alias();
+   |       ^^^^^ [1]
+11 | }
+
+1 error found

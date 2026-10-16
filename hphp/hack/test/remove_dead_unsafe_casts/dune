@@ -17,7 +17,7 @@
    --flags
    --remove-dead-unsafe-casts
    --error-format
-   plain)))
+   plain_highlighted)))
 
 (alias
  (name runtest)

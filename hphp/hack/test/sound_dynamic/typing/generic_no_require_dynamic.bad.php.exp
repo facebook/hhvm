@@ -1,24 +1,54 @@
-ERROR: File "generic_no_require_dynamic.bad.php", line 6, characters 41-42:
-Method  `__construct` in class `C` is not dynamically callable. (Typing[4426])
-  File "generic_no_require_dynamic.bad.php", line 6, characters 41-42:
-  Cannot write to property `x` through dynamic type because private property in `C` does not have an enforceable type
-  File "generic_no_require_dynamic.bad.php", line 6, characters 39-39:
-  Property `x` has type `T`
-ERROR: File "generic_no_require_dynamic.bad.php", line 12, characters 41-42:
-Method  `__construct` in class `D` is not dynamically callable. (Typing[4426])
-  File "generic_no_require_dynamic.bad.php", line 12, characters 41-42:
-  Cannot write to property `x` through dynamic type because private property in `D` does not have an enforceable type
-  File "generic_no_require_dynamic.bad.php", line 12, characters 39-39:
-  Property `x` has type `T`
-ERROR: File "generic_no_require_dynamic.bad.php", line 13, characters 45-45:
-Method  `set` in class `D` is not dynamically callable. (Typing[4426])
-  File "generic_no_require_dynamic.bad.php", line 13, characters 45-45:
-  Cannot write to property `x` through dynamic type because private property in `D` does not have an enforceable type
-  File "generic_no_require_dynamic.bad.php", line 12, characters 39-39:
-  Property `x` has type `T`
-ERROR: File "generic_no_require_dynamic.bad.php", line 17, characters 3-32:
-Typing error (Typing[4110])
-  File "generic_no_require_dynamic.bad.php", line 17, characters 26-32:
-  Expected `dynamic`
-  File "generic_no_require_dynamic.bad.php", line 17, characters 7-7:
-  Type `C<mixed>` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4426] Method  `__construct` in class `C` is not dynamically callable. [1]
+-> Cannot write to property `x` through dynamic type because private property in `C` does not have an enforceable type [1]
+-> Property `x` has type `T` [2]
+
+generic_no_require_dynamic.bad.php:6:41
+4 | <<__SupportDynamicType>>
+5 | class C<T> {
+6 |   public function __construct(private T $x) {}
+  |                                       ^ [2]
+  |                                         ^^ [1]
+7 |   public function get() : T { return $this->x; }
+8 | }
+
+error: Typing[4426] Method  `__construct` in class `D` is not dynamically callable. [1]
+-> Cannot write to property `x` through dynamic type because private property in `D` does not have an enforceable type [1]
+-> Property `x` has type `T` [2]
+
+generic_no_require_dynamic.bad.php:12:41
+10 | <<__SupportDynamicType>>
+11 | class D<T> {
+12 |   public function __construct(private T $x) {}
+   |                                       ^ [2]
+   |                                         ^^ [1]
+13 |   public function set(T $x) : void { $this->x = $x; }
+14 | }
+
+error: Typing[4426] Method  `set` in class `D` is not dynamically callable. [1]
+-> Cannot write to property `x` through dynamic type because private property in `D` does not have an enforceable type [1]
+-> Property `x` has type `T` [2]
+
+generic_no_require_dynamic.bad.php:13:45
+10 | <<__SupportDynamicType>>
+11 | class D<T> {
+12 |   public function __construct(private T $x) {}
+   |                                       ^ [2]
+13 |   public function set(T $x) : void { $this->x = $x; }
+   |                                             ^ [1]
+14 | }
+15 | 
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `C<mixed>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+generic_no_require_dynamic.bad.php:17:3
+15 | 
+16 | function f() : void {
+17 |   new C<mixed>(1) upcast dynamic;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |       ^ [3]
+   |                          ^^^^^^^ [2]
+18 | }
+
+4 errors found

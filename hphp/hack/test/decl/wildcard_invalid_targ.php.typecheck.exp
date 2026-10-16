@@ -1,44 +1,144 @@
-ERROR: File "wildcard_invalid_targ.php", line 6, characters 19-19:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid_targ.php", line 7, characters 21-21:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid_targ.php", line 9, characters 19-19:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid_targ.php", line 9, characters 30-30:
-Wildcard typehints are not allowed in this position (Naming[2084])
-ERROR: File "wildcard_invalid_targ.php", line 6, characters 19-19:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_targ.php", line 6, characters 19-19:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_targ.php", line 4, characters 15-16:
-  `Tc` is reified
-ERROR: File "wildcard_invalid_targ.php", line 7, characters 19-22:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_targ.php", line 7, characters 21-21:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_targ.php", line 4, characters 15-16:
-  `Tc` is reified
-ERROR: File "wildcard_invalid_targ.php", line 7, characters 21-21:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_targ.php", line 7, characters 21-21:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_targ.php", line 4, characters 15-16:
-  `Tc` is reified
-ERROR: File "wildcard_invalid_targ.php", line 9, characters 17-20:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_targ.php", line 9, characters 19-19:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_targ.php", line 4, characters 15-16:
-  `Tc` is reified
-ERROR: File "wildcard_invalid_targ.php", line 9, characters 19-19:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_targ.php", line 9, characters 19-19:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_targ.php", line 4, characters 15-16:
-  `Tc` is reified
-ERROR: File "wildcard_invalid_targ.php", line 9, characters 30-30:
-Invalid reified hint (Typing[4305])
-  File "wildcard_invalid_targ.php", line 9, characters 30-30:
-  This is a wildcard, it cannot be used as a reified type argument
-  File "wildcard_invalid_targ.php", line 4, characters 15-16:
-  `Tc` is reified
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid_targ.php:6:19
+4 | class C<reify Tc> {}
+5 | 
+6 | class D extends C<_> {}
+  |                   ^ [1]
+7 | class E extends C<C<_>> {}
+8 | 
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid_targ.php:7:21
+5 | 
+6 | class D extends C<_> {}
+7 | class E extends C<C<_>> {}
+  |                     ^ [1]
+8 | 
+9 | function test(C<C<_>> $c): C<_> {
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid_targ.php:9:19
+ 7 | class E extends C<C<_>> {}
+ 8 | 
+ 9 | function test(C<C<_>> $c): C<_> {
+   |                   ^ [1]
+10 |   return $c;
+11 | }
+
+error: Naming[2084] Wildcard typehints are not allowed in this position [1]
+
+wildcard_invalid_targ.php:9:30
+ 7 | class E extends C<C<_>> {}
+ 8 | 
+ 9 | function test(C<C<_>> $c): C<_> {
+   |                              ^ [1]
+10 |   return $c;
+11 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+wildcard_invalid_targ.php:6:19
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [2]
+5 | 
+6 | class D extends C<_> {}
+  |                   ^ [1]
+7 | class E extends C<C<_>> {}
+8 | 
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [2]
+-> `Tc` is reified [3]
+
+wildcard_invalid_targ.php:7:19
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [3]
+5 | 
+6 | class D extends C<_> {}
+7 | class E extends C<C<_>> {}
+  |                   ^^^^ [1]
+  |                     ^ [2]
+8 | 
+9 | function test(C<C<_>> $c): C<_> {
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+wildcard_invalid_targ.php:7:21
+2 | // Copyright 2004-present Facebook. All Rights Reserved.
+3 | 
+4 | class C<reify Tc> {}
+  |               ^^ [2]
+5 | 
+6 | class D extends C<_> {}
+7 | class E extends C<C<_>> {}
+  |                     ^ [1]
+8 | 
+9 | function test(C<C<_>> $c): C<_> {
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [2]
+-> `Tc` is reified [3]
+
+wildcard_invalid_targ.php:9:17
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<reify Tc> {}
+   |               ^^ [3]
+ 5 | 
+ 6 | class D extends C<_> {}
+ 7 | class E extends C<C<_>> {}
+ 8 | 
+ 9 | function test(C<C<_>> $c): C<_> {
+   |                 ^^^^ [1]
+   |                   ^ [2]
+10 |   return $c;
+11 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+wildcard_invalid_targ.php:9:19
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<reify Tc> {}
+   |               ^^ [2]
+ 5 | 
+ 6 | class D extends C<_> {}
+ 7 | class E extends C<C<_>> {}
+ 8 | 
+ 9 | function test(C<C<_>> $c): C<_> {
+   |                   ^ [1]
+10 |   return $c;
+11 | }
+
+error: Typing[4305] Invalid reified hint [1]
+-> This is a wildcard, it cannot be used as a reified type argument [1]
+-> `Tc` is reified [2]
+
+wildcard_invalid_targ.php:9:30
+ 2 | // Copyright 2004-present Facebook. All Rights Reserved.
+ 3 | 
+ 4 | class C<reify Tc> {}
+   |               ^^ [2]
+ 5 | 
+ 6 | class D extends C<_> {}
+ 7 | class E extends C<C<_>> {}
+ 8 | 
+ 9 | function test(C<C<_>> $c): C<_> {
+   |                              ^ [1]
+10 |   return $c;
+11 | }
+
+10 errors found

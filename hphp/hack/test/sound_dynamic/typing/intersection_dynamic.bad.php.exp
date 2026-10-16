@@ -1,18 +1,58 @@
-ERROR: File "intersection_dynamic.bad.php", line 12, characters 10-19:
-Invalid return type (Typing[4110])
-  File "intersection_dynamic.bad.php", line 10, characters 17-29:
-  Expected `((string & dynamic) | E)`
-  File "intersection_dynamic.bad.php", line 6, characters 22-23:
-  But got `dynamic`
-ERROR: File "intersection_dynamic.bad.php", line 12, characters 10-19:
-Invalid return type (Typing[4110])
-  File "intersection_dynamic.bad.php", line 10, characters 19-19:
-  Expected `E`
-  File "intersection_dynamic.bad.php", line 6, characters 22-23:
-  But got `dynamic`
-ERROR: File "intersection_dynamic.bad.php", line 12, characters 10-19:
-Invalid return type (Typing[4110])
-  File "intersection_dynamic.bad.php", line 10, characters 23-28:
-  Expected `string`
-  File "intersection_dynamic.bad.php", line 6, characters 22-23:
-  But got `dynamic`
+error: Typing[4110] Invalid return type [1]
+-> Expected `((string & dynamic) | E)` [2]
+-> But got `dynamic` [3]
+
+intersection_dynamic.bad.php:12:10
+ 4 | enum E : string as string { A = "A"; }
+ 5 | 
+ 6 | function getLikeE(): ~E {
+   |                      ^^ [3]
+ 7 |   return E::A;
+ 8 | }
+ 9 | 
+10 | function foo(): (~E & string) {
+   |                 ^^^^^^^^^^^^^ [2]
+11 |   // Should fail
+12 |   return getLikeE();
+   |          ^^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `E` [2]
+-> But got `dynamic` [3]
+
+intersection_dynamic.bad.php:12:10
+ 4 | enum E : string as string { A = "A"; }
+ 5 | 
+ 6 | function getLikeE(): ~E {
+   |                      ^^ [3]
+ 7 |   return E::A;
+ 8 | }
+ 9 | 
+10 | function foo(): (~E & string) {
+   |                   ^ [2]
+11 |   // Should fail
+12 |   return getLikeE();
+   |          ^^^^^^^^^^ [1]
+13 | }
+
+error: Typing[4110] Invalid return type [1]
+-> Expected `string` [2]
+-> But got `dynamic` [3]
+
+intersection_dynamic.bad.php:12:10
+ 4 | enum E : string as string { A = "A"; }
+ 5 | 
+ 6 | function getLikeE(): ~E {
+   |                      ^^ [3]
+ 7 |   return E::A;
+ 8 | }
+ 9 | 
+10 | function foo(): (~E & string) {
+   |                       ^^^^^^ [2]
+11 |   // Should fail
+12 |   return getLikeE();
+   |          ^^^^^^^^^^ [1]
+13 | }
+
+3 errors found

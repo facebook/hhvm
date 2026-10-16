@@ -1,8 +1,61 @@
-ERROR: File "const_attribute.php", line 4, characters 7-7:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-ERROR: File "const_attribute.php", line 16, characters 7-7:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-ERROR: File "const_attribute.php", line 25, characters 7-7:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-ERROR: File "const_attribute.php", line 3, characters 1-147:
-Classes, interfaces, traits and enums may not be declared `__Const` (Parsing[1002])
+error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
+
+const_attribute.php:4:7
+2 | 
+3 | <<__Const>>
+4 | class A {
+  |       ^ [1]
+5 |   public int $x;
+6 | 
+
+error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
+
+const_attribute.php:16:7
+14 | }
+15 | 
+16 | class B {
+   |       ^ [1]
+17 |   <<__Const>>
+18 |   public int $x;
+
+error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
+
+const_attribute.php:25:7
+23 | }
+24 | 
+25 | class C {
+   |       ^ [1]
+26 |   public function __construct(<<__Const>> private int $x) {}
+27 | }
+
+error: Parsing[1002] Classes, interfaces, traits and enums may not be declared `__Const` [1]
+
+const_attribute.php:3:1
+ 1 | <?hh
+ 2 | 
+ 3 | <<__Const>>
+   | ^^^^^^^^^^^ [1]
+ 4 | class A {
+   | ^^^^^^^^^ [1]
+ 5 |   public int $x;
+   |   ^^^^^^^^^^^^^^ [1]
+ 6 | 
+ 7 |   <<__Const>>
+   |   ^^^^^^^^^^^ [1]
+ 8 |   public int $y;
+   |   ^^^^^^^^^^^^^^ [1]
+ 9 | 
+10 |   public function __construct() {
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+11 |     $this->x = 4;
+   |     ^^^^^^^^^^^^^ [1]
+12 |     $this->y = 5;
+   |     ^^^^^^^^^^^^^ [1]
+13 |   }
+   |   ^ [1]
+14 | }
+   | ^ [1]
+15 | 
+16 | class B {
+
+4 errors found

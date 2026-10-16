@@ -1,8 +1,29 @@
-ERROR: File "classes.php", line 9, characters 19-29:
-Class `MyClass` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-  File "classes.php", line 5, characters 17-33:
-  `$this->instanceProperty` is not initialized.
-  File "classes.php", line 6, characters 17-34:
-  `$this->protectedProperty` is not initialized.
-ERROR: File "classes.php", line 4, characters 25-39:
-Please assign a value (Typing[4055])
+error: NastCheck[3015] Class `MyClass` has properties that cannot be null and aren't always set in `__construct`. [1]
+-> `$this->instanceProperty` is not initialized. [2]
+-> `$this->protectedProperty` is not initialized. [3]
+
+classes.php:9:19
+ 3 | class MyClass {
+ 4 |   private static string $staticProperty;
+ 5 |   public string $instanceProperty;
+   |                 ^^^^^^^^^^^^^^^^^ [2]
+ 6 |   protected int $protectedProperty;
+   |                 ^^^^^^^^^^^^^^^^^^ [3]
+ 7 |   <<__LateInit>> public arraykey $p;
+ 8 | 
+ 9 |   public function __construct(): void {}
+   |                   ^^^^^^^^^^^ [1]
+10 | 
+11 |   private function privateMethod(): void {}
+
+error: Typing[4055] Please assign a value [1]
+
+classes.php:4:25
+2 | 
+3 | class MyClass {
+4 |   private static string $staticProperty;
+  |                         ^^^^^^^^^^^^^^^ [1]
+5 |   public string $instanceProperty;
+6 |   protected int $protectedProperty;
+
+2 errors found

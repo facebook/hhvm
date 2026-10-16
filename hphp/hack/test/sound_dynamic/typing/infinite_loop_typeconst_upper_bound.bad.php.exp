@@ -1,4 +1,21 @@
-WARN: File "infinite_loop_typeconst_upper_bound.bad.php", line 21, characters 7-20:
-This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. (Warn[12036])
-ERROR: File "infinite_loop_typeconst_upper_bound.bad.php", line 14, characters 31-37:
-Unbound name: `NoExist` (Naming[2049])
+warning: Warn[12036] This expression has an unresolved type due to a limitation of the typechecker. It is silently compatible with every type, so it can be passed to or returned from any function without triggering a type error, potentially hiding bugs. Please post in the support group for further guidance. [1]
+
+infinite_loop_typeconst_upper_bound.bad.php:21:7
+19 |     if ($i is C1<_>) {
+20 |     } else if ($i is C2<_>) {
+21 |       $this->empty();
+   |       ^^^^^^^^^^^^^^ [1]
+22 |     }
+23 |   }
+
+error: Naming[2049] Unbound name: `NoExist` [1]
+
+infinite_loop_typeconst_upper_bound.bad.php:14:31
+12 | 
+13 | trait T {
+14 |   abstract const type TEnt as NoExist;
+   |                               ^^^^^^^ [1]
+15 | 
+16 |   final protected function empty(): this::TEnt::TViewerContext {}
+
+2 errors found

@@ -1,6 +1,29 @@
-WARN: File "check_sdt_meth.bad.php", line 10, characters 9-20:
-This `is` check is always `true`. The expression on the left has type `vec<int>` which is a subtype of `vec<int>`. (Warn[12009])
-ERROR: File "check_sdt_meth.bad.php", line 15, characters 25-32:
-Too many positional arguments (expected 1 but got 2) (Typing[4105])
-  File "check_sdt_meth.bad.php", line 5, characters 19-19:
-  Definition is here
+warning: Warn[12009] This `is` check is always `true`. The expression on the left has type `vec<int>` which is a subtype of `vec<int>`. [1]
+
+check_sdt_meth.bad.php:10:9
+ 8 | class C {
+ 9 |   public function g(vec<int> $v) : vec<int> {
+10 |     if ($v is vec<_>) {
+   |         ^^^^^^^^^^^^ [1]
+11 |       return vec[4];
+12 |     }
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+check_sdt_meth.bad.php:15:25
+ 3 | <<__SupportDynamicType>>
+ 4 | class D {
+ 5 |   public function f(vec<int> $x) : vec<int> { return $x; } }
+   |                   ^ [2]
+ 6 | 
+ 7 | <<__SupportDynamicType>>
+   :
+13 |     else {
+14 |       // $v : nothing in first check and $v : dynamic & not vec in second
+15 |       return (new D())->f($v, 4);
+   |                         ^^^^^^^^ [1]
+16 |     }
+17 |   }
+
+2 errors found

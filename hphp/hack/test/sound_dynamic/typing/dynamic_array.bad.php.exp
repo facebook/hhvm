@@ -1,50 +1,155 @@
-WARN: File "dynamic_array.bad.php", line 6, characters 3-4:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic_array.bad.php", line 5, characters 25-31:
-  This expression has type `dynamic`
-WARN: File "dynamic_array.bad.php", line 7, characters 3-4:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic_array.bad.php", line 5, characters 25-31:
-  This expression has type `dynamic`
-WARN: File "dynamic_array.bad.php", line 8, characters 3-4:
-Appending to a value of type `dynamic` (Warn[12040])
-  File "dynamic_array.bad.php", line 5, characters 25-31:
-  This expression has type `dynamic`
-WARN: File "dynamic_array.bad.php", line 9, characters 3-4:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic_array.bad.php", line 5, characters 25-31:
-  This expression has type `dynamic`
-WARN: File "dynamic_array.bad.php", line 10, characters 3-4:
-Indexing into a value of type `dynamic` (Warn[12040])
-  File "dynamic_array.bad.php", line 5, characters 25-31:
-  This expression has type `dynamic`
-ERROR: File "dynamic_array.bad.php", line 6, characters 3-12:
-Typing error (Typing[4110])
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Expected `dynamic`
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "dynamic_array.bad.php", line 7, characters 3-13:
-Typing error (Typing[4110])
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Expected `dynamic`
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "dynamic_array.bad.php", line 8, characters 3-11:
-Typing error (Typing[4110])
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Expected `dynamic`
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "dynamic_array.bad.php", line 9, characters 3-8:
-Typing error (Typing[4110])
-  File "dynamic_array.bad.php", line 5, characters 25-31:
-  Expected `dynamic`
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "dynamic_array.bad.php", line 10, characters 3-12:
-Typing error (Typing[4110])
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Expected `dynamic`
-  File "dynamic_array.bad.php", line 5, characters 37-37:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_array.bad.php:6:3
+3 | class C {}
+4 | 
+5 | function test_dyn_array(dynamic $d, C $c) : void {
+  |                         ^^^^^^^ [2]
+6 |   $d[1] = $c;
+  |   ^^ [1]
+7 |   $d[$d] = $c;
+8 |   $d[] = $c;
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_array.bad.php:7:3
+3 | class C {}
+4 | 
+5 | function test_dyn_array(dynamic $d, C $c) : void {
+  |                         ^^^^^^^ [2]
+6 |   $d[1] = $c;
+7 |   $d[$d] = $c;
+  |   ^^ [1]
+8 |   $d[] = $c;
+9 |   $d[$c];
+
+warning: Warn[12040] Appending to a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_array.bad.php:8:3
+ 3 | class C {}
+ 4 | 
+ 5 | function test_dyn_array(dynamic $d, C $c) : void {
+   |                         ^^^^^^^ [2]
+ 6 |   $d[1] = $c;
+ 7 |   $d[$d] = $c;
+ 8 |   $d[] = $c;
+   |   ^^ [1]
+ 9 |   $d[$c];
+10 |   $d[$c] = 1;
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_array.bad.php:9:3
+ 3 | class C {}
+ 4 | 
+ 5 | function test_dyn_array(dynamic $d, C $c) : void {
+   |                         ^^^^^^^ [2]
+ 6 |   $d[1] = $c;
+ 7 |   $d[$d] = $c;
+ 8 |   $d[] = $c;
+ 9 |   $d[$c];
+   |   ^^ [1]
+10 |   $d[$c] = 1;
+11 | }
+
+warning: Warn[12040] Indexing into a value of type `dynamic` [1]
+-> This expression has type `dynamic` [2]
+
+dynamic_array.bad.php:10:3
+ 3 | class C {}
+ 4 | 
+ 5 | function test_dyn_array(dynamic $d, C $c) : void {
+   |                         ^^^^^^^ [2]
+ 6 |   $d[1] = $c;
+ 7 |   $d[$d] = $c;
+ 8 |   $d[] = $c;
+ 9 |   $d[$c];
+10 |   $d[$c] = 1;
+   |   ^^ [1]
+11 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+dynamic_array.bad.php:6:3
+3 | class C {}
+4 | 
+5 | function test_dyn_array(dynamic $d, C $c) : void {
+  |                                     ^ [2]
+6 |   $d[1] = $c;
+  |   ^^^^^^^^^^ [1]
+7 |   $d[$d] = $c;
+8 |   $d[] = $c;
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+dynamic_array.bad.php:7:3
+3 | class C {}
+4 | 
+5 | function test_dyn_array(dynamic $d, C $c) : void {
+  |                                     ^ [2]
+6 |   $d[1] = $c;
+7 |   $d[$d] = $c;
+  |   ^^^^^^^^^^^ [1]
+8 |   $d[] = $c;
+9 |   $d[$c];
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+dynamic_array.bad.php:8:3
+ 3 | class C {}
+ 4 | 
+ 5 | function test_dyn_array(dynamic $d, C $c) : void {
+   |                                     ^ [2]
+ 6 |   $d[1] = $c;
+ 7 |   $d[$d] = $c;
+ 8 |   $d[] = $c;
+   |   ^^^^^^^^^ [1]
+ 9 |   $d[$c];
+10 |   $d[$c] = 1;
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+dynamic_array.bad.php:9:3
+ 3 | class C {}
+ 4 | 
+ 5 | function test_dyn_array(dynamic $d, C $c) : void {
+   |                         ^^^^^^^ [2]
+   |                                     ^ [3]
+ 6 |   $d[1] = $c;
+ 7 |   $d[$d] = $c;
+ 8 |   $d[] = $c;
+ 9 |   $d[$c];
+   |   ^^^^^^ [1]
+10 |   $d[$c] = 1;
+11 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+dynamic_array.bad.php:10:3
+ 3 | class C {}
+ 4 | 
+ 5 | function test_dyn_array(dynamic $d, C $c) : void {
+   |                                     ^ [2]
+ 6 |   $d[1] = $c;
+ 7 |   $d[$d] = $c;
+ 8 |   $d[] = $c;
+ 9 |   $d[$c];
+10 |   $d[$c] = 1;
+   |   ^^^^^^^^^^ [1]
+11 | }
+
+10 errors found

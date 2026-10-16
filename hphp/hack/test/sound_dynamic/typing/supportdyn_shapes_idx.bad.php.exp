@@ -1,6 +1,19 @@
-ERROR: File "supportdyn_shapes_idx.bad.php", line 16, characters 34-40:
-Invalid argument (Typing[4110])
-  File "supportdyn_shapes_idx.bad.php", line 11, characters 20-32:
-  Expected `dynamic`
-  File "supportdyn_shapes_idx.bad.php", line 16, characters 38-38:
-  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+supportdyn_shapes_idx.bad.php:16:34
+ 9 | type TS = supportdyn<shape('a' => int, ?'b' => int, 'c' => C, ?'d' => supportdyn<C>, ...)>;
+10 | 
+11 | function expectSDC(supportdyn<C> $x):void { }
+   |                    ^^^^^^^^^^^^^ [2]
+12 | 
+13 | function foo(TS $s):void {
+14 |   // This shold be rejected because the result of the idx
+15 |   // can be C, which is not supportdyn
+16 |   expectSDC(Shapes::idx($s, 'd', new C()));
+   |                                  ^^^^^^^ [1]
+   |                                      ^ [3]
+17 | }
+
+1 error found

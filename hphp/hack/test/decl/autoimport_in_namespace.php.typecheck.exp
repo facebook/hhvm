@@ -1,4 +1,21 @@
-ERROR: File "autoimport_in_namespace.php", line 5, characters 12-23:
-Unbound name: `Traversable` (Naming[2049])
-ERROR: File "autoimport_in_namespace.php", line 9, characters 14-25:
-Unbound name: `Traversable` (Naming[2049])
+error: Naming[2049] Unbound name: `Traversable` [1]
+
+autoimport_in_namespace.php:5:12
+3 | namespace {
+4 |   type A = Traversable<int>;
+5 |   type B = \Traversable<int>;
+  |            ^^^^^^^^^^^^ [1]
+6 | 
+7 |   namespace NS {
+
+error: Naming[2049] Unbound name: `Traversable` [1]
+
+autoimport_in_namespace.php:9:14
+ 7 |   namespace NS {
+ 8 |     type A = Traversable<int>;
+ 9 |     type B = \Traversable<int>;
+   |              ^^^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+2 errors found

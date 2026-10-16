@@ -1,6 +1,17 @@
-ERROR: File "implemented_by_wrong_param_count.hhi", line 5, characters 21-40:
-The method must be implemented by a function with a compatible type. (Typing[4041])
-  File "implemented_by_wrong_param_count.hhi", line 2, characters 10-26:
-  Too many mandatory arguments (expected 2 but got 3)
-  File "implemented_by_wrong_param_count.hhi", line 6, characters 19-26:
-  Because of this definition
+error: Typing[4041] The method must be implemented by a function with a compatible type. [1]
+-> Too many mandatory arguments (expected 2 but got 3) [2]
+-> Because of this definition [3]
+
+implemented_by_wrong_param_count.hhi:5:21
+1 | <?hh
+2 | function my_implementation(C $c, ~int $x, int $y): int;
+  |          ^^^^^^^^^^^^^^^^^ [2]
+3 | 
+4 | final class C {
+5 |   <<__ImplementedBy('\my_implementation')>>
+  |                     ^^^^^^^^^^^^^^^^^^^^ [1]
+6 |   public function myMethod(int $x): int;
+  |                   ^^^^^^^^ [3]
+7 | }
+
+1 error found

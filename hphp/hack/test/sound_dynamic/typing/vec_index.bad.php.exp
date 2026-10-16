@@ -1,24 +1,71 @@
-ERROR: File "vec_index.bad.php", line 7, characters 21-23:
-Invalid assignment (Typing[4110])
-  File "vec_index.bad.php", line 4, characters 43-45:
-  Expected `int`
-  File "vec_index.bad.php", line 7, characters 21-23:
-  But got `string`
-ERROR: File "vec_index.bad.php", line 8, characters 21-22:
-Invalid assignment (Typing[4110])
-  File "vec_index.bad.php", line 4, characters 39-46:
-  Expected `vec<int>`
-  File "vec_index.bad.php", line 7, characters 5-23:
-  But got `(_ & _)`
-ERROR: File "vec_index.bad.php", line 8, characters 21-22:
-Invalid assignment (Typing[4110])
-  File "vec_index.bad.php", line 4, characters 43-45:
-  Expected `int`
-  File "vec_index.bad.php", line 6, characters 21-27:
-  But got `dynamic`
-ERROR: File "vec_index.bad.php", line 8, characters 21-22:
-Invalid assignment (Typing[4110])
-  File "vec_index.bad.php", line 4, characters 43-45:
-  Expected `int`
-  File "vec_index.bad.php", line 7, characters 21-23:
-  But got `string`
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+vec_index.bad.php:7:21
+2 | 
+3 | class C {
+4 |   public function __construct(private vec<int> $v1) {}
+  |                                           ^^^ [2]
+5 | 
+6 |   public function f(dynamic $d): void {
+7 |     $this->v1[$d] = "s";
+  |                     ^^^ [1]
+8 |     $this->v1[$d] = $d;
+9 |   }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `vec<int>` [2]
+-> But got `(_ & _)` [3]
+
+vec_index.bad.php:8:21
+ 2 | 
+ 3 | class C {
+ 4 |   public function __construct(private vec<int> $v1) {}
+   |                                       ^^^^^^^^ [2]
+ 5 | 
+ 6 |   public function f(dynamic $d): void {
+ 7 |     $this->v1[$d] = "s";
+   |     ^^^^^^^^^^^^^^^^^^^ [3]
+ 8 |     $this->v1[$d] = $d;
+   |                     ^^ [1]
+ 9 |   }
+10 | }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `dynamic` [3]
+
+vec_index.bad.php:8:21
+ 2 | 
+ 3 | class C {
+ 4 |   public function __construct(private vec<int> $v1) {}
+   |                                           ^^^ [2]
+ 5 | 
+ 6 |   public function f(dynamic $d): void {
+   |                     ^^^^^^^ [3]
+ 7 |     $this->v1[$d] = "s";
+ 8 |     $this->v1[$d] = $d;
+   |                     ^^ [1]
+ 9 |   }
+10 | }
+
+error: Typing[4110] Invalid assignment [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+vec_index.bad.php:8:21
+ 2 | 
+ 3 | class C {
+ 4 |   public function __construct(private vec<int> $v1) {}
+   |                                           ^^^ [2]
+ 5 | 
+ 6 |   public function f(dynamic $d): void {
+ 7 |     $this->v1[$d] = "s";
+   |                     ^^^ [3]
+ 8 |     $this->v1[$d] = $d;
+   |                     ^^ [1]
+ 9 |   }
+10 | }
+
+4 errors found

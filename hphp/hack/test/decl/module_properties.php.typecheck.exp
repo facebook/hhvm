@@ -1,4 +1,18 @@
-ERROR: File "module_properties.php--f.php", line 4, characters 7-7:
-Cannot access an internal element from module `A` in the default module (Typing[4444])
-  File "module_properties.php--A.php", line 8, characters 12-14:
-  This is from module `A`
+error: Typing[4444] Cannot access an internal element from module `A` in the default module [1]
+-> This is from module `A` [2]
+
+module_properties.php--f.php:4:7
+2 | 
+3 | function f(A $a): void {
+4 |   $a->x = 123;
+  |       ^ [1]
+5 | }
+
+module_properties.php--A.php:8:12
+6 | 
+7 | class A {
+8 |   internal int $x = 0;
+  |            ^^^ [2]
+9 | }
+
+1 error found

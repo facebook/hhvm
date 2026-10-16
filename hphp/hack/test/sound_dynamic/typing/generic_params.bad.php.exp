@@ -1,31 +1,69 @@
-ERROR: File "generic_params.bad.php", line 18, characters 3-32:
-Typing error (Typing[4110])
-  File "generic_params.bad.php", line 18, characters 26-32:
-  Expected `dynamic`
-  File "generic_params.bad.php", line 18, characters 7-9:
-  Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "generic_params.bad.php", line 19, characters 3-43:
-Typing error (Typing[4110])
-  File "generic_params.bad.php", line 19, characters 37-43:
-  Expected `dynamic`
-  File "generic_params.bad.php", line 19, characters 7-15:
-  Type `SimpleBox<string>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "generic_params.bad.php", line 20, characters 3-35:
-Typing error (Typing[4110])
-  File "generic_params.bad.php", line 20, characters 29-35:
-  Expected `dynamic`
-  File "generic_params.bad.php", line 20, characters 7-12:
-  Type `KeyBox<int>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "generic_params.bad.php", line 29, characters 7-16:
-Class AnotherBox must support dynamic at least as often as Getter:
-Getter<vec<T>> is subtype of dynamic implies AnotherBox<T> is subtype of dynamic (Typing[4433])
-  File "generic_params.bad.php", line 29, characters 7-16:
-  Expected `dynamic`
-  File "generic_params.bad.php", line 29, characters 7-16:
-  Type `AnotherBox<T>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "generic_params.bad.php", line 30, characters 46-50:
-Method  `__construct` in class `AnotherBox` is not dynamically callable. (Typing[4426])
-  File "generic_params.bad.php", line 30, characters 46-50:
-  Cannot write to property `item` through dynamic type because private property in `AnotherBox` does not have an enforceable type
-  File "generic_params.bad.php", line 30, characters 39-44:
-  Property `item` has type `vec<T>`
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+generic_params.bad.php:18:3
+16 | 
+17 | function testit():void {
+18 |   new Box<int>(3) upcast dynamic;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |       ^^^ [3]
+   |                          ^^^^^^^ [2]
+19 |   new SimpleBox<string>("a") upcast dynamic;
+20 |   new KeyBox<int>(3) upcast dynamic;
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `SimpleBox<string>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+generic_params.bad.php:19:3
+17 | function testit():void {
+18 |   new Box<int>(3) upcast dynamic;
+19 |   new SimpleBox<string>("a") upcast dynamic;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |       ^^^^^^^^^ [3]
+   |                                     ^^^^^^^ [2]
+20 |   new KeyBox<int>(3) upcast dynamic;
+21 | }
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `KeyBox<int>` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+generic_params.bad.php:20:3
+18 |   new Box<int>(3) upcast dynamic;
+19 |   new SimpleBox<string>("a") upcast dynamic;
+20 |   new KeyBox<int>(3) upcast dynamic;
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |       ^^^^^^ [3]
+   |                             ^^^^^^^ [2]
+21 | }
+22 | 
+
+error: Typing[4433] Class AnotherBox must support dynamic at least as often as Getter:
+Getter<vec<T>> is subtype of dynamic implies AnotherBox<T> is subtype of dynamic [1]
+-> Expected `dynamic` [1]
+-> Type `AnotherBox<T>` is not a subtype of `dynamic` under dynamic-aware subtyping [1]
+
+generic_params.bad.php:29:7
+27 | 
+28 | <<__SupportDynamicType>>
+29 | class AnotherBox<<<__RequireDynamic>> T> implements Getter<vec<T>> {
+   |       ^^^^^^^^^^ [1]
+30 |   public function __construct(private vec<T> $item) { }
+31 |   public function get(): vec<T> { return $this->item; }
+
+error: Typing[4426] Method  `__construct` in class `AnotherBox` is not dynamically callable. [1]
+-> Cannot write to property `item` through dynamic type because private property in `AnotherBox` does not have an enforceable type [1]
+-> Property `item` has type `vec<T>` [2]
+
+generic_params.bad.php:30:46
+28 | <<__SupportDynamicType>>
+29 | class AnotherBox<<<__RequireDynamic>> T> implements Getter<vec<T>> {
+30 |   public function __construct(private vec<T> $item) { }
+   |                                       ^^^^^^ [2]
+   |                                              ^^^^^ [1]
+31 |   public function get(): vec<T> { return $this->item; }
+32 |   public function set(T $x): void { $this->item = vec[$x]; }
+
+5 errors found

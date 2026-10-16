@@ -1,2 +1,11 @@
-WARN: File "namespace_import.php", line 18, characters 14-24:
-Class `NS1\NS2\C` in sealed allowlist for `D`, but does not extend `D` (Warn[12035])
+warning: Warn[12035] Class `NS1\NS2\C` in sealed allowlist for `D`, but does not extend `D` [1]
+
+namespace_import.php:18:14
+16 |     return 4;
+17 |   }
+18 |   <<__Sealed(NS\C::class)>>
+   |              ^^^^^^^^^^^ [1]
+19 |   class D {}
+20 | }
+
+1 error found

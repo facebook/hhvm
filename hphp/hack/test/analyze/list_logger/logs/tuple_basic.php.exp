@@ -1,5 +1,21 @@
 @list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"tuple_basic.php","line":5,"char_start":18,"char_end":19},"lhs_code":"list($a, $b)","total_lvalue_count":2,"is_generated":false}
-WARN: File "tuple_basic.php", line 6, characters 3-11:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-WARN: File "tuple_basic.php", line 7, characters 3-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `string` which is a subtype of `string`. (Warn[12011])
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. [1]
+
+tuple_basic.php:6:3
+4 |   $t = tuple(1, "hello");
+5 |   list($a, $b) = $t;
+6 |   $a as int;
+  |   ^^^^^^^^^ [1]
+7 |   $b as string;
+8 | }
+
+warning: Warn[12011] This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `string` which is a subtype of `string`. [1]
+
+tuple_basic.php:7:3
+5 |   list($a, $b) = $t;
+6 |   $a as int;
+7 |   $b as string;
+  |   ^^^^^^^^^^^^ [1]
+8 | }
+
+2 errors found

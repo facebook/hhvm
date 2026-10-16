@@ -1,10 +1,22 @@
-ERROR: File "variadic_argument_1.bad.php", line 9, characters 13-17:
-Method  `foo` in class `C` is not dynamically callable. (Typing[4110])
-  File "variadic_argument_1.bad.php", line 9, characters 13-17:
-  Invalid argument
-  File "variadic_argument_1.bad.php", line 4, characters 18-27:
-  Expected `(int, int)`
-  File "variadic_argument_1.bad.php", line 9, characters 13-17:
-  But got `dynamic`
-  File "variadic_argument_1.bad.php", line 8, characters 37-38:
-    from this definition (variadic argument)
+error: Typing[4110] Method  `foo` in class `C` is not dynamically callable. [1]
+-> Invalid argument [1]
+-> Expected `(int, int)` [2]
+-> But got `dynamic` [1]
+->   from this definition (variadic argument) [3]
+
+variadic_argument_1.bad.php:9:13
+ 2 | // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+ 3 | 
+ 4 | function f_tuple((int, int) $t) : void {}
+   |                  ^^^^^^^^^^ [2]
+ 5 | 
+ 6 | <<__SupportDynamicType>>
+ 7 | class C {
+ 8 |   public function foo((int, int) ...$x) : void {
+   |                                     ^^ [3]
+ 9 |     f_tuple($x[0]);
+   |             ^^^^^ [1]
+10 |   }
+11 | }
+
+1 error found

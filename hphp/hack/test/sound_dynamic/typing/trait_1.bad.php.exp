@@ -1,6 +1,19 @@
-ERROR: File "trait_1.bad.php", line 7, characters 7-7:
-Method  `bar` in class `C` is not dynamically callable. (Typing[4402])
-  File "trait_1.bad.php", line 12, characters 19-21:
-  Method `bar` is defined in the super class `T` and is not overridden
-  File "trait_1.bad.php", line 7, characters 7-7:
-  A parameter of `bar` is not enforceable. Try adding the <<__SupportDynamicType>> attribute to the method to check if its code is safe for dynamic calling.
+error: Typing[4402] Method  `bar` in class `C` is not dynamically callable. [1]
+-> Method `bar` is defined in the super class `T` and is not overridden [2]
+-> A parameter of `bar` is not enforceable. Try adding the <<__SupportDynamicType>> attribute to the method to check if its code is safe for dynamic calling. [1]
+
+trait_1.bad.php:7:7
+ 5 | 
+ 6 | <<__SupportDynamicType>>
+ 7 | class C {
+   |       ^ [1]
+ 8 |   use T;
+ 9 | }
+10 | 
+11 | trait T {
+12 |   public function bar(Box<int> $x) : Box<int> {
+   |                   ^^^ [2]
+13 |     return $x;
+14 |   }
+
+1 error found

@@ -1,24 +1,87 @@
-ERROR: File "supportdyn_ho_run.bad.php", line 14, characters 10-11:
-Invalid argument (Typing[4110])
-  File "supportdyn_ho_run.bad.php", line 10, characters 38-43:
-  Expected `string`
-  File "supportdyn_ho_run.bad.php", line 6, characters 8-10:
-  But got `int`
-ERROR: File "supportdyn_ho_run.bad.php", line 15, characters 3-8:
-Too few positional arguments (required 2 but got 1) (Typing[4104])
-  File "supportdyn_ho_run.bad.php", line 10, characters 3-53:
-  Definition is here
-ERROR: File "supportdyn_ho_run.bad.php", line 16, characters 6-7:
-Typing error (Typing[4110])
-  File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Expected `dynamic`
-  File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "supportdyn_ho_run.bad.php", line 17, characters 6-7:
-Typing error (Typing[4110])
-  File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Expected `dynamic`
-  File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "supportdyn_ho_run.bad.php", line 18, characters 3-8:
-This call is invalid, this is not a function, it is a mixed value (Typing[4009])
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+supportdyn_ho_run.bad.php:14:10
+ 4 | 
+ 5 | function f(
+ 6 |   ~vec<int> $x,
+   |        ^^^ [3]
+ 7 |   ~vec<string> $y,
+ 8 |   vec<string> $y2,
+ 9 |   ~vec<C> $c,
+10 |   supportdyn<(function(vec<int>, vec<string>): bool)> $g,
+   |                                      ^^^^^^ [2]
+11 |   supportdyn<(function(vec<C>, vec<string>): bool)> $h,
+12 |   supportdyn<mixed> $m,
+13 | ): void {
+14 |   $g($x, $x);
+   |          ^^ [1]
+15 |   $g($x);
+16 |   $h($c, $y);
+
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+supportdyn_ho_run.bad.php:15:3
+ 8 |   vec<string> $y2,
+ 9 |   ~vec<C> $c,
+10 |   supportdyn<(function(vec<int>, vec<string>): bool)> $g,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+11 |   supportdyn<(function(vec<C>, vec<string>): bool)> $h,
+12 |   supportdyn<mixed> $m,
+13 | ): void {
+14 |   $g($x, $x);
+15 |   $g($x);
+   |   ^^^^^^ [1]
+16 |   $h($c, $y);
+17 |   $h($c, $y2);
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+supportdyn_ho_run.bad.php:16:6
+ 7 |   ~vec<string> $y,
+ 8 |   vec<string> $y2,
+ 9 |   ~vec<C> $c,
+   |   ^^^^^^^ [2]
+10 |   supportdyn<(function(vec<int>, vec<string>): bool)> $g,
+11 |   supportdyn<(function(vec<C>, vec<string>): bool)> $h,
+   :
+14 |   $g($x, $x);
+15 |   $g($x);
+16 |   $h($c, $y);
+   |      ^^ [1]
+17 |   $h($c, $y2);
+18 |   $m($c);
+
+error: Typing[4110] Typing error [1]
+-> Expected `dynamic` [2]
+-> Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping [2]
+
+supportdyn_ho_run.bad.php:17:6
+ 7 |   ~vec<string> $y,
+ 8 |   vec<string> $y2,
+ 9 |   ~vec<C> $c,
+   |   ^^^^^^^ [2]
+10 |   supportdyn<(function(vec<int>, vec<string>): bool)> $g,
+11 |   supportdyn<(function(vec<C>, vec<string>): bool)> $h,
+   :
+15 |   $g($x);
+16 |   $h($c, $y);
+17 |   $h($c, $y2);
+   |      ^^ [1]
+18 |   $m($c);
+19 | }
+
+error: Typing[4009] This call is invalid, this is not a function, it is a mixed value [1]
+
+supportdyn_ho_run.bad.php:18:3
+16 |   $h($c, $y);
+17 |   $h($c, $y2);
+18 |   $m($c);
+   |   ^^^^^^ [1]
+19 | }
+
+5 errors found

@@ -1,4 +1,14 @@
-ERROR: File "duplicate_siblings.bad.php", line 14, characters 7-7:
-H cannot re-inherit constant A from G (Typing[4389])
-  File "duplicate_siblings.bad.php", line 12, characters 6-6:
-  because it already inherited it via F
+error: Typing[4389] H cannot re-inherit constant A from G [1]
+-> because it already inherited it via F [2]
+
+duplicate_siblings.bad.php:14:7
+10 | }
+11 | 
+12 | enum H: int {
+   |      ^ [2]
+13 |   use F;
+14 |   use G;
+   |       ^ [1]
+15 | }
+
+1 error found

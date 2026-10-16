@@ -1,12 +1,61 @@
-ERROR: File "classname_in_namespace.php", line 4, characters 22-22:
-Unbound name: `C` (Naming[2049])
-ERROR: File "classname_in_namespace.php", line 5, characters 12-21:
-Unbound name: `classname` (Naming[2049])
-ERROR: File "classname_in_namespace.php", line 5, characters 23-23:
-Unbound name: `C` (Naming[2049])
-ERROR: File "classname_in_namespace.php", line 8, characters 24-24:
-Unbound name: `NS\C` (Naming[2049])
-ERROR: File "classname_in_namespace.php", line 9, characters 14-23:
-Unbound name: `classname` (Naming[2049])
-ERROR: File "classname_in_namespace.php", line 9, characters 25-25:
-Unbound name: `NS\C` (Naming[2049])
+error: Naming[2049] Unbound name: `C` [1]
+
+classname_in_namespace.php:4:22
+2 | 
+3 | namespace {
+4 |   type A = classname<C>;
+  |                      ^ [1]
+5 |   type B = \classname<C>;
+6 | 
+
+error: Naming[2049] Unbound name: `classname` [1]
+
+classname_in_namespace.php:5:12
+3 | namespace {
+4 |   type A = classname<C>;
+5 |   type B = \classname<C>;
+  |            ^^^^^^^^^^ [1]
+6 | 
+7 |   namespace NS {
+
+error: Naming[2049] Unbound name: `C` [1]
+
+classname_in_namespace.php:5:23
+3 | namespace {
+4 |   type A = classname<C>;
+5 |   type B = \classname<C>;
+  |                       ^ [1]
+6 | 
+7 |   namespace NS {
+
+error: Naming[2049] Unbound name: `NS\C` [1]
+
+classname_in_namespace.php:8:24
+ 6 | 
+ 7 |   namespace NS {
+ 8 |     type A = classname<C>;
+   |                        ^ [1]
+ 9 |     type B = \classname<C>;
+10 |   }
+
+error: Naming[2049] Unbound name: `classname` [1]
+
+classname_in_namespace.php:9:14
+ 7 |   namespace NS {
+ 8 |     type A = classname<C>;
+ 9 |     type B = \classname<C>;
+   |              ^^^^^^^^^^ [1]
+10 |   }
+11 | }
+
+error: Naming[2049] Unbound name: `NS\C` [1]
+
+classname_in_namespace.php:9:25
+ 7 |   namespace NS {
+ 8 |     type A = classname<C>;
+ 9 |     type B = \classname<C>;
+   |                         ^ [1]
+10 |   }
+11 | }
+
+6 errors found

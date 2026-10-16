@@ -1,2 +1,11 @@
-ERROR: File "classes_const_keyword.php", line 24, characters 16-24:
-Missing type parameter to `classname`; `classname` is entirely meaningless without one (Naming[2066])
+error: Naming[2066] Missing type parameter to `classname`; `classname` is entirely meaningless without one [1]
+
+classes_const_keyword.php:24:16
+22 |   const dict<string, int> CDARRAY = dict["test" => 1];
+23 |   const keyset<string> CKEYSET = keyset['a', 'b'];
+24 |   const keyset<classname> CCLASSNAME_KEYSET = keyset[];
+   |                ^^^^^^^^^ [1]
+25 |   const vec<string> CVARRAY = vec['MAP_1', 'MAP_2'];
+26 | }
+
+1 error found

@@ -1,4 +1,21 @@
-ERROR: File "missing_function_typehints.php", line 3, characters 10-10:
-Was expecting a return type hint (Typing[4030])
-ERROR: File "missing_function_typehints.php", line 3, characters 12-13:
-Was expecting a type hint (Typing[4032])
+error: Typing[4030] Was expecting a return type hint [1]
+
+missing_function_typehints.php:3:10
+1 | <?hh
+2 | 
+3 | function f($x) {
+  |          ^ [1]
+4 |   throw new Exception();
+5 | }
+
+error: Typing[4032] Was expecting a type hint [1]
+
+missing_function_typehints.php:3:12
+1 | <?hh
+2 | 
+3 | function f($x) {
+  |            ^^ [1]
+4 |   throw new Exception();
+5 | }
+
+2 errors found

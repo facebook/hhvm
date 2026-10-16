@@ -1,2 +1,9 @@
-ERROR: File "interfaces_2.bad.php", line 9, characters 11-12:
-Interface `I2` must declare <<__SupportDynamicType>> because it extends interface `I1` which does (Typing[4402])
+error: Typing[4402] Interface `I2` must declare <<__SupportDynamicType>> because it extends interface `I1` which does [1]
+
+interfaces_2.bad.php:9:11
+7 | <<__SupportDynamicType>>
+8 | interface I1 {}
+9 | interface I2 extends I1 {}
+  |           ^^ [1]
+
+1 error found

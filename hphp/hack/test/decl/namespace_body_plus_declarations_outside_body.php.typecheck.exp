@@ -1,2 +1,15 @@
-ERROR: File "namespace_body_plus_declarations_outside_body.php", line 3, characters 1-39:
-No code may exist outside of namespace {} (Parsing[1002])
+error: Parsing[1002] No code may exist outside of namespace {} [1]
+
+namespace_body_plus_declarations_outside_body.php:3:1
+1 | <?hh
+2 | 
+3 | namespace X {
+  | ^^^^^^^^^^^^^ [1]
+4 |   function a(): void {}
+  |   ^^^^^^^^^^^^^^^^^^^^^ [1]
+5 | }
+  | ^ [1]
+6 | 
+7 | // This is illegal--can't mix namespace declarations with bodies and
+
+1 error found

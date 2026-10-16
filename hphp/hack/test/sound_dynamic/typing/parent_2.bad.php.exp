@@ -1,2 +1,9 @@
-ERROR: File "parent_2.bad.php", line 7, characters 7-9:
-Class `Bar` must declare <<__SupportDynamicType>> because it extends class `Foo` which does (Typing[4402])
+error: Typing[4402] Class `Bar` must declare <<__SupportDynamicType>> because it extends class `Foo` which does [1]
+
+parent_2.bad.php:7:7
+5 | class Foo {}
+6 | 
+7 | class Bar extends Foo {}
+  |       ^^^ [1]
+
+1 error found

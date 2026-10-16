@@ -1,12 +1,41 @@
-ERROR: File "supportdyn_pushing.bad.php", line 9, characters 14-15:
-Invalid argument (Typing[4110])
-  File "supportdyn_pushing.bad.php", line 3, characters 30-46:
-  Expected `dynamic`
-  File "supportdyn_pushing.bad.php", line 8, characters 32-36:
-  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "supportdyn_pushing.bad.php", line 13, characters 15-17:
-Invalid argument (Typing[4110])
-  File "supportdyn_pushing.bad.php", line 5, characters 46-62:
-  Expected `dynamic`
-  File "supportdyn_pushing.bad.php", line 12, characters 47-51:
-  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+supportdyn_pushing.bad.php:9:14
+ 1 | <?hh
+ 2 | 
+ 3 | function takes_iter(Iterator<supportdyn<mixed>> $kc) : void {}
+   |                              ^^^^^^^^^^^^^^^^^ [2]
+ 4 | 
+ 5 | function takes_kiter(KeyedIterator<arraykey, supportdyn<mixed>> $kc)
+ 6 |   : void {}
+ 7 | 
+ 8 | function f(supportdyn<Iterator<mixed>> $i) : void {
+   |                                ^^^^^ [3]
+ 9 |   takes_iter($i);
+   |              ^^ [1]
+10 | }
+11 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `dynamic` [2]
+-> Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping [3]
+
+supportdyn_pushing.bad.php:13:15
+ 3 | function takes_iter(Iterator<supportdyn<mixed>> $kc) : void {}
+ 4 | 
+ 5 | function takes_kiter(KeyedIterator<arraykey, supportdyn<mixed>> $kc)
+   |                                              ^^^^^^^^^^^^^^^^^ [2]
+ 6 |   : void {}
+ 7 | 
+   :
+10 | }
+11 | 
+12 | function g(supportdyn<KeyedIterator<arraykey, mixed>> $ki) : void {
+   |                                               ^^^^^ [3]
+13 |   takes_kiter($ki);
+   |               ^^^ [1]
+14 | }
+
+2 errors found

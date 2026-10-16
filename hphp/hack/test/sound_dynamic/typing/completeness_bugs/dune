@@ -28,7 +28,7 @@
    --out-extension
    .legacy_decl.out
    --error-format
-   plain)))
+   plain_highlighted)))
 
 (alias
  (name runtest)

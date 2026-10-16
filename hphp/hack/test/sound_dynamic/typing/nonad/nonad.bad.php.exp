@@ -1,6 +1,31 @@
-ERROR: File "nonad.bad.php", line 4, characters 3-17:
-This attribute is not yet supported in user code (Typing[4474])
-ERROR: File "nonad.bad.php", line 7, characters 3-17:
-This attribute is not yet supported in user code (Typing[4474])
-ERROR: File "nonad.bad.php", line 11, characters 5-19:
-This attribute is not yet supported in user code (Typing[4474])
+error: Typing[4474] This attribute is not yet supported in user code [1]
+
+nonad.bad.php:4:3
+2 | // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+3 | 
+4 | <<__NoAutoDynamic>>
+  |   ^^^^^^^^^^^^^^^ [1]
+5 | class C {}
+6 | 
+
+error: Typing[4474] This attribute is not yet supported in user code [1]
+
+nonad.bad.php:7:3
+5 | class C {}
+6 | 
+7 | <<__NoAutoDynamic>>
+  |   ^^^^^^^^^^^^^^^ [1]
+8 | function foo():void { }
+9 | 
+
+error: Typing[4474] This attribute is not yet supported in user code [1]
+
+nonad.bad.php:11:5
+ 9 | 
+10 | class D {
+11 |   <<__NoAutoDynamic>>
+   |     ^^^^^^^^^^^^^^^ [1]
+12 |   public function bar():void { }
+13 | }
+
+3 errors found

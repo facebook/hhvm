@@ -1,16 +1,81 @@
-ERROR: File "class_const_referencing_global_const.php", line 5, characters 23-31:
-Unbound name: `INT32_MAX` (a global constant) (Naming[2049])
-ERROR: File "class_const_referencing_global_const.php", line 6, characters 23-36:
-Unbound name: `Math\INT64_MAX` (a global constant) (Naming[2049])
-ERROR: File "class_const_referencing_global_const.php", line 11, characters 25-33:
-Unbound name: `NS\INT32_MAX` (a global constant) (Naming[2049])
-ERROR: File "class_const_referencing_global_const.php", line 12, characters 25-38:
-Unbound name: `NS\Math\INT64_MAX` (a global constant) (Naming[2049])
-ERROR: File "class_const_referencing_global_const.php", line 5, characters 23-31:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "class_const_referencing_global_const.php", line 6, characters 23-36:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "class_const_referencing_global_const.php", line 11, characters 25-33:
-Unbound global constant (Typing) (Typing[4106])
-ERROR: File "class_const_referencing_global_const.php", line 12, characters 25-38:
-Unbound global constant (Typing) (Typing[4106])
+error: Naming[2049] Unbound name: `INT32_MAX` (a global constant) [1]
+
+class_const_referencing_global_const.php:5:23
+3 | namespace {
+4 |   class Integer {
+5 |     const int MAX32 = INT32_MAX;
+  |                       ^^^^^^^^^ [1]
+6 |     const int MAX64 = Math\INT64_MAX;
+7 |   }
+
+error: Naming[2049] Unbound name: `Math\INT64_MAX` (a global constant) [1]
+
+class_const_referencing_global_const.php:6:23
+4 |   class Integer {
+5 |     const int MAX32 = INT32_MAX;
+6 |     const int MAX64 = Math\INT64_MAX;
+  |                       ^^^^^^^^^^^^^^ [1]
+7 |   }
+8 | 
+
+error: Naming[2049] Unbound name: `NS\INT32_MAX` (a global constant) [1]
+
+class_const_referencing_global_const.php:11:25
+ 9 |   namespace NS {
+10 |     class Integer {
+11 |       const int MAX32 = INT32_MAX;
+   |                         ^^^^^^^^^ [1]
+12 |       const int MAX64 = Math\INT64_MAX;
+13 |     }
+
+error: Naming[2049] Unbound name: `NS\Math\INT64_MAX` (a global constant) [1]
+
+class_const_referencing_global_const.php:12:25
+10 |     class Integer {
+11 |       const int MAX32 = INT32_MAX;
+12 |       const int MAX64 = Math\INT64_MAX;
+   |                         ^^^^^^^^^^^^^^ [1]
+13 |     }
+14 |   }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+class_const_referencing_global_const.php:5:23
+3 | namespace {
+4 |   class Integer {
+5 |     const int MAX32 = INT32_MAX;
+  |                       ^^^^^^^^^ [1]
+6 |     const int MAX64 = Math\INT64_MAX;
+7 |   }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+class_const_referencing_global_const.php:6:23
+4 |   class Integer {
+5 |     const int MAX32 = INT32_MAX;
+6 |     const int MAX64 = Math\INT64_MAX;
+  |                       ^^^^^^^^^^^^^^ [1]
+7 |   }
+8 | 
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+class_const_referencing_global_const.php:11:25
+ 9 |   namespace NS {
+10 |     class Integer {
+11 |       const int MAX32 = INT32_MAX;
+   |                         ^^^^^^^^^ [1]
+12 |       const int MAX64 = Math\INT64_MAX;
+13 |     }
+
+error: Typing[4106] Unbound global constant (Typing) [1]
+
+class_const_referencing_global_const.php:12:25
+10 |     class Integer {
+11 |       const int MAX32 = INT32_MAX;
+12 |       const int MAX64 = Math\INT64_MAX;
+   |                         ^^^^^^^^^^^^^^ [1]
+13 |     }
+14 |   }
+
+8 errors found

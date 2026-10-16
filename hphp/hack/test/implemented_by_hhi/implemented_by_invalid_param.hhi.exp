@@ -1,2 +1,11 @@
-ERROR: File "implemented_by_invalid_param.hhi", line 3, characters 21-23:
-This attribute parameter should be a string literal (Typing[4127])
+error: Typing[4127] This attribute parameter should be a string literal [1]
+
+implemented_by_invalid_param.hhi:3:21
+1 | <?hh
+2 | final class C {
+3 |   <<__ImplementedBy(123)>>
+  |                     ^^^ [1]
+4 |   public function myMethod(): int;
+5 | }
+
+1 error found

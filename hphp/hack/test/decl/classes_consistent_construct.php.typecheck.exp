@@ -1,12 +1,21 @@
-ERROR: File "classes_consistent_construct.php", line 8, characters 19-29:
-The method `__construct` is not compatible with the overridden method (Typing[4341])
-  File "classes_consistent_construct.php", line 8, characters 19-29:
-  Method `__construct` has type `(function(A $a): void)` in `C2`
-  File "classes_consistent_construct.php", line 4, characters 7-8:
-  But it has type `(function()[]: void)` in parent `C1`
-  File "classes_consistent_construct.php", line 8, characters 19-29:
-  Type `(function(A $a): void)` is not a subtype of `(function()[]: void)`
-  File "classes_consistent_construct.php", line 8, characters 19-29:
-  Too many mandatory arguments (expected 0 but got 1)
-  File "classes_consistent_construct.php", line 4, characters 7-8:
-  Because of this definition
+error: Typing[4341] The method `__construct` is not compatible with the overridden method [1]
+-> Method `__construct` has type `(function(A $a): void)` in `C2` [1]
+-> But it has type `(function()[]: void)` in parent `C1` [2]
+-> Type `(function(A $a): void)` is not a subtype of `(function()[]: void)` [1]
+-> Too many mandatory arguments (expected 0 but got 1) [1]
+-> Because of this definition [2]
+
+classes_consistent_construct.php:8:19
+ 2 | 
+ 3 | <<__ConsistentConstruct>>
+ 4 | class C1 {}
+   |       ^^ [2]
+ 5 | 
+ 6 | class C2 extends C1 {
+ 7 |   // new mandatory arg is not ok
+ 8 |   public function __construct(A $a) {}
+   |                   ^^^^^^^^^^^ [1]
+ 9 | }
+10 | 
+
+1 error found

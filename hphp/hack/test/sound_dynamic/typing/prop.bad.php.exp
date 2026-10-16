@@ -1,8 +1,25 @@
-ERROR: File "prop.bad.php", line 12, characters 15-16:
-Class `E` cannot support dynamic because property `x` cannot be assigned to dynamic (Typing[4402])
-  File "prop.bad.php", line 12, characters 12-13:
-  Property `x` has type `?C`
-ERROR: File "prop.bad.php", line 14, characters 22-23:
-Class `E` cannot support dynamic because property `z` does not have an enforceable type (Typing[4402])
-  File "prop.bad.php", line 14, characters 12-20:
-  Property `z` has type `?vec<int>`
+error: Typing[4402] Class `E` cannot support dynamic because property `x` cannot be assigned to dynamic [1]
+-> Property `x` has type `?C` [2]
+
+prop.bad.php:12:15
+10 |   class E {
+11 |     // This should be rejected, as it is not a subtype of dynamic
+12 |     public ?C $x;
+   |            ^^ [2]
+   |               ^^ [1]
+13 |     // This should be rejected, as it is not enforceable
+14 |     public ?vec<int> $z;
+
+error: Typing[4402] Class `E` cannot support dynamic because property `z` does not have an enforceable type [1]
+-> Property `z` has type `?vec<int>` [2]
+
+prop.bad.php:14:22
+12 |     public ?C $x;
+13 |     // This should be rejected, as it is not enforceable
+14 |     public ?vec<int> $z;
+   |            ^^^^^^^^^ [2]
+   |                      ^^ [1]
+15 |     // This should not be rejected: although it's not enforceable or a subtype
+16 |     // of dynamic, it's private. We check possible dynamic access to such
+
+2 errors found

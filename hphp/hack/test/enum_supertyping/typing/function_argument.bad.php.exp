@@ -1,16 +1,51 @@
-ERROR: File "function_argument.bad.php", line 17, characters 7-10:
-Invalid argument (Typing[4110])
-  File "function_argument.bad.php", line 13, characters 14-14:
-  Expected `F`
-  File "function_argument.bad.php", line 8, characters 9-11:
-  But got `arraykey`
-  File "function_argument.bad.php", line 8, characters 6-6:
-    by the definition of `G` arising from an implicit `as arraykey` constraint on this type
-ERROR: File "function_argument.bad.php", line 18, characters 7-10:
-Invalid argument (Typing[4110])
-  File "function_argument.bad.php", line 13, characters 14-14:
-  Expected `F`
-  File "function_argument.bad.php", line 8, characters 9-11:
-  But got `arraykey`
-  File "function_argument.bad.php", line 8, characters 6-6:
-    by the definition of `G` arising from an implicit `as arraykey` constraint on this type
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `arraykey` [3]
+->   by the definition of `G` arising from an implicit `as arraykey` constraint on this type [4]
+
+function_argument.bad.php:17:7
+ 6 | }
+ 7 | 
+ 8 | enum G: int {
+   |      ^ [4]
+   |         ^^^ [3]
+ 9 |   use F;
+10 |   B = 1;
+11 | }
+12 | 
+13 | function foo(F $e) : void {}
+   |              ^ [2]
+14 | 
+15 | <<__EntryPoint>>
+16 | function main(): void {
+17 |   foo(G::A);
+   |       ^^^^ [1]
+18 |   foo(G::B);
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `F` [2]
+-> But got `arraykey` [3]
+->   by the definition of `G` arising from an implicit `as arraykey` constraint on this type [4]
+
+function_argument.bad.php:18:7
+ 6 | }
+ 7 | 
+ 8 | enum G: int {
+   |      ^ [4]
+   |         ^^^ [3]
+ 9 |   use F;
+10 |   B = 1;
+11 | }
+12 | 
+13 | function foo(F $e) : void {}
+   |              ^ [2]
+14 | 
+15 | <<__EntryPoint>>
+16 | function main(): void {
+17 |   foo(G::A);
+18 |   foo(G::B);
+   |       ^^^^ [1]
+19 | }
+
+2 errors found

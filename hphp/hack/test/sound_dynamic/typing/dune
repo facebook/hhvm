@@ -54,7 +54,7 @@
    --config
    everything_sdt=false
    --error-format
-   plain)))
+   plain_highlighted)))
 
 (alias
  (name runtest)

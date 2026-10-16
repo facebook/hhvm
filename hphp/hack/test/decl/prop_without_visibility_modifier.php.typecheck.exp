@@ -1,2 +1,10 @@
-ERROR: File "prop_without_visibility_modifier.php", line 4, characters 3-18:
-Property declarations require a visibility modifier such as `public`, `private` or `protected`. (Parsing[1002])
+error: Parsing[1002] Property declarations require a visibility modifier such as `public`, `private` or `protected`. [1]
+
+prop_without_visibility_modifier.php:4:3
+2 | 
+3 | class C {
+4 |   static ?bool $b;
+  |   ^^^^^^^^^^^^^^^^ [1]
+5 | }
+
+1 error found

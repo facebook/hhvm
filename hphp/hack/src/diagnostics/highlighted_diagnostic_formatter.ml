@@ -268,12 +268,13 @@ let load_context_lines_for_highlighted ~before ~after ~(pos : Pos.absolute) :
      output to at most 1,000 lines. *)
   let end_line = min (start_line + 1000) end_line in
 
-  let lines = Diagnostics.read_lines path in
+  let lines = Diagnostics.read_lines_for_highlighted path in
   match lines with
-  | [] ->
+  | None -> []
+  | Some [] ->
     List.range ~start:`inclusive ~stop:`inclusive start_line end_line
     |> List.map ~f:(fun line_num -> (line_num, None))
-  | lines ->
+  | Some lines ->
     let numbered_lines = List.mapi lines ~f:(fun i l -> (i + 1, Some l)) in
     let original_lines =
       List.filter numbered_lines ~f:(fun (i, _) ->

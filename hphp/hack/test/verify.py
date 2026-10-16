@@ -770,7 +770,12 @@ def execute_snapshot_update(
 
     try:
         result = subprocess.run(
-            command_args, env=env, capture_output=True, text=True, cwd=os.getcwd()
+            command_args,
+            env=env,
+            capture_output=True,
+            text=True,
+            errors="backslashreplace",
+            cwd=os.getcwd(),
         )
         if result.returncode != 0:
             print(

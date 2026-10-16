@@ -59,6 +59,8 @@ module Typing : Error_category.S
 
 val read_lines : string -> string list
 
+val read_lines_for_highlighted : string -> string list option
+
 val num_digits : int -> int
 
 val add_diagnostic : diagnostic -> unit

@@ -461,6 +461,13 @@ let read_lines path =
     (try Multifile.read_file_from_multifile path with
     | Sys_error _ -> [])
 
+let read_lines_for_highlighted path =
+  let lines = read_lines path in
+  if List.for_all lines ~f:Stdlib.String.is_valid_utf_8 then
+    Some lines
+  else
+    None
+
 let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1
 
 (* Sort [xs] such that all the values that return the same

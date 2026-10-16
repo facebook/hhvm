@@ -71,11 +71,12 @@ let load_context_lines ~(before : int) ~(after : int) (pos : Pos.absolute) :
   let (end_line, end_col) = Pos.end_line_column pos in
   (* Internal errors can report the whole file; cap the window. *)
   let end_line = min (start_line + 1000) end_line in
-  match Diagnostics.read_lines path with
-  | [] ->
+  match Diagnostics.read_lines_for_highlighted path with
+  | None -> []
+  | Some [] ->
     List.range ~start:`inclusive ~stop:`inclusive start_line end_line
     |> List.map ~f:(fun line_num -> (line_num, None))
-  | lines ->
+  | Some lines ->
     let numbered = List.mapi lines ~f:(fun i l -> (i + 1, Some l)) in
     let window =
       List.filter numbered ~f:(fun (i, _) ->

@@ -88,6 +88,27 @@ auto const s_checkpointBytes =
   ServiceData::createCounter("jit.cprof.checkpoint.bytes");
 auto const s_checkpointWriteFailures =
   ServiceData::createCounter("jit.cprof.checkpoint.write_failures");
+auto const s_checkpointWriteSuccesses =
+  ServiceData::createCounter("jit.cprof.checkpoint.write_successes");
+// Cumulative record omissions across file-write attempts, not distinct funcs.
+auto const s_checkpointRecordLimitSkips =
+  ServiceData::createCounter("jit.cprof.checkpoint.record_limit_skips");
+auto const s_checkpointInvalidRecordSkips =
+  ServiceData::createCounter("jit.cprof.checkpoint.invalid_record_skips");
+auto const s_checkpointByteLimitSkips =
+  ServiceData::createCounter("jit.cprof.checkpoint.byte_limit_skips");
+auto const s_checkpointFilesPruned =
+  ServiceData::createCounter("jit.cprof.checkpoint.files_pruned");
+auto const s_checkpointPruneFailures =
+  ServiceData::createCounter("jit.cprof.checkpoint.prune_failures");
+
+auto const s_fileIoFailures =
+  ServiceData::createCounter("jit.cprof.reader.file_io_failures");
+auto const s_filesOversized =
+  ServiceData::createCounter("jit.cprof.reader.files_oversized");
+// Includes schema mismatches: the checkpoint decoder rejects the whole file.
+auto const s_filesInvalid =
+  ServiceData::createCounter("jit.cprof.reader.files_invalid");
 
 // Start attempts include eligibility exclusions, but exclude calls with an
 // already-joinable writer. Failures count invalid directories, thread creation
@@ -103,6 +124,10 @@ auto const s_writerCheckpointAttempts =
   ServiceData::createCounter("jit.cprof.writer.checkpoint_attempts");
 auto const s_writerEmptyCheckpointSkips =
   ServiceData::createCounter("jit.cprof.writer.empty_checkpoint_skips");
+auto const s_writerUnchangedCheckpointSkips =
+  ServiceData::createCounter("jit.cprof.writer.unchanged_checkpoint_skips");
+auto const s_writerCheckpointExceptions =
+  ServiceData::createCounter("jit.cprof.writer.checkpoint_exceptions");
 
 // Eligibility reasons are first-match exclusions counted only by start(),
 // never by the per-function contProfActive() checks.
@@ -244,10 +269,20 @@ struct EncodedCheckpoint {
   EncodedRecordCount recordCount;
 };
 
+struct CheckpointEncodeStats {
+  size_t recordLimitSkips{};
+  size_t invalidRecordSkips{};
+  size_t byteLimitSkips{};
+};
+
 std::optional<EncodedCheckpoint>
-encodeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
+encodeContProfCheckpoint(
+  const std::vector<ContProfProfileRecord>& records,
+  CheckpointEncodeStats* stats = nullptr
+) {
   auto const selected = selectContProfCheckpointRecords(records);
   if (selected.empty()) return std::nullopt;
+  if (stats) stats->recordLimitSkips = records.size() - selected.size();
 
   Writer writer{kMaxCheckpointBytes};
 
@@ -256,8 +291,13 @@ encodeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
   EncodedRecordCount recordCount{};
   for (auto const record : selected) {
     auto const encoded = serializeContProfProfileRecord(*record);
-    if (!encoded || sizeof(EncodedRecordSize) > writer.remaining() ||
+    if (!encoded) {
+      if (stats) ++stats->invalidRecordSkips;
+      continue;
+    }
+    if (sizeof(EncodedRecordSize) > writer.remaining() ||
         encoded->size() > writer.remaining() - sizeof(EncodedRecordSize)) {
+      if (stats) ++stats->byteLimitSkips;
       continue;
     }
 
@@ -335,7 +375,13 @@ bool writeContProfCheckpointFile(
   });
   if (path.empty()) return false;
 
-  auto const encoded = encodeContProfCheckpoint(records);
+  CheckpointEncodeStats stats;
+  SCOPE_EXIT {
+    s_checkpointRecordLimitSkips->addValue(stats.recordLimitSkips);
+    s_checkpointInvalidRecordSkips->addValue(stats.invalidRecordSkips);
+    s_checkpointByteLimitSkips->addValue(stats.byteLimitSkips);
+  };
+  auto const encoded = encodeContProfCheckpoint(records, &stats);
   if (!encoded) return false;
 
   auto const& bytes = encoded->bytes;
@@ -352,11 +398,15 @@ bool writeContProfCheckpointFile(
 
   s_checkpointRecords->setValue(encoded->recordCount);
   s_checkpointBytes->setValue(bytes.size());
+  s_checkpointWriteSuccesses->increment();
   onFailure.dismiss();
   return true;
 }
 
 bool pruneContProfCheckpointFiles(const std::string& currentPath) {
+  auto onFailure = folly::makeGuard([] {
+    s_checkpointPruneFailures->increment();
+  });
   auto const current = std::filesystem::path{currentPath};
   auto const directory = current.parent_path();
 
@@ -401,25 +451,38 @@ bool pruneContProfCheckpointFiles(const std::string& currentPath) {
     auto const mtime = std::filesystem::last_write_time(file.path, error);
     if (error || mtime != file.mtime) continue;
 
-    std::filesystem::remove(file.path, error);
+    if (std::filesystem::remove(file.path, error)) {
+      s_checkpointFilesPruned->increment();
+    }
     if (error) success = false;
   }
+  if (success) onFailure.dismiss();
   return success;
 }
 
 std::optional<std::vector<ContProfProfileRecord>>
 readContProfCheckpointFile(const std::string& path) {
-  if (path.empty()) return std::nullopt;
-
-  std::vector<uint8_t> encoded;
-  if (!folly::readFile(path.c_str(), encoded, kMaxCheckpointBytes + 1) ||
-      encoded.size() > kMaxCheckpointBytes) {
+  // File-read attempts only; standalone byte decoders remain uninstrumented.
+  if (path.empty()) {
+    s_fileIoFailures->increment();
     return std::nullopt;
   }
 
-  return deserializeContProfCheckpoint(
+  std::vector<uint8_t> encoded;
+  if (!folly::readFile(path.c_str(), encoded, kMaxCheckpointBytes + 1)) {
+    s_fileIoFailures->increment();
+    return std::nullopt;
+  }
+  if (encoded.size() > kMaxCheckpointBytes) {
+    s_filesOversized->increment();
+    return std::nullopt;
+  }
+
+  auto result = deserializeContProfCheckpoint(
     folly::ByteRange{encoded.data(), encoded.size()}
   );
+  if (!result) s_filesInvalid->increment();
+  return result;
 }
 
 namespace {
@@ -565,7 +628,10 @@ private:
 
       // Records are immutable after their first snapshot, so an unchanged
       // count means there is nothing new to write.
-      if (recordCount == m_lastWrittenRecordCount) return;
+      if (recordCount == m_lastWrittenRecordCount) {
+        s_writerUnchangedCheckpointSkips->increment();
+        return;
+      }
 
       auto const records = [] {
         Treadmill::Session session{Treadmill::SessionKind::ProfData};
@@ -588,11 +654,13 @@ private:
         );
       }
     } catch (const std::exception& exception) {
+      s_writerCheckpointExceptions->increment();
       Logger::Warning(
         "Failed to build cont-prof checkpoint: %s",
         exception.what()
       );
     } catch (...) {
+      s_writerCheckpointExceptions->increment();
       Logger::Warning("Failed to build cont-prof checkpoint");
     }
   }

@@ -59,10 +59,20 @@ enum class ContProfCaptureRejection {
  * examined translation, including when the function snapshot succeeds.
  * InvalidEntry also covers malformed bytecode starts.
  * Examined/eligible translation counts precede per-start deduplication.
+ * Retained/start-deduplicated counts precede final record validation.
+ * Region/block details partition UnexpectedRegion/UnexpectedBlock, using the
+ * first failing condition. Missing regions include null and zero-block regions.
  */
 struct ContProfCaptureStats {
   size_t translationsExamined{};
   size_t translationsEligible{};
+  size_t translationsRetained{};
+  size_t translationsStartDeduplicated{};
+  size_t missingRegions{};
+  size_t multipleBlockRegions{};
+  size_t mismatchedBlockStarts{};
+  size_t nonzeroStackOffsets{};
+  size_t emptyBlocks{};
   std::array<size_t, static_cast<size_t>(ContProfCaptureRejection::Count)>
     rejections{};
 };

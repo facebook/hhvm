@@ -33,6 +33,8 @@ struct Func;
 namespace HPHP::jit::cprof {
 
 struct ContProfCheckpointReadResult {
+  // Only files/records admitted under the aggregate record limit. Reader work
+  // counters also include a decoded file which would exceed that limit.
   size_t filesRead{};
   size_t recordsDecoded{};
   std::vector<ContProfProfileRecord> records;

@@ -298,6 +298,13 @@ TEST_F(ContProfCaptureTest, ResetsStatsWhenNoProfileTranslations) {
   ContProfCaptureStats stats{};
   stats.translationsExamined = 7;
   stats.translationsEligible = 3;
+  stats.translationsRetained = 2;
+  stats.translationsStartDeduplicated = 1;
+  stats.missingRegions = 1;
+  stats.multipleBlockRegions = 1;
+  stats.mismatchedBlockStarts = 1;
+  stats.nonzeroStackOffsets = 1;
+  stats.emptyBlocks = 1;
   stats.rejections.fill(1);
   std::vector<TransID> sourceTransIds{0};
 
@@ -307,6 +314,13 @@ TEST_F(ContProfCaptureTest, ResetsStatsWhenNoProfileTranslations) {
   EXPECT_TRUE(sourceTransIds.empty());
   EXPECT_EQ(0, stats.translationsExamined);
   EXPECT_EQ(0, stats.translationsEligible);
+  EXPECT_EQ(0, stats.translationsRetained);
+  EXPECT_EQ(0, stats.translationsStartDeduplicated);
+  EXPECT_EQ(0, stats.missingRegions);
+  EXPECT_EQ(0, stats.multipleBlockRegions);
+  EXPECT_EQ(0, stats.mismatchedBlockStarts);
+  EXPECT_EQ(0, stats.nonzeroStackOffsets);
+  EXPECT_EQ(0, stats.emptyBlocks);
   expectRejections(stats, {{Rejection::NoProfileTranslations, 1}});
 }
 
@@ -418,6 +432,8 @@ TEST_F(ContProfCaptureTest, SelectsBestDuplicate) {
   ASSERT_TRUE(record);
   EXPECT_EQ(3, stats.translationsExamined);
   EXPECT_EQ(3, stats.translationsEligible);
+  EXPECT_EQ(1, stats.translationsRetained);
+  EXPECT_EQ(2, stats.translationsStartDeduplicated);
   expectRejections(stats, {});
 
   std::vector<ContProfProfileTranslation> const expected{
@@ -465,6 +481,8 @@ TEST_F(ContProfCaptureTest, RequiresEntryTranslation) {
   ));
   EXPECT_EQ(1, stats.translationsExamined);
   EXPECT_EQ(1, stats.translationsEligible);
+  EXPECT_EQ(1, stats.translationsRetained);
+  EXPECT_EQ(0, stats.translationsStartDeduplicated);
   expectRejections(stats, {{Rejection::InvalidFinalRecord, 1}});
 }
 
@@ -483,6 +501,9 @@ TEST_F(ContProfCaptureTest, SkipsBytecodeWithNonzeroStackOffset) {
   ));
   EXPECT_EQ(3, stats.translationsExamined);
   EXPECT_EQ(1, stats.translationsEligible);
+  EXPECT_EQ(2, stats.nonzeroStackOffsets);
+  EXPECT_EQ(0, stats.mismatchedBlockStarts);
+  EXPECT_EQ(0, stats.emptyBlocks);
   expectRejections(stats, {{Rejection::UnexpectedBlock, 2}});
 }
 
@@ -580,6 +601,8 @@ TEST_F(ContProfCaptureTest, CountsUnexpectedMultiblockRegion) {
   EXPECT_FALSE(snapshotContProfProfileRecord(
     profData, *func(), nullptr, &stats
   ));
+  EXPECT_EQ(1, stats.multipleBlockRegions);
+  EXPECT_EQ(0, stats.missingRegions);
   expectRejections(stats, {
     {Rejection::UnexpectedRegion, 1},
     {Rejection::NoEligibleCandidates, 1},
@@ -1033,10 +1056,23 @@ TEST_F(ContProfCaptureTest, StoresFirstRecordAndFinalizesTargetProfilesOnce) {
         "jit.cprof.capture.stored_records").value_or(-1),
       ServiceData::exportCounterByKey(
         "jit.cprof.capture.duplicates").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.translations_examined").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.translations_eligible").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.translations_retained").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.translations_start_deduplicated").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.rejected.nonzero_stack_offset").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.records").value_or(-1),
     };
   };
   auto const countersBefore = counters();
   for (auto const count : countersBefore) ASSERT_GE(count, 0);
+  EXPECT_EQ(before.size(), countersBefore.back());
   auto const missingProfiles = ServiceData::exportCounterByKey(
     "jit.cprof.capture.rejected.no_profile_translations"
   );
@@ -1213,10 +1249,11 @@ TEST_F(ContProfCaptureTest, StoresFirstRecordAndFinalizesTargetProfilesOnce) {
   // The direct snapshot above is not a capture attempt. The controller saw
   // one failure, two new records, and one valid duplicate snapshot.
   auto const countersAfter = counters();
-  std::array<int64_t, 5> const deltas{4, 3, 1, 2, 1};
+  std::array<int64_t, 11> const deltas{4, 3, 1, 2, 1, 12, 8, 5, 3, 4, 2};
   for (size_t i = 0; i < deltas.size(); ++i) {
     EXPECT_EQ(countersBefore[i] + deltas[i], countersAfter[i]);
   }
+  EXPECT_EQ(records.size(), countersAfter.back());
   EXPECT_EQ(*missingProfiles + 1, ServiceData::exportCounterByKey(
     "jit.cprof.capture.rejected.no_profile_translations"
   ).value_or(-1));

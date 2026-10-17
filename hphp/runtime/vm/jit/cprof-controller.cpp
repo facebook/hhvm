@@ -72,6 +72,44 @@ auto const s_storedRecords = ServiceData::createCounter(
 auto const s_duplicates = ServiceData::createCounter(
   "jit.cprof.capture.duplicates"
 );
+// Translation totals include successful snapshots discarded as duplicate
+// functions. Retained translations precede final record validation.
+auto const s_translationsExamined = ServiceData::createCounter(
+  "jit.cprof.capture.translations_examined"
+);
+auto const s_translationsEligible = ServiceData::createCounter(
+  "jit.cprof.capture.translations_eligible"
+);
+auto const s_translationsRetained = ServiceData::createCounter(
+  "jit.cprof.capture.translations_retained"
+);
+auto const s_translationsStartDeduplicated = ServiceData::createCounter(
+  "jit.cprof.capture.translations_start_deduplicated"
+);
+// First-failing detail subsets of unexpected_region and unexpected_block.
+auto const s_missingRegions = ServiceData::createCounter(
+  "jit.cprof.capture.rejected.missing_region"
+);
+auto const s_multipleBlockRegions = ServiceData::createCounter(
+  "jit.cprof.capture.rejected.multiple_blocks"
+);
+auto const s_mismatchedBlockStarts = ServiceData::createCounter(
+  "jit.cprof.capture.rejected.mismatched_block_start"
+);
+auto const s_nonzeroStackOffsets = ServiceData::createCounter(
+  "jit.cprof.capture.rejected.nonzero_stack_offset"
+);
+auto const s_emptyBlocks = ServiceData::createCounter(
+  "jit.cprof.capture.rejected.empty_block"
+);
+// Current process-local record count, updated under the record-map lock.
+auto const s_recordsCount = ServiceData::createCounter(
+  "jit.cprof.capture.records"
+);
+// Target sites in retained translations rejected before snapshot attempts.
+auto const s_targetProfilesOutOfBounds = ServiceData::createCounter(
+  "jit.cprof.target.capture.out_of_bounds"
+);
 
 // Rejection scopes and first-rejection semantics are defined by
 // ContProfCaptureStats. Flush at most once per nonzero reason per function.
@@ -156,6 +194,7 @@ void snapshotTargetProfiles(std::vector<CapturedRecord>& records) {
 
   if (destinations.empty()) return;
 
+  size_t outOfBounds = 0;
   rds::visitSymbols([&](
       const rds::Symbol& symbol,
       rds::Handle handle,
@@ -167,7 +206,10 @@ void snapshotTargetProfiles(std::vector<CapturedRecord>& records) {
     if (it == destinations.end()) return;
 
     auto const& destination = it->second;
-    if (profile->bcOff >= destination.bytecodeLength) return;
+    if (profile->bcOff >= destination.bytecodeLength) {
+      ++outOfBounds;
+      return;
+    }
 
     auto snapshot = snapshotContProfTargetProfile(
       *profile,
@@ -178,6 +220,7 @@ void snapshotTargetProfiles(std::vector<CapturedRecord>& records) {
 
     destination.translation->targetProfiles.push_back(std::move(*snapshot));
   });
+  if (outOfBounds) s_targetProfilesOutOfBounds->addValue(outOfBounds);
 
   for (auto& captured : records) {
     if (captured.sourceTransIds.empty()) continue;
@@ -220,9 +263,21 @@ bool captureContProfProfile(const ProfData& profData, const Func& func) {
   auto record = snapshotContProfProfileRecord(
     profData, func, &sourceTransIds, &stats
   );
+  auto const addCount = [](ServiceData::ExportedCounter* counter, size_t count) {
+    if (count) counter->addValue(count);
+  };
+  addCount(s_translationsExamined, stats.translationsExamined);
+  addCount(s_translationsEligible, stats.translationsEligible);
+  addCount(s_translationsRetained, stats.translationsRetained);
+  addCount(s_translationsStartDeduplicated, stats.translationsStartDeduplicated);
+  addCount(s_missingRegions, stats.missingRegions);
+  addCount(s_multipleBlockRegions, stats.multipleBlockRegions);
+  addCount(s_mismatchedBlockStarts, stats.mismatchedBlockStarts);
+  addCount(s_nonzeroStackOffsets, stats.nonzeroStackOffsets);
+  addCount(s_emptyBlocks, stats.emptyBlocks);
   for (auto const& rejection : s_rejections) {
     auto const count = stats.rejections[static_cast<size_t>(rejection.reason)];
-    if (count) rejection.counter->addValue(count);
+    addCount(rejection.counter, count);
   }
   if (!record) {
     s_snapshotFailures->increment();
@@ -241,6 +296,7 @@ bool captureContProfProfile(const ProfData& profData, const Func& func) {
     }
   ).second;
   (inserted ? s_storedRecords : s_duplicates)->increment();
+  if (inserted) s_recordsCount->setValue(records->size());
   return inserted;
 }
 

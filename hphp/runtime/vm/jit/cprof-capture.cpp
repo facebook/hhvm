@@ -212,6 +212,13 @@ snapshotContProfProfileRecord(
     auto const region = record->region();
     if (!region || region->blocks().size() != 1) {
       reject(ContProfCaptureRejection::UnexpectedRegion);
+      if (stats) {
+        if (!region || region->blocks().empty()) {
+          ++stats->missingRegions;
+        } else {
+          ++stats->multipleBlockRegions;
+        }
+      }
       TRACE(2, "cont-prof: %s trans %d has an unexpected region\n",
             func.fullName()->data(), transId);
       continue;
@@ -222,6 +229,15 @@ snapshotContProfProfileRecord(
         block->initialSpOffset() != SBInvOffset{0} ||
         block->length() <= 0) {
       reject(ContProfCaptureRejection::UnexpectedBlock);
+      if (stats) {
+        if (block->start() != start) {
+          ++stats->mismatchedBlockStarts;
+        } else if (block->initialSpOffset() != SBInvOffset{0}) {
+          ++stats->nonzeroStackOffsets;
+        } else {
+          ++stats->emptyBlocks;
+        }
+      }
       TRACE(2, "cont-prof: %s trans %d has an unexpected block\n",
             func.fullName()->data(), transId);
       continue;
@@ -327,6 +343,12 @@ snapshotContProfProfileRecord(
     }
 
     i = next;
+  }
+
+  if (stats) {
+    stats->translationsRetained = selectedCandidates.size();
+    stats->translationsStartDeduplicated =
+      candidates.size() - selectedCandidates.size();
   }
 
   hphp_fast_map<TransID, uint32_t> localIndices;

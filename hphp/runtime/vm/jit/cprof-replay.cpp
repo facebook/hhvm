@@ -25,13 +25,32 @@
 
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
 
 namespace {
 
+// Cumulative guard outcomes; busy/abandoned replays are intentional skips.
+// Errors include acquisition, abandoned-checkpoint cleanup, and marker clearing.
+auto const s_replayAttempts =
+  ServiceData::createCounter("jit.cprof.replay.attempts");
+auto const s_replayAcquired =
+  ServiceData::createCounter("jit.cprof.replay.acquired");
+auto const s_replayBusy =
+  ServiceData::createCounter("jit.cprof.replay.busy");
+auto const s_replayAbandoned =
+  ServiceData::createCounter("jit.cprof.replay.abandoned");
+auto const s_replayFilesDeleted =
+  ServiceData::createCounter("jit.cprof.replay.files_deleted");
+auto const s_replayGuardErrors =
+  ServiceData::createCounter("jit.cprof.replay.guard_errors");
+auto const s_replayCompleted =
+  ServiceData::createCounter("jit.cprof.replay.completed");
+
 bool clearReplayMarker(int fd) noexcept {
   if (folly::ftruncateNoInt(fd, 0) != 0 || folly::fsyncNoInt(fd) != 0) {
+    s_replayGuardErrors->increment();
     Logger::Warning("cont-prof replay could not clear its replay marker");
     return false;
   }
@@ -43,8 +62,10 @@ bool clearReplayMarker(int fd) noexcept {
 ContProfReplayGuard::ContProfReplayGuard(
   const std::string& directory
 ) noexcept {
+  s_replayAttempts->increment();
   try {
     if (directory.empty()) {
+      s_replayGuardErrors->increment();
       Logger::Warning("cont-prof replay skipped: empty checkpoint directory");
       return;
     }
@@ -54,6 +75,7 @@ ContProfReplayGuard::ContProfReplayGuard(
       path, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600
     };
     if (!file.try_lock()) {
+      s_replayBusy->increment();
       Logger::Warning(
         "cont-prof replay skipped: another replay holds %s", path.c_str()
       );
@@ -62,6 +84,7 @@ ContProfReplayGuard::ContProfReplayGuard(
 
     struct stat status{};
     if (::fstat(file.fd(), &status) != 0 || !S_ISREG(status.st_mode)) {
+      s_replayGuardErrors->increment();
       Logger::Warning(
         "cont-prof replay skipped: cannot inspect replay lock %s",
         path.c_str()
@@ -69,6 +92,7 @@ ContProfReplayGuard::ContProfReplayGuard(
       return;
     }
     if (status.st_size != 0) {
+      s_replayAbandoned->increment();
       Logger::Warning(
         "cont-prof replay skipped: previous replay did not complete. "
         "Discarding checkpoints in %s",
@@ -79,7 +103,9 @@ ContProfReplayGuard::ContProfReplayGuard(
           continue;
         }
         if (!std::filesystem::is_regular_file(entry.symlink_status())) continue;
-        std::filesystem::remove(entry.path());
+        if (std::filesystem::remove(entry.path())) {
+          s_replayFilesDeleted->increment();
+        }
       }
       clearReplayMarker(file.fd());
       return;
@@ -87,6 +113,7 @@ ContProfReplayGuard::ContProfReplayGuard(
 
     if (folly::ftruncateNoInt(file.fd(), 1) != 0 ||
         folly::fsyncNoInt(file.fd()) != 0) {
+      s_replayGuardErrors->increment();
       Logger::Warning(
         "cont-prof replay skipped: cannot persist replay marker %s",
         path.c_str()
@@ -95,15 +122,20 @@ ContProfReplayGuard::ContProfReplayGuard(
     }
 
     m_file = std::move(file);
+    s_replayAcquired->increment();
   } catch (const std::exception& exception) {
+    s_replayGuardErrors->increment();
     Logger::Warning("cont-prof replay skipped: %s", exception.what());
   } catch (...) {
+    s_replayGuardErrors->increment();
     Logger::Warning("cont-prof replay skipped: cannot acquire replay guard");
   }
 }
 
 bool ContProfReplayGuard::complete() noexcept {
-  return active() && clearReplayMarker(m_file.fd());
+  if (!active() || !clearReplayMarker(m_file.fd())) return false;
+  s_replayCompleted->increment();
+  return true;
 }
 
 }

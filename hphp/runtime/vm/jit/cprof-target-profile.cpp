@@ -52,10 +52,137 @@
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
 
 namespace {
+
+// Cumulative target-profile outcomes, not function counts or execution counts.
+// Capture counts sweep attempts for retained translations, not all live RDS
+// sites; concurrent sweeps can examine the same site. Preparation precedes
+// cross-translation method-conflict filtering. Installed does not imply the
+// optimizer used the profile or published code. Outcome totals cover normal
+// returns; an escaping exception can leave an attempt without an outcome.
+struct TargetProfileCounters {
+  ServiceData::ExportedCounter* captureAttempts;
+  ServiceData::ExportedCounter* captured;
+  ServiceData::ExportedCounter* prepareAttempts;
+  ServiceData::ExportedCounter* prepared;
+  ServiceData::ExportedCounter* installed;
+};
+
+#define CPROF_TARGET_KINDS(X) \
+  X(DecRef, DecRefProfile, decref) \
+  X(COW, COWProfile, cow) \
+  X(CoeffectFunParam, CoeffectFunParamProfile, coeffect_fun_param) \
+  X(IncRef, IncRefProfile, incref) \
+  X(IsTypeStruct, IsTypeStructProfile, is_type_struct) \
+  X(Switch, SwitchProfile, switch) \
+  X(ArrayAccess, ArrayAccessProfile, array_access) \
+  X(ClsCns, ClsCnsProfile, cls_cns) \
+  X(Type, TypeProfile, type) \
+  X(ArrayIter, ArrayIterProfile, array_iter) \
+  X(CallTarget, CallTargetProfile, call_target) \
+  X(Meth, MethProfile, meth)
+
+#define X(kind, type, name) \
+  TargetProfileCounters const s_##kind##Counters{ \
+    ServiceData::createCounter("jit.cprof.target." #name ".capture_attempts"), \
+    ServiceData::createCounter("jit.cprof.target." #name ".captured"), \
+    ServiceData::createCounter("jit.cprof.target." #name ".prepare_attempts"), \
+    ServiceData::createCounter("jit.cprof.target." #name ".prepared"), \
+    ServiceData::createCounter("jit.cprof.target." #name ".installed"), \
+  };
+CPROF_TARGET_KINDS(X)
+#undef X
+
+const TargetProfileCounters* targetCounters(rds::ProfileKind kind) {
+  switch (kind) {
+#define X(kind, type, name) \
+    case rds::ProfileKind::type: return &s_##kind##Counters;
+    CPROF_TARGET_KINDS(X)
+#undef X
+    default: return nullptr;
+  }
+}
+
+const TargetProfileCounters* targetCounters(ContProfTargetProfileKind kind) {
+  switch (kind) {
+#define X(kind, type, name) \
+    case ContProfTargetProfileKind::kind: return &s_##kind##Counters;
+    CPROF_TARGET_KINDS(X)
+#undef X
+  }
+  return nullptr;
+}
+#undef CPROF_TARGET_KINDS
+
+auto const s_captureAttempts = ServiceData::createCounter(
+  "jit.cprof.target.capture.attempts");
+auto const s_captured = ServiceData::createCounter(
+  "jit.cprof.target.capture.captured");
+// One first-match reason per failed snapshot attempt.
+auto const s_captureInvalidOffset = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.invalid_offset");
+auto const s_captureUnsupportedKind = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.unsupported_kind");
+auto const s_captureEmpty = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.empty");
+auto const s_captureInvalidFuncKey = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.invalid_func_key");
+// No unique method: includes empty, BaseMeth, InterfaceMeth and invalid states.
+auto const s_captureNonUniqueMethod = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.non_unique_method");
+auto const s_captureUnsupportedMethod = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.unsupported_method");
+auto const s_captureAllocationFailure = ServiceData::createCounter(
+  "jit.cprof.target.capture.skipped.allocation_failure");
+
+auto const s_prepareAttempts = ServiceData::createCounter(
+  "jit.cprof.target.prepare.attempts");
+auto const s_prepared = ServiceData::createCounter(
+  "jit.cprof.target.prepare.prepared");
+
+// One first-match reason per failed preparation, even for a CallTarget profile
+// containing several unresolved callees. Decoding failure takes precedence.
+enum class PrepareRejection {
+  InvalidPayload,
+  UnsupportedMethod,
+  MissingUnit,
+  UnresolvedOrStale,
+  ResolveException,
+};
+ServiceData::ExportedCounter* const s_prepareRejections[] = {
+  ServiceData::createCounter("jit.cprof.target.prepare.skipped.invalid_payload"),
+  ServiceData::createCounter(
+    "jit.cprof.target.prepare.skipped.unsupported_method"),
+  ServiceData::createCounter("jit.cprof.target.prepare.skipped.missing_unit"),
+  ServiceData::createCounter(
+    "jit.cprof.target.prepare.skipped.unresolved_or_stale"),
+  ServiceData::createCounter(
+    "jit.cprof.target.prepare.skipped.resolve_exception"),
+};
+
+// Successful method preparations with a saved receiver, partitioned into
+// restored UniqueClass and fallback to UniqueMeth (not discarded profiles).
+auto const s_receiverRestored = ServiceData::createCounter(
+  "jit.cprof.target.meth.receiver_restored");
+auto const s_receiverUnavailable = ServiceData::createCounter(
+  "jit.cprof.target.meth.receiver_unavailable");
+auto const s_receiverChangedDispatch = ServiceData::createCounter(
+  "jit.cprof.target.meth.receiver_changed_dispatch");
+// Captures that retain the method but cannot encode its unique receiver hint.
+auto const s_receiverNotCaptured = ServiceData::createCounter(
+  "jit.cprof.target.meth.receiver_not_captured");
+
+auto const s_installAttempts = ServiceData::createCounter(
+  "jit.cprof.target.install.attempts");
+auto const s_installed = ServiceData::createCounter(
+  "jit.cprof.target.install.installed");
+// False returns from installation (allocation or payload decoding failure).
+auto const s_installFailures = ServiceData::createCounter(
+  "jit.cprof.target.install.failures");
 
 // Buffer-backed adapters for the profile's existing serialize/deserialize.
 struct PayloadWriter {
@@ -176,8 +303,6 @@ snapshotCallTargetProfile(
   rds::Handle handle,
   uint32_t allocationSize
 ) {
-  if (profile.bcOff < 0) return std::nullopt;
-
   assertx(profile.name);
   assertx(allocationSize == sizeof(CallTargetProfile));
 
@@ -186,7 +311,10 @@ snapshotCallTargetProfile(
   CallTargetWriter writer;
   reduced.serialize(writer);
   // A concurrent reduction can see initialization before the first target.
-  if (writer.failed || !writer.hasTarget) return std::nullopt;
+  if (writer.failed || !writer.hasTarget) {
+    (writer.failed ? s_captureInvalidFuncKey : s_captureEmpty)->increment();
+    return std::nullopt;
+  }
 
   return ContProfTargetProfile{
     ContProfTargetProfileKind::CallTarget,
@@ -198,18 +326,21 @@ snapshotCallTargetProfile(
 
 const Func* resolveTargetFunc(
   const ContProfFuncKey& key,
-  const std::map<std::string, Unit*>& units
+  const std::map<std::string, Unit*>& units,
+  PrepareRejection& rejection
 ) {
+  rejection = PrepareRejection::UnresolvedOrStale;
   if (key.closureContextName) return nullptr;
   auto const unit = units.find(key.resolutionUnitPath);
-  if (unit == units.end()) return nullptr;
-  if (key.bytecodeUnitPath &&
-      units.find(*key.bytecodeUnitPath) == units.end()) {
+  if (unit == units.end() || (key.bytecodeUnitPath &&
+      units.find(*key.bytecodeUnitPath) == units.end())) {
+    rejection = PrepareRejection::MissingUnit;
     return nullptr;
   }
   try {
     return resolveContProfFunc(key, *unit->second);
   } catch (...) {
+    rejection = PrepareRejection::ResolveException;
     return nullptr;
   }
 }
@@ -270,18 +401,22 @@ std::optional<ContProfTargetProfile> snapshotMethProfile(
   rds::Handle handle,
   uint32_t allocationSize
 ) {
-  if (profile.bcOff < 0) return std::nullopt;
-
   assertx(profile.name);
   assertx(allocationSize == sizeof(MethProfile));
 
   MethProfile reduced{};
   TargetProfile<MethProfile>::reduce(reduced, handle, allocationSize);
   auto const func = reduced.uniqueMeth();
-  if (!isSupportedMethTarget(func)) return std::nullopt;
+  if (!isSupportedMethTarget(func)) {
+    (func ? s_captureUnsupportedMethod : s_captureNonUniqueMethod)->increment();
+    return std::nullopt;
+  }
 
   auto const key = makeContProfFuncKey(*func);
-  if (!key) return std::nullopt;
+  if (!key) {
+    s_captureInvalidFuncKey->increment();
+    return std::nullopt;
+  }
   auto const method = serializeContProfFuncKey(*key);
   assertx(method);
 
@@ -290,12 +425,15 @@ std::optional<ContProfTargetProfile> snapshotMethProfile(
   PayloadWriter writer;
   writeBytes(writer, method->data(), method->size());
   auto const cls = reduced.uniqueClass();
+  bool capturedReceiver = false;
   if (isSupportedMethReceiver(cls)) {
     if (auto const path = contProfUnitPath(*cls->preClass()->unit())) {
       writeBytes(writer, path->data(), path->size());
       writeBytes(writer, cls->name()->data(), cls->name()->size());
+      capturedReceiver = true;
     }
   }
+  if (cls && !capturedReceiver) s_receiverNotCaptured->increment();
 
   return ContProfTargetProfile{
     ContProfTargetProfileKind::Meth,
@@ -355,8 +493,6 @@ snapshotRawTargetProfile(
   uint32_t allocationSize,
   ContProfTargetProfileKind kind
 ) {
-  if (profile.bcOff < 0) return std::nullopt;
-
   assertx(profile.name);
   assertx(isValidRawTargetProfileSize<T>(allocationSize));
 
@@ -367,7 +503,10 @@ snapshotRawTargetProfile(
       std::memcpy(payload.data(), &reduced, payload.size());
     }
   );
-  if (!captured) return std::nullopt;
+  if (!captured) {
+    s_captureAllocationFailure->increment();
+    return std::nullopt;
+  }
 
   return ContProfTargetProfile{
     kind,
@@ -480,8 +619,6 @@ snapshotTypeTargetProfile(
   rds::Handle handle,
   uint32_t allocationSize
 ) {
-  if (profile.bcOff < 0) return std::nullopt;
-
   assertx(profile.name);
   assertx(allocationSize == sizeof(TypeProfile));
 
@@ -502,8 +639,6 @@ snapshotArrayIterTargetProfile(
   rds::Handle handle,
   uint32_t allocationSize
 ) {
-  if (profile.bcOff < 0) return std::nullopt;
-
   assertx(profile.name);
   assertx(allocationSize == sizeof(ArrayIterProfile));
 
@@ -623,15 +758,16 @@ snapshotDecRefTargetProfile(
   rds::Handle handle,
   uint32_t allocationSize
 ) {
-  if (profile.bcOff < 0) return std::nullopt;
-
   assertx(profile.name);
   assertx(allocationSize == sizeof(DecRefProfile));
   assertx(decodeDecRefProfileId(profile.name->slice()));
 
   DecRefProfile reduced{};
   TargetProfile<DecRefProfile>::reduce(reduced, handle, allocationSize);
-  if (reduced.total == 0) return std::nullopt;
+  if (reduced.total == 0) {
+    s_captureEmpty->increment();
+    return std::nullopt;
+  }
 
   assertx(
     reduced.datatype == kNoDataTypesSeen ||
@@ -724,12 +860,16 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
   return false;
 }
 
-std::optional<ContProfTargetProfile>
-snapshotContProfTargetProfile(
+static std::optional<ContProfTargetProfile> snapshotTargetProfile(
   const rds::Profile& profile,
   rds::Handle handle,
   uint32_t allocationSize
 ) {
+  if (profile.bcOff < 0) {
+    s_captureInvalidOffset->increment();
+    return std::nullopt;
+  }
+
   switch (profile.kind) {
     case rds::ProfileKind::DecRefProfile:
       return snapshotDecRefTargetProfile(profile, handle, allocationSize);
@@ -803,8 +943,26 @@ snapshotContProfTargetProfile(
       return snapshotMethProfile(profile, handle, allocationSize);
 
     default:
+      s_captureUnsupportedKind->increment();
       return std::nullopt;
   }
+}
+
+std::optional<ContProfTargetProfile> snapshotContProfTargetProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize
+) {
+  s_captureAttempts->increment();
+  auto const counters = targetCounters(profile.kind);
+  if (counters) counters->captureAttempts->increment();
+  auto result = snapshotTargetProfile(profile, handle, allocationSize);
+  if (result) {
+    s_captured->increment();
+    assertx(counters);
+    counters->captured->increment();
+  }
+  return result;
 }
 
 std::vector<std::string>
@@ -835,17 +993,22 @@ contProfTargetProfileUnitPaths(const ContProfTargetProfile& profile) {
   return result;
 }
 
-std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
+static std::optional<ContProfPreparedTargetProfile> prepareTargetProfile(
   const ContProfTargetProfile& profile,
-  const std::map<std::string, Unit*>& units
+  const std::map<std::string, Unit*>& units,
+  PrepareRejection& rejection
 ) {
   if (profile.bytecodeOffset < 0) return std::nullopt;
 
   if (profile.kind == ContProfTargetProfileKind::Meth) {
     auto const decoded = decodeMethProfilePayload(profile.payload);
     if (!decoded) return std::nullopt;
-    auto const func = resolveTargetFunc(decoded->method, units);
-    if (!isSupportedMethTarget(func)) return std::nullopt;
+    auto const func = resolveTargetFunc(decoded->method, units, rejection);
+    if (!func) return std::nullopt;
+    if (!isSupportedMethTarget(func)) {
+      rejection = PrepareRejection::UnsupportedMethod;
+      return std::nullopt;
+    }
 
     auto const cls = decoded->receiver
       ? resolveMethReceiver(*decoded->receiver, units)
@@ -856,8 +1019,12 @@ std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
     if (cls && cls->lookupMethod(func->name()) == func) {
       meth = std::make_unique<MethProfile>();
       meth->reportMeth(cls, func, nullptr);
+      s_receiverRestored->increment();
     } else {
       meth = std::make_unique<MethProfile>(MethProfile::fromUniqueMeth(func));
+      if (decoded->receiver) {
+        (cls ? s_receiverChangedDispatch : s_receiverUnavailable)->increment();
+      }
     }
 
     return ContProfPreparedTargetProfile{
@@ -874,13 +1041,19 @@ std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
     bool resolved = true;
     auto const value = decodeCallTargetPayload(
       profile.payload, [&] (const ContProfFuncKey& key) -> const Func* {
-        auto const func = resolveTargetFunc(key, units);
+        auto reason = PrepareRejection::UnresolvedOrStale;
+        auto const func = resolveTargetFunc(key, units, reason);
+        if (resolved && !func) rejection = reason;
         resolved &= func != nullptr;
         return func;
       }
     );
     // A missing target is not an empty slot: keep all counts or skip the site.
-    if (!value || !resolved) return std::nullopt;
+    if (!value) {
+      rejection = PrepareRejection::InvalidPayload;
+      return std::nullopt;
+    }
+    if (!resolved) return std::nullopt;
 
     return ContProfPreparedTargetProfile{
       profile.kind,
@@ -901,7 +1074,26 @@ std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
   };
 }
 
-bool installContProfTargetProfile(
+std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
+  const ContProfTargetProfile& profile,
+  const std::map<std::string, Unit*>& units
+) {
+  s_prepareAttempts->increment();
+  auto const counters = targetCounters(profile.kind);
+  if (counters) counters->prepareAttempts->increment();
+  auto rejection = PrepareRejection::InvalidPayload;
+  auto result = prepareTargetProfile(profile, units, rejection);
+  if (result) {
+    s_prepared->increment();
+    assertx(counters);
+    counters->prepared->increment();
+  } else {
+    s_prepareRejections[static_cast<size_t>(rejection)]->increment();
+  }
+  return result;
+}
+
+static bool installTargetProfile(
   const ContProfPreparedTargetProfile& profile,
   TransID transId,
   ProfDataTargetProfile& targetProfiles
@@ -993,6 +1185,24 @@ bool installContProfTargetProfile(
   }
 
   return false;
+}
+
+bool installContProfTargetProfile(
+  const ContProfPreparedTargetProfile& profile,
+  TransID transId,
+  ProfDataTargetProfile& targetProfiles
+) {
+  s_installAttempts->increment();
+  auto const installed = installTargetProfile(profile, transId, targetProfiles);
+  if (installed) {
+    s_installed->increment();
+    auto const counters = targetCounters(profile.kind);
+    assertx(counters);
+    counters->installed->increment();
+  } else {
+    s_installFailures->increment();
+  }
+  return installed;
 }
 
 }

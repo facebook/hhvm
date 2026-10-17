@@ -101,8 +101,8 @@ LoadedUnits loadCandidateUnits(
     addPaths(key);
     for (auto const& translation : record.translations) {
       for (auto const& profile : translation.targetProfiles) {
-        for (auto const& callee : contProfTargetProfileFuncKeys(profile)) {
-          if (!callee.closureContextName) addPaths(callee);
+        for (auto const& path : contProfTargetProfileUnitPaths(profile)) {
+          paths.emplace(path);
         }
       }
     }

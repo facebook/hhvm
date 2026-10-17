@@ -31,8 +31,11 @@
 #include <utility>
 #include <vector>
 
+#include <folly/Range.h>
+
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
@@ -46,6 +49,8 @@
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/preclass.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP::jit::cprof {
@@ -85,6 +90,31 @@ void read_raw(PayloadReader& reader, T& value) {
   reader.remaining -= sizeof(value);
 }
 
+void writeBytes(PayloadWriter& writer, const void* data, size_t size) {
+  write_raw(writer, size);
+  auto const bytes = static_cast<const uint8_t*>(data);
+  writer.payload.insert(writer.payload.end(), bytes, bytes + size);
+}
+
+folly::ByteRange readBytes(PayloadReader& reader) {
+  size_t size{};
+  read_raw(reader, size);
+  if (reader.failed || size > reader.remaining) {
+    reader.failed = true;
+    return {};
+  }
+  folly::ByteRange bytes{reader.data, size};
+  reader.data += size;
+  reader.remaining -= size;
+  return bytes;
+}
+
+std::string readString(PayloadReader& reader) {
+  auto const bytes = readBytes(reader);
+  if (reader.failed) return {};
+  return {reinterpret_cast<const char*>(bytes.data()), bytes.size()};
+}
+
 struct CallTargetWriter : PayloadWriter {
   bool failed{false};
   bool hasTarget{false};
@@ -104,10 +134,7 @@ void write_func(CallTargetWriter& writer, const Func* func) {
 
   auto const encoded = serializeContProfFuncKey(*key);
   assertx(encoded);
-  write_raw(writer, encoded->size());
-  writer.payload.insert(
-    writer.payload.end(), encoded->begin(), encoded->end()
-  );
+  writeBytes(writer, encoded->data(), encoded->size());
   writer.hasTarget = true;
 }
 
@@ -118,18 +145,10 @@ struct CallTargetReader : PayloadReader {
 
 template<class Resolve>
 const Func* read_func(CallTargetReader<Resolve>& reader) {
-  size_t size{};
-  read_raw(reader, size);
-  if (reader.failed) return nullptr;
-  if (size > reader.remaining) {
-    reader.failed = true;
-    return nullptr;
-  }
-  if (!size) return nullptr;
+  auto const bytes = readBytes(reader);
+  if (reader.failed || bytes.empty()) return nullptr;
 
-  auto const key = deserializeContProfFuncKey({reader.data, size});
-  reader.data += size;
-  reader.remaining -= size;
+  auto const key = deserializeContProfFuncKey(bytes);
   if (!key) {
     reader.failed = true;
     return nullptr;
@@ -201,6 +220,51 @@ bool isSupportedMethTarget(const Func* func) {
     !func->isClosureBody();
 }
 
+bool isSupportedMethReceiver(const Class* cls) {
+  return cls && isNormalClass(cls) && !cls->isBuiltin() &&
+    !cls->isClosureClass() &&
+    !PreClassEmitter::IsAnonymousClassName(cls->name()->slice());
+}
+
+struct MethProfileReceiver {
+  std::string unitPath;
+  std::string className;
+};
+
+struct MethProfilePayload {
+  ContProfFuncKey method;
+  std::optional<MethProfileReceiver> receiver;
+};
+
+std::optional<MethProfilePayload>
+decodeMethProfilePayload(const std::vector<uint8_t>& payload) {
+  PayloadReader reader{payload.data(), payload.size()};
+  auto method = deserializeContProfFuncKey(readBytes(reader));
+  if (!method) return std::nullopt;
+
+  std::optional<MethProfileReceiver> receiver;
+  if (reader.remaining) {
+    receiver = MethProfileReceiver{readString(reader), readString(reader)};
+    if (reader.failed || reader.remaining ||
+        !isValidContProfUnitPath(receiver->unitPath) ||
+        receiver->className.empty() ||
+        receiver->className.find('\0') != std::string::npos) {
+      return std::nullopt;
+    }
+  }
+  return MethProfilePayload{std::move(*method), std::move(receiver)};
+}
+
+const Class* resolveMethReceiver(
+  const MethProfileReceiver& receiver,
+  const std::map<std::string, Unit*>& units
+) {
+  if (units.find(receiver.unitPath) == units.end()) return nullptr;
+  auto const name = lookupStaticString(folly::StringPiece{receiver.className});
+  auto const cls = name ? Class::lookup(name) : nullptr;
+  return isSupportedMethReceiver(cls) ? cls : nullptr;
+}
+
 std::optional<ContProfTargetProfile> snapshotMethProfile(
   const rds::Profile& profile,
   rds::Handle handle,
@@ -218,15 +282,26 @@ std::optional<ContProfTargetProfile> snapshotMethProfile(
 
   auto const key = makeContProfFuncKey(*func);
   if (!key) return std::nullopt;
-  auto payload = serializeContProfFuncKey(*key);
-  assertx(payload);
+  auto const method = serializeContProfFuncKey(*key);
+  assertx(method);
 
-  // Rebuild as UniqueMeth: guard current dispatch rather than a saved class.
+  // The receiver path is a preload hint, not a bytecode compatibility key.
+  // An inherited method can live in a different unit from its receiver.
+  PayloadWriter writer;
+  writeBytes(writer, method->data(), method->size());
+  auto const cls = reduced.uniqueClass();
+  if (isSupportedMethReceiver(cls)) {
+    if (auto const path = contProfUnitPath(*cls->preClass()->unit())) {
+      writeBytes(writer, path->data(), path->size());
+      writeBytes(writer, cls->name()->data(), cls->name()->size());
+    }
+  }
+
   return ContProfTargetProfile{
     ContProfTargetProfileKind::Meth,
     profile.bcOff,
     profile.name->toCppString(),
-    std::move(*payload),
+    std::move(writer.payload),
   };
 }
 
@@ -643,9 +718,7 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
 
     case ContProfTargetProfileKind::Meth:
       return profile.bytecodeOffset >= 0 &&
-        deserializeContProfFuncKey(
-          {profile.payload.data(), profile.payload.size()}
-        ).has_value();
+        decodeMethProfilePayload(profile.payload).has_value();
   }
 
   return false;
@@ -734,21 +807,27 @@ snapshotContProfTargetProfile(
   }
 }
 
-std::vector<ContProfFuncKey>
-contProfTargetProfileFuncKeys(const ContProfTargetProfile& profile) {
-  std::vector<ContProfFuncKey> result;
+std::vector<std::string>
+contProfTargetProfileUnitPaths(const ContProfTargetProfile& profile) {
+  std::vector<std::string> result;
+  auto const addPaths = [&] (const ContProfFuncKey& key) {
+    if (key.closureContextName) return;
+    result.push_back(key.resolutionUnitPath);
+    if (key.bytecodeUnitPath) result.push_back(*key.bytecodeUnitPath);
+  };
   if (profile.kind == ContProfTargetProfileKind::Meth) {
-    auto key = deserializeContProfFuncKey(
-      {profile.payload.data(), profile.payload.size()}
-    );
-    if (key) result.push_back(std::move(*key));
+    auto const decoded = decodeMethProfilePayload(profile.payload);
+    if (decoded) {
+      addPaths(decoded->method);
+      if (decoded->receiver) result.push_back(decoded->receiver->unitPath);
+    }
     return result;
   }
   if (profile.kind != ContProfTargetProfileKind::CallTarget) return result;
 
   auto const decoded = decodeCallTargetPayload(
     profile.payload, [&] (const ContProfFuncKey& key) -> const Func* {
-      result.push_back(key);
+      addPaths(key);
       return nullptr;
     }
   );
@@ -763,12 +842,23 @@ std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
   if (profile.bytecodeOffset < 0) return std::nullopt;
 
   if (profile.kind == ContProfTargetProfileKind::Meth) {
-    auto const key = deserializeContProfFuncKey(
-      {profile.payload.data(), profile.payload.size()}
-    );
-    if (!key) return std::nullopt;
-    auto const func = resolveTargetFunc(*key, units);
+    auto const decoded = decodeMethProfilePayload(profile.payload);
+    if (!decoded) return std::nullopt;
+    auto const func = resolveTargetFunc(decoded->method, units);
     if (!isSupportedMethTarget(func)) return std::nullopt;
+
+    auto const cls = decoded->receiver
+      ? resolveMethReceiver(*decoded->receiver, units)
+      : nullptr;
+    std::unique_ptr<MethProfile> meth;
+    // Guard the current class only if it still dispatches to this method.
+    // Otherwise retain the method and let UniqueMeth guard current dispatch.
+    if (cls && cls->lookupMethod(func->name()) == func) {
+      meth = std::make_unique<MethProfile>();
+      meth->reportMeth(cls, func, nullptr);
+    } else {
+      meth = std::make_unique<MethProfile>(MethProfile::fromUniqueMeth(func));
+    }
 
     return ContProfPreparedTargetProfile{
       profile.kind,
@@ -776,7 +866,7 @@ std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
       makeStaticString(profile.name),
       {},
       nullptr,
-      std::make_unique<MethProfile>(MethProfile::fromUniqueMeth(func)),
+      std::move(meth),
     };
   }
 

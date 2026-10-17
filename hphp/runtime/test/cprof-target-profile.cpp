@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <map>
 #include <memory>
 #include <new>
@@ -371,7 +372,7 @@ TEST_F(ContProfCallTargetTest, RoundTripsCountsAndUntrackedProbability) {
     SCOPED_TRACE(numTargets);
     CallTargetProfile value{};
     uint32_t total = 0;
-    std::vector<ContProfFuncKey> expectedKeys;
+    std::vector<std::string> expectedPaths;
     for (size_t i = 0; i < numTargets; ++i) {
       auto const func = m_ownedUnits[i]->funcs()[0];
       auto const count = static_cast<uint32_t>(7 - i);
@@ -380,7 +381,10 @@ TEST_F(ContProfCallTargetTest, RoundTripsCountsAndUntrackedProbability) {
       if (i < 6) {
         auto const key = makeContProfFuncKey(*func);
         ASSERT_TRUE(key);
-        expectedKeys.push_back(*key);
+        expectedPaths.push_back(key->resolutionUnitPath);
+        if (key->bytecodeUnitPath) {
+          expectedPaths.push_back(*key->bytecodeUnitPath);
+        }
       }
     }
     ScopedTargetProfile<CallTargetProfile> const source{
@@ -393,7 +397,7 @@ TEST_F(ContProfCallTargetTest, RoundTripsCountsAndUntrackedProbability) {
     ASSERT_EQ(1, decoded->translations.size());
     auto const& profiles = decoded->translations[0].targetProfiles;
     ASSERT_EQ(1, profiles.size());
-    EXPECT_EQ(expectedKeys, contProfTargetProfileFuncKeys(profiles[0]));
+    EXPECT_EQ(expectedPaths, contProfTargetProfileUnitPaths(profiles[0]));
 
     auto const prepared = prepareContProfTargetProfile(profiles[0], m_units);
     ASSERT_TRUE(prepared);
@@ -433,24 +437,26 @@ TEST_F(ContProfCallTargetTest, RejectsUnavailableOrStaleRequiredTargets) {
     }
     ASSERT_TRUE(snapshot);
     ASSERT_TRUE(prepareContProfTargetProfile(*snapshot, m_units));
-    auto const keys = contProfTargetProfileFuncKeys(*snapshot);
-    ASSERT_EQ(3, keys.size());
-    auto const& key = keys[missing];
+    auto const paths = contProfTargetProfileUnitPaths(*snapshot);
+    ASSERT_EQ(3, paths.size());
+    auto const key = makeContProfFuncKey(*m_ownedUnits[missing]->funcs()[0]);
+    ASSERT_TRUE(key);
+    EXPECT_EQ(key->resolutionUnitPath, paths[missing]);
 
     auto unavailable = m_units;
-    unavailable.erase(key.resolutionUnitPath);
+    unavailable.erase(key->resolutionUnitPath);
     EXPECT_FALSE(prepareContProfTargetProfile(*snapshot, unavailable));
 
     auto replacement = makeCallTargetTestUnit(missing, true);
     ASSERT_NE(nullptr, replacement);
     m_ownedUnits[missing].reset();
     replacement->merge();
-    m_units.at(key.resolutionUnitPath) = replacement.get();
+    m_units.at(key->resolutionUnitPath) = replacement.get();
     m_ownedUnits[missing] = std::move(replacement);
     auto const replacementKey =
       makeContProfFuncKey(*m_ownedUnits[missing]->funcs()[0]);
     ASSERT_TRUE(replacementKey);
-    ASSERT_NE(key.bytecodeUnitHash, replacementKey->bytecodeUnitHash);
+    ASSERT_NE(key->bytecodeUnitHash, replacementKey->bytecodeUnitHash);
     EXPECT_FALSE(prepareContProfTargetProfile(*snapshot, m_units));
   }
 }
@@ -555,7 +561,7 @@ struct ContProfMethTest : testing::Test {
   const Func* m_method{nullptr};
 };
 
-TEST_F(ContProfMethTest, RestoresSupportedStatesAsGuardedUniqueMethod) {
+TEST_F(ContProfMethTest, RestoresSupportedMethodAndReceiverStates) {
   auto const name = makeStaticString("MethProfile-FCallObjMethod");
   for (auto const multipleClasses : {false, true}) {
     SCOPED_TRACE(multipleClasses);
@@ -576,8 +582,9 @@ TEST_F(ContProfMethTest, RestoresSupportedStatesAsGuardedUniqueMethod) {
     ASSERT_EQ(1, profiles.size());
     auto const key = makeContProfFuncKey(*m_method);
     ASSERT_TRUE(key);
-    std::vector<ContProfFuncKey> const expectedKeys{*key};
-    EXPECT_EQ(expectedKeys, contProfTargetProfileFuncKeys(profiles.front()));
+    std::vector<std::string> expectedPaths{key->resolutionUnitPath};
+    if (!multipleClasses) expectedPaths.push_back(kMethUnitPath);
+    EXPECT_EQ(expectedPaths, contProfTargetProfileUnitPaths(profiles.front()));
 
     auto const prepared = prepareContProfTargetProfile(profiles.front(), m_units);
     ASSERT_TRUE(prepared);
@@ -589,11 +596,11 @@ TEST_F(ContProfMethTest, RestoresSupportedStatesAsGuardedUniqueMethod) {
       static_cast<MethProfile*>(nullptr), TransID{2'800'001}, 0, name
     });
     ASSERT_NE(nullptr, actual);
-    EXPECT_EQ(nullptr, actual->uniqueClass());
+    EXPECT_EQ(multipleClasses ? nullptr : m_base, actual->uniqueClass());
     EXPECT_EQ(m_method, actual->uniqueMeth());
     EXPECT_EQ(nullptr, actual->baseMeth());
     EXPECT_EQ(nullptr, actual->interfaceMeth());
-    // UniqueMeth checks the current receiver's slot against this exact Func*.
+    // A UniqueMeth fallback checks the receiver's slot against this exact Func*.
     EXPECT_EQ(m_method, m_child->getMethod(m_method->methodSlot()));
     EXPECT_NE(m_method, m_override->getMethod(m_method->methodSlot()));
   }
@@ -614,11 +621,16 @@ TEST_F(ContProfMethTest, SkipsContextDependentMethods) {
     // Preparation independently enforces eligibility for a well-formed key.
     auto const key = makeContProfFuncKey(*method);
     ASSERT_TRUE(key);
-    auto const payload = serializeContProfFuncKey(*key);
-    ASSERT_TRUE(payload);
+    auto const methodPayload = serializeContProfFuncKey(*key);
+    ASSERT_TRUE(methodPayload);
+    auto const methodSize = methodPayload->size();
+    std::vector<uint8_t> payload(sizeof(methodSize));
+    std::memcpy(payload.data(), &methodSize, sizeof(methodSize));
+    payload.insert(payload.end(), methodPayload->begin(), methodPayload->end());
     ContProfTargetProfile const profile{
-      ContProfTargetProfileKind::Meth, 0, name->toCppString(), *payload
+      ContProfTargetProfileKind::Meth, 0, name->toCppString(), std::move(payload)
     };
+    EXPECT_TRUE(isValidContProfTargetProfile(profile));
     EXPECT_FALSE(prepareContProfTargetProfile(profile, m_units));
   };
   for (auto const methodName : {
@@ -686,6 +698,238 @@ TEST_F(ContProfMethTest, SkipsUnavailableOrStaleMethod) {
   m_units.at(kMethUnitPath) = replacement.get();
   m_unit = std::move(replacement);
   EXPECT_FALSE(prepareContProfTargetProfile(*snapshot, m_units));
+}
+
+TEST_F(ContProfMethTest, RejectsMalformedMethodPayloads) {
+  auto const key = makeContProfFuncKey(*m_method);
+  ASSERT_TRUE(key);
+  auto const payload = serializeContProfFuncKey(*key);
+  ASSERT_TRUE(payload);
+  ContProfTargetProfile const legacy{
+    ContProfTargetProfileKind::Meth, 0, "MethProfile-FCallObjMethod", *payload
+  };
+
+  EXPECT_FALSE(isValidContProfTargetProfile(legacy));
+  EXPECT_FALSE(prepareContProfTargetProfile(legacy, m_units));
+
+  MethProfile value;
+  value.reportMeth(m_base, m_method, nullptr);
+  ScopedTargetProfile<MethProfile> const source{
+    TransID{2'800'007}, 0, makeStaticString("MethProfile-FCallObjMethod"), value
+  };
+  auto const snapshot = source.snapshot();
+  ASSERT_TRUE(snapshot);
+  auto const methodEnd = sizeof(size_t) + payload->size();
+  ASSERT_GT(snapshot->payload.size(), methodEnd);
+
+  // Ending exactly after the framed method is a valid UniqueMeth payload.
+  auto withoutReceiver = *snapshot;
+  withoutReceiver.payload.resize(methodEnd);
+  auto const prepared = prepareContProfTargetProfile(withoutReceiver, m_units);
+  ASSERT_TRUE(prepared);
+  ASSERT_NE(nullptr, prepared->meth);
+  EXPECT_EQ(nullptr, prepared->meth->uniqueClass());
+  EXPECT_EQ(m_method, prepared->meth->uniqueMeth());
+
+  for (auto end = methodEnd + 1; end < snapshot->payload.size(); ++end) {
+    SCOPED_TRACE(end);
+    auto truncated = *snapshot;
+    truncated.payload.resize(end);
+    EXPECT_FALSE(isValidContProfTargetProfile(truncated));
+  }
+  auto trailing = *snapshot;
+  trailing.payload.push_back(0);
+  EXPECT_FALSE(isValidContProfTargetProfile(trailing));
+}
+
+constexpr auto kMethAncestorUnitPath =
+  "hphp/runtime/test/cont-prof-meth-ancestor.php";
+constexpr auto kMethReceiverUnitPath =
+  "hphp/runtime/test/cont-prof-meth-receiver.php";
+constexpr auto kMethAncestorHhas = R"HHAS(
+.class ContProfMethAncestor_19ab32d5 extends ContProfMethBase_19ab32d5 {}
+)HHAS";
+constexpr auto kMethReceiverHhas = R"HHAS(
+.class ContProfMethReceiver_19ab32d5 extends ContProfMethAncestor_19ab32d5 {
+  .method [public] N marker() {
+    Int 17
+    RetC None
+  }
+}
+)HHAS";
+
+TargetProfileTestUnit makeMethHierarchyUnit(
+  const char* path,
+  const std::string& hhas
+) {
+  auto const emitter = assemble_string(
+    hhas,
+    path,
+    SHA1{"8888888888888888888888888888888888888888"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  if (!emitter || emitter->m_fatalUnit) return nullptr;
+  return TargetProfileTestUnit{emitter->create().release()};
+}
+
+struct ContProfMethReceiverTest : ContProfMethTest {
+  void SetUp() override {
+    ContProfMethTest::SetUp();
+    ASSERT_FALSE(HasFatalFailure());
+    m_ancestor = makeMethHierarchyUnit(kMethAncestorUnitPath, kMethAncestorHhas);
+    ASSERT_NE(nullptr, m_ancestor);
+    m_ancestor->merge();
+    m_receiver = makeMethHierarchyUnit(kMethReceiverUnitPath, kMethReceiverHhas);
+    ASSERT_NE(nullptr, m_receiver);
+    m_receiver->merge();
+    m_units.emplace(kMethAncestorUnitPath, m_ancestor.get());
+    m_units.emplace(kMethReceiverUnitPath, m_receiver.get());
+    ASSERT_NE(nullptr, receiver());
+    ASSERT_EQ(m_method, receiver()->lookupMethod(makeStaticString("f")));
+  }
+
+  Class* receiver() const {
+    return Class::lookup(makeStaticString("ContProfMethReceiver_19ab32d5"));
+  }
+
+  std::optional<ContProfTargetProfile> snapshot() const {
+    MethProfile value;
+    value.reportMeth(receiver(), m_method, nullptr);
+    ScopedTargetProfile<MethProfile> const source{
+      TransID{2'800'005}, 0, makeStaticString("MethProfile-FCallObjMethod"), value
+    };
+    return source.snapshot();
+  }
+
+  // Destroy derived classes before their ancestors.
+  TargetProfileTestUnit m_ancestor;
+  TargetProfileTestUnit m_receiver;
+};
+
+TEST_F(ContProfMethReceiverTest, RestoresReceiverAcrossUnrelatedBytecodeChange) {
+  auto const profile = snapshot();
+  ASSERT_TRUE(profile);
+  auto const methodKey = makeContProfFuncKey(*m_method);
+  ASSERT_TRUE(methodKey);
+  EXPECT_NE(methodKey->resolutionUnitPath, kMethReceiverUnitPath);
+  std::vector<std::string> const expectedPaths{
+    methodKey->resolutionUnitPath, kMethReceiverUnitPath
+  };
+  EXPECT_EQ(expectedPaths, contProfTargetProfileUnitPaths(*profile));
+
+  auto const prepared = prepareContProfTargetProfile(*profile, m_units);
+  ASSERT_TRUE(prepared);
+  ASSERT_NE(nullptr, prepared->meth);
+  EXPECT_EQ(receiver(), prepared->meth->uniqueClass());
+  EXPECT_EQ(m_method, prepared->meth->uniqueMeth());
+
+  auto unavailable = m_units;
+  unavailable.erase(kMethReceiverUnitPath);
+  auto const withoutReceiver = prepareContProfTargetProfile(*profile, unavailable);
+  ASSERT_TRUE(withoutReceiver);
+  ASSERT_NE(nullptr, withoutReceiver->meth);
+  EXPECT_EQ(nullptr, withoutReceiver->meth->uniqueClass());
+  EXPECT_EQ(m_method, withoutReceiver->meth->uniqueMeth());
+
+  auto const oldReceiverHash = m_receiver->bcSha1();
+  auto changedHhas = std::string{kMethReceiverHhas};
+  changedHhas.replace(changedHhas.find("Int 17"), 6, "Int 18");
+  auto replacement = makeMethHierarchyUnit(kMethReceiverUnitPath, changedHhas);
+  ASSERT_NE(nullptr, replacement);
+  m_receiver.reset();
+  replacement->merge();
+  m_receiver = std::move(replacement);
+  m_units.at(kMethReceiverUnitPath) = m_receiver.get();
+  ASSERT_NE(nullptr, receiver());
+  ASSERT_NE(oldReceiverHash, m_receiver->bcSha1());
+  ASSERT_EQ(m_method, resolveContProfFunc(*methodKey, *m_unit));
+
+  auto const changedReceiver = prepareContProfTargetProfile(*profile, m_units);
+  ASSERT_TRUE(changedReceiver);
+  ASSERT_NE(nullptr, changedReceiver->meth);
+  EXPECT_EQ(receiver(), changedReceiver->meth->uniqueClass());
+  EXPECT_EQ(m_method, changedReceiver->meth->uniqueMeth());
+}
+
+TEST_F(ContProfMethReceiverTest, ChangedAncestorDispatchDropsOnlyReceiver) {
+  auto const profile = snapshot();
+  ASSERT_TRUE(profile);
+  auto const receiverHash = m_receiver->bcSha1();
+  auto const methodKey = makeContProfFuncKey(*m_method);
+  ASSERT_TRUE(methodKey);
+  constexpr auto changedAncestorHhas = R"HHAS(
+.class ContProfMethAncestor_19ab32d5 extends ContProfMethBase_19ab32d5 {
+  .method [public] N f() {
+    Int 29
+    RetC None
+  }
+}
+)HHAS";
+  m_receiver.reset();
+  m_ancestor.reset();
+  m_ancestor = makeMethHierarchyUnit(kMethAncestorUnitPath, changedAncestorHhas);
+  ASSERT_NE(nullptr, m_ancestor);
+  m_ancestor->merge();
+  m_receiver = makeMethHierarchyUnit(kMethReceiverUnitPath, kMethReceiverHhas);
+  ASSERT_NE(nullptr, m_receiver);
+  m_receiver->merge();
+  m_units.at(kMethAncestorUnitPath) = m_ancestor.get();
+  m_units.at(kMethReceiverUnitPath) = m_receiver.get();
+  ASSERT_NE(nullptr, receiver());
+  EXPECT_EQ(receiverHash, m_receiver->bcSha1());
+  EXPECT_EQ(m_method, resolveContProfFunc(*methodKey, *m_unit));
+  EXPECT_NE(m_method, receiver()->lookupMethod(makeStaticString("f")));
+
+  auto const prepared = prepareContProfTargetProfile(*profile, m_units);
+  ASSERT_TRUE(prepared);
+  ASSERT_NE(nullptr, prepared->meth);
+  EXPECT_EQ(nullptr, prepared->meth->uniqueClass());
+  EXPECT_EQ(m_method, prepared->meth->uniqueMeth());
+  EXPECT_NE(m_method, receiver()->getMethod(m_method->methodSlot()));
+}
+
+TEST_F(ContProfMethTest, ReducesRestoredReceiverStatesInEitherOrder) {
+  auto const prepare = [&](const MethProfile& value) {
+    ScopedTargetProfile<MethProfile> const source{
+      TransID{2'800'006}, 0, makeStaticString("MethProfile-FCallObjMethod"), value
+    };
+    auto const profile = source.snapshot();
+    return profile ? prepareContProfTargetProfile(*profile, m_units)
+                   : std::nullopt;
+  };
+  MethProfile base;
+  base.reportMeth(m_base, m_method, nullptr);
+  MethProfile child;
+  child.reportMeth(m_child, m_method, nullptr);
+  auto const restoredBase = prepare(base);
+  auto const restoredChild = prepare(child);
+  auto const restoredMethod = prepare(MethProfile::fromUniqueMeth(m_method));
+  ASSERT_TRUE(restoredBase && restoredBase->meth);
+  ASSERT_TRUE(restoredChild && restoredChild->meth);
+  ASSERT_TRUE(restoredMethod && restoredMethod->meth);
+
+  for (auto const other : {
+    restoredBase->meth.get(),
+    restoredChild->meth.get(),
+    restoredMethod->meth.get(),
+  }) {
+    SCOPED_TRACE(other->toString());
+    auto const expectedClass = other == restoredBase->meth.get()
+      ? m_base : nullptr;
+    for (auto const reverse : {false, true}) {
+      SCOPED_TRACE(reverse);
+      MethProfile aggregate;
+      MethProfile::reduce(aggregate, reverse ? *other : *restoredBase->meth);
+      MethProfile::reduce(aggregate, reverse ? *restoredBase->meth : *other);
+      EXPECT_EQ(expectedClass, aggregate.uniqueClass());
+      EXPECT_EQ(m_method, aggregate.uniqueMeth());
+      EXPECT_EQ(nullptr, aggregate.baseMeth());
+      EXPECT_EQ(nullptr, aggregate.interfaceMeth());
+    }
+  }
 }
 
 template<class T>

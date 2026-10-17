@@ -430,8 +430,8 @@ TEST_F(ContProfConsumeTest, PreparesCallTargetWithoutCalleeRecord) {
   value.report(callee);
   auto const snapshot = snapshotTestTargetProfile(value, callTargetProfileKey());
   ASSERT_TRUE(snapshot);
-  std::vector<ContProfFuncKey> const expectedKeys{*calleeKey};
-  EXPECT_EQ(expectedKeys, contProfTargetProfileFuncKeys(*snapshot));
+  std::vector<std::string> const expectedPaths{calleeKey->resolutionUnitPath};
+  EXPECT_EQ(expectedPaths, contProfTargetProfileUnitPaths(*snapshot));
   m_alpha.translations.front().targetProfiles = {*snapshot};
 
   auto const prepared = prepareContProfStartupCandidates({m_alpha}, m_units, 1);

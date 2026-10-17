@@ -31,6 +31,11 @@ struct Unit;
 
 namespace HPHP::jit::cprof {
 
+/* Canonical SourceRoot-relative paths for keys and unit preload hints. */
+bool isValidContProfUnitPath(const std::string&);
+
+std::optional<std::string> contProfUnitPath(const Unit&);
+
 /*
  * A restart-stable identity for a Hack function.
  *

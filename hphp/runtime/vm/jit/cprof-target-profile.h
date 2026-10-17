@@ -57,9 +57,9 @@ snapshotContProfTargetProfile(
   uint32_t allocationSize
 );
 
-/* Function dependencies whose units must be loaded before preparation. */
-std::vector<ContProfFuncKey>
-contProfTargetProfileFuncKeys(const ContProfTargetProfile& profile);
+/* Dependency units to load before preparation; paths may repeat. */
+std::vector<std::string>
+contProfTargetProfileUnitPaths(const ContProfTargetProfile& profile);
 
 /* Resolve and intern a target profile, or skip it if a dependency changed. */
 std::optional<ContProfPreparedTargetProfile>

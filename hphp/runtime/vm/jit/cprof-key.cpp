@@ -32,9 +32,7 @@
 
 namespace HPHP::jit::cprof {
 
-namespace {
-
-bool isCanonicalRelativePath(const std::string& path) {
+bool isValidContProfUnitPath(const std::string& path) {
   if (path.empty() ||
       path.find('\\') != std::string::npos ||
       path.find('\0') != std::string::npos) {
@@ -50,7 +48,7 @@ bool isCanonicalRelativePath(const std::string& path) {
     parsed.lexically_normal().generic_string() == path;
 }
 
-std::optional<std::string> sourceRootRelativeUnitPath(const Unit& unit) {
+std::optional<std::string> contProfUnitPath(const Unit& unit) {
   auto path = std::filesystem::path{unit.origFilepath()->toCppString()};
   if (path.is_absolute()) {
     auto const sourceRoot = std::filesystem::path{Cfg::Server::SourceRoot};
@@ -59,9 +57,11 @@ std::optional<std::string> sourceRootRelativeUnitPath(const Unit& unit) {
   }
 
   auto const relativePath = path.generic_string();
-  if (!isCanonicalRelativePath(relativePath)) return std::nullopt;
+  if (!isValidContProfUnitPath(relativePath)) return std::nullopt;
   return relativePath;
 }
+
+namespace {
 
 const StringData* existingStaticString(const std::string& value) {
   if (value.empty()) return nullptr;
@@ -115,10 +115,10 @@ bool isValidSymbol(const std::string& value) {
 }
 
 bool isValidContProfFuncKey(const ContProfFuncKey& key) {
-  if (!isCanonicalRelativePath(key.resolutionUnitPath)) return false;
+  if (!isValidContProfUnitPath(key.resolutionUnitPath)) return false;
 
   if (key.bytecodeUnitPath &&
-      (!isCanonicalRelativePath(*key.bytecodeUnitPath) ||
+      (!isValidContProfUnitPath(*key.bytecodeUnitPath) ||
        *key.bytecodeUnitPath == key.resolutionUnitPath)) {
     return false;
   }
@@ -140,7 +140,7 @@ std::optional<ContProfFuncKey> makeContProfFuncKey(const Func& func) {
   auto const bytecodeUnit = func.unit();
   assertx(bytecodeUnit);
 
-  auto const bytecodePath = sourceRootRelativeUnitPath(*bytecodeUnit);
+  auto const bytecodePath = contProfUnitPath(*bytecodeUnit);
   if (!bytecodePath) return std::nullopt;
 
   auto const bytecodeHash = bytecodeUnit->bcSha1();
@@ -165,7 +165,7 @@ std::optional<ContProfFuncKey> makeContProfFuncKey(const Func& func) {
     }
   }
 
-  auto const resolutionPath = sourceRootRelativeUnitPath(*resolutionUnit);
+  auto const resolutionPath = contProfUnitPath(*resolutionUnit);
   if (!resolutionPath) return std::nullopt;
 
   ContProfFuncKey key{

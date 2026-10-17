@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
+#include "hphp/runtime/vm/jit/cprof-serde.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
@@ -82,6 +83,116 @@ void read_raw(PayloadReader& reader, T& value) {
   std::memcpy(&value, reader.data, sizeof(value));
   reader.data += sizeof(value);
   reader.remaining -= sizeof(value);
+}
+
+struct CallTargetWriter : PayloadWriter {
+  bool failed{false};
+  bool hasTarget{false};
+};
+
+void write_func(CallTargetWriter& writer, const Func* func) {
+  if (!func) {
+    write_raw(writer, size_t{0});
+    return;
+  }
+
+  auto const key = makeContProfFuncKey(*func);
+  if (!key || key->closureContextName) {
+    writer.failed = true;
+    return;
+  }
+
+  auto const encoded = serializeContProfFuncKey(*key);
+  assertx(encoded);
+  write_raw(writer, encoded->size());
+  writer.payload.insert(
+    writer.payload.end(), encoded->begin(), encoded->end()
+  );
+  writer.hasTarget = true;
+}
+
+template<class Resolve>
+struct CallTargetReader : PayloadReader {
+  Resolve resolve;
+};
+
+template<class Resolve>
+const Func* read_func(CallTargetReader<Resolve>& reader) {
+  size_t size{};
+  read_raw(reader, size);
+  if (reader.failed) return nullptr;
+  if (size > reader.remaining) {
+    reader.failed = true;
+    return nullptr;
+  }
+  if (!size) return nullptr;
+
+  auto const key = deserializeContProfFuncKey({reader.data, size});
+  reader.data += size;
+  reader.remaining -= size;
+  if (!key) {
+    reader.failed = true;
+    return nullptr;
+  }
+  return reader.resolve(*key);
+}
+
+template<class Resolve>
+std::optional<CallTargetProfile> decodeCallTargetPayload(
+  const std::vector<uint8_t>& payload,
+  Resolve resolve
+) {
+  CallTargetReader<Resolve> reader{
+    {payload.data(), payload.size()}, std::move(resolve)
+  };
+  CallTargetProfile result{};
+  result.deserialize(reader);
+  if (reader.failed || reader.remaining != 0) return std::nullopt;
+  return result;
+}
+
+std::optional<ContProfTargetProfile>
+snapshotCallTargetProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize
+) {
+  if (profile.bcOff < 0) return std::nullopt;
+
+  assertx(profile.name);
+  assertx(allocationSize == sizeof(CallTargetProfile));
+
+  CallTargetProfile reduced{};
+  TargetProfile<CallTargetProfile>::reduce(reduced, handle, allocationSize);
+  CallTargetWriter writer;
+  reduced.serialize(writer);
+  // A concurrent reduction can see initialization before the first target.
+  if (writer.failed || !writer.hasTarget) return std::nullopt;
+
+  return ContProfTargetProfile{
+    ContProfTargetProfileKind::CallTarget,
+    profile.bcOff,
+    profile.name->toCppString(),
+    std::move(writer.payload),
+  };
+}
+
+const Func* resolveTargetFunc(
+  const ContProfFuncKey& key,
+  const std::map<std::string, Unit*>& units
+) {
+  if (key.closureContextName) return nullptr;
+  auto const unit = units.find(key.resolutionUnitPath);
+  if (unit == units.end()) return nullptr;
+  if (key.bytecodeUnitPath &&
+      units.find(*key.bytecodeUnitPath) == units.end()) {
+    return nullptr;
+  }
+  try {
+    return resolveContProfFunc(key, *unit->second);
+  } catch (...) {
+    return nullptr;
+  }
 }
 
 template<class T>
@@ -486,6 +597,14 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
     case ContProfTargetProfileKind::ArrayIter:
       return profile.bytecodeOffset >= 0 &&
         decodeArrayIterProfilePayload(profile.payload).has_value();
+
+    case ContProfTargetProfileKind::CallTarget:
+      return profile.bytecodeOffset >= 0 &&
+        decodeCallTargetPayload(
+          profile.payload, [](const ContProfFuncKey&) -> const Func* {
+            return nullptr;
+          }
+        ).has_value();
   }
 
   return false;
@@ -563,13 +682,56 @@ snapshotContProfTargetProfile(
     case rds::ProfileKind::ArrayIterProfile:
       return snapshotArrayIterTargetProfile(profile, handle, allocationSize);
 
+    case rds::ProfileKind::CallTargetProfile:
+      return snapshotCallTargetProfile(profile, handle, allocationSize);
+
     default:
       return std::nullopt;
   }
 }
 
-std::optional<ContProfPreparedTargetProfile>
-prepareContProfTargetProfile(const ContProfTargetProfile& profile) {
+std::vector<ContProfFuncKey>
+contProfTargetProfileFuncKeys(const ContProfTargetProfile& profile) {
+  std::vector<ContProfFuncKey> result;
+  if (profile.kind != ContProfTargetProfileKind::CallTarget) return result;
+
+  auto const decoded = decodeCallTargetPayload(
+    profile.payload, [&] (const ContProfFuncKey& key) -> const Func* {
+      result.push_back(key);
+      return nullptr;
+    }
+  );
+  if (!decoded) result.clear();
+  return result;
+}
+
+std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
+  const ContProfTargetProfile& profile,
+  const std::map<std::string, Unit*>& units
+) {
+  if (profile.bytecodeOffset < 0) return std::nullopt;
+
+  if (profile.kind == ContProfTargetProfileKind::CallTarget) {
+    bool resolved = true;
+    auto const value = decodeCallTargetPayload(
+      profile.payload, [&] (const ContProfFuncKey& key) -> const Func* {
+        auto const func = resolveTargetFunc(key, units);
+        resolved &= func != nullptr;
+        return func;
+      }
+    );
+    // A missing target is not an empty slot: keep all counts or skip the site.
+    if (!value || !resolved) return std::nullopt;
+
+    return ContProfPreparedTargetProfile{
+      profile.kind,
+      profile.bytecodeOffset,
+      makeStaticString(profile.name),
+      {},
+      std::make_unique<CallTargetProfile>(*value),
+    };
+  }
+
   if (!isValidContProfTargetProfile(profile)) return std::nullopt;
 
   return ContProfPreparedTargetProfile{
@@ -643,6 +805,19 @@ bool installContProfTargetProfile(
 
     case ContProfTargetProfileKind::ArrayIter:
       return installArrayIterTargetProfile(profile, transId, targetProfiles);
+
+    case ContProfTargetProfileKind::CallTarget:
+      assertx(profile.callTarget);
+      return addTargetProfileValue(
+        rds::Profile{
+          static_cast<CallTargetProfile*>(nullptr),
+          transId,
+          profile.bytecodeOffset,
+          profile.name,
+        },
+        *profile.callTarget,
+        targetProfiles
+      );
   }
 
   return false;

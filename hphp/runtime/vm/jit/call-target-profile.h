@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 namespace HPHP {
 
@@ -28,9 +29,6 @@ struct Class;
 namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct ProfDataSerializer;
-struct ProfDataDeserializer;
 
 /*
  * Profiles the target functions for a given call site to determine the most
@@ -53,9 +51,30 @@ struct CallTargetProfile {
   std::string toString() const;
   folly::dynamic toDynamic() const;
 
-  void serialize(ProfDataSerializer&) const;
+  template<class Serializer>
+  void serialize(Serializer& ser) const {
+    for (size_t i = 0; i < kMaxEntries; i++) {
+      auto const funcId = m_entries[i].funcId;
+      const Func* func = funcId.isInvalid() ? nullptr
+                                          : Func::fromFuncId(funcId);
+      write_func(ser, func);
+      write_raw(ser, m_entries[i].count);
+    }
+    write_raw(ser, m_untracked);
+    write_raw(ser, m_init);
+  }
 
-  void deserialize(ProfDataDeserializer&);
+  template<class Deserializer>
+  void deserialize(Deserializer& ser) {
+    for (size_t i = 0; i < kMaxEntries; i++) {
+      auto const func = read_func(ser);
+      m_entries[i].funcId =
+        func != nullptr ? func->getFuncId() : FuncId::Invalid;
+      read_raw(ser, m_entries[i].count);
+    }
+    read_raw(ser, m_untracked);
+    read_raw(ser, m_init);
+  }
 
  private:
   struct Entry {

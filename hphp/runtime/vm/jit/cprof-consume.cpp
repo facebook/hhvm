@@ -90,13 +90,21 @@ LoadedUnits loadCandidateUnits(
   LoadedUnits result{};
 
   std::set<std::string> paths;
+  auto const addPaths = [&] (const ContProfFuncKey& key) {
+    paths.emplace(key.resolutionUnitPath);
+    if (key.bytecodeUnitPath) paths.emplace(*key.bytecodeUnitPath);
+  };
   for (auto const& record : records) {
     auto const& key = record.header.funcKey;
     // Skip class-scoped closures to avoid populating the cache.
     if (key.closureContextName) continue;
-    paths.emplace(key.resolutionUnitPath);
-    if (key.bytecodeUnitPath) {
-      paths.emplace(*key.bytecodeUnitPath);
+    addPaths(key);
+    for (auto const& translation : record.translations) {
+      for (auto const& profile : translation.targetProfiles) {
+        for (auto const& callee : contProfTargetProfileFuncKeys(profile)) {
+          if (!callee.closureContextName) addPaths(callee);
+        }
+      }
     }
   }
   result.pathsRequested = paths.size();
@@ -128,7 +136,8 @@ LoadedUnits loadCandidateUnits(
 
 ContProfStartupCandidate prepareCandidate(
   const ContProfProfileRecord& record,
-  Func& func
+  Func& func,
+  const std::map<std::string, Unit*>& units
 ) {
   ContProfStartupCandidate result{};
   result.func = &func;
@@ -172,8 +181,8 @@ ContProfStartupCandidate prepareCandidate(
     targetProfiles.reserve(translation.targetProfiles.size());
 
     for (auto const& profile : translation.targetProfiles) {
-      auto prepared = prepareContProfTargetProfile(profile);
-      assertx(prepared);
+      auto prepared = prepareContProfTargetProfile(profile, units);
+      if (!prepared) continue;
 
       targetProfiles.push_back(std::move(*prepared));
     }
@@ -362,7 +371,7 @@ ContProfStartupCandidates prepareContProfStartupCandidates(
       continue;
     }
 
-    result.candidates.push_back(prepareCandidate(*record, *func));
+    result.candidates.push_back(prepareCandidate(*record, *func, units));
     if (result.candidates.size() == maxFunctions) break;
   }
 

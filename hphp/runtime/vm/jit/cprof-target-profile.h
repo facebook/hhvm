@@ -17,10 +17,14 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -40,6 +44,7 @@ struct ContProfPreparedTargetProfile {
   Offset bytecodeOffset{0};
   const StringData* name{nullptr};
   std::vector<uint8_t> payload;
+  std::unique_ptr<CallTargetProfile> callTarget{};
 };
 
 /* Snapshot a supported live RDS target profile under a Treadmill session. */
@@ -50,9 +55,16 @@ snapshotContProfTargetProfile(
   uint32_t allocationSize
 );
 
-/* Validate and intern a target profile for this process. */
+/* Function dependencies whose units must be loaded before preparation. */
+std::vector<ContProfFuncKey>
+contProfTargetProfileFuncKeys(const ContProfTargetProfile& profile);
+
+/* Resolve and intern a target profile, or skip it if a dependency changed. */
 std::optional<ContProfPreparedTargetProfile>
-prepareContProfTargetProfile(const ContProfTargetProfile& profile);
+prepareContProfTargetProfile(
+  const ContProfTargetProfile& profile,
+  const std::map<std::string, Unit*>& units = {}
+);
 
 /*
  * Install a prepared target profile under a newly allocated TransID.

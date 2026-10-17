@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
@@ -78,6 +79,26 @@ struct DestroyTestUnit {
     unit->destroy();
   }
 };
+
+std::unique_ptr<Unit, DestroyTestUnit> makeCalleeUnit() {
+  constexpr auto hhas = R"HHAS(
+.function N cont_prof_consume_callee_c2a07e49() {
+  Null
+  RetC None
+}
+)HHAS";
+  auto const emitter = assemble_string(
+    hhas,
+    "hphp/runtime/test/cont-prof-consume-callee.php",
+    SHA1{"6666666666666666666666666666666666666666"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  if (!emitter || emitter->m_fatalUnit) return nullptr;
+  return std::unique_ptr<Unit, DestroyTestUnit>{emitter->create().release()};
+}
 
 template<class T>
 std::optional<ContProfTargetProfile> snapshotTestTargetProfile(
@@ -365,6 +386,74 @@ TEST_F(ContProfConsumeTest, RejectsUnrelatedProfDataWithoutInstalling) {
     EXPECT_FALSE(unrelated.profiling(func));
     EXPECT_TRUE(unrelated.funcProfTransIDs(func->getFuncId()).empty());
   }
+}
+
+TEST_F(ContProfConsumeTest, PreparesCallTargetWithoutCalleeRecord) {
+  auto calleeUnit = makeCalleeUnit();
+  ASSERT_NE(nullptr, calleeUnit);
+  ASSERT_EQ(1, calleeUnit->funcs().size());
+  calleeUnit->merge();
+  auto const callee = calleeUnit->funcs()[0];
+  auto const calleeKey = makeContProfFuncKey(*callee);
+  ASSERT_TRUE(calleeKey);
+  ASSERT_NE(m_alpha.header.funcKey.resolutionUnitPath,
+            calleeKey->resolutionUnitPath);
+  m_units.emplace(calleeKey->resolutionUnitPath, calleeUnit.get());
+
+  CallTargetProfile value{};
+  value.report(callee);
+  auto const snapshot = snapshotTestTargetProfile(value, callTargetProfileKey());
+  ASSERT_TRUE(snapshot);
+  std::vector<ContProfFuncKey> const expectedKeys{*calleeKey};
+  EXPECT_EQ(expectedKeys, contProfTargetProfileFuncKeys(*snapshot));
+  m_alpha.translations.front().targetProfiles = {*snapshot};
+
+  auto const prepared = prepareContProfStartupCandidates({m_alpha}, m_units, 1);
+  ASSERT_EQ(1, prepared.candidates.size());
+  auto const& candidate = prepared.candidates.front();
+  EXPECT_EQ(m_alphaFunc, candidate.func);
+  ASSERT_EQ(1, candidate.translations.size());
+  auto const& translation = candidate.translations.front();
+  EXPECT_EQ(7, translation.executionCount);
+  ASSERT_EQ(1, translation.targetProfiles.size());
+  auto const& target = translation.targetProfiles.front().callTarget;
+  ASSERT_TRUE(target);
+  auto const choices = target->choose();
+  ASSERT_EQ(1, choices.size());
+  EXPECT_EQ(callee, choices.front().func);
+  EXPECT_DOUBLE_EQ(1.0, choices.front().probability);
+}
+
+TEST_F(ContProfConsumeTest, UnavailableCallTargetPreservesCallerAndOtherSites) {
+  auto calleeUnit = makeCalleeUnit();
+  ASSERT_NE(nullptr, calleeUnit);
+  ASSERT_EQ(1, calleeUnit->funcs().size());
+  calleeUnit->merge();
+  CallTargetProfile value{};
+  value.report(calleeUnit->funcs()[0]);
+  auto const callTarget = snapshotTestTargetProfile(value, callTargetProfileKey());
+  ASSERT_TRUE(callTarget);
+  DecRefProfile const decRef{7, 5, 2, 3, 0, KindOfString};
+  auto const otherSite = snapshotTestTargetProfile(decRef, decRefProfileKey(0));
+  ASSERT_TRUE(otherSite);
+  m_alpha.translations.front().targetProfiles = {*otherSite, *callTarget};
+
+  // The callee unit is intentionally absent from the available-unit map.
+  auto const prepared = prepareContProfStartupCandidates({m_alpha}, m_units, 1);
+  ASSERT_EQ(1, prepared.candidates.size());
+  auto const& candidate = prepared.candidates.front();
+  EXPECT_EQ(m_alphaFunc, candidate.func);
+  ASSERT_EQ(1, candidate.translations.size());
+  auto const& translation = candidate.translations.front();
+  EXPECT_EQ(SrcKey(m_alphaFunc, 1, false, SrcKey::FuncEntryTag{}),
+            translation.start);
+  EXPECT_EQ(7, translation.executionCount);
+  ASSERT_NE(nullptr, translation.region);
+  EXPECT_EQ(2, translation.region->entry()->length());
+  ASSERT_EQ(1, translation.targetProfiles.size());
+  EXPECT_EQ(ContProfTargetProfileKind::DecRef,
+            translation.targetProfiles.front().kind);
+  EXPECT_EQ(otherSite->payload, translation.targetProfiles.front().payload);
 }
 
 TEST(ContProfConsume, StartupActivation) {

@@ -19,8 +19,10 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <optional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -28,13 +30,18 @@
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-serde.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/incref-profile.h"
@@ -44,6 +51,9 @@
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
+#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/sha1.h"
 
 namespace HPHP::jit::cprof {
@@ -267,6 +277,169 @@ std::optional<ContProfProfileRecord> roundTripTargetProfiles(
   return deserializeContProfProfileRecord(
     folly::ByteRange{serialized->data(), serialized->size()}
   );
+}
+
+struct DestroyCallTargetTestUnit {
+  void operator()(Unit* unit) const {
+    if (!unit) return;
+    for (auto const func : unit->funcs()) {
+      auto const named = func->getNamedFunc();
+      if (named->getCachedFunc() == func) named->setCachedFunc(nullptr);
+    }
+    unit->destroy();
+  }
+};
+
+using CallTargetTestUnit = std::unique_ptr<Unit, DestroyCallTargetTestUnit>;
+
+CallTargetTestUnit makeCallTargetTestUnit(size_t index, bool changed = false) {
+  auto const suffix = std::to_string(index);
+  auto const hhas = ".function N cont_prof_call_target_28f619d3_" + suffix +
+    "() {\n" + (changed ? "Int 42\n" : "Null\n") + "RetC None\n}\n";
+  auto const path = "hphp/runtime/test/cont-prof-call-target-" + suffix + ".php";
+  auto const emitter = assemble_string(
+    hhas.c_str(),
+    path.c_str(),
+    SHA1{"5555555555555555555555555555555555555555"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  if (!emitter || emitter->m_fatalUnit) return nullptr;
+  return CallTargetTestUnit{emitter->create().release()};
+}
+
+struct ContProfCallTargetTest : testing::Test {
+  void SetUp() override {
+    for (size_t i = 0; i < 7; ++i) {
+      auto unit = makeCallTargetTestUnit(i);
+      ASSERT_NE(nullptr, unit);
+      ASSERT_EQ(1, unit->funcs().size());
+      unit->merge();
+      auto const key = makeContProfFuncKey(*unit->funcs()[0]);
+      ASSERT_TRUE(key);
+      m_units.emplace(key->resolutionUnitPath, unit.get());
+      m_ownedUnits.push_back(std::move(unit));
+    }
+  }
+
+  std::vector<CallTargetTestUnit> m_ownedUnits;
+  std::map<std::string, Unit*> m_units;
+};
+
+struct EmptyCallTargetReader {
+  bool initialized;
+};
+
+const Func* read_func(EmptyCallTargetReader&) { return nullptr; }
+void read_raw(EmptyCallTargetReader&, uint32_t& count) { count = 0; }
+void read_raw(EmptyCallTargetReader& reader, bool& initialized) {
+  initialized = reader.initialized;
+}
+
+TEST(ContProfTargetProfile, SkipsCallTargetWithoutTargets) {
+  for (auto const initialized : {false, true}) {
+    SCOPED_TRACE(initialized);
+    CallTargetProfile value{};
+    EmptyCallTargetReader reader{initialized};
+    value.deserialize(reader);
+    ScopedTargetProfile<CallTargetProfile> const source{
+      TransID{2'600'002}, 0, callTargetProfileKey(), value
+    };
+    EXPECT_FALSE(source.snapshot());
+  }
+}
+
+TEST_F(ContProfCallTargetTest, RoundTripsCountsAndUntrackedProbability) {
+  constexpr auto transId = TransID{2'600'000};
+  auto const name = callTargetProfileKey();
+  for (auto const numTargets : {size_t{2}, size_t{7}}) {
+    SCOPED_TRACE(numTargets);
+    CallTargetProfile value{};
+    uint32_t total = 0;
+    std::vector<ContProfFuncKey> expectedKeys;
+    for (size_t i = 0; i < numTargets; ++i) {
+      auto const func = m_ownedUnits[i]->funcs()[0];
+      auto const count = static_cast<uint32_t>(7 - i);
+      for (uint32_t n = 0; n < count; ++n) value.report(func);
+      total += count;
+      if (i < 6) {
+        auto const key = makeContProfFuncKey(*func);
+        ASSERT_TRUE(key);
+        expectedKeys.push_back(*key);
+      }
+    }
+    ScopedTargetProfile<CallTargetProfile> const source{
+      transId, 0, name, value
+    };
+    auto const snapshot = source.snapshot();
+    ASSERT_TRUE(snapshot);
+    auto const decoded = roundTripTargetProfiles({*snapshot});
+    ASSERT_TRUE(decoded);
+    ASSERT_EQ(1, decoded->translations.size());
+    auto const& profiles = decoded->translations[0].targetProfiles;
+    ASSERT_EQ(1, profiles.size());
+    EXPECT_EQ(expectedKeys, contProfTargetProfileFuncKeys(profiles[0]));
+
+    auto const prepared = prepareContProfTargetProfile(profiles[0], m_units);
+    ASSERT_TRUE(prepared);
+    ProfDataTargetProfile imported;
+    ASSERT_TRUE(installContProfTargetProfile(*prepared, transId, imported));
+    auto const actual = imported.get<CallTargetProfile>(rds::Profile{
+      static_cast<CallTargetProfile*>(nullptr), transId, 0, name
+    });
+    ASSERT_NE(nullptr, actual);
+    EXPECT_EQ(value.toDynamic(), actual->toDynamic());
+
+    auto const choices = actual->choose();
+    ASSERT_EQ(std::min(numTargets, size_t{6}), choices.size());
+    for (size_t i = 0; i < choices.size(); ++i) {
+      EXPECT_EQ(m_ownedUnits[i]->funcs()[0], choices[i].func);
+      EXPECT_DOUBLE_EQ(double(7 - i) / total, choices[i].probability);
+    }
+  }
+}
+
+TEST_F(ContProfCallTargetTest, RejectsUnavailableOrStaleRequiredTargets) {
+  // Exercise both an initial hole and a hole before a later valid target.
+  for (auto const missing : {size_t{0}, size_t{1}}) {
+    SCOPED_TRACE(missing);
+    CallTargetProfile value{};
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t n = 0; n < 3 - i; ++n) {
+        value.report(m_ownedUnits[i]->funcs()[0]);
+      }
+    }
+    std::optional<ContProfTargetProfile> snapshot;
+    {
+      ScopedTargetProfile<CallTargetProfile> const source{
+        TransID{2'600'001}, 0, callTargetProfileKey(), value
+      };
+      snapshot = source.snapshot();
+    }
+    ASSERT_TRUE(snapshot);
+    ASSERT_TRUE(prepareContProfTargetProfile(*snapshot, m_units));
+    auto const keys = contProfTargetProfileFuncKeys(*snapshot);
+    ASSERT_EQ(3, keys.size());
+    auto const& key = keys[missing];
+
+    auto unavailable = m_units;
+    unavailable.erase(key.resolutionUnitPath);
+    EXPECT_FALSE(prepareContProfTargetProfile(*snapshot, unavailable));
+
+    auto replacement = makeCallTargetTestUnit(missing, true);
+    ASSERT_NE(nullptr, replacement);
+    m_ownedUnits[missing].reset();
+    replacement->merge();
+    m_units.at(key.resolutionUnitPath) = replacement.get();
+    m_ownedUnits[missing] = std::move(replacement);
+    auto const replacementKey =
+      makeContProfFuncKey(*m_ownedUnits[missing]->funcs()[0]);
+    ASSERT_TRUE(replacementKey);
+    ASSERT_NE(key.bytecodeUnitHash, replacementKey->bytecodeUnitHash);
+    EXPECT_FALSE(prepareContProfTargetProfile(*snapshot, m_units));
+  }
 }
 
 template<class T>

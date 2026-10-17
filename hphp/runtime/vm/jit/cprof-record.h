@@ -72,6 +72,7 @@ enum class ContProfTargetProfileKind : uint8_t {
   Switch = 8,
   Type = 9,
   ArrayIter = 10,
+  CallTarget = 11,
 };
 
 /* Serialized target-profile payload associated with a bytecode site. */

@@ -43,7 +43,7 @@ using EncodedIncomingIndex = uint32_t;
 using EncodedPostConditionCount = size_t;
 using EncodedPostConditionLocalId = uint32_t;
 using EncodedPostConditionChanged = uint8_t;
-using EncodedPostConditionType = uint8_t;
+using EncodedPostConditionType = Type::bits_t;
 using EncodedTargetProfileCount = size_t;
 using EncodedTargetProfileKind = uint8_t;
 // Unsigned on the wire: bytecodeOffset is validated non-negative everywhere,
@@ -262,7 +262,7 @@ serializeContProfProfileRecord(const ContProfProfileRecord& record) {
     for (auto const& post : translation.localPostConditions) {
       writer.writeValue(post.localId);
       writer.writeByte(post.changed ? 1 : 0);
-      writer.writeByte(static_cast<EncodedPostConditionType>(post.type));
+      writer.writeBytes(&post.type, sizeof(post.type));
     }
 
     writer.writeValue(translation.targetProfiles.size());
@@ -375,12 +375,12 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
       EncodedPostConditionType encodedType{};
 
       if (!reader.readValue(localId) || !reader.readByte(changed) ||
-          changed > 1 || !reader.readByte(encodedType)) {
+          changed > 1 || !reader.readBytes(&encodedType, sizeof(encodedType))) {
         return std::nullopt;
       }
 
       translation.localPostConditions.push_back({
-        localId, changed != 0, static_cast<DataType>(encodedType)
+        localId, changed != 0, encodedType
       });
     }
 

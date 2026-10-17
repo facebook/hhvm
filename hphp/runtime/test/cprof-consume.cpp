@@ -136,8 +136,8 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   m_alpha.translations.front().regionLength = 3;
   m_alpha.translations.front().localTypeGuards = {{0, KindOfInt64}};
   m_alpha.translations.front().localPostConditions = {
-    {0, true, KindOfInt64},
-    {1, false, KindOfString},
+    {0, true, Type::kInt | Type::kInitNull},
+    {1, false, Type::kStr | Type::kInt},
   };
   m_alpha.translations.push_back({
     ContProfStartKind::Bytecode,
@@ -146,7 +146,7 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
     11,
     {{1, KindOfString}},
     {0},
-    {{0, true, kInvalidDataType}},
+    {{0, true, Type::kCell}},
   });
 
   auto const prepared = prepareContProfStartupCandidates(
@@ -169,10 +169,10 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   EXPECT_EQ(expectedEntryGuards, entry.region->entry()->typePreConditions());
   EXPECT_TRUE(entry.incoming.empty());
   TypedLocations const expectedChanged{
-    {Location::Local{0}, TInt},
+    {Location::Local{0}, TInt | TInitNull},
   };
   TypedLocations const expectedRefined{
-    {Location::Local{1}, TStr},
+    {Location::Local{1}, TStr | TInt},
   };
   EXPECT_EQ(expectedChanged, entry.postConditions.changed);
   EXPECT_EQ(expectedRefined, entry.postConditions.refined);

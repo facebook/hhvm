@@ -156,13 +156,9 @@ ContProfStartupCandidate prepareCandidate(
     PostConditions postConditions{};
 
     for (auto const& post : translation.localPostConditions) {
-      auto const type = post.type == kInvalidDataType
-        ? TCell
-        : Type{post.type};
-
       auto const location = RegionDesc::TypedLocation{
         Location::Local{post.localId},
-        type,
+        Type{post.type, PtrLocation::Bottom},
       };
 
       if (post.changed) {

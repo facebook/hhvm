@@ -94,7 +94,7 @@ snapshotLocalPostConditions(
 ) {
   struct State {
     bool changed;
-    Type type;
+    Type::bits_t type;
   };
 
   std::map<uint32_t, State> states;
@@ -110,11 +110,12 @@ snapshotLocalPostConditions(
       auto const type = condition.type;
       if (type == TBottom || !(type <= TCell)) return false;
 
-      auto [it, inserted] = states.emplace(localId, State{changed, type});
+      auto const bits = type.rawBits();
+      auto [it, inserted] = states.emplace(localId, State{changed, bits});
 
       if (!inserted) {
         it->second.changed = it->second.changed || changed;
-        it->second.type |= type;
+        it->second.type |= bits;
       }
     }
 
@@ -130,12 +131,8 @@ snapshotLocalPostConditions(
   result.reserve(states.size());
 
   for (auto const& [localId, state] : states) {
-    if (state.type.isKnownDataType()) {
-      result.push_back({localId, state.changed, state.type.toDataType()});
-    } else if (state.changed) {
-      // Preserve the write so replay clears any previously known type.
-      result.push_back({localId, true, kInvalidDataType});
-    }
+    if (!state.changed && state.type == Type::kCell) continue;
+    result.push_back({localId, state.changed, state.type});
   }
 
   return result;
@@ -166,19 +163,8 @@ bool candidateLess(
   if (left.executionCount != right.executionCount) {
     return left.executionCount > right.executionCount;
   }
-  auto const leftTieBreakers = std::tie(
-    left.regionLength,
-    left.localTypeGuards,
-    left.localPostConditions,
-    lhs.transId
-  );
-  auto const rightTieBreakers = std::tie(
-    right.regionLength,
-    right.localTypeGuards,
-    right.localPostConditions,
-    rhs.transId
-  );
-  return leftTieBreakers < rightTieBreakers;
+  return std::tie(left.regionLength, lhs.transId) <
+    std::tie(right.regionLength, rhs.transId);
 }
 
 }

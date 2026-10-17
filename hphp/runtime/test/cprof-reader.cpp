@@ -565,13 +565,13 @@ TEST_F(ContProfReaderBytecodeTest, ValidatesLocalPostConditionBounds) {
   ASSERT_LT(entryLimit, localLimit);
 
   record.translations.front().localPostConditions = {
-    {entryLimit, true, kInvalidDataType},
+    {entryLimit, true, Type::kCell},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
 
   record.translations.front().localPostConditions = {
-    {localLimit, false, KindOfInt64},
+    {localLimit, false, Type::kInt},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));

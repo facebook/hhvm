@@ -137,9 +137,9 @@ ContProfProfileRecord exampleProfileRecord() {
     {2, KindOfString},
   };
   record.translations[0].localPostConditions = {
-    {0, true, kInvalidDataType},
-    {1, true, KindOfInt64},
-    {2, false, KindOfString},
+    {0, true, Type::kCell},
+    {1, true, Type::kInt | Type::kInitNull},
+    {2, false, Type::kStr | Type::kInt},
   };
   record.translations.back().localTypeGuards = {
     {1, KindOfObject},
@@ -284,13 +284,13 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   append(size_t{3}); // local postconditions
   append(uint32_t{0});
   append(uint8_t{1});
-  append(static_cast<uint8_t>(kInvalidDataType));
+  append(Type::kCell);
   append(uint32_t{1});
   append(uint8_t{1});
-  append(static_cast<uint8_t>(KindOfInt64));
+  append(Type::kInt | Type::kInitNull);
   append(uint32_t{2});
   append(uint8_t{0});
-  append(static_cast<uint8_t>(KindOfString));
+  append(Type::kStr | Type::kInt);
   append(size_t{0}); // target profiles
   appendTranslation(1, 1, 3, 7);
   append(size_t{0}); // local type guards
@@ -381,7 +381,11 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
-  record.translations[0].localPostConditions[1].type = static_cast<DataType>(0);
+  record.translations[0].localPostConditions[1].type = Type::kBottom;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  record = exampleProfileRecord();
+  record.translations[0].localPostConditions[1].type = Type::kPtr;
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
@@ -689,7 +693,8 @@ TEST(ContProfSerde, RejectsMalformedLocalPostConditions) {
   ));
 
   auto invalidType = *serialized;
-  invalidType[firstType] = 0;
+  auto const bottom = Type::kBottom;
+  std::memcpy(invalidType.data() + firstType, &bottom, sizeof(bottom));
   EXPECT_FALSE(deserializeContProfProfileRecord(
     folly::ByteRange{invalidType.data(), invalidType.size()}
   ));
@@ -716,7 +721,7 @@ TEST(ContProfSerde, RejectsMalformedTargetProfiles) {
   constexpr size_t encodedPostConditionSize =
     sizeof(uint32_t) +
     sizeof(uint8_t) +
-    sizeof(uint8_t);
+    sizeof(Type::bits_t);
 
   auto const firstTranslation = encodedFuncKeyLengthSize +
     encodedFuncKey->size() +

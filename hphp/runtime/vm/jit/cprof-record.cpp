@@ -112,9 +112,10 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
     for (size_t i = 0; i < posts.size(); ++i) {
       auto const& post = posts[i];
 
-      if (post.type != kInvalidDataType && !isRealType(post.type)) return false;
-
-      if (!post.changed && post.type == kInvalidDataType) return false;
+      if (post.type.empty() || (post.type & Type::kCell) != post.type) {
+        return false;
+      }
+      if (!post.changed && post.type == Type::kCell) return false;
 
       if (i != 0 && posts[i - 1].localId >= post.localId) {
         return false;

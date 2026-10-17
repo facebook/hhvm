@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP::jit::cprof {
 
@@ -54,11 +55,10 @@ struct ContProfLocalPostCondition {
   uint32_t localId{0};
   // Whether the local may have been overwritten, rather than just refined.
   bool changed{false};
-  // kInvalidDataType means a changed local's type is unknown (TCell on replay).
-  DataType type{kInvalidDataType};
+  // Basic cell-type bits only: no constants or process-local specializations.
+  Type::bits_t type{Type::kCell};
 
-  std::strong_ordering operator<=>(const ContProfLocalPostCondition&) const
-    = default;
+  bool operator==(const ContProfLocalPostCondition&) const = default;
 };
 
 enum class ContProfTargetProfileKind : uint8_t {

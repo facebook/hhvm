@@ -862,11 +862,11 @@ TEST_F(ContProfCaptureTest, CapturesLocalPostConditions) {
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
   PostConditions postConditions{};
   postConditions.changed = {
-    {Location::Local{0}, TInt},
+    {Location::Local{0}, Type::cns(int64_t{42})},
     {Location::Local{1}, TInt | TStr},
   };
   postConditions.refined = {
-    {Location::Local{2}, TStaticStr},
+    {Location::Local{2}, TStaticStr | TInt},
   };
 
   addProfileTranslation(profData, main, 2, 7);
@@ -885,9 +885,9 @@ TEST_F(ContProfCaptureTest, CapturesLocalPostConditions) {
   ASSERT_TRUE(record);
 
   std::vector<ContProfLocalPostCondition> const expected{
-    {0, true, KindOfInt64},
-    {1, true, kInvalidDataType},
-    {2, false, KindOfPersistentString},
+    {0, true, Type::kInt},
+    {1, true, Type::kInt | Type::kStr},
+    {2, false, Type::kStaticStr | Type::kInt},
   };
   ASSERT_EQ(2, record->translations.size());
   EXPECT_EQ(expected, record->translations.back().localPostConditions);

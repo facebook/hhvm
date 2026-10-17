@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <compare>
 #include <cstdint>
 #include <string>
 #include <tuple>
@@ -45,10 +44,11 @@ enum class ContProfStartKind : uint8_t {
 
 struct ContProfLocalTypeGuard {
   uint32_t localId{0};
-  DataType type{kInvalidDataType};
+  // Basic cell-type bits, with the category used by guard relaxation.
+  Type::bits_t type{Type::kBottom};
+  DataTypeCategory category{DataTypeSpecific};
 
-  std::strong_ordering operator<=>(const ContProfLocalTypeGuard&) const
-    = default;
+  bool operator==(const ContProfLocalTypeGuard&) const = default;
 };
 
 struct ContProfLocalPostCondition {

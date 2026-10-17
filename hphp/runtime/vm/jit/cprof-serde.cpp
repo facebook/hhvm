@@ -37,7 +37,8 @@ using EncodedRegionLength = uint32_t;
 using EncodedExecutionCount = uint64_t;
 using EncodedGuardCount = size_t;
 using EncodedLocalId = uint32_t;
-using EncodedDataType = uint8_t;
+using EncodedGuardType = Type::bits_t;
+using EncodedGuardCategory = uint8_t;
 using EncodedIncomingCount = size_t;
 using EncodedIncomingIndex = uint32_t;
 using EncodedPostConditionCount = size_t;
@@ -59,7 +60,8 @@ constexpr size_t kMinEncodedTargetProfileSize =
 constexpr size_t kEncodedIncomingIndexSize = sizeof(EncodedIncomingIndex);
 constexpr size_t kEncodedLocalTypeGuardSize =
   sizeof(EncodedLocalId) +
-  sizeof(EncodedDataType);
+  sizeof(EncodedGuardType) +
+  sizeof(EncodedGuardCategory);
 
 constexpr size_t kEncodedLocalPostConditionSize =
   sizeof(EncodedPostConditionLocalId) +
@@ -248,7 +250,8 @@ serializeContProfProfileRecord(const ContProfProfileRecord& record) {
 
     for (auto const& guard : translation.localTypeGuards) {
       writer.writeValue(guard.localId);
-      writer.writeValue(static_cast<EncodedDataType>(guard.type));
+      writer.writeBytes(&guard.type, sizeof(guard.type));
+      writer.writeByte(static_cast<EncodedGuardCategory>(guard.category));
     }
 
     writer.writeValue(translation.incoming.size());
@@ -336,14 +339,17 @@ deserializeContProfProfileRecord(folly::ByteRange encoded) {
     translation.localTypeGuards.reserve(guardCount);
     for (size_t j = 0; j < guardCount; ++j) {
       EncodedLocalId localId{};
-      EncodedDataType encodedType{};
+      EncodedGuardType encodedType{};
+      EncodedGuardCategory category{};
 
-      if (!reader.readValue(localId) || !reader.readValue(encodedType)) {
+      if (!reader.readValue(localId) ||
+          !reader.readBytes(&encodedType, sizeof(encodedType)) ||
+          !reader.readByte(category)) {
         return std::nullopt;
       }
 
       translation.localTypeGuards.push_back({
-        localId, static_cast<DataType>(encodedType)
+        localId, encodedType, static_cast<DataTypeCategory>(category)
       });
     }
 

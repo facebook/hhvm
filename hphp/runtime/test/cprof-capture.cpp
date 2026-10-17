@@ -662,21 +662,21 @@ TEST_F(ContProfCaptureTest, CapturesCanonicalLocalTypeGuards) {
       1,
       11,
       {
-        {0, KindOfInt64},
-        {1, KindOfPersistentString},
+        {0, Type::kInt},
+        {1, Type::kStaticStr},
       },
     },
   };
   EXPECT_EQ(expected, record->translations);
 }
 
-TEST_F(ContProfCaptureTest, SkipsNonPrimitiveLocalTypeGuard) {
+TEST_F(ContProfCaptureTest, CapturesUnionLocalTypeGuard) {
   ProfData profData;
   profData.resetCounters(100);
 
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
   GuardedLocations const preconditions{
-    {Location::Local{0}, TInt | TStr, DataTypeGeneric},
+    {Location::Local{0}, TInt | TBool, DataTypeCountnessInit},
   };
 
   addProfileTranslation(profData, main, 2, 7);
@@ -689,16 +689,22 @@ TEST_F(ContProfCaptureTest, SkipsNonPrimitiveLocalTypeGuard) {
     preconditions
   );
 
-  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+  ASSERT_EQ(2, record->translations.size());
+  std::vector<ContProfLocalTypeGuard> const expected{
+    {0, Type::kUncountedInit, DataTypeCountnessInit},
+  };
+  EXPECT_EQ(expected, record->translations.back().localTypeGuards);
 }
 
-TEST_F(ContProfCaptureTest, KeepsEntryWithNonPrimitiveLocalTypeGuard) {
+TEST_F(ContProfCaptureTest, CapturesEntryUnionLocalTypeGuard) {
   ProfData profData;
   profData.resetCounters(100);
 
   auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
   GuardedLocations const preconditions{
-    {Location::Local{0}, TInt | TStr, DataTypeGeneric},
+    {Location::Local{0}, TVec | TDict, DataTypeGeneric},
   };
 
   addProfileTranslation(
@@ -710,7 +716,39 @@ TEST_F(ContProfCaptureTest, KeepsEntryWithNonPrimitiveLocalTypeGuard) {
     preconditions
   );
 
-  expectEntryOnlyRecord(snapshotContProfProfileRecord(profData, *func()));
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+  ASSERT_EQ(1, record->translations.size());
+  std::vector<ContProfLocalTypeGuard> const expected{
+    {0, Type::kArrLike, DataTypeGeneric},
+  };
+  EXPECT_EQ(expected, record->translations.front().localTypeGuards);
+}
+
+TEST_F(ContProfCaptureTest, KeepsCountnessAndDropsSpecializedGuardCategories) {
+  ProfData profData;
+  profData.resetCounters(100);
+  auto const main = SrcKey{func(), 0, false, SrcKey::FuncEntryTag{}};
+  addProfileTranslation(profData, main, 2, 7);
+  addProfileTranslation(
+    profData, emptyMid(), 1, 11, SBInvOffset{0},
+    {
+      {Location::Local{0}, TInt | TBool, DataTypeCountnessInit},
+      {Location::Local{1}, TVec.narrowToVanilla(), DataTypeSpecialized},
+      {Location::Local{2}, TStaticStr, DataTypeCountnessInit},
+      {Location::Local{2}, TStaticStr, DataTypeSpecific},
+    }
+  );
+
+  auto const record = snapshotContProfProfileRecord(profData, *func());
+  ASSERT_TRUE(record);
+  ASSERT_EQ(2, record->translations.size());
+  std::vector<ContProfLocalTypeGuard> const expected{
+    {0, Type::kUncountedInit, DataTypeCountnessInit},
+    {1, Type::kVec, DataTypeSpecific},
+    {2, Type::kStaticStr, DataTypeSpecific},
+  };
+  EXPECT_EQ(expected, record->translations.back().localTypeGuards);
 }
 
 TEST_F(ContProfCaptureTest, CapturesEntryLocalTypeGuard) {
@@ -745,7 +783,7 @@ TEST_F(ContProfCaptureTest, CapturesEntryLocalTypeGuard) {
       func()->numPositionalParams(),
       2,
       7,
-      {{0, KindOfInt64}},
+      {{0, Type::kInt}},
     },
   };
   EXPECT_EQ(expected, record->translations);

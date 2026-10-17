@@ -506,28 +506,28 @@ TEST_F(ContProfReaderBytecodeTest, ValidatesLocalTypeGuardBounds) {
   ASSERT_LT(entryLimit, bytecodeLimit);
 
   record.translations.front().localTypeGuards = {
-    {0, KindOfNull},
+    {0, Type::kInitNull},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
 
   record.translations.front().localTypeGuards.clear();
   record.translations.back().localTypeGuards = {
-    {entryLimit, KindOfInt64},
+    {entryLimit, Type::kInt},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_TRUE(isContProfProfileRecordCompatible(record, *func()));
 
   record.translations.back().localTypeGuards.clear();
   record.translations.front().localTypeGuards = {
-    {entryLimit, KindOfInt64},
+    {entryLimit, Type::kInt},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));
 
   record.translations.front().localTypeGuards.clear();
   record.translations.back().localTypeGuards = {
-    {bytecodeLimit, KindOfInt64},
+    {bytecodeLimit, Type::kInt},
   };
   ASSERT_TRUE(isValidContProfProfileRecord(record));
   EXPECT_FALSE(isContProfProfileRecordCompatible(record, *func()));

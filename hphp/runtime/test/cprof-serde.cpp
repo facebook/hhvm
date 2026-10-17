@@ -133,8 +133,8 @@ ContProfProfileRecord exampleProfileRecord() {
     exampleBytecodeTranslation(),
   };
   record.translations[0].localTypeGuards = {
-    {0, KindOfInt64},
-    {2, KindOfString},
+    {0, Type::kUncountedInit, DataTypeCountnessInit},
+    {2, Type::kArrLike, DataTypeGeneric},
   };
   record.translations[0].localPostConditions = {
     {0, true, Type::kCell},
@@ -142,7 +142,7 @@ ContProfProfileRecord exampleProfileRecord() {
     {2, false, Type::kStr | Type::kInt},
   };
   record.translations.back().localTypeGuards = {
-    {1, KindOfObject},
+    {1, Type::kObj},
   };
   record.translations.back().incoming = {0, 1, 3};
   record.translations[0].targetProfiles = {
@@ -277,9 +277,11 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   appendTranslation(1, 0, 2, uint64_t{1} << 40);
   append(size_t{2}); // local type guards
   append(uint32_t{0});
-  append(static_cast<uint8_t>(KindOfInt64));
+  append(Type::kUncountedInit);
+  append(static_cast<uint8_t>(DataTypeCountnessInit));
   append(uint32_t{2});
-  append(static_cast<uint8_t>(KindOfString));
+  append(Type::kArrLike);
+  append(static_cast<uint8_t>(DataTypeGeneric));
   append(size_t{0}); // incoming translations
   append(size_t{3}); // local postconditions
   append(uint32_t{0});
@@ -305,7 +307,8 @@ TEST(ContProfSerde, ProfileTranslationWireFormat) {
   appendTranslation(3, 4, 3, 13);
   append(size_t{1}); // local type guards
   append(uint32_t{1});
-  append(static_cast<uint8_t>(KindOfObject));
+  append(Type::kObj);
+  append(static_cast<uint8_t>(DataTypeSpecific));
   append(size_t{3}); // incoming translations
   append(uint32_t{0});
   append(uint32_t{1});
@@ -413,7 +416,7 @@ TEST(ContProfSerde, RejectsInvalidProfileRecord) {
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
-  record.translations[0].localTypeGuards[0].type = kInvalidDataType;
+  record.translations[0].localTypeGuards[0].type = Type::kBottom;
   EXPECT_FALSE(serializeContProfProfileRecord(record));
 
   record = exampleProfileRecord();
@@ -541,6 +544,28 @@ TEST(ContProfSerde, RejectsMalformedProfileRecord) {
   ));
 }
 
+TEST(ContProfSerde, RejectsUnsupportedGuardTypesAndCategories) {
+  auto record = exampleProfileRecord();
+  auto& guard = record.translations.front().localTypeGuards.front();
+  guard.type = Type::kPtr;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  guard.type = Type::kInt | Type::kBool;
+  guard.category = DataTypeSpecific;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  guard.type = Type::kInt | Type::kStr;
+  guard.category = DataTypeCountnessInit;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  guard.category = DataTypeGeneric;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+
+  guard.type = Type::kObj;
+  guard.category = DataTypeSpecialized;
+  EXPECT_FALSE(serializeContProfProfileRecord(record));
+}
+
 TEST(ContProfSerde, RejectsMalformedLocalTypeGuards) {
   auto const record = exampleProfileRecord();
   auto const encodedFuncKey = serializeContProfFuncKey(record.header.funcKey);
@@ -572,9 +597,16 @@ TEST(ContProfSerde, RejectsMalformedLocalTypeGuards) {
   ASSERT_LT(firstGuardTypePosition, serialized->size());
 
   auto invalidType = *serialized;
-  invalidType[firstGuardTypePosition] = 0;
+  auto const bottom = Type::kBottom;
+  std::memcpy(invalidType.data() + firstGuardTypePosition, &bottom, sizeof(bottom));
   EXPECT_FALSE(deserializeContProfProfileRecord(
     folly::ByteRange{invalidType.data(), invalidType.size()}
+  ));
+
+  auto invalidCategory = *serialized;
+  invalidCategory[firstGuardTypePosition + sizeof(Type::bits_t)] = 0xff;
+  EXPECT_FALSE(deserializeContProfProfileRecord(
+    folly::ByteRange{invalidCategory.data(), invalidCategory.size()}
   ));
 
   auto invalidCount = *serialized;
@@ -606,7 +638,7 @@ TEST(ContProfSerde, RejectsMalformedIncomingTopology) {
     sizeof(uint32_t) +
     sizeof(uint64_t);
   constexpr size_t encodedGuardSize =
-    sizeof(uint32_t) + sizeof(uint8_t);
+    sizeof(uint32_t) + sizeof(Type::bits_t) + sizeof(uint8_t);
 
   auto const firstTranslation = encodedFuncKeyLengthSize +
     encodedFuncKey->size() +
@@ -653,7 +685,7 @@ TEST(ContProfSerde, RejectsMalformedLocalPostConditions) {
     sizeof(uint32_t) +
     sizeof(uint64_t);
   constexpr size_t encodedGuardSize =
-    sizeof(uint32_t) + sizeof(uint8_t);
+    sizeof(uint32_t) + sizeof(Type::bits_t) + sizeof(uint8_t);
 
   auto const firstTranslation = encodedFuncKeyLengthSize +
     encodedFuncKey->size() +
@@ -717,7 +749,7 @@ TEST(ContProfSerde, RejectsMalformedTargetProfiles) {
     sizeof(uint32_t) +
     sizeof(uint64_t);
   constexpr size_t encodedGuardSize =
-    sizeof(uint32_t) + sizeof(uint8_t);
+    sizeof(uint32_t) + sizeof(Type::bits_t) + sizeof(uint8_t);
   constexpr size_t encodedPostConditionSize =
     sizeof(uint32_t) +
     sizeof(uint8_t) +

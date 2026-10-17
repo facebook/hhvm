@@ -148,8 +148,8 @@ ContProfStartupCandidate prepareCandidate(
     for (auto const& guard : translation.localTypeGuards) {
       block->addPreCondition(RegionDesc::GuardedLocation{
         Location::Local{guard.localId},
-        Type{guard.type},
-        DataTypeSpecific,
+        Type{guard.type, PtrLocation::Bottom},
+        guard.category,
       });
     }
 

@@ -134,7 +134,9 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   auto const midStart = SrcKey{m_alphaFunc, midOffset, ResumeMode::None};
   // Include the synthetic entry, Null, and PopC to reach midStart.
   m_alpha.translations.front().regionLength = 3;
-  m_alpha.translations.front().localTypeGuards = {{0, KindOfInt64}};
+  m_alpha.translations.front().localTypeGuards = {
+    {0, Type::kUncountedInit, DataTypeCountnessInit},
+  };
   m_alpha.translations.front().localPostConditions = {
     {0, true, Type::kInt | Type::kInitNull},
     {1, false, Type::kStr | Type::kInt},
@@ -144,7 +146,7 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
     static_cast<uint32_t>(midOffset),
     2,
     11,
-    {{1, KindOfString}},
+    {{1, Type::kArrLike, DataTypeGeneric}},
     {0},
     {{0, true, Type::kCell}},
   });
@@ -164,7 +166,7 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   ASSERT_NE(nullptr, entry.region);
   ASSERT_EQ(1, entry.region->blocks().size());
   GuardedLocations const expectedEntryGuards{
-    {Location::Local{0}, TInt, DataTypeSpecific},
+    {Location::Local{0}, TUncountedInit, DataTypeCountnessInit},
   };
   EXPECT_EQ(expectedEntryGuards, entry.region->entry()->typePreConditions());
   EXPECT_TRUE(entry.incoming.empty());
@@ -188,7 +190,7 @@ TEST_F(ContProfConsumeTest, PreparesBytecodeTranslation) {
   EXPECT_EQ(2, block->length());
   EXPECT_EQ(SBInvOffset{0}, block->initialSpOffset());
   GuardedLocations const expectedBytecodeGuards{
-    {Location::Local{1}, TStr, DataTypeSpecific},
+    {Location::Local{1}, TArrLike, DataTypeGeneric},
   };
   EXPECT_EQ(expectedBytecodeGuards, block->typePreConditions());
   std::vector<uint32_t> const expectedIncoming{0};

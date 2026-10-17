@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
@@ -40,8 +41,8 @@ TRACE_SET_MOD(cprof)
 namespace {
 
 /*
- * Snapshot the block's local type preconditions. Entry starts may omit
- * unrepresentable preconditions; bytecode starts reject them.
+ * Snapshot basic local types and guard categories. Entry starts may omit
+ * non-local preconditions; bytecode starts reject them.
  */
 std::optional<std::vector<ContProfLocalTypeGuard>>
 snapshotLocalTypeGuards(const RegionDesc::Block& block, const Func& func) {
@@ -50,8 +51,7 @@ snapshotLocalTypeGuards(const RegionDesc::Block& block, const Func& func) {
     ? func.numFuncEntryInputs()
     : static_cast<uint32_t>(func.numLocals());
 
-  std::vector<ContProfLocalTypeGuard> result;
-  result.reserve(block.typePreConditions().size());
+  std::map<uint32_t, ContProfLocalTypeGuard> guards;
 
   for (auto const& precondition : block.typePreConditions()) {
     auto const& location = precondition.location;
@@ -65,25 +65,28 @@ snapshotLocalTypeGuards(const RegionDesc::Block& block, const Func& func) {
 
     auto const type = precondition.type;
     if (type == TBottom || !(type <= TCell)) return std::nullopt;
-    if (!type.isKnownDataType()) {
-      if (!isEntry && type != TCell) return std::nullopt;
-      continue;
-    }
+    auto const guardType = relaxToGuardable(type);
+    if (guardType == TCell) continue;
 
-    // Replay keeps the DataType, not constants or specializations.
-    result.push_back({localId, type.toDataType()});
-  }
-
-  std::sort(result.begin(), result.end());
-
-  for (size_t i = 1; i < result.size(); ++i) {
-    if (result[i - 1].localId == result[i].localId &&
-        result[i - 1].type != result[i].type) {
+    // Class/layout specializations are not retained in the basic type bits.
+    auto const category = std::min(precondition.category, DataTypeSpecific);
+    auto const bits = guardType.rawBits();
+    if (!typeFitsConstraint(guardType, category)) {
       return std::nullopt;
     }
+
+    auto [it, inserted] = guards.try_emplace(
+      localId, ContProfLocalTypeGuard{localId, bits, category}
+    );
+    if (!inserted) {
+      if (it->second.type != bits) return std::nullopt;
+      it->second.category = std::max(it->second.category, category);
+    }
   }
 
-  result.erase(std::unique(result.begin(), result.end()), result.end());
+  std::vector<ContProfLocalTypeGuard> result;
+  result.reserve(guards.size());
+  for (auto const& [_, guard] : guards) result.push_back(guard);
   return result;
 }
 

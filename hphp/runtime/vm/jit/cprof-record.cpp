@@ -20,6 +20,7 @@
 #include <limits>
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP::jit::cprof {
@@ -87,7 +88,15 @@ bool isValidContProfProfileRecord(const ContProfProfileRecord& record) {
     auto const& guards = translation.localTypeGuards;
     for (size_t i = 0; i < guards.size(); ++i) {
       auto const& guard = guards[i];
-      if (!isRealType(guard.type)) return false;
+      if (guard.type.empty() || (guard.type & Type::kCell) != guard.type ||
+          guard.category > DataTypeSpecific) {
+        return false;
+      }
+      auto const type = Type{guard.type, PtrLocation::Bottom};
+      if (relaxToGuardable(type) != type ||
+          !typeFitsConstraint(type, guard.category)) {
+        return false;
+      }
       if (i != 0 && guards[i - 1].localId >= guard.localId) {
         return false;
       }

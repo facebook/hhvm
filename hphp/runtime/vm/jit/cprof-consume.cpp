@@ -134,6 +134,30 @@ LoadedUnits loadCandidateUnits(
   return result;
 }
 
+void discardConflictingMethProfiles(ContProfStartupCandidate& candidate) {
+  using Site = std::pair<Offset, const StringData*>;
+  std::map<Site, const Func*> methods;
+  for (auto const& translation : candidate.translations) {
+    for (auto const& profile : translation.targetProfiles) {
+      if (!profile.meth) continue;
+      auto const func = profile.meth->uniqueMeth();
+      auto const [it, inserted] = methods.emplace(
+        Site{profile.bytecodeOffset, profile.name}, func
+      );
+      if (!inserted && it->second != func) it->second = nullptr;
+    }
+  }
+
+  // Different methods could reduce to BaseMeth/InterfaceMeth, whose broader
+  // dispatch assumptions aren't established by the imported function keys.
+  for (auto& translation : candidate.translations) {
+    std::erase_if(translation.targetProfiles, [&] (auto const& profile) {
+      return profile.meth &&
+        !methods.at(Site{profile.bytecodeOffset, profile.name});
+    });
+  }
+}
+
 ContProfStartupCandidate prepareCandidate(
   const ContProfProfileRecord& record,
   Func& func,
@@ -197,6 +221,7 @@ ContProfStartupCandidate prepareCandidate(
     });
   }
 
+  discardConflictingMethProfiles(result);
   return result;
 }
 

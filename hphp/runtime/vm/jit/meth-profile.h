@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/ptr.h"
 
 namespace HPHP {
@@ -49,10 +50,17 @@ struct MethProfile {
 
   MethProfile() : m_curMeth(nullptr), m_curClass(nullptr) {}
 
-  MethProfile(const MethProfile& other)
+  MethProfile(const MethProfile& other) noexcept
     : m_curClass(other.m_curClass)
   {
     m_curMeth.store(other.m_curMeth.load(std::memory_order_acquire), std::memory_order_release);
+  }
+
+  static MethProfile fromUniqueMeth(const Func* meth) {
+    assertx(meth && meth->isMethod());
+    MethProfile profile;
+    profile.setMeth(meth, Tag::UniqueMeth);
+    return profile;
   }
 
   std::string toString() const;

@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <new>
 #include <optional>
 #include <string>
 #include <utility>
@@ -29,7 +30,9 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
@@ -37,9 +40,9 @@
 #include "hphp/runtime/vm/jit/cprof-record.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -76,6 +79,16 @@ struct DestroyTestUnit {
         named->setCachedFunc(nullptr);
       }
     }
+    auto const preclasses = unit->preclasses();
+    for (size_t i = preclasses.size(); i > 0; --i) {
+      auto const& preclass = preclasses[i - 1];
+      auto const named = preclass->namedType();
+      auto const cls = named->getCachedClass();
+      if (cls && cls->preClass() == preclass.get()) {
+        named->setCachedClass(nullptr);
+        cls->destroy();
+      }
+    }
     unit->destroy();
   }
 };
@@ -85,6 +98,18 @@ std::unique_ptr<Unit, DestroyTestUnit> makeCalleeUnit() {
 .function N cont_prof_consume_callee_c2a07e49() {
   Null
   RetC None
+}
+.class ContProfConsumeMethBase_c2a07e49 {
+  .method [public] N f() {
+    Null
+    RetC None
+  }
+}
+.class ContProfConsumeMethChild_c2a07e49 extends ContProfConsumeMethBase_c2a07e49 {
+  .method [public] N f() {
+    Int 1
+    RetC None
+  }
 }
 )HHAS";
   auto const emitter = assemble_string(
@@ -103,14 +128,15 @@ std::unique_ptr<Unit, DestroyTestUnit> makeCalleeUnit() {
 template<class T>
 std::optional<ContProfTargetProfile> snapshotTestTargetProfile(
   const T& value,
-  const StringData* name
+  const StringData* name,
+  Offset bytecodeOffset = 0
 ) {
   auto const key = rds::Profile{
-    static_cast<T*>(nullptr), TransID{2'700'000}, 0, name
+    static_cast<T*>(nullptr), TransID{2'700'000}, bytecodeOffset, name
   };
   auto const handle = rds::bind<T, rds::Mode::Local>(rds::Symbol{key}).handle();
   SCOPE_EXIT { rds::unbind(rds::Symbol{key}, handle); };
-  rds::handleToRef<T, rds::Mode::Local>(handle) = value;
+  new (&rds::handleToRef<T, rds::Mode::Local>(handle)) T(value);
   return snapshotContProfTargetProfile(key, handle, sizeof(T));
 }
 
@@ -454,6 +480,98 @@ TEST_F(ContProfConsumeTest, UnavailableCallTargetPreservesCallerAndOtherSites) {
   EXPECT_EQ(ContProfTargetProfileKind::DecRef,
             translation.targetProfiles.front().kind);
   EXPECT_EQ(otherSite->payload, translation.targetProfiles.front().payload);
+}
+
+TEST_F(ContProfConsumeTest, DropsConflictingMethSitesAndKeepsAgreement) {
+  auto const popOffset = instrLen(m_alphaFunc->at(0));
+  auto const midOffset = popOffset + instrLen(m_alphaFunc->at(popOffset));
+  // Cover the synthetic entry, Null, PopC, and the Null at the shared site.
+  m_alpha.translations.front().regionLength = 4;
+  auto calleeUnit = makeCalleeUnit();
+  ASSERT_NE(nullptr, calleeUnit);
+  calleeUnit->merge();
+  auto const base =
+    Class::lookup(makeStaticString("ContProfConsumeMethBase_c2a07e49"));
+  auto const child =
+    Class::lookup(makeStaticString("ContProfConsumeMethChild_c2a07e49"));
+  ASSERT_NE(nullptr, base);
+  ASSERT_NE(nullptr, child);
+  auto const method = base->lookupMethod(makeStaticString("f"));
+  auto const otherMethod = child->lookupMethod(makeStaticString("f"));
+  ASSERT_NE(nullptr, method);
+  ASSERT_NE(nullptr, otherMethod);
+  ASSERT_NE(method, otherMethod);
+  auto const key = makeContProfFuncKey(*method);
+  ASSERT_TRUE(key);
+  m_units.emplace(key->resolutionUnitPath, calleeUnit.get());
+
+  MethProfile first;
+  first.reportMeth(base, method, nullptr);
+  MethProfile second;
+  second.reportMeth(child, otherMethod, nullptr);
+  auto const name = makeStaticString("MethProfile-FCallObjMethod");
+  auto const firstSite = snapshotTestTargetProfile(first, name, midOffset);
+  auto const secondSite = snapshotTestTargetProfile(second, name, midOffset);
+  auto const otherName = makeStaticString("MethProfile-Other");
+  auto const otherMethSite = snapshotTestTargetProfile(first, otherName, midOffset);
+  DecRefProfile const decRef{7, 5, 2, 3, 0, KindOfString};
+  auto const decRefSite =
+    snapshotTestTargetProfile(decRef, decRefProfileKey(0), midOffset);
+  ASSERT_TRUE(firstSite);
+  ASSERT_TRUE(secondSite);
+  ASSERT_TRUE(otherMethSite);
+  ASSERT_TRUE(decRefSite);
+
+  for (auto const conflict : {false, true}) {
+    SCOPED_TRACE(conflict);
+    auto record = m_alpha;
+    record.translations.front().targetProfiles = {
+      *decRefSite, *firstSite, *otherMethSite
+    };
+    ContProfProfileTranslation bytecode{
+      ContProfStartKind::Bytecode, static_cast<uint32_t>(midOffset), 2, 11
+    };
+    bytecode.targetProfiles = {*decRefSite, conflict ? *secondSite : *firstSite};
+    record.translations.push_back(std::move(bytecode));
+
+    auto const prepared = prepareContProfStartupCandidates({record}, m_units, 1);
+    ASSERT_EQ(1, prepared.candidates.size());
+    auto const& translations = prepared.candidates.front().translations;
+    ASSERT_EQ(2, translations.size());
+    EXPECT_EQ(7, translations[0].executionCount);
+    EXPECT_EQ(11, translations[1].executionCount);
+    ASSERT_EQ(conflict ? 2 : 3, translations[0].targetProfiles.size());
+    ASSERT_EQ(conflict ? 1 : 2, translations[1].targetProfiles.size());
+    for (auto const& translation : translations) {
+      EXPECT_EQ(decRefSite->payload, translation.targetProfiles.front().payload);
+    }
+    auto const& retainedOther = translations[0].targetProfiles.back();
+    EXPECT_EQ(otherName, retainedOther.name);
+    ASSERT_NE(nullptr, retainedOther.meth);
+    EXPECT_EQ(method, retainedOther.meth->uniqueMeth());
+    if (!conflict) {
+      MethProfile aggregate;
+      for (auto const& translation : translations) {
+        auto const& target = translation.targetProfiles[1].meth;
+        ASSERT_NE(nullptr, target);
+        MethProfile::reduce(aggregate, *target);
+      }
+      EXPECT_EQ(method, aggregate.uniqueMeth());
+      EXPECT_EQ(nullptr, aggregate.baseMeth());
+      EXPECT_EQ(nullptr, aggregate.interfaceMeth());
+    }
+  }
+
+  auto unavailable = m_units;
+  unavailable.erase(key->resolutionUnitPath);
+  m_alpha.translations.front().targetProfiles = {*decRefSite, *firstSite};
+  auto const prepared = prepareContProfStartupCandidates({m_alpha}, unavailable, 1);
+  ASSERT_EQ(1, prepared.candidates.size());
+  auto const& translations = prepared.candidates.front().translations;
+  ASSERT_EQ(1, translations.size());
+  EXPECT_EQ(7, translations.front().executionCount);
+  ASSERT_EQ(1, translations.front().targetProfiles.size());
+  EXPECT_EQ(decRefSite->payload, translations.front().targetProfiles.front().payload);
 }
 
 TEST(ContProfConsume, StartupActivation) {

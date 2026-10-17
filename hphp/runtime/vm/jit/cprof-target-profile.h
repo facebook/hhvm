@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
+#include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -45,6 +46,7 @@ struct ContProfPreparedTargetProfile {
   const StringData* name{nullptr};
   std::vector<uint8_t> payload;
   std::unique_ptr<CallTargetProfile> callTarget{};
+  std::unique_ptr<MethProfile> meth{};
 };
 
 /* Snapshot a supported live RDS target profile under a Treadmill session. */

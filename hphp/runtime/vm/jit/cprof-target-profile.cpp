@@ -195,6 +195,41 @@ const Func* resolveTargetFunc(
   }
 }
 
+bool isSupportedMethTarget(const Func* func) {
+  return func && func->isMethod() && (func->attrs() & AttrPublic) &&
+    !func->isInternal() && !func->hasPrivateAncestor() &&
+    !func->isClosureBody();
+}
+
+std::optional<ContProfTargetProfile> snapshotMethProfile(
+  const rds::Profile& profile,
+  rds::Handle handle,
+  uint32_t allocationSize
+) {
+  if (profile.bcOff < 0) return std::nullopt;
+
+  assertx(profile.name);
+  assertx(allocationSize == sizeof(MethProfile));
+
+  MethProfile reduced{};
+  TargetProfile<MethProfile>::reduce(reduced, handle, allocationSize);
+  auto const func = reduced.uniqueMeth();
+  if (!isSupportedMethTarget(func)) return std::nullopt;
+
+  auto const key = makeContProfFuncKey(*func);
+  if (!key) return std::nullopt;
+  auto payload = serializeContProfFuncKey(*key);
+  assertx(payload);
+
+  // Rebuild as UniqueMeth: guard current dispatch rather than a saved class.
+  return ContProfTargetProfile{
+    ContProfTargetProfileKind::Meth,
+    profile.bcOff,
+    profile.name->toCppString(),
+    std::move(*payload),
+  };
+}
+
 template<class T>
 bool addTargetProfileValue(
   const rds::Profile& key,
@@ -605,6 +640,12 @@ bool isValidContProfTargetProfile(const ContProfTargetProfile& profile) {
             return nullptr;
           }
         ).has_value();
+
+    case ContProfTargetProfileKind::Meth:
+      return profile.bytecodeOffset >= 0 &&
+        deserializeContProfFuncKey(
+          {profile.payload.data(), profile.payload.size()}
+        ).has_value();
   }
 
   return false;
@@ -685,6 +726,9 @@ snapshotContProfTargetProfile(
     case rds::ProfileKind::CallTargetProfile:
       return snapshotCallTargetProfile(profile, handle, allocationSize);
 
+    case rds::ProfileKind::MethProfile:
+      return snapshotMethProfile(profile, handle, allocationSize);
+
     default:
       return std::nullopt;
   }
@@ -693,6 +737,13 @@ snapshotContProfTargetProfile(
 std::vector<ContProfFuncKey>
 contProfTargetProfileFuncKeys(const ContProfTargetProfile& profile) {
   std::vector<ContProfFuncKey> result;
+  if (profile.kind == ContProfTargetProfileKind::Meth) {
+    auto key = deserializeContProfFuncKey(
+      {profile.payload.data(), profile.payload.size()}
+    );
+    if (key) result.push_back(std::move(*key));
+    return result;
+  }
   if (profile.kind != ContProfTargetProfileKind::CallTarget) return result;
 
   auto const decoded = decodeCallTargetPayload(
@@ -710,6 +761,24 @@ std::optional<ContProfPreparedTargetProfile> prepareContProfTargetProfile(
   const std::map<std::string, Unit*>& units
 ) {
   if (profile.bytecodeOffset < 0) return std::nullopt;
+
+  if (profile.kind == ContProfTargetProfileKind::Meth) {
+    auto const key = deserializeContProfFuncKey(
+      {profile.payload.data(), profile.payload.size()}
+    );
+    if (!key) return std::nullopt;
+    auto const func = resolveTargetFunc(*key, units);
+    if (!isSupportedMethTarget(func)) return std::nullopt;
+
+    return ContProfPreparedTargetProfile{
+      profile.kind,
+      profile.bytecodeOffset,
+      makeStaticString(profile.name),
+      {},
+      nullptr,
+      std::make_unique<MethProfile>(MethProfile::fromUniqueMeth(func)),
+    };
+  }
 
   if (profile.kind == ContProfTargetProfileKind::CallTarget) {
     bool resolved = true;
@@ -816,6 +885,19 @@ bool installContProfTargetProfile(
           profile.name,
         },
         *profile.callTarget,
+        targetProfiles
+      );
+
+    case ContProfTargetProfileKind::Meth:
+      assertx(profile.meth);
+      return addTargetProfileValue(
+        rds::Profile{
+          static_cast<MethProfile*>(nullptr),
+          transId,
+          profile.bytecodeOffset,
+          profile.name,
+        },
+        *profile.meth,
         targetProfiles
       );
   }

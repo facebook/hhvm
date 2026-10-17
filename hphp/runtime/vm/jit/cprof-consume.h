@@ -32,6 +32,10 @@ struct Func;
 struct Unit;
 }
 
+namespace HPHP::jit {
+struct ProfData;
+}
+
 namespace HPHP::jit::cprof {
 
 struct ContProfProfileRecord;
@@ -65,6 +69,17 @@ ContProfStartupCandidates prepareContProfStartupCandidates(
   const std::vector<ContProfProfileRecord>& records,
   const std::map<std::string, Unit*>& units,
   size_t maxFunctions
+);
+
+/*
+ * Install profiles without optimizing any functions. Returns successful imports
+ * in candidate order, borrowing pointers from candidates. The caller must keep
+ * candidates alive, hold a VM/Treadmill session for the current ProfData, and
+ * allow write-lease acquisition.
+ */
+std::vector<const ContProfStartupCandidate*> installContProfStartupCandidates(
+  ProfData& profData,
+  const std::vector<ContProfStartupCandidate>& candidates
 );
 
 /* Whether continuous-profile startup replay is enabled. */

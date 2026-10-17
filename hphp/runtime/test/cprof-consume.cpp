@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -26,12 +27,18 @@
 #include <folly/ScopeGuard.h>
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
+#include "hphp/runtime/vm/jit/cprof-target-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/prof-data-target-profile.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
+
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -71,6 +78,20 @@ struct DestroyTestUnit {
     unit->destroy();
   }
 };
+
+template<class T>
+std::optional<ContProfTargetProfile> snapshotTestTargetProfile(
+  const T& value,
+  const StringData* name
+) {
+  auto const key = rds::Profile{
+    static_cast<T*>(nullptr), TransID{2'700'000}, 0, name
+  };
+  auto const handle = rds::bind<T, rds::Mode::Local>(rds::Symbol{key}).handle();
+  SCOPE_EXIT { rds::unbind(rds::Symbol{key}, handle); };
+  rds::handleToRef<T, rds::Mode::Local>(handle) = value;
+  return snapshotContProfTargetProfile(key, handle, sizeof(T));
+}
 
 struct ContProfConsumeTest : testing::Test {
   void SetUp() override {
@@ -243,6 +264,107 @@ TEST_F(ContProfConsumeTest, ZeroCapSkipsPreparation) {
 
   EXPECT_TRUE(prepared.candidates.empty());
   EXPECT_EQ(0, prepared.recordsResolved);
+}
+
+TEST_F(ContProfConsumeTest, InstallsAllProfilesBeforeOptimization) {
+  DecRefProfile const alphaValue{7, 5, 2, 3, 0, KindOfString};
+  DecRefProfile const betaValue{13, 9, 4, 5, 0, KindOfDict};
+  auto const name = decRefProfileKey(0);
+  auto const alphaProfile = snapshotTestTargetProfile(alphaValue, name);
+  auto const betaProfile = snapshotTestTargetProfile(betaValue, name);
+  ASSERT_TRUE(alphaProfile);
+  ASSERT_TRUE(betaProfile);
+  m_alpha.translations.front().targetProfiles = {*alphaProfile};
+  m_beta.translations.front().targetProfiles = {*betaProfile};
+  auto const prepared = prepareContProfStartupCandidates(
+    {m_alpha, m_beta}, m_units, 2
+  );
+  ASSERT_EQ(2, prepared.candidates.size());
+
+  auto const previousProfData = jit::profData();
+  auto const createdProfData = globalProfData() == nullptr;
+  if (createdProfData) {
+    auto const oldPGO = std::exchange(Cfg::Jit::PGO, true);
+    SCOPE_EXIT { Cfg::Jit::PGO = oldPGO; };
+    processInitProfData();
+  }
+  SCOPE_EXIT {
+    if (createdProfData) discardProfData();
+    *rl_profData = previousProfData;
+  };
+  requestInitProfData();
+  auto const profData = jit::profData();
+  ASSERT_NE(nullptr, profData);
+  auto const hadTargetProfiles = profData->targetProfile() != nullptr;
+  SCOPE_EXIT {
+    profData->cleanupFunc(m_alphaFunc, {}, {});
+    profData->cleanupFunc(m_betaFunc, {}, {});
+    if (!hadTargetProfiles) profData->setTargetProfile(nullptr);
+  };
+
+  auto const installed = installContProfStartupCandidates(
+    *profData, prepared.candidates
+  );
+  ASSERT_EQ(2, installed.size());
+  EXPECT_EQ(m_betaFunc, installed[0]->func);
+  EXPECT_EQ(m_alphaFunc, installed[1]->func);
+  auto const targetProfiles = profData->targetProfile();
+  ASSERT_NE(nullptr, targetProfiles);
+
+  std::vector<TransID> transIds;
+  for (auto const candidate : installed) {
+    auto const funcId = candidate->func->getFuncId();
+    EXPECT_TRUE(profData->profiling(funcId));
+    EXPECT_FALSE(profData->optimized(funcId));
+    auto const ids = profData->funcProfTransIDs(funcId);
+    ASSERT_EQ(1, ids.size());
+    transIds.push_back(ids.front());
+    auto const record = profData->transRec(ids.front());
+    ASSERT_NE(nullptr, record);
+    EXPECT_EQ(candidate->translations.front().start, record->srcKey());
+    EXPECT_EQ(candidate->translations.front().executionCount,
+              profData->transCounter(ids.front()));
+
+    auto const target = targetProfiles->get<DecRefProfile>(rds::Profile{
+      static_cast<DecRefProfile*>(nullptr), ids.front(), 0, name
+    });
+    ASSERT_NE(nullptr, target);
+    auto const& expected = candidate->func == m_alphaFunc
+      ? alphaValue : betaValue;
+    EXPECT_EQ(expected.toDynamic(), target->toDynamic());
+  }
+  EXPECT_NE(transIds[0], transIds[1]);
+
+  auto const numTransRecs = profData->numTransRecs();
+  EXPECT_TRUE(installContProfStartupCandidates(
+    *profData, prepared.candidates
+  ).empty());
+  EXPECT_EQ(numTransRecs, profData->numTransRecs());
+  for (size_t i = 0; i < installed.size(); ++i) {
+    TransIDVec const expected{transIds[i]};
+    EXPECT_EQ(expected,
+              profData->funcProfTransIDs(installed[i]->func->getFuncId()));
+    EXPECT_FALSE(profData->optimized(installed[i]->func->getFuncId()));
+  }
+}
+
+TEST_F(ContProfConsumeTest, RejectsUnrelatedProfDataWithoutInstalling) {
+  auto const prepared = prepareContProfStartupCandidates(
+    {m_alpha, m_beta}, m_units, 2
+  );
+  ASSERT_EQ(2, prepared.candidates.size());
+  ProfData unrelated;
+
+  EXPECT_TRUE(installContProfStartupCandidates(
+    unrelated, prepared.candidates
+  ).empty());
+
+  EXPECT_EQ(0, unrelated.numTransRecs());
+  EXPECT_EQ(nullptr, unrelated.targetProfile());
+  for (auto const func : {m_alphaFunc, m_betaFunc}) {
+    EXPECT_FALSE(unrelated.profiling(func));
+    EXPECT_TRUE(unrelated.funcProfTransIDs(func->getFuncId()).empty());
+  }
 }
 
 TEST(ContProfConsume, StartupActivation) {

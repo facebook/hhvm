@@ -239,10 +239,9 @@ void installCandidateProfileData(
   }
 }
 
-bool optimizeCandidate(
+bool installCandidate(
   ProfData& profData,
-  const ContProfStartupCandidate& candidate,
-  bool& installing
+  const ContProfStartupCandidate& candidate
 ) {
   auto const func = candidate.func;
 
@@ -272,14 +271,43 @@ bool optimizeCandidate(
     }
   }
 
-  installing = true;
+  SCOPE_FAIL {
+    always_assert_flog(
+      false, "cont-prof startup failed during ProfData installation"
+    );
+  };
   installCandidateProfileData(profData, candidate, counterDefault);
-
   profData.setProfiling(func);
+  return true;
+}
+
+bool optimizeCandidate(
+  ProfData& profData,
+  const ContProfStartupCandidate& candidate
+) {
+  auto const func = candidate.func;
+
+  VMProtect protect;
+  LeaseHolder lease{func, TransKind::Optimize, true};
+  if (!lease) return false;
+
+  auto const funcId = func->getFuncId();
+  if (!Func::isFuncIdValid(funcId) || Func::fromFuncId(funcId) != func ||
+      jit::profData() != &profData || globalProfData() != &profData ||
+      !profData.profiling(funcId) || profData.optimized(funcId) ||
+      profData.funcProfTransIDs(funcId).empty()) {
+    return false;
+  }
+
+  SCOPE_FAIL {
+    always_assert_flog(
+      false, "cont-prof startup failed during optimization"
+    );
+  };
   profData.setOptimized(funcId);
   mcgen::optimizeFunc(func);
 
-  auto const published = std::any_of(
+  return std::any_of(
     candidate.translations.begin(),
     candidate.translations.end(),
     [](const ContProfStartupCandidate::Translation& translation) {
@@ -287,9 +315,6 @@ bool optimizeCandidate(
       return srcRec && srcRec->numTrans() != 0;
     }
   );
-
-  installing = false;
-  return published;
 }
 
 }
@@ -344,13 +369,38 @@ ContProfStartupCandidates prepareContProfStartupCandidates(
   return result;
 }
 
+std::vector<const ContProfStartupCandidate*> installContProfStartupCandidates(
+  ProfData& profData,
+  const std::vector<ContProfStartupCandidate>& candidates
+) {
+  std::vector<const ContProfStartupCandidate*> installed;
+  installed.reserve(candidates.size());
+
+  if (candidates.empty() || jit::profData() != &profData ||
+      globalProfData() != &profData) {
+    return installed;
+  }
+
+  if (!profData.targetProfile()) {
+    // Replay covers only a subset of sites, so a miss falls back to live
+    // RDS rather than meaning "no data".
+    profData.setTargetProfile(
+      std::make_unique<ProfDataTargetProfile>(/*liveFallback=*/true)
+    );
+  }
+
+  for (auto const& candidate : candidates) {
+    if (jit::profData() != &profData || globalProfData() != &profData) break;
+    if (installCandidate(profData, candidate)) installed.push_back(&candidate);
+  }
+  return installed;
+}
+
 void consumeContProfAtStartup() noexcept {
   if (!contProfStartupActive()) {
     Logger::Info("cont-prof startup: inactive");
     return;
   }
-
-  auto installing = false;
 
   try {
     BootStats::Block timer{"cont_prof_startup", Cfg::Server::Mode, true};
@@ -387,16 +437,14 @@ void consumeContProfAtStartup() noexcept {
       auto const profData = jit::profData();
       if (!profData || globalProfData() != profData) return;
 
-      if (!prepared.candidates.empty() && !profData->targetProfile()) {
-        // Replay covers only a subset of sites, so a miss falls back to live
-        // RDS rather than meaning "no data".
-        profData->setTargetProfile(
-          std::make_unique<ProfDataTargetProfile>(/*liveFallback=*/true)
-        );
-      }
-
       setMayAcquireLease(true);
       SCOPE_EXIT { setMayAcquireLease(false); };
+
+      // Make every imported callee's profiles available before compiling callers.
+      auto const installed = [&] {
+        BootStats::Block timer{"cont_prof_install", Cfg::Server::Mode, true};
+        return installContProfStartupCandidates(*profData, prepared.candidates);
+      }();
 
       size_t published{};
 
@@ -405,22 +453,23 @@ void consumeContProfAtStartup() noexcept {
           "cont_prof_optimize_serial", Cfg::Server::Mode, true
         };
         // Optimize candidates in descending function-hotness order.
-        for (auto const& candidate : prepared.candidates) {
+        for (auto const candidate : installed) {
           if (jit::profData() != profData || globalProfData() != profData) {
             break;
           }
 
-          if (optimizeCandidate(*profData, candidate, installing)) ++published;
+          if (optimizeCandidate(*profData, *candidate)) ++published;
         }
       }
       s_startupPublishedFuncs->setValue(published);
 
       Logger::Info(
         "Cont-prof startup published optimized code for %zu of "
-        "%zu prepared functions (%zu candidates "
+        "%zu imported functions (%zu prepared, %zu candidates "
         "from %zu decoded records in %zu files, %zu resolved, "
         "%zu of %zu units ready)",
         published,
+        installed.size(),
         prepared.candidates.size(),
         input->records.size(),
         input->recordsDecoded,
@@ -431,10 +480,6 @@ void consumeContProfAtStartup() noexcept {
       );
     }).run();
   } catch (...) {
-    always_assert_flog(
-      !installing,
-      "cont-prof startup failed during ProfData installation"
-    );
     Logger::Warning("cont-prof startup consumption failed");
   }
 }

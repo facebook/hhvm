@@ -60,7 +60,7 @@ let test () =
     {
       env with
       Server_env.nonpersistent_client_pending_command_needs_full_check =
-        Some ((fun env -> env), "test", make_client (), (fun () -> ()));
+        Some ((fun env -> env), "test", make_client ());
     }
   in
   (* Enable real progress-file writes in an isolated directory. *)

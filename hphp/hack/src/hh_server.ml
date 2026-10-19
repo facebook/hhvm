@@ -45,7 +45,4 @@
  *      signatures are correct).
  *)
 
-let () =
-  Art_cli_lite.detach ();
-  Process.stamp_env := Art_cli_lite.stamp_env;
-  Monitor_start.start ()
+let () = Monitor_start.start ()

@@ -69,8 +69,6 @@ val status_to_string : Unix.process_status -> string
 
 val env_to_string : Process_types.environment -> string
 
-val stamp_env : (string -> string array option -> string array option) ref
-
 (** Returns true if read_and_close_pid would be nonblocking. *)
 val is_ready : Process_types.t -> bool
 

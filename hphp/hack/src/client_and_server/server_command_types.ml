@@ -651,7 +651,6 @@ type cmd_metadata = {
   from: string;
   (* a short human-readable string, used in "hh_server is busy [desc]" *)
   desc: string;
-  trace_context: (string * string) list;
 }
 
 type 'a command = cmd_metadata * 'a t

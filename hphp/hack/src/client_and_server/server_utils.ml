@@ -15,7 +15,6 @@ type 'env handle_command_result =
   | Needs_full_recheck of {
       env: 'env;
       finish_command_handling: 'env -> 'env;
-      abandon_command_handling: unit -> unit;
       reason: string;
     }
 

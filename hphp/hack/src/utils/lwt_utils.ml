@@ -200,7 +200,6 @@ let exec_checked
       (program, Array.append [| program |] args)
   in
   let command_line = snd command |> String.concat_array ~sep:" " in
-  let env = !Process.stamp_env command_line env in
   let process = Lwt_process.open_process_full command ?timeout ?env in
   let cancel_watcher =
     match cancel with

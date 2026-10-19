@@ -154,24 +154,10 @@ let handle
     send_progress " done";
     r
   in
-  if full_recheck_needed then send_progress " typechecking";
-  let request =
-    Art_cli_lite.request_begin (fst msg).trace_context "cli.hh_server_request"
-  in
-  let handle_command env =
-    try_finally
-      ~f:(fun () ->
-        Art_cli_lite.request_run request (fun () -> handle_command env))
-      ~finally:(fun () -> Art_cli_lite.request_end request)
-  in
 
-  if full_recheck_needed then
+  if full_recheck_needed then begin
+    send_progress " typechecking";
     Server_utils.Needs_full_recheck
-      {
-        env;
-        finish_command_handling = handle_command;
-        abandon_command_handling = (fun () -> Art_cli_lite.request_end request);
-        reason = reason msg;
-      }
-  else
+      { env; finish_command_handling = handle_command; reason = reason msg }
+  end else
     Server_utils.Done (handle_command env)

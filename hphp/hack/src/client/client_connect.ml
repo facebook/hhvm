@@ -54,7 +54,6 @@ type conn = {
   conn_root: Path.t;
   conn_deadline: float option;
   from: string;
-  trace_context: (string * string) list;
 }
 
 let read_and_show_progress (progress_callback : string option -> unit) : unit =
@@ -356,7 +355,6 @@ let rec connect
         conn_root = root;
         conn_deadline = deadline;
         from;
-        trace_context = [];
       }
   | Error e ->
     (* must hide the spinner prior to printing output or exiting *)
@@ -436,12 +434,6 @@ let rec connect
         raise Exit_status.(Exit_with Build_id_mismatch))
 
 let connect (env : env) : conn Lwt.t =
-  let trace_context =
-    if env.do_post_handoff_handshake then
-      Art_cli_lite.outgoing "hh_server" "hh_server"
-    else
-      []
-  in
   let start_time = Unix.time () in
   let%lwt ({ channels = (_, oc); _ } as conn) = connect env start_time in
   Hack_event_logger.client_established_connection start_time;
@@ -450,8 +442,7 @@ let connect (env : env) : conn Lwt.t =
     Marshal.to_channel oc Server_command_types.Non_persistent [];
     Out_channel.flush oc
   end;
-  Lwt.return
-    { conn with t_sent_connection_type = Unix.gettimeofday (); trace_context }
+  Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
 
 let rpc :
     type a.
@@ -467,12 +458,11 @@ let rpc :
        conn_root;
        conn_deadline = deadline;
        from;
-       trace_context;
      }
      ~desc
      cmd ->
   let t_ready_to_send_cmd = Unix.gettimeofday () in
-  let metadata = { Server_command_types.from; desc; trace_context } in
+  let metadata = { Server_command_types.from; desc } in
   Marshal.to_channel oc (metadata, cmd) [];
   Out_channel.flush oc;
   let t_sent_cmd = Unix.gettimeofday () in

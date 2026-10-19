@@ -145,7 +145,6 @@
   (:standard
    (:include dune_config/ld-opts.sexp)))
  (libraries
-  art_cli_lite_stubs
   client
   default_injector_config
   file_content
@@ -168,7 +167,6 @@
    (:include dune_config/ld-opts.sexp)))
  (libraries
   agent_session_id_stubs
-  art_cli_lite_stubs
   client
   default_injector_config
   file_content

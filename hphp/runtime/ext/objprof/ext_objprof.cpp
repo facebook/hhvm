@@ -942,16 +942,13 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
                                 std::make_pair(clsName, func->name()->toCppString()) :
                                 std::make_pair(clsName, "Static");
           auto& metrics = (*histogram)[histogram_key];
-          metrics.instances = 1;
           if(objprof_props_mode) {
-            metrics.bytes = tv_size.first + e.keySize;
-            metrics.bytes_rel = tv_size.first + e.keySize;
+            metrics.instances += 1;
+          } else {
+            metrics.instances = 1;
           }
-          else {
-            // Class level aggregation, increment
-            metrics.bytes += tv_size.first + e.keySize;
-            metrics.bytes_rel += tv_size.first + e.keySize;
-          }
+          metrics.bytes += tv_size.first + e.keySize;
+          metrics.bytes_rel += tv_size.first + e.keySize;
         }
       },
       [&](auto const& param) {

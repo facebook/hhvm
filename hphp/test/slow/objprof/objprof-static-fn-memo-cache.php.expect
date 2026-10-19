@@ -1,6 +1,6 @@
 Pass: The normalized size of A should be greater than 14000
 Pass: The normalized size of A should be greater than 3000
-Pass: The normalized size of A::oneParam1 should be greater than 1000
+Pass: The normalized size of A::oneParam1 should be greater than 5000 with 5 entries
 Pass: The normalized size of A::oneParam2 should be greater than 1000
 Pass: The normalized size of A::oneParam3 should be greater than 1000
 Pass: The normalized size of A::oneParam4 should be greater than 1000

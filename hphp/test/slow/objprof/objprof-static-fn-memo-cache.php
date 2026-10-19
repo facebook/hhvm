@@ -99,6 +99,10 @@ function check_and_print($condition, $message) {
 function main(): void {
     $a = new A();
     A::oneParam1('a');
+    A::oneParam1('b');
+    A::oneParam1('c');
+    A::oneParam1('d');
+    A::oneParam1('e');
     A::oneParam2('a');
     A::oneParam3('a');
     A::oneParam4('a');
@@ -127,7 +131,8 @@ function main(): void {
     // The normalized size of B::Static should be greater than 3000 bytes due to 3x memo caches
     check_and_print($prof["A::Static"]["bytes_normalized"] > 3000, "The normalized size of A should be greater than 3000");
     // Each of the static memoized functions should have their own entry in the per property map
-    check_and_print($prof_per_prop["A::oneParam1"]["bytes_normalized"] > 1000, "The normalized size of A::oneParam1 should be greater than 1000");
+    $a_op1 = idx($prof_per_prop, "A::oneParam1", dict[]);
+    check_and_print(idx($a_op1, "bytes_normalized", 0.0) > 5000 && idx($a_op1, "instances", 0) == 5, "The normalized size of A::oneParam1 should be greater than 5000 with 5 entries");
     check_and_print($prof_per_prop["A::oneParam2"]["bytes_normalized"] > 1000, "The normalized size of A::oneParam2 should be greater than 1000");
     check_and_print($prof_per_prop["A::oneParam3"]["bytes_normalized"] > 1000, "The normalized size of A::oneParam3 should be greater than 1000");
     check_and_print($prof_per_prop["A::oneParam4"]["bytes_normalized"] > 1000, "The normalized size of A::oneParam4 should be greater than 1000");

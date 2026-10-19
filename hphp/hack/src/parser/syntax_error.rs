@@ -664,6 +664,9 @@ pub const duplicate_variadic_named_param: Error = Cow::Borrowed(
     "A parameter list may have at most one variadic `named` parameter. The first one already collects every named argument that matches no named parameter.",
 );
 
+pub const duplicate_named_param: Error =
+    Cow::Borrowed("A function type cannot contain duplicate named parameter names.");
+
 pub fn duplicate_parameter_modifier(modifier: &str) -> Error {
     Cow::Owned(format!("Duplicate parameter modifier `{}`.", modifier))
 }

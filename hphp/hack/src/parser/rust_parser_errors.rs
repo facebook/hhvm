@@ -2520,6 +2520,29 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    fn duplicate_named_param(&self, params: S<'a>) -> Option<S<'a>> {
+        let mut names = HashSet::default();
+        syntax_to_list_no_separators(params).find_map(|param| {
+            // Named variadics have no name; duplicate_variadic_named_param handles them.
+            let name = match &param.children {
+                ClosureParameterTypeSpecifier(x)
+                    if !x.named.is_missing() && !x.ellipsis.is_ellipsis() =>
+                {
+                    &x.name
+                }
+                _ => return None,
+            };
+            let Token(token) = &name.children else {
+                return None;
+            };
+            if names.insert(self.token_text(token)) {
+                None
+            } else {
+                Some(name)
+            }
+        })
+    }
+
     fn params_errors(&mut self, params: S<'a>) {
         self.produce_error_from_check(ends_with_variadic_comma, params, || errors::error2022);
         self.produce_error_from_check(misplaced_variadic_param, params, || errors::error2021);
@@ -2530,6 +2553,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.produce_error_from_check(duplicate_variadic_named_param, params, || {
             errors::duplicate_variadic_named_param
         });
+        if let Some(name) = self.duplicate_named_param(params) {
+            self.errors
+                .push(make_error_from_node(name, errors::duplicate_named_param));
+        }
 
         self.produce_error_from_check(variadic_param_with_default_value, params, || {
             errors::error2065

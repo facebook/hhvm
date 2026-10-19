@@ -1,0 +1,2 @@
+ERROR: File "duplicate_function_type_parameter_bad.php", line 5, characters 53-58:
+A function type cannot contain duplicate named parameter names. (Parsing[1002])

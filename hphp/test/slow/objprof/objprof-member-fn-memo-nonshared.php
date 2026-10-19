@@ -41,8 +41,8 @@ function check_and_print($condition, $message) {
 <<__EntryPoint>>
 function main(): void {
     $a = new A();
-    $c = $a->zeroParam();
-    $b = $a->oneParam('b');
+    $a->zeroParam();
+    $a->oneParam('b');
     $a->oneParam('c');
     $a->twoParams('c','d');
     $a->initDict();
@@ -58,7 +58,7 @@ function main(): void {
     check_and_print($prof_per_prop["A::zeroParam"]["bytes_normalized"] > 1000, "The normalized size of zeroParam should be greater than 1000");
     echo "\n";
     $a = __hhvm_intrinsics\launder_value($a);
-    check_and_print($prof_per_prop["A::oneParam"]["bytes_normalized"] > 1000, "The normalized size of oneParam should be greater than 1000");
+    check_and_print($prof_per_prop["A::oneParam"]["bytes_normalized"] > 2000, "The normalized size of oneParam should be greater than 2000");
     echo "\n";
 
     check_and_print($prof_per_prop["A::twoParams"]["bytes_normalized"] > 1000, "The normalized size of twoParams should be greater than 1000");
@@ -83,5 +83,12 @@ function main(): void {
     echo "\n";
 
     check_and_print($prof_per_prop["A::myDict"]["instances"] == 1, "Total number of instances of myDict should be 1");
+    echo "\n";
+
+    $a2 = new A();
+    $a2->zeroParam();
+    $prof2 = objprof_get_data_extended();
+    $a2 = __hhvm_intrinsics\launder_value($a2);
+    check_and_print($prof2["A"]["bytes_normalized"] > $prof["A"]["bytes_normalized"], "Default-mode bytes_normalized should accumulate across instances");
     echo "\n";
 }

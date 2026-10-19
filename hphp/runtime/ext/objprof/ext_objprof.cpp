@@ -849,7 +849,7 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
               metrics.instances += 1;
             }
             metrics.bytes += e.keySize + tv_size.first;
-            metrics.bytes_rel = metrics.bytes / metrics.instances;
+            metrics.bytes_rel += e.keySize + tv_size.second;
           }
           seen_caches.insert(cache);
         }
@@ -864,7 +864,7 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
               metrics.instances += 1;
             }
           metrics.bytes += tv_size.first;
-          metrics.bytes_rel = metrics.bytes / metrics.instances;
+          metrics.bytes_rel += tv_size.second;
         }
       }
   }

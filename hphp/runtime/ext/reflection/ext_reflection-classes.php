@@ -46,8 +46,6 @@ trait ReflectionLegacyAttribute {
 }
 
 trait ReflectionTypedAttribute {
-  // TODO(T199610905) can be further improved to enforce exact kind of
-  // user attribute e.g. HH\ClassLikeAttribute when we do deep enforcement
   final public function getAttributeClass(class<mixed> $c)[] {
     $attrs = $this->getAttributesNamespaced();
     $args = hphp_array_idx($attrs, HH\class_to_classname($c), null);

@@ -18,6 +18,41 @@ type seconds = float
 
 type seconds_since_epoch = float
 
+module Rust_disk_provider_read_telemetry = struct
+  type t = {
+    count: int;
+    seconds: float;
+  }
+  [@@deriving show]
+
+  let get_totals () =
+    let record = Measure.peek_global () in
+    let count =
+      Measure.get_count ~record "rust_disk_provider_read_seconds"
+      |> Option.value ~default:0.
+      |> Int.of_float
+    in
+    let seconds =
+      Measure.get_sum ~record "rust_disk_provider_read_seconds"
+      |> Option.value ~default:0.
+    in
+    { count; seconds }
+
+  let delta ~start ~finish =
+    {
+      count = finish.count - start.count;
+      seconds = finish.seconds -. start.seconds;
+    }
+
+  let to_telemetry { count; seconds } =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"count" ~value:count
+    |> Telemetry.float_ ~key:"duration_ms" ~value:(seconds *. 1000.)
+
+  let get_delta_telemetry ~start =
+    delta ~start ~finish:(get_totals ()) |> to_telemetry
+end
+
 module RecheckLoopStats = struct
   type t = {
     updates_stale: bool;
@@ -29,6 +64,7 @@ module RecheckLoopStats = struct
     total_rechecked_count: int;
     last_iteration_start_time: seconds_since_epoch;
     duration: seconds;
+    rust_disk_provider_read: Rust_disk_provider_read_telemetry.t;
     time_first_result: seconds_since_epoch option;
     recheck_id: string;
     any_full_checks: bool;
@@ -42,6 +78,8 @@ module RecheckLoopStats = struct
       total_rechecked_count = 0;
       last_iteration_start_time = 0.;
       duration = 0.;
+      rust_disk_provider_read =
+        { Rust_disk_provider_read_telemetry.count = 0; seconds = 0. };
       time_first_result = None;
       recheck_id;
       any_full_checks = false;
@@ -57,6 +95,7 @@ module RecheckLoopStats = struct
       total_rechecked_count;
       last_iteration_start_time;
       duration;
+      rust_disk_provider_read;
       time_first_result;
       recheck_id;
       any_full_checks;
@@ -66,6 +105,11 @@ module RecheckLoopStats = struct
     Telemetry.create ()
     |> Telemetry.string_ ~key:"id" ~value:recheck_id
     |> Telemetry.float_ ~key:"time" ~value:duration
+    |> Telemetry.object_
+         ~key:"rust_disk_provider_read"
+         ~value:
+           (Rust_disk_provider_read_telemetry.to_telemetry
+              rust_disk_provider_read)
     |> Telemetry.int_ ~key:"count" ~value:total_rechecked_count
     |> Telemetry.int_
          ~key:"total_changed_files_count"

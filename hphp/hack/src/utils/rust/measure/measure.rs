@@ -5,9 +5,10 @@
 
 //! A simple telemetry crate ported from src/utils/core/measure.ml.
 //!
-//! The OCaml implementation will call into this one upon invocations of
-//! `Measure.push_global` and `Measure.pop_global`, unioning the Rust
-//! measurements into the returned OCaml record.
+//! The OCaml implementation calls into this one to keep global scopes aligned
+//! through `Measure.push_global` and `Measure.pop_global`. Both
+//! `Measure.pop_global` and `Measure.peek_global` combine Rust measurements with
+//! OCaml measurements in the returned record; peeking leaves the scopes intact.
 //!
 //! The `measure` crate is primarily useful for debugging. It's particularly
 //! useful for gathering stats about something that happens a lot. Let's say you
@@ -64,7 +65,7 @@ use std::sync::LazyLock;
 use ocamlrep::ToOcamlRep;
 use parking_lot::RwLock;
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Record {
     entries: hash::DashMap<RecordName, RecordEntry>,
 }
@@ -108,6 +109,19 @@ pub fn pop_global() -> Record {
         Some(record) => record,
         None => panic!("measure::pop_global called with empty stack"),
     }
+}
+
+/// Return a copy of the current global record without changing it or the stack.
+///
+/// # Panics
+///
+/// Panics if the global record stack is empty.
+pub fn peek_global() -> Record {
+    let stack = GLOBAL.read();
+    stack
+        .last()
+        .expect("No global record available! Did you forget to call measure::push_global?")
+        .clone()
 }
 
 pub fn print_stats() {

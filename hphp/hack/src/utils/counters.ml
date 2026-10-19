@@ -12,7 +12,6 @@ exception WrongEnum
 
 module Category = struct
   type t =
-    | Disk_cat
     | Direct_decl_parse
     | Decl_provider_get
     | Ast_provider_get

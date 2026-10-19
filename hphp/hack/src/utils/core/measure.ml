@@ -68,6 +68,11 @@
  *   let record = Measure.pop_global () in
  *   Measure.print_stats ~record ();
  *
+ * To inspect the current scope without ending it, use Measure.peek_global ().
+ * Both pop_global and peek_global return an OCaml record containing the
+ * combined OCaml and Rust measurements. Without an explicit record argument,
+ * getters and printers inspect only the current OCaml global record.
+ *
  * Using a local record:
  *   let record = Measure.create () in
  *   Measure.sample ~record "num_bunnies" number_bunnies;
@@ -371,6 +376,8 @@ external rust_push_global : unit -> unit = "hh_measure_push_global"
 
 external rust_pop_global : unit -> record_data = "hh_measure_pop_global"
 
+external rust_peek_global : unit -> record_data = "hh_measure_peek_global"
+
 let push_global () =
   global := create () :: !global;
   rust_push_global ()
@@ -383,3 +390,9 @@ let pop_global () =
     merge ~record:ret rust_record;
     ret
   | _ -> failwith "Measure.pop_global called with empty stack"
+
+let peek_global () =
+  let record = ref !(get_record None) in
+  let rust_record = deserialize (rust_peek_global ()) in
+  merge ~record rust_record;
+  record

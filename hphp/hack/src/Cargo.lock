@@ -1717,6 +1717,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bstr",
+ "measure",
  "pos",
  "tempfile",
 ]

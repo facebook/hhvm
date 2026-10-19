@@ -122,7 +122,7 @@ let is_directory x =
   with
   | No_such_file_or_directory _ -> false
 
-let cat x = Counters.count Counters.Category.Disk_cat @@ fun () -> get x
+let cat = get
 
 let file_exists x =
   try

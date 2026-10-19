@@ -7,15 +7,25 @@
  *
  *)
 
+(** An OCaml measurement record. Functions with an optional [record] argument
+    default to the current OCaml global record. To include active Rust
+    measurements, pass a record returned by [peek_global] or [pop_global]. *)
 type record
 
 type record_data
 
 val create : unit -> record
 
+(** Start a fresh measurement scope in both OCaml and Rust. *)
 val push_global : unit -> unit
 
+(** Remove the current OCaml and Rust scopes and return their combined record.
+    The returned measurements are not merged into the enclosing scope. *)
 val pop_global : unit -> record
+
+(** Copy and combine the current OCaml and Rust records without modifying
+    either record or stack. The returned record is independent of both. *)
+val peek_global : unit -> record
 
 val serialize : record -> record_data
 

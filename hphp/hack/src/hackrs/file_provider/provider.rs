@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::sync::Arc;
+use std::time::Instant;
 
 use anyhow::Result;
 use bstr::BString;
@@ -26,9 +27,16 @@ impl DiskProvider {
         }
     }
 
+    /// The `rust_disk_provider_read_seconds` metric covers calls to this method, including errors.
     pub fn read(&self, file: RelativePath) -> std::io::Result<BString> {
         let absolute_path = file.to_absolute(&self.relative_path_ctx);
-        Ok(std::fs::read(absolute_path)?.into())
+        let start = Instant::now();
+        let contents = std::fs::read(absolute_path);
+        measure::sample(
+            "rust_disk_provider_read_seconds",
+            start.elapsed().as_secs_f64(),
+        );
+        Ok(contents?.into())
     }
 }
 

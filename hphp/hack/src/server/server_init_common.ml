@@ -124,6 +124,7 @@ let log_type_check_end
     env
     genv
     ~start_t
+    ~rust_disk_provider_read_start
     ~total_rechecked_count
     ~desc
     ~init_telemetry
@@ -136,6 +137,11 @@ let log_type_check_end
          ~key:"init"
          ~value:(Server_env.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+    |> Telemetry.object_
+         ~key:"rust_disk_provider_read"
+         ~value:
+           (Server_env.Rust_disk_provider_read_telemetry.get_delta_telemetry
+              ~start:rust_disk_provider_read_start)
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.object_
          ~key:"errors"
@@ -203,6 +209,9 @@ let defer_or_do_type_check
       Printf.sprintf "type-check %d files" total_rechecked_count
     in
     Hh_logger.log "Begin %s" logstring;
+    let rust_disk_provider_read_start =
+      Server_env.Rust_disk_provider_read_telemetry.get_totals ()
+    in
     let {
       Typing_check_service.diagnostics = errorl;
       telemetry = typecheck_telemetry;
@@ -255,6 +264,7 @@ let defer_or_do_type_check
       env
       genv
       ~start_t:t
+      ~rust_disk_provider_read_start
       ~total_rechecked_count
       ~desc:telemetry_label
       ~init_telemetry

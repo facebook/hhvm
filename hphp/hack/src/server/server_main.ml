@@ -273,6 +273,7 @@ let update_stats_after_recheck :
        recheck_id;
        last_iteration_start_time = _;
        duration;
+       rust_disk_provider_read;
        time_first_result = _;
        any_full_checks = _;
      }
@@ -294,6 +295,7 @@ let update_stats_after_recheck :
     recheck_id;
     last_iteration_start_time = start_time;
     duration = duration +. (Unix.gettimeofday () -. start_time);
+    rust_disk_provider_read;
     time_first_result;
     any_full_checks = true;
   }
@@ -552,6 +554,7 @@ let log_recheck_end
   in
   let {
     RecheckLoopStats.duration;
+    rust_disk_provider_read = _;
     total_changed_files_count;
     total_rechecked_count;
     per_batch_telemetry;
@@ -688,6 +691,9 @@ let serve_one_iteration genv env client_provider =
    * after that we'll be able to give an up-to-date answer to the client.
    * Except: this might be stopped early in some cases, e.g. IDE checks. *)
   let t_start_recheck = Unix.gettimeofday () in
+  let rust_disk_provider_read_start =
+    Rust_disk_provider_read_telemetry.get_totals ()
+  in
   let (stats, env) =
     recheck_until_no_changes_left
       ?agent_session_id
@@ -697,6 +703,14 @@ let serve_one_iteration genv env client_provider =
       selected_client
   in
   let t_done_recheck = Unix.gettimeofday () in
+  let stats =
+    {
+      stats with
+      RecheckLoopStats.rust_disk_provider_read =
+        Rust_disk_provider_read_telemetry.(
+          delta ~start:rust_disk_provider_read_start ~finish:(get_totals ()));
+    }
+  in
   let t_sent_diagnostics = Unix.gettimeofday () in
   let stats =
     Server_env.RecheckLoopStats.record_result_sent_ts
@@ -1092,6 +1106,10 @@ let program_init genv env =
   Event_logger.set_init_type init_type;
   let telemetry =
     Server_utils.log_and_get_sharedmem_load_telemetry ()
+    |> Telemetry.object_
+         ~key:"rust_disk_provider_read"
+         ~value:
+           Rust_disk_provider_read_telemetry.(get_totals () |> to_telemetry)
     |> Telemetry.object_opt ~key:"init_error" ~value:init_error_telemetry
     |> Telemetry.json
          ~key:"deps_mode"

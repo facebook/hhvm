@@ -13,5 +13,6 @@ path = "../../file_provider.rs"
 [dependencies]
 anyhow = "1.0.104"
 bstr = { version = "1.13.1", features = ["serde", "std", "unicode"] }
+measure = { path = "../../../../utils/rust/measure" }
 pos = { path = "../../../pos/cargo/pos" }
 tempfile = "3.27.0"

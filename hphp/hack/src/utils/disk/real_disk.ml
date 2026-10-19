@@ -1,7 +1,8 @@
 include Disk_sig.Types
 
+(** This function does not collect telemetry. With the Rust provider backend enabled,
+    source file reads should go through [DiskProvider::read] instead. *)
 let cat (filename : string) : string =
-  Counters.count Counters.Category.Disk_cat @@ fun () ->
   let ic = open_in_bin filename in
   let len =
     try in_channel_length ic with

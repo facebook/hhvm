@@ -10,4 +10,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_measure_pop_global() -> measure::Record {
         measure::pop_global()
     }
+    fn hh_measure_peek_global() -> measure::Record {
+        measure::peek_global()
+    }
 }

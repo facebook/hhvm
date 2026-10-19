@@ -482,6 +482,9 @@ let type_check_core
     start_time
     ~check_reason
     cgroup_steps =
+  let rust_disk_provider_read_start =
+    Rust_disk_provider_read_telemetry.get_totals ()
+  in
   let t = Unix.gettimeofday () in
   (* `start_time` is when the recheck_loop started and includes preliminaries like
    * reading about file-change notifications and communicating with client.
@@ -1000,6 +1003,14 @@ let type_check_core
   let type_check_end_id = Random.bits () in
   let telemetry =
     Telemetry.int_ telemetry ~key:"type_check_end_id" ~value:type_check_end_id
+  in
+  let telemetry =
+    Telemetry.object_
+      telemetry
+      ~key:"rust_disk_provider_read"
+      ~value:
+        (Rust_disk_provider_read_telemetry.get_delta_telemetry
+           ~start:rust_disk_provider_read_start)
   in
 
   (* CAUTION! Lots of alerts/dashboards depend on this event, particularly start_t  *)

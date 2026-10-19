@@ -13,6 +13,8 @@ module type S = sig
 
   val is_real_disk : bool
 
+  (** This function does not collect telemetry. With the Rust provider backend enabled,
+      source file reads should go through [DiskProvider::read] instead. *)
   val cat : string -> string
 
   val write_file : file:string -> contents:string -> unit

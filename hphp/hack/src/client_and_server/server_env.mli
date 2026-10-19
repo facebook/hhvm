@@ -29,6 +29,30 @@ type genv = {
   mutable debug_channels: (Timeout.in_channel * Out_channel.t) option;
 }
 
+(** Telemetry for calls to Rust [DiskProvider::read], including failed attempts.
+    File reads performed through other APIs are not included. *)
+module Rust_disk_provider_read_telemetry : sig
+  type t = {
+    count: int;
+    seconds: float;
+  }
+  [@@deriving show]
+
+  (** Cumulative read count and elapsed time from the main process and
+  collected worker results. Cancelled jobs whose results are discarded are not
+  included. Retrieving totals does not reset the measurements. *)
+  val get_totals : unit -> t
+
+  (** Subtract [start] from [finish]. *)
+  val delta : start:t -> finish:t -> t
+
+  (** Encode read attempts and summed elapsed milliseconds. *)
+  val to_telemetry : t -> Telemetry.t
+
+  (** Read current totals and encode the delta from [start]. *)
+  val get_delta_telemetry : start:t -> Telemetry.t
+end
+
 module Init_telemetry : sig
   (** These names appear in telemetry, where it's nice to see the word "Init" in them. *)
   type reason =
@@ -148,6 +172,8 @@ module RecheckLoopStats : sig
     last_iteration_start_time: seconds_since_epoch;
         (** Start time of the last loop iteration, after the last user change. *)
     duration: seconds;
+    rust_disk_provider_read: Rust_disk_provider_read_telemetry.t;
+        (** Read count and elapsed time across the whole recheck loop. *)
     time_first_result: seconds_since_epoch option;
         (** This is either the duration to get the first error if any
             or until we get "typecheck done" status message.

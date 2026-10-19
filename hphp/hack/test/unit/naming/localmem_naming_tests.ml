@@ -48,10 +48,6 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     1
     (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
-  Asserter.Int_asserter.assert_equals
-    1
-    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
-    "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
       "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
@@ -80,10 +76,6 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     0
     (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo1) should have this many calls to get_ast";
-  Asserter.Int_asserter.assert_equals
-    0
-    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
-    "unsaved: compute_tast(class Foo1) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
       "[2049] Unbound name: `Foo`";
@@ -110,10 +102,6 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     1
     (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo again) should have this many calls to get_ast";
-  Asserter.Int_asserter.assert_equals
-    0
-    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
-    "unsaved: compute_tast(class Foo again) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
       "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";

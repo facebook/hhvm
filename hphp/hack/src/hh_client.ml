@@ -52,6 +52,21 @@ let log_qe_fetch (fetch : Server_local_config_qe.fetch) =
     ~start_time:fetch.start_time
     ~end_time:fetch.end_time
 
+let apply_agent_error_format
+    (local_config : Server_local_config.t)
+    (check_env : Client_env.client_check_env) : Client_env.client_check_env =
+  match
+    ( check_env.Client_env.error_format,
+      local_config.Server_local_config.use_agent_error_format )
+  with
+  | (None, Server_local_config.Agent_error_format_disabled) ->
+    Server_local_config_qe.enable_agent_error_format_exposure ();
+    check_env
+  | (None, Server_local_config.Agent_error_format_enabled) ->
+    Server_local_config_qe.enable_agent_error_format_exposure ();
+    { check_env with Client_env.error_format = Some Diagnostics.Agent }
+  | _ -> check_env
+
 let set_up_signals () =
   (* Ignore SIGPIPE since if it arises from clientConnect then it might indicate server hangup;
      we detect this case already and handle it better than a signal (unhandled signals cause program exit). *)
@@ -178,6 +193,7 @@ let exec_command_with_config
     let exit_status =
       match command with
       | Client_command.CCheck check_env ->
+        let check_env = apply_agent_error_format local_config check_env in
         Client_check.main check_env config local_config ~init_proc_stack
         (* never returns; does [Exit.exit] itself *)
       | Client_command.CStart env ->

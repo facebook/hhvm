@@ -36,6 +36,7 @@
   sandcastle
   server
   server_command_types
+  server_local_config_qe_stubs
   server_monitor
   server_notifier_types
   server_progress

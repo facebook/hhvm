@@ -33,6 +33,7 @@ let print_diagnostic_plain_highlighted e =
 let print_diagnostic
     ~(error_format : Diagnostics.format) (e : Diagnostics.finalized_diagnostic)
     : unit =
+  Server_local_config_qe.log_agent_error_format_exposure ();
   match error_format with
   | Diagnostics.Raw -> print_diagnostic_raw e
   | Diagnostics.Agent -> print_diagnostic_agent e
@@ -61,6 +62,9 @@ let go
   } =
     status
   in
+  if (not output_json) && (not output_jsonl) && not (List.is_empty error_list)
+  then
+    Server_local_config_qe.log_agent_error_format_exposure ();
   let stale_msg = is_stale_msg liveness in
   if output_jsonl then begin
     let error_format = Diagnostics.format_or_default error_format in

@@ -526,6 +526,8 @@ module Hhconf = struct
 
   let consume_streaming_errors = hhconf_key "consume_streaming_errors"
 
+  let use_agent_error_format = hhconf_key "use_agent_error_format"
+
   let cpu_priority = hhconf_key "cpu_priority"
 
   let enable_fuzzy_search = hhconf_key "enable_fuzzy_search"

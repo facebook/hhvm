@@ -28,8 +28,6 @@ interface IteratorAggregate<+Tv> extends Traversable<Tv> {
 namespace HH {
 
 interface Iterable<+Tv> extends Traversable<Tv>, \IteratorAggregate<Tv> {
-  // TODO(T121800572) We should add in the methods defined in the version of
-  // this class in `hphp/hack/hhi/interfaces.hhi`
 }
 
 }

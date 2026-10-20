@@ -1,4 +1,5 @@
 <?hh
+//
 
 class InlineGenericDefaultSupplied {
   private function inline_me<T>(vec<T> $values = vec<T>[]): vec<T> {

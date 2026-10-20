@@ -1,4 +1,5 @@
 <?hh
+//
 
 class InlineContextDefaultSupplied {
   private function inline_me(int $line = __LINE__): int {

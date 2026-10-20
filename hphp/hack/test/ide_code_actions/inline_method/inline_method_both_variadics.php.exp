@@ -1,6 +1,67 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 10, "character": 4 },
+            "end": { "line": 10, "character": 4 }
+          },
+          "newText": "$__inline_method_named_arg_1 = 'hello';\n    $__inline_method_named_arg_3 = 'world';\n    $__inline_method_arg_0 = 1;\n    $__inline_method_arg_2 = 2;\n    $numbers = vec[$__inline_method_arg_0, $__inline_method_arg_2];\n    $__inline_method_arg_2 = null;\n    $__inline_method_arg_0 = null;\n    $res = count($numbers);\n    $__inline_method_named_arg_3 = null;\n    $__inline_method_named_arg_1 = null;\n    $numbers = null;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 10, "character": 11 },
+            "end": { "line": 10, "character": 90 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineBothVariadics {
+
+
+  public function caller(): int {
+    $__inline_method_named_arg_1 = 'hello';
+    $__inline_method_named_arg_3 = 'world';
+    $__inline_method_arg_0 = 1;
+    $__inline_method_arg_2 = 2;
+    $numbers = vec[$__inline_method_arg_0, $__inline_method_arg_2];
+    $__inline_method_arg_2 = null;
+    $__inline_method_arg_0 = null;
+    $res = count($numbers);
+    $__inline_method_named_arg_3 = null;
+    $__inline_method_named_arg_1 = null;
+    $numbers = null;
+    return $res;
+  }
+}
+//
+

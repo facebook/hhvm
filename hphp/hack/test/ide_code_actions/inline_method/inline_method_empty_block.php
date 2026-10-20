@@ -1,4 +1,5 @@
 <?hh
+//
 
 class Klass {
   // ensure we gracefully handle an empty block, which can have weird positions (Pos.none)

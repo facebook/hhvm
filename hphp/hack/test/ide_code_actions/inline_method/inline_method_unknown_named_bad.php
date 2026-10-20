@@ -1,4 +1,5 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
 class InlineUnknownNamed {

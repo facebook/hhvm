@@ -1,4 +1,5 @@
 <?hh
+//
 
 class A {
   private function inline_me(): void {

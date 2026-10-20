@@ -1,4 +1,5 @@
 <?hh
+//
 
 class InlineVariadicLifetimeBox {
   public function __construct(public string $name) {}

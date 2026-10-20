@@ -1,6 +1,56 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 4, "character": 0 },
+            "end": { "line": 6, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 9, "character": 4 },
+            "end": { "line": 9, "character": 4 }
+          },
+          "newText": "$values = vec[1];\n    $res = $values;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 9, "character": 11 },
+            "end": { "line": 9, "character": 68 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+
+class InlineGenericDefaultSupplied {
+
+
+  public function caller(): vec<int> {
+    $values = vec[1];
+    $res = $values;
+    return $res;
+  }
+}
+

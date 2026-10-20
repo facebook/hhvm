@@ -5,19 +5,25 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+type param_info = {
+  name: string;
+  named: bool;
+  default: Pos.t option;
+      (** Only context-independent defaults can be copied. *)
+  variadic: bool;
+}
+
 type method_info = {
   method_pos: Pos.t;
   block: Tast.block;
-  param_names: string list;
+  params: param_info list;
   var_names: string list;
   has_void_return: bool;
   is_private: bool;
   return_cnt: int;
   last_stmt_is_return: bool;
-  all_params_are_normal: bool;
-      (** As of this writing, we have
-    * no special logic to handle varargs and inout.
-    * We don't offer refactorings in such cases *)
+  all_params_are_supported: bool;
+      (** Inout, splat, and attributed parameters cannot be inlined. *)
 }
 
 type call_info = {
@@ -25,7 +31,10 @@ type call_info = {
   caller_name: string;
   call_stmt_pos: Pos.t;  (** Helpful for formatting *)
   call_pos: Pos.t;
-  call_arg_positions: Pos.t list;
+  call_args: (string option * Pos.t) list;
+      (** Argument names and expression positions in source order. *)
+  arg_evaluation_order: int list;
+      (** HackC preserves side effects in source order but can defer pure argument reads. *)
 }
 
 type candidate = {

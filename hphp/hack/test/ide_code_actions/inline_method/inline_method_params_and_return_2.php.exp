@@ -16,24 +16,17 @@ JSON for selected code action:
       "FILE.php": [
         {
           "range": {
-            "start": { "line": 3, "character": 0 },
-            "end": { "line": 9, "character": 3 }
+            "start": { "line": 4, "character": 0 },
+            "end": { "line": 10, "character": 3 }
           },
           "newText": ""
         },
         {
           "range": {
-            "start": { "line": 12, "character": 12 },
-            "end": { "line": 12, "character": 12 }
+            "start": { "line": 13, "character": 12 },
+            "end": { "line": 13, "character": 59 }
           },
-          "newText": "$a = \"a\";\n            $b = \"b\";\n            $x = 3;\n            $z = $a.$b;\n            echo $z;\n            "
-        },
-        {
-          "range": {
-            "start": { "line": 12, "character": 8 },
-            "end": { "line": 12, "character": 59 }
-          },
-          "newText": ""
+          "newText": "$a = \"a\";\n            $b = \"b\";\n            $x = 3;\n            $z = $a.$b;\n            echo $z;"
         }
       ]
     }
@@ -43,6 +36,7 @@ JSON for selected code action:
 Applied edit for code action:
 ------------------------------------------
 <?hh
+//
 
 class A {
 
@@ -53,7 +47,6 @@ class A {
             $x = 3;
             $z = $a.$b;
             echo $z;
-            
     echo "done";
   }
 }

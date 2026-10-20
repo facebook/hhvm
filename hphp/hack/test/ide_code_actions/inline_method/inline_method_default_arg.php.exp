@@ -1,6 +1,56 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 4, "character": 0 },
+            "end": { "line": 6, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 8, "character": 4 },
+            "end": { "line": 8, "character": 4 }
+          },
+          "newText": "$x = 1;\n    $y = 2;\n    $res = $x + $y;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 8, "character": 11 },
+            "end": { "line": 8, "character": 58 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+
+class A {
+
+  public function foo(): int {
+    $x = 1;
+    $y = 2;
+    $res = $x + $y;
+    return $res;
+  }
+}
+

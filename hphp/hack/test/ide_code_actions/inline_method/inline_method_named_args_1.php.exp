@@ -15,22 +15,22 @@ JSON for selected code action:
       "FILE.php": [
         {
           "range": {
-            "start": { "line": 4, "character": 0 },
-            "end": { "line": 10, "character": 3 }
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 11, "character": 3 }
           },
           "newText": ""
         },
         {
           "range": {
-            "start": { "line": 12, "character": 4 },
-            "end": { "line": 12, "character": 4 }
+            "start": { "line": 13, "character": 4 },
+            "end": { "line": 13, "character": 4 }
           },
-          "newText": "$param_a = 2;\n    $param_b = \"hello\";\n    $z = $param_a;\n    if ($param_b > 1) {\n      $z = $param_a.$param_b;\n    }\n    $res = $z;\n    "
+          "newText": "$param_a = \"hello\";\n    $param_b = 2;\n    $z = $param_a;\n    if ($param_b > 1) {\n      $z = $param_a.$param_b;\n    }\n    $res = $z;\n    "
         },
         {
           "range": {
-            "start": { "line": 12, "character": 11 },
-            "end": { "line": 12, "character": 83 }
+            "start": { "line": 13, "character": 11 },
+            "end": { "line": 13, "character": 83 }
           },
           "newText": "$res"
         }
@@ -42,13 +42,14 @@ JSON for selected code action:
 Applied edit for code action:
 ------------------------------------------
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
 class InlineNamedArgs {
 
   public function caller(): string {
-    $param_a = 2;
-    $param_b = "hello";
+    $param_a = "hello";
+    $param_b = 2;
     $z = $param_a;
     if ($param_b > 1) {
       $z = $param_a.$param_b;

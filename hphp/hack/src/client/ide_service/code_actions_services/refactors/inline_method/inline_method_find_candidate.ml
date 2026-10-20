@@ -8,6 +8,96 @@
 open Hh_prelude
 module T = Inline_method_types
 
+let rec context_independent_default (_, _, expr) =
+  let open Aast_defs in
+  match expr with
+  | Null
+  | True
+  | False
+  | Int _
+  | Float _
+  | String _ ->
+    true
+  | Unop ((Ast_defs.Uplus | Ast_defs.Uminus), expr) ->
+    context_independent_default expr
+  | ValCollection (_, None, exprs)
+  | Tuple exprs ->
+    List.for_all exprs ~f:context_independent_default
+  | KeyValCollection (_, None, entries) ->
+    List.for_all entries ~f:(fun (key, value) ->
+        context_independent_default key && context_independent_default value)
+  | Shape fields ->
+    List.for_all fields ~f:(function
+        | SF_field (SFlit_str _, value) -> context_independent_default value
+        | SF_field ((SFclassname _ | SFclass_const _), _)
+        | SF_splat _ ->
+          false)
+  | _ -> false
+
+let argument_evaluation_order args =
+  let open Aast_defs in
+  let indexed =
+    List.mapi args ~f:(fun index arg ->
+        let (name, (_, _, expr)) =
+          match arg with
+          | Anamed ((_, name), expr) -> (Some name, expr)
+          | Anormal expr
+          | Ainout (_, expr) ->
+            (None, expr)
+        in
+        let effectful =
+          match expr with
+          | Int _
+          | Float _
+          | String _
+          | EnumClassLabel _
+          | Null
+          | False
+          | True
+          | Lvar _
+          | Id _
+          | PrefixedString _ ->
+            false
+          | _ -> true
+        in
+        (index, name, effectful))
+  in
+  let named =
+    List.filter_map indexed ~f:(fun (index, name, _) ->
+        Option.map name ~f:(fun name -> (name, index)))
+    |> List.sort ~compare:(fun (left, _) (right, _) ->
+           String.compare left right)
+    |> List.map ~f:snd
+  in
+  let positional =
+    List.filter_map indexed ~f:(fun (index, name, _) ->
+        Option.some_if (Option.is_none name) index)
+  in
+  let effectful =
+    List.filter_map indexed ~f:(fun (index, _, effectful) ->
+        Option.some_if effectful index)
+  in
+  let effectful_set = Int.Set.of_list effectful in
+  let rec take_until index = function
+    | [] -> failwith "inline_method: missing effectful argument"
+    | current :: rest when Int.equal current index -> ([current], rest)
+    | current :: rest ->
+      let (before, rest) = take_until index rest in
+      (current :: before, rest)
+  in
+  let rec order evaluated effectful = function
+    | [] -> []
+    | index :: rest when Set.mem evaluated index ->
+      order evaluated effectful rest
+    | index :: rest when not (Set.mem effectful_set index) ->
+      index :: order evaluated effectful rest
+    | index :: rest ->
+      let (before, effectful) = take_until index effectful in
+      let evaluated = List.fold before ~init:evaluated ~f:Set.add in
+      before @ order evaluated effectful rest
+  in
+  order Int.Set.empty effectful (named @ positional)
+
 let method_info_create (m : Tast.method_) : T.method_info =
   let open Aast_defs in
   let is_private =
@@ -27,10 +117,9 @@ let method_info_create (m : Tast.method_) : T.method_info =
            | _ -> false)
     |> Option.value ~default:false
   in
-  let is_normal_param p =
-    (not (Aast_utils.is_param_variadic p))
-    && Option.is_none (Aast_utils.get_param_default p)
-    && List.is_empty p.param_user_attributes
+  let is_supported_param p =
+    List.is_empty p.param_user_attributes
+    && Option.is_none p.param_splat
     &&
     match p.param_callconv with
     | Ast_defs.Pinout _ -> false
@@ -43,19 +132,36 @@ let method_info_create (m : Tast.method_) : T.method_info =
     | Some _ ->
       false
   in
-  let all_params_are_normal = m.m_params |> List.for_all ~f:is_normal_param in
+  let all_params_are_supported =
+    m.m_params |> List.for_all ~f:is_supported_param
+  in
   T.
     {
       method_pos = m.m_span;
       block;
-      param_names = m.m_params |> List.map ~f:(fun p -> p.param_name);
+      params =
+        m.m_params
+        |> List.map ~f:(fun p ->
+               let default =
+                 Option.bind (Aast_utils.get_param_default p) ~f:(fun expr ->
+                     Option.some_if
+                       (context_independent_default expr)
+                       (Aast_utils.get_expr_pos expr))
+               in
+               T.
+                 {
+                   name = p.param_name;
+                   named = Option.is_some p.param_named;
+                   default;
+                   variadic = Aast_utils.is_param_variadic p;
+                 });
       (* only the following two are computed from the body *)
       var_names = [];
       return_cnt = 0;
       has_void_return;
       is_private;
       last_stmt_is_return;
-      all_params_are_normal;
+      all_params_are_supported;
     }
 
 let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
@@ -105,13 +211,23 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
         | Some current_method -> begin
           super#on_expr env expr;
           let (_, expr_pos, expr_) = expr in
-          let on_call ~call_id_pos ~callee_name ~param_kind_arg_pairs =
+          let on_call
+              ~call_id_pos ~callee_name ~param_kind_arg_pairs ~unpacked_arg =
             method_use_counts :=
               Map.update !method_use_counts callee_name ~f:(fun count_opt ->
                   1 + Option.value count_opt ~default:0);
-            if Pos.contains call_id_pos cursor then
-              let call_arg_positions =
-                List.map param_kind_arg_pairs ~f:Aast_utils.get_argument_pos
+            if Pos.contains call_id_pos cursor && Option.is_none unpacked_arg
+            then
+              let call_args =
+                List.map param_kind_arg_pairs ~f:(fun arg ->
+                    let name =
+                      match arg with
+                      | Anamed ((_, name), _) -> Some name
+                      | Anormal _
+                      | Ainout _ ->
+                        None
+                    in
+                    (name, Aast_utils.get_argument_pos arg))
               in
               call_info :=
                 Some
@@ -121,7 +237,9 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
                       call_stmt_pos = !stmt_pos;
                       caller_name = current_method;
                       call_pos = expr_pos;
-                      call_arg_positions;
+                      call_args;
+                      arg_evaluation_order =
+                        argument_evaluation_order param_kind_arg_pairs;
                     }
           in
           match expr_ with
@@ -133,9 +251,14 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
                     Class_const ((_, _, (CIself | CIstatic)), (_, callee_name))
                   );
                 args = param_kind_arg_pairs;
+                unpacked_arg;
                 _;
               } -> begin
-            on_call ~call_id_pos ~callee_name ~param_kind_arg_pairs
+            on_call
+              ~call_id_pos
+              ~callee_name
+              ~param_kind_arg_pairs
+              ~unpacked_arg
           end
           | Call
               {
@@ -146,9 +269,14 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
                       ((_, _, This), (_, _, Id (call_id_pos, callee_name)), _, _)
                   );
                 args = param_kind_arg_pairs;
+                unpacked_arg;
                 _;
               } ->
-            on_call ~call_id_pos ~callee_name ~param_kind_arg_pairs
+            on_call
+              ~call_id_pos
+              ~callee_name
+              ~param_kind_arg_pairs
+              ~unpacked_arg
           | _ -> ()
         end
         | None -> ()
@@ -185,7 +313,7 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
   let* (T.
           {
             is_private;
-            all_params_are_normal;
+            all_params_are_supported;
             last_stmt_is_return;
             return_cnt;
             _;
@@ -197,7 +325,7 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
     let has_ok_returns =
       return_cnt = 0 || (return_cnt = 1 && last_stmt_is_return)
     in
-    has_ok_returns && is_private && all_params_are_normal && has_ok_returns
+    has_ok_returns && is_private && all_params_are_supported
   in
   let* called_count = Map.find !method_use_counts call.T.callee_name in
   if called_count = 1 && is_inlineable then

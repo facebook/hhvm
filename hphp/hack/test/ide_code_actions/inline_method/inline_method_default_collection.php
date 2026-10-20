@@ -1,4 +1,5 @@
 <?hh
+//
 
 class InlineDefaultCollection {
   private function inline_me(vec<int> $values = vec[1, 2]): int {

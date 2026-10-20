@@ -1,4 +1,5 @@
 <?hh
+//
 
 class InlineNoUnpack {
   private function inline_me(int ...$numbers): int {

@@ -1,6 +1,60 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 10, "character": 4 },
+            "end": { "line": 10, "character": 4 }
+          },
+          "newText": "$first = 1;\n    $last = 4;\n    $choice = 2;\n    $res = $first + $choice + $last;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 10, "character": 11 },
+            "end": { "line": 10, "character": 61 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineDefaultNamedSkip {
+
+
+  public function caller(): int {
+    $first = 1;
+    $last = 4;
+    $choice = 2;
+    $res = $first + $choice + $last;
+    return $res;
+  }
+}
+//
+

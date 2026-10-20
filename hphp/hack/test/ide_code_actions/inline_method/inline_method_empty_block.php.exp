@@ -15,22 +15,15 @@ JSON for selected code action:
       "FILE.php": [
         {
           "range": {
-            "start": { "line": 4, "character": 0 },
-            "end": { "line": 4, "character": 33 }
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 5, "character": 33 }
           },
           "newText": ""
         },
         {
           "range": {
-            "start": { "line": 6, "character": 4 },
-            "end": { "line": 6, "character": 4 }
-          },
-          "newText": ""
-        },
-        {
-          "range": {
-            "start": { "line": 6, "character": 0 },
-            "end": { "line": 6, "character": 45 }
+            "start": { "line": 7, "character": 4 },
+            "end": { "line": 7, "character": 45 }
           },
           "newText": ""
         }
@@ -42,6 +35,7 @@ JSON for selected code action:
 Applied edit for code action:
 ------------------------------------------
 <?hh
+//
 
 class Klass {
   // ensure we gracefully handle an empty block, which can have weird positions (Pos.none)

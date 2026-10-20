@@ -1,7 +1,66 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 slog variable (CodeActionKind: "refactor")
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 12, "character": 4 },
+            "end": { "line": 12, "character": 4 }
+          },
+          "newText": "$__inline_method_named_arg_1_ = $__inline_method_named_arg_1;\n    $__inline_method_arg_0_ = $__inline_method_arg_0;\n    $rest = vec[$__inline_method_arg_0_];\n    $__inline_method_arg_0_ = null;\n    $res = $rest[0];\n    $__inline_method_named_arg_1_ = null;\n    $rest = null;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 12, "character": 11 },
+            "end": { "line": 15, "character": 5 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineVariadicTempHygiene {
+
+
+  public function caller(): int {
+    $__inline_method_arg_0 = 7;
+    $__inline_method_named_arg_1 = 3;
+    $__inline_method_named_arg_1_ = $__inline_method_named_arg_1;
+    $__inline_method_arg_0_ = $__inline_method_arg_0;
+    $rest = vec[$__inline_method_arg_0_];
+    $__inline_method_arg_0_ = null;
+    $res = $rest[0];
+    $__inline_method_named_arg_1_ = null;
+    $rest = null;
+    return $res;
+  }
+}
+//
+

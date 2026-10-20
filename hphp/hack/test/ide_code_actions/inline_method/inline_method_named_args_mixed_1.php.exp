@@ -15,22 +15,22 @@ JSON for selected code action:
       "FILE.php": [
         {
           "range": {
-            "start": { "line": 4, "character": 0 },
-            "end": { "line": 6, "character": 3 }
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
           },
           "newText": ""
         },
         {
           "range": {
-            "start": { "line": 8, "character": 4 },
-            "end": { "line": 8, "character": 4 }
+            "start": { "line": 9, "character": 4 },
+            "end": { "line": 9, "character": 4 }
           },
-          "newText": "$a = \"x\";\n    $b = \"y\";\n    $c = 3;\n    $res = $a.$b.$c;\n    "
+          "newText": "$b = 3;\n    $c = \"y\";\n    $a = \"x\";\n    $res = $a.$b.$c;\n    "
         },
         {
           "range": {
-            "start": { "line": 8, "character": 11 },
-            "end": { "line": 8, "character": 72 }
+            "start": { "line": 9, "character": 11 },
+            "end": { "line": 9, "character": 72 }
           },
           "newText": "$res"
         }
@@ -42,14 +42,15 @@ JSON for selected code action:
 Applied edit for code action:
 ------------------------------------------
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
 class InlineMixedArgs {
 
   public function caller(): string {
+    $b = 3;
+    $c = "y";
     $a = "x";
-    $b = "y";
-    $c = 3;
     $res = $a.$b.$c;
     return $res;
   }

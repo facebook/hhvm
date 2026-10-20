@@ -1,4 +1,5 @@
 <?hh
+//
 
 class InlineVariadicEmpty {
   private function inline_me(int ...$rest): int {

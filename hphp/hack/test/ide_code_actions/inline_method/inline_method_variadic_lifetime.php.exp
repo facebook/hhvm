@@ -1,6 +1,57 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 8, "character": 0 },
+            "end": { "line": 11, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 14, "character": 4 },
+            "end": { "line": 14, "character": 87 }
+          },
+          "newText": "$__inline_method_arg_0 = new InlineVariadicLifetimeBox('old');\n    $rest = vec[$__inline_method_arg_0];\n    $__inline_method_arg_0 = null;\n    $rest[0] = new InlineVariadicLifetimeBox('new');\n    echo 'body';\n    $rest = null;"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+
+class InlineVariadicLifetimeBox {
+  public function __construct(public string $name) {}
+}
+
+class InlineVariadicLifetime {
+
+
+  public function caller(): void {
+    $__inline_method_arg_0 = new InlineVariadicLifetimeBox('old');
+    $rest = vec[$__inline_method_arg_0];
+    $__inline_method_arg_0 = null;
+    $rest[0] = new InlineVariadicLifetimeBox('new');
+    echo 'body';
+    $rest = null;
+  }
+}
+//
+

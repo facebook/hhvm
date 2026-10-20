@@ -16,22 +16,22 @@ JSON for selected code action:
       "FILE.php": [
         {
           "range": {
-            "start": { "line": 4, "character": 0 },
-            "end": { "line": 6, "character": 3 }
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
           },
           "newText": ""
         },
         {
           "range": {
-            "start": { "line": 10, "character": 4 },
-            "end": { "line": 10, "character": 4 }
+            "start": { "line": 11, "character": 4 },
+            "end": { "line": 11, "character": 4 }
           },
-          "newText": "$x_ = \"!\";\n    $y = \"replacement\";\n    $res = $x_.$y;\n    "
+          "newText": "$x_ = \"replacement\";\n    $y = \"!\";\n    $res = $x_.$y;\n    "
         },
         {
           "range": {
-            "start": { "line": 10, "character": 11 },
-            "end": { "line": 10, "character": 79 }
+            "start": { "line": 11, "character": 11 },
+            "end": { "line": 11, "character": 79 }
           },
           "newText": "$res"
         }
@@ -43,6 +43,7 @@ JSON for selected code action:
 Applied edit for code action:
 ------------------------------------------
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
 class InlineNamedArgsHygiene {
@@ -50,8 +51,8 @@ class InlineNamedArgsHygiene {
 
   public function caller(): string {
     $x = "previous";
-    $x_ = "!";
-    $y = "replacement";
+    $x_ = "replacement";
+    $y = "!";
     $res = $x_.$y;
     return $res.$x;
   }

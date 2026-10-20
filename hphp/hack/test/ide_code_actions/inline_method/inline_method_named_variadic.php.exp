@@ -1,6 +1,67 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 14, "character": 4 },
+            "end": { "line": 14, "character": 4 }
+          },
+          "newText": "$__inline_method_named_arg_0 = $this->observe('first');\n    $label = $this->observe('label');\n    $__inline_method_named_arg_3 = $this->observe('last');\n    $first = 2;\n    $res = $label.$first;\n    $__inline_method_named_arg_3 = null;\n    $__inline_method_named_arg_0 = null;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 14, "character": 11 },
+            "end": { "line": 19, "character": 5 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineNamedVariadic {
+
+
+  private function observe(string $x): string {
+    return $x;
+  }
+
+  public function caller(): string {
+    $__inline_method_named_arg_0 = $this->observe('first');
+    $label = $this->observe('label');
+    $__inline_method_named_arg_3 = $this->observe('last');
+    $first = 2;
+    $res = $label.$first;
+    $__inline_method_named_arg_3 = null;
+    $__inline_method_named_arg_0 = null;
+    return $res;
+  }
+}
+//
+

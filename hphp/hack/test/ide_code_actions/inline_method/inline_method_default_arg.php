@@ -1,4 +1,5 @@
 <?hh
+//
 
 class A {
   private function inline_me(int $x, int $y = 2): int {

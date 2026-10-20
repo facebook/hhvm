@@ -1,6 +1,60 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
 Extract into method (CodeActionKind: "refactor")
 
-No code action titles match prefix: Inline method
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 5, "character": 0 },
+            "end": { "line": 7, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 10, "character": 4 },
+            "end": { "line": 10, "character": 4 }
+          },
+          "newText": "$choice = 5;\n    $first = 6;\n    $last = 3;\n    $res = $first + $choice + $last;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 10, "character": 11 },
+            "end": { "line": 10, "character": 68 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+//
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineDefaultNamedSupplied {
+
+
+  public function caller(): int {
+    $choice = 5;
+    $first = 6;
+    $last = 3;
+    $res = $first + $choice + $last;
+    return $res;
+  }
+}
+//
+

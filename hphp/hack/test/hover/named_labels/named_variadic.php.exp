@@ -1,1 +1,3 @@
-(function(named #A...): void)
+(function(
+  named HH\EnumClass\Label<NamedLabels, int>...
+): void)

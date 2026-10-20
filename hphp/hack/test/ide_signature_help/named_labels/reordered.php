@@ -15,3 +15,4 @@ function test(): void {
   labels(second = #B, first = #A);
   //                           ^ at-caret
 }
+//

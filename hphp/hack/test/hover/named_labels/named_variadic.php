@@ -12,3 +12,4 @@ function test(
   $f(first = #A, second = #B);
 // ^ hover-at-caret
 }
+//

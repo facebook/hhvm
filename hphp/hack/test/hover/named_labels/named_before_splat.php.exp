@@ -1,5 +1,5 @@
 (function(
-  named #A $n,
+  named #B $n,
   HH\EnumClass\Label<NamedLabels, int>,
   HH\EnumClass\Label<NamedLabels, int>
 ): void)

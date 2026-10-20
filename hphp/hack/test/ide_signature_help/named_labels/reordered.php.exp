@@ -3,7 +3,7 @@ textDocument/signatureHelp response:
 {
   "signatures": [
     {
-      "label": "function labels(named #B $first, named #A $second): void",
+      "label": "function labels(named #A $first, named #B $second): void",
       "parameters": [ { "label": "$first" }, { "label": "$second" } ]
     }
   ],

@@ -1,1 +1,1 @@
-(function(named #B $first, named #A $second): void)
+(function(named #A $first, named #B $second): void)

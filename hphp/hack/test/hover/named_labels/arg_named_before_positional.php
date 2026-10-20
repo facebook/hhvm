@@ -13,3 +13,4 @@ function test(
   $f(n = #B, #A);
 // ^ hover-at-caret
 }
+//

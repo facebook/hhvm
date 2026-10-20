@@ -14,3 +14,4 @@ function test(
   $f(#A, #A, n = #B);
 // ^ hover-at-caret
 }
+//

@@ -13,3 +13,4 @@ function test(
   $f(extra = #B, first = #A);
 // ^ hover-at-caret
 }
+//

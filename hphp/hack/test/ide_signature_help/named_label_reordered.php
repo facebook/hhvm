@@ -28,3 +28,4 @@ function testsapp(): void {
   $r = sapp(arg=tuple(2, 4), l=#Mul);
   //                             ^ at-caret
 }
+//

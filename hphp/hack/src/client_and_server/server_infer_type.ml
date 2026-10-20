@@ -232,46 +232,78 @@ let base_visitor
        *)
       let (call, ty) =
         match Typing_defs.deref ty with
-        | (r, Typing_defs.(Tfun ({ ft_params; _ } as ft))) ->
-          let rec replace_label_params args ft_params =
-            match (args, ft_params) with
-            | (arg :: args, fp :: ft_params) ->
-              let { Typing_defs.fp_type; _ } = fp in
-              let (arg_type, p, expr_) = Aast_utils.arg_to_expr arg in
-              let fp =
-                match (expr_, Typing_defs.get_node arg_type) with
-                | (Aast.EnumClassLabel (None, label), _)
-                | (_, Typing_defs.Tlabel label) ->
-                  let label_ty =
-                    Typing_defs.(mk (Reason.witness p, Tlabel label))
-                  in
-                  (* If function supports dynamic then allow a like-type *)
-                  let fp_type =
-                    if sd then
-                      Typing_make_type.locl_like r fp_type
-                    else
-                      fp_type
-                  in
-                  if Tast_env.is_sub_type env label_ty fp_type then
-                    Typing_defs.{ fp with fp_type = label_ty }
-                  else
-                    fp
-                | _ -> fp
+        | (r, Typing_defs.(Tfun ft)) ->
+          let refine_fp_with_arg fp arg =
+            let { Typing_defs.fp_type; _ } = fp in
+            let (arg_type, p, expr_) = Aast_utils.arg_to_expr arg in
+            match (expr_, Typing_defs.get_node arg_type) with
+            | (Aast.EnumClassLabel (None, label), _)
+            | (_, Typing_defs.Tlabel label) ->
+              let label_ty =
+                Typing_defs.(mk (Reason.witness p, Tlabel label))
               in
-              fp :: replace_label_params args ft_params
-            | _ -> ft_params
+              (* If function supports dynamic then allow a like-type *)
+              let fp_type =
+                if sd then
+                  Typing_make_type.locl_like r fp_type
+                else
+                  fp_type
+              in
+              if Tast_env.is_sub_type env label_ty fp_type then
+                Typing_defs.{ fp with fp_type = label_ty }
+              else
+                fp
+            | _ -> fp
+          in
+          let (positional_args, named_args) =
+            List.fold_right
+              args
+              ~init:([], S_map.empty)
+              ~f:(fun arg (positional, named) ->
+                match arg with
+                | Aast.Anamed ((_, name), _) ->
+                  (positional, S_map.add name arg named)
+                | _ -> (arg :: positional, named))
+          in
+          let params_without_named_variadic =
+            Typing_defs.ft_params_without_named_variadic ft
+          in
+          let named_variadic = Typing_defs.ft_named_variadic_param ft in
+          let rec replace_label_params_rec positional_args ft_params =
+            match ft_params with
+            | [] -> []
+            | fp :: ft_params ->
+              if Typing_defs.get_fp_splat fp then
+                fp :: replace_label_params_rec positional_args ft_params
+              else (
+                match Typing_defs.Named_params.name_of_named_param fp with
+                | Some name ->
+                  let fp =
+                    match S_map.find_opt name named_args with
+                    | Some arg -> refine_fp_with_arg fp arg
+                    | None -> fp
+                  in
+                  fp :: replace_label_params_rec positional_args ft_params
+                | None ->
+                  (match positional_args with
+                  | arg :: rest ->
+                    refine_fp_with_arg fp arg
+                    :: replace_label_params_rec rest ft_params
+                  | [] -> fp :: replace_label_params_rec [] ft_params)
+              )
+          in
+          let new_ft_params =
+            replace_label_params_rec
+              positional_args
+              params_without_named_variadic
+            @ Option.to_list named_variadic
           in
           let ty =
             Typing_defs.(
               mk
                 ( r,
                   (* This is an instantiated signature, it makes no sense to include generic parameters *)
-                  Tfun
-                    {
-                      ft with
-                      ft_params = replace_label_params args ft_params;
-                      ft_tparams = [];
-                    } ))
+                  Tfun { ft with ft_params = new_ft_params; ft_tparams = [] } ))
           in
           let expr_ =
             match expr_ with

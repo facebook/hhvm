@@ -13,3 +13,4 @@ function test(): void {
   $f(second = #B, first = $a);
 // ^ hover-at-caret
 }
+//

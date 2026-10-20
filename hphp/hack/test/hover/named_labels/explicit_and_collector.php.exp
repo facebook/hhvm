@@ -1,1 +1,4 @@
-(function(named #B $first, named #A...): void)
+(function(
+  named #A $first,
+  named HH\EnumClass\Label<NamedLabels, int>...
+): void)

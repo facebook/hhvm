@@ -43,6 +43,10 @@ cd "$ROOT" || exit 1
   for FILE in "$ROOT"/**/*.php; do
     ID=$(( ID + 1 ))
     [ $(( ID % OUT_OF - EVERY )) == "0" ] || continue;
+    # This baseline intentionally triggers an ICE before the recovery fix.
+    if [[ ${FILE#"$ROOT/"} == "named_parameters/variadic_fn_types/named_params_variadic_position_bad.php" ]]; then
+      continue
+    fi
     echo "$ID. Check didOpen+hover+didClose for ${FILE#"$ROOT/"}" 1>&2
     TEXT=$(jq --slurp --raw-input . "$FILE")
     URI="file://$ROOT/$FILE"

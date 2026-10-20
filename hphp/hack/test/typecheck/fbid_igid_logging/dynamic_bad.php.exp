@@ -1,0 +1,12 @@
+ERROR: File "dynamic_bad.php", line 8, characters 19-20:
+Invalid argument (Typing[4110])
+  File "dynamic_bad.php", line 4, characters 26-28:
+  Expected `int`
+  File "dynamic_bad.php", line 7, characters 23-29:
+  But got `dynamic`
+ERROR: File "dynamic_bad.php", line 9, characters 44-45:
+Invalid argument (Typing[4110])
+  File "dynamic_bad.php", line 5, characters 21-23:
+  Expected `int`
+  File "dynamic_bad.php", line 7, characters 23-29:
+  But got `dynamic`

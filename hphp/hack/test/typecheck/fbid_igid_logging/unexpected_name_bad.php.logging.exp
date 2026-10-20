@@ -1,0 +1,9 @@
+[FBID_IGID_type_logger] {"message":"IGID type erasure detected, is this an IGID or an FBID? How will you know?","kind":"IGID","arg_type":{"src_pos":{"filename":"/tmp/hhi_dir/fbid_igid_builtin.hhi","line":11,"char_start":23,"char_end":66},"kind":"newtype","name":"\\BaseIGID","args":[{"src_pos":{"filename":"/tmp/hhi_dir/fbid_igid_builtin.hhi","line":11,"char_start":32,"char_end":52},"kind":"class","name":"\\IMETAEntInstagramUser","args":[]},{"src_pos":{"filename":"/tmp/hhi_dir/fbid_igid_builtin.hhi","line":11,"char_start":55,"char_end":65},"kind":"class","name":"\\InIGIDRange","args":[]}],"as":{"src_pos":{"filename":"/tmp/hhi_dir/fbid_igid_builtin.hhi","line":2,"char_start":29,"char_end":31},"kind":"primitive","name":"int"}},"full_param_text":"int $instagram_id","param_type":{"src_pos":{"filename":"unexpected_name_bad.php","line":4,"char_start":21,"char_end":23},"kind":"primitive","name":"int"},"pos":{"filename":"unexpected_name_bad.php","line":6,"char_start":3,"char_end":6}}
+ERROR: File "unexpected_name_bad.php", line 6, characters 3-27:
+Missing required named argument: instagram_id (Typing[4499])
+  File "unexpected_name_bad.php", line 4, characters 10-13:
+  Definition is here
+ERROR: File "unexpected_name_bad.php", line 6, characters 3-27:
+Unexpected named argument: other (Typing[4500])
+  File "unexpected_name_bad.php", line 4, characters 10-13:
+  Definition is here

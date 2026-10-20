@@ -1,0 +1,8 @@
+ERROR: File "unexpected_name_bad.php", line 6, characters 3-27:
+Missing required named argument: instagram_id (Typing[4499])
+  File "unexpected_name_bad.php", line 4, characters 10-13:
+  Definition is here
+ERROR: File "unexpected_name_bad.php", line 6, characters 3-27:
+Unexpected named argument: other (Typing[4500])
+  File "unexpected_name_bad.php", line 4, characters 10-13:
+  Definition is here

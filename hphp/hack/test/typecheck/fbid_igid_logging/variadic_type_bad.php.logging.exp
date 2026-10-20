@@ -1,0 +1,30 @@
+ERROR: File "variadic_type_bad.php", line 7, characters 18-29:
+Invalid argument (Typing[4110])
+  File "variadic_type_bad.php", line 4, characters 30-32:
+  Expected `int`
+  File "variadic_type_bad.php", line 7, characters 18-29:
+  But got `string`
+ERROR: File "variadic_type_bad.php", line 7, characters 36-52:
+Invalid argument (Typing[4110])
+  File "variadic_type_bad.php", line 4, characters 30-32:
+  Expected `int`
+  File "variadic_type_bad.php", line 7, characters 36-52:
+  But got `string`
+ERROR: File "variadic_type_bad.php", line 8, characters 14-25:
+Invalid argument (Typing[4110])
+  File "variadic_type_bad.php", line 5, characters 28-32:
+  Expected `int` (variadic argument)
+  File "variadic_type_bad.php", line 8, characters 14-25:
+  But got `string`
+ERROR: File "variadic_type_bad.php", line 8, characters 28-44:
+Invalid argument (Typing[4110])
+  File "variadic_type_bad.php", line 5, characters 28-32:
+  Expected `int` (variadic argument)
+  File "variadic_type_bad.php", line 8, characters 28-44:
+  But got `string`
+ERROR: File "variadic_type_bad.php", line 9, characters 18-29:
+Invalid argument (Typing[4110])
+  File "variadic_type_bad.php", line 4, characters 30-32:
+  Expected `int`
+  File "variadic_type_bad.php", line 9, characters 18-29:
+  But got `string`

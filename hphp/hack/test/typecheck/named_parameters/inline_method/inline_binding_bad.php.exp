@@ -1,36 +1,131 @@
-ERROR: File "inline_binding_bad.php", line 14, characters 31-37:
-Invalid argument (Typing[4110])
-  File "inline_binding_bad.php", line 5, characters 55-57:
-  Expected `int`
-  File "inline_binding_bad.php", line 14, characters 31-37:
-  But got `string`
-ERROR: File "inline_binding_bad.php", line 14, characters 48-48:
-Invalid argument (Typing[4110])
-  File "inline_binding_bad.php", line 5, characters 32-37:
-  Expected `string`
-  File "inline_binding_bad.php", line 14, characters 48-48:
-  But got `int`
-ERROR: File "inline_binding_bad.php", line 15, characters 17-48:
-Missing required named argument: param_b (Typing[4499])
-  File "inline_binding_bad.php", line 5, characters 20-24:
-  Definition is here
-ERROR: File "inline_binding_bad.php", line 16, characters 17-54:
-Missing required named argument: param_a (Typing[4499])
-  File "inline_binding_bad.php", line 5, characters 20-24:
-  Definition is here
-ERROR: File "inline_binding_bad.php", line 16, characters 17-54:
-Unexpected named argument: unknown (Typing[4500])
-  File "inline_binding_bad.php", line 5, characters 20-24:
-  Definition is here
-ERROR: File "inline_binding_bad.php", line 17, characters 26-43:
-Invalid argument (Typing[4110])
-  File "inline_binding_bad.php", line 9, characters 36-40:
-  Expected `int` (variadic argument)
-  File "inline_binding_bad.php", line 17, characters 26-43:
-  But got `string`
-ERROR: File "inline_binding_bad.php", line 17, characters 52-53:
-Invalid argument (Typing[4110])
-  File "inline_binding_bad.php", line 9, characters 55-57:
-  Expected `string`
-  File "inline_binding_bad.php", line 17, characters 52-53:
-  But got `int`
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+inline_binding_bad.php:14:31
+ 3 | 
+ 4 | class InlineBindingBad {
+ 5 |   private function names(named string $param_a, named int $param_b): string {
+   |                                                       ^^^ [2]
+ 6 |     return $param_a.$param_b;
+ 7 |   }
+   :
+12 | 
+13 |   public function caller(): void {
+14 |     $a = $this->names(param_b='wrong', param_a=2);
+   |                               ^^^^^^^ [1]
+15 |     $b = $this->names(param_a='missing param_b');
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+inline_binding_bad.php:14:48
+ 3 | 
+ 4 | class InlineBindingBad {
+ 5 |   private function names(named string $param_a, named int $param_b): string {
+   |                                ^^^^^^ [2]
+ 6 |     return $param_a.$param_b;
+ 7 |   }
+   :
+12 | 
+13 |   public function caller(): void {
+14 |     $a = $this->names(param_b='wrong', param_a=2);
+   |                                                ^ [1]
+15 |     $b = $this->names(param_a='missing param_b');
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+
+error: Typing[4499] Missing required named argument: param_b [1]
+-> Definition is here [2]
+
+inline_binding_bad.php:15:17
+ 3 | 
+ 4 | class InlineBindingBad {
+ 5 |   private function names(named string $param_a, named int $param_b): string {
+   |                    ^^^^^ [2]
+ 6 |     return $param_a.$param_b;
+ 7 |   }
+   :
+13 |   public function caller(): void {
+14 |     $a = $this->names(param_b='wrong', param_a=2);
+15 |     $b = $this->names(param_a='missing param_b');
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+17 |     $d = $this->variadic('wrong positional', extra=42);
+
+error: Typing[4499] Missing required named argument: param_a [1]
+-> Definition is here [2]
+
+inline_binding_bad.php:16:17
+ 3 | 
+ 4 | class InlineBindingBad {
+ 5 |   private function names(named string $param_a, named int $param_b): string {
+   |                    ^^^^^ [2]
+ 6 |     return $param_a.$param_b;
+ 7 |   }
+   :
+14 |     $a = $this->names(param_b='wrong', param_a=2);
+15 |     $b = $this->names(param_a='missing param_b');
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |     $d = $this->variadic('wrong positional', extra=42);
+18 |   }
+
+error: Typing[4500] Unexpected named argument: unknown [1]
+-> Definition is here [2]
+
+inline_binding_bad.php:16:17
+ 3 | 
+ 4 | class InlineBindingBad {
+ 5 |   private function names(named string $param_a, named int $param_b): string {
+   |                    ^^^^^ [2]
+ 6 |     return $param_a.$param_b;
+ 7 |   }
+   :
+14 |     $a = $this->names(param_b='wrong', param_a=2);
+15 |     $b = $this->names(param_a='missing param_b');
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |     $d = $this->variadic('wrong positional', extra=42);
+18 |   }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` (variadic argument) [2]
+-> But got `string` [1]
+
+inline_binding_bad.php:17:26
+ 7 |   }
+ 8 | 
+ 9 |   private function variadic(int ...$rest, named string...): int {
+   |                                    ^^^^^ [2]
+10 |     return count($rest);
+11 |   }
+   :
+15 |     $b = $this->names(param_a='missing param_b');
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+17 |     $d = $this->variadic('wrong positional', extra=42);
+   |                          ^^^^^^^^^^^^^^^^^^ [1]
+18 |   }
+19 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+inline_binding_bad.php:17:52
+ 7 |   }
+ 8 | 
+ 9 |   private function variadic(int ...$rest, named string...): int {
+   |                                                       ^^^ [2]
+10 |     return count($rest);
+11 |   }
+   :
+15 |     $b = $this->names(param_a='missing param_b');
+16 |     $c = $this->names(param_b=2, unknown='wrong name');
+17 |     $d = $this->variadic('wrong positional', extra=42);
+   |                                                    ^^ [1]
+18 |   }
+19 | }
+
+7 errors found

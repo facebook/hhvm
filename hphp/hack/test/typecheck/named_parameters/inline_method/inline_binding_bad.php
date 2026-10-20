@@ -17,3 +17,4 @@ class InlineBindingBad {
     $d = $this->variadic('wrong positional', extra=42);
   }
 }
+//

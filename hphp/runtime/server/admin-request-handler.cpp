@@ -78,6 +78,7 @@
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
+#include <folly/String.h>
 #include <folly/json/json.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
@@ -298,6 +299,27 @@ Optional<DumpFile> dump_file(const char* name) {
   return DumpFile{path, folly::File(fd, /*owns=*/true)};
 }
 
+Optional<jit::SBWarmupFlags> parseSBWarmupFlags(const std::string& param) {
+  if (param.empty()) return jit::SBWarmupFlags::All;
+
+  auto flags = jit::SBWarmupFlags::None;
+  std::vector<std::string> phases;
+  folly::split(',', param, phases);
+  for (auto const& phase : phases) {
+    if (phase == "preload") {
+      flags = flags | jit::SBWarmupFlags::Preload;
+    } else if (phase == "apc") {
+      flags = flags | jit::SBWarmupFlags::Apc;
+    } else if (phase == "jit") {
+      flags = flags | jit::SBWarmupFlags::Jit;
+    } else {
+      return {};
+    }
+  }
+  if (!flags) return {};
+  return flags;
+}
+
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
@@ -417,6 +439,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/sb-prof-ser:     serialize sandbox profiles\n"
         "    root          path of sandbox root\n"
         "    path          absolute path of profile data\n"
+        "    warmup        optional, comma-separated payloads to serialize\n"
+        "                  (preload,apc,jit). Default: all payloads\n"
 #ifdef HPHP_TRACE
         "/trace-request:   write trace for next request(s) to "
         + RuntimeOption::getTraceOutputFile() + "\n"
@@ -698,28 +722,26 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       auto const sbRoot = transport->getParam("root");
       auto const profPath = transport->getParam("path");
       auto const warmupParam = transport->getParam("warmup");
-      auto flags = jit::SBWarmupFlags::All;
-      if (!warmupParam.empty()) {
-        flags = jit::SBWarmupFlags::None;
-        if (warmupParam.find("preload") != std::string::npos) {
-          flags = flags | jit::SBWarmupFlags::Preload;
-        }
-        if (warmupParam.find("apc") != std::string::npos) {
-          flags = flags | jit::SBWarmupFlags::Apc;
-        }
-        if (warmupParam.find("jit") != std::string::npos) {
-          flags = flags | jit::SBWarmupFlags::Jit;
-        }
+      auto const flags = parseSBWarmupFlags(warmupParam);
+      if (!flags) {
+        transport->sendString("invalid warmup payload list\n", 400);
+        break;
       }
       auto const status =
-        jit::deserializeSBProfData(sbRoot, profPath, flags);
+        jit::deserializeSBProfData(sbRoot, profPath, *flags);
       transport->sendString(status);
       break;
     }
     if (cmd == "sb-prof-ser") {
       auto const sbRoot = transport->getParam("root");
       auto const profPath = transport->getParam("path");
-      auto const status = jit::serializeSBProfData(sbRoot, profPath);
+      auto const warmupParam = transport->getParam("warmup");
+      auto const flags = parseSBWarmupFlags(warmupParam);
+      if (!flags) {
+        transport->sendString("invalid warmup payload list\n", 400);
+        break;
+      }
+      auto const status = jit::serializeSBProfData(sbRoot, profPath, *flags);
       transport->sendString(status);
       break;
     }

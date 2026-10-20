@@ -19,10 +19,16 @@ enum SBWarmupFlag: int {
  *
  * @param string $sb_root - PHP root directory of the sandbox.
  * @param string $prof_path - Full path of the profile file.
+ * @param int $warmup - Bitmask of SBWarmupFlag values controlling which
+ *   payloads to serialize. Defaults to SBWarmupFlag::ALL (all payloads).
  * @return string - Status of the serialization attempt.
  */
 <<__Native>>
-function sb_profile_ser(string $sb_root, string $prof_path): ?string;
+function sb_profile_ser(
+  string $sb_root,
+  string $prof_path,
+  /* SBWarmupFlag bitmask */ int $warmup = 7 /* SBWarmupFlag::ALL */,
+): ?string;
 /**
  * Deserializes sandbox profile. A profile can be deserialized only once for the
  * lifetime of the HHVM process.

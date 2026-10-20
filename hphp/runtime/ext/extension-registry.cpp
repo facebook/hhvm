@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
+#include <cstring>
 #include <optional>
 #include <sstream>
 
@@ -245,9 +246,10 @@ void requestShutdown() {
 
 bool modulesInitialised() { return s_initialized; }
 
-void serialize(jit::ProfDataSerializer& ser) {
+void serialize(jit::ProfDataSerializer& ser, const char* onlyExtension) {
   std::vector<std::pair<Extension*, BlobEncoder>> extData;
   for (auto& ext : s_ordered) {
+    if (onlyExtension && strcmp(ext->getName(), onlyExtension)) continue;
     BlobEncoder sd;
     ext->serialize(sd);
     if (!sd.size()) continue;

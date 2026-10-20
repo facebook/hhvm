@@ -2294,10 +2294,16 @@ std::string serializeOptProfData(const std::string& filename) {
 }
 
 std::string serializeSBProfData(const std::string& root,
-                                const std::string& filename) {
+                                const std::string& filename,
+                                SBWarmupFlags flags) {
   if (!Cfg::Eval::EnableSBProfSerialize ||
       !Cfg::Eval::EnableAsyncJIT) {
     return "Serialization failed: options not enabled\n";
+  }
+  auto const rawFlags = static_cast<uint32_t>(flags);
+  auto const allFlags = static_cast<uint32_t>(SBWarmupFlags::All);
+  if (!flags || (rawFlags & ~allFlags)) {
+    return "Serialization failed: invalid warmup flags\n";
   }
 
   auto const profFileName = !filename.empty() ?
@@ -2317,15 +2323,21 @@ std::string serializeSBProfData(const std::string& root,
     write_raw(ser, kSBVersion);
 
     // TODO: repo-schema
-    auto const sbProfData = getSBSerProfDataCopy();
-    // TODO: do not serialize unit paths for preloading here --
-    // offline processing should add these paths.
+    auto const preload = !!(flags & SBWarmupFlags::Preload);
+    auto const apc = !!(flags & SBWarmupFlags::Apc);
+    auto const jit = !!(flags & SBWarmupFlags::Jit);
+
     std::vector<const ProfDataSBSer*> filteredProfData;
     hphp_fast_set<std::string> relPaths;
-    for (auto const& pd : sbProfData) {
-      auto unitRelPath = relativePath(root, pd->m_unitPath);
-      if (!unitRelPath.empty()) {
-        filteredProfData.push_back(pd);
+    if (preload || jit) {
+      auto const sbProfData = getSBSerProfDataCopy();
+      for (auto const& pd : sbProfData) {
+        auto const unitRelPath = relativePath(root, pd->m_unitPath);
+        if (unitRelPath.empty()) continue;
+
+        if (jit) filteredProfData.push_back(pd);
+        if (!preload) continue;
+
         if (!FileUtil::isSystemName(pd->m_unitPath->slice())) {
           relPaths.insert(unitRelPath);
         }
@@ -2334,20 +2346,31 @@ std::string serializeSBProfData(const std::string& root,
         }
       }
     }
+
     write_container(ser, relPaths,
                     [&](const std::string& path) {
                       write_string(ser, path);
                     });
 
-    // Write extension data (e.g. APC keys via Server.APC.SerializePrefix).
-    ExtensionRegistry::serialize(ser);
+    if (apc) {
+      // Preserve the existing all-payload profile. The APC-only mode filters
+      // extension data to the APC extension.
+      ExtensionRegistry::serialize(
+        ser, flags == SBWarmupFlags::All ? nullptr : "apc"
+      );
+    } else {
+      write_raw<uint32_t>(ser, 0);
+    }
 
     write_container(ser, filteredProfData,
                     [&](const ProfDataSBSer* pd) {
                       write_sb_prof_data(ser, pd, root);
                     });
     ser.finalize();
-    return "Serialization of profile data successful\n";
+    return fmt::format(
+      "Serialization of profile data successful "
+      "(preload={}, jit={}, apc={})\n", preload, jit, apc
+    );
   } catch (std::runtime_error& err) {
     return fmt::format("Serialization failed: {}", err.what());
   }

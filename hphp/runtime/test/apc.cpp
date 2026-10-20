@@ -15,15 +15,23 @@
 */
 #include <gtest/gtest.h>
 
-#include <memory>
-#include <cstring>
-
 #include <folly/Format.h>
+#include <folly/ScopeGuard.h>
+#include <folly/testing/TestUtil.h>
 
-#include "hphp/runtime/base/tv-comparisons.h"
+#include <cstring>
+#include <memory>
+#include <set>
+
 #include "hphp/runtime/base/concurrent-shared-store.h"
+#include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
+
+Variant HHVM_FUNCTION(apc_delete, const Variant& key);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -151,6 +159,69 @@ TEST(APC, SampleEntries) {
                   entry.key == std::string("key2"));
     }
   }
+}
+
+TEST(APC, SandboxJumpstartAPCOnlyOmitsPreloadAndJITPayloads) {
+  folly::test::TemporaryDirectory temp{"sb-apc-only-profile"};
+  auto const path = (temp.path() / "sb-apc.prof").native();
+  auto const matchingKey = StaticString{"sb-apc-only-test:matching"};
+  auto const ignoredKey = StaticString{"sb-apc-other:ignored"};
+
+  auto const oldSerialize = Cfg::Eval::EnableSBProfSerialize;
+  auto const oldAsyncJIT = Cfg::Eval::EnableAsyncJIT;
+  auto const oldPrefixes = apcExtension::SerializePrefix;
+  Cfg::Eval::EnableSBProfSerialize = true;
+  Cfg::Eval::EnableAsyncJIT = true;
+  apcExtension::SerializePrefix = {"sb-apc-only-test:"};
+  SCOPE_EXIT {
+    Cfg::Eval::EnableSBProfSerialize = oldSerialize;
+    Cfg::Eval::EnableAsyncJIT = oldAsyncJIT;
+    apcExtension::SerializePrefix = oldPrefixes;
+  };
+
+  EXPECT_TRUE(HHVM_FN(apc_store)(
+    Variant{matchingKey}, Variant{s_value1}, 1500, 0
+  ).toBoolean());
+  EXPECT_TRUE(HHVM_FN(apc_store)(
+    Variant{ignoredKey}, Variant{s_value2}, 1500, 0
+  ).toBoolean());
+  SCOPE_EXIT {
+    HHVM_FN(apc_delete)(Variant{matchingKey});
+    HHVM_FN(apc_delete)(Variant{ignoredKey});
+  };
+
+  auto const status = jit::serializeSBProfData(
+    "", path, jit::SBWarmupFlags::Apc
+  );
+  ASSERT_NE(status.find("successful"), std::string::npos) << status;
+
+  jit::ProfDataDeserializer des{path};
+  EXPECT_EQ(jit::read_raw<uint32_t>(des), 0x4d564848);
+  auto const extraDataOffset = jit::read_raw<off_t>(des);
+  des.setExtraDataOffset(extraDataOffset);
+  EXPECT_EQ(jit::read_raw<uint32_t>(des), 2);
+
+  EXPECT_EQ(jit::read_raw<uint32_t>(des), 0);
+
+  ASSERT_EQ(jit::read_raw<uint32_t>(des), 1);
+  EXPECT_EQ(jit::read_cpp_string(des), "apc");
+  auto const apcDataSize = jit::read_raw<uint32_t>(des);
+  ASSERT_GT(apcDataSize, 0);
+  std::string apcData(apcDataSize, '\0');
+  jit::read_raw(des, apcData.data(), apcData.size());
+
+  BlobDecoder apcDecoder{apcData.data(), apcData.size()};
+  std::set<std::string> keys;
+  apcDecoder.readWithLazyCount([&] {
+    std::string_view key;
+    apcDecoder(key);
+    keys.emplace(key);
+  });
+  apcDecoder.assertDone();
+  EXPECT_EQ(keys, std::set<std::string>{matchingKey.data()});
+
+  EXPECT_EQ(jit::read_raw<uint32_t>(des), 0);
+  EXPECT_TRUE(des.done());
 }
 
 //////////////////////////////////////////////////////////////////////

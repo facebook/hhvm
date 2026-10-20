@@ -48,7 +48,8 @@ void moduleDeclInit();
 
 bool modulesInitialised();
 
-void serialize(jit::ProfDataSerializer& ser);
+void serialize(jit::ProfDataSerializer& ser,
+               const char* onlyExtension = nullptr);
 void deserialize(jit::ProfDataDeserializer& des);
 
 /////////////////////////////////////////////////////////////////////////////

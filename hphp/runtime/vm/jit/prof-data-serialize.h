@@ -41,15 +41,15 @@ struct TypeAlias;
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
-// Flags controlling which warmup phases are enabled during sandbox jumpstart
-// deserialization. Each flag gates a specific side effect; the profile data
-// is always fully read from the stream regardless of these flags (required
-// by the always_assert(des.done()) invariant).
+// Flags controlling payload selection during sandbox Jumpstart serialization
+// and side effects during deserialization. Deserialization always consumes each
+// section from the stream so files produced with any flag combination retain
+// the same framing.
 enum class SBWarmupFlags : uint32_t {
   None    = 0,
-  Preload = 1 << 0,  // Parallel unit preloading
-  Jit     = 1 << 1,  // Enqueue translations for async JIT compilation
-  Apc     = 1 << 2,  // Reserved for future APC warmup data in SB profiles
+  Preload = 1 << 0,  // Unit preload paths
+  Jit     = 1 << 1,  // Async JIT profile records
+  Apc     = 1 << 2,  // APC extension warmup data
   All     = Preload | Jit | Apc,
 };
 
@@ -292,8 +292,11 @@ FuncId read_func_id(ProfDataDeserializer& des);
 std::string serializeProfData(const std::string& filename);
 std::string serializeOptProfData(const std::string& filename);
 
-std::string serializeSBProfData(const std::string& root,
-                                const std::string& filename);
+std::string serializeSBProfData(
+  const std::string& root,
+  const std::string& filename,
+  SBWarmupFlags flags = SBWarmupFlags::All
+);
 
 // If loadRDS is true, only the RDS ordering information will be
 // loaded.

@@ -226,11 +226,12 @@ class LowPtrPrinter(PtrPrinter):
         try:
             storage = template_type(rawtype(rtype.template_argument(1)))
             if storage == "HPHP::detail::AtomicStorage":
-                return atomic_get(self.val["m_s"]).cast(inner.pointer())
+                atomic_get(self.val["m_s"]).cast(inner.pointer())
             else:
-                return self.val["m_s"].cast(inner.pointer())
-        finally:
-            return self.val["m_s"].cast(inner.pointer())
+                self.val["m_s"].cast(inner.pointer())
+        except BaseException:  # noqa: B036
+            pass
+        return self.val["m_s"].cast(inner.pointer())
 
 
 # ------------------------------------------------------------------------------

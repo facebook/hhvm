@@ -1,0 +1,6 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
+Extract into method (CodeActionKind: "refactor")
+(Invalid_argument "length mismatch in zip_exn: 1 <> 0")

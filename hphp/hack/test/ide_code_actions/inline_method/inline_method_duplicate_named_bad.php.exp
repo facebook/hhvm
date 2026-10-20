@@ -1,0 +1,61 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
+Extract into method (CodeActionKind: "refactor")
+Devmate Quick Fix - Missing required named argument: second (CodeActionKind: "quickfix")
+Devmate Agent Fix - Missing required named argument: second (CodeActionKind: "quickfix")
+Devmate Quick Fix - Duplicate named argument: first (CodeActionKind: "quickfix")
+Devmate Agent Fix - Duplicate named argument: first (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 4, "character": 0 },
+            "end": { "line": 6, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 9, "character": 4 },
+            "end": { "line": 9, "character": 4 }
+          },
+          "newText": "$first = 1;\n    $second = 2;\n    $res = $first + $second;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 9, "character": 11 },
+            "end": { "line": 9, "character": 73 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineDuplicateNamed {
+
+
+  public function caller(): int {
+    $first = 1;
+    $second = 2;
+    $res = $first + $second;
+    return $res;
+  }
+}
+

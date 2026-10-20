@@ -1,0 +1,58 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: "refactor")
+Inline method (CodeActionKind: "refactor") SELECTED
+Extract into method (CodeActionKind: "refactor")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "title": "Inline method",
+  "kind": "refactor",
+  "diagnostics": [],
+  "edit": {
+    "changes": {
+      "FILE.php": [
+        {
+          "range": {
+            "start": { "line": 4, "character": 0 },
+            "end": { "line": 6, "character": 3 }
+          },
+          "newText": ""
+        },
+        {
+          "range": {
+            "start": { "line": 8, "character": 4 },
+            "end": { "line": 8, "character": 4 }
+          },
+          "newText": "$a = \"x\";\n    $b = \"y\";\n    $c = 3;\n    $res = $a.$b.$c;\n    "
+        },
+        {
+          "range": {
+            "start": { "line": 8, "character": 11 },
+            "end": { "line": 8, "character": 72 }
+          },
+          "newText": "$res"
+        }
+      ]
+    }
+  }
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+class InlineMixedArgs {
+
+  public function caller(): string {
+    $a = "x";
+    $b = "y";
+    $c = 3;
+    $res = $a.$b.$c;
+    return $res;
+  }
+}
+//
+

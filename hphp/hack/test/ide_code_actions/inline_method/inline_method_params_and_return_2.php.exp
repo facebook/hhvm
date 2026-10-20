@@ -2,6 +2,7 @@ Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: "refactor")
 Inline method (CodeActionKind: "refactor") SELECTED
+slog variable (CodeActionKind: "refactor")
 Extract into method (CodeActionKind: "refactor")
 
 JSON for selected code action:
@@ -16,21 +17,21 @@ JSON for selected code action:
         {
           "range": {
             "start": { "line": 3, "character": 0 },
-            "end": { "line": 7, "character": 3 }
+            "end": { "line": 9, "character": 3 }
           },
           "newText": ""
         },
         {
           "range": {
-            "start": { "line": 10, "character": 4 },
-            "end": { "line": 10, "character": 4 }
+            "start": { "line": 12, "character": 12 },
+            "end": { "line": 12, "character": 12 }
           },
-          "newText": "$x = 3;\n    $z = $a.$b;\n    echo $z;\n    "
+          "newText": "$a = \"a\";\n            $b = \"b\";\n            $x = 3;\n            $z = $a.$b;\n            echo $z;\n            "
         },
         {
           "range": {
-            "start": { "line": 10, "character": 0 },
-            "end": { "line": 10, "character": 51 }
+            "start": { "line": 12, "character": 8 },
+            "end": { "line": 12, "character": 59 }
           },
           "newText": ""
         }
@@ -47,10 +48,12 @@ class A {
 
   public function foo(): void {
     // We remove the call when it's to a void function.
-    $x = 3;
-    $z = $a.$b;
-    echo $z;
-    
+    $n = 1; $a = "a";
+            $b = "b";
+            $x = 3;
+            $z = $a.$b;
+            echo $z;
+            
     echo "done";
   }
 }

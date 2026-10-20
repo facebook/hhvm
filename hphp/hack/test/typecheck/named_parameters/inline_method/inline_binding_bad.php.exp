@@ -1,0 +1,36 @@
+ERROR: File "inline_binding_bad.php", line 14, characters 31-37:
+Invalid argument (Typing[4110])
+  File "inline_binding_bad.php", line 5, characters 55-57:
+  Expected `int`
+  File "inline_binding_bad.php", line 14, characters 31-37:
+  But got `string`
+ERROR: File "inline_binding_bad.php", line 14, characters 48-48:
+Invalid argument (Typing[4110])
+  File "inline_binding_bad.php", line 5, characters 32-37:
+  Expected `string`
+  File "inline_binding_bad.php", line 14, characters 48-48:
+  But got `int`
+ERROR: File "inline_binding_bad.php", line 15, characters 17-48:
+Missing required named argument: param_b (Typing[4499])
+  File "inline_binding_bad.php", line 5, characters 20-24:
+  Definition is here
+ERROR: File "inline_binding_bad.php", line 16, characters 17-54:
+Missing required named argument: param_a (Typing[4499])
+  File "inline_binding_bad.php", line 5, characters 20-24:
+  Definition is here
+ERROR: File "inline_binding_bad.php", line 16, characters 17-54:
+Unexpected named argument: unknown (Typing[4500])
+  File "inline_binding_bad.php", line 5, characters 20-24:
+  Definition is here
+ERROR: File "inline_binding_bad.php", line 17, characters 26-43:
+Invalid argument (Typing[4110])
+  File "inline_binding_bad.php", line 9, characters 36-40:
+  Expected `int` (variadic argument)
+  File "inline_binding_bad.php", line 17, characters 26-43:
+  But got `string`
+ERROR: File "inline_binding_bad.php", line 17, characters 52-53:
+Invalid argument (Typing[4110])
+  File "inline_binding_bad.php", line 9, characters 55-57:
+  Expected `string`
+  File "inline_binding_bad.php", line 17, characters 52-53:
+  But got `int`

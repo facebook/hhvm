@@ -8,7 +8,8 @@
 
 open Hh_prelude
 
-exception Informant_edenfs_watcher_failed of string
+exception
+  Informant_edenfs_watcher_failed of Edenfs_watcher_types.edenfs_watcher_error
 
 type repo_transition =
   | State_enter of Hg.Rev.t
@@ -94,10 +95,7 @@ let get_change_eden
 
   (match Edenfs_watcher.get_changes_async instance with
   | Ok (changes, _clock, _telemetry) -> Queue.enqueue_all pending changes
-  | Error e ->
-    raise
-      (Informant_edenfs_watcher_failed
-         (Edenfs_watcher.show_edenfs_watcher_error e)));
+  | Error e -> raise (Informant_edenfs_watcher_failed e));
 
   match Queue.dequeue pending with
   | None -> None
@@ -128,10 +126,7 @@ let has_more_messages t =
       true
     else (
       match Edenfs_watcher.get_notification_fd instance with
-      | Error e ->
-        raise
-          (Informant_edenfs_watcher_failed
-             (Edenfs_watcher.show_edenfs_watcher_error e))
+      | Error e -> raise (Informant_edenfs_watcher_failed e)
       | Ok fd ->
         Buffered_line_reader.is_readable (Buffered_line_reader.create fd)
     )

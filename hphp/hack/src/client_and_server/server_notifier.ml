@@ -38,6 +38,9 @@ let handle_edenfs_watcher_result
   | Result.Error (Edenfs_watcher_types.LostChanges reason) ->
     Hh_logger.log "Edenfs_watcher has lost track of changes, reason: %s" reason;
     raise Exit_status.(Exit_with Edenfs_watcher_lost_changes)
+  | Result.Error (Edenfs_watcher_types.EdenShuttingDown msg) ->
+    Hh_logger.log "Edenfs_watcher detected Eden shutting down: %s" msg;
+    raise Exit_status.(Exit_with Edenfs_watcher_eden_shutting_down)
   | Result.Ok value -> value
 
 type t =
@@ -220,6 +223,15 @@ let init
       let msg =
         Printf.sprintf
           "Failed to initialize EdenFS watcher with lost changes message, reason %s"
+          reason
+      in
+      Hh_logger.log "%s" msg;
+      Hack_event_logger.edenfs_watcher_fallback ~msg;
+      None
+    | Result.Error (Edenfs_watcher_types.EdenShuttingDown reason) ->
+      let msg =
+        Printf.sprintf
+          "Failed to initialize EdenFS watcher because Eden is shutting down: %s"
           reason
       in
       Hh_logger.log "%s" msg;

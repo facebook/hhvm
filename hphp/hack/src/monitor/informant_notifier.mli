@@ -16,7 +16,8 @@ type repo_transition =
           or may not have changed. *)
 [@@deriving show]
 
-exception Informant_edenfs_watcher_failed of string
+exception
+  Informant_edenfs_watcher_failed of Edenfs_watcher_types.edenfs_watcher_error
 
 type t
 

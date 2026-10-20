@@ -785,6 +785,13 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
     | Some c when c = Exit_status.(exit_code Edenfs_watcher_failed) -> true
     | _ -> false
   in
+  let is_edenfs_watcher_eden_shutting_down =
+    match exit_status with
+    | Some c when c = Exit_status.(exit_code Edenfs_watcher_eden_shutting_down)
+      ->
+      true
+    | _ -> false
+  in
   let is_config_changed =
     match exit_status with
     | Some c when c = Exit_status.(exit_code Hhconfig_changed) -> true
@@ -861,7 +868,9 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
         let env = { env with watchman_retries = env.watchman_retries + 1 } in
         (Some reason, set_server (Ok env) Not_yet_started)
       else if
-        (is_edenfs_watcher_failed || is_edenfs_watcher_lost_changes)
+        (is_edenfs_watcher_failed
+        || is_edenfs_watcher_eden_shutting_down
+        || is_edenfs_watcher_lost_changes)
         && env.edenfs_watcher_retries < max_edenfs_watcher_retries
       then
         let reason =
@@ -1025,9 +1034,21 @@ let rec check_and_run_loop
       Exit.exit Exit_status.No_server_running_should_retry
     | Watchman.Watchman_restarted ->
       Exit.exit Exit_status.Watchman_fresh_instance
-    | Informant_notifier.Informant_edenfs_watcher_failed msg ->
-      Hh_logger.log "Informant Edenfs_watcher failed: %s. Exiting." msg;
-      Exit.exit Exit_status.Edenfs_watcher_failed
+    | Informant_notifier.Informant_edenfs_watcher_failed error ->
+      Hh_logger.log
+        "Informant Edenfs_watcher failed: %s. Exiting."
+        (Edenfs_watcher.show_edenfs_watcher_error error);
+      let exit_status =
+        match error with
+        | Edenfs_watcher_types.EdenShuttingDown _ ->
+          Exit_status.Edenfs_watcher_eden_shutting_down
+        | Edenfs_watcher_types.LostChanges _ ->
+          Exit_status.Edenfs_watcher_lost_changes
+        | Edenfs_watcher_types.EdenfsWatcherError _
+        | Edenfs_watcher_types.NonEdenWWW ->
+          Exit_status.Edenfs_watcher_failed
+      in
+      Exit.exit exit_status
     | Exit_status.Exit_with _ as exn ->
       let e = Exception.wrap exn in
       Exception.reraise e

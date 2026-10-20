@@ -53,6 +53,8 @@ type t =
   | Watchman_invalid_result
   | Edenfs_watcher_failed
       (** The EdenFS watcher failed in a way that we cannot recover from *)
+  | Edenfs_watcher_eden_shutting_down
+      (** Eden reported that it is intentionally shutting down. *)
   | Edenfs_watcher_lost_changes
       (** Similar to Watchman_fresh_instance (and some instances of Watchman_failed):
       Eden told us that it may have lost track of changes (e.g., due to an Eden restart),
@@ -208,6 +210,7 @@ let exit_code = function
   | Not_restarting_server_with_precomputed_saved_state -> 223
   | Config_error -> 224
   | Edenfs_watcher_failed -> 225
+  | Edenfs_watcher_eden_shutting_down -> 232 (* Zoncolan uses 231. *)
   | Edenfs_watcher_lost_changes ->
     (* Zoncolan uses 226 and 227, skipping *)
     228
@@ -243,6 +246,8 @@ let exit_code_to_string (code : int) : string =
       Failed_to_load_should_abort;
       Server_hung_up_should_abort None;
       Watchman_failed;
+      Edenfs_watcher_failed;
+      Edenfs_watcher_eden_shutting_down;
       Server_non_opt_build_mode;
       Distc_failed;
       Client_bad_args;

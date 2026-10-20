@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<84a8a63db59e2ffbe76d29846d36f16e>>
+// @generated SignedSource<<9c43123c480f77e369ceae96742fd176>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -272,6 +272,8 @@ pub enum Changes {
 #[repr(C, u8)]
 pub enum EdenfsWatcherError {
     EdenfsWatcherError(String),
+    /// Eden reported that it is intentionally shutting down.
+    EdenShuttingDown(String),
     /// There may have been some changes that Eden has lost track of.
     /// (e.g., due to Eden restarting).
     /// The string is just a description of what happened.

@@ -449,6 +449,8 @@ let edenfs_watcher_lost_changes ~msg:_ ~backtrace:_ = ()
 
 let edenfs_watcher_error ~msg:_ ~backtrace:_ = ()
 
+let edenfs_watcher_eden_shutting_down ~msg:_ ~backtrace:_ = ()
+
 let edenfs_watcher_fallback ~msg:_ = ()
 
 (* Typing service events. *)

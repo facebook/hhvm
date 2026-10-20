@@ -151,6 +151,26 @@ def assertMonitorLogContains(driver: CommonTestDriver, needle: str) -> None:
     driver.assertTrue(needle in monitor_log)
 
 
+def waitForServerExitStatus(
+    driver: CommonTestDriver,
+    monitor_log_path: Path,
+    status: str,
+    timeout_secs: float = 30,
+) -> None:
+    """Wait until the monitor logs a server exit with the specified status."""
+    deadline = time.monotonic() + timeout_secs
+    while True:
+        monitor_log = monitor_log_path.read_text()
+        for line in monitor_log.splitlines():
+            if "TYPECHECKER_EXIT " in line and status in line:
+                return
+        if time.monotonic() >= deadline:
+            driver.fail(
+                f"Timed out waiting for {status} in monitor log:\n{monitor_log}"
+            )
+        time.sleep(0.1)
+
+
 def assertEdenFsWatcherInitialized(driver: CommonTestDriver) -> None:
     """Checks that an Edenfs_watcher instance was initialized
 
@@ -168,6 +188,7 @@ def assertServerNotCrashed(driver: CommonTestDriver) -> None:
     monitor_log = driver.get_all_logs(driver.repo_dir).all_monitor_logs
 
     driver.assertFalse("Exit_status.Edenfs_watcher_failed" in monitor_log)
+    driver.assertFalse("Exit_status.Edenfs_watcher_eden_shutting_down" in monitor_log)
 
 
 def assertServerNotifierChangesYes(driver: CommonTestDriver) -> None:
@@ -414,6 +435,89 @@ class EdenfsWatcherNonMountPointTestDriver(EdenfsWatcherTestDriver):
     @classmethod
     def setUpClass(cls, template_repo: str) -> None:
         cls.setUpClassImpl(template_repo, "some/sub/folder")
+
+
+class EdenfsWatcherShutdownTestDriver(EdenfsWatcherTestDriver):
+    """Owns a foreground monitor for a test that intentionally stops Eden."""
+
+    _monitor: subprocess.Popen[str] | None = None
+    log_path: Path
+
+    def setUp(self) -> None:
+        super().setUp()
+        self._monitor = None
+        self.log_path = Path(self.hh_tmp_dir, "shutdown_hh_server.log")
+
+    def start_hh_server(
+        self,
+        changed_files: list[str] | None = None,
+        saved_state_path: str | None = None,
+        args: list[str] | None = None,
+        wait_for_server: bool = True,
+    ) -> None:
+        self.assertIsNone(self._monitor)
+        # Both monitor and server inherit this output file, which survives Eden stop.
+        with self.log_path.open("w") as log_file:
+            monitor = subprocess.Popen(
+                [hh_server, "--max-procs", "2", self.repo_dir] + (args or []),
+                env=self.test_env,
+                stdin=subprocess.DEVNULL,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+        self._monitor = monitor
+        if wait_for_server:
+            self.wait_until_server_ready()
+        self.assertIsNone(monitor.poll(), self.log_path.read_text())
+
+    def run_check(
+        self, stdin: str | None = None, options: list[str] | None = None
+    ) -> tuple[str, str, int]:
+        # Clients must use the monitor owned by this driver rather than start another.
+        return super().run_check(
+            stdin=stdin, options=(options or []) + ["--autostart-server", "false"]
+        )
+
+    def tearDown(self) -> None:
+        monitor = self._monitor
+        if monitor is None:
+            return
+        try:
+            monitor.terminate()
+            monitor.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            monitor.kill()
+            monitor.wait(timeout=30)
+            raise
+        finally:
+            print(self.log_path.read_text())
+
+
+class EdenfsWatcherShutdownTests(TestCase[EdenfsWatcherShutdownTestDriver]):
+    @classmethod
+    def get_test_driver(cls) -> EdenfsWatcherShutdownTestDriver:
+        return EdenfsWatcherShutdownTestDriver()
+
+    def test_eden_stop_uses_shutdown_exit_status(self) -> None:
+        """`eden stop` logs shutdown distinctly and uses its dedicated exit status."""
+        driver = self.test_driver
+        driver.start_hh_server()
+        driver.check_cmd(["No errors!"])
+        # Establish that the server used Eden rather than falling back to dfind.
+        self.assertIn(
+            "[edenfs_watcher][init] finished init", driver.log_path.read_text()
+        )
+
+        # EdenFS.shutdown runs `eden stop -t 0` against this test's isolated daemon.
+        driver.eden_instance.shutdown()
+        waitForServerExitStatus(
+            driver, driver.log_path, "Exit_status.Edenfs_watcher_eden_shutting_down"
+        )
+        self.assertIn(
+            "Edenfs_watcher detected Eden shutting down:",
+            driver.log_path.read_text(),
+        )
 
 
 class EdenfsWatcherTests(common_tests.CommonTests):

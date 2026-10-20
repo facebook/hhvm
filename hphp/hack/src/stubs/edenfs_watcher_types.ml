@@ -43,6 +43,8 @@ type changes =
 
 type edenfs_watcher_error =
   | EdenfsWatcherError of string
+  | EdenShuttingDown of string
+      (** Eden reported that it is intentionally shutting down. *)
   | LostChanges of string
       (** There may have been some changes that Eden has lost track of.
         (e.g., due to Eden restarting).

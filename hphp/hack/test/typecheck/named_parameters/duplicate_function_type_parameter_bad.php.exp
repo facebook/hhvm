@@ -1,2 +1,10 @@
-ERROR: File "duplicate_function_type_parameter_bad.php", line 5, characters 53-58:
-A function type cannot contain duplicate named parameter names. (Parsing[1002])
+error: Parsing[1002] A function type cannot contain duplicate named parameter names. [1]
+
+duplicate_function_type_parameter_bad.php:5:53
+3 | 
+4 | type DuplicateNamedParameter =
+5 |   (function(named int $value, optional named string $value): void);
+  |                                                     ^^^^^^ [1]
+6 | //
+
+1 error found

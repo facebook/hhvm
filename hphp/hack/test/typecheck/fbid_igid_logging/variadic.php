@@ -15,3 +15,4 @@ function test_named_sink(): void {
 function test_both(): void {
   both(456, make_igid(), make_fbid(), a = make_igid(), b = make_fbid());
 }
+//

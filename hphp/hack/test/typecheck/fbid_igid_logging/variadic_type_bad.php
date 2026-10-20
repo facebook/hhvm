@@ -8,3 +8,4 @@ function test_wrong_type(): void {
   positional('not an int', 'also not an int');
   named_sink(a = 'not an int', b = make_igid());
 }
+//

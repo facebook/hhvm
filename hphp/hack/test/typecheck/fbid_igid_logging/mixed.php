@@ -7,3 +7,4 @@ function test_mixed(): void {
   sink(make_fbid(), instagram_id = make_igid(), other = 456);
   sink(456, instagram_id = 123, other = 789);
 }
+//

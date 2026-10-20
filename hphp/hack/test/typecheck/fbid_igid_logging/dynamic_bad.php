@@ -8,3 +8,4 @@ function test_dynamic(dynamic $d): void {
   sink_positional($d, make_igid());
   sink(instagram_id = make_igid(), other = $d);
 }
+//

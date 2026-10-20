@@ -88,83 +88,111 @@ let log_json env kind message arg_ty param_ty param_name pos =
         ("pos", Pos.json pos);
       ]
   in
-  (* unsorted: telemetry/logging, not snapshot-tested *)
+  (* unsorted: emitted in argument order *)
   Hh_logger.log "[FBID_IGID_type_logger] %s" (Yojson.Safe.to_string json)
 
-let check_args (env : Tast_env.env) params args pos =
+let check_one_arg
+    (env : Tast_env.env) (fp : T.locl_ty T.fun_param) (arg_ty : T.locl_ty) pos =
   let Equal = Tast_env.eq_typing_env in
-  let rec loop p a =
-    match (p, a) with
-    | ([], _) -> ()
-    | (_, []) -> ()
-    | (_ :: param_tail, arg_ty :: arg_tail)
-      when Typing_utils.is_dynamic env arg_ty ->
-      (* Skip dynamic types as they're likely false positives *)
-      loop param_tail arg_tail
-    | ((param_name, param_ty) :: param_tail, arg_ty :: arg_tail)
-      when is_int param_ty && is_igid_of_meta_ent_instagram_user env arg_ty ->
-      let () =
-        log_json
-          env
-          "IGID"
-          "IGID type erasure detected, is this an IGID or an FBID? How will you know?"
-          arg_ty
-          param_ty
-          param_name
-          pos
-      in
-      loop param_tail arg_tail
-    | ((param_name, param_ty) :: param_tail, arg_ty :: arg_tail)
-      when is_int param_ty && is_fbid_of_meta_ent_instagram_user env arg_ty ->
-      let () =
-        log_json
-          env
-          "FBID"
-          "FBID type erasure detected, is this an IGID or an FBID? How will you know?"
-          arg_ty
-          param_ty
-          param_name
-          pos
-      in
-      loop param_tail arg_tail
-    | ((param_name, param_ty) :: param_tail, arg_ty :: arg_tail)
-      when is_int param_ty && is_fbid_or_igid_of_media_id env arg_ty ->
-      let () =
-        log_json
-          env
-          "MediaID"
-          "MediaID type weakening detected"
-          arg_ty
-          param_ty
-          param_name
-          pos
-      in
-      loop param_tail arg_tail
-    | (_ :: param_tail, _ :: arg_tail) -> loop param_tail arg_tail
+  if Typing_utils.is_dynamic env arg_ty then
+    (* Skip dynamic types as they're likely false positives *)
+    ()
+  else
+    let param_name = fp.T.fp_name in
+    let param_ty = fp.T.fp_type in
+    if is_int param_ty && is_igid_of_meta_ent_instagram_user env arg_ty then
+      log_json
+        env
+        "IGID"
+        "IGID type erasure detected, is this an IGID or an FBID? How will you know?"
+        arg_ty
+        param_ty
+        param_name
+        pos
+    else if is_int param_ty && is_fbid_of_meta_ent_instagram_user env arg_ty
+    then
+      log_json
+        env
+        "FBID"
+        "FBID type erasure detected, is this an IGID or an FBID? How will you know?"
+        arg_ty
+        param_ty
+        param_name
+        pos
+    else if is_int param_ty && is_fbid_or_igid_of_media_id env arg_ty then
+      log_json
+        env
+        "MediaID"
+        "MediaID type weakening detected"
+        arg_ty
+        param_ty
+        param_name
+        pos
+    else
+      ()
+
+let check_args (env : Tast_env.env) (fty : T.locl_ty T.fun_type) args pos =
+  let named_variadic = T.ft_named_variadic_param fty in
+  let (named_params, positional_params) =
+    T.ft_params_without_named_variadic fty
+    |> List.partition_tf ~f:T.get_fp_is_named
   in
-  loop params args
+  let named_params =
+    List.fold named_params ~init:S_map.empty ~f:(fun params param ->
+        match T.Named_params.name_of_named_param param with
+        | Some name -> S_map.add name param params
+        | None -> params)
+  in
+  let (positional_params, positional_variadic) =
+    if T.get_ft_variadic fty then
+      (List.drop_last_exn positional_params, List.last positional_params)
+    else
+      (positional_params, None)
+  in
+  let rec loop args positional_params named_params =
+    match args with
+    | [] -> ()
+    | arg :: rest ->
+      let arg_ty = Tast.get_type (Aast_utils.arg_to_expr arg) in
+      (match T.Named_params.name_of_arg arg with
+      | None ->
+        (* Positional argument: the next positional formal, else the
+           positional variadic. Anything unmatched is an arity error
+           reported elsewhere. *)
+        (match positional_params with
+        | fp :: rest_pos ->
+          check_one_arg env fp arg_ty pos;
+          loop rest rest_pos named_params
+        | [] ->
+          (match positional_variadic with
+          | Some fp ->
+            check_one_arg env fp arg_ty pos;
+            loop rest [] named_params
+          | None -> loop rest [] named_params))
+      | Some name ->
+        (* Named argument: the formal with that name, else the named
+           variadic, which absorbs any number of them. Anything
+           unmatched is an unexpected-name error reported elsewhere. *)
+        (match S_map.find_opt name named_params with
+        | Some fp ->
+          check_one_arg env fp arg_ty pos;
+          loop rest positional_params (S_map.remove name named_params)
+        | None ->
+          (match named_variadic with
+          | Some fp ->
+            check_one_arg env fp arg_ty pos;
+            loop rest positional_params named_params
+          | None -> loop rest positional_params named_params)))
+  in
+  loop args positional_params named_params
 
 let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 
     method! at_Call env { func = (fx_ty, pos, _); args; _ } =
-      let extract_param_types param : T.locl_ty = param.T.fp_type in
-      let extract_arg_types arg_exp : T.locl_ty =
-        Tast.get_type (Aast_utils.arg_to_expr arg_exp)
-      in
       let check (_, ft) =
-        let param_names_and_types =
-          List.map ft.T.ft_params ~f:(fun p ->
-              (p.T.fp_name, extract_param_types p))
-        in
-        let arg_types = List.map args ~f:(fun a -> extract_arg_types a) in
-
-        check_args
-          env
-          param_names_and_types
-          arg_types
-          (pos |> Pos.to_relative_string)
+        check_args env ft args (pos |> Pos.to_relative_string)
       in
       Option.iter (Tast_env.get_underlying_function_type env fx_ty) ~f:check
   end

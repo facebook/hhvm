@@ -10,3 +10,4 @@ function test_media_id(): void {
   sink(instagram_id = make_media_id(), other = 456);
   sink(other = 456, instagram_id = make_media_id());
 }
+//

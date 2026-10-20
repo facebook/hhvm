@@ -23,3 +23,4 @@ function test_positional(): void {
   sink_positional(make_igid(), 456);
 }
 //
+//

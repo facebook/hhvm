@@ -1,0 +1,18 @@
+ERROR: File "class_generic_bad.php", line 11, characters 33-39:
+Invalid argument (Typing[4110])
+  File "class_generic_bad.php", line 11, characters 23-25:
+  Expected `int`
+  File "class_generic_bad.php", line 11, characters 33-39:
+  But got `string`
+ERROR: File "class_generic_bad.php", line 12, characters 36-36:
+Invalid argument (Typing[4110])
+  File "class_generic_bad.php", line 12, characters 23-28:
+  Expected `string`
+  File "class_generic_bad.php", line 12, characters 36-36:
+  But got `int`
+ERROR: File "class_generic_bad.php", line 14, characters 17-23:
+Invalid argument (Typing[4110])
+  File "class_generic_bad.php", line 7, characters 24-29:
+  Expected `string`
+  File "class_generic_bad.php", line 5, characters 41-41:
+  But got `int`

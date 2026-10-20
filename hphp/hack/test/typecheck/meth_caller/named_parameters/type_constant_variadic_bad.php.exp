@@ -1,0 +1,12 @@
+ERROR: File "type_constant_variadic_bad.php", line 13, characters 15-21:
+Invalid argument (Typing[4110])
+  File "type_constant_variadic_bad.php", line 8, characters 56-58:
+  Expected `int`
+  File "type_constant_variadic_bad.php", line 13, characters 15-21:
+  But got `string`
+ERROR: File "type_constant_variadic_bad.php", line 14, characters 18-18:
+Invalid argument (Typing[4110])
+  File "type_constant_variadic_bad.php", line 9, characters 59-64:
+  Expected `string`
+  File "type_constant_variadic_bad.php", line 14, characters 18-18:
+  But got `int`

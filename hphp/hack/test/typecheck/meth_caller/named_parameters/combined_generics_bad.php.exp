@@ -1,0 +1,22 @@
+ERROR: File "combined_generics_bad.php", line 15, characters 14-20:
+Invalid argument (Typing[4110])
+  File "combined_generics_bad.php", line 11, characters 60-62:
+  Expected `int`
+  File "combined_generics_bad.php", line 15, characters 14-20:
+  But got `string`
+ERROR: File "combined_generics_bad.php", line 15, characters 38-41:
+Invalid argument (Typing[4110])
+  File "combined_generics_bad.php", line 13, characters 44-46:
+  Expected `int`
+  File "combined_generics_bad.php", line 15, characters 25-31:
+  But got `string`
+  File "combined_generics_bad.php", line 15, characters 25-31:
+  This type argument to `Box` must match exactly (it is invariant)
+ERROR: File "combined_generics_bad.php", line 15, characters 46-46:
+Invalid argument (Typing[4110])
+  File "combined_generics_bad.php", line 13, characters 26-31:
+  Expected `string`
+  File "combined_generics_bad.php", line 11, characters 37-37:
+    via this generic `T`
+  File "combined_generics_bad.php", line 15, characters 46-46:
+  But got `int`

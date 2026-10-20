@@ -30,16 +30,22 @@ let check_inout_parameters env pos (_, ftype) =
   | None -> ()
 
 let check_named_parameters env pos (_, ftype) =
-  match List.find ~f:get_fp_is_named ftype.ft_params with
-  | Some fparam ->
-    let Equal = Tast_env.eq_typing_env in
-    Typing_error_utils.add_typing_error
-      ~env
-      Typing_error.(
-        primary
-        @@ Primary.Invalid_meth_caller_named_parameter
-             { pos; decl_pos = fparam.fp_pos })
-  | None -> ()
+  if
+    not
+      (Typechecker_options.is_unstable_feature_enabled
+         (Tast_env.get_tcopt env)
+         Naming_special_names.UnstableFeatures.named_parameters_meth_caller)
+  then
+    match List.find ~f:get_fp_is_named ftype.ft_params with
+    | Some fparam ->
+      let Equal = Tast_env.eq_typing_env in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Invalid_meth_caller_named_parameter
+               { pos; decl_pos = fparam.fp_pos })
+    | None -> ()
 
 let check_readonly_return env pos (r, ftype) =
   let Equal = Tast_env.eq_typing_env in

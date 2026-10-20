@@ -1,0 +1,18 @@
+ERROR: File "type_constant_bad.php", line 14, characters 15-21:
+Invalid argument (Typing[4110])
+  File "type_constant_bad.php", line 8, characters 56-58:
+  Expected `int`
+  File "type_constant_bad.php", line 14, characters 15-21:
+  But got `string`
+ERROR: File "type_constant_bad.php", line 15, characters 18-18:
+Invalid argument (Typing[4110])
+  File "type_constant_bad.php", line 9, characters 59-64:
+  Expected `string`
+  File "type_constant_bad.php", line 15, characters 18-18:
+  But got `int`
+ERROR: File "type_constant_bad.php", line 17, characters 17-23:
+Invalid argument (Typing[4110])
+  File "type_constant_bad.php", line 10, characters 24-29:
+  Expected `string`
+  File "type_constant_bad.php", line 6, characters 56-59:
+  But got `int`

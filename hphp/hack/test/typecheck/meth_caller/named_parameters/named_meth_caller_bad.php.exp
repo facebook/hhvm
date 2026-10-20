@@ -1,0 +1,72 @@
+ERROR: File "named_meth_caller_bad.php", line 23, characters 3-35:
+Missing required named argument: x (Typing[4499])
+  File "named_meth_caller_bad.php", line 22, characters 15-63:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 24, characters 24-35:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 5, characters 51-53:
+  Expected `int`
+  File "named_meth_caller_bad.php", line 24, characters 24-35:
+  But got `string`
+ERROR: File "named_meth_caller_bad.php", line 24, characters 40-40:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 5, characters 65-70:
+  Expected `string`
+  File "named_meth_caller_bad.php", line 24, characters 40-40:
+  But got `int`
+ERROR: File "named_meth_caller_bad.php", line 25, characters 3-49:
+Duplicate named argument: x (Typing[4501])
+ERROR: File "named_meth_caller_bad.php", line 25, characters 3-49:
+Unexpected named argument: unknown (Typing[4500])
+  File "named_meth_caller_bad.php", line 22, characters 15-63:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 26, characters 3-47:
+Missing required named arguments: x, y (Typing[4499])
+  File "named_meth_caller_bad.php", line 22, characters 15-63:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 26, characters 3-47:
+Too many positional arguments (expected 2 but got 4) (Typing[4105])
+  File "named_meth_caller_bad.php", line 22, characters 15-63:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 27, characters 3-46:
+Too few positional arguments (required 2 but got 1) (Typing[4104])
+  File "named_meth_caller_bad.php", line 22, characters 15-63:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 28, characters 13-26:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 22, characters 30-43:
+  Expected `NamedCallerBad`
+  File "named_meth_caller_bad.php", line 28, characters 17-24:
+  But got `stdClass`
+ERROR: File "named_meth_caller_bad.php", line 29, characters 14-54:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 18, characters 21-23:
+  Expected `int`
+  File "named_meth_caller_bad.php", line 5, characters 77-82:
+  But got `string`
+ERROR: File "named_meth_caller_bad.php", line 32, characters 3-44:
+Unexpected named argument: unknown (Typing[4500])
+  File "named_meth_caller_bad.php", line 31, characters 15-63:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 32, characters 21-32:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 9, characters 34-36:
+  Expected `int`
+  File "named_meth_caller_bad.php", line 32, characters 21-32:
+  But got `string`
+ERROR: File "named_meth_caller_bad.php", line 35, characters 3-34:
+Missing required named argument: tag (Typing[4499])
+  File "named_meth_caller_bad.php", line 34, characters 26-85:
+  Definition is here
+ERROR: File "named_meth_caller_bad.php", line 36, characters 33-50:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 13, characters 46-50:
+  Expected `int` (variadic argument)
+  File "named_meth_caller_bad.php", line 36, characters 33-50:
+  But got `string`
+ERROR: File "named_meth_caller_bad.php", line 36, characters 57-57:
+Invalid argument (Typing[4110])
+  File "named_meth_caller_bad.php", line 13, characters 59-64:
+  Expected `string`
+  File "named_meth_caller_bad.php", line 36, characters 57-57:
+  But got `int`

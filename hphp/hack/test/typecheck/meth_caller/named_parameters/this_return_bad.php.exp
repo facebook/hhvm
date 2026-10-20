@@ -1,0 +1,12 @@
+ERROR: File "this_return_bad.php", line 12, characters 16-16:
+Invalid argument (Typing[4110])
+  File "this_return_bad.php", line 5, characters 29-34:
+  Expected `string`
+  File "this_return_bad.php", line 12, characters 16-16:
+  But got `int`
+ERROR: File "this_return_bad.php", line 14, characters 16-20:
+Invalid argument (Typing[4110])
+  File "this_return_bad.php", line 8, characters 23-27:
+  Expected `Child`
+  File "this_return_bad.php", line 13, characters 18-27:
+  But got `ThisReturn`

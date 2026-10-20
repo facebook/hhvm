@@ -1,0 +1,44 @@
+ERROR: File "named_variadic_meth_caller_bad.php", line 13, characters 27-38:
+Invalid argument (Typing[4110])
+  File "named_variadic_meth_caller_bad.php", line 5, characters 43-45:
+  Expected `int`
+  File "named_variadic_meth_caller_bad.php", line 13, characters 27-38:
+  But got `string`
+ERROR: File "named_variadic_meth_caller_bad.php", line 14, characters 3-26:
+Too many positional arguments (expected 1 but got 2) (Typing[4105])
+  File "named_variadic_meth_caller_bad.php", line 12, characters 21-83:
+  Definition is here
+ERROR: File "named_variadic_meth_caller_bad.php", line 17, characters 41-58:
+Invalid argument (Typing[4110])
+  File "named_variadic_meth_caller_bad.php", line 6, characters 57-61:
+  Expected `int` (variadic argument)
+  File "named_variadic_meth_caller_bad.php", line 17, characters 41-58:
+  But got `string`
+ERROR: File "named_variadic_meth_caller_bad.php", line 17, characters 63-63:
+Invalid argument (Typing[4110])
+  File "named_variadic_meth_caller_bad.php", line 6, characters 76-78:
+  Expected `string`
+  File "named_variadic_meth_caller_bad.php", line 17, characters 63-63:
+  But got `int`
+ERROR: File "named_variadic_meth_caller_bad.php", line 20, characters 3-59:
+Missing required named argument: x (Typing[4499])
+  File "named_variadic_meth_caller_bad.php", line 19, characters 31-103:
+  Definition is here
+ERROR: File "named_variadic_meth_caller_bad.php", line 21, characters 37-54:
+Invalid argument (Typing[4110])
+  File "named_variadic_meth_caller_bad.php", line 7, characters 50-52:
+  Expected `int`
+  File "named_variadic_meth_caller_bad.php", line 21, characters 37-54:
+  But got `string`
+ERROR: File "named_variadic_meth_caller_bad.php", line 22, characters 42-42:
+Invalid argument (Typing[4110])
+  File "named_variadic_meth_caller_bad.php", line 7, characters 64-69:
+  Expected `string`
+  File "named_variadic_meth_caller_bad.php", line 22, characters 42-42:
+  But got `int`
+ERROR: File "named_variadic_meth_caller_bad.php", line 22, characters 51-51:
+Invalid argument (Typing[4110])
+  File "named_variadic_meth_caller_bad.php", line 7, characters 99-101:
+  Expected `string`
+  File "named_variadic_meth_caller_bad.php", line 22, characters 51-51:
+  But got `int`

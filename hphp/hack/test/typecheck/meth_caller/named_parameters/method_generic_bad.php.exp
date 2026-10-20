@@ -1,0 +1,14 @@
+ERROR: File "method_generic_bad.php", line 12, characters 42-45:
+Invalid argument (Typing[4110])
+  File "method_generic_bad.php", line 10, characters 19-21:
+  Expected `int`
+  File "method_generic_bad.php", line 12, characters 29-35:
+  But got `string`
+  File "method_generic_bad.php", line 12, characters 29-35:
+  This type argument to `Box` must match exactly (it is invariant)
+ERROR: File "method_generic_bad.php", line 14, characters 17-23:
+Invalid argument (Typing[4110])
+  File "method_generic_bad.php", line 8, characters 24-29:
+  Expected `string`
+  File "method_generic_bad.php", line 6, characters 64-64:
+  But got `int`

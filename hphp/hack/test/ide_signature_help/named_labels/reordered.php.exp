@@ -1,0 +1,12 @@
+textDocument/signatureHelp response:
+
+{
+  "signatures": [
+    {
+      "label": "function labels(named #B $first, named #A $second): void",
+      "parameters": [ { "label": "$first" }, { "label": "$second" } ]
+    }
+  ],
+  "activeSignature": 0,
+  "activeParameter": 1
+}

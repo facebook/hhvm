@@ -1,0 +1,4 @@
+(function(
+  HH\EnumClass\Label<SplatLabels, int>,
+  HH\EnumClass\Label<SplatLabels, int>
+): void)

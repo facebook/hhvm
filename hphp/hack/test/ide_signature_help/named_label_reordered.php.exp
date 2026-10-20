@@ -1,0 +1,12 @@
+textDocument/signatureHelp response:
+
+{
+  "signatures": [
+    {
+      "label": "function sapp(\n  named HH\\EnumClass\\Label<\n    FuncsLab3,\n    FLab3<(int, int), int>\n  > $l,\n  named (int, int) $arg\n): ~int",
+      "parameters": [ { "label": "$l" }, { "label": "$arg" } ]
+    }
+  ],
+  "activeSignature": 0,
+  "activeParameter": 1
+}

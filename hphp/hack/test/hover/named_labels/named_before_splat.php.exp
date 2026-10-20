@@ -1,0 +1,5 @@
+(function(
+  named #A $n,
+  HH\EnumClass\Label<NamedLabels, int>,
+  HH\EnumClass\Label<NamedLabels, int>
+): void)

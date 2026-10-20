@@ -1221,7 +1221,9 @@ let initialize_logging
   let hhconfig_version =
     config |> Server_config.version |> Config_file.version_to_string_opt
   in
-  if is_worker then
+  if is_worker && Option.is_some (Server_args.ai_mode options) then
+    Event_logger.init_fake ()
+  else if is_worker then
     Hack_event_logger.init_worker
       ~root
       ~hhconfig_version

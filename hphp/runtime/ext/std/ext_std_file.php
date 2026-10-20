@@ -283,8 +283,6 @@ function fputs(resource $handle, string $data, int $length = 0): mixed;
  */
 <<__Native>>
 function fprintf(mixed $handle, string $format, mixed... $argv): mixed;
-// TODO(T121572869): This function probably ought to take a format string
-// rather than a normal string.
 
 /**
  * Write a string produced according to format to the stream resource

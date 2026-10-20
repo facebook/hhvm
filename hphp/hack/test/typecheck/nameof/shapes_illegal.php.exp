@@ -168,6 +168,16 @@ shapes_illegal.php:23:22
 24 |     Shapes::idx($t2, nameof static);
 25 |     Shapes::idx($t2, static::class);
 
+error: Typing[4482] Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` [1]
+
+shapes_illegal.php:23:22
+21 |   public function g(this::T1 $t1, this::T1 $t2): void {
+22 |     Shapes::idx($t1, nameof static);
+23 |     Shapes::idx($t1, static::class);
+   |                      ^^^^^^^^^^^^^ [1]
+24 |     Shapes::idx($t2, nameof static);
+25 |     Shapes::idx($t2, static::class);
+
 error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
 
 shapes_illegal.php:24:22
@@ -179,6 +189,16 @@ shapes_illegal.php:24:22
 26 |     Shapes::idx($t1, nameof parent);
 
 error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
+
+shapes_illegal.php:25:22
+23 |     Shapes::idx($t1, static::class);
+24 |     Shapes::idx($t2, nameof static);
+25 |     Shapes::idx($t2, static::class);
+   |                      ^^^^^^^^^^^^^ [1]
+26 |     Shapes::idx($t1, nameof parent);
+27 |     Shapes::idx($t1, parent::class);
+
+error: Typing[4482] Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` [1]
 
 shapes_illegal.php:25:22
 23 |     Shapes::idx($t1, static::class);
@@ -208,6 +228,16 @@ shapes_illegal.php:27:22
 28 |     Shapes::idx($t2, nameof parent);
 29 |     Shapes::idx($t2, parent::class);
 
+error: Typing[4482] Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` [1]
+
+shapes_illegal.php:27:22
+25 |     Shapes::idx($t2, static::class);
+26 |     Shapes::idx($t1, nameof parent);
+27 |     Shapes::idx($t1, parent::class);
+   |                      ^^^^^^^^^^^^^ [1]
+28 |     Shapes::idx($t2, nameof parent);
+29 |     Shapes::idx($t2, parent::class);
+
 error: Typing[4051] Shape access requires a string literal, integer literal, or a class constant [1]
 
 shapes_illegal.php:28:22
@@ -228,4 +258,14 @@ shapes_illegal.php:29:22
 30 |   }
 31 | }
 
-23 errors found
+error: Typing[4482] Using `parent::class` in this position will trigger an implicit runtime conversion to string, please use `nameof parent` [1]
+
+shapes_illegal.php:29:22
+27 |     Shapes::idx($t1, parent::class);
+28 |     Shapes::idx($t2, nameof parent);
+29 |     Shapes::idx($t2, parent::class);
+   |                      ^^^^^^^^^^^^^ [1]
+30 |   }
+31 | }
+
+27 errors found

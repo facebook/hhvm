@@ -54,6 +54,8 @@ let check_string_coercion_point env expr ty =
           | Tclass ((_, id), _, _)
             when String.equal id Naming_special_names.Classes.cString ->
             error_at_cls_const_expr env pos (string_of_class_id_ cid_)
+          | Tprim Tarraykey ->
+            error_at_cls_const_expr env pos (string_of_class_id_ cid_)
           | _ -> ()
         in
         let (_env, ty) = Typing_dynamic_utils.strip_dynamic env ty in

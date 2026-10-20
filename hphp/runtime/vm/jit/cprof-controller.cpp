@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <map>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -27,12 +28,16 @@
 
 #include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/cprof-capture.h"
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/service-data.h"
 
@@ -239,6 +244,20 @@ void snapshotTargetProfiles(std::vector<CapturedRecord>& records) {
   }
 }
 
+}
+
+std::vector<std::string> snapshotContProfLoadedUnits() {
+  if (!Cfg::Repo::Authoritative) return {};
+  auto const units = loadedUnitsRepoAuth();
+  std::vector<std::string> paths;
+  paths.reserve(units.size());
+  for (auto const unit : units) {
+    if (unit->isSystemLib()) continue;
+    if (auto path = contProfUnitPath(*unit)) {
+      paths.push_back(std::move(*path));
+    }
+  }
+  return paths;
 }
 
 void maybeCaptureContProfProfile(

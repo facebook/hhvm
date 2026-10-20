@@ -44,18 +44,25 @@ bool contProfActive();
 void startContProfCheckpointWriter();
 void stopContProfCheckpointWriter();
 
-/* Encode key-ordered records into a checkpoint blob. */
+struct ContProfCheckpoint {
+  std::vector<ContProfProfileRecord> records;
+  std::vector<std::string> unitPaths;
+};
+
+/* Encode key-ordered records and canonicalize the unit preload manifest. */
 std::optional<std::vector<uint8_t>> serializeContProfCheckpoint(
-  const std::vector<ContProfProfileRecord>& records);
+  const std::vector<ContProfProfileRecord>& records,
+  const std::vector<std::string>& unitPaths = {});
 
 /* Decode a checkpoint blob, validating untrusted input. */
-std::optional<std::vector<ContProfProfileRecord>>
+std::optional<ContProfCheckpoint>
 deserializeContProfCheckpoint(folly::ByteRange);
 
 /* Atomically replace path with a checkpoint of records. */
 bool writeContProfCheckpointFile(
   const std::string& path,
-  const std::vector<ContProfProfileRecord>& records);
+  const std::vector<ContProfProfileRecord>& records,
+  const std::vector<std::string>& unitPaths = {});
 
 /*
  * After a successful write, retain the newest checkpoints including currentPath.
@@ -64,7 +71,7 @@ bool writeContProfCheckpointFile(
 bool pruneContProfCheckpointFiles(const std::string& currentPath);
 
 /* Read the checkpoint at path; nullopt if missing or malformed. */
-std::optional<std::vector<ContProfProfileRecord>>
+std::optional<ContProfCheckpoint>
 readContProfCheckpointFile(const std::string& path);
 
 }

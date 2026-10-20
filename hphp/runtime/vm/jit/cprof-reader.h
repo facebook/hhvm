@@ -38,6 +38,8 @@ struct ContProfCheckpointReadResult {
   size_t filesRead{};
   size_t recordsDecoded{};
   std::vector<ContProfProfileRecord> records;
+  // Sorted union of manifests from admitted files, including superseded records.
+  std::vector<std::string> unitPaths;
 };
 
 /*

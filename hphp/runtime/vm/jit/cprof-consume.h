@@ -57,8 +57,21 @@ struct ContProfStartupCandidate {
 struct ContProfStartupCandidates {
   // Only includes records resolved before reaching the preparation cap.
   size_t recordsResolved{0};
+  size_t unitsRequested{0};
+  size_t unitsReady{0};
   std::vector<ContProfStartupCandidate> candidates;
 };
+
+/*
+ * Load and merge the saved preload paths and units referenced by records, then
+ * prepare compatible functions. Preloading is best-effort across repo changes.
+ * Must run in a VM session, before installing profiles or entering the optimizer.
+ */
+ContProfStartupCandidates prepareContProfStartupCandidates(
+  const std::vector<ContProfProfileRecord>& records,
+  size_t maxFunctions,
+  const std::vector<std::string>& unitPaths = {}
+);
 
 /*
  * Resolve records against already merged units and prepare compatible functions

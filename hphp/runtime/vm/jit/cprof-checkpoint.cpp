@@ -45,6 +45,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-serde.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -78,6 +79,8 @@ namespace {
 
 using EncodedRecordCount = uint32_t;
 using EncodedRecordSize = uint32_t;
+using EncodedUnitCount = uint32_t;
+using EncodedUnitPathSize = uint32_t;
 
 constexpr size_t kMaxCheckpointBytes = 256U << 20;
 constexpr EncodedRecordCount kMaxCheckpointRecords = 100'000;
@@ -278,13 +281,38 @@ struct CheckpointEncodeStats {
 std::optional<EncodedCheckpoint>
 encodeContProfCheckpoint(
   const std::vector<ContProfProfileRecord>& records,
+  const std::vector<std::string>& unitPaths,
   CheckpointEncodeStats* stats = nullptr
 ) {
   auto const selected = selectContProfCheckpointRecords(records);
   if (selected.empty()) return std::nullopt;
   if (stats) stats->recordLimitSkips = records.size() - selected.size();
 
-  Writer writer{kMaxCheckpointBytes};
+  auto paths = unitPaths;
+  std::sort(paths.begin(), paths.end());
+  paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+  if (paths.size() > kMaxCheckpointBytes / sizeof(EncodedUnitPathSize)) {
+    return std::nullopt;
+  }
+
+  Writer manifest{kMaxCheckpointBytes};
+  if (!manifest.writeValue(static_cast<EncodedUnitCount>(paths.size()))) {
+    return std::nullopt;
+  }
+  for (auto const& path : paths) {
+    if (!isValidContProfUnitPath(path) ||
+        sizeof(EncodedUnitPathSize) > manifest.remaining() ||
+        path.size() > manifest.remaining() - sizeof(EncodedUnitPathSize)) {
+      return std::nullopt;
+    }
+    if (!manifest.writeValue(static_cast<EncodedUnitPathSize>(path.size())) ||
+        !manifest.writeBytes(
+          reinterpret_cast<const uint8_t*>(path.data()), path.size())) {
+      return std::nullopt;
+    }
+  }
+  auto const manifestBytes = std::move(manifest).takeBytes();
+  Writer writer{kMaxCheckpointBytes - manifestBytes.size()};
 
   if (!writer.writeValue(EncodedRecordCount{0})) return std::nullopt;
 
@@ -314,19 +342,24 @@ encodeContProfCheckpoint(
     return std::nullopt;
   }
 
-  return EncodedCheckpoint{std::move(writer).takeBytes(), recordCount};
+  auto bytes = std::move(writer).takeBytes();
+  bytes.insert(bytes.end(), manifestBytes.begin(), manifestBytes.end());
+  return EncodedCheckpoint{std::move(bytes), recordCount};
 }
 
 }
 
 std::optional<std::vector<uint8_t>>
-serializeContProfCheckpoint(const std::vector<ContProfProfileRecord>& records) {
-  auto encoded = encodeContProfCheckpoint(records);
+serializeContProfCheckpoint(
+  const std::vector<ContProfProfileRecord>& records,
+  const std::vector<std::string>& unitPaths
+) {
+  auto encoded = encodeContProfCheckpoint(records, unitPaths);
   if (!encoded) return std::nullopt;
   return std::move(encoded->bytes);
 }
 
-std::optional<std::vector<ContProfProfileRecord>>
+std::optional<ContProfCheckpoint>
 deserializeContProfCheckpoint(folly::ByteRange encoded) {
   if (encoded.size() < sizeof(EncodedRecordCount) ||
       encoded.size() > kMaxCheckpointBytes) {
@@ -341,7 +374,8 @@ deserializeContProfCheckpoint(folly::ByteRange encoded) {
     return std::nullopt;
   }
 
-  std::vector<ContProfProfileRecord> records;
+  ContProfCheckpoint checkpoint;
+  auto& records = checkpoint.records;
   records.reserve(recordCount);
 
   for (EncodedRecordCount i = 0; i < recordCount; ++i) {
@@ -362,13 +396,35 @@ deserializeContProfCheckpoint(folly::ByteRange encoded) {
     records.push_back(std::move(*record));
   }
 
+  // The manifest frame is required, even when empty. Record-only checkpoints
+  // do not provide the preload context needed by startup replay.
+  EncodedUnitCount unitCount{};
+  if (!reader.readValue(unitCount) ||
+      unitCount > reader.remaining() / sizeof(EncodedUnitPathSize)) {
+    return std::nullopt;
+  }
+  auto& paths = checkpoint.unitPaths;
+  for (EncodedUnitCount i = 0; i < unitCount; ++i) {
+    EncodedUnitPathSize pathSize{};
+    if (!reader.readValue(pathSize)) return std::nullopt;
+    auto const bytes = reader.readRange(pathSize);
+    if (!bytes) return std::nullopt;
+    std::string path{reinterpret_cast<const char*>(bytes->data()), bytes->size()};
+    if (!isValidContProfUnitPath(path) ||
+        (!paths.empty() && !(paths.back() < path))) {
+      return std::nullopt;
+    }
+    paths.push_back(std::move(path));
+  }
+
   if (reader.remaining() != 0) return std::nullopt;
-  return records;
+  return checkpoint;
 }
 
 bool writeContProfCheckpointFile(
   const std::string& path,
-  const std::vector<ContProfProfileRecord>& records
+  const std::vector<ContProfProfileRecord>& records,
+  const std::vector<std::string>& unitPaths
 ) {
   auto onFailure = folly::makeGuard([] {
     s_checkpointWriteFailures->increment();
@@ -381,7 +437,7 @@ bool writeContProfCheckpointFile(
     s_checkpointInvalidRecordSkips->addValue(stats.invalidRecordSkips);
     s_checkpointByteLimitSkips->addValue(stats.byteLimitSkips);
   };
-  auto const encoded = encodeContProfCheckpoint(records, &stats);
+  auto const encoded = encodeContProfCheckpoint(records, unitPaths, &stats);
   if (!encoded) return false;
 
   auto const& bytes = encoded->bytes;
@@ -460,7 +516,7 @@ bool pruneContProfCheckpointFiles(const std::string& currentPath) {
   return success;
 }
 
-std::optional<std::vector<ContProfProfileRecord>>
+std::optional<ContProfCheckpoint>
 readContProfCheckpointFile(const std::string& path) {
   // File-read attempts only; standalone byte decoders remain uninstrumented.
   if (path.empty()) {
@@ -627,7 +683,7 @@ private:
       }
 
       // Records are immutable after their first snapshot, so an unchanged
-      // count means there is nothing new to write.
+      // count means there are no new profiles to checkpoint.
       if (recordCount == m_lastWrittenRecordCount) {
         s_writerUnchangedCheckpointSkips->increment();
         return;
@@ -637,8 +693,9 @@ private:
         Treadmill::Session session{Treadmill::SessionKind::ProfData};
         return snapshotContProfProfileRecords();
       }();
+      auto const unitPaths = snapshotContProfLoadedUnits();
 
-      if (!writeContProfCheckpointFile(m_path, records)) {
+      if (!writeContProfCheckpointFile(m_path, records, unitPaths)) {
         Logger::Warning(
           "Failed to write cont-prof checkpoint: %s",
           m_path.c_str()

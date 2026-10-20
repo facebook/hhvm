@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 #include "hphp/runtime/vm/jit/cprof-record.h"
@@ -50,6 +51,9 @@ void maybeCaptureContProfProfile(const ProfData&, const Func&, bool async = fals
 bool captureContProfProfile(const ProfData&, const Func&);
 
 size_t numContProfProfileRecords();
+
+/* Best-effort loaded repo-unit paths, sampled after the profile records. */
+std::vector<std::string> snapshotContProfLoadedUnits();
 
 /*
  * Finalize pending target profiles and return a key-ordered snapshot of the

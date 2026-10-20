@@ -198,12 +198,13 @@ struct LoadedUnits {
   std::map<std::string, Unit*> units;
 };
 
-LoadedUnits loadCandidateUnits(
-  const std::vector<ContProfProfileRecord>& records
+LoadedUnits loadStartupUnits(
+  const std::vector<ContProfProfileRecord>& records,
+  const std::vector<std::string>& unitPaths
 ) {
   LoadedUnits result{};
 
-  std::set<std::string> paths;
+  std::set<std::string> paths{unitPaths.begin(), unitPaths.end()};
   auto const addPaths = [&] (const ContProfFuncKey& key) {
     paths.emplace(key.resolutionUnitPath);
     if (key.bytecodeUnitPath) paths.emplace(*key.bytecodeUnitPath);
@@ -509,6 +510,27 @@ bool contProfStartupActive() {
 
 ContProfStartupCandidates prepareContProfStartupCandidates(
   const std::vector<ContProfProfileRecord>& records,
+  size_t maxFunctions,
+  const std::vector<std::string>& unitPaths
+) {
+  if (records.empty() || !maxFunctions) {
+    return prepareContProfStartupCandidates(records, {}, maxFunctions);
+  }
+  auto const loaded = [&] {
+    BootStats::Block timer{"cont_prof_resolve", Cfg::Server::Mode, true};
+    return loadStartupUnits(records, unitPaths);
+  }();
+  BootStats::Block timer{"cont_prof_prepare", Cfg::Server::Mode, true};
+  auto result = prepareContProfStartupCandidates(
+    records, loaded.units, maxFunctions
+  );
+  result.unitsRequested = loaded.pathsRequested;
+  result.unitsReady = loaded.units.size();
+  return result;
+}
+
+ContProfStartupCandidates prepareContProfStartupCandidates(
+  const std::vector<ContProfProfileRecord>& records,
   const std::map<std::string, Unit*>& units,
   size_t maxFunctions
 ) {
@@ -642,18 +664,9 @@ void consumeContProfAtStartup() noexcept {
       }();
       if (!input) return;
 
-      auto const loaded = [&] {
-        BootStats::Block timer{"cont_prof_resolve", Cfg::Server::Mode, true};
-        return loadCandidateUnits(input->records);
-      }();
-      auto const prepared = [&] {
-        BootStats::Block timer{"cont_prof_prepare", Cfg::Server::Mode, true};
-        return prepareContProfStartupCandidates(
-          input->records,
-          loaded.units,
-          Cfg::Jit::ContProfStartupMaxFunctions
-        );
-      }();
+      auto const prepared = prepareContProfStartupCandidates(
+        input->records, Cfg::Jit::ContProfStartupMaxFunctions, input->unitPaths
+      );
       s_startupPreparedFuncs->setValue(prepared.candidates.size());
 
       auto const profData = jit::profData();
@@ -701,8 +714,8 @@ void consumeContProfAtStartup() noexcept {
         input->recordsDecoded,
         input->filesRead,
         prepared.recordsResolved,
-        loaded.units.size(),
-        loaded.pathsRequested
+        prepared.unitsReady,
+        prepared.unitsRequested
       );
     }).run();
   } catch (...) {

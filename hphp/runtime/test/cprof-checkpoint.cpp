@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -67,6 +68,20 @@ void expectCheckpointCounters(const std::string& path, size_t records) {
   ).value_or(-1));
 }
 
+void expectCheckpointRecords(
+  const std::string& path,
+  const std::vector<ContProfProfileRecord>& records
+) {
+  auto const checkpoint = readContProfCheckpointFile(path);
+  ASSERT_TRUE(checkpoint);
+  EXPECT_EQ(records, checkpoint->records);
+}
+
+void appendUint32(std::vector<uint8_t>& bytes, uint32_t value) {
+  auto const data = reinterpret_cast<const uint8_t*>(&value);
+  bytes.insert(bytes.end(), data, data + sizeof(value));
+}
+
 std::vector<std::string> directoryEntries(const std::filesystem::path& path) {
   std::vector<std::string> names;
   for (auto const& entry : std::filesystem::directory_iterator{path}) {
@@ -76,20 +91,25 @@ std::vector<std::string> directoryEntries(const std::filesystem::path& path) {
   return names;
 }
 
-TEST(ContProfCheckpoint, RoundTripsRecords) {
+TEST(ContProfCheckpoint, RoundTripsRecordsAndCanonicalUnitPaths) {
   std::vector<ContProfProfileRecord> const expected{
     makeRecord("alpha", 1, 7),
     makeRecord("beta", 2, 11),
   };
 
-  auto const encoded = serializeContProfCheckpoint(expected);
+  std::vector<std::string> const unitPaths{"src/alpha.php", "src/beta.php"};
+  auto const encoded = serializeContProfCheckpoint(
+    expected, {"src/beta.php", "src/alpha.php", "src/beta.php"}
+  );
   ASSERT_TRUE(encoded);
 
   auto const decoded = deserializeContProfCheckpoint(
     folly::ByteRange{encoded->data(), encoded->size()}
   );
   ASSERT_TRUE(decoded);
-  EXPECT_EQ(expected, *decoded);
+  EXPECT_EQ(expected, decoded->records);
+  EXPECT_EQ(unitPaths, decoded->unitPaths);
+  EXPECT_EQ(encoded, serializeContProfCheckpoint(expected, unitPaths));
 }
 
 TEST(ContProfCheckpoint, SkipsInvalidRecords) {
@@ -111,7 +131,8 @@ TEST(ContProfCheckpoint, SkipsInvalidRecords) {
   ASSERT_TRUE(decoded);
 
   std::vector<ContProfProfileRecord> const expected{first, last};
-  EXPECT_EQ(expected, *decoded);
+  EXPECT_EQ(expected, decoded->records);
+  EXPECT_TRUE(decoded->unitPaths.empty());
 }
 
 TEST(ContProfCheckpoint, RejectsMalformedOrNoncanonicalInput) {
@@ -122,7 +143,9 @@ TEST(ContProfCheckpoint, RejectsMalformedOrNoncanonicalInput) {
   EXPECT_FALSE(serializeContProfCheckpoint({second, first}));
   EXPECT_FALSE(serializeContProfCheckpoint({first, first}));
 
-  auto const encoded = serializeContProfCheckpoint({first, second});
+  auto const encoded = serializeContProfCheckpoint(
+    {first, second}, {"src/dependency.php"}
+  );
   ASSERT_TRUE(encoded);
 
   for (size_t size = 0; size < encoded->size(); ++size) {
@@ -144,6 +167,45 @@ TEST(ContProfCheckpoint, RejectsMalformedOrNoncanonicalInput) {
   ));
 }
 
+TEST(ContProfCheckpoint, RequiresCanonicalUnitManifestFrame) {
+  std::vector<ContProfProfileRecord> const records{makeRecord("alpha", 1, 7)};
+  auto legacy = serializeContProfCheckpoint(records);
+  ASSERT_TRUE(legacy);
+  legacy->resize(legacy->size() - sizeof(uint32_t));
+  EXPECT_FALSE(deserializeContProfCheckpoint(
+    folly::ByteRange{legacy->data(), legacy->size()}
+  ));
+
+  auto const withManifest = [&](const std::vector<std::string>& paths) {
+    auto bytes = *legacy;
+    appendUint32(bytes, static_cast<uint32_t>(paths.size()));
+    for (auto const& path : paths) {
+      appendUint32(bytes, static_cast<uint32_t>(path.size()));
+      bytes.insert(bytes.end(), path.begin(), path.end());
+    }
+    return bytes;
+  };
+  for (auto const& paths : std::vector<std::vector<std::string>>{
+    {""}, {"/absolute.php"}, {"../outside.php"},
+    {std::string{"src/a\0.php", 10}},
+    {"src/b.php", "src/a.php"}, {"src/a.php", "src/a.php"},
+  }) {
+    auto const bytes = withManifest(paths);
+    EXPECT_FALSE(deserializeContProfCheckpoint(
+      folly::ByteRange{bytes.data(), bytes.size()}
+    ));
+  }
+  for (auto const& path : {"", "/absolute.php", "../outside.php"}) {
+    EXPECT_FALSE(serializeContProfCheckpoint(records, {path}));
+  }
+
+  auto oversizedCount = *legacy;
+  appendUint32(oversizedCount, uint32_t{0xffffffff});
+  EXPECT_FALSE(deserializeContProfCheckpoint(
+    folly::ByteRange{oversizedCount.data(), oversizedCount.size()}
+  ));
+}
+
 TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   folly::test::TemporaryDirectory temp{"cont-prof-checkpoint"};
   auto const path = temp.path().native() + "/checkpoint.cprof";
@@ -156,11 +218,11 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
     makeRecord("alpha", 1, 7),
   };
   ASSERT_TRUE(writeContProfCheckpointFile(path, first));
-  EXPECT_EQ(first, readContProfCheckpointFile(path));
+  expectCheckpointRecords(path, first);
   expectCheckpointCounters(path, first.size());
 
   EXPECT_FALSE(writeContProfCheckpointFile(path, {}));
-  EXPECT_EQ(first, readContProfCheckpointFile(path));
+  expectCheckpointRecords(path, first);
   expectCheckpointCounters(path, first.size());
   EXPECT_EQ(*failures + 1, ServiceData::exportCounterByKey(
     "jit.cprof.checkpoint.write_failures"
@@ -177,8 +239,12 @@ TEST(ContProfCheckpoint, AtomicallyReplacesFile) {
   EXPECT_EQ(*failures + 2, ServiceData::exportCounterByKey(
     "jit.cprof.checkpoint.write_failures"
   ).value_or(-1));
-  ASSERT_TRUE(writeContProfCheckpointFile(path, replacement));
-  EXPECT_EQ(replacement, readContProfCheckpointFile(path));
+  std::vector<std::string> const unitPaths{"src/dependency.php"};
+  ASSERT_TRUE(writeContProfCheckpointFile(path, replacement, unitPaths));
+  auto const decoded = readContProfCheckpointFile(path);
+  ASSERT_TRUE(decoded);
+  EXPECT_EQ(replacement, decoded->records);
+  EXPECT_EQ(unitPaths, decoded->unitPaths);
   expectCheckpointCounters(path, replacement.size());
   EXPECT_EQ(*failures + 2, ServiceData::exportCounterByKey(
     "jit.cprof.checkpoint.write_failures"
@@ -208,7 +274,7 @@ TEST(ContProfCheckpoint, SelectsHottestRecordsWithinLimit) {
   ASSERT_TRUE(decoded);
 
   records.erase(records.end() - 2);
-  EXPECT_EQ(records, *decoded);
+  EXPECT_EQ(records, decoded->records);
 }
 
 TEST(ContProfCheckpoint, PrunesOnlyOldCheckpointsAndPreservesCurrent) {
@@ -259,10 +325,8 @@ TEST(ContProfCheckpoint, PrunesOnlyOldCheckpointsAndPreservesCurrent) {
   }
   std::sort(expected.begin(), expected.end());
   EXPECT_EQ(expected, directoryEntries(directoryPath));
-  EXPECT_EQ(records, readContProfCheckpointFile(checkpoints.front().native()));
-  EXPECT_EQ(records, readContProfCheckpointFile(
-    (directory / "nested.cprof").native()
-  ));
+  expectCheckpointRecords(checkpoints.front().native(), records);
+  expectCheckpointRecords((directory / "nested.cprof").native(), records);
   EXPECT_TRUE(std::filesystem::is_symlink(symlink));
 
   EXPECT_TRUE(pruneContProfCheckpointFiles(checkpoints.front().native()));

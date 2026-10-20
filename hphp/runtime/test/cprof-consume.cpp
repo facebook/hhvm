@@ -16,35 +16,54 @@
 
 #include "hphp/runtime/vm/jit/cprof-consume.h"
 
+#include <algorithm>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <memory>
 #include <new>
 #include <optional>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
 #include <folly/ScopeGuard.h>
+#include <folly/testing/TestUtil.h>
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
+#include "hphp/runtime/vm/jit/cprof-reader.h"
 #include "hphp/runtime/vm/jit/cprof-record.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-file.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/configs/jit.h"
@@ -412,6 +431,288 @@ TEST_F(ContProfConsumeTest, RejectsUnrelatedProfDataWithoutInstalling) {
     EXPECT_FALSE(unrelated.profiling(func));
     EXPECT_TRUE(unrelated.funcProfTransIDs(func->getFuncId()).empty());
   }
+}
+
+enum class ConstantDependency {
+  Direct,
+  CallTarget,
+};
+
+void optimizeBeforePersistentConstantUnitLoads(ConstantDependency dependency) {
+  folly::test::TemporaryDirectory directory{"cont-prof-constant"};
+  auto const root = directory.path().native() + "/";
+  auto const callerPath = root + "caller.php";
+  auto const calleePath = root + "callee.php";
+  auto const constantPath = root + "constant.php";
+  auto const name = makeStaticString("CONT_PROF_CONSUME_CONSTANT_83D6E9A1");
+  auto const oldSourceRoot = std::exchange(Cfg::Server::SourceRoot, root);
+  auto const oldRepoAuthoritative =
+    std::exchange(Cfg::Repo::Authoritative, true);
+  auto const oldPGO = std::exchange(Cfg::Jit::PGO, true);
+  SCOPE_EXIT {
+    Cfg::Server::SourceRoot = oldSourceRoot;
+    Cfg::Repo::Authoritative = oldRepoAuthoritative;
+    Cfg::Jit::PGO = oldPGO;
+  };
+
+  constexpr auto directHhas = R"HHAS(
+.function N cont_prof_consume_constant_caller_83d6e9a1() {
+  CnsE "CONT_PROF_CONSUME_CONSTANT_83D6E9A1"
+  RetC None
+}
+)HHAS";
+  constexpr auto callHhas = R"HHAS(
+.function N cont_prof_consume_constant_caller_83d6e9a1() {
+  NullUninit
+  NullUninit
+  ResolveFunc "cont_prof_consume_constant_callee_83d6e9a1"
+  FCallFunc <> 0 1 "" "" $ - ""
+  RetC None
+}
+)HHAS";
+  auto const throughCallTarget = dependency == ConstantDependency::CallTarget;
+  auto const emitter = assemble_string(
+    throughCallTarget ? callHhas : directHhas,
+    callerPath.c_str(),
+    SHA1{"8888888888888888888888888888888888888888"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  ASSERT_NE(nullptr, emitter);
+  ASSERT_FALSE(emitter->m_fatalUnit);
+  emitter->m_sn = 0;
+  constexpr auto calleeHhas = R"HHAS(
+.function N cont_prof_consume_constant_callee_83d6e9a1() {
+  CnsE "CONT_PROF_CONSUME_CONSTANT_83D6E9A1"
+  RetC None
+}
+)HHAS";
+  auto const calleeEmitter = assemble_string(
+    calleeHhas,
+    calleePath.c_str(),
+    SHA1{"7777777777777777777777777777777777777777"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  ASSERT_NE(nullptr, calleeEmitter);
+  ASSERT_FALSE(calleeEmitter->m_fatalUnit);
+  calleeEmitter->m_sn = 2;
+  auto const constantEmitter = assemble_string(
+    "",
+    constantPath.c_str(),
+    SHA1{"9999999999999999999999999999999999999999"},
+    nullptr,
+    RepoOptions::defaults().packageInfo(),
+    UnitEmitterAttributes::defaults(),
+    false
+  );
+  ASSERT_NE(nullptr, constantEmitter);
+  ASSERT_FALSE(constantEmitter->m_fatalUnit);
+  constantEmitter->m_sn = 1;
+  Constant constant;
+  constant.name = name;
+  constant.val = make_tv<KindOfInt64>(42);
+  constant.attrs = AttrPersistent;
+  constantEmitter->addConstant(constant);
+
+  auto const repoPath = (directory.path() / "test.hhbc").native();
+  {
+    RepoFileBuilder builder{repoPath};
+    RepoAutoloadMapBuilder autoload;
+    for (auto const ue : {emitter.get(), constantEmitter.get()}) {
+      autoload.addUnit(*ue);
+      builder.add(*ue);
+    }
+    if (throughCallTarget) {
+      autoload.addUnit(*calleeEmitter);
+      builder.add(*calleeEmitter);
+    }
+    builder.finish(
+      RepoGlobalData{}, autoload, RepoOptions::defaults().packageInfo()
+    );
+  }
+  RepoFile::init(repoPath);
+  SCOPE_EXIT { RepoFile::destroy(); };
+  RepoFile::loadGlobalTables();
+  AutoloadHandler::s_instance->requestShutdown();
+  AutoloadHandler::s_instance->requestInit();
+  ASSERT_NE(nullptr, AutoloadHandler::s_instance->getAutoloadMap());
+  ASSERT_EQ(throughCallTarget ? 3 : 2, RepoFile::numUnits());
+  auto const constantSymbols =
+    RepoFile::findUnitSymbols(makeStaticString(constantPath));
+  ASSERT_NE(nullptr, constantSymbols);
+  ASSERT_EQ(1, constantSymbols->size());
+  EXPECT_EQ(name, constantSymbols->front().first);
+  EXPECT_EQ(RepoSymbolType::CONSTANT, constantSymbols->front().second);
+
+  auto const unit = lookupUnit(
+    makeStaticString(callerPath), "", nullptr, nullptr, false
+  );
+  ASSERT_NE(nullptr, unit);
+  unit->merge();
+  ASSERT_EQ(1, unit->funcs().size());
+  auto const func = unit->funcs().front();
+  ASSERT_FALSE(rds::isHandleBound(lookupCnsHandle(name)));
+
+  auto const key = makeContProfFuncKey(*func);
+  ASSERT_TRUE(key);
+  ContProfProfileRecord record;
+  record.header = {*key, 1};
+  record.translations = {{ContProfStartKind::FuncEntry, 0, 3, 7}};
+  Func* callee{nullptr};
+  if (throughCallTarget) {
+    auto const calleeUnit = lookupUnit(
+      makeStaticString(calleePath), "", nullptr, nullptr, false
+    );
+    ASSERT_NE(nullptr, calleeUnit);
+    calleeUnit->merge();
+    ASSERT_EQ(1, calleeUnit->funcs().size());
+    callee = calleeUnit->funcs().front();
+    auto const calleeKey = makeContProfFuncKey(*callee);
+    ASSERT_TRUE(calleeKey);
+
+    Offset callOffset = 0;
+    for (int i = 0; i < 3; ++i) callOffset += instrLen(func->at(callOffset));
+    ASSERT_EQ(Op::FCallFunc, peek_op(func->at(callOffset)));
+    CallTargetProfile target{};
+    target.report(callee);
+    auto const snapshot = snapshotTestTargetProfile(
+      target, callTargetProfileKey(), callOffset
+    );
+    ASSERT_TRUE(snapshot);
+    // End this profile block at the call, before the nonempty-stack return.
+    record.translations.front().regionLength = 5;
+    record.translations.front().targetProfiles = {*snapshot};
+  }
+  ASSERT_FALSE(rds::isHandleBound(lookupCnsHandle(name)));
+  auto const loadedBefore = snapshotContProfLoadedUnits();
+  EXPECT_NE(loadedBefore.end(), std::find(
+    loadedBefore.begin(), loadedBefore.end(), "caller.php"
+  ));
+  EXPECT_EQ(loadedBefore.end(), std::find(
+    loadedBefore.begin(), loadedBefore.end(), "constant.php"
+  ));
+
+  std::vector<std::string> savedUnits{"caller.php", "constant.php"};
+  if (throughCallTarget) savedUnits.push_back("callee.php");
+  std::sort(savedUnits.begin(), savedUnits.end());
+  auto const checkpointPath = root + "cont-prof-1-100.cprof";
+  ASSERT_TRUE(writeContProfCheckpointFile(checkpointPath, {record}, savedUnits));
+  auto const input = readContProfCheckpointDirectory(directory.path().native());
+  ASSERT_TRUE(input);
+  EXPECT_EQ(1, input->filesRead);
+  EXPECT_EQ(std::vector<ContProfProfileRecord>{record}, input->records);
+  EXPECT_EQ(savedUnits, input->unitPaths);
+  ASSERT_FALSE(rds::isHandleBound(lookupCnsHandle(name)));
+
+  auto const prepared = prepareContProfStartupCandidates(
+    input->records, 1, input->unitPaths
+  );
+  ASSERT_EQ(1, prepared.candidates.size());
+  ASSERT_NE(nullptr, Constant::lookupPersistent(name));
+  auto const loadedAfter = snapshotContProfLoadedUnits();
+  auto const provider = std::find(
+    loadedAfter.begin(), loadedAfter.end(), "constant.php"
+  );
+  EXPECT_NE(loadedAfter.end(), provider);
+  if (throughCallTarget) {
+    auto const& targets = prepared.candidates.front().translations.front()
+      .targetProfiles;
+    ASSERT_EQ(1, targets.size());
+    ASSERT_NE(nullptr, targets.front().callTarget);
+    auto const choices = targets.front().callTarget->choose();
+    ASSERT_EQ(1, choices.size());
+    EXPECT_EQ(callee, choices.front().func);
+  }
+
+  auto const previousProfData = jit::profData();
+  auto const createdProfData = globalProfData() == nullptr;
+  if (createdProfData) processInitProfData();
+  SCOPE_EXIT {
+    if (createdProfData) discardProfData();
+    *rl_profData = previousProfData;
+  };
+  requestInitProfData();
+  auto const profData = jit::profData();
+  ASSERT_NE(nullptr, profData);
+  auto const hadTargetProfiles = profData->targetProfile() != nullptr;
+  SCOPE_EXIT {
+    profData->cleanupFunc(func, {}, {});
+    if (callee) profData->cleanupFunc(callee, {}, {});
+    if (!hadTargetProfiles) profData->setTargetProfile(nullptr);
+  };
+
+  auto const installed = installContProfStartupCandidates(
+    *profData, prepared.candidates
+  );
+  ASSERT_EQ(1, installed.size());
+  if (callee) EXPECT_TRUE(profData->funcProfTransIDs(callee->getFuncId()).empty());
+  {
+    VMProtect protect;
+    LeaseHolder lease{func, TransKind::Optimize, true};
+    ASSERT_TRUE(lease);
+    profData->setOptimized(func->getFuncId());
+    mcgen::optimizeFunc(func);
+  }
+  auto const srcRec = tc::findSrcRec(
+    installed.front()->translations.front().start
+  );
+  ASSERT_NE(nullptr, srcRec);
+  ASSERT_NE(0, srcRec->numTrans());
+  auto const handle = lookupCnsHandle(name);
+  ASSERT_FALSE(rds::isHandleBound(handle) && rds::isNormalHandle(handle));
+
+  ASSERT_TRUE(RID().getJit());
+  ASSERT_TRUE(rds::local::tcCheck());
+  for (int i = 0; i < 2; ++i) {
+    auto const result = Variant::attach(g_context->invokeFuncFew(
+      func, nullptr, 0, nullptr, nullptr, RuntimeCoeffects::fixme(), false
+    ));
+    ASSERT_TRUE(result.isInteger());
+    EXPECT_EQ(42, result.toInt64());
+    auto const value = Constant::lookup(name);
+    ASSERT_EQ(KindOfInt64, value.m_type);
+    EXPECT_EQ(42, value.m_data.num);
+    EXPECT_NE(nullptr, Constant::lookupPersistent(name));
+  }
+}
+
+void runConstantDependencyTest(ConstantDependency dependency) {
+  auto const oldDeathTestStyle = GTEST_FLAG_GET(death_test_style);
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  SCOPE_EXIT { GTEST_FLAG_SET(death_test_style, oldDeathTestStyle); };
+  // The repo autoload map is process-global and can only be installed once.
+  ASSERT_EXIT({
+    std::thread{[&] {
+      HphpSessionAndThread session{Treadmill::SessionKind::UnitTests};
+      optimizeBeforePersistentConstantUnitLoads(dependency);
+    }}.join();
+    auto const result = testing::UnitTest::GetInstance()
+      ->current_test_info()->result();
+    for (int i = 0; i < result->total_part_count(); ++i) {
+      auto const& part = result->GetTestPartResult(i);
+      if (!part.failed()) continue;
+      std::fprintf(
+        stderr, "%s:%d\n%s\n",
+        part.file_name() ? part.file_name() : "unknown",
+        part.line_number(), part.message()
+      );
+    }
+    std::fflush(stderr);
+    std::_Exit(testing::Test::HasFailure() ? 1 : 0);
+  }, testing::ExitedWithCode(0), "");
+}
+
+TEST(ContProfConsume, OptimizationBeforePersistentConstantUnitLoads) {
+  runConstantDependencyTest(ConstantDependency::Direct);
+}
+
+TEST(ContProfConsume, PreparesConstantFromCallTargetWithoutCalleeRecord) {
+  runConstantDependencyTest(ConstantDependency::CallTarget);
 }
 
 TEST_F(ContProfConsumeTest, PreparesCallTargetWithoutCalleeRecord) {

@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <string>
 #include <system_error>
 #include <tuple>
@@ -298,30 +299,33 @@ readContProfCheckpointDirectory(const std::string& directory) {
   size_t filesRead{};
   size_t deduplicatedRecords{};
   std::map<ContProfFuncKey, SelectedRecord> selected;
+  std::set<std::string> unitPaths;
 
   for (size_t i = 0; i < files->size(); ++i) {
     auto const& file = (*files)[i];
     s_filesAttempted->increment();
-    auto records = readContProfCheckpointFile(file.path);
-    if (!records) {
+    auto checkpoint = readContProfCheckpointFile(file.path);
+    if (!checkpoint) {
       s_filesRejected->increment();
       continue;
     }
     s_filesRead->increment();
-    s_recordsDecoded->addValue(records->size());
+    auto& records = checkpoint->records;
+    s_recordsDecoded->addValue(records.size());
 
-    if (records->size() > kMaxDecodedRecords - decodedRecords) {
+    if (records.size() > kMaxDecodedRecords - decodedRecords) {
       s_recordLimitHits->increment();
-      s_recordsLimited->addValue(records->size());
+      s_recordsLimited->addValue(records.size());
       // The current file was decoded; only subsequent files remain unread.
       s_filesUnreadRecordLimit->addValue(files->size() - i - 1);
       break;
     }
 
     ++filesRead;
-    decodedRecords += records->size();
+    decodedRecords += records.size();
+    unitPaths.insert(checkpoint->unitPaths.begin(), checkpoint->unitPaths.end());
 
-    for (auto& record : *records) {
+    for (auto& record : records) {
       auto const [current, inserted] =
         selected.try_emplace(record.header.funcKey);
       if (!inserted) ++deduplicatedRecords;
@@ -335,6 +339,7 @@ readContProfCheckpointDirectory(const std::string& directory) {
   ContProfCheckpointReadResult result{};
   result.filesRead = filesRead;
   result.recordsDecoded = decodedRecords;
+  result.unitPaths.assign(unitPaths.begin(), unitPaths.end());
   result.records.reserve(selected.size());
 
   for (auto& entry : selected) {

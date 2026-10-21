@@ -26,12 +26,17 @@ type method_info = {
       (** Inout, splat, and attributed parameters cannot be inlined. *)
 }
 
+(** Supported arguments. Calls with inout arguments are not candidates. *)
+type call_arg =
+  | Positional of Pos.t
+  | Named of string * Pos.t
+
 type call_info = {
   callee_name: string;
   caller_name: string;
   call_stmt_pos: Pos.t;  (** Helpful for formatting *)
   call_pos: Pos.t;
-  call_args: (string option * Pos.t) list;
+  call_args: call_arg list;
       (** Argument names and expression positions in source order. *)
   arg_evaluation_order: int list;
       (** HackC preserves side effects in source order but can defer pure argument reads. *)

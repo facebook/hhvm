@@ -220,27 +220,25 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
             then
               let call_args =
                 List.map param_kind_arg_pairs ~f:(fun arg ->
-                    let name =
-                      match arg with
-                      | Anamed ((_, name), _) -> Some name
-                      | Anormal _
-                      | Ainout _ ->
-                        None
-                    in
-                    (name, Aast_utils.get_argument_pos arg))
+                    let pos = Aast_utils.get_argument_pos arg in
+                    match arg with
+                    | Anamed ((_, name), _) -> Some (T.Named (name, pos))
+                    | Anormal _ -> Some (T.Positional pos)
+                    | Ainout _ -> None)
+                |> Option.all
               in
               call_info :=
-                Some
-                  T.
-                    {
-                      callee_name;
-                      call_stmt_pos = !stmt_pos;
-                      caller_name = current_method;
-                      call_pos = expr_pos;
-                      call_args;
-                      arg_evaluation_order =
-                        argument_evaluation_order param_kind_arg_pairs;
-                    }
+                Option.map call_args ~f:(fun call_args ->
+                    T.
+                      {
+                        callee_name;
+                        call_stmt_pos = !stmt_pos;
+                        caller_name = current_method;
+                        call_pos = expr_pos;
+                        call_args;
+                        arg_evaluation_order =
+                          argument_evaluation_order param_kind_arg_pairs;
+                      })
           in
           match expr_ with
           | Call

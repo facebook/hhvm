@@ -24,12 +24,16 @@ type method_info = {
   all_params_are_supported: bool;
 }
 
+type call_arg =
+  | Positional of Pos.t
+  | Named of string * Pos.t
+
 type call_info = {
   callee_name: string;
   caller_name: string;
   call_stmt_pos: Pos.t;
   call_pos: Pos.t;
-  call_args: (string option * Pos.t) list;
+  call_args: call_arg list;
   arg_evaluation_order: int list;
 }
 

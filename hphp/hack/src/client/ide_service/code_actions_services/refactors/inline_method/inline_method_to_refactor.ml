@@ -28,11 +28,11 @@ type binding =
 let bind_args ~call_args ~(params : T.param_info list) : binding list option =
   let open Option.Let_syntax in
   let (named_args, positional_args) =
-    List.foldi call_args ~init:([], []) ~f:(fun index acc (name_opt, pos) ->
+    List.foldi call_args ~init:([], []) ~f:(fun index acc arg ->
         let (named, positional) = acc in
-        match name_opt with
-        | Some name -> ((name, (index, pos)) :: named, positional)
-        | None -> (named, (index, pos) :: positional))
+        match arg with
+        | T.Named (name, pos) -> ((name, (index, pos)) :: named, positional)
+        | T.Positional pos -> (named, (index, pos) :: positional))
   in
   let named_args = List.rev named_args in
   let* named_arg_map =

@@ -36,6 +36,10 @@ type help_section =
 
 (** Arg specs shared across more than 1 arg parser. *)
 module Common_argspecs = struct
+  (* Failure telemetry can retain the caller parsed so far, including aliases,
+     without attempting to interpret the remaining malformed argv. *)
+  let from_for_bad_args : string ref option ref = ref None
+
   let add_key_value ~option_name value_ref value =
     match String_utils.split2 '=' value with
     | Some key_value -> value_ref := key_value :: !value_ref
@@ -71,6 +75,7 @@ module Common_argspecs = struct
       ^ " the next one to start up automatically (default: false)" )
 
   let from value_ref =
+    from_for_bad_args := Some value_ref;
     ( "--from",
       Arg.Set_string value_ref,
       " so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode"
@@ -176,13 +181,18 @@ end = struct
       ~f:(fun () ->
         try
           let agent_session_id = Agent_session_id.get () in
-          (* Arg parsing failed, so there is no trustworthy root, --from or
-           * --custom-telemetry-data yet; initialize with placeholders so that
-           * the sample below has a base env to build on. *)
+          let from =
+            Option.value_map
+              !Common_argspecs.from_for_bad_args
+              ~default:""
+              ~f:(fun value_ref -> !value_ref)
+          in
+          (* Root and custom telemetry may be invalid, but the caller reference
+             contains only the default and values already consumed by Arg. *)
           Hack_event_logger.client_init
           (* ~init_id is used for correlating things, specific value doesn't matter *)
             ~init_id:(Random_id.short_string ())
-            ~from:""
+            ~from
             ~is_interactive:false
             ~custom_columns:[]
             ?agent_session_id
@@ -1775,6 +1785,7 @@ invocations of `hh` faster.|}
     }
 
 let parse_args ~(from_default : string) : command =
+  Common_argspecs.from_for_bad_args := None;
   let command = parse_command () in
   try
     match command with

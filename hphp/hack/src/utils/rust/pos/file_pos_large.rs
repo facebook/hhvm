@@ -31,7 +31,7 @@ impl arena_trait::TrivialDrop for FilePosLarge {}
 const DUMMY: FilePosLarge = FilePosLarge {
     lnum: 0,
     bol: 0,
-    offset: usize::max_value(),
+    offset: usize::MAX,
 };
 
 impl FilePosLarge {

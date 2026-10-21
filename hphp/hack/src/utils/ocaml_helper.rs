@@ -289,22 +289,22 @@ mod tests {
         assert_eq!(f("1_0"), Some(10));
         assert_eq!(f("_10"), None);
         assert_eq!(f("0x10"), Some(16));
-        assert_eq!(f("9223372036854775807"), Some(std::i64::MAX));
+        assert_eq!(f("9223372036854775807"), Some(i64::MAX));
         assert_eq!(f("9223372036854775808"), None);
 
-        assert_eq!(f("0x7FFFFFFFFFFFFFFF"), Some(std::i64::MAX));
-        assert_eq!(f("-0x8000000000000000"), Some(std::i64::MIN));
+        assert_eq!(f("0x7FFFFFFFFFFFFFFF"), Some(i64::MAX));
+        assert_eq!(f("-0x8000000000000000"), Some(i64::MIN));
 
         assert_eq!(f("0x8000000000000000"), None);
         assert_eq!(f("-0x8000000000000001"), None);
 
         assert_eq!(
             f("0b111111111111111111111111111111111111111111111111111111111111111"),
-            Some(std::i64::MAX)
+            Some(i64::MAX)
         );
         assert_eq!(
             f("-0b1000000000000000000000000000000000000000000000000000000000000000"),
-            Some(std::i64::MIN)
+            Some(i64::MIN)
         );
 
         assert_eq!(f("-_10"), None);
@@ -312,7 +312,7 @@ mod tests {
 
         assert_eq!(f("-0b10"), Some(-2));
 
-        assert_eq!(f("-9223372036854775808"), Some(std::i64::MIN));
+        assert_eq!(f("-9223372036854775808"), Some(i64::MIN));
         assert_eq!(f("-9223372036854775809"), None);
 
         assert_eq!(f("-0"), Some(0));
@@ -333,22 +333,22 @@ mod tests {
         assert_eq!(f("1_0"), Ok(10));
         assert_eq!(f("_10"), Err(ParseIntError::InvalidDigit(IntKind::Dec)));
         assert_eq!(f("0x10"), Ok(16));
-        assert_eq!(f("9223372036854775807"), Ok(std::i64::MAX));
+        assert_eq!(f("9223372036854775807"), Ok(i64::MAX));
         assert_eq!(f("9223372036854775808"), Err(ParseIntError::OutOfRange));
 
-        assert_eq!(f("0x7FFFFFFFFFFFFFFF"), Ok(std::i64::MAX));
-        assert_eq!(f("-0x8000000000000000"), Ok(std::i64::MIN));
+        assert_eq!(f("0x7FFFFFFFFFFFFFFF"), Ok(i64::MAX));
+        assert_eq!(f("-0x8000000000000000"), Ok(i64::MIN));
 
         assert_eq!(f("0x8000000000000000"), Err(ParseIntError::OutOfRange));
         assert_eq!(f("-0x8000000000000001"), Err(ParseIntError::OutOfRange));
 
         assert_eq!(
             f("0b111111111111111111111111111111111111111111111111111111111111111"),
-            Ok(std::i64::MAX)
+            Ok(i64::MAX)
         );
         assert_eq!(
             f("-0b1000000000000000000000000000000000000000000000000000000000000000"),
-            Ok(std::i64::MIN)
+            Ok(i64::MIN)
         );
 
         assert_eq!(f("-_10"), Err(ParseIntError::InvalidDigit(IntKind::Dec)));
@@ -356,7 +356,7 @@ mod tests {
 
         assert_eq!(f("-0b10"), Ok(-2));
 
-        assert_eq!(f("-9223372036854775808"), Ok(std::i64::MIN));
+        assert_eq!(f("-9223372036854775808"), Ok(i64::MIN));
         assert_eq!(f("-9223372036854775809"), Err(ParseIntError::OutOfRange));
 
         assert_eq!(f("-0"), Ok(0));
@@ -365,8 +365,8 @@ mod tests {
         assert_eq!(f("010"), Ok(8));
         assert_eq!(f("-010"), Ok(-8));
 
-        assert_eq!(f("0777777777777777777777"), Ok(std::i64::MAX));
-        assert_eq!(f("-01000000000000000000000"), Ok(std::i64::MIN));
+        assert_eq!(f("0777777777777777777777"), Ok(i64::MAX));
+        assert_eq!(f("-01000000000000000000000"), Ok(i64::MIN));
 
         assert_eq!(f("01000000000000000000000"), Err(ParseIntError::OutOfRange));
         assert_eq!(

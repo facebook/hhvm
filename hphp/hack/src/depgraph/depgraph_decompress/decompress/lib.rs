@@ -195,7 +195,7 @@ fn compute_alignment_shift(num_edge_lists: usize, total_bytes: usize) -> u8 {
     // assuming the worst-case padding is introduced for every edge list.
     let mut alignment_shift = 0;
     while (total_bytes + (num_edge_lists * ((1 << alignment_shift) - 1))) >> alignment_shift
-        > std::u32::MAX as usize
+        > u32::MAX as usize
     {
         alignment_shift += 1;
     }

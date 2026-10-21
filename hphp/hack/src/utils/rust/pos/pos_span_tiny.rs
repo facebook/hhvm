@@ -396,8 +396,8 @@ mod test {
     fn test_tiny_dummy() {
         let line: u64 = 0;
         let bol: u64 = 0;
-        let start_offset = u64::max_value();
-        let end_offset = u64::max_value();
+        let start_offset = u64::MAX;
+        let end_offset = u64::MAX;
         let start =
             FilePosLarge::from_lnum_bol_offset(line as usize, bol as usize, start_offset as usize);
         let end =
@@ -421,7 +421,7 @@ mod test {
 
     #[test]
     fn test_tiny_large() {
-        let max_int = u64::max_value();
+        let max_int = u64::MAX;
         let line = max_int;
         let bol = max_int;
         let start_offset = max_int;

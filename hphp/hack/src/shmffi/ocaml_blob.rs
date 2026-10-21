@@ -195,9 +195,9 @@ pub struct MallocBuf {
 impl Drop for MallocBuf {
     fn drop(&mut self) {
         unsafe extern "C" {
-            fn free(data: *const u8);
+            fn free(data: *mut std::ffi::c_void);
         }
-        unsafe { free(self.ptr) };
+        unsafe { free(self.ptr.cast_mut().cast()) };
     }
 }
 
@@ -386,9 +386,9 @@ mod tests {
 
         fn malloc_buf(buf: &[u8]) -> MallocBuf {
             unsafe extern "C" {
-                fn malloc(size: usize) -> *mut u8;
+                fn malloc(size: usize) -> *mut std::ffi::c_void;
             }
-            let ptr = unsafe { malloc(buf.len()) };
+            let ptr = unsafe { malloc(buf.len()) }.cast::<u8>();
             assert_ne!(ptr, std::ptr::null_mut());
             let slice = unsafe { std::slice::from_raw_parts_mut(ptr, buf.len()) };
             slice.copy_from_slice(buf);

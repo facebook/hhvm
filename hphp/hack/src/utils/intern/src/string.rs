@@ -399,7 +399,6 @@ mod tests {
         use std::sync::atomic::AtomicU32;
         use std::sync::atomic::Ordering;
         use std::thread;
-        use std::u32;
 
         // Load test lots of threads creating strings, with load
         // gradually getting heavier on later (popular) strings.

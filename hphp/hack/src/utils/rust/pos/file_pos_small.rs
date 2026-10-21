@@ -57,7 +57,7 @@ const MAX_COLUMN: usize = mask(COLUMN_BITS);
 const MAX_LINE: usize = mask(LINE_BITS);
 const MAX_BOL: usize = mask(BOL_BITS);
 
-const DUMMY: u64 = u64::max_value();
+const DUMMY: u64 = u64::MAX;
 
 impl FilePosSmall {
     #[inline]

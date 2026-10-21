@@ -77,7 +77,7 @@ macro_rules! newtype_int {
                 Self(u as $num)
             }
 
-            pub const NONE: Self = Self(std::$num::MAX);
+            pub const NONE: Self = Self(<$num>::MAX);
         }
 
         impl $crate::FromUsize for $name {
@@ -99,7 +99,7 @@ macro_rules! newtype_int {
         }
 
         impl $crate::HasNone for $name {
-            const NONE: Self = Self(std::$num::MAX);
+            const NONE: Self = Self(<$num>::MAX);
         }
 
         impl std::fmt::Display for $name {

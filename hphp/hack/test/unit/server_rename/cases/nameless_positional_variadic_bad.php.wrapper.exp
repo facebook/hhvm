@@ -1,0 +1,7 @@
+<?hh
+
+<<__Deprecated("Use `renamed` instead")>>
+function original(int...): void {
+  renamed(...);
+}
+function renamed(int...): void {}

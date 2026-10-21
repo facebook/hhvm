@@ -1,0 +1,10 @@
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+class C {
+
+  <<__Deprecated("Use `renamed` instead")>>
+  public static async function original(named int $b): Awaitable<void> {
+    await self::renamed($b);
+  }
+  public static async function renamed(named int $b): Awaitable<void> {}
+}

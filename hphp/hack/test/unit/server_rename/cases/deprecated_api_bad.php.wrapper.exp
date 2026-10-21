@@ -1,0 +1,12 @@
+<?hh
+
+<<__Deprecated("Use `renamed` instead")>>
+function original(int $x): int {
+  return renamed($x);
+}
+function renamed(int $x): int {
+  return $x;
+}
+function test(): int {
+  return original(1);
+}

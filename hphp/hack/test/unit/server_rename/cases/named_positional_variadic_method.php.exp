@@ -1,0 +1,10 @@
+ERROR: File "named_positional_variadic_method.php", line 7, characters 19-39:
+Missing required named argument: b (Typing[4499])
+  File "named_positional_variadic_method.php", line 9, characters 19-25:
+  Definition is here
+ERROR: File "named_positional_variadic_method.php", line 7, characters 27-28:
+Invalid argument (Typing[4110])
+  File "named_positional_variadic_method.php", line 9, characters 51-55:
+  Expected `string` (variadic argument)
+  File "named_positional_variadic_method.php", line 6, characters 34-36:
+  But got `int`

@@ -1,0 +1,8 @@
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+<<__Deprecated("Use `renamed` instead")>>
+function original(int $a, named int $b, named int...): void {
+  renamed($a, $b, ...);
+}
+function renamed(int $a, named int $b, named int...): void {}

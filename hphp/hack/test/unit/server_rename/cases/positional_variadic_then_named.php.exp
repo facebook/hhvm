@@ -1,0 +1,12 @@
+ERROR: File "positional_variadic_then_named.php", line 6, characters 28-29:
+The splat operator `...` for unpacking variadic arguments may not appear before other positional arguments. (Parsing[1002])
+ERROR: File "positional_variadic_then_named.php", line 6, characters 10-30:
+Missing required named argument: b (Typing[4499])
+  File "positional_variadic_then_named.php", line 8, characters 10-16:
+  Definition is here
+ERROR: File "positional_variadic_then_named.php", line 6, characters 28-29:
+Invalid argument (Typing[4110])
+  File "positional_variadic_then_named.php", line 8, characters 28-32:
+  Expected `string` (variadic argument)
+  File "positional_variadic_then_named.php", line 5, characters 42-44:
+  But got `int`

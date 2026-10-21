@@ -1,0 +1,8 @@
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+<<__Deprecated("Use `renamed` instead")>>
+function original(named int...): void {
+  renamed(...);
+}
+function renamed(named int...): void {}

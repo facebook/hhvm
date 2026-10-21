@@ -1,0 +1,4 @@
+ERROR: File "positional_inout_method.php", line 6, characters 20-21:
+This argument should be annotated with `inout` (Typing[4182])
+  File "positional_inout_method.php", line 8, characters 37-38:
+  Because this is an `inout` parameter

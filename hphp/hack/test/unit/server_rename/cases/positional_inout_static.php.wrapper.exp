@@ -1,0 +1,11 @@
+<?hh
+class C {
+
+  <<__Deprecated("Use `renamed` instead")>>
+  public static function original(inout int $x): void {
+    self::renamed($x);
+  }
+  public static function renamed(inout int $x): void {
+    $x += 1;
+  }
+}

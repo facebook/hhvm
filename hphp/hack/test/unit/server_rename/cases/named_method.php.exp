@@ -1,0 +1,8 @@
+ERROR: File "named_method.php", line 7, characters 19-33:
+Missing required named argument: b (Typing[4499])
+  File "named_method.php", line 9, characters 19-25:
+  Definition is here
+ERROR: File "named_method.php", line 7, characters 19-33:
+Too many positional arguments (expected 1 but got 2) (Typing[4105])
+  File "named_method.php", line 9, characters 19-25:
+  Definition is here

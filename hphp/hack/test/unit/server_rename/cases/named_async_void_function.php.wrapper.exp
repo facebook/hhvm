@@ -1,0 +1,8 @@
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+
+<<__Deprecated("Use `renamed` instead")>>
+async function original(named int $b): Awaitable<void> {
+  await renamed($b);
+}
+async function renamed(named int $b): Awaitable<void> {}

@@ -1,0 +1,8 @@
+ERROR: File "named_async_void_function.php", line 6, characters 9-19:
+Missing required named argument: b (Typing[4499])
+  File "named_async_void_function.php", line 8, characters 16-22:
+  Definition is here
+ERROR: File "named_async_void_function.php", line 6, characters 9-19:
+Too many positional arguments (expected 0 but got 1) (Typing[4105])
+  File "named_async_void_function.php", line 8, characters 16-22:
+  Definition is here

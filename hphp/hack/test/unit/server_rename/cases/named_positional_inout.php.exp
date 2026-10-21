@@ -1,0 +1,12 @@
+ERROR: File "named_positional_inout.php", line 6, characters 3-17:
+Missing required named argument: b (Typing[4499])
+  File "named_positional_inout.php", line 8, characters 10-16:
+  Definition is here
+ERROR: File "named_positional_inout.php", line 6, characters 3-17:
+Too many positional arguments (expected 1 but got 2) (Typing[4105])
+  File "named_positional_inout.php", line 8, characters 10-16:
+  Definition is here
+ERROR: File "named_positional_inout.php", line 6, characters 11-12:
+This argument should be annotated with `inout` (Typing[4182])
+  File "named_positional_inout.php", line 8, characters 42-43:
+  Because this is an `inout` parameter

@@ -1,0 +1,14 @@
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters')>>
+class C {
+
+  <<__Deprecated("Use `renamed` instead")>>
+  public static function original(named int $b): void {
+    self::renamed($b);
+  }
+  public static function renamed(named int $b): void {}
+}
+function test(): void {
+  /* HH_FIXME[4128] */
+  C::original(b = 'wrong');
+}

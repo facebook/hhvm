@@ -53,3 +53,11 @@ val go_for_localvar :
   ( Server_rename_types.patch list option,
     Server_command_types.Find_refs.action )
   result
+
+module For_test : sig
+  val deprecated_wrapper_patch :
+    definition:Relative_path.t Symbol_definition.t option ->
+    ctx:Provider_context.t ->
+    string ->
+    Server_rename_types.patch option
+end

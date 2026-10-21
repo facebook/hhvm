@@ -381,6 +381,10 @@ let get_deprecated_wrapper_patch
       in
       Insert patch))
 
+module For_test = struct
+  let deprecated_wrapper_patch = get_deprecated_wrapper_patch
+end
+
 let method_might_support_dynamic ctx ~class_name ~method_name =
   let open Option.Monad_infix in
   let module Class = Folded_class in

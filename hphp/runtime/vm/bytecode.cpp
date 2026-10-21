@@ -5667,9 +5667,8 @@ extern const TCDispatchTable tcDispatchCoverageTable;
 extern const TCDispatchTable tcDispatchDebuggerTable;
 extern const TCDispatchTable tcDispatchDebuggerCoverageTable;
 
-// Mode changes are sampled at basic-block boundaries. Native calls which can
-// change either mode are control-flow opcodes, so no resampling is needed
-// within a handler chain.
+// Mode changes are sampled at basic-block boundaries, including simple jumps
+// which remain in the handler chain when the JIT is disabled.
 ALWAYS_INLINE const TCDispatchTable* tcDispatchTable(bool collectCoverage) {
   auto table = collectCoverage
     ? &tcDispatchCoverageTable
@@ -5713,6 +5712,11 @@ ALWAYS_INLINE void tcDispatchTrace() {}
 // nullopt if dispatch should continue to the next opcode; otherwise the
 // JitResumeAddr that the dispatcher must return to its caller.
 template<Op op>
+constexpr bool tcDispatchCanContinue() {
+  return op == Op::Jmp || op == Op::JmpZ || op == Op::JmpNZ;
+}
+
+template<Op op>
 ALWAYS_INLINE Optional<JitResumeAddr>
 tcDispatchPost(PC pc, JitResumeAddr retAddr) {
   vmpc() = pc;
@@ -5726,7 +5730,10 @@ tcDispatchPost(PC pc, JitResumeAddr retAddr) {
     return retAddr;
   }
   if (instrIsControlFlow(op)) {
-    // Matches the isCtlFlow branch of dispatchImpl()'s DISPATCH macro.
+    if constexpr (tcDispatchCanContinue<op>()) {
+      assertx(!retAddr);
+      if (!RID().getJit()) return std::nullopt;
+    }
     ONTRACE(1, Trace::trace("dispatch: Halt dispatch(%p)\n", vmfp()));
     return retAddr;
   }
@@ -5746,6 +5753,9 @@ tcDispatchPost(PC pc, JitResumeAddr retAddr) {
     auto const retAddr = iopWrap##name(pc);                             \
     if (auto const out = tcDispatchPost<Op::name>(pc, retAddr)) {       \
       return *out;                                                      \
+    }                                                                   \
+    if constexpr (tcDispatchCanContinue<Op::name>()) {                  \
+      table = tcDispatchTable(interpCollectCoverage());                 \
     }                                                                   \
     auto const next = decode_op(pc);                                    \
     HHVM_MUSTTAIL return table->entries[size_t(next)](                  \

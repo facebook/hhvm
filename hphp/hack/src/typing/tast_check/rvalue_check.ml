@@ -58,7 +58,7 @@ let check_valid_rvalue pos env ty =
   in
   ignore (iter_over_types env [ty])
 
-let visitor =
+let make_visitor () =
   object (this)
     inherit [_] Aast.iter as super
 
@@ -133,9 +133,11 @@ let visitor =
       this#allow_non_returning (fun () -> super#on_block env block)
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_stmt = visitor#on_stmt
+    method! at_stmt = (Lazy.force visitor)#on_stmt
   end

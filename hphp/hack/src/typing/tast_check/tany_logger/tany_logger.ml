@@ -152,7 +152,7 @@ let collect_infos_methods_functions context_id =
 
 (** Reduction to collect all Tany/Terr information. It calls the reudction for
     functions and methods with the context information attached. *)
-let collect_infos =
+let make_collect_infos () =
   object
     inherit [_] Tast_visitor.reduce
 
@@ -173,15 +173,17 @@ let collect_infos =
       (collect_infos_methods_functions context_id)#on_method_ env m
   end
 
+let collect_infos = lazy (make_collect_infos ())
+
 let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 
     method! at_fun_def env f =
-      let infos = collect_infos#on_fun_def env f in
+      let infos = (Lazy.force collect_infos)#on_fun_def env f in
       log_info env infos
 
     method! at_class_ env c =
-      let infos = collect_infos#on_class_ env c in
+      let infos = (Lazy.force collect_infos)#on_class_ env c in
       log_info env infos
   end

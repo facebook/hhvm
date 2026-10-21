@@ -834,7 +834,7 @@ let rec has_global_write_access (_, _, te) =
   | _ ->
     false
 
-let visitor =
+let make_visitor () =
   object (self)
     inherit [_] Tast_visitor.iter_with_state as super
 
@@ -1169,6 +1169,8 @@ let visitor =
       | _ -> super#on_expr (env, (ctx, fun_name)) te
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -1185,7 +1187,7 @@ let handler =
       let full_name =
         String.sub full_name ~pos:1 ~len:(String.length full_name - 1)
       in
-      visitor#on_method_ (env, (current_ctx, full_name)) m
+      (Lazy.force visitor)#on_method_ (env, (current_ctx, full_name)) m
 
     method! at_fun_def env f =
       let (_, function_name) = f.fd_name in
@@ -1193,5 +1195,5 @@ let handler =
       let function_name =
         String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
       in
-      visitor#on_fun_def (env, (current_ctx, function_name)) f
+      (Lazy.force visitor)#on_fun_def (env, (current_ctx, function_name)) f
   end

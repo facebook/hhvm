@@ -160,7 +160,7 @@ let validate_state fun_span fun_kind env s =
   | (false, _) -> Lazy.force raise_error_2
   | _ -> ()
 
-let visitor =
+let make_visitor () =
   object (this)
     inherit [_] Aast.iter as super
 
@@ -285,17 +285,21 @@ let visitor =
       | _ -> super#on_expr env e
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
     method! at_method_ env x =
       let env = Tast_env.restore_method_env env x in
+      let visitor = Lazy.force visitor in
       visitor#reset;
       visitor#on_method_ env x
 
     method! at_fun_ env x =
       let env = Tast_env.restore_fun_env env x in
+      let visitor = Lazy.force visitor in
       visitor#reset;
       visitor#on_fun_ env x
   end

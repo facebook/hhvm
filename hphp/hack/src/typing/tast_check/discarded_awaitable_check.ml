@@ -117,7 +117,7 @@ let disallow_due_to_cast_with_explicit_nullcheck_and_return_nonnull ctx =
     non_nullable_awaitable_disallowed = true;
   }
 
-let visitor =
+let make_visitor () =
   object (this)
     inherit [_] Tast_visitor.iter_with_state as super
 
@@ -212,11 +212,15 @@ let visitor =
       super#on_block (env, allow_awaitable) block
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_def env = visitor#on_fun_def (env, allow_awaitable)
+    method! at_fun_def env =
+      (Lazy.force visitor)#on_fun_def (env, allow_awaitable)
 
-    method! at_method_ env = visitor#on_method_ (env, allow_awaitable)
+    method! at_method_ env =
+      (Lazy.force visitor)#on_method_ (env, allow_awaitable)
   end

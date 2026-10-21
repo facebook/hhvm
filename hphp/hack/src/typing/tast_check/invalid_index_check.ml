@@ -168,7 +168,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | _ ->
     ()
 
-let index_visitor =
+let make_index_visitor () =
   object (this)
     inherit [_] Tast_visitor.iter_with_state as super
 
@@ -191,11 +191,13 @@ let index_visitor =
       | _ -> super#on_expr (env, is_lvalue) e
   end
 
+let index_visitor = lazy (make_index_visitor ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_def env = index_visitor#on_fun_def (env, false)
+    method! at_fun_def env = (Lazy.force index_visitor)#on_fun_def (env, false)
 
-    method! at_method_ env = index_visitor#on_method_ (env, false)
+    method! at_method_ env = (Lazy.force index_visitor)#on_method_ (env, false)
   end

@@ -113,7 +113,7 @@ let rec check_array_get env pos full_expr_pos arr_pos idx_pos ty =
  * We skip the warning for Array_get inside unset() since that's a valid
  * way to remove elements from a keyset/set.
  *)
-let visitor =
+let make_visitor () =
   object (this)
     inherit [_] Tast_visitor.iter_with_state as super
 
@@ -136,11 +136,13 @@ let visitor =
       | _ -> super#on_expr (env, false) e
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler ~as_lint =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_def env = visitor#on_fun_def (env, false)
+    method! at_fun_def env = (Lazy.force visitor)#on_fun_def (env, false)
 
-    method! at_method_ env = visitor#on_method_ (env, false)
+    method! at_method_ env = (Lazy.force visitor)#on_method_ (env, false)
   end

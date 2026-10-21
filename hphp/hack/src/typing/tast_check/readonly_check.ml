@@ -641,7 +641,7 @@ let caller_is_special_builtin caller =
   | (_, _, Id (_, name)) when is_special_builtin (Utils.strip_ns name) -> true
   | _ -> false
 
-let check =
+let make_check () =
   object (self)
     inherit Tast_visitor.iter as super
 
@@ -773,6 +773,8 @@ let check =
       | (_, _, Invalid _) -> ()
   end
 
+let check = lazy (make_check ())
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -784,7 +786,7 @@ let handler =
       let env = Tast_env.restore_method_env env m in
       if Tast_env.fun_has_readonly env then (
         fun_has_readonly := true;
-        check#on_method_ env m
+        (Lazy.force check)#on_method_ env m
       ) else (
         fun_has_readonly := false;
         ()
@@ -794,7 +796,7 @@ let handler =
       let env = Tast_env.restore_fun_env env f.fd_fun in
       if Tast_env.fun_has_readonly env then (
         fun_has_readonly := true;
-        check#on_fun_def env f
+        (Lazy.force check)#on_fun_def env f
       ) else (
         fun_has_readonly := false;
         ()

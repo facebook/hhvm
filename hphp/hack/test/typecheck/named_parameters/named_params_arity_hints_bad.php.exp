@@ -1,0 +1,292 @@
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:25:3
+ 2 | <<file:__EnableUnstableFeatures('named_parameters')>>
+ 3 | 
+ 4 | function optional_named_first(named int $n = 0, int $x): void {}
+   |          ^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                     ^^ [3]
+ 5 | function optional_named_last(int $x, named int $n = 0): void {}
+ 6 | function optional_mixed(named int $n = 0, int $x, int $y = 0): void {}
+   :
+23 | 
+24 | function rejected_calls(): void {
+25 |   optional_named_first(1, 2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 |   optional_named_last(1, 2);
+27 |   optional_mixed(1, 2, 3);
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:26:3
+ 3 | 
+ 4 | function optional_named_first(named int $n = 0, int $x): void {}
+ 5 | function optional_named_last(int $x, named int $n = 0): void {}
+   |          ^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                ^^ [3]
+ 6 | function optional_mixed(named int $n = 0, int $x, int $y = 0): void {}
+ 7 | 
+   :
+24 | function rejected_calls(): void {
+25 |   optional_named_first(1, 2);
+26 |   optional_named_last(1, 2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+27 |   optional_mixed(1, 2, 3);
+28 |   optional_mixed(1, 2, 3, n=4);
+
+error: Typing[4105] Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:27:3
+ 4 | function optional_named_first(named int $n = 0, int $x): void {}
+ 5 | function optional_named_last(int $x, named int $n = 0): void {}
+ 6 | function optional_mixed(named int $n = 0, int $x, int $y = 0): void {}
+   |          ^^^^^^^^^^^^^^ [2]
+   |                                               ^^^^^^^^^^ [3]
+ 7 | 
+ 8 | function take_optional_named(
+   :
+25 |   optional_named_first(1, 2);
+26 |   optional_named_last(1, 2);
+27 |   optional_mixed(1, 2, 3);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+28 |   optional_mixed(1, 2, 3, n=4);
+29 | }
+
+error: Typing[4105] Too many positional arguments (expected 2 but got 3) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:28:3
+ 4 | function optional_named_first(named int $n = 0, int $x): void {}
+ 5 | function optional_named_last(int $x, named int $n = 0): void {}
+ 6 | function optional_mixed(named int $n = 0, int $x, int $y = 0): void {}
+   |          ^^^^^^^^^^^^^^ [2]
+   |                                               ^^^^^^^^^^ [3]
+ 7 | 
+ 8 | function take_optional_named(
+   :
+26 |   optional_named_last(1, 2);
+27 |   optional_mixed(1, 2, 3);
+28 |   optional_mixed(1, 2, 3, n=4);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+29 | }
+30 | 
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+named_params_arity_hints_bad.php:32:23
+ 7 | 
+ 8 | function take_optional_named(
+ 9 |   (function(optional named int $n, int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | ): void {}
+11 | 
+   :
+30 | 
+31 | function rejected_lambdas(): void {
+32 |   take_optional_named((named int $n = 0, int $x, int $extra) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+34 |   take_optional_positional((int $x, int $y) ==> {});
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:32:23
+ 7 | 
+ 8 | function take_optional_named(
+ 9 |   (function(optional named int $n, int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | ): void {}
+11 | 
+   :
+30 | 
+31 | function rejected_lambdas(): void {
+32 |   take_optional_named((named int $n = 0, int $x, int $extra) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                              ^^^^^^^^^^^^^^ [3]
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+34 |   take_optional_positional((int $x, int $y) ==> {});
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+named_params_arity_hints_bad.php:33:23
+ 7 | 
+ 8 | function take_optional_named(
+ 9 |   (function(optional named int $n, int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | ): void {}
+11 | 
+   :
+31 | function rejected_lambdas(): void {
+32 |   take_optional_named((named int $n = 0, int $x, int $extra) ==> {});
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+34 |   take_optional_positional((int $x, int $y) ==> {});
+35 |   take_optional_positional((int $x) ==> {});
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:33:23
+ 7 | 
+ 8 | function take_optional_named(
+ 9 |   (function(optional named int $n, int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+10 | ): void {}
+11 | 
+   :
+31 | function rejected_lambdas(): void {
+32 |   take_optional_named((named int $n = 0, int $x, int $extra) ==> {});
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                    ^^^^^^^^^^^^^^^^^^^^ [3]
+34 |   take_optional_positional((int $x, int $y) ==> {});
+35 |   take_optional_positional((int $x) ==> {});
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+named_params_arity_hints_bad.php:34:28
+11 | 
+12 | function take_optional_positional(
+13 |   (function(int, optional int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | ): void {}
+15 | 
+   :
+32 |   take_optional_named((named int $n = 0, int $x, int $extra) ==> {});
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+34 |   take_optional_positional((int $x, int $y) ==> {});
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+35 |   take_optional_positional((int $x) ==> {});
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+-> Try converting this argument as optional [3]
+
+named_params_arity_hints_bad.php:34:28
+11 | 
+12 | function take_optional_positional(
+13 |   (function(int, optional int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+14 | ): void {}
+15 | 
+   :
+32 |   take_optional_named((named int $n = 0, int $x, int $extra) ==> {});
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+34 |   take_optional_positional((int $x, int $y) ==> {});
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+   |                                         ^^ [3]
+35 |   take_optional_positional((int $x) ==> {});
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+-> Optional arguments are missing [3]
+
+named_params_arity_hints_bad.php:35:28
+11 | 
+12 | function take_optional_positional(
+13 |   (function(int, optional int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                           ^^^ [3]
+14 | ): void {}
+15 | 
+   :
+33 |   take_optional_named((int $x, int $extra, named int $n = 0) ==> {});
+34 |   take_optional_positional((int $x, int $y) ==> {});
+35 |   take_optional_positional((int $x) ==> {});
+   |                            ^^^^^^^^^^^^^^^ [1]
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+37 |   take_optional_mixed((named int $n = 0, int $x) ==> {});
+
+error: Typing[4041] Invalid argument [1]
+-> Too many mandatory arguments (expected 1 but got 2) [1]
+-> Because of this definition [2]
+
+named_params_arity_hints_bad.php:36:23
+15 | 
+16 | function take_optional_mixed(
+17 |   (function(optional named int $n, int, optional int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+18 | ): void {}
+19 | 
+   :
+34 |   take_optional_positional((int $x, int $y) ==> {});
+35 |   take_optional_positional((int $x) ==> {});
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 |   take_optional_mixed((named int $n = 0, int $x) ==> {});
+38 |   take_required_mixed((named int $n = 0, int $x) ==> {});
+
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
+-> Definition is here [2]
+
+named_params_arity_hints_bad.php:36:23
+15 | 
+16 | function take_optional_mixed(
+17 |   (function(optional named int $n, int, optional int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+18 | ): void {}
+19 | 
+   :
+34 |   take_optional_positional((int $x, int $y) ==> {});
+35 |   take_optional_positional((int $x) ==> {});
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+37 |   take_optional_mixed((named int $n = 0, int $x) ==> {});
+38 |   take_required_mixed((named int $n = 0, int $x) ==> {});
+
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+
+named_params_arity_hints_bad.php:37:23
+15 | 
+16 | function take_optional_mixed(
+17 |   (function(optional named int $n, int, optional int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+18 | ): void {}
+19 | 
+   :
+35 |   take_optional_positional((int $x) ==> {});
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+37 |   take_optional_mixed((named int $n = 0, int $x) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+38 |   take_required_mixed((named int $n = 0, int $x) ==> {});
+39 | }
+
+error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
+-> Definition is here [2]
+-> Optional arguments are missing [3]
+
+named_params_arity_hints_bad.php:38:23
+19 | 
+20 | function take_required_mixed(
+21 |   (function(optional named int $n, int, int): void) $f,
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                            ^^^ [3]
+22 | ): void {}
+23 | 
+   :
+36 |   take_optional_mixed((named int $n = 0, int $x, int $y) ==> {});
+37 |   take_optional_mixed((named int $n = 0, int $x) ==> {});
+38 |   take_required_mixed((named int $n = 0, int $x) ==> {});
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+39 | }
+
+15 errors found

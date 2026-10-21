@@ -16,3 +16,10 @@ function too_many_positional(): void {
   fx("", y=1, "", "", x=1);
   fxyz1(x=1, y=1, z=1, "", "");
 }
+
+function f_optional_named_before_required(named int $n = 0, int $x): void {}
+
+function too_many_with_optional_named_before_required(): void {
+  f_optional_named_before_required(1, 2);
+}
+//

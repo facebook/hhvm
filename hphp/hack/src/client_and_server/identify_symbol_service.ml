@@ -422,7 +422,7 @@ let stmt_is_invariant_package_intern env (_, stmt_) =
       ~f:is_invariant_package_intern_call
   | _ -> false
 
-let visitor =
+let make_visitor () =
   let class_name = ref None in
   let parent_class_hint = ref None in
   let method_name = ref None in
@@ -1066,6 +1066,8 @@ let visitor =
   end
 
 (* Types of decls used in keyword extraction.*)
+let visitor = lazy (make_visitor ())
+
 type classish_decl_kind =
   | DKclass
   | DKinterface
@@ -1369,7 +1371,8 @@ let keywords (tree : FFP.t) : Result_set.elt list =
   aux None [] tree
 
 let all_symbols ctx tast : Result_set.elt list =
-  Diagnostics.ignore_ (fun () -> visitor#go ctx tast |> Result_set.elements)
+  Diagnostics.ignore_ (fun () ->
+      (Lazy.force visitor)#go ctx tast |> Result_set.elements)
 
 let all_symbols_ctx
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :

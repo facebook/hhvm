@@ -11,7 +11,7 @@ open Hh_prelude
 
 type collected_type = Tast_env.env * Typing_defs.phase_ty
 
-let type_collector =
+let make_type_collector () =
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
@@ -49,7 +49,10 @@ let type_collector =
         [(env, Typing_defs.DeclTy ty)]
   end
 
-let collect_types tast = Diagnostics.ignore_ (fun () -> type_collector#go tast)
+let type_collector = lazy (make_type_collector ())
+
+let collect_types tast =
+  Diagnostics.ignore_ (fun () -> (Lazy.force type_collector)#go tast)
 
 (*
   Ideally this would be just Pos.AbsolutePosMap.find_opt, however the positions

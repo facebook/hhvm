@@ -1887,7 +1887,7 @@ let complete_xhp_tag
       add_res complete);
   autocomplete_is_complete := List.length !autocomplete_items < max_results
 
-let auto_complete_suffix_finder =
+let make_auto_complete_suffix_finder () =
   object
     inherit [_] Aast.reduce
 
@@ -1899,12 +1899,16 @@ let auto_complete_suffix_finder =
       matches_auto_complete_suffix (Local_id.get_name id)
   end
 
-let method_contains_cursor = auto_complete_suffix_finder#on_method_ ()
+let auto_complete_suffix_finder = lazy (make_auto_complete_suffix_finder ())
 
-let fun_contains_cursor = auto_complete_suffix_finder#on_fun_ ()
+let method_contains_cursor m =
+  (Lazy.force auto_complete_suffix_finder)#on_method_ () m
+
+let fun_contains_cursor f =
+  (Lazy.force auto_complete_suffix_finder)#on_fun_ () f
 
 (* Find all the local variables before the cursor, so we can offer them as completion candidates. *)
-class local_vars =
+let make_local_vars () =
   object (self)
     inherit Tast_visitor.iter as super
 
@@ -1954,7 +1958,7 @@ class local_vars =
   end
 
 let compute_complete_local env ctx tast =
-  let (locals, id_at_cursor) = (new local_vars)#get_locals ctx tast in
+  let (locals, id_at_cursor) = (make_local_vars ())#get_locals ctx tast in
   let id_at_cursor = Option.value id_at_cursor ~default:(Pos.none, "") in
   let replace_pos = replace_pos_of_id id_at_cursor in
 

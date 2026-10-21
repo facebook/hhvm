@@ -156,7 +156,7 @@ let expand_ty ?var_hook ?pos env ty =
   and exp_where_constraint (ty1, ck, ty2) = (exp_ty ty1, ck, exp_ty ty2) in
   exp_ty ty
 
-let expander =
+let make_expander () =
   object (self)
     inherit Tast_visitor.endo
 
@@ -170,6 +170,8 @@ let expander =
   end
 
 (* Replace all types in a program AST by their expansions *)
-let expand_program ctx tast = expander#go ctx tast
+let expander = lazy (make_expander ())
 
-let expand_def ctx def = expander#go_def ctx def
+let expand_program ctx tast = (Lazy.force expander)#go ctx tast
+
+let expand_def ctx def = (Lazy.force expander)#go_def ctx def

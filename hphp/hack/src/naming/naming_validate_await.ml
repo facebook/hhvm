@@ -226,7 +226,7 @@ let check_expr on_error expr =
   | Sequential ->
     ()
 
-let visitor =
+let make_visitor () =
   object (_s)
     inherit [_] Aast.iter as super
 
@@ -327,10 +327,14 @@ let visitor =
             | _ -> ())
   end
 
-let validate_fun_def on_error elem = visitor#on_fun_def on_error elem
+let visitor = lazy (make_visitor ())
 
-let validate_class on_error elem = visitor#on_class_ on_error elem
+let validate_fun_def on_error elem =
+  (Lazy.force visitor)#on_fun_def on_error elem
 
-let validate_program on_error elem = visitor#on_program on_error elem
+let validate_class on_error elem = (Lazy.force visitor)#on_class_ on_error elem
 
-let validate_stmt on_error elem = visitor#on_stmt on_error elem
+let validate_program on_error elem =
+  (Lazy.force visitor)#on_program on_error elem
+
+let validate_stmt on_error elem = (Lazy.force visitor)#on_stmt on_error elem

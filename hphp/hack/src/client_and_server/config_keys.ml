@@ -486,9 +486,6 @@ module Hhconf = struct
 
   let load_state_natively_v4 = hhconf_key "load_state_natively_v4"
 
-  let log_saved_state_age_and_distance =
-    hhconf_key "log_saved_state_age_and_distance"
-
   let saved_state_max_expected_age_days =
     hhconf_key "saved_state_max_expected_age_days"
 

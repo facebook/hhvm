@@ -114,8 +114,8 @@ let load_saved_state ~(env : env) ~(local_config : Server_local_config.t) :
       Global_options.loading =
         {
           local_config.Server_local_config.saved_state.Global_options.loading with
-          Global_options.log_saved_state_age_and_distance = false;
-          saved_state_manifold_api_key = env.saved_state_manifold_api_key;
+          Global_options.saved_state_manifold_api_key =
+            env.saved_state_manifold_api_key;
         };
     }
   in

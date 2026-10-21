@@ -21,7 +21,6 @@ impl Default for SavedStateLoading {
             manifold_local_port: None,
             use_eden: false,
             database_shard_name: None,
-            log_saved_state_age_and_distance: false,
             saved_state_max_expected_age_days: 14,
             use_manifold_cython_client: false,
             zstd_decompress_by_file: true,

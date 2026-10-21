@@ -17,8 +17,6 @@ type saved_state_loading = {
   use_eden: bool;  (** Use Eden rather than Watchman to look up saved states. *)
   database_shard_name: string option;
       (** Override the database shard used by saved-state lookup. Useful for testing. *)
-  log_saved_state_age_and_distance: bool;
-      (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
   saved_state_max_expected_age_days: int;
       (** Only used for diagnostics when no saved-state was found: If the mergebase is older than
         this value, we assume that the revision's age is why we can't find a saved-state, instead of a
@@ -59,8 +57,6 @@ val with_saved_state_manifold_api_key :
   string option -> saved_state -> saved_state
 
 val with_use_manifold_cython_client : bool -> saved_state -> saved_state
-
-val with_log_saved_state_age_and_distance : bool -> saved_state -> saved_state
 
 val with_zstd_decompress_by_file : bool -> saved_state -> saved_state
 

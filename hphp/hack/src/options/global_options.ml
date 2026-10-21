@@ -27,7 +27,6 @@ type saved_state_loading = {
   manifold_local_port: int option;
   use_eden: bool;
   database_shard_name: string option;
-  log_saved_state_age_and_distance: bool;
   saved_state_max_expected_age_days: int;
   use_manifold_cython_client: bool;
   zstd_decompress_by_file: bool;
@@ -42,7 +41,6 @@ let default_saved_state_loading =
     manifold_local_port = None;
     use_eden = false;
     database_shard_name = None;
-    log_saved_state_age_and_distance = false;
     saved_state_max_expected_age_days = 14;
     use_manifold_cython_client = false;
     zstd_decompress_by_file = true;
@@ -79,9 +77,6 @@ let with_saved_state_manifold_api_key saved_state_manifold_api_key ss =
 
 let with_use_manifold_cython_client use_manifold_cython_client ss =
   { ss with loading = { ss.loading with use_manifold_cython_client } }
-
-let with_log_saved_state_age_and_distance log_saved_state_age_and_distance ss =
-  { ss with loading = { ss.loading with log_saved_state_age_and_distance } }
 
 let with_zstd_decompress_by_file zstd_decompress_by_file ss =
   { ss with loading = { ss.loading with zstd_decompress_by_file } }

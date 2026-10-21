@@ -856,15 +856,6 @@ let load_
       ~current_version
       config
   in
-  let log_saved_state_age_and_distance =
-    bool_if_min_version
-      Config_keys.Hhconf.log_saved_state_age_and_distance
-      ~default:
-        Global_options.(
-          default_saved_state_loading.log_saved_state_age_and_distance)
-      ~current_version
-      config
-  in
   let saved_state_max_expected_age_days =
     let days =
       int_
@@ -1178,7 +1169,6 @@ let load_
             manifold_local_port;
             use_eden;
             database_shard_name;
-            log_saved_state_age_and_distance;
             saved_state_max_expected_age_days;
             use_manifold_cython_client;
             zstd_decompress_by_file;
@@ -1365,9 +1355,6 @@ let load_from_config
 let to_rollout_flags (options : t) : Hack_event_logger.rollout_flags =
   Hack_event_logger.
     {
-      log_saved_state_age_and_distance =
-        Global_options.(
-          options.saved_state.loading.log_saved_state_age_and_distance);
       saved_state_lookup_use_eden =
         Global_options.(options.saved_state.loading.use_eden);
       fetch_remote_old_decls = options.fetch_remote_old_decls;

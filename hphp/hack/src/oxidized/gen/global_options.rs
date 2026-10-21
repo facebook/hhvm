@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e38ee4d410d53c4d5ce6d7eab57071f>>
+// @generated SignedSource<<5c76a78845e49789ae032b34cde1216d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -46,8 +46,6 @@ pub struct SavedStateLoading {
     pub use_eden: bool,
     /// Override the database shard used by saved-state lookup. Useful for testing.
     pub database_shard_name: Option<String>,
-    /// Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry
-    pub log_saved_state_age_and_distance: bool,
     /// Only used for diagnostics when no saved-state was found: If the mergebase is older than
     /// this value, we assume that the revision's age is why we can't find a saved-state, instead of a
     /// technical issue.

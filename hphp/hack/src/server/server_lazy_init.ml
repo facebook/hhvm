@@ -288,51 +288,6 @@ let mergebase_info (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
       (Future.error_to_string e);
     Server_env.SavedStateRevsInfo.default ~saved_state_rev
 
-let calculate_state_distance_and_age_from_hg
-    (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
-    Server_env.saved_state_revs_info =
-  let root_path = Path.to_string root_path in
-  let future =
-    Future.continue_with_future (Hg.current_mergebase_hg_rev root_path)
-    @@ fun mergebase_rev ->
-    Future.continue_with_future
-      (Hg.get_closest_global_ancestor mergebase_rev root_path)
-    @@ fun mergebase_globalrev ->
-    Future.continue_with_future
-      (Hg.get_closest_global_ancestor saved_state_rev root_path)
-    @@ fun corresponding_base_global_rev ->
-    Future.continue_with_future
-      (Hg.get_hg_revision_time (Hg.Hg_rev mergebase_rev) root_path)
-    @@ fun mergebase_time ->
-    Future.continue_with_future
-      (Hg.get_hg_revision_time (Hg.Hg_rev saved_state_rev) root_path)
-    @@ fun corresponding_time ->
-    let state_distance =
-      abs (mergebase_globalrev - corresponding_base_global_rev)
-    in
-    let state_age = abs (mergebase_time - corresponding_time) in
-    let saved_state_revs_info =
-      {
-        age = Some state_age;
-        distance = Some state_distance;
-        saved_state_rev;
-        saved_state_globalrev = Some corresponding_base_global_rev;
-        saved_state_rev_timestamp = Some corresponding_time;
-        mergebase_rev = Some mergebase_rev;
-        mergebase_globalrev = Some mergebase_globalrev;
-        mergebase_rev_timestamp = Some mergebase_time;
-      }
-    in
-    Future.of_value saved_state_revs_info
-  in
-  match Future.get future with
-  | Ok x -> x
-  | Error e ->
-    Hh_logger.log
-      "[serverLazyInit]: calculate_state_distance_and_age_from_hg failed: %s"
-      (Future.error_to_string e);
-    Server_env.SavedStateRevsInfo.default ~saved_state_rev
-
 let use_precomputed_state_exn
     ~(root : Path.t)
     (genv : Server_env.genv)
@@ -388,17 +343,7 @@ let use_precomputed_state_exn
       ~errors_path
       ~warning_hashes_path
   in
-  let log_saved_state_age_and_distance =
-    ctx
-    |> Provider_context.get_tcopt
-    |> Typechecker_options.log_saved_state_age_and_distance
-  in
-  let saved_state_revs_info =
-    if log_saved_state_age_and_distance then
-      calculate_state_distance_and_age_from_hg root corresponding_base_revision
-    else
-      mergebase_info root corresponding_base_revision
-  in
+  let saved_state_revs_info = mergebase_info root corresponding_base_revision in
   {
     naming_table_fn = naming_table_path;
     naming_table_fallback_fn = naming_table_fallback_path;

@@ -31,6 +31,7 @@
 #include <folly/portability/SysMman.h>
 
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/random.h"
@@ -5597,17 +5598,164 @@ ModeType updateCoverageModeThreaded(ModeType modes) {
     (modes & ~(ModeType)ExecMode::Coverage);
 }
 
+// Whether the bytecode interpreter should collect per-bytecode code coverage
+// for the current opcode. Shared between the computed-goto dispatcher
+// (dispatchImpl) and the tail-call dispatcher (dispatchTailCall).
+static ALWAYS_INLINE bool interpCollectCoverage() {
+  return !RI().m_coverage.m_should_use_per_file_coverage
+    ? RID().getCoverage()
+    : vmfp() && vmfp()->unit()->isCoverageEnabled();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Tail-call (musttail) threaded dispatch.
+//
+// dispatchImpl() below is a computed-goto direct-threaded interpreter: every
+// opcode body ends in `goto *optab[next]`. The implementation here is an
+// alternative dispatcher in which each opcode handler instead ends by
+// *tail-calling* the next opcode's handler. With a guaranteed tail call
+// ([[clang::musttail]] / [[gnu::musttail]]) every step reuses a single native
+// stack frame, and each handler gets its own return/branch site. Semantics are
+// identical to dispatchImpl(); selection is controlled at runtime by
+// Cfg::Eval::InterpTailCallDispatch.
+//
+// This path is only compiled when the toolchain guarantees a tail call. It
+// works on any architecture the compiler targets (notably x86-64 and arm64)
+// and is independent of CTI, which is x86-only and takes precedence when enabled.
+
+#if defined(__has_cpp_attribute)
+#  if __has_cpp_attribute(clang::musttail)
+#    define HHVM_MUSTTAIL [[clang::musttail]]
+#    define HHVM_HAS_MUSTTAIL 1
+#  elif __has_cpp_attribute(gnu::musttail)
+#    define HHVM_MUSTTAIL [[gnu::musttail]]
+#    define HHVM_HAS_MUSTTAIL 1
+#  endif
+#endif
+#ifndef HHVM_HAS_MUSTTAIL
+#  define HHVM_HAS_MUSTTAIL 0
+#  define HHVM_MUSTTAIL
+#endif
+
+#if HHVM_HAS_MUSTTAIL
+
+namespace {
+
+// Mutable state threaded (by reference) through every tail-called handler.
+struct TCDispatchState {
+  PC pc;    // points just past the current opcode (at its immediates)
+  PC opPC;  // start of the current instruction
+  bool collectCoverage;
+  bool debuggerAttached;
+};
+
+using TCDispatchFn = JitResumeAddr (*)(TCDispatchState&);
+extern const TCDispatchFn tcDispatchTable[];
+
+// Pre-opcode work, in the same order as dispatchImpl(): the trace (its DISPATCH
+// macro) first, then the debugger/coverage hooks (its LabelDbg/LabelCover entry
+// points). Stats::inc and the opcode body follow in the caller, matching the
+// computed-goto path's OPCODE_MAIN_BODY. Off the common (no debugger, no
+// coverage) path the hook block is a single predicted branch.
+ALWAYS_INLINE void tcDispatchPre(TCDispatchState& st) {
+  COND_STACKTRACE("dispatch:                    ");
+  FTRACE(1, "dispatch: {}: {}\n", pcOff(),
+         instrToString(st.opPC, vmfp()->func()));
+  if (UNLIKELY(st.debuggerAttached || st.collectCoverage)) {
+    if (st.debuggerAttached) phpDebuggerOpcodeHook(st.opPC);
+    if (st.collectCoverage) recordCodeCoverage(st.opPC);
+  }
+}
+
+// Post-opcode bookkeeping. Mirrors the tail of OPCODE_MAIN_BODY. Returns
+// nullopt if dispatch should continue to the next opcode; otherwise the
+// JitResumeAddr that the dispatcher must return to its caller.
+template<Op op>
+ALWAYS_INLINE Optional<JitResumeAddr>
+tcDispatchPost(TCDispatchState& st, JitResumeAddr retAddr) {
+  vmpc() = st.pc;
+  if (isFCallFunc(op) || op == Op::NativeImpl) {
+    // A native call may toggle coverage or attach a debugger; re-sample.
+    st.collectCoverage = interpCollectCoverage();
+    st.debuggerAttached = isDebuggerAttached();
+  }
+  if (instrCanHalt(op) && UNLIKELY(!st.pc)) {
+    vmfp() = nullptr;
+    vmpc() = nullptr;
+    // We returned from the top VM frame in this nesting level; m_savedRip in
+    // our ActRec must have been callToExit. (The computed-goto path returns
+    // here without the "Halt dispatch" trace, so we match it.)
+    assertx(isCallToExit((uint64_t)retAddr.arg));
+    return retAddr;
+  }
+  if (instrIsControlFlow(op)) {
+    // Matches the isCtlFlow branch of dispatchImpl()'s DISPATCH macro.
+    ONTRACE(1, Trace::trace("dispatch: Halt dispatch(%p)\n", vmfp()));
+    return retAddr;
+  }
+  assertx(!retAddr);
+  st.opPC = st.pc;  // start of the next instruction
+  return std::nullopt;
+}
+
+// Generate one tail-threaded handler per opcode. The musttail return lives
+// directly in this function (signature JitResumeAddr(TCDispatchState&), which
+// matches the table entries) so the tail call is legal; the actual opcode body
+// runs inside iopWrap##name(), whose locals' destructors run before we return.
+#define O(name, imm, push, pop, flags)                                  \
+  JitResumeAddr tcDispatch_##name(TCDispatchState& st) {                \
+    tcDispatchPre(st);                                                  \
+    if (Stats::enableInstrCount()) {                                    \
+      Stats::inc(Stats::Instr_InterpBB##name);                          \
+    }                                                                   \
+    auto const retAddr = iopWrap##name(st.pc);                          \
+    if (auto const out = tcDispatchPost<Op::name>(st, retAddr)) {       \
+      return *out;                                                      \
+    }                                                                   \
+    auto const next = decode_op(st.pc);                                 \
+    HHVM_MUSTTAIL return tcDispatchTable[size_t(next)](st);             \
+  }
+OPCODES
+#undef O
+
+const TCDispatchFn tcDispatchTable[] = {
+#define O(name, imm, push, pop, flags) &tcDispatch_##name,
+  OPCODES
+#undef O
+};
+
+JitResumeAddr dispatchTailCall(bool collectCoverage) {
+  TCDispatchState st;
+  st.pc = vmpc();
+  st.opPC = st.pc;
+  st.collectCoverage = collectCoverage;
+  st.debuggerAttached = isDebuggerAttached();
+  ONTRACE(1, Trace::trace("dispatch: Enter tail-call dispatch(%p)\n", vmfp()));
+  auto const op = decode_op(st.pc);
+  // Root call (intentionally NOT a tail call): when the handler chain reaches a
+  // control-flow/halt opcode it returns here, and we forward that to our caller.
+  return tcDispatchTable[size_t(op)](st);
+}
+
+} // namespace
+
+#endif // HHVM_HAS_MUSTTAIL
+
 JitResumeAddr dispatchImpl() {
   auto const checkCoverage = [&] {
-    return !RI().m_coverage.m_should_use_per_file_coverage
-      ? RID().getCoverage()
-      : vmfp() && vmfp()->unit()->isCoverageEnabled();
+    return interpCollectCoverage();
   };
   bool collectCoverage = checkCoverage();
 
 #ifdef CTI_SUPPORTED
   if (cti_enabled()) {
     return dispatchThreaded(collectCoverage);
+  }
+#endif
+
+#if HHVM_HAS_MUSTTAIL
+  if (Cfg::Eval::InterpTailCallDispatch) {
+    return dispatchTailCall(collectCoverage);
   }
 #endif
 

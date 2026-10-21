@@ -616,6 +616,16 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.TimeoutsUseWallTime = true, UNKNOWN
 
+- bool Eval.InterpTailCallDispatch = false, UNKNOWN
+
+  When true (and the compiler supports a guaranteed tail call, i.e. Clang's
+  [[clang::musttail]] or GCC 15's [[gnu::musttail]]), the bytecode interpreter
+  dispatches each opcode by tail-calling the next opcode's handler instead of
+  using the computed-goto loop in dispatchImpl(). Each step reuses a single
+  native stack frame. This is a pure performance/codegen change with identical
+  semantics; set it back to false to fall back to the computed-goto interpreter.
+  Has no effect when CTI is active or when the toolchain lacks musttail support.
+
 - bool Eval.RecordCodeCoverage = false, UNKNOWN
 
 - bool Eval.CheckSymLink = true, UNKNOWN, postprocess

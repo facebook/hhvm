@@ -125,14 +125,12 @@ named_params_arity_too_many_bad.php:17:3
 
 error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
 -> Definition is here [2]
--> Try converting this argument as optional [3]
 
 named_params_arity_too_many_bad.php:23:3
 18 | }
 19 | 
 20 | function f_optional_named_before_required(named int $n = 0, int $x): void {}
    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [2]
-   |                                                                 ^^ [3]
 21 | 
 22 | function too_many_with_optional_named_before_required(): void {
 23 |   f_optional_named_before_required(1, 2);

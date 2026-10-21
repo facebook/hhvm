@@ -30,8 +30,7 @@ module Common = struct
   let reasons_of_trail trail =
     List.map trail ~f:(fun pos -> (pos, "Typedef definition comes from here"))
 
-  let typing_too_many_args
-      pos decl_pos actual expected ~hint_convert_to_optional =
+  let typing_too_many_args pos decl_pos actual expected =
     let claim =
       lazy
         ( pos,
@@ -39,12 +38,7 @@ module Common = struct
             "Too many positional arguments (expected %d but got %d)"
             expected
             actual )
-    and reasons =
-      lazy
-        ((decl_pos, "Definition is here")
-        :: Option.value_map hint_convert_to_optional ~default:[] ~f:(fun pos ->
-               [(pos, "Try converting this argument as optional")]))
-    in
+    and reasons = lazy [(decl_pos, "Definition is here")] in
     (Error_code.TypingTooManyArgs, claim, reasons)
 
   let typing_too_few_args pos decl_pos actual expected ~hint_missing_optional =
@@ -2499,15 +2493,9 @@ end = struct
     in
     create ~code ~claim ~reasons ~quickfixes ()
 
-  let typing_too_many_args
-      pos decl_pos actual expected ~hint_convert_to_optional =
+  let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
-      Common.typing_too_many_args
-        pos
-        decl_pos
-        actual
-        expected
-        ~hint_convert_to_optional
+      Common.typing_too_many_args pos decl_pos actual expected
     in
     create ~code ~claim ~reasons ()
 
@@ -5472,14 +5460,8 @@ end = struct
     | Hh_expect { pos; equivalent } -> hh_expect pos equivalent
     | Null_member { pos; obj_pos_opt; ctxt; kind; member_name; reason } ->
       null_member pos ~obj_pos_opt ctxt kind member_name reason
-    | Typing_too_many_args
-        { pos; decl_pos; actual; expected; hint_convert_to_optional } ->
-      typing_too_many_args
-        pos
-        decl_pos
-        actual
-        expected
-        ~hint_convert_to_optional
+    | Typing_too_many_args { pos; decl_pos; actual; expected } ->
+      typing_too_many_args pos decl_pos actual expected
     | Typing_too_few_args
         { pos; decl_pos; actual; expected; hint_missing_optional } ->
       typing_too_few_args pos decl_pos actual expected ~hint_missing_optional
@@ -7124,15 +7106,9 @@ end = struct
     in
     create ~code:Error_code.InvalidCrossPackage ~reasons ()
 
-  let typing_too_many_args
-      pos decl_pos actual expected ~hint_convert_to_optional =
+  let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
-      Common.typing_too_many_args
-        pos
-        decl_pos
-        actual
-        expected
-        ~hint_convert_to_optional
+      Common.typing_too_many_args pos decl_pos actual expected
     in
     let reasons =
       Lazy.(
@@ -7614,13 +7590,7 @@ end = struct
     | Require_package_mismatch { pos; reason_sub; reason_super } ->
       Eval_result.single (require_package_mismatch pos reason_sub reason_super)
     | Typing_too_many_args { pos; decl_pos; actual; expected } ->
-      Eval_result.single
-        (typing_too_many_args
-           pos
-           decl_pos
-           actual
-           expected
-           ~hint_convert_to_optional:None)
+      Eval_result.single (typing_too_many_args pos decl_pos actual expected)
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->
       Eval_result.single
         (typing_too_few_args

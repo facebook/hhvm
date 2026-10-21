@@ -37,3 +37,4 @@ function rejected_lambdas(): void {
   take_optional_mixed((named int $n = 0, int $x) ==> {});
   take_required_mixed((named int $n = 0, int $x) ==> {});
 }
+//

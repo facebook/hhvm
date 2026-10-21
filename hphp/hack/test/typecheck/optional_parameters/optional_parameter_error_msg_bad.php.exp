@@ -2,7 +2,7 @@ error: Typing[4041] Invalid argument [1]
 -> Too many mandatory arguments (expected 1 but got 2) [1]
 -> Because of this definition [2]
 
-optional_parameter_error_msg.php:8:34
+optional_parameter_error_msg_bad.php:8:34
  2 | 
  3 | function takes_func_with_optional_param(
  4 |   (function(int, optional int): void) $f,
@@ -17,9 +17,8 @@ optional_parameter_error_msg.php:8:34
 
 error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
 -> Definition is here [2]
--> Try converting this argument as optional [3]
 
-optional_parameter_error_msg.php:8:34
+optional_parameter_error_msg_bad.php:8:34
  2 | 
  3 | function takes_func_with_optional_param(
  4 |   (function(int, optional int): void) $f,
@@ -29,7 +28,6 @@ optional_parameter_error_msg.php:8:34
  7 | function test(): void {
  8 |   takes_func_with_optional_param(($x, $y) ==> {});
    |                                  ^^^^^^^^^^^^^^^ [1]
-   |                                       ^^ [3]
  9 |   takes_func_with_optional_param(($x) ==> {});
 10 | }
 
@@ -37,7 +35,7 @@ error: Typing[4104] Too few positional arguments (required 2 but got 1) [1]
 -> Definition is here [2]
 -> Optional arguments are missing [3]
 
-optional_parameter_error_msg.php:9:34
+optional_parameter_error_msg_bad.php:9:34
  2 | 
  3 | function takes_func_with_optional_param(
  4 |   (function(int, optional int): void) $f,
@@ -50,5 +48,6 @@ optional_parameter_error_msg.php:9:34
  9 |   takes_func_with_optional_param(($x) ==> {});
    |                                  ^^^^^^^^^^^ [1]
 10 | }
+11 | //
 
 3 errors found

@@ -23,3 +23,4 @@ function too_many_with_optional_named_before_required(): void {
   f_optional_named_before_required(1, 2);
 }
 //
+//

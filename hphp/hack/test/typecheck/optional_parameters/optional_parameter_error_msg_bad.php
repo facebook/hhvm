@@ -8,3 +8,4 @@ function test(): void {
   takes_func_with_optional_param(($x, $y) ==> {});
   takes_func_with_optional_param(($x) ==> {});
 }
+//

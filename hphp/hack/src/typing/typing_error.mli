@@ -1521,9 +1521,6 @@ module Primary : sig
         decl_pos: Pos_or_decl.t;
         actual: int;
         expected: int;
-        (* Hint for converting mandatory arguments into optional, takes
-           positions of the argument to be converted *)
-        hint_convert_to_optional: Pos_or_decl.t option;
       }
     | Typing_too_few_args of {
         pos: Pos.t;

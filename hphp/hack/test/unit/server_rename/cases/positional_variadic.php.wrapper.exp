@@ -4,6 +4,7 @@
 function original(int $a, string ...$rest): int {
   return renamed($a, ...$rest);
 }
+//
 function renamed(int $a, string ...$rest): int {
   return $a;
 }

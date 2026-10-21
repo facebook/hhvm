@@ -1,8 +1,1 @@
-ERROR: File "docblock_attribute_method.php", line 7, characters 21-31:
-Missing required named argument: b (Typing[4499])
-  File "docblock_attribute_method.php", line 11, characters 21-27:
-  Definition is here
-ERROR: File "docblock_attribute_method.php", line 7, characters 21-31:
-Too many positional arguments (expected 0 but got 1) (Typing[4105])
-  File "docblock_attribute_method.php", line 11, characters 21-27:
-  Definition is here
+No errors

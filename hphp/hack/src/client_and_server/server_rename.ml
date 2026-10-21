@@ -150,9 +150,9 @@ type wrapper_call_signature_info = {
   is_static: bool;
 }
 
-(* Identify key information about a function so we can produce a deprecated wrapper *)
+(* Identify key information needed to produce a deprecated wrapper. *)
 let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
-    : wrapper_call_signature_info =
+    : wrapper_call_signature_info option =
   Full_fidelity_positioned_syntax.(
     match syntax func_decl with
     | FunctionDeclarationHeader
@@ -165,32 +165,80 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
       let params_text_list =
         match syntax params with
         | SyntaxList params ->
-          let params_text_list =
+          let params =
             List.map params ~f:(fun param ->
-                let param =
-                  match syntax param with
-                  | ListItem { list_item; _ } -> list_item
-                  | _ -> failwith "Expected ListItem"
-                in
                 match syntax param with
-                (* NOTE:
-                    `ParameterDeclaration` includes regular params like "$x" and
-                     _named_ variadic parameters like "...$nums". For the latter case,
-                     we prepend the name with the ellipsis, in order to construct
-                     the wrapped call.
-                *)
+                | ListItem { list_item; _ } -> list_item
+                | _ -> failwith "Expected ListItem")
+          in
+          let (has_named, has_inout) =
+            List.fold
+              params
+              ~init:(false, false)
+              ~f:(fun (has_named, has_inout) param ->
+                match syntax param with
                 | ParameterDeclaration
-                    { parameter_name = name; parameter_ellipsis = ellipsis; _ }
-                  -> begin
-                  match syntax ellipsis with
-                  | Missing -> text name
-                  | _ -> "..." ^ text name
-                end
+                    { parameter_named; parameter_call_convention; _ } ->
+                  let is_named =
+                    match syntax parameter_named with
+                    | Missing -> false
+                    | _ -> true
+                  in
+                  ( has_named || is_named,
+                    has_inout
+                    || String.equal (text parameter_call_convention) "inout" )
                 | _ -> failwith "Expected some parameter type")
           in
-          params_text_list
-        | Missing -> []
-        | _ -> []
+          if has_named && has_inout then
+            None
+          else
+            List.map params ~f:(fun param ->
+                match syntax param with
+                | ParameterDeclaration
+                    {
+                      parameter_named = named;
+                      parameter_name = name;
+                      parameter_ellipsis = ellipsis;
+                      parameter_call_convention = call_convention;
+                      _;
+                    } ->
+                  let is_named =
+                    match syntax named with
+                    | Missing -> false
+                    | _ -> true
+                  in
+                  let is_variadic =
+                    match syntax ellipsis with
+                    | Missing -> false
+                    | _ -> true
+                  in
+                  let name_text =
+                    match syntax name with
+                    | Missing -> None
+                    | _ -> Some (text name)
+                  in
+                  (match (is_named, is_variadic, name_text) with
+                  | (_, _, None)
+                  | (true, true, Some _) ->
+                    None
+                  | (true, false, Some name_text) ->
+                    let arg_name =
+                      String.chop_prefix_if_exists ~prefix:"$" name_text
+                    in
+                    Some (arg_name ^ " = " ^ name_text)
+                  | (false, true, Some name_text) -> Some ("..." ^ name_text)
+                  | (false, false, Some name_text) ->
+                    let prefix =
+                      if String.equal (text call_convention) "inout" then
+                        "inout "
+                      else
+                        ""
+                    in
+                    Some (prefix ^ name_text))
+                | _ -> failwith "Expected some parameter type")
+            |> Option.all
+        | Missing -> Some []
+        | _ -> Some []
       in
       let returns_void =
         match syntax ret_type with
@@ -254,14 +302,16 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
           (is_async, is_static)
         | _ -> (false, false)
       in
-      { params_text_list; returns_void; is_async; is_static }
+      Option.map params_text_list ~f:(fun params_text_list ->
+          { params_text_list; returns_void; is_async; is_static })
     | _ ->
-      {
-        params_text_list = [];
-        returns_void = false;
-        is_async = false;
-        is_static = false;
-      })
+      Some
+        {
+          params_text_list = [];
+          returns_void = false;
+          is_async = false;
+          is_static = false;
+        })
 
 let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
   match Decl_provider.get_class ctx (Utils.add_ns name) with
@@ -320,7 +370,7 @@ let get_deprecated_wrapper_patch
         match syntax cst_node with
         | MethodishDeclaration { methodish_function_decl_header = func_decl; _ }
           ->
-          let call_signature = get_call_signature_for_wrap func_decl in
+          get_call_signature_for_wrap func_decl >>= fun call_signature ->
           let func_decl_text = text func_decl in
           let func_ref =
             if call_signature.is_static then
@@ -343,7 +393,7 @@ let get_deprecated_wrapper_patch
                 call_signature.is_async,
                 func_ref ))
         | FunctionDeclaration { function_declaration_header = func_decl; _ } ->
-          let call_signature = get_call_signature_for_wrap func_decl in
+          get_call_signature_for_wrap func_decl >>= fun call_signature ->
           let func_decl_text = text func_decl in
           let func_ref = DeprecatedFunctionRef in
           Some

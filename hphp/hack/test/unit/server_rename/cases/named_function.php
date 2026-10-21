@@ -1,4 +1,5 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 function original(named int $b, int $a, named string $label = ''): int {
   return $a + $b;

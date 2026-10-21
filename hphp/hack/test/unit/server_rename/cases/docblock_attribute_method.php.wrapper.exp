@@ -1,10 +1,11 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 class C {
 
     <<__Deprecated("Use `renamed` instead")>>
     public function original(named int $b): int {
-      return $this->renamed($b);
+      return $this->renamed(b = $b);
     }
     /** Keep the docblock and attribute on the renamed target. */
     <<__Memoize>>

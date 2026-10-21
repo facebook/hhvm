@@ -1,10 +1,11 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 class C {
 
   <<__Deprecated("Use `renamed` instead")>>
   public static function original(named int $b): void {
-    self::renamed($b);
+    self::renamed(b = $b);
   }
   public static function renamed(named int $b): void {}
 }

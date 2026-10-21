@@ -1,9 +1,10 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
 <<__Deprecated("Use `renamed` instead")>>
 function original(named int $b, int $a, named string $label = ''): int {
-  return renamed($b, $a, $label);
+  return renamed(b = $b, $a, label = $label);
 }
 function renamed(named int $b, int $a, named string $label = ''): int {
   return $a + $b;

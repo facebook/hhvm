@@ -1,10 +1,6 @@
 <?hh
+// @no-wrapper
 <<file: __EnableUnstableFeatures('named_parameters')>>
-
-<<__Deprecated("Use `renamed` instead")>>
-function original(named int $b, inout int $a): void {
-  renamed($b, $a);
-}
 function renamed(named int $b, inout int $a): void {
   $a += $b;
 }

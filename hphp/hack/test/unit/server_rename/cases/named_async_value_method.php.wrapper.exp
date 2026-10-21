@@ -1,10 +1,11 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 class C {
 
   <<__Deprecated("Use `renamed` instead")>>
   public async function original(named int $b): Awaitable<int> {
-    return await $this->renamed($b);
+    return await $this->renamed(b = $b);
   }
   public async function renamed(named int $b): Awaitable<int> {
     return $b;

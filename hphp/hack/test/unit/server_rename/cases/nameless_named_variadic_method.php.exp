@@ -1,6 +1,1 @@
-ERROR: File "nameless_named_variadic_method.php", line 7, characters 24-24:
-An expression is expected here. (Parsing[1002])
-ERROR: File "nameless_named_variadic_method.php", line 7, characters 23-23:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "nameless_named_variadic_method.php", line 7, characters 23-23:
-Unbound global constant (Typing) (Typing[4106])
+No errors

@@ -1,10 +1,11 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 class C {
 
   <<__Deprecated("Use `renamed` instead")>>
   public function original(named int $b, string ...$rest): int {
-    return $this->renamed($b, ...$rest);
+    return $this->renamed(b = $b, ...$rest);
   }
   public function renamed(named int $b, string ...$rest): int {
     return $b;

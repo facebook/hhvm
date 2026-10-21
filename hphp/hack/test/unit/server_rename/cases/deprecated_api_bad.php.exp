@@ -1,4 +1,4 @@
-ERROR: File "deprecated_api_bad.php", line 11, characters 10-17:
+ERROR: File "deprecated_api_bad.php", line 12, characters 10-17:
 The function original is deprecated: Use `renamed` instead (Typing[4128])
   File "deprecated_api_bad.php", line 4, characters 10-17:
   Definition is here

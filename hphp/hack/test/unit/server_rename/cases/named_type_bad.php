@@ -1,4 +1,5 @@
 <?hh
+//
 <<file: __EnableUnstableFeatures('named_parameters')>>
 class C {
   public static function original(named int $b): void {}

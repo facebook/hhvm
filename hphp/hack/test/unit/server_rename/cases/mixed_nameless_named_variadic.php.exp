@@ -1,14 +1,1 @@
-ERROR: File "mixed_nameless_named_variadic.php", line 6, characters 23-23:
-An expression is expected here. (Parsing[1002])
-ERROR: File "mixed_nameless_named_variadic.php", line 6, characters 22-22:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "mixed_nameless_named_variadic.php", line 6, characters 3-22:
-Missing required named argument: b (Typing[4499])
-  File "mixed_nameless_named_variadic.php", line 8, characters 10-16:
-  Definition is here
-ERROR: File "mixed_nameless_named_variadic.php", line 6, characters 3-22:
-Too many positional arguments (expected 1 but got 2) (Typing[4105])
-  File "mixed_nameless_named_variadic.php", line 8, characters 10-16:
-  Definition is here
-ERROR: File "mixed_nameless_named_variadic.php", line 6, characters 22-22:
-Unbound global constant (Typing) (Typing[4106])
+No errors

@@ -1,16 +1,8 @@
-ERROR: File "missing_named_bad.php", line 6, characters 3-13:
+ERROR: File "missing_named_bad.php", line 12, characters 3-13:
 Missing required named argument: b (Typing[4499])
-  File "missing_named_bad.php", line 8, characters 10-16:
+  File "missing_named_bad.php", line 6, characters 10-17:
   Definition is here
-ERROR: File "missing_named_bad.php", line 6, characters 3-13:
+ERROR: File "missing_named_bad.php", line 12, characters 3-13:
 Too many positional arguments (expected 0 but got 1) (Typing[4105])
-  File "missing_named_bad.php", line 8, characters 10-16:
-  Definition is here
-ERROR: File "missing_named_bad.php", line 11, characters 3-13:
-Missing required named argument: b (Typing[4499])
-  File "missing_named_bad.php", line 5, characters 10-17:
-  Definition is here
-ERROR: File "missing_named_bad.php", line 11, characters 3-13:
-Too many positional arguments (expected 0 but got 1) (Typing[4105])
-  File "missing_named_bad.php", line 5, characters 10-17:
+  File "missing_named_bad.php", line 6, characters 10-17:
   Definition is here

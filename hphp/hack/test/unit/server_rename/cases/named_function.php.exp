@@ -1,8 +1,1 @@
-ERROR: File "named_function.php", line 6, characters 10-32:
-Missing required named argument: b (Typing[4499])
-  File "named_function.php", line 8, characters 10-16:
-  Definition is here
-ERROR: File "named_function.php", line 6, characters 10-32:
-Too many positional arguments (expected 1 but got 3) (Typing[4105])
-  File "named_function.php", line 8, characters 10-16:
-  Definition is here
+No errors

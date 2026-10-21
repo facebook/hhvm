@@ -2,8 +2,9 @@
 
 <<__Deprecated("Use `renamed` instead")>>
 function original(inout int $x): void {
-  renamed($x);
+  renamed(inout $x);
 }
+//
 function renamed(inout int $x): void {
   $x += 1;
 }

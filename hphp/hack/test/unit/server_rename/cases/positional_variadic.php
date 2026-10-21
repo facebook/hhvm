@@ -1,4 +1,5 @@
 <?hh
+//
 function original(int $a, string ...$rest): int {
   return $a;
 }

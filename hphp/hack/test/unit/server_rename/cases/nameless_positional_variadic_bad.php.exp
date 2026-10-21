@@ -1,6 +1,2 @@
-ERROR: File "nameless_positional_variadic_bad.php", line 4, characters 25-25:
+ERROR: File "nameless_positional_variadic_bad.php", line 3, characters 24-24:
 A variable name is expected here. (Parsing[1002])
-ERROR: File "nameless_positional_variadic_bad.php", line 5, characters 14-14:
-Unbound name: `)` (a global constant) (Naming[2049])
-ERROR: File "nameless_positional_variadic_bad.php", line 5, characters 14-14:
-Unbound global constant (Typing) (Typing[4106])

@@ -161,9 +161,11 @@ std::optional<ContProfTargetProfile> snapshotTestTargetProfile(
 
 struct ContProfConsumeTest : testing::Test {
   void SetUp() override {
+    auto const path = std::string{kUnitPath} + "." +
+      testing::UnitTest::GetInstance()->current_test_info()->name();
     auto const emitter = assemble_string(
       kHhas,
-      kUnitPath,
+      path.c_str(),
       SHA1{"3333333333333333333333333333333333333333"},
       nullptr,
       RepoOptions::defaults().packageInfo(),
@@ -190,6 +192,8 @@ struct ContProfConsumeTest : testing::Test {
     m_units.emplace(alphaKey->resolutionUnitPath, m_unit.get());
     m_units.emplace(betaKey->resolutionUnitPath, m_unit.get());
   }
+
+  void checkReuse(double probability, bool captureEnabled);
 
   std::unique_ptr<Unit, DestroyTestUnit> m_unit;
   Func* m_alphaFunc{nullptr};
@@ -412,6 +416,143 @@ TEST_F(ContProfConsumeTest, InstallsAllProfilesBeforeOptimization) {
               profData->funcProfTransIDs(installed[i]->func->getFuncId()));
     EXPECT_FALSE(profData->optimized(installed[i]->func->getFuncId()));
   }
+}
+
+void ContProfConsumeTest::checkReuse(double probability, bool captureEnabled) {
+  DecRefProfile const value{13, 9, 4, 5, 0, KindOfDict};
+  auto const name = decRefProfileKey(0);
+  auto const target = snapshotTestTargetProfile(value, name);
+  ASSERT_TRUE(target);
+  m_beta.translations.front().targetProfiles = {*target};
+
+  auto stale = m_alpha;
+  stale.header.funcKey.bytecodeUnitHash = SHA1{uint64_t{2}};
+  stale.translations.front().executionCount = 100;
+  auto invalid = m_alpha;
+  invalid.translations.front().regionLength = 0;
+  invalid.translations.front().executionCount = 50;
+  std::vector<ContProfProfileRecord> records{stale, invalid, m_beta};
+  std::sort(records.begin(), records.end(), [](auto const& a, auto const& b) {
+    return a.header.funcKey < b.header.funcKey;
+  });
+  auto const prepared = prepareContProfStartupCandidates(records, m_units, 1);
+  ASSERT_EQ(1, prepared.candidates.size());
+  ASSERT_EQ(m_betaFunc, prepared.candidates.front().func);
+
+  folly::test::TemporaryDirectory directory{"cont-prof-refresh"};
+  auto const oldServerMode = std::exchange(Cfg::Server::Mode, true);
+  auto const oldCaptureEnabled =
+    std::exchange(Cfg::Jit::ContProfCaptureEnabled, captureEnabled);
+  auto const oldProbability =
+    std::exchange(Cfg::Jit::ContProfReuseProbability, probability);
+  auto const oldInterval = std::exchange(
+    Cfg::Jit::ContProfCheckpointIntervalSeconds, uint32_t{3600}
+  );
+  auto const oldDirectory = std::exchange(
+    Cfg::Jit::ContProfCheckpointDirectory, directory.path().native()
+  );
+  SCOPE_EXIT {
+    Cfg::Server::Mode = oldServerMode;
+    Cfg::Jit::ContProfCaptureEnabled = oldCaptureEnabled;
+    Cfg::Jit::ContProfReuseProbability = oldProbability;
+    Cfg::Jit::ContProfCheckpointIntervalSeconds = oldInterval;
+    Cfg::Jit::ContProfCheckpointDirectory = oldDirectory;
+  };
+
+  auto const previousProfData = jit::profData();
+  auto const createdProfData = globalProfData() == nullptr;
+  if (createdProfData) {
+    auto const oldPGO = std::exchange(Cfg::Jit::PGO, true);
+    SCOPE_EXIT { Cfg::Jit::PGO = oldPGO; };
+    processInitProfData();
+  }
+  SCOPE_EXIT {
+    if (createdProfData) discardProfData();
+    *rl_profData = previousProfData;
+  };
+  requestInitProfData();
+  auto const profData = jit::profData();
+  ASSERT_NE(nullptr, profData);
+  auto const hadTargetProfiles = profData->targetProfile() != nullptr;
+  SCOPE_EXIT {
+    profData->cleanupFunc(m_alphaFunc, {}, {});
+    profData->cleanupFunc(m_betaFunc, {}, {});
+    if (!hadTargetProfiles) profData->setTargetProfile(nullptr);
+  };
+
+  startContProfCheckpointWriter();
+  SCOPE_EXIT { stopContProfCheckpointWriter(); };
+  ASSERT_EQ(captureEnabled, contProfActive());
+
+  auto const beforeBudget = profData->profilingBCSize();
+  auto const beforeTranslations = profData->numTransRecs();
+  auto const beforeTargets = ServiceData::exportCounterByKey(
+    "jit.cprof.target.install.attempts"
+  ).value_or(0);
+  auto const beforeRefresh = ServiceData::exportCounterByKey(
+    "jit.cprof.startup.refresh_selected"
+  ).value_or(0);
+
+  auto const installed = installContProfStartupCandidates(
+    *profData, prepared.candidates, records
+  );
+
+  auto const refresh = captureEnabled && probability == 0.0;
+  EXPECT_EQ(refresh ? 0 : 1, installed.size());
+  EXPECT_EQ(beforeBudget + (refresh ? 0 : m_betaFunc->bclen()),
+            profData->profilingBCSize());
+  EXPECT_EQ(beforeTranslations + (refresh ? 0 : 1), profData->numTransRecs());
+  EXPECT_EQ(beforeTargets + (refresh ? 0 : 1),
+    ServiceData::exportCounterByKey(
+      "jit.cprof.target.install.attempts"
+    ).value_or(-1)
+  );
+  EXPECT_EQ(beforeRefresh + (refresh ? 1 : 0),
+    ServiceData::exportCounterByKey(
+      "jit.cprof.startup.refresh_selected"
+    ).value_or(-1)
+  );
+  EXPECT_FALSE(profData->profiling(m_alphaFunc));
+  EXPECT_TRUE(profData->funcProfTransIDs(m_alphaFunc->getFuncId()).empty());
+  EXPECT_FALSE(profData->optimized(m_betaFunc->getFuncId()));
+  EXPECT_EQ(!refresh, profData->profiling(m_betaFunc));
+  auto const ids = profData->funcProfTransIDs(m_betaFunc->getFuncId());
+  if (refresh) {
+    EXPECT_TRUE(ids.empty());
+  } else {
+    ASSERT_EQ(1, ids.size());
+    EXPECT_EQ(13, profData->transCounter(ids.front()));
+    ASSERT_NE(nullptr, profData->targetProfile());
+    auto const restored = profData->targetProfile()->get<DecRefProfile>(
+      rds::Profile{static_cast<DecRefProfile*>(nullptr), ids.front(), 0, name}
+    );
+    ASSERT_NE(nullptr, restored);
+    EXPECT_EQ(value.toDynamic(), restored->toDynamic());
+  }
+
+  std::vector<ContProfProfileRecord> retained;
+  for (auto const& record : snapshotContProfProfileRecords()) {
+    if (record.header.funcKey.resolutionUnitPath ==
+        m_beta.header.funcKey.resolutionUnitPath) {
+      retained.push_back(record);
+    }
+  }
+  auto const expected = captureEnabled
+    ? std::vector<ContProfProfileRecord>{m_beta}
+    : std::vector<ContProfProfileRecord>{};
+  EXPECT_EQ(expected, retained);
+}
+
+TEST_F(ContProfConsumeTest, ZeroReuseProbabilityRetainsWithoutInstallingProfiles) {
+  checkReuse(0.0, true);
+}
+
+TEST_F(ContProfConsumeTest, FullReuseProbabilityRetainsAndInstallsProfiles) {
+  checkReuse(1.0, true);
+}
+
+TEST_F(ContProfConsumeTest, InactiveCaptureIgnoresReuseProbability) {
+  checkReuse(0.0, false);
 }
 
 TEST_F(ContProfConsumeTest, RejectsUnrelatedProfDataWithoutInstalling) {

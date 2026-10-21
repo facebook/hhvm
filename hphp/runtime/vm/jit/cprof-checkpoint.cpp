@@ -121,14 +121,11 @@ auto const s_writerStartAttempts =
 auto const s_writerStartFailures =
   ServiceData::createCounter("jit.cprof.writer.start_failures");
 
-// Count every scheduled/final flush, including skips. Empty skips mean no
-// captured records, not an unchanged nonempty checkpoint.
+// Count every scheduled/final flush, including those skipped for an empty cache.
 auto const s_writerCheckpointAttempts =
   ServiceData::createCounter("jit.cprof.writer.checkpoint_attempts");
 auto const s_writerEmptyCheckpointSkips =
   ServiceData::createCounter("jit.cprof.writer.empty_checkpoint_skips");
-auto const s_writerUnchangedCheckpointSkips =
-  ServiceData::createCounter("jit.cprof.writer.unchanged_checkpoint_skips");
 auto const s_writerCheckpointExceptions =
   ServiceData::createCounter("jit.cprof.writer.checkpoint_exceptions");
 
@@ -627,6 +624,7 @@ struct ContProfCheckpointWriter {
       return;
     }
 
+    m_stopping = false;
     m_state.store(State::Starting, std::memory_order_release);
     try {
       m_thread = std::thread{[this] { run(); }};
@@ -682,13 +680,6 @@ private:
         return;
       }
 
-      // Records are immutable after their first snapshot, so an unchanged
-      // count means there are no new profiles to checkpoint.
-      if (recordCount == m_lastWrittenRecordCount) {
-        s_writerUnchangedCheckpointSkips->increment();
-        return;
-      }
-
       auto const records = [] {
         Treadmill::Session session{Treadmill::SessionKind::ProfData};
         return snapshotContProfProfileRecords();
@@ -703,7 +694,6 @@ private:
         return;
       }
 
-      m_lastWrittenRecordCount = records.size();
       if (!pruneContProfCheckpointFiles(m_path)) {
         Logger::Warning(
           "Failed to prune cont-prof checkpoints: %s",
@@ -773,7 +763,6 @@ private:
   std::mutex m_shutdownMutex;
   std::condition_variable m_shutdownCondition;
   std::atomic<State> m_state{State::Stopped};
-  size_t m_lastWrittenRecordCount{0};
   bool m_stopping{false};
 };
 

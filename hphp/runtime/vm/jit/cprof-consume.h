@@ -88,11 +88,14 @@ ContProfStartupCandidates prepareContProfStartupCandidates(
  * Install profiles without optimizing any functions. Returns successful imports
  * in candidate order, borrowing pointers from candidates. The caller must keep
  * candidates alive, hold a VM/Treadmill session for the current ProfData, and
- * allow write-lease acquisition.
+ * allow write-lease acquisition. When supplied, records must be the key-ordered
+ * originals used to prepare candidates. With active capture, retain those
+ * originals and leave the sampled refresh cohort uninstalled.
  */
 std::vector<const ContProfStartupCandidate*> installContProfStartupCandidates(
   ProfData& profData,
-  const std::vector<ContProfStartupCandidate>& candidates
+  const std::vector<ContProfStartupCandidate>& candidates,
+  const std::vector<ContProfProfileRecord>& records = {}
 );
 
 /* Whether continuous-profile startup replay is enabled. */

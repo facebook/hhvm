@@ -60,8 +60,8 @@ auto const s_captureSkippedInactive = ServiceData::createCounter(
   "jit.cprof.capture.skipped_inactive"
 );
 // Attempts count calls to captureContProfProfile. Snapshot outcomes precede
-// duplicate detection, so successes = stored_records + duplicates. Imported
-// records retained for future checkpoints do not contribute to these totals.
+// duplicate detection, so successes = stored_records + replaced_records +
+// duplicates. Retaining imported originals does not count as a fresh capture.
 auto const s_captureAttempts = ServiceData::createCounter(
   "jit.cprof.capture.attempts"
 );
@@ -73,6 +73,14 @@ auto const s_snapshotFailures = ServiceData::createCounter(
 );
 auto const s_storedRecords = ServiceData::createCounter(
   "jit.cprof.capture.stored_records"
+);
+// Successful fresh captures replacing a retained original, once per key.
+auto const s_replacedRecords = ServiceData::createCounter(
+  "jit.cprof.capture.replaced_records"
+);
+// Compatible replay records newly retained for subsequent checkpoints.
+auto const s_retainedRecords = ServiceData::createCounter(
+  "jit.cprof.startup.retained_records"
 );
 auto const s_duplicates = ServiceData::createCounter(
   "jit.cprof.capture.duplicates"
@@ -160,6 +168,7 @@ struct CapturedRecord {
   ContProfProfileRecord record;
   std::vector<TransID> sourceTransIds;
   Offset bytecodeLength{0};
+  bool retained{false};
 };
 
 struct TargetProfileDestination {
@@ -305,18 +314,36 @@ bool captureContProfProfile(const ProfData& profData, const Func& func) {
   s_snapshotSuccesses->increment();
 
   auto key = record->header.funcKey;
+  CapturedRecord captured{
+    std::move(*record), std::move(sourceTransIds), func.bclen()
+  };
   auto records = s_records.wlock();
-  auto const inserted = records->try_emplace(
-    std::move(key),
-    CapturedRecord{
-      std::move(*record),
-      std::move(sourceTransIds),
-      func.bclen(),
+  auto const [it, inserted] = records->try_emplace(
+    std::move(key), std::move(captured)
+  );
+  if (!inserted) {
+    if (!it->second.retained) {
+      s_duplicates->increment();
+      return false;
     }
-  ).second;
-  (inserted ? s_storedRecords : s_duplicates)->increment();
-  if (inserted) s_recordsCount->setValue(records->size());
-  return inserted;
+    it->second = std::move(captured);
+  }
+  (inserted ? s_storedRecords : s_replacedRecords)->increment();
+  s_recordsCount->setValue(records->size());
+  return true;
+}
+
+bool retainContProfProfileRecord(const ContProfProfileRecord& record) {
+  assertx(isValidContProfProfileRecord(record));
+  auto records = s_records.wlock();
+  if (!records->try_emplace(
+    record.header.funcKey, CapturedRecord{record, {}, 0, true}
+  ).second) {
+    return false;
+  }
+  s_retainedRecords->increment();
+  s_recordsCount->setValue(records->size());
+  return true;
 }
 
 size_t numContProfProfileRecords() {
@@ -343,10 +370,13 @@ std::vector<ContProfProfileRecord> snapshotContProfProfileRecords() {
     for (auto& captured : capturedRecords) {
       if (captured.sourceTransIds.empty()) continue;
 
-      // Records are only inserted, never removed or replaced. Another
-      // snapshot may have finalized this one while the sweep was running.
+      // Only retained originals can be replaced; pending sweeps belong to
+      // fresh captures. Another snapshot may have finalized this capture.
       auto& stored = records->at(captured.record.header.funcKey);
-      if (stored.sourceTransIds.empty()) continue;
+      if (stored.sourceTransIds.empty()) {
+        captured.record = stored.record;
+        continue;
+      }
 
       stored.record = captured.record;
       stored.sourceTransIds = {};

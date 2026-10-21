@@ -20,8 +20,12 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <filesystem>
+#include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -29,7 +33,10 @@
 #include <folly/testing/TestUtil.h>
 #include <gtest/gtest.h>
 
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-reader.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/service-data.h"
@@ -318,9 +325,10 @@ TEST(ContProfCheckpoint, PrunesOnlyOldCheckpointsAndPreservesCurrent) {
 
   ASSERT_TRUE(pruneContProfCheckpointFiles(checkpoints.front().native()));
 
-  // The oldest file belongs to this writer; keep it plus the newest 19 others.
+  // The oldest file belongs to this writer; fill the remaining slots by recency.
   expected.push_back(checkpoints.front().filename().native());
-  for (size_t i = 3; i < checkpoints.size(); ++i) {
+  auto const first = checkpoints.size() - (kMaxContProfCheckpointFiles - 1);
+  for (size_t i = first; i < checkpoints.size(); ++i) {
     expected.push_back(checkpoints[i].filename().native());
   }
   std::sort(expected.begin(), expected.end());
@@ -352,6 +360,108 @@ TEST(ContProfCheckpoint, PruningRequiresCurrentCheckpointInDirectory) {
     (directoryPath / "missing/cont-prof-1-1000.cprof").native()
   ));
   EXPECT_EQ(expected, directoryEntries(directoryPath));
+}
+
+void writeRetainedCheckpointGeneration(
+  const std::string& directory,
+  size_t generation
+) {
+  ASSERT_EQ(0, numContProfProfileRecords());
+  auto const original = makeRecord("rotation_original", 1, 7);
+  if (generation == 0) {
+    ASSERT_TRUE(retainContProfProfileRecord(original));
+  } else {
+    auto const input = readContProfCheckpointDirectory(directory);
+    ASSERT_TRUE(input);
+    ASSERT_EQ(generation, input->records.size());
+    auto const stored = std::find(
+      input->records.begin(), input->records.end(), original
+    );
+    ASSERT_NE(input->records.end(), stored);
+    for (auto const& record : input->records) {
+      ASSERT_TRUE(retainContProfProfileRecord(record));
+    }
+    // Distinct synthetic records stand in for newly captured functions. The
+    // real-capture replacement path is exercised in ContProfCaptureTest.
+    ASSERT_TRUE(retainContProfProfileRecord(makeRecord(
+      "rotation_" + std::to_string(generation),
+      static_cast<uint8_t>(generation + 1),
+      11 + generation
+    )));
+  }
+
+  auto const records = snapshotContProfProfileRecords();
+  ASSERT_EQ(generation + 1, records.size());
+  auto const path = directory + "/cont-prof-1-" +
+    std::to_string(1000 + generation) + ".cprof";
+  ASSERT_TRUE(writeContProfCheckpointFile(path, records));
+  std::filesystem::last_write_time(
+    path,
+    std::filesystem::file_time_type::clock::now() +
+      std::chrono::seconds{generation}
+  );
+  ASSERT_TRUE(pruneContProfCheckpointFiles(path));
+  expectCheckpointRecords(path, records);
+}
+
+TEST(ContProfCheckpoint, CarriesOriginalThroughTwentyFiveProcessGenerations) {
+  // GTest's threadsafe death tests re-exec this test for each generation. Keep
+  // the parent-owned directory across re-execs, but not the controller's map.
+  constexpr auto environment = "HHVM_CPROF_ROTATION_TEST_DIRECTORY";
+  auto const inherited = std::getenv(environment);
+  std::unique_ptr<folly::test::TemporaryDirectory> temporary;
+  std::string directory;
+  if (inherited) {
+    directory = inherited;
+  } else {
+    temporary = std::make_unique<folly::test::TemporaryDirectory>(
+      "cont-prof-checkpoint-generations"
+    );
+    directory = temporary->path().native();
+    ASSERT_EQ(0, ::setenv(environment, directory.c_str(), 1));
+  }
+  SCOPE_EXIT { if (!inherited) ::unsetenv(environment); };
+  auto const oldDeathTestStyle = GTEST_FLAG_GET(death_test_style);
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  SCOPE_EXIT { GTEST_FLAG_SET(death_test_style, oldDeathTestStyle); };
+
+  constexpr size_t generations = 25;
+  for (size_t generation = 0; generation < generations; ++generation) {
+    // No parent assertions inside the loop: a re-exec skips the earlier
+    // ASSERT_EXIT statements before reaching its own generation.
+    ASSERT_EXIT({
+      std::thread{[&] {
+        HphpSessionAndThread session{Treadmill::SessionKind::UnitTests};
+        writeRetainedCheckpointGeneration(directory, generation);
+      }}.join();
+      auto const result = testing::UnitTest::GetInstance()
+        ->current_test_info()->result();
+      for (int i = 0; i < result->total_part_count(); ++i) {
+        auto const& part = result->GetTestPartResult(i);
+        if (!part.failed()) continue;
+        std::fprintf(
+          stderr, "%s:%d\n%s\n",
+          part.file_name() ? part.file_name() : "unknown",
+          part.line_number(), part.message()
+        );
+      }
+      std::fflush(stderr);
+      std::_Exit(testing::Test::HasFailure() ? 1 : 0);
+    }, testing::ExitedWithCode(0), "");
+  }
+
+  EXPECT_FALSE(std::filesystem::exists(
+    directory + "/cont-prof-1-1000.cprof"
+  ));
+  EXPECT_EQ(kMaxContProfCheckpointFiles, directoryEntries(directory).size());
+  auto const input = readContProfCheckpointDirectory(directory);
+  ASSERT_TRUE(input);
+  EXPECT_EQ(kMaxContProfCheckpointFiles, input->filesRead);
+  ASSERT_EQ(generations, input->records.size());
+  auto const original = makeRecord("rotation_original", 1, 7);
+  EXPECT_NE(input->records.end(), std::find(
+    input->records.begin(), input->records.end(), original
+  ));
 }
 
 TEST(ContProfCheckpoint, ActivatesOnlyWhileWriterIsRunning) {

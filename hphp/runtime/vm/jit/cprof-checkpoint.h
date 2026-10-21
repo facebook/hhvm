@@ -29,7 +29,7 @@
 
 namespace HPHP::jit::cprof {
 
-constexpr size_t kMaxContProfCheckpointFiles = 20;
+constexpr size_t kMaxContProfCheckpointFiles = 5;
 
 bool isContProfCheckpointFilename(std::string_view filename);
 

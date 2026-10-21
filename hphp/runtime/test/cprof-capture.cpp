@@ -18,15 +18,19 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <initializer_list>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <folly/ScopeGuard.h>
+#include <folly/testing/TestUtil.h>
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/rds.h"
@@ -37,6 +41,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/cprof-checkpoint.h"
 #include "hphp/runtime/vm/jit/cprof-controller.h"
+#include "hphp/runtime/vm/jit/cprof-reader.h"
 #include "hphp/runtime/vm/jit/cprof-target-profile.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -46,6 +51,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/sha1.h"
 
@@ -70,6 +76,11 @@ DV:
 
 .function N cont_prof_capture_required_test_81d926f4(N $x) {
 main:
+  Null
+  RetC None
+}
+
+.function N cont_prof_capture_refresh_test_81d926f4() {
   Null
   RetC None
 }
@@ -229,10 +240,11 @@ struct ContProfCaptureTest : testing::Test {
   static void SetUpTestSuite() {
     s_unit = makeTestUnit();
     ASSERT_NE(nullptr, s_unit);
-    ASSERT_EQ(2, s_unit->funcs().size());
+    ASSERT_EQ(3, s_unit->funcs().size());
 
     s_func = s_unit->funcs()[0];
     s_requiredFunc = s_unit->funcs()[1];
+    s_refreshFunc = s_unit->funcs()[2];
     ASSERT_EQ(3, s_func->numLocals());
     ASSERT_EQ(1, s_func->numFuncEntryInputs());
     ASSERT_EQ(1, s_requiredFunc->numRequiredPositionalParams());
@@ -249,11 +261,13 @@ struct ContProfCaptureTest : testing::Test {
   static void TearDownTestSuite() {
     s_func = nullptr;
     s_requiredFunc = nullptr;
+    s_refreshFunc = nullptr;
     s_unit.reset();
   }
 
   static Func* func() { return s_func; }
   static Func* requiredFunc() { return s_requiredFunc; }
+  static Func* refreshFunc() { return s_refreshFunc; }
 
   static SrcKey mid() { return SrcKey{func(), s_midOffset, ResumeMode::None}; }
 
@@ -265,6 +279,7 @@ private:
   static inline TestUnit s_unit;
   static inline Func* s_func{nullptr};
   static inline Func* s_requiredFunc{nullptr};
+  static inline Func* s_refreshFunc{nullptr};
   static inline Offset s_midOffset{0};
   static inline Offset s_emptyMidOffset{0};
 };
@@ -1260,6 +1275,129 @@ TEST_F(ContProfCaptureTest, StoresFirstRecordAndFinalizesTargetProfilesOnce) {
   EXPECT_EQ(*unexpectedBlocks + 4, ServiceData::exportCounterByKey(
     "jit.cprof.capture.rejected.unexpected_block"
   ).value_or(-1));
+}
+
+TEST_F(ContProfCaptureTest, ReplacesRetainedRecordAndRewritesCheckpoint) {
+  auto const counters = [] {
+    return std::array{
+      ServiceData::exportCounterByKey(
+        "jit.cprof.startup.retained_records").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.replaced_records").value_or(-1),
+      ServiceData::exportCounterByKey(
+        "jit.cprof.capture.stored_records").value_or(-1),
+    };
+  };
+  auto expectedCounters = counters();
+  for (auto const count : expectedCounters) ASSERT_GE(count, 0);
+  auto const before = snapshotContProfProfileRecords();
+  auto const key = makeContProfFuncKey(*refreshFunc());
+  ASSERT_TRUE(key);
+  ContProfProfileRecord original;
+  original.header = {*key, 1};
+  original.translations = {{ContProfStartKind::FuncEntry, 0, 2, 41}};
+  original.translations.front().targetProfiles = {
+    makeContProfDecRefTargetProfile(
+      0, -1, makeDecRefProfileValue(9, 6, 2, 3, 1, KindOfString)
+    ),
+  };
+  ASSERT_TRUE(retainContProfProfileRecord(original));
+  ++expectedCounters[0];
+  EXPECT_EQ(expectedCounters, counters());
+  EXPECT_EQ(before.size() + 1, numContProfProfileRecords());
+
+  auto duplicate = original;
+  duplicate.header.capturedAtMs = 2;
+  duplicate.translations.front().executionCount = 99;
+  EXPECT_FALSE(retainContProfProfileRecord(duplicate));
+  ProfData profData;
+  profData.resetCounters(100);
+  EXPECT_FALSE(captureContProfProfile(profData, *refreshFunc()));
+  EXPECT_EQ(expectedCounters, counters());
+
+  auto const retained = snapshotContProfProfileRecords();
+  auto const stored = std::find_if(
+    retained.begin(), retained.end(),
+    [&](auto const& record) { return record.header.funcKey == *key; }
+  );
+  ASSERT_NE(retained.end(), stored);
+  // Retention is already finalized: no live RDS is needed to preserve it.
+  EXPECT_EQ(original, *stored);
+  EXPECT_EQ(retained, snapshotContProfProfileRecords());
+
+  folly::test::TemporaryDirectory directory{"cont-prof-refresh"};
+  auto const server = std::exchange(Cfg::Server::Mode, true);
+  auto const enabled = std::exchange(Cfg::Jit::ContProfCaptureEnabled, true);
+  auto const interval = std::exchange(
+    Cfg::Jit::ContProfCheckpointIntervalSeconds, uint32_t{1}
+  );
+  auto const path = std::exchange(
+    Cfg::Jit::ContProfCheckpointDirectory, directory.path().native()
+  );
+  SCOPE_EXIT {
+    stopContProfCheckpointWriter();
+    Cfg::Server::Mode = server;
+    Cfg::Jit::ContProfCaptureEnabled = enabled;
+    Cfg::Jit::ContProfCheckpointIntervalSeconds = interval;
+    Cfg::Jit::ContProfCheckpointDirectory = path;
+  };
+  auto const writes = [] {
+    return ServiceData::exportCounterByKey(
+      "jit.cprof.checkpoint.write_successes"
+    ).value_or(-1);
+  };
+  auto const writesBefore = writes();
+  ASSERT_GE(writesBefore, 0);
+  startContProfCheckpointWriter();
+  ASSERT_TRUE(contProfActive());
+  auto const deadline = std::chrono::steady_clock::now() +
+    std::chrono::seconds{30};
+  std::mutex mutex;
+  std::condition_variable condition;
+  std::unique_lock lock{mutex};
+  // Two scheduled writes must succeed without changing the stored records.
+  while (writes() < writesBefore + 2 &&
+         std::chrono::steady_clock::now() < deadline) {
+    condition.wait_for(lock, std::chrono::milliseconds{20});
+  }
+  ASSERT_GE(writes(), writesBefore + 2);
+  auto const first = readContProfCheckpointDirectory(directory.path().native());
+  ASSERT_TRUE(first);
+  EXPECT_EQ(retained, first->records);
+
+  auto const transId = addProfileTranslation(
+    profData, SrcKey{refreshFunc(), 0, false, SrcKey::FuncEntryTag{}}, 3, 7
+  );
+  ASSERT_TRUE(captureContProfProfile(profData, *refreshFunc()));
+  ++expectedCounters[1];
+  EXPECT_EQ(expectedCounters, counters());
+  EXPECT_EQ(before.size() + 1, numContProfProfileRecords());
+  auto const fresh = snapshotContProfProfileRecords();
+  auto const replacement = std::find_if(
+    fresh.begin(), fresh.end(),
+    [&](auto const& record) { return record.header.funcKey == *key; }
+  );
+  ASSERT_NE(fresh.end(), replacement);
+  EXPECT_GT(replacement->header.capturedAtMs, original.header.capturedAtMs);
+  std::vector<ContProfProfileTranslation> const expected{
+    {ContProfStartKind::FuncEntry, 0, 3, 7},
+  };
+  EXPECT_EQ(expected, replacement->translations);
+  EXPECT_EQ(7, replacement->functionExecutions());
+
+  *profData.transCounterAddr(transId) = profData.counterDefault() - 99;
+  EXPECT_FALSE(captureContProfProfile(profData, *refreshFunc()));
+  EXPECT_FALSE(retainContProfProfileRecord(original));
+  EXPECT_EQ(expectedCounters, counters());
+  EXPECT_EQ(fresh, snapshotContProfProfileRecords());
+
+  // The final flush includes the replacement despite unchanged cardinality.
+  auto const writesBeforeStop = writes();
+  stopContProfCheckpointWriter();
+  auto const last = readContProfCheckpointDirectory(directory.path().native());
+  ASSERT_TRUE(last);
+  EXPECT_EQ(fresh, last->records);
+  EXPECT_GT(writes(), writesBeforeStop);
 }
 
 }

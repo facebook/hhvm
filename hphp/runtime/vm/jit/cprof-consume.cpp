@@ -35,6 +35,8 @@
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/cprof-checkpoint.h"
+#include "hphp/runtime/vm/jit/cprof-controller.h"
 #include "hphp/runtime/vm/jit/cprof-key.h"
 #include "hphp/runtime/vm/jit/cprof-reader.h"
 #include "hphp/runtime/vm/jit/cprof-replay.h"
@@ -56,6 +58,7 @@
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/random.h"
 #include "hphp/util/service-data.h"
 
 namespace HPHP::jit::cprof {
@@ -105,6 +108,10 @@ auto const s_startupPreparedFuncs =
   ServiceData::createCounter("jit.cprof.startup.prepared_funcs");
 auto const s_startupPublishedFuncs =
   ServiceData::createCounter("jit.cprof.startup.published_funcs");
+// Prepared functions withheld from import for ordinary profiling. Selection
+// does not guarantee execution, profiling-budget headroom, or a fresh capture.
+auto const s_refreshSelected =
+  ServiceData::createCounter("jit.cprof.startup.refresh_selected");
 // Configuration eligibility, not whether replay is currently running. The
 // replay guard or reader can still prevent an eligible startup from importing.
 auto const s_startupActive =
@@ -605,7 +612,8 @@ ContProfStartupCandidates prepareContProfStartupCandidates(
 
 std::vector<const ContProfStartupCandidate*> installContProfStartupCandidates(
   ProfData& profData,
-  const std::vector<ContProfStartupCandidate>& candidates
+  const std::vector<ContProfStartupCandidate>& candidates,
+  const std::vector<ContProfProfileRecord>& records
 ) {
   std::vector<const ContProfStartupCandidate*> installed;
   installed.reserve(candidates.size());
@@ -624,10 +632,30 @@ std::vector<const ContProfStartupCandidate*> installContProfStartupCandidates(
     );
   }
 
+  auto const retain = !records.empty() && contProfActive();
   for (auto const& candidate : candidates) {
     if (jit::profData() != &profData || globalProfData() != &profData) {
       s_startupProfDataUnavailable->increment();
       break;
+    }
+    if (retain) {
+      auto const key = makeContProfFuncKey(*candidate.func);
+      assertx(key);
+      auto const record = std::lower_bound(
+        records.begin(), records.end(), *key,
+        [](auto const& record, auto const& key) {
+          return record.header.funcKey < key;
+        }
+      );
+      assertx(record != records.end() && record->header.funcKey == *key);
+      retainContProfProfileRecord(*record);
+      if (Cfg::Jit::ContProfReuseProbability < 1 &&
+          !folly::Random::randBool(
+            Cfg::Jit::ContProfReuseProbability, threadLocalRng64()
+          )) {
+        s_refreshSelected->increment();
+        continue;
+      }
     }
     if (installCandidate(profData, candidate)) installed.push_back(&candidate);
   }
@@ -681,7 +709,9 @@ void consumeContProfAtStartup() noexcept {
       // Make every imported callee's profiles available before compiling callers.
       auto const installed = [&] {
         BootStats::Block timer{"cont_prof_install", Cfg::Server::Mode, true};
-        return installContProfStartupCandidates(*profData, prepared.candidates);
+        return installContProfStartupCandidates(
+          *profData, prepared.candidates, input->records
+        );
       }();
 
       size_t published{};

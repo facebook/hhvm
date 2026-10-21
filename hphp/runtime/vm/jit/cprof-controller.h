@@ -45,10 +45,14 @@ void maybeCaptureContProfProfile(const ProfData&, const Func&, bool async = fals
 
 /*
  * Snapshot and retain the first valid profile record for `func`.
- * Returns true iff a new record was inserted. Records capture outcomes, but
- * does not check capture eligibility (the optimization hook does that).
+ * Replace a retained replay record, or insert a new record. Later captures of
+ * the same function are duplicates. Returns true iff the stored record changed.
+ * Does not check capture eligibility (the optimization hook does that).
  */
 bool captureContProfProfile(const ProfData&, const Func&);
+
+/* Retain a compatible replay record unchanged, unless its key is already stored. */
+bool retainContProfProfileRecord(const ContProfProfileRecord&);
 
 size_t numContProfProfileRecords();
 

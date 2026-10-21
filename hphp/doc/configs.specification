@@ -2430,6 +2430,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   startup. This does not limit checkpoint reading or unit loading. Zero disables
   startup replay.
 
+- double Jit.ContProfReuseProbability = 1.0, jtwarren
+
+  Probability of reusing a saved profile at startup when capture is active.
+  Skipped functions are left to normal profiling.
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

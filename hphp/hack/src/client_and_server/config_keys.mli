@@ -321,6 +321,12 @@ module Hhconf : sig
 
   val use_distc_crawl_dircache : string
 
+  val eden_prefetch_enabled : string
+
+  val eden_prefetch_fanout_threshold : string
+
+  val eden_prefetch_workers : string
+
   (* edenfs file watcher *)
 
   val edenfs_file_watcher_debug_logging : string

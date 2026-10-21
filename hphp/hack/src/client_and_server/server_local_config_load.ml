@@ -96,6 +96,9 @@ let default =
     allow_unstable_features = false;
     watchman = Watchman.default;
     edenfs_file_watcher = EdenfsFileWatcher.default;
+    eden_prefetch_enabled = false;
+    eden_prefetch_fanout_threshold = 1000;
+    eden_prefetch_workers = 4;
     workload_quantile = None;
     rollout_group = None;
     status_single_use_cached_diagnostics = false;
@@ -742,6 +745,25 @@ let load_
       ~default:default.edenfs_file_watcher
       config
   in
+  let eden_prefetch_enabled =
+    bool_if_min_version
+      Config_keys.Hhconf.eden_prefetch_enabled
+      ~default:default.eden_prefetch_enabled
+      ~current_version
+      config
+  in
+  let eden_prefetch_fanout_threshold =
+    int_
+      Config_keys.Hhconf.eden_prefetch_fanout_threshold
+      ~default:default.eden_prefetch_fanout_threshold
+      config
+  in
+  let eden_prefetch_workers =
+    int_
+      Config_keys.Hhconf.eden_prefetch_workers
+      ~default:default.eden_prefetch_workers
+      config
+  in
   let enable_naming_table_fallback =
     bool_if_min_version
       Config_keys.Hhconf.enable_naming_table_fallback
@@ -1263,6 +1285,9 @@ let load_
     allow_unstable_features;
     watchman;
     edenfs_file_watcher;
+    eden_prefetch_enabled;
+    eden_prefetch_fanout_threshold;
+    eden_prefetch_workers;
     workload_quantile;
     rollout_group;
     status_single_use_cached_diagnostics;

@@ -219,6 +219,15 @@ let try_finally ~f ~(finally : unit -> unit) =
   finally ();
   res
 
+let try_all steps =
+  let first_exception =
+    List.fold steps ~init:None ~f:(fun first_exception step ->
+        match try_with_stack step with
+        | Ok () -> first_exception
+        | Error exn -> Option.first_some first_exception (Some exn))
+  in
+  Option.iter first_exception ~f:Exception.reraise
+
 let with_context
     ~(enter : unit -> unit) ~(exit : unit -> unit) ~(do_ : unit -> 'a) : 'a =
   enter ();

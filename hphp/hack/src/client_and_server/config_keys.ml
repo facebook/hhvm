@@ -351,6 +351,13 @@ module Hhconf = struct
 
   let use_distc_crawl_dircache = hhconf_key "use_distc_crawl_dircache"
 
+  let eden_prefetch_enabled = hhconf_key "eden_prefetch_enabled"
+
+  let eden_prefetch_fanout_threshold =
+    hhconf_key "eden_prefetch_fanout_threshold"
+
+  let eden_prefetch_workers = hhconf_key "eden_prefetch_workers"
+
   (* edenfs file watcher *)
 
   let edenfs_file_watcher_debug_logging =

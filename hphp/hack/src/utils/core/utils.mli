@@ -90,6 +90,11 @@ end
 
 val try_finally : f:(unit -> 'a) -> finally:(unit -> unit) -> 'a
 
+(** Run every step once, in order, even if earlier steps raise. After all steps
+    have been attempted, re-raise the first exception with its original backtrace,
+    or return normally if every step succeeded. *)
+val try_all : (unit -> unit) list -> unit
+
 val with_context :
   enter:(unit -> unit) -> exit:(unit -> unit) -> do_:(unit -> 'a) -> 'a
 

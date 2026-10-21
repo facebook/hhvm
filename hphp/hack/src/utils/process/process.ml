@@ -455,3 +455,68 @@ let exec_with_working_directory
     env
     chdir_entry
     { cwd = dir; prog = Exec_command.to_string prog; env; args }
+
+let terminate ~graceful_signal ~grace_period (process : Process_types.t) =
+  let open Process_types in
+  let close_fd fd_ref =
+    match !fd_ref with
+    | None -> ()
+    | Some fd ->
+      (* A failed close may already have released the descriptor. Clear our
+         ownership first so a retry cannot close a reused descriptor. *)
+      fd_ref := None;
+      Unix.close fd
+  in
+  let send_signal pid signal =
+    try Unix.kill pid signal with
+    | Unix.Unix_error (Unix.ESRCH, _, _) ->
+      (* ESRCH means no process has this PID, so there is nothing to signal.
+         Other errors, such as insufficient permissions, still propagate. *)
+      ()
+  in
+  let running_pid () =
+    (* Once a child has been reaped, its PID may be reused. The lifecycle
+       check and update prevent repeated cleanup from signaling that PID. *)
+    match !(process.lifecycle) with
+    | Lifecycle_exited _
+    | Lifecycle_killed_due_to_overflow_stdin ->
+      None
+    | Lifecycle_running { pid } ->
+      (* WNOHANG returns immediately: (0, _) means the child is still running;
+         otherwise waitpid reaps it and returns its exit status. The non_intr
+         helper retries waitpid calls interrupted by a signal. *)
+      (match Sys_utils.waitpid_non_intr [Unix.WNOHANG] pid with
+      | (0, _) -> Some pid
+      | (_, status) ->
+        process.lifecycle := Lifecycle_exited status;
+        None)
+  in
+  let graceful_shutdown () =
+    match (graceful_signal, running_pid ()) with
+    | (Some signal, Some pid) ->
+      send_signal pid signal;
+      let deadline = Unix.gettimeofday () +. grace_period in
+      while
+        Option.is_some (running_pid ())
+        && Float.(Unix.gettimeofday () < deadline)
+      do
+        Unix.sleepf sleep_seconds_per_retry
+      done
+    | (None, _)
+    | (_, None) ->
+      ()
+  in
+  let kill_and_reap () =
+    Option.iter (running_pid ()) ~f:(fun pid ->
+        send_signal pid Sys.sigkill;
+        let (_, status) = Sys_utils.waitpid_non_intr [] pid in
+        process.lifecycle := Lifecycle_exited status)
+  in
+  Utils.try_all
+    [
+      graceful_shutdown;
+      kill_and_reap;
+      (fun () -> close_fd process.stdin_fd);
+      (fun () -> close_fd process.stdout_fd);
+      (fun () -> close_fd process.stderr_fd);
+    ]

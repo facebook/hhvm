@@ -344,6 +344,12 @@ type t = {
       (** Allows unstable features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
   edenfs_file_watcher: EdenfsFileWatcher.t;
+  eden_prefetch_enabled: bool;
+      (** Prefetch the type-checking fanout from the controller. *)
+  eden_prefetch_fanout_threshold: int;
+      (** Minimum number of files in the fanout to enable prefetching. *)
+  eden_prefetch_workers: int;
+      (** Maximum number of concurrent Sapling file fetch workers. *)
   workload_quantile: quantile option;
       (** Allows to typecheck only a certain quantile of the workload. *)
   rollout_group: string option;

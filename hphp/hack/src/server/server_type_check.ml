@@ -350,36 +350,60 @@ let do_type_checking
       ~telemetry_ref:cgroup_typecheck_telemetry
       "type check"
     @@ fun () ->
-    let ( ( env,
-            {
-              Typing_check_service.diagnostics = errorl;
-              warnings_saved_state = mergebase_warning_hashes;
-              telemetry;
-              time_first_error;
-            } ),
-          cancelled ) =
+    let ( ( ( env,
+              {
+                Typing_check_service.diagnostics = errorl;
+                warnings_saved_state = mergebase_warning_hashes;
+                telemetry;
+                time_first_error;
+              } ),
+            cancelled ),
+          prefetch_telemetry ) =
       let root = Server_args.root genv.Server_env.options in
-      Typing_check_service.go_with_interrupt
-        ctx
-        genv.workers
-        telemetry
-        (files_to_check |> Relative_path.Set.elements)
-        ~root:(Some root)
-        ~interrupt
-        ~longlived_workers
-        ~hh_distc_config
-        ~check_info:
-          (Server_check_utils.get_check_info
-             ~check_reason
-             ~log_errors:true
-             ~discard_warnings:
-               (let during_init =
-                  Option.is_some env.init_env.why_needed_full_check
-                in
-                during_init && Server_env.discard_warnings env)
-             genv
-             env)
-        ~warnings_saved_state:Server_env.(env.init_env.mergebase_warning_hashes)
+      let typecheck () =
+        Typing_check_service.go_with_interrupt
+          ctx
+          genv.workers
+          telemetry
+          (files_to_check |> Relative_path.Set.elements)
+          ~root:(Some root)
+          ~interrupt
+          ~longlived_workers
+          ~hh_distc_config
+          ~check_info:
+            (Server_check_utils.get_check_info
+               ~check_reason
+               ~log_errors:true
+               ~discard_warnings:
+                 (let during_init =
+                    Option.is_some env.init_env.why_needed_full_check
+                  in
+                  during_init && Server_env.discard_warnings env)
+               genv
+               env)
+          ~warnings_saved_state:
+            Server_env.(env.init_env.mergebase_warning_hashes)
+      in
+      if
+        genv.local_config.Server_local_config.eden_prefetch_enabled
+        && Relative_path.Set.cardinal files_to_check
+           >= genv.local_config
+                .Server_local_config.eden_prefetch_fanout_threshold
+      then
+        let (result, telemetry) =
+          Edenfs_prefetch.with_prefetch
+            ~root
+            ~files:files_to_check
+            ~workers:genv.local_config.Server_local_config.eden_prefetch_workers
+            ~f:typecheck
+        in
+        (result, Some telemetry)
+      else
+        (typecheck (), None)
+    in
+    let telemetry =
+      Option.value_map prefetch_telemetry ~default:telemetry ~f:(fun prefetch ->
+          Telemetry.object_ ~key:"edenfs_prefetch" ~value:prefetch telemetry)
     in
     let env =
       { env with init_env = { env.init_env with mergebase_warning_hashes } }

@@ -73,3 +73,14 @@ val env_to_string : Process_types.environment -> string
 val is_ready : Process_types.t -> bool
 
 val env_to_array : Process_types.environment -> string array option
+
+(** Terminate and reap the process represented by this handle if it is still
+    running, and close all owned descriptors. With [graceful_signal = Some signal],
+    send that signal first and allow up to [grace_period] seconds for exit before
+    sending SIGKILL. With [graceful_signal = None], send SIGKILL immediately and
+    ignore [grace_period]. Idempotent. Output not already consumed is discarded.
+
+    The SIGKILL step and all descriptor closes are attempted even if an earlier
+    step raises. The first error is then re-raised. *)
+val terminate :
+  graceful_signal:int option -> grace_period:float -> Process_types.t -> unit

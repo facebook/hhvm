@@ -112,6 +112,7 @@
   decl_redecl_service
   direct_decl_service
   dfind
+  edenfs_prefetch
   fileutils
   findmytests_stubs
   format_helpers

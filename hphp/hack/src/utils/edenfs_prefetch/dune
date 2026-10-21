@@ -1,0 +1,13 @@
+(library
+ (name edenfs_prefetch)
+ (wrapped false)
+ (modules edenfs_prefetch)
+ (libraries
+  exec_command
+  process
+  process_types
+  relative_path
+  sys_utils
+  unix
+  utils_core
+  utils_exit))

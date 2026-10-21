@@ -52,6 +52,35 @@ let test_exception_stack () =
     expect "test/unit/utils/exception_test.ml" stack;
     true
 
+(** All steps run in order despite multiple failures, and the first exception
+    is re-raised with its original backtrace after the remaining steps finish. *)
+let test_try_all () =
+  let attempted = ref [] in
+  let step number f () =
+    attempted := number :: !attempted;
+    f ()
+  in
+  let result =
+    Utils.try_with_stack (fun () ->
+        Utils.try_all
+          [
+            step 1 (fun () -> ());
+            step 2 foo;
+            step 3 (fun () -> failwith "later failure");
+            step 4 (fun () -> ());
+          ])
+  in
+  assert (List.equal Int.equal (List.rev !attempted) [1; 2; 3; 4]);
+  (match result with
+  | Ok () -> failwith "Expected the first step failure to be re-raised"
+  | Error exn ->
+    (match Exception.unwrap exn with
+    | Failure message -> assert (String.equal message "intentional raise")
+    | _ -> failwith "Expected the original exception");
+    let stack = Exception.get_backtrace_string exn |> Exception.clean_stack in
+    expect "test/unit/utils/exception_test_b.ml" stack);
+  true
+
 let test_clean_stack1 () =
   let stack1 =
     {|Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
@@ -166,6 +195,7 @@ let tests =
   [
     ("test_current_stack", test_current_stack);
     ("test_exception_stack", test_exception_stack);
+    ("test_try_all", test_try_all);
     ("test_clean_stack1", test_clean_stack1);
     ("test_clean_stack2", test_clean_stack2);
     ("test_clean_stack3", test_clean_stack3);

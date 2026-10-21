@@ -1,0 +1,1683 @@
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:9:17
+ 2 | <<file: __EnableUnstableFeatures('named_parameters', 'union_intersection_type_hints')>>
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+   |                                        ^^^ [2]
+   |                                                      ^^^^^^ [3]
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+ 9 |   take_named_fn((named $b, named $a) ==> {
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     wants_int($a);
+   |     ^^^^^^^^^^^^^^ [1]
+11 |     wants_string($b);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+12 |   });
+   |   ^ [1]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:9:17
+ 2 | <<file: __EnableUnstableFeatures('named_parameters', 'union_intersection_type_hints')>>
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+   |                                        ^^^ [3]
+   |                                                      ^^^^^^ [2]
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+ 9 |   take_named_fn((named $b, named $a) ==> {
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+10 |     wants_int($a);
+   |     ^^^^^^^^^^^^^^ [1]
+11 |     wants_string($b);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+12 |   });
+   |   ^ [1]
+13 | }
+14 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:10:15
+ 2 | <<file: __EnableUnstableFeatures('named_parameters', 'union_intersection_type_hints')>>
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+   |                                                      ^^^^^^ [3]
+ 5 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+ 9 |   take_named_fn((named $b, named $a) ==> {
+10 |     wants_int($a);
+   |               ^^ [1]
+11 |     wants_string($b);
+12 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:11:18
+ 2 | <<file: __EnableUnstableFeatures('named_parameters', 'union_intersection_type_hints')>>
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+   |                                        ^^^ [3]
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+ 9 |   take_named_fn((named $b, named $a) ==> {
+10 |     wants_int($a);
+11 |     wants_string($b);
+   |                  ^^ [1]
+12 |   });
+13 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:16:26
+14 | 
+15 | function optional_extra_named_accepts(): void {
+16 |   take_optional_extra_fn((named $extra = "s", $x, named $name) ==> {
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+17 |     wants_string($extra);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+18 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+19 |     wants_string($name);
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+20 |   });
+   |   ^ [1]
+21 | }
+22 | 
+23 | function take_optional_extra_fn(
+24 |   (function(int, named string $name): void) $_,
+   |             ^^^ [3]
+   |                        ^^^^^^ [2]
+25 | ): void {}
+26 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:16:33
+14 | 
+15 | function optional_extra_named_accepts(): void {
+16 |   take_optional_extra_fn((named $extra = "s", $x, named $name) ==> {
+   |                                 ^^^^^^ [1]
+   |                                          ^^^ [3]
+17 |     wants_string($extra);
+18 |     wants_int($x);
+   :
+22 | 
+23 | function take_optional_extra_fn(
+24 |   (function(int, named string $name): void) $_,
+   |             ^^^ [2]
+25 | ): void {}
+26 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:17:18
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+   :
+15 | function optional_extra_named_accepts(): void {
+16 |   take_optional_extra_fn((named $extra = "s", $x, named $name) ==> {
+17 |     wants_string($extra);
+   |                  ^^^^^^ [1]
+18 |     wants_int($x);
+19 |     wants_string($name);
+   :
+22 | 
+23 | function take_optional_extra_fn(
+24 |   (function(int, named string $name): void) $_,
+   |             ^^^ [3]
+25 | ): void {}
+26 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:18:15
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+   :
+16 |   take_optional_extra_fn((named $extra = "s", $x, named $name) ==> {
+17 |     wants_string($extra);
+18 |     wants_int($x);
+   |               ^^ [1]
+19 |     wants_string($name);
+20 |   });
+21 | }
+22 | 
+23 | function take_optional_extra_fn(
+24 |   (function(int, named string $name): void) $_,
+   |                        ^^^^^^ [3]
+25 | ): void {}
+26 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:28:38
+26 | 
+27 | function optional_extra_positional_accepts(): void {
+28 |   take_optional_extra_positional_fn(($extra = "s", named $name) ==> {
+   |                                      ^^^^^^ [1]
+   |                                               ^^^ [3]
+29 |     wants_string($extra);
+30 |     wants_int($name);
+   :
+33 | 
+34 | function take_optional_extra_positional_fn(
+35 |   (function(named int $name): void) $_,
+   |                   ^^^ [2]
+36 | ): void {}
+37 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:29:18
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+   :
+27 | function optional_extra_positional_accepts(): void {
+28 |   take_optional_extra_positional_fn(($extra = "s", named $name) ==> {
+29 |     wants_string($extra);
+   |                  ^^^^^^ [1]
+30 |     wants_int($name);
+31 |   });
+32 | }
+33 | 
+34 | function take_optional_extra_positional_fn(
+35 |   (function(named int $name): void) $_,
+   |                   ^^^ [3]
+36 | ): void {}
+37 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:53:17
+51 | 
+52 | function mixed_positional_and_reordered_named_accepts(): void {
+53 |   take_mixed_fn(($x, named $b, named $a) ==> {
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+54 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+55 |     wants_int($a);
+   |     ^^^^^^^^^^^^^^ [1]
+56 |     wants_string($b);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+57 |   });
+   |   ^ [1]
+58 | }
+59 | 
+60 | function take_mixed_fn(
+61 |   (function(int, named int $a, named string $b): void) $_,
+   |                        ^^^ [2]
+   |                                      ^^^^^^ [3]
+62 | ): void {}
+63 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:53:17
+51 | 
+52 | function mixed_positional_and_reordered_named_accepts(): void {
+53 |   take_mixed_fn(($x, named $b, named $a) ==> {
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+54 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+55 |     wants_int($a);
+   |     ^^^^^^^^^^^^^^ [1]
+56 |     wants_string($b);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+57 |   });
+   |   ^ [1]
+58 | }
+59 | 
+60 | function take_mixed_fn(
+61 |   (function(int, named int $a, named string $b): void) $_,
+   |                        ^^^ [3]
+   |                                      ^^^^^^ [2]
+62 | ): void {}
+63 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:55:15
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+   :
+53 |   take_mixed_fn(($x, named $b, named $a) ==> {
+54 |     wants_int($x);
+55 |     wants_int($a);
+   |               ^^ [1]
+56 |     wants_string($b);
+57 |   });
+58 | }
+59 | 
+60 | function take_mixed_fn(
+61 |   (function(int, named int $a, named string $b): void) $_,
+   |                                      ^^^^^^ [3]
+62 | ): void {}
+63 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:56:18
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+   :
+54 |     wants_int($x);
+55 |     wants_int($a);
+56 |     wants_string($b);
+   |                  ^^ [1]
+57 |   });
+58 | }
+59 | 
+60 | function take_mixed_fn(
+61 |   (function(int, named int $a, named string $b): void) $_,
+   |                        ^^^ [3]
+62 | ): void {}
+63 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:66:15
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+   :
+64 | function immediate_application_reordered_accepts(): void {
+65 |   ((named $a, named $b) ==> {
+66 |     wants_int($a);
+   |               ^^ [1]
+67 |     wants_string($b);
+68 |   })(b = "s", a = 1);
+   |          ^^^ [3]
+69 | }
+70 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:67:18
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+   :
+65 |   ((named $a, named $b) ==> {
+66 |     wants_int($a);
+67 |     wants_string($b);
+   |                  ^^ [1]
+68 |   })(b = "s", a = 1);
+   |                   ^ [3]
+69 | }
+70 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+named_lambda_reordered_params.php:68:10
+66 |     wants_int($a);
+67 |     wants_string($b);
+68 |   })(b = "s", a = 1);
+   |          ^^^ [1]
+   |                   ^ [2]
+69 | }
+70 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+named_lambda_reordered_params.php:68:19
+66 |     wants_int($a);
+67 |     wants_string($b);
+68 |   })(b = "s", a = 1);
+   |          ^^^ [2]
+   |                   ^ [1]
+69 | }
+70 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:72:23
+70 | 
+71 | function interleaved_positional_and_named_accepts(): void {
+72 |   take_interleaved_fn(($x, named $name) ==> {
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+73 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+74 |     wants_string($name);
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+75 |   });
+   |   ^ [1]
+76 | }
+77 | 
+78 | function take_interleaved_fn(
+79 |   (function(named string $name, int): void) $_,
+   |                   ^^^^^^ [2]
+   |                                 ^^^ [3]
+80 | ): void {}
+81 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:72:23
+70 | 
+71 | function interleaved_positional_and_named_accepts(): void {
+72 |   take_interleaved_fn(($x, named $name) ==> {
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^ [1]
+73 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+74 |     wants_string($name);
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+75 |   });
+   |   ^ [1]
+76 | }
+77 | 
+78 | function take_interleaved_fn(
+79 |   (function(named string $name, int): void) $_,
+   |                   ^^^^^^ [3]
+   |                                 ^^^ [2]
+80 | ): void {}
+81 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:73:15
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+   :
+71 | function interleaved_positional_and_named_accepts(): void {
+72 |   take_interleaved_fn(($x, named $name) ==> {
+73 |     wants_int($x);
+   |               ^^ [1]
+74 |     wants_string($name);
+75 |   });
+76 | }
+77 | 
+78 | function take_interleaved_fn(
+79 |   (function(named string $name, int): void) $_,
+   |                   ^^^^^^ [3]
+80 | ): void {}
+81 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:74:18
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+   :
+72 |   take_interleaved_fn(($x, named $name) ==> {
+73 |     wants_int($x);
+74 |     wants_string($name);
+   |                  ^^^^^ [1]
+75 |   });
+76 | }
+77 | 
+78 | function take_interleaved_fn(
+79 |   (function(named string $name, int): void) $_,
+   |                                 ^^^ [3]
+80 | ): void {}
+81 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:87:26
+81 | 
+82 | function take_two_positional_fn(
+83 |   (function(named string $name, int, bool): void) $_,
+   |                   ^^^^^^ [2]
+   |                                 ^^^ [3]
+84 | ): void {}
+85 | 
+86 | function multiple_interleaved_positional_accepts(): void {
+87 |   take_two_positional_fn(($x, named $name, $flag) ==> {
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+88 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+89 |     wants_string($name);
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+90 |     wants_bool($flag);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+91 |   });
+   |   ^ [1]
+92 | }
+93 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:87:26
+81 | 
+82 | function take_two_positional_fn(
+83 |   (function(named string $name, int, bool): void) $_,
+   |                   ^^^^^^ [3]
+   |                                 ^^^ [2]
+84 | ): void {}
+85 | 
+86 | function multiple_interleaved_positional_accepts(): void {
+87 |   take_two_positional_fn(($x, named $name, $flag) ==> {
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+88 |     wants_int($x);
+   |     ^^^^^^^^^^^^^^ [1]
+89 |     wants_string($name);
+   |     ^^^^^^^^^^^^^^^^^^^^ [1]
+90 |     wants_bool($flag);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+91 |   });
+   |   ^ [1]
+92 | }
+93 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:88:15
+ 3 | 
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 6 | function wants_string(string $x): void {}
+ 7 | 
+   :
+81 | 
+82 | function take_two_positional_fn(
+83 |   (function(named string $name, int, bool): void) $_,
+   |                   ^^^^^^ [3]
+84 | ): void {}
+85 | 
+86 | function multiple_interleaved_positional_accepts(): void {
+87 |   take_two_positional_fn(($x, named $name, $flag) ==> {
+88 |     wants_int($x);
+   |               ^^ [1]
+89 |     wants_string($name);
+90 |     wants_bool($flag);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:89:18
+ 4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+ 5 | function wants_int(int $x): void {}
+ 6 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+ 7 | 
+ 8 | function reordered_lambda_accepts(): void {
+   :
+81 | 
+82 | function take_two_positional_fn(
+83 |   (function(named string $name, int, bool): void) $_,
+   |                                 ^^^ [3]
+84 | ): void {}
+85 | 
+86 | function multiple_interleaved_positional_accepts(): void {
+87 |   take_two_positional_fn(($x, named $name, $flag) ==> {
+88 |     wants_int($x);
+89 |     wants_string($name);
+   |                  ^^^^^ [1]
+90 |     wants_bool($flag);
+91 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:99:16
+ 92 | }
+ 93 | 
+ 94 | function wants_bool(bool $x): void {}
+    |                     ^^^^ [2]
+ 95 | 
+ 96 | function immediate_interleaved_accepts(): void {
+ 97 |   (($x, named $b, $flag, named $a) ==> {
+ 98 |     wants_int($x);
+ 99 |     wants_bool($flag);
+    |                ^^^^^ [1]
+100 |     wants_int($a);
+101 |     wants_string($b);
+102 |   })(1, false, a = 2, b = "s");
+    |                    ^ [3]
+103 | }
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:100:15
+  3 | 
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+    |                    ^^^ [2]
+  6 | function wants_string(string $x): void {}
+  7 | 
+    :
+ 98 |     wants_int($x);
+ 99 |     wants_bool($flag);
+100 |     wants_int($a);
+    |               ^^ [1]
+101 |     wants_string($b);
+102 |   })(1, false, a = 2, b = "s");
+    |                           ^^^ [3]
+103 | }
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:101:18
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+  6 | function wants_string(string $x): void {}
+    |                       ^^^^^^ [2]
+  7 | 
+  8 | function reordered_lambda_accepts(): void {
+    :
+ 99 |     wants_bool($flag);
+100 |     wants_int($a);
+101 |     wants_string($b);
+    |                  ^^ [1]
+102 |   })(1, false, a = 2, b = "s");
+    |         ^^^^^ [3]
+103 | }
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [1]
+
+named_lambda_reordered_params.php:102:9
+100 |     wants_int($a);
+101 |     wants_string($b);
+102 |   })(1, false, a = 2, b = "s");
+    |         ^^^^^ [1]
+    |                    ^ [2]
+103 | }
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+named_lambda_reordered_params.php:102:20
+100 |     wants_int($a);
+101 |     wants_string($b);
+102 |   })(1, false, a = 2, b = "s");
+    |                    ^ [1]
+    |                           ^^^ [2]
+103 | }
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `string` [1]
+
+named_lambda_reordered_params.php:102:27
+100 |     wants_int($a);
+101 |     wants_string($b);
+102 |   })(1, false, a = 2, b = "s");
+    |         ^^^^^ [2]
+    |                           ^^^ [1]
+103 | }
+104 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:116:17
+  2 | <<file: __EnableUnstableFeatures('named_parameters', 'union_intersection_type_hints')>>
+  3 | 
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+    |                                        ^^^ [3]
+    |                                                      ^^^^^^ [2]
+  5 | function wants_int(int $x): void {}
+  6 | function wants_string(string $x): void {}
+    :
+114 | 
+115 | function partly_annotated_reordered_accepts(): void {
+116 |   take_named_fn((named string $b, named $a) ==> wants_int($a));
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+117 | }
+118 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:116:59
+  2 | <<file: __EnableUnstableFeatures('named_parameters', 'union_intersection_type_hints')>>
+  3 | 
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+    |                                                      ^^^^^^ [3]
+  5 | function wants_int(int $x): void {}
+    |                    ^^^ [2]
+  6 | function wants_string(string $x): void {}
+  7 | 
+    :
+114 | 
+115 | function partly_annotated_reordered_accepts(): void {
+116 |   take_named_fn((named string $b, named $a) ==> wants_int($a));
+    |                                                           ^^ [1]
+117 | }
+118 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:124:26
+118 | 
+119 | function take_optional_named_fn(
+120 |   (function(optional named int $a, named string $b): void) $_,
+    |                            ^^^ [2]
+    |                                          ^^^^^^ [3]
+121 | ): void {}
+122 | 
+123 | function optional_named_context_accepts(): void {
+124 |   take_optional_named_fn((named $b, named $a = 0) ==> {
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+125 |     wants_int($a);
+    |     ^^^^^^^^^^^^^^ [1]
+126 |     wants_string($b);
+    |     ^^^^^^^^^^^^^^^^^ [1]
+127 |   });
+    |   ^ [1]
+128 | }
+129 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:124:26
+118 | 
+119 | function take_optional_named_fn(
+120 |   (function(optional named int $a, named string $b): void) $_,
+    |                            ^^^ [3]
+    |                                          ^^^^^^ [2]
+121 | ): void {}
+122 | 
+123 | function optional_named_context_accepts(): void {
+124 |   take_optional_named_fn((named $b, named $a = 0) ==> {
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+125 |     wants_int($a);
+    |     ^^^^^^^^^^^^^^ [1]
+126 |     wants_string($b);
+    |     ^^^^^^^^^^^^^^^^^ [1]
+127 |   });
+    |   ^ [1]
+128 | }
+129 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:124:43
+118 | 
+119 | function take_optional_named_fn(
+120 |   (function(optional named int $a, named string $b): void) $_,
+    |                                          ^^^^^^ [2]
+121 | ): void {}
+122 | 
+123 | function optional_named_context_accepts(): void {
+124 |   take_optional_named_fn((named $b, named $a = 0) ==> {
+    |                                           ^^ [1]
+    |                                                ^ [3]
+125 |     wants_int($a);
+126 |     wants_string($b);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:125:15
+  3 | 
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+    |                    ^^^ [2]
+  6 | function wants_string(string $x): void {}
+  7 | 
+    :
+118 | 
+119 | function take_optional_named_fn(
+120 |   (function(optional named int $a, named string $b): void) $_,
+    |                                          ^^^^^^ [3]
+121 | ): void {}
+122 | 
+123 | function optional_named_context_accepts(): void {
+124 |   take_optional_named_fn((named $b, named $a = 0) ==> {
+125 |     wants_int($a);
+    |               ^^ [1]
+126 |     wants_string($b);
+127 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:126:18
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+  6 | function wants_string(string $x): void {}
+    |                       ^^^^^^ [2]
+  7 | 
+  8 | function reordered_lambda_accepts(): void {
+    :
+118 | 
+119 | function take_optional_named_fn(
+120 |   (function(optional named int $a, named string $b): void) $_,
+    |                            ^^^ [3]
+121 | ): void {}
+122 | 
+123 | function optional_named_context_accepts(): void {
+124 |   take_optional_named_fn((named $b, named $a = 0) ==> {
+125 |     wants_int($a);
+126 |     wants_string($b);
+    |                  ^^ [1]
+127 |   });
+128 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:132:15
+  3 | 
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+    |                    ^^^ [2]
+  6 | function wants_string(string $x): void {}
+  7 | 
+    :
+130 | function immediate_named_before_positional_accepts(): void {
+131 |   (($x, named $a) ==> {
+132 |     wants_int($x);
+    |               ^^ [1]
+133 |     wants_string($a);
+134 |   })(a = "s", 1);
+    |          ^^^ [3]
+135 | }
+136 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:133:18
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+  6 | function wants_string(string $x): void {}
+    |                       ^^^^^^ [2]
+  7 | 
+  8 | function reordered_lambda_accepts(): void {
+    :
+131 |   (($x, named $a) ==> {
+132 |     wants_int($x);
+133 |     wants_string($a);
+    |                  ^^ [1]
+134 |   })(a = "s", 1);
+    |               ^ [3]
+135 | }
+136 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [1]
+
+named_lambda_reordered_params.php:134:10
+132 |     wants_int($x);
+133 |     wants_string($a);
+134 |   })(a = "s", 1);
+    |          ^^^ [1]
+    |               ^ [2]
+135 | }
+136 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [1]
+
+named_lambda_reordered_params.php:134:15
+132 |     wants_int($x);
+133 |     wants_string($a);
+134 |   })(a = "s", 1);
+    |          ^^^ [2]
+    |               ^ [1]
+135 | }
+136 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:142:31
+136 | 
+137 | function take_positional_variadic_fn(
+138 |   (function(named int $a, named string $b, int...): void) $_,
+    |                   ^^^ [2]
+    |                                 ^^^^^^ [3]
+139 | ): void {}
+140 | 
+141 | function reordered_with_positional_collector_accepts(): void {
+142 |   take_positional_variadic_fn((named $b, named $a, ...$rest) ==> {
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+143 |     wants_int($a);
+    |     ^^^^^^^^^^^^^^ [1]
+144 |     wants_string($b);
+    |     ^^^^^^^^^^^^^^^^^ [1]
+145 |     wants_int_vec($rest);
+    |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+146 |   });
+    |   ^ [1]
+147 | }
+148 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:142:31
+136 | 
+137 | function take_positional_variadic_fn(
+138 |   (function(named int $a, named string $b, int...): void) $_,
+    |                   ^^^ [3]
+    |                                 ^^^^^^ [2]
+139 | ): void {}
+140 | 
+141 | function reordered_with_positional_collector_accepts(): void {
+142 |   take_positional_variadic_fn((named $b, named $a, ...$rest) ==> {
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+143 |     wants_int($a);
+    |     ^^^^^^^^^^^^^^ [1]
+144 |     wants_string($b);
+    |     ^^^^^^^^^^^^^^^^^ [1]
+145 |     wants_int_vec($rest);
+    |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+146 |   });
+    |   ^ [1]
+147 | }
+148 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:143:15
+  3 | 
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+    |                    ^^^ [2]
+  6 | function wants_string(string $x): void {}
+  7 | 
+    :
+136 | 
+137 | function take_positional_variadic_fn(
+138 |   (function(named int $a, named string $b, int...): void) $_,
+    |                                 ^^^^^^ [3]
+139 | ): void {}
+140 | 
+141 | function reordered_with_positional_collector_accepts(): void {
+142 |   take_positional_variadic_fn((named $b, named $a, ...$rest) ==> {
+143 |     wants_int($a);
+    |               ^^ [1]
+144 |     wants_string($b);
+145 |     wants_int_vec($rest);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:144:18
+  4 | function take_named_fn((function(named int $a, named string $b): void) $_): void {}
+  5 | function wants_int(int $x): void {}
+  6 | function wants_string(string $x): void {}
+    |                       ^^^^^^ [2]
+  7 | 
+  8 | function reordered_lambda_accepts(): void {
+    :
+136 | 
+137 | function take_positional_variadic_fn(
+138 |   (function(named int $a, named string $b, int...): void) $_,
+    |                   ^^^ [3]
+139 | ): void {}
+140 | 
+141 | function reordered_with_positional_collector_accepts(): void {
+142 |   take_positional_variadic_fn((named $b, named $a, ...$rest) ==> {
+143 |     wants_int($a);
+144 |     wants_string($b);
+    |                  ^^ [1]
+145 |     wants_int_vec($rest);
+146 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:156:28
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [2]
+    |                                ^^^^ [3]
+153 | ): void {}
+154 | 
+155 | function extra_positionals_flow_into_collector(): void {
+156 |   take_fixed_positional_fn((named $flag, ...$rest) ==> {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+157 |     wants_bool($flag);
+    |     ^^^^^^^^^^^^^^^^^^ [1]
+158 |     wants_arraykey_vec($rest);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+159 |   });
+    |   ^ [1]
+160 | }
+161 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:156:28
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [3]
+    |                  ^^^^^^ [2]
+153 | ): void {}
+154 | 
+155 | function extra_positionals_flow_into_collector(): void {
+156 |   take_fixed_positional_fn((named $flag, ...$rest) ==> {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+157 |     wants_bool($flag);
+    |     ^^^^^^^^^^^^^^^^^^ [1]
+158 |     wants_arraykey_vec($rest);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+159 |   });
+    |   ^ [1]
+160 | }
+161 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:157:16
+ 92 | }
+ 93 | 
+ 94 | function wants_bool(bool $x): void {}
+    |                     ^^^^ [2]
+ 95 | 
+ 96 | function immediate_interleaved_accepts(): void {
+    :
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [3]
+153 | ): void {}
+154 | 
+155 | function extra_positionals_flow_into_collector(): void {
+156 |   take_fixed_positional_fn((named $flag, ...$rest) ==> {
+157 |     wants_bool($flag);
+    |                ^^^^^ [1]
+158 |     wants_arraykey_vec($rest);
+159 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:169:34
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |             ^^^ [2]
+    |                  ^^^^^^ [3]
+166 | ): void {}
+167 | 
+168 | function non_tail_collector_with_expected_variadic_accepts(): void {
+169 |   take_heterogeneous_variadic_fn((...$values, named $flag) ==> {
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+170 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+171 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+172 |   });
+    |   ^ [1]
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:169:34
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |                  ^^^^^^ [2]
+    |                                   ^^^^ [3]
+166 | ): void {}
+167 | 
+168 | function non_tail_collector_with_expected_variadic_accepts(): void {
+169 |   take_heterogeneous_variadic_fn((...$values, named $flag) ==> {
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+170 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+171 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+172 |   });
+    |   ^ [1]
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:170:5
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |                  ^^^^^^ [2]
+166 | ): void {}
+167 | 
+168 | function non_tail_collector_with_expected_variadic_accepts(): void {
+169 |   take_heterogeneous_variadic_fn((...$values, named $flag) ==> {
+170 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                               ^^^ [3]
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:171:5
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |             ^^^ [3]
+166 | ): void {}
+167 | 
+168 | function non_tail_collector_with_expected_variadic_accepts(): void {
+169 |   take_heterogeneous_variadic_fn((...$values, named $flag) ==> {
+170 |     hh_expect_equivalent<vec<(int | string)>>($values);
+171 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                          ^^^^ [2]
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+named_lambda_reordered_params.php:171:32
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |             ^^^ [4]
+166 | ): void {}
+167 | 
+168 | function non_tail_collector_with_expected_variadic_accepts(): void {
+169 |   take_heterogeneous_variadic_fn((...$values, named $flag) ==> {
+170 |     hh_expect_equivalent<vec<(int | string)>>($values);
+171 |     hh_expect_equivalent<bool>($flag);
+    |                          ^^^^ [2]
+    |                                ^^^^^ [1]
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+
+hh_single_type_check_magic.hhi:5:108
+  3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+    |                                                                                                            ^ [3]
+  6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+  7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:173:34
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |             ^^^ [2]
+    |                  ^^^^^^ [3]
+166 | ): void {}
+167 | 
+    :
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+175 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+176 |   });
+    |   ^ [1]
+177 | }
+178 | 
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `(int | string)` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:174:5
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                                     ^^^^ [3]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                              ^^^^^^^^^^^^^^ [2]
+175 |     hh_expect_equivalent<bool>($flag);
+176 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:174:5
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                                     ^^^^ [3]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                               ^^^ [2]
+175 |     hh_expect_equivalent<bool>($flag);
+176 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:174:5
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                                     ^^^^ [3]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                                     ^^^^^^ [2]
+175 |     hh_expect_equivalent<bool>($flag);
+176 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int | string)` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:174:47
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                                     ^^^^ [3]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |                              ^^^^^^^^^^^^^^ [2]
+    |                                               ^^^^^^^ [1]
+175 |     hh_expect_equivalent<bool>($flag);
+176 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:174:47
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                                     ^^^^ [3]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |                               ^^^ [2]
+    |                                               ^^^^^^^ [1]
+175 |     hh_expect_equivalent<bool>($flag);
+176 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:174:47
+171 |     hh_expect_equivalent<bool>($flag);
+172 |   });
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+    |                                                     ^^^^ [3]
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |                                     ^^^^^^ [2]
+    |                                               ^^^^^^^ [1]
+175 |     hh_expect_equivalent<bool>($flag);
+176 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:175:5
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |             ^^^ [3]
+166 | ): void {}
+167 | 
+    :
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+175 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                          ^^^^ [2]
+176 |   });
+177 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+named_lambda_reordered_params.php:175:32
+163 | 
+164 | function take_heterogeneous_variadic_fn(
+165 |   (function(int, string..., named bool $flag): void) $_,
+    |             ^^^ [4]
+166 | ): void {}
+167 | 
+    :
+173 |   take_heterogeneous_variadic_fn((...$values, named bool $flag) ==> {
+174 |     hh_expect_equivalent<vec<(int | string)>>($values);
+175 |     hh_expect_equivalent<bool>($flag);
+    |                          ^^^^ [2]
+    |                                ^^^^^ [1]
+176 |   });
+177 | }
+
+hh_single_type_check_magic.hhi:5:108
+  3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+    |                                                                                                            ^ [3]
+  6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+  7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:180:28
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [2]
+    |                  ^^^^^^ [3]
+153 | ): void {}
+154 | 
+    :
+178 | 
+179 | function non_tail_collector_with_fixed_expected_accepts(): void {
+180 |   take_fixed_positional_fn((...$values, named $flag) ==> {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+181 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+182 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+183 |   });
+    |   ^ [1]
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:180:28
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |                  ^^^^^^ [2]
+    |                                ^^^^ [3]
+153 | ): void {}
+154 | 
+    :
+178 | 
+179 | function non_tail_collector_with_fixed_expected_accepts(): void {
+180 |   take_fixed_positional_fn((...$values, named $flag) ==> {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+181 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+182 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+183 |   });
+    |   ^ [1]
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:181:5
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |                  ^^^^^^ [2]
+153 | ): void {}
+154 | 
+    :
+179 | function non_tail_collector_with_fixed_expected_accepts(): void {
+180 |   take_fixed_positional_fn((...$values, named $flag) ==> {
+181 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                               ^^^ [3]
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:182:5
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [3]
+153 | ): void {}
+154 | 
+    :
+180 |   take_fixed_positional_fn((...$values, named $flag) ==> {
+181 |     hh_expect_equivalent<vec<(int | string)>>($values);
+182 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                          ^^^^ [2]
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+named_lambda_reordered_params.php:182:32
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [4]
+153 | ): void {}
+154 | 
+    :
+180 |   take_fixed_positional_fn((...$values, named $flag) ==> {
+181 |     hh_expect_equivalent<vec<(int | string)>>($values);
+182 |     hh_expect_equivalent<bool>($flag);
+    |                          ^^^^ [2]
+    |                                ^^^^^ [1]
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+
+hh_single_type_check_magic.hhi:5:108
+  3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+    |                                                                                                            ^ [3]
+  6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+  7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params.php:184:28
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [2]
+    |                  ^^^^^^ [3]
+153 | ): void {}
+154 | 
+    :
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+186 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+187 |   });
+    |   ^ [1]
+188 | }
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `(int | string)` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:185:5
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                                               ^^^^ [3]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                              ^^^^^^^^^^^^^^ [2]
+186 |     hh_expect_equivalent<bool>($flag);
+187 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:185:5
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                                               ^^^^ [3]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                               ^^^ [2]
+186 |     hh_expect_equivalent<bool>($flag);
+187 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:185:5
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                                               ^^^^ [3]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                                     ^^^^^^ [2]
+186 |     hh_expect_equivalent<bool>($flag);
+187 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `(int | string)` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:185:47
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                                               ^^^^ [3]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |                              ^^^^^^^^^^^^^^ [2]
+    |                                               ^^^^^^^ [1]
+186 |     hh_expect_equivalent<bool>($flag);
+187 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:185:47
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                                               ^^^^ [3]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |                               ^^^ [2]
+    |                                               ^^^^^^^ [1]
+186 |     hh_expect_equivalent<bool>($flag);
+187 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params.php:185:47
+182 |     hh_expect_equivalent<bool>($flag);
+183 |   });
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+    |                                               ^^^^ [3]
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+    |                                     ^^^^^^ [2]
+    |                                               ^^^^^^^ [1]
+186 |     hh_expect_equivalent<bool>($flag);
+187 |   });
+
+error: Typing[4452] hh_expect_equivalent type mismatch [1]
+-> Expected `bool` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params.php:186:5
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [3]
+153 | ): void {}
+154 | 
+    :
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+186 |     hh_expect_equivalent<bool>($flag);
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+    |                          ^^^^ [2]
+187 |   });
+188 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `bool` [2]
+->   via this generic `T` [3]
+-> But got `int` [4]
+
+named_lambda_reordered_params.php:186:32
+150 | 
+151 | function take_fixed_positional_fn(
+152 |   (function(int, string, named bool $flag): void) $_,
+    |             ^^^ [4]
+153 | ): void {}
+154 | 
+    :
+184 |   take_fixed_positional_fn((...$values, named bool $flag) ==> {
+185 |     hh_expect_equivalent<vec<(int | string)>>($values);
+186 |     hh_expect_equivalent<bool>($flag);
+    |                          ^^^^ [2]
+    |                                ^^^^^ [1]
+187 |   });
+188 | }
+
+hh_single_type_check_magic.hhi:5:108
+  3 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  4 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+  5 | <<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}
+    |                                                                                                            ^ [3]
+  6 | <<__NoAutoDynamic>> function hh_show_env()[]:void {}
+  7 | <<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}
+
+78 errors found

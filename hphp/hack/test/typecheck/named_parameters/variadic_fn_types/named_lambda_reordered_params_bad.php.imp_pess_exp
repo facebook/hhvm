@@ -1,0 +1,463 @@
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('value' => int)` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:12:26
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                      ^^^ [3]
+ 6 | ): void {}
+ 7 | 
+   :
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+12 |   take_named_variadic_fn((named $extra = 0, named $name, named int...) ==> {
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |     wants_string($extra);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     wants_string($name['value']);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   });
+   |   ^ [1]
+16 | }
+17 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `shape('value' => int)` [3]
+
+named_lambda_reordered_params_bad.php:12:26
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                      ^^^ [2]
+ 6 | ): void {}
+ 7 | 
+   :
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+12 |   take_named_variadic_fn((named $extra = 0, named $name, named int...) ==> {
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+13 |     wants_string($extra);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+14 |     wants_string($name['value']);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+15 |   });
+   |   ^ [1]
+16 | }
+17 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `shape('value' => int)` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:12:33
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+ 6 | ): void {}
+ 7 | 
+   :
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+12 |   take_named_variadic_fn((named $extra = 0, named $name, named int...) ==> {
+   |                                 ^^^^^^ [1]
+   |                                          ^ [3]
+13 |     wants_string($extra);
+14 |     wants_string($name['value']);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `shape('value' => int)` [3]
+
+named_lambda_reordered_params_bad.php:13:18
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+ 6 | ): void {}
+ 7 | 
+ 8 | function wants_int(int $x): void {}
+ 9 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+12 |   take_named_variadic_fn((named $extra = 0, named $name, named int...) ==> {
+13 |     wants_string($extra);
+   |                  ^^^^^^ [1]
+14 |     wants_string($name['value']);
+15 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:13:18
+ 7 | 
+ 8 | function wants_int(int $x): void {}
+ 9 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+12 |   take_named_variadic_fn((named $extra = 0, named $name, named int...) ==> {
+   |                                          ^ [3]
+13 |     wants_string($extra);
+   |                  ^^^^^^ [1]
+14 |     wants_string($name['value']);
+15 |   });
+
+error: Typing[4110] Typing error [1]
+-> Expected an array that can be indexed [1]
+-> But got `int` [2]
+
+named_lambda_reordered_params_bad.php:14:18
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                                                      ^^^ [2]
+ 6 | ): void {}
+ 7 | 
+   :
+12 |   take_named_variadic_fn((named $extra = 0, named $name, named int...) ==> {
+13 |     wants_string($extra);
+14 |     wants_string($name['value']);
+   |                  ^^^^^^^^^^^^^^ [1]
+15 |   });
+16 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `num` [3]
+
+named_lambda_reordered_params_bad.php:20:15
+ 6 | ): void {}
+ 7 | 
+ 8 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 9 | function wants_string(string $x): void {}
+10 | 
+   :
+17 | 
+18 | function named_variadic_explicit_annotations_remain_authoritative(): void {
+19 |   take_named_variadic_fn((named num $extra = 0, named shape('value' => int) $name, named int...) ==> {
+   |                                 ^^^ [3]
+20 |     wants_int($extra);
+   |               ^^^^^^ [1]
+21 |   });
+22 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('value' => int)` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:25:26
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                      ^^^ [3]
+ 6 | ): void {}
+ 7 | 
+   :
+23 | 
+24 | function named_variadic_extra_default_mistype_rejects(): void {
+25 |   take_named_variadic_fn((named $extra = "s", named $name, named int...) ==> {});
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 | }
+27 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `shape('value' => int)` [3]
+
+named_lambda_reordered_params_bad.php:25:26
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                      ^^^ [2]
+ 6 | ): void {}
+ 7 | 
+   :
+23 | 
+24 | function named_variadic_extra_default_mistype_rejects(): void {
+25 |   take_named_variadic_fn((named $extra = "s", named $name, named int...) ==> {});
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+26 | }
+27 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `shape('value' => int)` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params_bad.php:25:33
+ 3 | 
+ 4 | function take_named_variadic_fn(
+ 5 |   (function(named shape('value' => int) $name, named int...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+ 6 | ): void {}
+ 7 | 
+   :
+23 | 
+24 | function named_variadic_extra_default_mistype_rejects(): void {
+25 |   take_named_variadic_fn((named $extra = "s", named $name, named int...) ==> {});
+   |                                 ^^^^^^ [1]
+   |                                          ^^^ [3]
+26 | }
+27 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `shape('value' => int)` [2]
+-> But got `num` [3]
+
+named_lambda_reordered_params_bad.php:33:30
+27 | 
+28 | function take_named_num_variadic_fn(
+29 |   (function(named shape('value' => int) $name, named num...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+   |                                                      ^^^ [3]
+30 | ): void {}
+31 | 
+32 | function named_variadic_context_not_narrowed_to_default(): void {
+33 |   take_named_num_variadic_fn((named $extra = 0, named $name, named num...) ==> {
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+34 |     wants_int($extra);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+35 |   });
+   |   ^ [1]
+36 | }
+37 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `num` [2]
+-> But got `shape('value' => int)` [3]
+
+named_lambda_reordered_params_bad.php:33:30
+27 | 
+28 | function take_named_num_variadic_fn(
+29 |   (function(named shape('value' => int) $name, named num...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+   |                                                      ^^^ [2]
+30 | ): void {}
+31 | 
+32 | function named_variadic_context_not_narrowed_to_default(): void {
+33 |   take_named_num_variadic_fn((named $extra = 0, named $name, named num...) ==> {
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+34 |     wants_int($extra);
+   |     ^^^^^^^^^^^^^^^^^^ [1]
+35 |   });
+   |   ^ [1]
+36 | }
+37 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `shape('value' => int)` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:33:37
+27 | 
+28 | function take_named_num_variadic_fn(
+29 |   (function(named shape('value' => int) $name, named num...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [2]
+30 | ): void {}
+31 | 
+32 | function named_variadic_context_not_narrowed_to_default(): void {
+33 |   take_named_num_variadic_fn((named $extra = 0, named $name, named num...) ==> {
+   |                                     ^^^^^^ [1]
+   |                                              ^ [3]
+34 |     wants_int($extra);
+35 |   });
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `shape('value' => int)` [3]
+
+named_lambda_reordered_params_bad.php:34:15
+ 6 | ): void {}
+ 7 | 
+ 8 | function wants_int(int $x): void {}
+   |                    ^^^ [2]
+ 9 | function wants_string(string $x): void {}
+10 | 
+   :
+27 | 
+28 | function take_named_num_variadic_fn(
+29 |   (function(named shape('value' => int) $name, named num...): void) $_,
+   |                   ^^^^^^^^^^^^^^^^^^^^^ [3]
+30 | ): void {}
+31 | 
+32 | function named_variadic_context_not_narrowed_to_default(): void {
+33 |   take_named_num_variadic_fn((named $extra = 0, named $name, named num...) ==> {
+34 |     wants_int($extra);
+   |               ^^^^^^ [1]
+35 |   });
+36 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params_bad.php:47:27
+37 | 
+38 | function take_both_collectors_fn(
+39 |   (function(int, string, named bool $flag, named int...): void) $_,
+   |             ^^^ [2]
+   |                  ^^^^^^ [3]
+40 | ): void {}
+41 | 
+   :
+45 | 
+46 | function both_collectors_extra_positional_body_mistype_rejects(): void {
+47 |   take_both_collectors_fn((...$rest, named $flag, named int...) ==> {
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+48 |     wants_int_vec($rest);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+49 |     wants_int($flag);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+50 |   });
+   |   ^ [1]
+51 |   take_both_variadic_collectors_fn((...$rest, named $flag, named int...) ==> {
+52 |     wants_int_vec($rest);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params_bad.php:47:27
+37 | 
+38 | function take_both_collectors_fn(
+39 |   (function(int, string, named bool $flag, named int...): void) $_,
+   |                  ^^^^^^ [2]
+   |                                ^^^^ [3]
+40 | ): void {}
+41 | 
+   :
+45 | 
+46 | function both_collectors_extra_positional_body_mistype_rejects(): void {
+47 |   take_both_collectors_fn((...$rest, named $flag, named int...) ==> {
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+48 |     wants_int_vec($rest);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+49 |     wants_int($flag);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+50 |   });
+   |   ^ [1]
+51 |   take_both_variadic_collectors_fn((...$rest, named $flag, named int...) ==> {
+52 |     wants_int_vec($rest);
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `int` [2]
+-> But got `string` [3]
+
+named_lambda_reordered_params_bad.php:51:36
+41 | 
+42 | function take_both_variadic_collectors_fn(
+43 |   (function(int, string..., named bool $flag, named int...): void) $_,
+   |             ^^^ [2]
+   |                  ^^^^^^ [3]
+44 | ): void {}
+45 | 
+   :
+49 |     wants_int($flag);
+50 |   });
+51 |   take_both_variadic_collectors_fn((...$rest, named $flag, named int...) ==> {
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 |     wants_int_vec($rest);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+53 |     wants_int($flag);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+54 |   });
+   |   ^ [1]
+55 | }
+56 | 
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `bool` [3]
+
+named_lambda_reordered_params_bad.php:51:36
+41 | 
+42 | function take_both_variadic_collectors_fn(
+43 |   (function(int, string..., named bool $flag, named int...): void) $_,
+   |                  ^^^^^^ [2]
+   |                                   ^^^^ [3]
+44 | ): void {}
+45 | 
+   :
+49 |     wants_int($flag);
+50 |   });
+51 |   take_both_variadic_collectors_fn((...$rest, named $flag, named int...) ==> {
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ [1]
+52 |     wants_int_vec($rest);
+   |     ^^^^^^^^^^^^^^^^^^^^^ [1]
+53 |     wants_int($flag);
+   |     ^^^^^^^^^^^^^^^^^ [1]
+54 |   });
+   |   ^ [1]
+55 | }
+56 | 
+
+error: Typing[4331] Wrong type hint [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:60:15
+58 | 
+59 | function immediately_called_named_collector_body_mistype_rejects(): void {
+60 |   (($x, named $optional = 0, named arraykey...) ==> {
+   |               ^^^^^^^^^ [1]
+   |                           ^ [3]
+61 |     wants_string($x);
+62 |     wants_string($optional);
+63 |   })(1, extra = "s");
+   |                 ^^^ [2]
+64 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:61:18
+ 7 | 
+ 8 | function wants_int(int $x): void {}
+ 9 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+   :
+59 | function immediately_called_named_collector_body_mistype_rejects(): void {
+60 |   (($x, named $optional = 0, named arraykey...) ==> {
+61 |     wants_string($x);
+   |                  ^^ [1]
+62 |     wants_string($optional);
+63 |   })(1, extra = "s");
+   |      ^ [3]
+64 | }
+
+error: Typing[4110] Invalid argument [1]
+-> Expected `string` [2]
+-> But got `int` [3]
+
+named_lambda_reordered_params_bad.php:62:18
+ 7 | 
+ 8 | function wants_int(int $x): void {}
+ 9 | function wants_string(string $x): void {}
+   |                       ^^^^^^ [2]
+10 | 
+11 | function named_variadic_extra_body_mistype_rejects(): void {
+   :
+58 | 
+59 | function immediately_called_named_collector_body_mistype_rejects(): void {
+60 |   (($x, named $optional = 0, named arraykey...) ==> {
+   |                           ^ [3]
+61 |     wants_string($x);
+62 |     wants_string($optional);
+   |                  ^^^^^^^^^ [1]
+63 |   })(1, extra = "s");
+64 | }
+
+21 errors found

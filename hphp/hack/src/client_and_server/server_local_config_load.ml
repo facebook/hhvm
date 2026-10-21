@@ -82,7 +82,6 @@ let default =
     prefetch_decls_threshold = 0;
     produce_streaming_errors = true;
     consume_streaming_errors = false;
-    use_agent_error_format = Agent_error_format_unconfigured;
     rust_provider_backend = true;
     isolation_allow_decl_repackaging = false;
     naming_sqlite_path = None;
@@ -734,12 +733,6 @@ let load_
       ~default:default.consume_streaming_errors
       config
   in
-  let use_agent_error_format =
-    match bool_opt Config_keys.Hhconf.use_agent_error_format config with
-    | None -> Agent_error_format_unconfigured
-    | Some false -> Agent_error_format_disabled
-    | Some true -> Agent_error_format_enabled
-  in
   let watchman =
     Watchman.load ~current_version ~default:default.watchman config
   in
@@ -1257,7 +1250,6 @@ let load_
     prefetch_decls_threshold;
     produce_streaming_errors;
     consume_streaming_errors;
-    use_agent_error_format;
     rust_provider_backend;
     isolation_allow_decl_repackaging;
     naming_sqlite_path;

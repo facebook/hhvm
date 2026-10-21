@@ -473,8 +473,6 @@ module Hhconf : sig
 
   val consume_streaming_errors : string
 
-  val use_agent_error_format : string
-
   val cpu_priority : string
 
   val enable_fuzzy_search : string

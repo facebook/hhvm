@@ -18,6 +18,6 @@ val build_mode : string
 val is_build_optimized : bool
 
 (**
-  Returns `true` iff the binary was not made by fbpkg
+  Returns [true] iff the embedded package name is empty.
 *)
 val is_dev_build : bool

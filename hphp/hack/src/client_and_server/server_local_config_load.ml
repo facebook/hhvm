@@ -18,6 +18,16 @@ let output_config_section title output_config =
   Printf.eprintf "\n%!";
   ()
 
+let output_build_and_test_mode () =
+  output_config_section "Build and test mode" @@ fun () ->
+  Printf.eprintf
+    "is_dev_build = %b\nHH_TEST_MODE = %s\nprod_telemetry = %b\n"
+    Build_id.is_dev_build
+    (match Sys.getenv_opt "HH_TEST_MODE" with
+    | None -> "<unset>"
+    | Some value -> Printf.sprintf "%S" value)
+    (Sys_utils.prod_telemetry ())
+
 let default =
   {
     saved_state = Global_options.default_saved_state;
@@ -320,6 +330,7 @@ let load_
     ~deactivate_saved_state_rollout
     ~from
     ~overrides : t =
+  if not silent then output_build_and_test_mode ();
   let (experiments_config_meta, config) =
     match config with
     | Some c ->

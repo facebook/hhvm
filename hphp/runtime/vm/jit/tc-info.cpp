@@ -224,11 +224,8 @@ std::string getTCSpace() {
 std::string getTCAddrs() {
   std::string addrs;
 
-  code().forEachSection([&] (const char* name, auto const& s) {
-    auto const addr = Cfg::Jit::DynamicTCSections
-      ? code().base()
-      : s.block().base();
-    addrs += folly::format("{}: {}\n", name, addr).str();
+  code().forEachSection([&] (const char* name, auto const&) {
+    addrs += folly::format("{}: {}\n", name, code().base()).str();
   });
   return addrs;
 }

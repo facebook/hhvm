@@ -106,11 +106,6 @@ struct CodeCache {
     body("data");
   }
 
-  // maxUsage should be slightly less than the max capacity to avoid overflow.
-  static uint32_t maxUsage(uint32_t total) {
-    return total - total / 128;
-  }
-
   size_t codeSize() const { return m_codeSize; }
 
   size_t mainUsed() const { return m_main.used(); }
@@ -165,10 +160,9 @@ struct CodeCache {
   }
 
   /*
-   * Prevent or allow writing to the code section of this CodeCache.
+   * Prevent writing to the code section of this CodeCache.
    */
   void protect();
-  void unprotect();
 
   const CodeBlock& all()    const { return m_all; }
 
@@ -260,8 +254,6 @@ struct CodeCache {
 private:
   template<typename S>
   CodeBlock* releaseSection(S& section, size_t size);
-
-  void cutTCSizeTo(size_t targetSize);
 
   static constexpr const char kMain[] = "main";
   static constexpr const char kCold[] = "cold";

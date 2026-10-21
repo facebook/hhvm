@@ -300,7 +300,6 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
   return TranslationResult::Scope::Success;
 }
 
-static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 // After DataBlockFull exception is raised consecutively this number of times,
 // we consider TC as being full.
 static constexpr size_t kConsecutiveTransBlocksFull = 3;
@@ -324,23 +323,6 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
 
     // Set this so that next checks are faster.
   s_TCisFull.store(true, std::memory_order_release);
-  auto const main_under = code().mainUsed() < Cfg::CodeCache::AMaxUsage;
-  auto const cold_under = code().coldUsed() < Cfg::CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozenUsed() < Cfg::CodeCache::AFrozenMaxUsage;
-
-  if (!Cfg::Jit::DynamicTCSections && main_under && !s_did_log.test_and_set() &&
-      Cfg::Eval::ProfBranchSampleFreq == 0) {
-    // If we ran out of TC space in cold or frozen but not in main,
-    // something unexpected is happening and we should take note of
-    // it. We skip this logging if TC branch profiling is on, since
-    // it fills up code and frozen at a much higher rate.
-    if (!cold_under) {
-      logPerfWarning("cold_full", 1, [] (StructuredLogEntry&) {});
-    }
-    if (!froz_under) {
-      logPerfWarning("frozen_full", 1, [] (StructuredLogEntry&) {});
-    }
-  }
 
   return TranslationResult::Scope::Process;
 }
@@ -911,10 +893,8 @@ void incrementLiveFuncTransBytes(FuncId funcId, uint32_t bytes) {
 }
 
 bool tcIsFull() {
-  if (Cfg::Jit::DynamicTCSections) {
-    if (Cfg::Jit::DataBlockSizeRatio > 0) {
-      return s_TCisFull.load(std::memory_order_acquire);
-    }
+  if (Cfg::Jit::DataBlockSizeRatio > 0) {
+    return s_TCisFull.load(std::memory_order_acquire);
   }
 
   return code().isAnySectionFull();

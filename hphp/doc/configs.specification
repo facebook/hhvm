@@ -2394,16 +2394,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   On average, log every 1 / Jit.TranslationStatsSampleRate counters. Has
   no effect unless Jit.CollectTranslationStats is set.
 
-- bool Jit.DynamicTCSections = true, paulbiss
-
-  Dynamically allocate TC blocks
-
 - bool Jit.EnableConcurrentCodeViews, UNKNOWN
 
   Enable concurrent code cache views, allowing multiple JIT threads to emit
   into independent TC sections in parallel. Defaults to true when
-  Jit.DynamicTCSections is on, Repo.Authoritative is true, and
-  Eval.MaxConcurrentCodeViews > 1.
+  Repo.Authoritative is true and Eval.MaxConcurrentCodeViews > 1.
 
 - double Jit.DataBlockSizeRatio = 0.007, UNKNOWN
 

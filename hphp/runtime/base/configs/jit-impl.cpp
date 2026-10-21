@@ -93,7 +93,7 @@ bool JitLoader::LayoutProfileSplitHotColdDefault() {
 }
 
 bool JitLoader::EnableConcurrentCodeViewsDefault() {
-  return Jit::DynamicTCSections && Cfg::Repo::Authoritative && Cfg::Eval::MaxConcurrentCodeViews > 1;
+  return Cfg::Repo::Authoritative && Cfg::Eval::MaxConcurrentCodeViews > 1;
 }
 
 bool JitLoader::PGODefault() {

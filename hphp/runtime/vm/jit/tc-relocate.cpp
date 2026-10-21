@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -99,6 +100,8 @@ void relocateTranslation(
     assertx(!main.contains(ib.toSmash()));
     assertx(!cold.contains(ib.toSmash()));
   }
+  CodeWriteScope mainScope(main);
+  CodeWriteScope coldScope(cold);
   memset(main.base(), 0xcc, main.frontier() - main.base());
   memset(cold.base(), 0xcc, cold.frontier() - cold.base());
   if (arch::any<arch::ARM>()) {

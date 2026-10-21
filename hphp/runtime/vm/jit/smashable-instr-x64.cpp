@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
@@ -83,21 +84,25 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
 
 void smashMovq(TCA inst, uint64_t imm) {
   always_assert(is_aligned(inst, Alignment::SmashMovq));
+  CodeWriteScope scope(inst, inst + smashableMovqLen());
   *reinterpret_cast<uint64_t*>(inst + kSmashMovqImmOff) = imm;
 }
 
 void smashCmpq(TCA inst, uint32_t imm) {
   always_assert(is_aligned(inst, Alignment::SmashCmpq));
+  CodeWriteScope scope(inst, inst + smashableCmpqLen());
   *reinterpret_cast<uint32_t*>(inst + kSmashCmpqImmOff) = imm;
 }
 
 void smashCall(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashCall));
+  CodeWriteScope scope(inst, inst + smashableCallLen());
   X64Assembler::patchCall(inst, inst, target);
 }
 
 void smashJmp(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJmp));
+  CodeWriteScope scope(inst, inst + smashableJmpLen());
 
   // Smashing jmps can be tricky because we sometimes override the entire five
   // byte instruction with a nop rather than updating the four byte immediate.
@@ -143,14 +148,17 @@ void smashJmp(TCA inst, TCA target) {
 
 void smashJcc(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
+  CodeWriteScope scope(inst, inst + smashableJccLen());
   X64Assembler::patchJcc(inst, inst, target);
 }
 
 void smashInterceptJcc(TCA inst) {
+  CodeWriteScope scope(inst, inst + 6);
   X64Assembler::patchInterceptJcc(inst);
 }
 
 void smashInterceptJmp(TCA inst) {
+  CodeWriteScope scope(inst, inst + 5);
   X64Assembler::patchInterceptJmp(inst);
 }
 

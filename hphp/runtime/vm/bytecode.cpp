@@ -5637,6 +5637,15 @@ static ALWAYS_INLINE bool interpCollectCoverage() {
 #  define HHVM_MUSTTAIL
 #endif
 
+#if defined(__has_attribute)
+#  if __has_attribute(preserve_none)
+#    define HHVM_TAIL_CALL_CC __attribute__((preserve_none))
+#  endif
+#endif
+#ifndef HHVM_TAIL_CALL_CC
+#  define HHVM_TAIL_CALL_CC
+#endif
+
 #if HHVM_HAS_MUSTTAIL
 
 namespace {
@@ -5649,7 +5658,8 @@ struct TCDispatchState {
   bool debuggerAttached;
 };
 
-using TCDispatchFn = JitResumeAddr (*)(TCDispatchState&);
+using TCDispatchFn =
+  JitResumeAddr (HHVM_TAIL_CALL_CC *)(TCDispatchState&);
 extern const TCDispatchFn tcDispatchTable[];
 
 // Pre-opcode work, in the same order as dispatchImpl(): the trace (its DISPATCH
@@ -5703,7 +5713,8 @@ tcDispatchPost(TCDispatchState& st, JitResumeAddr retAddr) {
 // matches the table entries) so the tail call is legal; the actual opcode body
 // runs inside iopWrap##name(), whose locals' destructors run before we return.
 #define O(name, imm, push, pop, flags)                                  \
-  JitResumeAddr tcDispatch_##name(TCDispatchState& st) {                \
+  JitResumeAddr HHVM_TAIL_CALL_CC                                       \
+  tcDispatch_##name(TCDispatchState& st) {                              \
     tcDispatchPre(st);                                                  \
     if (Stats::enableInstrCount()) {                                    \
       Stats::inc(Stats::Instr_InterpBB##name);                          \
@@ -5740,6 +5751,8 @@ JitResumeAddr dispatchTailCall(bool collectCoverage) {
 } // namespace
 
 #endif // HHVM_HAS_MUSTTAIL
+
+#undef HHVM_TAIL_CALL_CC
 
 JitResumeAddr dispatchImpl() {
   auto const checkCoverage = [&] {

@@ -5724,21 +5724,17 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if parameter_modifier(node, TokenKind::Named).is_some() {
                 self.check_can_use_feature(node, &FeatureName::NamedParameters);
             }
-            match self.env.context.active_callable {
-                Some(node) => match node.children {
-                    AnonymousFunction(_) | LambdaExpression(_) => {
-                        self.check_constant_expression_ban_static(&x.default_value);
-                    }
-                    _ => {}
-                },
-                _ => {}
-            }
+            let in_lambda = matches!(
+                self.env.context.active_callable.map(|node| &node.children),
+                Some(AnonymousFunction(_) | LambdaExpression(_))
+            );
             let rules = ConstantRules {
-                // `static` in constant
-                static_allowed: !self
-                    .env
-                    .parser_options
-                    .disallow_static_constants_in_default_func_args,
+                // Lambda defaults never allow `static`.
+                static_allowed: !in_lambda
+                    && !self
+                        .env
+                        .parser_options
+                        .disallow_static_constants_in_default_func_args,
             };
             self.check_constant_expression(&x.default_value, rules)
         }

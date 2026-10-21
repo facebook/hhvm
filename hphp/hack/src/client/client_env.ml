@@ -13,7 +13,7 @@ type rename_mode =
   | Method
   | Unspecified
 
-type status_single = {
+type status_files = {
   filenames: string list;
   show_tast: bool;
   preexisting_warnings: bool;
@@ -67,7 +67,7 @@ type client_mode =
   | MODE_SERVER_RAGE
   | MODE_STATS
   | MODE_STATUS
-  | MODE_STATUS_SINGLE of status_single
+  | MODE_STATUS_FILES of status_files
   | MODE_LOG_ERRORS of log_errors_params
   | MODE_TYPE_AT_POS of string
   | MODE_INFER_DYNAMIC of string * bool

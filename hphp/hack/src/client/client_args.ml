@@ -360,7 +360,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let dump_config = ref false in
 
   let set_from x () = from := x in
-  let single_files = ref [] in
+  let files_to_check = ref [] in
   let only_log_errors = ref false in
   let log_to_file = ref None in
   let set_mode ?(validate = true) x =
@@ -372,7 +372,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       ()
     end
   in
-  let add_single x = single_files := x :: !single_files in
+  let add_single x = files_to_check := x :: !files_to_check in
   let set_log_to_file x = log_to_file := Some x in
   let add_multi f =
     let files =
@@ -382,7 +382,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       |> String.strip
       |> String.split ~on:'\n'
     in
-    single_files := files @ !single_files
+    files_to_check := files @ !files_to_check
   in
   let add_warning_switch switch =
     warning_switches := switch :: !warning_switches
@@ -390,15 +390,15 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let add_invalid_warning_code i =
     invalid_warning_codes := i :: !invalid_warning_codes
   in
-  let set_mode_from_single_files (show_tast : bool) preexisting_warnings =
-    match !single_files with
+  let set_mode_from_files_to_check (show_tast : bool) preexisting_warnings =
+    match !files_to_check with
     | [] -> ()
-    | single_files ->
+    | files_to_check ->
       (match !mode with
       | _ ->
         set_mode
-          (MODE_STATUS_SINGLE
-             { filenames = single_files; show_tast; preexisting_warnings }))
+          (MODE_STATUS_FILES
+             { filenames = files_to_check; show_tast; preexisting_warnings }))
   in
   let set_mode_only_log_errors config =
     if !only_log_errors then set_mode (MODE_LOG_ERRORS config)
@@ -1305,7 +1305,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     exit 0
   );
 
-  set_mode_from_single_files !show_tast !preexisting_warnings;
+  set_mode_from_files_to_check !show_tast !preexisting_warnings;
   set_mode_only_log_errors
     { log_file = !log_to_file; preexisting_warnings = !preexisting_warnings };
   let mode =

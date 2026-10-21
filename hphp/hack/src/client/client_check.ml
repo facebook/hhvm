@@ -402,7 +402,7 @@ let main_internal
       in
       Lwt.return (exit_status, telemetry)
   | Client_env.(
-      MODE_STATUS_SINGLE { filenames; show_tast; preexisting_warnings }) ->
+      MODE_STATUS_FILES { filenames; show_tast; preexisting_warnings }) ->
     let file_input filename =
       match filename with
       | "-" ->
@@ -1285,7 +1285,11 @@ let main
     (local_config : Server_local_config.t)
     ~(init_proc_stack : string list option) : _ =
   Hack_event_logger.client_set_mode
-    (Client_env.Variants_of_client_mode.to_name args.mode);
+    (match args.mode with
+    | Client_env.MODE_STATUS_FILES _ ->
+      (* Telemetry names are stable across internal renames. *)
+      "MODE_STATUS_SINGLE"
+    | mode -> Client_env.Variants_of_client_mode.to_name mode);
 
   Hack_event_logger.client_check_start ~reason:args.reason;
   Client_spinner.start_heartbeat_telemetry ();

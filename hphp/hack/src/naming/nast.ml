@@ -283,7 +283,7 @@ type ignore_attribute_env = { ignored_attributes: string list }
 
 (** Some utility functions **)
 
-let ast_deregister_attributes_mapper =
+let make_ast_deregister_attributes_mapper () =
   object (self)
     inherit [_] Aast.endo as super
 
@@ -321,6 +321,9 @@ let ast_deregister_attributes_mapper =
       super#on_class_ env this
   end
 
+let ast_deregister_attributes_mapper =
+  lazy (make_ast_deregister_attributes_mapper ())
+
 let deregister_ignored_attributes (ast : program) =
   let env =
     {
@@ -328,9 +331,9 @@ let deregister_ignored_attributes (ast : program) =
       ignored_attributes = [Naming_special_names.UserAttributes.uaPHPStdLib];
     }
   in
-  ast_deregister_attributes_mapper#on_program env ast
+  (Lazy.force ast_deregister_attributes_mapper)#on_program env ast
 
-let ast_no_pos_or_docblock_mapper =
+let make_ast_no_pos_or_docblock_mapper () =
   object
     inherit [_] Aast.endo as super
 
@@ -362,8 +365,10 @@ let ast_no_pos_or_docblock_mapper =
   end
 
 (* Given an AST, return an AST with no position or docblock info *)
+let ast_no_pos_or_docblock_mapper = lazy (make_ast_no_pos_or_docblock_mapper ())
+
 let remove_pos_and_docblock ast =
-  ast_no_pos_or_docblock_mapper#on_program () ast
+  (Lazy.force ast_no_pos_or_docblock_mapper)#on_program () ast
 
 (* Given an AST, generate a unique hash for its decl tree. *)
 let generate_ast_decl_hash ast =

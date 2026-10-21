@@ -111,7 +111,7 @@ let unsafe_contexts_ns =
       ns_name = Some (Utils.strip_ns SN.Coeffects.unsafe_contexts);
     }
 
-class ['a, 'b, 'c, 'd] generic_elaborator =
+let make_generic_elaborator () =
   object (self)
     inherit [_] Aast.endo as super
 
@@ -499,26 +499,30 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       List.rev rev_defs
   end
 
-let elaborate_namespaces = new generic_elaborator
+let elaborate_namespaces = lazy (make_generic_elaborator ())
 
 let elaborate_program program =
-  elaborate_namespaces#on_program
+  (Lazy.force elaborate_namespaces)#on_program
     (make_env Namespace_env.empty_with_default)
     program
 
 let elaborate_fun_def fd =
-  elaborate_namespaces#on_fun_def (make_env fd.Aast.fd_namespace) fd
+  (Lazy.force elaborate_namespaces)#on_fun_def
+    (make_env fd.Aast.fd_namespace)
+    fd
 
 let elaborate_class_ c =
-  elaborate_namespaces#on_class_ (make_env c.Aast.c_namespace) c
+  (Lazy.force elaborate_namespaces)#on_class_ (make_env c.Aast.c_namespace) c
 
 let elaborate_module_def m =
-  elaborate_namespaces#on_module_def
+  (Lazy.force elaborate_namespaces)#on_module_def
     (make_env Namespace_env.empty_with_default)
     m
 
 let elaborate_gconst cst =
-  elaborate_namespaces#on_gconst (make_env cst.Aast.cst_namespace) cst
+  (Lazy.force elaborate_namespaces)#on_gconst
+    (make_env cst.Aast.cst_namespace)
+    cst
 
 let elaborate_typedef td =
-  elaborate_namespaces#on_typedef (make_env td.Aast.t_namespace) td
+  (Lazy.force elaborate_namespaces)#on_typedef (make_env td.Aast.t_namespace) td

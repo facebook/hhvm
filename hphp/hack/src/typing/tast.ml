@@ -291,7 +291,7 @@ let get_position ((_, p, _) : expr) = p
 (* Get the type of an expression *)
 let get_type ((ty, _, _) : expr) = ty
 
-let nast_converter =
+let make_nast_converter () =
   object
     inherit [_] Aast.map as super
 
@@ -319,11 +319,14 @@ let nast_converter =
       | _ -> ex_
   end
 
-let to_nast p = nast_converter#on_program () p
+let nast_converter = lazy (make_nast_converter ())
 
-let to_nast_expr (tast : expr) : Nast.expr = nast_converter#on_expr () tast
+let to_nast p = (Lazy.force nast_converter)#on_program () p
 
-let to_nast_class_id_ cid = nast_converter#on_class_id_ () cid
+let to_nast_expr (tast : expr) : Nast.expr =
+  (Lazy.force nast_converter)#on_expr () tast
+
+let to_nast_class_id_ cid = (Lazy.force nast_converter)#on_class_id_ () cid
 
 let force_lazy_values_saved_env (saved_env : saved_env) : saved_env =
   let { tcopt; inference_env; tpenv; fun_tast_info; checked } = saved_env in

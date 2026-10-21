@@ -1,0 +1,14 @@
+-09:00            'now' instant: ok, local time: ok
+-09:00            ''    instant: ok, local time: ok
++05:30            'now' instant: ok, local time: ok
++05:30            ''    instant: ok, local time: ok
++14:00            'now' instant: ok, local time: ok
++14:00            ''    instant: ok, local time: ok
+-12:00            'now' instant: ok, local time: ok
+-12:00            ''    instant: ok, local time: ok
+UTC               'now' instant: ok, local time: ok
+UTC               ''    instant: ok, local time: ok
+America/Anchorage 'now' instant: ok, local time: ok
+America/Anchorage ''    instant: ok, local time: ok
+Etc/GMT+9         'now' instant: ok, local time: ok
+Etc/GMT+9         ''    instant: ok, local time: ok

@@ -5656,15 +5656,9 @@ enum class TCDispatchMode : uint8_t {
   DebuggerCoverage,
 };
 
-struct TCDispatchState {
-  PC pc;    // points just past the current opcode (at its immediates)
-  PC opPC;  // start of the current instruction
-};
-
 struct TCDispatchTable;
 using TCDispatchFn =
-  JitResumeAddr (HHVM_TAIL_CALL_CC *)(
-    TCDispatchState&, const TCDispatchTable*);
+  JitResumeAddr (HHVM_TAIL_CALL_CC *)(PC, const TCDispatchTable*);
 struct TCDispatchTable {
   TCDispatchFn entries[Op_count];
 };
@@ -5692,12 +5686,13 @@ ALWAYS_INLINE const TCDispatchTable* tcDispatchTable(bool collectCoverage) {
 // body. This lets all modes share the body's production PGO profile while
 // keeping hook checks off the direct path.
 template<TCDispatchMode mode>
-ALWAYS_INLINE void tcDispatchInstrument(const TCDispatchState& st) {
+ALWAYS_INLINE void tcDispatchInstrument() {
+  auto const opPC = vmpc();
   if constexpr (mode != TCDispatchMode::Coverage) {
-    phpDebuggerOpcodeHook(st.opPC);
+    phpDebuggerOpcodeHook(opPC);
   }
   if constexpr (mode != TCDispatchMode::Debugger) {
-    recordCodeCoverage(st.opPC);
+    recordCodeCoverage(opPC);
   }
 }
 
@@ -5705,13 +5700,13 @@ ALWAYS_INLINE void tcDispatchInstrument(const TCDispatchState& st) {
 // Keep the trace path shared so debug builds do not duplicate its formatting
 // and stack-walking code in every opcode handler. That keeps the tail-call
 // dispatch working set small when tracing is available but disabled at runtime.
-NEVER_INLINE void tcDispatchTrace(const TCDispatchState& st) {
+NEVER_INLINE void tcDispatchTrace() {
   COND_STACKTRACE("dispatch:                    ");
   FTRACE(1, "dispatch: {}: {}\n", pcOff(),
-         instrToString(st.opPC, vmfp()->func()));
+         instrToString(vmpc(), vmfp()->func()));
 }
 #else
-ALWAYS_INLINE void tcDispatchTrace(const TCDispatchState&) {}
+ALWAYS_INLINE void tcDispatchTrace() {}
 #endif
 
 // Post-opcode bookkeeping. Mirrors the tail of OPCODE_MAIN_BODY. Returns
@@ -5719,9 +5714,9 @@ ALWAYS_INLINE void tcDispatchTrace(const TCDispatchState&) {}
 // JitResumeAddr that the dispatcher must return to its caller.
 template<Op op>
 ALWAYS_INLINE Optional<JitResumeAddr>
-tcDispatchPost(TCDispatchState& st, JitResumeAddr retAddr) {
-  vmpc() = st.pc;
-  if (instrCanHalt(op) && UNLIKELY(!st.pc)) {
+tcDispatchPost(PC pc, JitResumeAddr retAddr) {
+  vmpc() = pc;
+  if (instrCanHalt(op) && UNLIKELY(!pc)) {
     vmfp() = nullptr;
     vmpc() = nullptr;
     // We returned from the top VM frame in this nesting level; m_savedRip in
@@ -5736,7 +5731,6 @@ tcDispatchPost(TCDispatchState& st, JitResumeAddr retAddr) {
     return retAddr;
   }
   assertx(!retAddr);
-  st.opPC = st.pc;  // start of the next instruction
   return std::nullopt;
 }
 
@@ -5744,25 +5738,25 @@ tcDispatchPost(TCDispatchState& st, JitResumeAddr retAddr) {
 // preludes. The actual opcode body runs inside iopWrap##name().
 #define O(name, imm, push, pop, flags)                                  \
   NEVER_INLINE JitResumeAddr HHVM_TAIL_CALL_CC                          \
-  tcDispatchBody_##name(                                                \
-      TCDispatchState& st, const TCDispatchTable* table) {              \
-    tcDispatchTrace(st);                                                \
+  tcDispatchBody_##name(PC pc, const TCDispatchTable* table) {          \
+    tcDispatchTrace();                                                  \
     if (Stats::enableInstrCount()) {                                    \
       Stats::inc(Stats::Instr_InterpBB##name);                          \
     }                                                                   \
-    auto const retAddr = iopWrap##name(st.pc);                          \
-    if (auto const out = tcDispatchPost<Op::name>(st, retAddr)) {       \
+    auto const retAddr = iopWrap##name(pc);                             \
+    if (auto const out = tcDispatchPost<Op::name>(pc, retAddr)) {       \
       return *out;                                                      \
     }                                                                   \
-    auto const next = decode_op(st.pc);                                 \
-    HHVM_MUSTTAIL return table->entries[size_t(next)](st, table);       \
+    auto const next = decode_op(pc);                                    \
+    HHVM_MUSTTAIL return table->entries[size_t(next)](                  \
+      pc, table);                                                       \
   }                                                                     \
   template<TCDispatchMode mode>                                         \
   NEVER_INLINE JitResumeAddr HHVM_TAIL_CALL_CC                          \
   tcDispatchInstrumented_##name(                                       \
-      TCDispatchState& st, const TCDispatchTable* table) {              \
-    tcDispatchInstrument<mode>(st);                                     \
-    HHVM_MUSTTAIL return tcDispatchBody_##name(st, table);              \
+      PC pc, const TCDispatchTable* table) {                            \
+    tcDispatchInstrument<mode>();                                       \
+    HHVM_MUSTTAIL return tcDispatchBody_##name(pc, table);              \
   }
 OPCODES
 #undef O
@@ -5796,15 +5790,13 @@ const TCDispatchTable tcDispatchDebuggerCoverageTable{{
 }};
 
 JitResumeAddr dispatchTailCall(bool collectCoverage) {
-  TCDispatchState st;
-  st.pc = vmpc();
-  st.opPC = st.pc;
   ONTRACE(1, Trace::trace("dispatch: Enter tail-call dispatch(%p)\n", vmfp()));
-  auto const op = decode_op(st.pc);
+  auto pc = vmpc();
+  auto const op = decode_op(pc);
   auto const table = tcDispatchTable(collectCoverage);
   // Root call (intentionally NOT a tail call): when the handler chain reaches a
   // control-flow/halt opcode it returns here, and we forward that to our caller.
-  return table->entries[size_t(op)](st, table);
+  return table->entries[size_t(op)](pc, table);
 }
 
 } // namespace

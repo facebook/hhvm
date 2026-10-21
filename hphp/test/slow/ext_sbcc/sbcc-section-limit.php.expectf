@@ -1,0 +1,3 @@
+%AFailed to load sandbox bytecode cache: Invalid section size for %s: Chunk 0 is %d (larger than limit of 1)
+init_errors:1
+value:hello-after-limit

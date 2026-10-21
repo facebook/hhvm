@@ -963,6 +963,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::string Eval.SBCCPath = "", UNKNOWN
 
+- uint64_t Eval.SBCCMaxUnitEmitterSectionSize = 1ULL << 36, UNKNOWN
+
+  Maximum size in bytes of the serialized UnitEmitter section in an SBCC file.
+  Set to 0 to disable the limit.
+
 - uint32_t Eval.LogDeclDeps = 0, UNKNOWN
 
 - uint32_t Eval.LogDeclErrors = 0, UNKNOWN

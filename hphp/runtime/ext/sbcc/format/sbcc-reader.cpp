@@ -28,6 +28,7 @@
 
 #include "hphp/util/blob-writer.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -44,9 +45,8 @@ struct SBCCReader::Data : Blob::Reader<SBCCChunk, SBCCIndex> {
 namespace {
 
 // Arbitrary limits on section sizes to prevent huge allocations from a
-// corrupted file. Sized so we should never hit them in practice.
-constexpr size_t kUEBlobsSizeLimit  = 1ull << 36; // 64 GB
-constexpr size_t kIndexSizeLimit    = 1ull << 27; // 128 MB
+// corrupted file.
+constexpr size_t kIndexSizeLimit     = 1ull << 27; // 128 MB
 constexpr size_t kIndexDataSizeLimit = std::numeric_limits<uint32_t>::max();
 
 } // namespace
@@ -115,9 +115,17 @@ void SBCCReader::init(const std::string& path) {
 
   // Blob::Reader::init() will re-read the header but won't abort since
   // we pre-validated magic, version, and repo schema above.
-  data->init(path, {'S', 'B', 'C', 'C'}, kCurrentVersion,
-             Blob::ReadMode::MMap);
-  data->check(SBCCChunk::UE_BLOBS, kUEBlobsSizeLimit);
+  data->init(
+    path,
+    {'S', 'B', 'C', 'C'},
+    kCurrentVersion,
+    Blob::ReadMode::MMap,
+    Blob::ErrorMode::Throw
+  );
+  data->check(
+    SBCCChunk::UE_BLOBS,
+    Cfg::Eval::SBCCMaxUnitEmitterSectionSize
+  );
   data->check(SBCCIndex::SHA1_TO_ENTRY, kIndexSizeLimit, kIndexDataSizeLimit);
 
   data->sha1ToEntryIndex =

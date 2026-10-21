@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/configs/eval-loader.h"
 
 #include "hphp/util/arch.h"
@@ -22,12 +23,27 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
+#include "hphp/util/hdf.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/process-cpu.h"
 #include "hphp/util/ptr.h"
 #include "hphp/util/roar.h"
 
 namespace HPHP::Cfg {
+
+InterpDispatchMode interpDispatchMode = InterpDispatchMode::ComputedGoto;
+
+void EvalLoader::InterpTailCallDispatchPostProcess(std::string& val) {
+  if (val == "alternate") {
+    interpDispatchMode = InterpDispatchMode::Alternate;
+    return;
+  }
+  auto const enabled = Hdf::convertRawConfigToBool(val.c_str());
+  interpDispatchMode = enabled
+    ? InterpDispatchMode::TailCall
+    : InterpDispatchMode::ComputedGoto;
+  val = enabled ? "true" : "false";
+}
 
 void EvalLoader::CheckSymLinkPostProcess(bool& val) {
   if (Cfg::Eval::RecordCodeCoverage) {

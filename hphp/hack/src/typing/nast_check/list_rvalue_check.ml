@@ -11,7 +11,7 @@ open Aast
 
 type env = { in_lvalue: bool }
 
-let visitor =
+let make_visitor () =
   object (self)
     inherit [_] Aast.iter as super
 
@@ -41,11 +41,15 @@ let visitor =
       | _ -> super#on_stmt env s
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_fun_ _env f = visitor#on_fun_ { in_lvalue = false } f
+    method! at_fun_ _env f =
+      (Lazy.force visitor)#on_fun_ { in_lvalue = false } f
 
-    method! at_method_ _env m = visitor#on_method_ { in_lvalue = false } m
+    method! at_method_ _env m =
+      (Lazy.force visitor)#on_method_ { in_lvalue = false } m
   end

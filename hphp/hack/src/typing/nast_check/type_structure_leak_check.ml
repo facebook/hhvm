@@ -10,7 +10,7 @@
 open Hh_prelude
 open Aast
 
-let visitor =
+let make_visitor () =
   object (_this)
     inherit [_] Nast_visitor.iter_with_state as super
 
@@ -26,11 +26,13 @@ let visitor =
       | _ -> super#on_hint (env, ancestor) h
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr env = visitor#on_expr (env, None)
+    method! at_expr env = (Lazy.force visitor)#on_expr (env, None)
 
     method! at_class_ env class_ =
       List.iter class_.c_typeconsts ~f:(fun tc ->
@@ -44,14 +46,16 @@ let handler =
                 else
                   "a type constant")
             in
-            visitor#on_hint (env, ancestor) hint
+            (Lazy.force visitor)#on_hint (env, ancestor) hint
           | _ -> ())
 
     method! at_typedef env td =
       match td.t_assignment with
       | SimpleTypeDef { tvh_vis = _; tvh_hint = hint } ->
-        visitor#on_hint (env, Some "a type alias") hint
+        (Lazy.force visitor)#on_hint (env, Some "a type alias") hint
       | CaseType (variant, variants) ->
         List.iter (variant :: variants) ~f:(fun variant ->
-            visitor#on_hint (env, Some "a case type") variant.Aast.tctv_hint)
+            (Lazy.force visitor)#on_hint
+              (env, Some "a case type")
+              variant.Aast.tctv_hint)
   end

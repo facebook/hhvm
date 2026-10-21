@@ -12,7 +12,7 @@ open Aast
 
 type ctx = { class_tparams: (Pos.t * string) list }
 
-let visitor =
+let make_visitor () =
   object
     inherit [ctx] Nast_visitor.iter_with_state as super
 
@@ -39,6 +39,8 @@ let visitor =
       super#on_hint (env, state) (pos, h)
   end
 
+let visitor = lazy (make_visitor ())
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -50,7 +52,7 @@ let handler =
             List.map c.c_tparams ~f:(fun { tp_name; _ } -> tp_name);
         }
       in
-      let on_hint = visitor#on_hint (env, state) in
+      let on_hint = (Lazy.force visitor)#on_hint (env, state) in
       List.iter c.c_typeconsts ~f:(fun t ->
           match t.c_tconst_kind with
           | TCAbstract

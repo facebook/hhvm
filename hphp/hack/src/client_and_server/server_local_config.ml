@@ -194,6 +194,11 @@ type quantile = {
           this should be in interval [0; n] *)
 }
 
+type agent_error_format_config =
+  | Agent_error_format_unconfigured
+  | Agent_error_format_disabled
+  | Agent_error_format_enabled
+
 (** These are the flags loaded from the following sources:
   - /etc/hh.conf
   - overridden by Knobs
@@ -319,6 +324,10 @@ type t = {
       (** whether hh_server should write errors to errors.bin file *)
   consume_streaming_errors: bool;
       (** whether hh_client should read errors from errors.bin file *)
+  use_agent_error_format: agent_error_format_config;
+      (** Whether hh_client should use the agent-oriented diagnostic format.
+          [Agent_error_format_unconfigured] means the config value was not
+          provided. *)
   rust_provider_backend: bool;
       (** Use Provider_backend.Rust_provider_backend as the global provider
        * backend, servicing File_provider, Naming_provider, and Decl_provider

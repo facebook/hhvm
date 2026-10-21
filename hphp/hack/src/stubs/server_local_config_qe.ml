@@ -14,3 +14,7 @@ type fetch = {
 }
 
 let apply_qe_overrides ~silent:_ config = (config, [])
+
+let enable_agent_error_format_exposure () = ()
+
+let log_agent_error_format_exposure () = ()

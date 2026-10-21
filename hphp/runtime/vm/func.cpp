@@ -31,7 +31,6 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/func-cleanup.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/repo-file.h"
@@ -43,6 +42,7 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/system/systemlib.h"
@@ -718,7 +718,6 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   , m_preClass(preClass)
   , m_line1(line1)
   , m_originalUnit(nullptr)
-  , m_cti_base(0)
   , m_numLocals(0)
   , m_numIterators(0)
 {
@@ -748,7 +747,6 @@ Func::SharedData::~SharedData() {
     delete table.ptr();
   }
   Func::s_extendedLineInfo.erase(this);
-  if (m_cti_base) free_cti(m_cti_base, m_cti_size);
 }
 
 void Func::SharedData::atomicRelease() {

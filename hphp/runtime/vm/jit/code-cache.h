@@ -104,7 +104,6 @@ struct CodeCache {
     body("cold");
     body("frozen");
     body("data");
-    body("bytecode");
   }
 
   // maxUsage should be slightly less than the max capacity to avoid overflow.
@@ -112,7 +111,6 @@ struct CodeCache {
     return total - total / 128;
   }
 
-  size_t tcSize() const { return m_tcSize; }
   size_t codeSize() const { return m_codeSize; }
 
   size_t mainUsed() const { return m_main.used(); }
@@ -173,9 +171,6 @@ struct CodeCache {
   void unprotect();
 
   const CodeBlock& all()    const { return m_all; }
-
-  const CodeBlock& bytecode() const { return m_bytecode; }
-        CodeBlock& bytecode()       { return m_bytecode; }
 
   const bool isAnySectionFull() const;
 
@@ -284,8 +279,7 @@ private:
 
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
-  size_t m_tcSize; // jit output
-  size_t m_codeSize; // all code (jit+bytecode)
+  size_t m_codeSize;
   size_t m_threadLocalSize;
 
   CodeSection<kMain, true, true, DataBlock::kPageSize> m_main;
@@ -293,7 +287,6 @@ private:
   CodeSection<kFrozen, false, false, DataBlock::kPageSize> m_frozen;
   DataSection m_data;
 
-  DataBlock m_bytecode;
   DataBlock m_all;
 
   // Each block is at least DataBlock::kPageSize (2MiB), indexed by >> 21

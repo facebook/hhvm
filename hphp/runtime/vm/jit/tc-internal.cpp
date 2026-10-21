@@ -63,10 +63,6 @@
 #include <cmath>
 #include <deque>
 
-extern "C" _Unwind_Reason_Code
-__gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
-                     _Unwind_Context*);
-
 TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
@@ -437,14 +433,8 @@ void processInit() {
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
   g_JitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
-  // Write an .eh_frame section that covers the JIT portion of the TC.
-  initUnwinder(g_code->base(), g_code->tcSize(),
-               tc_unwind_personality);
-
-  if (auto cti_cap = g_code->bytecode().capacity()) {
-    // write an .eh_frame for cti code using default personality
-    initUnwinder(g_code->bytecode().base(), cti_cap, __gxx_personality_v0);
-  }
+  // Write an .eh_frame section that covers the whole TC.
+  initUnwinder(g_code->base(), g_code->codeSize());
 
   Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
 

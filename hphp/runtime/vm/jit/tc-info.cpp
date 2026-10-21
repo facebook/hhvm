@@ -169,12 +169,6 @@ std::vector<UsageInfo> getUsageInfo() {
     });
   });
   tcUsageInfo.emplace_back(UsageInfo{
-    "code.bytecode",
-    code().bytecode().used(),
-    code().bytecode().capacity(),
-    true
-  });
-  tcUsageInfo.emplace_back(UsageInfo{
     "data",
     code().dataUsed(),
     code().dataCapacity(),

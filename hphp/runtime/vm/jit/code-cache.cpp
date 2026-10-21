@@ -136,26 +136,25 @@ CodeCache::CodeCache() {
   auto const usedBase = shiftTC(ru<size2m>(tc_start_address()));
 
   if (Cfg::Jit::DynamicTCSections) {
-    auto const aBytecode = Cfg::CodeCache::ABytecodeSize;
     auto mapSize = getTCMaxExtent(usedBase) - usedBase;
     while (mapSize > 0 && !mapTC(usedBase, mapSize)) mapSize /= 2;
-    m_tcSize = m_codeSize = mapSize - thread_local_size - aBytecode;
+    m_codeSize = mapSize - thread_local_size;
 
     always_assert_flog(
-      m_tcSize >= size2m * 4,
+      m_codeSize >= size2m * 4,
       "Insufficient low memory available to allocate minimum 2MB per section "
       "(usedBase = {}, lowArenaStart = {}, m_totalSize = {})",
       usedBase, getTCMaxExtent(usedBase), mapSize);
 
     m_base = reinterpret_cast<CodeAddress>(usedBase);
-    m_threadLocalStart = m_base + m_tcSize;
-    numa_interleave(m_base, m_tcSize);
+    m_threadLocalStart = m_base + m_codeSize;
+    numa_interleave(m_base, m_codeSize);
 
     TRACE(1, "init a @%p\n", m_base);
-    m_all.init(m_base, m_tcSize, "all");
+    m_all.init(m_base, m_codeSize, "all");
 
     if (!isJitDeserializing()) {
-      m_main.setHugePageBudget(m_tcSize >> 20);
+      m_main.setHugePageBudget(m_codeSize >> 20);
     } else {
       m_main.setHugePageBudget(
         Cfg::CodeCache::TCNumHugeHotMB + Cfg::CodeCache::TCNumHugeMainMB);
@@ -167,24 +166,15 @@ CodeCache::CodeCache() {
       mprotect(m_threadLocalStart, thread_local_size, PROT_NONE);
     }
     m_threadLocalSize = thread_local_size;
-    if (aBytecode) {
-      auto const bytecodeBase = m_threadLocalStart + thread_local_size;
-      m_bytecode.init(bytecodeBase, aBytecode, "abytecode");
-      mprotect(m_bytecode.frontier(), m_bytecode.size(),
-               PROT_READ | PROT_WRITE | PROT_EXEC);
-    }
     return;
   }
 
   auto const kASize         = ru<size2m>(Cfg::CodeCache::ASize);
   auto const kAColdSize     = ru<size2m>(Cfg::CodeCache::AColdSize);
   auto const kAFrozenSize   = ru<size2m>(Cfg::CodeCache::AFrozenSize);
-  auto const kABytecodeSize = ru<size2m>(Cfg::CodeCache::ABytecodeSize);
-
   auto kGDataSize = ru<size2m>(Cfg::CodeCache::GlobalDataSize);
   auto totalSize = ru<size2m>(kASize + kAColdSize + kAFrozenSize +
-                           kABytecodeSize + kGDataSize + thread_local_size);
-  m_tcSize = totalSize - kABytecodeSize - kGDataSize;
+                              kGDataSize + thread_local_size);
   m_codeSize = totalSize - kGDataSize;
 
   always_assert_flog(
@@ -204,8 +194,8 @@ CodeCache::CodeCache() {
   );
 
   if (totalSize > (2ul << 30)) {
-    fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize, "
-                    "ABytecodeSize, and GlobalDataSize must be < 2GiB "
+    fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize, and "
+                    "GlobalDataSize must be < 2GiB "
                     "to support 32-bit relative addresses.\n"
                     "The sizes will be automatically reduced.\n");
     cutTCSizeTo((2ul << 30) - usedBase - thread_local_size);
@@ -263,10 +253,6 @@ CodeCache::CodeCache() {
   TRACE(1, "init afrozen @%p\n", m_all.frontier());
   m_frozen.ensure(*this, kAFrozenSize);
 
-  TRACE(1, "init abytecode @%p\n", m_all.frontier());
-  m_bytecode.init(m_all.frontier(), kABytecodeSize, "abytecode");
-  m_all.moveFrontier(kABytecodeSize);
-
   TRACE(1, "init gdata @%p\n", m_all.frontier());
   m_data.ensure(*this, kGDataSize);
 
@@ -293,14 +279,12 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
   assertx(targetSize < (2ull << 30));
   // Make sure the result if size_t to avoid 32-bit overflow
   auto const total = Cfg::CodeCache::ASize + Cfg::CodeCache::AColdSize +
-    Cfg::CodeCache::AFrozenSize + Cfg::CodeCache::ABytecodeSize +
-    Cfg::CodeCache::GlobalDataSize;
+    Cfg::CodeCache::AFrozenSize + Cfg::CodeCache::GlobalDataSize;
   if (total <= targetSize) return;
 
   Cfg::CodeCache::ASize = rd<size2m>(Cfg::CodeCache::ASize * targetSize / total);
   Cfg::CodeCache::AColdSize = rd<size2m>(Cfg::CodeCache::AColdSize * targetSize / total);
   Cfg::CodeCache::AFrozenSize = rd<size2m>(Cfg::CodeCache::AFrozenSize * targetSize / total);
-  Cfg::CodeCache::ABytecodeSize = rd<size2m>(Cfg::CodeCache::ABytecodeSize * targetSize / total);
   Cfg::CodeCache::GlobalDataSize = rd<size2m>(Cfg::CodeCache::GlobalDataSize * targetSize / total);
 
   std::array<uint32_t*, 4> sizes = {

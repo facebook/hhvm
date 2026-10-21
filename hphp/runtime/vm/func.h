@@ -178,8 +178,6 @@ struct Func final {
     LazyStringData phpCode;
     // User-annotated type.
     LazyStringData userType;
-    // offset of dvi funclet from cti section base.
-    Offset ctiFunclet{kInvalidOffset};
     TypeIntersectionConstraint typeConstraints;
     UserAttributeMap userAttributes;
   };
@@ -478,12 +476,6 @@ public:
    * params DV funclets) for the func.
    */
   Offset getNamedParamsFuncEntry() const;
-
-
-  // CTI entry points
-  Offset ctiEntry() const;
-  void setCtiFunclet(int i, Offset);
-  void setCtiEntry(Offset entry, uint32_t size);
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
@@ -1541,15 +1533,13 @@ private:
      */
     uint16_t m_bclenSmall;
 
-    std::atomic<Offset> m_cti_base; // relative to CodeCache cti section
-    uint32_t m_cti_size; // size of cti code
     uint16_t m_numLocals;
     uint16_t m_numIterators;
 
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
     mutable LockFreePtrWrapper<LineTablePtr> m_lineTable;
   };
-  static_assert(CheckSize<SharedData, 160>(), "");
+  static_assert(CheckSize<SharedData, 152>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1585,7 +1575,7 @@ private:
     // `m_localNames[0 : m_namedParamCount - 1]`.
     uint32_t m_namedParamCount;
   };
-  static_assert(CheckSize<ExtendedSharedData, 232>(), "");
+  static_assert(CheckSize<ExtendedSharedData, 224>(), "");
 
   /*
    * SharedData accessors for internal use.

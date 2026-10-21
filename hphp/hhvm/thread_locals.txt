@@ -122,13 +122,6 @@ guard variable for facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous n
 facebook::datatype::MemcacheFetcher<HPHP::Decl::(anonymous namespace)::DeclsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 guard variable for facebook::datatype::MemcacheFetcher<HPHP::Decl::(anonymous namespace)::DeclsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 
-# TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.
-HPHP::(anonymous namespace)::cc_lookups
-HPHP::(anonymous namespace)::cc_misses
-HPHP::(anonymous namespace)::s_predict
-HPHP::(anonymous namespace)::s_predictors
-HPHP::(anonymous namespace)::tl_cti_cache
-
 # Outlining data caches are background JIT thread local
 HPHP::jit::(anonymous namespace)::tl_dataStorePtr
 

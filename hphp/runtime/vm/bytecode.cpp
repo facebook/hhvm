@@ -88,7 +88,6 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
@@ -5549,55 +5548,6 @@ OPCODES
 #undef O
 };
 
-#ifdef CTI_SUPPORTED
-// fast path to look up native pc; try entry point first.
-PcPair lookup_cti(const Func* func, PC pc) {
-  auto unitpc = func->entry();
-  auto cti_entry = func->ctiEntry();
-  if (!cti_entry) {
-    cti_entry = compile_cti(const_cast<Func*>(func), unitpc);
-  }
-  if (pc == unitpc) {
-    return {cti_code().base() + cti_entry, pc};
-  }
-  return {lookup_cti(func, cti_entry, unitpc, pc), pc};
-}
-
-uint64_t packJitResumeAddr(JitResumeAddr addr) {
-  auto const h = reinterpret_cast<uint64_t>(addr.handler);
-  auto const a = reinterpret_cast<uint64_t>(addr.arg);
-  assertx((h >> 32) == 0);
-  assertx((a >> 32) == 0);
-  return h << 32 | a;
-}
-
-JitResumeAddr unpackJitResumeAddr(uint64_t packedAddr) {
-  auto const arg = reinterpret_cast<TCA>(packedAddr & 0xFFFFFFFFu);
-  auto const handler = reinterpret_cast<TCA>(packedAddr >> 32);
-  return {handler, arg};
-}
-
-JitResumeAddr dispatchThreaded(bool coverage) {
-  auto modes = ExecMode::Normal;
-  if (coverage) {
-    modes = modes | ExecMode::Coverage;
-  }
-  DEBUGGER_ATTACHED_ONLY(modes = modes | ExecMode::Debugger);
-  auto target = lookup_cti(vmfp()->func(), vmpc());
-  CALLEE_SAVED_BARRIER();
-  auto retAddr = unpackJitResumeAddr(g_enterCti(modes, target));
-  CALLEE_SAVED_BARRIER();
-  return retAddr;
-}
-#endif
-using ModeType = std::underlying_type_t<ExecMode>;
-ModeType updateCoverageModeThreaded(ModeType modes) {
-  // TODO: Support per-file coverage mode.
-  return RID().getCoverage() ?
-    (modes | (ModeType)ExecMode::Coverage) :
-    (modes & ~(ModeType)ExecMode::Coverage);
-}
-
 // Whether the bytecode interpreter should collect per-bytecode code coverage
 // for the current opcode. Shared between the computed-goto dispatcher
 // (dispatchImpl) and the tail-call dispatcher (dispatchTailCall).
@@ -5620,8 +5570,7 @@ static ALWAYS_INLINE bool interpCollectCoverage() {
 // Cfg::Eval::InterpTailCallDispatch.
 //
 // This path is only compiled when the toolchain guarantees a tail call. It
-// works on any architecture the compiler targets (notably x86-64 and arm64)
-// and is independent of CTI, which is x86-only and takes precedence when enabled.
+// works on any architecture the compiler targets (notably x86-64 and arm64).
 
 #if defined(__has_cpp_attribute)
 #  if __has_cpp_attribute(clang::musttail)
@@ -5821,12 +5770,6 @@ JitResumeAddr dispatchImpl() {
   };
   bool collectCoverage = checkCoverage();
 
-#ifdef CTI_SUPPORTED
-  if (cti_enabled()) {
-    return dispatchThreaded(collectCoverage);
-  }
-#endif
-
 #if HHVM_HAS_MUSTTAIL
   if (Cfg::Eval::InterpTailCallDispatch) {
     return dispatchTailCall(collectCoverage);
@@ -5966,170 +5909,5 @@ JitResumeAddr dispatchBB() {
   }
   return retAddr;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Call-threaded entry points
-
-#ifdef CTI_SUPPORTED
-namespace {
-
-constexpr unsigned NumPredictors = 16; // real cpus have 8-24
-static __thread unsigned s_predict{0};
-static __thread PcPair s_predictors[NumPredictors];
-static void pushPrediction(PcPair p) {
-  s_predictors[s_predict++ % NumPredictors] = p;
-}
-static PcPair popPrediction() {
-  return s_predictors[--s_predict % NumPredictors];
-}
-
-// callsites quick reference:
-//
-// simple opcodes, including throw
-//       call  #addr
-// conditional branch
-//       lea   [pc + instrLen(pc)], nextpc_saved
-//       call  #addr
-//       cmp   rdx, nextpc_saved
-//       jne   native-target
-// unconditional branch
-//       call  #addr
-//       jmp   native-target
-// indirect branch
-//       call  #addr
-//       jmp   rax
-// calls w/ return prediction
-//       lea   [pc + instrLen(pc)], nextpc_arg
-//       call  #addr
-//       jmp   rax
-
-NEVER_INLINE void execModeHelper(PC pc, ExecMode modes) {
-  if (modes & ExecMode::Debugger) phpDebuggerOpcodeHook(pc);
-  if (modes & ExecMode::Coverage) recordCodeCoverage(pc);
-}
-
-template<Op opcode, bool repo_auth, class Iop>
-PcPair run(TCA* returnaddr, ExecMode modes, PC nextpc, PC pc, Iop iop) {
-  assert(vmpc() == pc);
-  assert(peek_op(pc) == opcode);
-  FTRACE(1, "dispatch: {}: {}\n", pcOff(),
-         instrToString(pc, vmfp()->func()));
-  if constexpr (!repo_auth) {
-    static_assert((int)ExecMode::Normal == 0);
-    if (UNLIKELY(modes > ExecMode::Normal)) {
-      execModeHelper(pc, modes);
-    }
-  }
-  DEBUG_ONLY auto origPc = pc;
-  pc += encoded_op_size(opcode); // skip the opcode
-  auto retAddr = iop(pc);
-  vmpc() = pc;
-  assert(!isThrow(opcode));
-  if constexpr (isSimple(opcode)) {
-    // caller ignores rax return value, invokes next bytecode
-    return {nullptr, pc};
-  }
-  if constexpr (isBranch(opcode) || isUnconditionalJmp(opcode)) {
-    // Regular branches have no ability to indirect-jump out of bytecode,
-    // so smash the return address to &g_exitCti if we need to exit.
-    // TODO: t6019406 use surprise checks to extend BB mode
-    *returnaddr = g_exitCti;
-    return {nullptr, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
-  }
-  // call & indirect branch: caller will jump to address returned in rax
-  if (instrCanHalt(opcode) && !pc) {
-    vmfp() = nullptr;
-    vmpc() = nullptr;
-    // We returned from the top VM frame in this nesting level. This means
-    // m_savedRip in our ActRec must have been callToExit, which should've
-    // been returned by jitReturnPost(), whether or not we were called from
-    // the TC.
-    assert(isCallToExit((uint64_t)retAddr.arg));
-    return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
-  }
-  if constexpr (instrIsControlFlow(opcode)) {
-    return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
-  }
-  if constexpr (isReturnish(opcode)) {
-    auto target = popPrediction();
-    if (pc == target.pc) return target;
-  }
-  if constexpr (isFCall(opcode)) {
-    // call-like opcodes predict return to next bytecode
-    assert(nextpc == origPc + instrLen(origPc));
-    pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
-  }
-  // return ip to jump to, caller will do jmp(rax)
-  return lookup_cti(vmfp()->func(), pc);
-}
-}
-
-// register assignments inbetween calls to cti opcodes
-// rax = target of indirect branch instr (call, switch, etc)
-// rdx = pc (passed as 3rd arg register, 2nd return register)
-// rbx = next-pc after branch instruction, only if isBranch(op)
-// r13 = modes
-// r14 = location of return address to cti caller on native stack
-
-#ifdef __clang__
-#define DECLARE_FIXED(MODES,RA)\
-  ExecMode MODES;\
-  TCA* RA;\
-  asm volatile(\
-    "mov %%r13d, %0\n\t"\
-    "mov %%r14, %1"\
-    : "=r"(MODES), "=r"(RA)\
-    :\
-    : "r13", "r14"\
-    );
-#else
-#define DECLARE_FIXED(MODES,RA)\
-  register ExecMode MODES  asm("r13");\
-  register TCA* RA         asm("r14");
-#endif
-
-namespace cti {
-// generate cti::op call-threaded function for each opcode
-#define O(opcode, imm, push, pop, flags)\
-PcPair opcode(PC nextpc, TCA*, PC pc) {\
-  DECLARE_FIXED(modes, returnaddr);\
-  return run<Op::opcode,true>(returnaddr, modes, nextpc, pc,\
-    [&](PC& pc) {\
-      return iopWrap##opcode(pc);\
-    }\
-  );\
-}
-OPCODES
-#undef O
-
-// generate debug/coverage-capable opcode bodies (for non-repo-auth)
-#define O(opcode, imm, push, pop, flags)\
-PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
-  DECLARE_FIXED(modes, returnaddr);\
-  return run<Op::opcode,false>(returnaddr, modes, nextpc, pc,\
-    [&](PC& pc) {\
-      return iopWrap##opcode(pc);\
-    }\
-  );\
-}
-OPCODES
-#undef O
-}
-
-// generate table of opcode handler addresses, used by call-threaded emitter
-const CodeAddress cti_ops[] = {
-  #define O(opcode, imm, push, pop, flags) (CodeAddress)&cti::opcode,
-  OPCODES
-  #undef O
-};
-const CodeAddress ctid_ops[] = {
-  #define O(opcode, imm, push, pop, flags) (CodeAddress)&cti::d##opcode,
-  OPCODES
-  #undef O
-};
-
-const CodeAddress updateCoverageFunc = (CodeAddress)&updateCoverageModeThreaded;
-
-#endif
 
 }

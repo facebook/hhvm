@@ -499,7 +499,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t CodeCache.ASize = 60 << 20, UNKNOWN
 - uint32_t CodeCache.AColdSize = 24 << 20, UNKNOWN
 - uint32_t CodeCache.AFrozenSize = 40 << 20, UNKNOWN
-- uint32_t CodeCache.ABytecodeSize = 0, UNKNOWN
 - uint32_t CodeCache.AMaxUsage = 0, UNKNOWN, nobind
 - uint32_t CodeCache.AColdMaxUsage = 0, UNKNOWN, nobind
 - uint32_t CodeCache.AFrozenMaxUsage = 0, UNKNOWN, nobind
@@ -624,7 +623,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   using the computed-goto loop in dispatchImpl(). Each step reuses a single
   native stack frame. This is a pure performance/codegen change with identical
   semantics; set it back to false to fall back to the computed-goto interpreter.
-  Has no effect when CTI is active or when the toolchain lacks musttail support.
+  Has no effect when the toolchain lacks musttail support.
 
 - bool Eval.RecordCodeCoverage = false, UNKNOWN
 

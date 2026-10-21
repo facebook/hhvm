@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -1608,10 +1607,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 #undef ADD
 
   emitAllResumable(code, dbg);
-
-#ifdef CTI_SUPPORTED
-  if (cti_enabled()) compile_cti_stubs();
-#endif
 
   tc::updateCodeSizeCounters();
 }

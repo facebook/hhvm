@@ -382,8 +382,9 @@ namespace {
  * basic instructions to the unwinder for rematerializing the call frame
  * registers.
  */
-void write_tc_cie(EHFrameWriter& ehfw, PersonalityFunc personality) {
-  ehfw.begin_cie(dw_reg::IP, reinterpret_cast<const void*>(personality));
+void write_tc_cie(EHFrameWriter& ehfw) {
+  ehfw.begin_cie(dw_reg::IP,
+                 reinterpret_cast<const void*>(tc_unwind_personality));
 
   // The part of the ActRec that mirrors the native frame record is the part
   // below ActRec::m_funcId, which at a minimum includes the saved frame pointer
@@ -420,9 +421,9 @@ void write_tc_cie(EHFrameWriter& ehfw, PersonalityFunc personality) {
 std::vector<EHFrameDesc> s_ehFrames;
 }
 
-void initUnwinder(TCA base, size_t size, PersonalityFunc personality) {
+void initUnwinder(TCA base, size_t size) {
   EHFrameWriter ehfw;
-  write_tc_cie(ehfw, personality);
+  write_tc_cie(ehfw);
   ehfw.begin_fde(base);
   ehfw.end_fde(size);
   ehfw.null_fde();

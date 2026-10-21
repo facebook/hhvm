@@ -337,20 +337,6 @@ inline Op Func::getOp(Offset instrOffset) const {
   return peek_op(entry() + instrOffset);
 }
 
-inline Offset Func::ctiEntry() const {
-  return shared()->m_cti_base.load(std::memory_order_acquire);
-}
-
-inline void Func::setCtiFunclet(int i, Offset cti_funclet) {
-  shared()->m_params[i].ctiFunclet = cti_funclet;
-}
-
-inline void Func::setCtiEntry(Offset base, uint32_t size) {
-  auto sd = shared();
-  sd->m_cti_size = size;
-  sd->m_cti_base.store(base, std::memory_order_release);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 

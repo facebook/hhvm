@@ -92,10 +92,12 @@ that actually can't.
 -- RC "lower bounds" --
 
 A lower bound on the reference count of a must-alias-set indicates a known
-minimum for the value of its object's count field at that program point.  This
-minimum value can be interpreted as a minimum value of the actual integer in
-memory at each point, if the program were not modified by this pass.  A lower
-bound is therefore always non-negative. The lower bound has two components; a
+minimum for the value of its object's count field when the value is counted.
+This minimum can be interpreted as a minimum value of the actual integer in
+memory at each point, if the program were not modified by this pass. A lower
+bound is therefore always non-negative. kInfReferences represents infinity for
+an uncounted value, and is unchanged by reference count operations. It has no
+unsupported references or memory support. The lower bound has two components; a
 supported component, which is known to be exclusive to this must-alias-set (in
 the sense that refcount operations on other must-alias-sets will not affect
 this one), and an unsupported component, which might be shared between multiple
@@ -539,7 +541,8 @@ namespace {
 TRACE_SET_MOD(hhir_refcount)
 
 //////////////////////////////////////////////////////////////////////
-const int32_t kMaxReferences = std::numeric_limits<int32_t>::max();
+constexpr int32_t kInfReferences = std::numeric_limits<int32_t>::max();
+constexpr int32_t kMaxPlausibleReferences = 1048576;
 
 // Helper for removing instructions in the rest of this file---if a debugging
 // mode is enabled, it will replace it with a debugging instruction if
@@ -634,9 +637,8 @@ struct MemRefAnalysis {
 // Per must-alias-set state information for rc_analyze.
 struct ASetInfo {
   /*
-   * A lower bound of the actual reference count of the object that this alias
-   * set refers to.  See "RC lower bounds" in the documentation---there are
-   * some subtleties here.
+   * A lower bound of the actual reference count when this alias set is counted.
+   * See "RC lower bounds" in the documentation, there are some subtleties here.
    */
   int32_t lower_bound{0};
 
@@ -644,7 +646,7 @@ struct ASetInfo {
    * An upper bound of the actual reference count of the object that this alias
    * set refers to.
    */
-  int32_t upper_bound{kMaxReferences};
+  int32_t upper_bound{kInfReferences};
 
   /*
    * Sometimes we know the refcount is higher than we've been able to
@@ -993,7 +995,8 @@ struct PreAdder {
      * in that case - but that requires some investigation.
      */
     auto const& aset = info->state.asets[asetID];
-    auto lb = int64_t{aset.lower_bound};
+    auto lb = aset.lower_bound;
+    if (lb == kInfReferences) return;
     if (aliasID != -1) {
       assertx(aliasID != asetID);
       auto const& alias = info->state.asets[aliasID];
@@ -1002,9 +1005,10 @@ struct PreAdder {
       // credits can satisfy the requirement. Unsupported credits may overlap
       // support in the other set, so only the supported components can be
       // added.
-      auto const supported = int64_t{aset.lower_bound} - aset.unsupported_refs +
+      if (alias.lower_bound == kInfReferences) return;
+      auto const supported = aset.lower_bound - aset.unsupported_refs +
         alias.lower_bound - alias.unsupported_refs;
-      lb = std::max({lb, int64_t{alias.lower_bound}, supported});
+      lb = std::max({lb, alias.lower_bound, supported});
     }
     if (lb - (info->incDec ? 1 : 0) >= n.level) return;
     FTRACE(4, "     altLoc: {}\n", asetID);
@@ -1506,6 +1510,12 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     always_assert(set.unsupported_refs >= 0);
     always_assert(set.lower_bound >= set.unsupported_refs);
     always_assert(set.upper_bound >= set.lower_bound);
+    always_assert(set.lower_bound == kInfReferences ||
+                  set.lower_bound <= kMaxPlausibleReferences);
+    always_assert(set.upper_bound == kInfReferences ||
+                  set.upper_bound <= kMaxPlausibleReferences);
+    always_assert(set.lower_bound != kInfReferences ||
+                  (!set.unsupported_refs && set.memory_support.none()));
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
@@ -1590,26 +1600,16 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
   }
 
   if (dst.lower_bound != lower_bound) {
-    /*
-     * If there's a cycle, we will still converge to 0,
-     * albeit rather slowly - after going through lower_bound iterations.
-     * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
-     */
-     if (is_back_edge) {
-      dst.lower_bound = dst.unsupported_refs = 0;
-    } else {
-      dst.lower_bound = lower_bound;
-    }
+    dst.lower_bound = lower_bound;
     changed = true;
   }
 
   if (dst.upper_bound != upper_bound) {
     /*
-     * If there's a cycle, we will still converge to kMaxReferences,
-     * albeit rather slowly - after going through kMaxReferences iterations.
-     * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
+     * A growing upper bound on a backedge may increase without limit.
+     * Widen it to infinity immediately.
      */
-    dst.upper_bound = is_back_edge ? kMaxReferences : upper_bound;
+    dst.upper_bound = is_back_edge ? kInfReferences : upper_bound;
     changed = true;
   }
 
@@ -1725,6 +1725,7 @@ Optional<ASetID> lookup_aset(Env& env, SSATmp* tmp) {
 void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
+  if (aset.lower_bound == kInfReferences) return;
   aset.lower_bound = std::max(aset.lower_bound - 1, 0);
   if (aset.unsupported_refs > aset.lower_bound) {
     aset.unsupported_refs = aset.lower_bound;
@@ -1763,7 +1764,11 @@ void observe_unbalanced_decrefs(Env& env, RCState& state, PreAdder add_node) {
 void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
                    PreAdder add_node) {
   auto& aset = state.asets[asetID];
-  aset.upper_bound = kMaxReferences;
+
+  // Nothing to pessimize, the value is TUncounted.
+  if (aset.lower_bound == kInfReferences) return;
+
+  aset.upper_bound = kInfReferences;
   if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
@@ -1773,7 +1778,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
     [&](size_t id) { state.support_map[id] = -1; }
   );
   aset.memory_support.reset();
-  add_node(asetID, NReq{kMaxReferences});
+  add_node(asetID, NReq{kInfReferences});
 }
 
 void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
@@ -1787,7 +1792,7 @@ void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
 void pessimize_upper_bound_one_aset(Env& /*env*/, RCState& state, ASetID asetID) {
   auto& aset = state.asets[asetID];
   FTRACE(2, "      {} upper bound pessimized\n", asetID);
-  aset.upper_bound = kMaxReferences;
+  aset.upper_bound = kInfReferences;
 }
 
 void pessimize_upper_bound_all_asets(Env& env, RCState& state) {
@@ -1800,6 +1805,7 @@ void pessimize_upper_bound_all_asets(Env& env, RCState& state) {
 void unsupport_all(Env& /*env*/, RCState& state) {
   FTRACE(3, "    unsupport_all\n");
   for (auto& aset : state.asets) {
+    if (aset.lower_bound == kInfReferences) continue;
     aset.unsupported_refs = aset.lower_bound;
     if (aset.unsupported_refs) state.has_unsupported_refs = true;
     bitset_for_each_set(
@@ -1835,12 +1841,13 @@ void observe_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_all\n");
   observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
-    add_node(asetID, NReq{kMaxReferences});
+    add_node(asetID, NReq{kInfReferences});
   }
 }
 
 void decrease_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
   auto& aset = state.asets[asetID];
+  if (aset.upper_bound == kInfReferences) return;
   aset.upper_bound--;
   assertx(aset.upper_bound >= aset.lower_bound);
   FTRACE(5, "    decreased upper bound for aset {} by 1: ub({})\n",
@@ -1849,7 +1856,7 @@ void decrease_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
 
 void increase_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
   auto& aset = state.asets[asetID];
-  if (aset.upper_bound < kMaxReferences) aset.upper_bound++;
+  if (aset.upper_bound < kInfReferences) aset.upper_bound++;
   assertx(aset.upper_bound >= aset.lower_bound);
   FTRACE(5, "    increased upper bound for aset {} by 1: new_ub({})\n",
     asetID, aset.upper_bound);
@@ -1868,6 +1875,9 @@ void may_incref(Env& env, RCState& state, ASetID asetID) {
 
 void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   auto& aset = state.asets[asetID];
+
+  // Nothing to decref, the value is TUncounted.
+  if (aset.lower_bound == kInfReferences) return;
 
   auto const balanced = aset.lower_bound > aset.unsupported_refs;
   reduce_lower_bound(env, state, asetID);
@@ -2027,6 +2037,9 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
   if_aset(env, tmp, [&] (ASetID asetID) {
     auto& aset = state.asets[asetID];
 
+    // No memory support tracked for TUncounted.
+    if (aset.lower_bound == kInfReferences) return;
+
     auto const meta = env.ainfo.find(dst);
     if (meta) {
       FTRACE(3, "    {} adding support in {}\n", asetID, show(dst));
@@ -2113,6 +2126,10 @@ void pure_load(Env& env,
   if_aset(env, dst, [&] (ASetID asetID) {
     FTRACE(2, "    {} adding support: {}\n", asetID, show(src));
     auto& aset = state.asets[asetID];
+
+    // No memory support tracked for TUncounted.
+    if (aset.lower_bound == kInfReferences) return;
+
     ++aset.lower_bound;
     aset.memory_support.set(meta->index);
     state.support_map[meta->index] = asetID;
@@ -2271,7 +2288,7 @@ void rc_analyze_inst(Env& env,
         auto& dstSet = state.asets[*dstID];
         auto const srcID = lookup_aset(env, inst.src(i));
         if (!srcID) {
-          dstSet.upper_bound = kMaxReferences;
+          dstSet.upper_bound = kInfReferences;
           FTRACE(3, "    DefLabel dstID {} set ub = {}\n", *dstID, dstSet.upper_bound);
           continue;
         }
@@ -2296,6 +2313,10 @@ void rc_analyze_inst(Env& env,
     observe_unbalanced_decrefs(env, state, add_node);
     if_aset(env, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
+
+      // IncRef on TUncounted has no effects.
+      if (aset.lower_bound == kInfReferences) return;
+
       if (!aset.lower_bound) {
         /*
          * We incref aset so there must be a ref to it, otherwise the input program is malformed.
@@ -2353,14 +2374,14 @@ void rc_analyze_inst(Env& env,
         may_decref(env, state, asetID, add_node);
         /*
          * We only modify upper bound for guaranteed counted asets.
-         * For asets that could be persistent, the upper bound must be kMaxReferences.
+         * For asets that could be persistent, the upper bound must be kInfReferences.
          * However, this invariant may be temporarily broken at the moment.
          * One situation is if we are currently within a loop body
          * and the Deflabel block corresponding to the loop beginning hasn't been merged
          * with all of its ancestors because some of them are yet to be processed.
          * It's possible that it has only been merged
-         * with the ancestors that provide counted values (upper_bound <= kMaxReferences)
-         * but not with those that provide uncounted values (upper_bound == kMaxReferences).
+         * with the ancestors that provide counted values (upper_bound <= kInfReferences)
+         * but not with those that provide uncounted values (upper_bound == kInfReferences).
          */
         if (src_type.subtypeOfAny(TCounted)) {
           decrease_upper_bound(env, state, asetID);
@@ -2430,6 +2451,7 @@ void rc_analyze_inst(Env& env,
       if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
         if (inst.movesReference(srcID)) {
           auto& aset = state.asets[asetID];
+          if (aset.lower_bound == kInfReferences) return;
           if (!aset.lower_bound) {
             // Add an assumed reference
             aset.lower_bound = aset.unsupported_refs = 1;
@@ -2454,7 +2476,7 @@ void rc_analyze_inst(Env& env,
       auto& aset = state.asets[asetID];
       assertx(aset.unsupported_refs == 0);
       assertx(aset.lower_bound == 0);
-      assertx(aset.upper_bound == kMaxReferences);
+      assertx(aset.upper_bound == kInfReferences);
       aset.lower_bound = 1;
       if (inst.producesNewReference() && inst.dst()->type().subtypeOfAny(TCounted)) {
         aset.upper_bound = 1;
@@ -2872,7 +2894,7 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
           auto lb = state.asets[id].lower_bound;
           for (auto const asetID : state.unbalanced_decrefs) {
             for (auto may_id : penv.env.asets[asetID].may_alias) {
-              if (may_id == id) lb--;
+              if (may_id == id && lb != kInfReferences) lb--;
             }
           }
           if (lb >= 2) {

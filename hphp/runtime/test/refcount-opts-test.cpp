@@ -200,8 +200,7 @@ TEST(RefcountOpts, WeakenDecrefAfterFiniteLoop) {
   // references and every backedge supplies at least two: the last DecRefNZ
   // leaves one, then IncRef adds one. The COW observation keeps those refs
   // from being canceled against the exit decrement.
-  // TODO: Preserve the finite loop bound instead of resetting it to zero.
-  EXPECT_EQ(DecRef, dec->op());
+  EXPECT_EQ(DecRefNZ, dec->op());
 }
 
 /*

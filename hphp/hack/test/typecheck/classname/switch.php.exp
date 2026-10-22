@@ -44,4 +44,34 @@ switch.php:9:3
    |   ^ [1]
 22 | }
 
-2 errors found
+error: Typing[4482] Using `D::class` in this position will trigger an implicit runtime conversion to string, please use `nameof D` [1]
+
+switch.php:10:10
+ 8 | function test(classname<C> $cls): void {
+ 9 |   switch ($cls) {
+10 |     case D::class:
+   |          ^^^^^^^^ [1]
+11 |       break;
+12 |     case E::class:
+
+error: Typing[4482] Using `E::class` in this position will trigger an implicit runtime conversion to string, please use `nameof E` [1]
+
+switch.php:12:10
+10 |     case D::class:
+11 |       break;
+12 |     case E::class:
+   |          ^^^^^^^^ [1]
+13 |       break;
+14 |     case UnrelatedC::class:
+
+error: Typing[4482] Using `UnrelatedC::class` in this position will trigger an implicit runtime conversion to string, please use `nameof UnrelatedC` [1]
+
+switch.php:14:10
+12 |     case E::class:
+13 |       break;
+14 |     case UnrelatedC::class:
+   |          ^^^^^^^^^^^^^^^^^ [1]
+15 |       // This is a limitation of the current approach to checking switch
+16 |       // case labels. Ideally we would be able to detect the impossibility
+
+5 errors found

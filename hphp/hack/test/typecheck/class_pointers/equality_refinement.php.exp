@@ -1,3 +1,13 @@
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_refinement.php:25:14
+23 |   $c = Wrapper::get_classname($p);
+24 | 
+25 |   if ($c === C1::class) {
+   |              ^^^^^^^^^ [1]
+26 |     expect_cn1($c);
+27 |     expect_c1($c);
+
 error: Typing[4110] Invalid argument [1]
 -> Expected `class<C1>` [2]
 -> But got `string` from this equality test [3]
@@ -21,6 +31,16 @@ equality_refinement.php:27:15
    |               ^^ [1]
 28 |   }
 29 | 
+
+error: Typing[4482] Using `C2::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C2` [1]
+
+equality_refinement.php:30:14
+28 |   }
+29 | 
+30 |   if ($c === C2::class) {
+   |              ^^^^^^^^^ [1]
+31 |     expect_cn2($c);
+32 |     expect_c2($c);
 
 error: Typing[4110] Invalid argument [1]
 -> Expected `class<C2>` [2]
@@ -46,4 +66,4 @@ equality_refinement.php:32:15
 33 |   }
 34 | }
 
-2 errors found
+4 errors found

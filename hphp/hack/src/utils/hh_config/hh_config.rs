@@ -630,6 +630,10 @@ impl HhConfig {
                 "class_pointer_ban_class_array_key",
                 default.class_pointer_ban_class_array_key,
             )?,
+            class_pointer_ban_class_string_comparison: hhconfig.get_bool_or(
+                "class_pointer_ban_class_string_comparison",
+                default.class_pointer_ban_class_string_comparison,
+            )?,
             tco_disallow_specialized_function_refs: hhconfig.get_bool_or(
                 "disallow_specialized_function_refs",
                 default.tco_disallow_specialized_function_refs,

@@ -97,3 +97,82 @@ let rec coerce_to_name env ty =
       | _ -> (env, ty)
     end
   | _ -> (env, ty)
+
+(* Whether a value of [ty] can be, or contain as a container value, a string
+   that isn't a class pointer. Like types are trusted, as in refinement. *)
+let rec may_hold_string ?(expanding = []) env ty =
+  let (env, ety) = Typing_env.expand_type env ty in
+  let (_, env, ety) = Typing_utils.strip_supportdyn env ety in
+  let exists ~expanding env tyl =
+    Common.List.fold_left tyl ~init:(env, false) ~f:(fun (env, found) ty ->
+        if found then
+          (env, true)
+        else
+          may_hold_string ~expanding env ty)
+  in
+  let for_all ~expanding env tyl =
+    Common.List.fold_left tyl ~init:(env, true) ~f:(fun (env, all) ty ->
+        if not all then
+          (env, false)
+        else
+          may_hold_string ~expanding env ty)
+  in
+  match get_node ety with
+  | Tclass_ptr _
+  | Tfun _
+  | Tlabel _
+  | Tdynamic _ ->
+    (env, false)
+  | Tprim Tarraykey -> (env, true)
+  | Tprim _ -> (env, false)
+  | Tclass ((_, name), _, tyl) ->
+    (* A string is also an instance of some interfaces, e.g. Stringish *)
+    if
+      String.equal name Naming_special_names.Classes.cString
+      || Typing_utils.is_sub_type_for_union
+           env
+           (Typing_make_type.string Typing_reason.none)
+           ety
+    then
+      (env, true)
+    else (
+      (* The value type of vec<T>, dict<K, T>, KeyedContainer<K, T>, ... *)
+      match Common.List.last tyl with
+      | Some ty -> may_hold_string ~expanding env ty
+      | None -> (env, false)
+    )
+  | Toption ty -> may_hold_string ~expanding env ty
+  | Tunion tyl -> exists ~expanding env tyl
+  | Tintersection tyl -> for_all ~expanding env tyl
+  | Tvec_or_dict (_, ty) -> may_hold_string ~expanding env ty
+  | Ttuple { t_required; t_optional; t_extra = Tvariadic ty | Tsplat ty } ->
+    exists ~expanding env ((ty :: t_required) @ t_optional)
+  | Tshape (Shape_simple { s_unknown_value; s_fields; _ }) ->
+    let field_tys =
+      TShapeMap.fold (fun _ sft acc -> sft.sft_ty :: acc) s_fields []
+    in
+    exists ~expanding env (s_unknown_value :: field_tys)
+  | Tshape (Shape_splat { ss_elems }) -> exists ~expanding env ss_elems
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _
+    when not (Common.List.mem expanding ety ~equal:ty_equal) ->
+    let (env, bounds) =
+      Typing_utils.get_concrete_supertypes
+        ~expand_supportdyn:false
+        ~abstract_enum:false
+        env
+        ety
+    in
+    (match bounds with
+    | [] -> (env, true)
+    | _ -> for_all ~expanding:(ety :: expanding) env bounds)
+  | Tnonnull
+  | Tany _
+  | Tvar _
+  | Tneg _
+  | Taccess _
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _ ->
+    (env, true)

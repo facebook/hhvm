@@ -297,6 +297,9 @@ let allow_class_string_cast t = t.Global_options.allow_class_string_cast
 let class_pointer_ban_class_array_key t =
   t.Global_options.class_pointer_ban_class_array_key
 
+let class_pointer_ban_class_string_comparison t =
+  t.Global_options.class_pointer_ban_class_string_comparison
+
 let disallow_specialized_function_refs t =
   t.Global_options.tco_disallow_specialized_function_refs
 

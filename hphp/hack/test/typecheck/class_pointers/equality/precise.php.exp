@@ -118,4 +118,24 @@ classname.hhi:21:28
  22 | 
  23 |   /**
 
-3 errors found
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+precise.php:102:20
+100 | 
+101 | function precise_tuple_mixed_positions((class<P>, string) $t): void {
+102 |   if ($t === tuple(C1::class, nameof C1)) {
+    |                    ^^^^^^^^^ [1]
+103 |     expect_c1($t[0]);
+104 |   }
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+precise.php:116:27
+114 |   shape('c' => class<P>, 's' => string) $s,
+115 | ): void {
+116 |   if ($s === shape('c' => C1::class, 's' => nameof C1)) {
+    |                           ^^^^^^^^^ [1]
+117 |     expect_c1($s['c']);
+118 |   }
+
+5 errors found

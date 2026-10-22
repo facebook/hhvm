@@ -1,0 +1,222 @@
+warning: Warn[12007] Invalid comparison: This expression will always return `false`.
+A value of type `EI` can never be equal to a value of type `class<C1>` [1]
+
+equality_class_const.php:127:7
+125 |   if ($i === C1::class) {
+126 |   }
+127 |   if ($ei === C1::class) {
+    |       ^^^^^^^^^^^^^^^^^ [1]
+128 |   }
+129 |   if ($tc === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:23:14
+21 |   dict<string, string> $d,
+22 | ): void {
+23 |   if ($s === C1::class) {
+   |              ^^^^^^^^^ [1]
+24 |   }
+25 |   if ($cn !== C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:25:15
+23 |   if ($s === C1::class) {
+24 |   }
+25 |   if ($cn !== C1::class) {
+   |               ^^^^^^^^^ [1]
+26 |   }
+27 |   if (C1::class == $m) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:27:7
+25 |   if ($cn !== C1::class) {
+26 |   }
+27 |   if (C1::class == $m) {
+   |       ^^^^^^^^^ [1]
+28 |   }
+29 |   if ($s != C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:29:13
+27 |   if (C1::class == $m) {
+28 |   }
+29 |   if ($s != C1::class) {
+   |             ^^^^^^^^^ [1]
+30 |   }
+31 |   if ($v === vec[C1::class]) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:31:18
+29 |   if ($s != C1::class) {
+30 |   }
+31 |   if ($v === vec[C1::class]) {
+   |                  ^^^^^^^^^ [1]
+32 |   }
+33 |   if ($sh === shape('c' => C1::class)) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:33:28
+31 |   if ($v === vec[C1::class]) {
+32 |   }
+33 |   if ($sh === shape('c' => C1::class)) {
+   |                            ^^^^^^^^^ [1]
+34 |   }
+35 |   if ($t === tuple(C1::class, 1)) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:35:20
+33 |   if ($sh === shape('c' => C1::class)) {
+34 |   }
+35 |   if ($t === tuple(C1::class, 1)) {
+   |                    ^^^^^^^^^ [1]
+36 |   }
+37 |   if ($d === dict['k' => C1::class]) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:37:26
+35 |   if ($t === tuple(C1::class, 1)) {
+36 |   }
+37 |   if ($d === dict['k' => C1::class]) {
+   |                          ^^^^^^^^^ [1]
+38 |   }
+39 |   switch ($cn) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:40:10
+38 |   }
+39 |   switch ($cn) {
+40 |     case C1::class:
+   |          ^^^^^^^^^ [1]
+41 |       break;
+42 |     default:
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:56:15
+54 |   (class<C1>, string) $cs,
+55 | ): void {
+56 |   if ($ns === C1::class) {
+   |               ^^^^^^^^^ [1]
+57 |   }
+58 |   if ($ak === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:58:15
+56 |   if ($ns === C1::class) {
+57 |   }
+58 |   if ($ak === C1::class) {
+   |               ^^^^^^^^^ [1]
+59 |   }
+60 |   if ($sish === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:60:17
+58 |   if ($ak === C1::class) {
+59 |   }
+60 |   if ($sish === C1::class) {
+   |                 ^^^^^^^^^ [1]
+61 |   }
+62 |   if ($ls === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:62:15
+60 |   if ($sish === C1::class) {
+61 |   }
+62 |   if ($ls === C1::class) {
+   |               ^^^^^^^^^ [1]
+63 |   }
+64 |   if ($es === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:64:15
+62 |   if ($ls === C1::class) {
+63 |   }
+64 |   if ($es === C1::class) {
+   |               ^^^^^^^^^ [1]
+65 |   }
+66 |   if ($vv === vec[vec[C1::class]]) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:66:23
+64 |   if ($es === C1::class) {
+65 |   }
+66 |   if ($vv === vec[vec[C1::class]]) {
+   |                       ^^^^^^^^^ [1]
+67 |   }
+68 |   // Literal elements are checked against the operand as a whole
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:69:21
+67 |   }
+68 |   // Literal elements are checked against the operand as a whole
+69 |   if ($cs === tuple(C1::class, 'x')) {
+   |                     ^^^^^^^^^ [1]
+70 |   }
+71 | }
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:81:15
+79 |   CT $ct,
+80 | ): void {
+81 |   if ($ts === C1::class) {
+   |               ^^^^^^^^^ [1]
+82 |   }
+83 |   if ($tu === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:83:15
+81 |   if ($ts === C1::class) {
+82 |   }
+83 |   if ($tu === C1::class) {
+   |               ^^^^^^^^^ [1]
+84 |   }
+85 |   if ($tr === vec[C1::class]) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:85:19
+83 |   if ($tu === C1::class) {
+84 |   }
+85 |   if ($tr === vec[C1::class]) {
+   |                   ^^^^^^^^^ [1]
+86 |   }
+87 |   if ($ct === C1::class) {
+
+error: Typing[4482] Using `C1::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C1` [1]
+
+equality_class_const.php:87:15
+85 |   if ($tr === vec[C1::class]) {
+86 |   }
+87 |   if ($ct === C1::class) {
+   |               ^^^^^^^^^ [1]
+88 |   }
+89 | }
+
+error: Typing[4482] Using `static::class` in this position will trigger an implicit runtime conversion to string, please use `nameof static` [1]
+
+equality_class_const.php:141:19
+139 | class K {
+140 |   public static function is_me(string $s): bool {
+141 |     return $s === static::class;
+    |                   ^^^^^^^^^^^^^ [1]
+142 |   }
+143 | }
+
+22 errors found

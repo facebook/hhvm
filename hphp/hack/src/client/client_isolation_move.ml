@@ -196,3 +196,125 @@ module Move_error = struct
         else
           Some error)
 end
+
+module Output = struct
+  type outcome =
+    | Refused of string
+    | Blocked of string list
+    | Not_moved of {
+        errors: Move_error.t list;
+        baseline_restored: bool;
+      }
+    | Moved of { files: int }
+
+  let is_moved = function
+    | Moved _ -> true
+    | Refused _
+    | Blocked _
+    | Not_moved _ ->
+      false
+
+  let error_to_json { Move_error.code; file; line; message } =
+    `Assoc
+      [
+        ("code", `Int code);
+        ("file", `String (Relative_path.suffix file));
+        ("line", `Int line);
+        ("message", `String message);
+      ]
+
+  (** The fields only this kind of outcome has. The others are [null]. *)
+  let outcome_fields = function
+    | Moved { files } -> [("files", `Int files)]
+    | Refused reason -> [("refused", `String reason)]
+    | Blocked blockers ->
+      [("blockers", `List (List.map blockers ~f:(fun file -> `String file)))]
+    | Not_moved { errors; baseline_restored } ->
+      [
+        ("new_errors", `List (List.map errors ~f:error_to_json));
+        ("baseline_restored", `Bool baseline_restored);
+      ]
+
+  let outcome_field_names =
+    ["files"; "refused"; "blockers"; "new_errors"; "baseline_restored"]
+
+  let to_json ~source ~target outcome =
+    let fields = outcome_fields outcome in
+    `Assoc
+      ([
+         ("source", `String source);
+         ("target", `String target);
+         ("moved", `Bool (is_moved outcome));
+       ]
+      @ List.map outcome_field_names ~f:(fun name ->
+            ( name,
+              Option.value
+                (List.Assoc.find fields name ~equal:String.equal)
+                ~default:`Null )))
+
+  let count n noun =
+    if n = 1 then
+      Printf.sprintf "1 %s" noun
+    else
+      Printf.sprintf "%d %ss" n noun
+
+  let first_line message =
+    String.take_while message ~f:(fun c -> not (Char.equal c '\n'))
+
+  let shown_errors = 10
+
+  let print_blocked blockers =
+    let n = List.length blockers in
+    Printf.printf
+      "Not moved: %s outside %s in.\n"
+      (count n "file")
+      (if n = 1 then
+        "references"
+      else
+        "reference");
+    List.iter blockers ~f:(Printf.printf "  %s\n")
+
+  let print_not_moved ~errors ~baseline_restored =
+    Printf.printf
+      "Not moved: the move introduced %s, and it was undone.\n"
+      (count (List.length errors) "error");
+    List.iter
+      (List.take errors shown_errors)
+      ~f:(fun { Move_error.code; file; line; message } ->
+        Printf.printf
+          "  %d %s:%d: %s\n"
+          code
+          (Relative_path.suffix file)
+          line
+          (first_line message));
+    if List.length errors > shown_errors then
+      Printf.printf "  and %d more\n" (List.length errors - shown_errors);
+    if not baseline_restored then
+      Printf.eprintf
+        "warning: the server's errors after the undo differ from those before the move; `hh restart` clears that\n"
+
+  let print_text ~source ~target = function
+    | Moved { files } ->
+      Printf.printf
+        "Moved: %s from %s to %s, with no new errors.\n"
+        (count files "file")
+        source
+        target
+    | Refused reason -> Printf.printf "Did not run: %s\n" reason
+    | Blocked blockers -> print_blocked blockers
+    | Not_moved { errors; baseline_restored } ->
+      print_not_moved ~errors ~baseline_restored
+
+  let print_outcome ~source ~target ~output_json outcome =
+    if output_json then
+      print_endline (Yojson.Safe.to_string (to_json ~source ~target outcome))
+    else
+      print_text ~source ~target outcome
+
+  let exit_status = function
+    | Moved _ -> Exit_status.No_error
+    | Refused _ -> Exit_status.Input_error
+    | Blocked _
+    | Not_moved _ ->
+      Exit_status.Type_error
+end

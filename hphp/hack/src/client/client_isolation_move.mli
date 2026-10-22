@@ -50,3 +50,28 @@ module Move_error : sig
   (** Whether the two have the same errors, in any order. *)
   val same : t list -> t list -> bool
 end
+
+module Output : sig
+  (** What came of trying to move a directory. *)
+  type outcome =
+    | Refused of string
+    | Blocked of string list
+        (** Every file outside the directory that references into it. *)
+    | Not_moved of {
+        errors: Move_error.t list;
+            (** What the move introduced, in the original paths. *)
+        baseline_restored: bool;
+            (** Whether the errors after the revert are the ones from before the
+                move. *)
+      }
+    | Moved of { files: int }
+
+  (** [print_outcome ~source ~target ~output_json outcome] prints [outcome] of
+      moving [source] to [target], as one line of JSON when [output_json] is set
+      and as text otherwise. *)
+  val print_outcome :
+    source:string -> target:string -> output_json:bool -> outcome -> unit
+
+  (** Zero only when the directory moved. *)
+  val exit_status : outcome -> Exit_status.t
+end

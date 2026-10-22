@@ -18571,7 +18571,7 @@ void bundle_classes(IndexData& index) {
     from(assignments.buckets)
       | move
       | map([&] (std::vector<SString> b) {
-          return run(std::move(b)).scheduleOn(index.executor->sticky());
+          return co_withExecutor(index.executor->sticky(), run(std::move(b)));
         })
       | as<std::vector>()
   ));

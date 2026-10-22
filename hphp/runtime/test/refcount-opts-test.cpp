@@ -234,9 +234,8 @@ TEST(RefcountOpts, MergePendingDecrefsByAffectedSet) {
 
   // Expected: cancel the explicit IncRef a and DecRef a. Only one predecessor
   // executes, so even without the pair, a retains at least one reference.
-  // TODO: Cancel the pair instead of adding mutually exclusive pending decrefs.
-  EXPECT_EQ(IncRef, inc->op());
-  EXPECT_EQ(DecRef, dec->op());
+  EXPECT_EQ(Nop, inc->op());
+  EXPECT_EQ(Nop, dec->op());
 }
 
 /*

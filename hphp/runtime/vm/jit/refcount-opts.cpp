@@ -659,6 +659,15 @@ struct ASetInfo {
   int32_t unsupported_refs{0};
 
   /*
+   * Deferred reductions of this set's lower bound from unbalanced decrefs of
+   * may-alias sets. The effective bound is
+   * max(lower_bound - pending_reductions, 0).
+   * Pending reductions can exceed the lower bound. kInfReferences represents
+   * an unbounded number of pending reductions; an infinite lower bound has none.
+   */
+  int32_t pending_reductions{0};
+
+  /*
    * Set of memory location ids that are being used to support the lower bound
    * of this object.  The purpose of this set is to reduce lower bounds when we
    * see memory events that might decref a pointer: this means it's never
@@ -682,6 +691,12 @@ struct ASetInfo {
 struct RCState {
   bool initialized{false};
   bool has_unsupported_refs{false};
+
+  /*
+   * The number of asets with non-zero pending reductions.
+   */
+  uint32_t num_pending_requirements{0};
+
   jit::vector<ASetInfo> asets;
 
   /*
@@ -698,17 +713,6 @@ struct RCState {
    * The mapped value is -1 if no ASet is currently supported by that location.
    */
   std::array<ASetID,kMaxTrackedALocs> support_map;
-
-  /*
-   * When we decref an unbalanced location, we have to reduce the
-   * lower bounds of all the may-alias sets too; but we can defer
-   * doing so until the next point at which they could be
-   * "observed". This means that one decref won't necessarily
-   * interfere with a subsequent decref (although the side effects of
-   * the first one could still affect it). So we record the unbalanced
-   * decrefs here, and apply them at the next non-trivial instruction.
-   */
-  CompactVector<ASetID> unbalanced_decrefs;
 };
 
 // The analysis result structure for rc_analyze.
@@ -1503,10 +1507,13 @@ void find_alias_sets(Env& env) {
 //////////////////////////////////////////////////////////////////////
 
 DEBUG_ONLY bool check_state(const RCState& state) {
+  auto num_pending_requirements = uint32_t{0};
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     auto& set = state.asets[asetID];
 
     // All reference count bounds are non-negative.
+    always_assert(set.pending_reductions >= 0);
+    if (set.pending_reductions) ++num_pending_requirements;
     always_assert(set.unsupported_refs >= 0);
     always_assert(set.lower_bound >= set.unsupported_refs);
     always_assert(set.upper_bound >= set.lower_bound);
@@ -1515,7 +1522,8 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     always_assert(set.upper_bound == kInfReferences ||
                   set.upper_bound <= kMaxPlausibleReferences);
     always_assert(set.lower_bound != kInfReferences ||
-                  (!set.unsupported_refs && set.memory_support.none()));
+                  (!set.unsupported_refs && !set.pending_reductions &&
+                   set.memory_support.none()));
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
@@ -1524,6 +1532,8 @@ DEBUG_ONLY bool check_state(const RCState& state) {
       [&](size_t id) { always_assert(state.support_map[id] == asetID); }
     );
   }
+
+  always_assert(state.num_pending_requirements == num_pending_requirements);
 
   // Check other direction on the support_map.
   for (auto id = uint32_t{0}; id < state.support_map.size(); ++id) {
@@ -1568,6 +1578,8 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
 
   auto const lower_bound = std::min(dst.lower_bound, src.lower_bound);
   auto const upper_bound = std::max(dst.upper_bound, src.upper_bound);
+  auto const pending_reductions =
+    std::max(dst.pending_reductions, src.pending_reductions);
 
   /*
    * We're going to reduce the memory support to the intersection of
@@ -1605,11 +1617,16 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
   }
 
   if (dst.upper_bound != upper_bound) {
-    /*
-     * A growing upper bound on a backedge may increase without limit.
-     * Widen it to infinity immediately.
-     */
+    // A growing upper bound on a backedge may increase without limit.
+    // Widen it to infinity immediately.
     dst.upper_bound = is_back_edge ? kInfReferences : upper_bound;
+    changed = true;
+  }
+
+  if (dst.pending_reductions != pending_reductions) {
+    // Pending reductions may grow without limit on a backedge.
+    // Widen the count to infinity immediately.
+    dst.pending_reductions = is_back_edge ? kInfReferences : pending_reductions;
     changed = true;
   }
 
@@ -1630,41 +1647,13 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src, bool is_back_edg
 
   always_assert(dst.asets.size() == src.asets.size());
 
-  if (src.unbalanced_decrefs.size()) {
-    auto tmp = src.unbalanced_decrefs;
-    if (dst.unbalanced_decrefs.size()) {
-      // Need to merge the unbalanced_decrefs. For each aset in
-      // either, we want the destination to end up with max(aset in
-      // dst, aset in src) occurrances of aset (a kind of "union with
-      // counts").
-      std::sort(tmp.begin(), tmp.end());
-      std::sort(dst.unbalanced_decrefs.begin(), dst.unbalanced_decrefs.end());
-      auto j = 0;
-      for (int i = 0, sz = dst.unbalanced_decrefs.size(); i < sz; ) {
-        if (j == tmp.size()) break;
-        if (tmp[j] > dst.unbalanced_decrefs[i]) {
-          ++i;
-          continue;
-        }
-        if (tmp[j] < dst.unbalanced_decrefs[i]) {
-          dst.unbalanced_decrefs.push_back(tmp[j++]);
-          continue;
-        }
-        i++;
-        j++;
-      }
-      while (j < tmp.size()) dst.unbalanced_decrefs.push_back(tmp[j++]);
-    } else {
-      dst.unbalanced_decrefs = std::move(tmp);
-    }
-  }
-
   // We'll reconstruct the support_map vector after merging each aset.
   dst.support_map.fill(-1);
 
   auto changed = false;
 
   dst.has_unsupported_refs = false;
+  dst.num_pending_requirements = 0;
   for (auto asetID = uint32_t{0}; asetID < dst.asets.size(); ++asetID) {
     auto &daset = dst.asets[asetID];
     if (merge_into(daset, src.asets[asetID], is_back_edge)) {
@@ -1673,6 +1662,7 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src, bool is_back_edg
     }
 
     if (daset.unsupported_refs) dst.has_unsupported_refs = true;
+    if (daset.pending_reductions) ++dst.num_pending_requirements;
 
     bitset_for_each_set(
       daset.memory_support,
@@ -1698,6 +1688,7 @@ bool is_same(const RCState &dstState, const RCState& srcState) {
     if (dst.lower_bound != src.lower_bound ||
         dst.upper_bound != src.upper_bound ||
         dst.unsupported_refs != src.unsupported_refs ||
+        dst.pending_reductions != src.pending_reductions ||
         dst.memory_support != src.memory_support) {
       return false;
     }
@@ -1732,18 +1723,34 @@ void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
   }
 }
 
-void observe_unbalanced_decrefs(Env& env, RCState& state, PreAdder add_node) {
-  for (auto asetID : state.unbalanced_decrefs) {
-    FTRACE(4, "    unbalanced decref: {}\n", asetID);
-    for (auto may_id : env.asets[asetID].may_alias) {
-      reduce_lower_bound(env, state, may_id);
-      DEBUG_ONLY auto& may_set = state.asets[may_id];
-      FTRACE(5, "      {} lb: {}({})\n",
-             may_id, may_set.lower_bound, may_set.unsupported_refs);
-      add_node(may_id, NReq{1});
-    }
+void add_unbalanced_decref(Env& env, RCState& state, ASetID asetID) {
+  for (auto id : env.asets[asetID].may_alias) {
+    auto& aset = state.asets[id];
+    if (aset.lower_bound == kInfReferences) continue;
+    if (!aset.pending_reductions) ++state.num_pending_requirements;
+    if (aset.pending_reductions < kInfReferences) ++aset.pending_reductions;
   }
-  state.unbalanced_decrefs.clear();
+}
+
+void observe_pending_requirements(RCState& state, ASetID asetID,
+                                  PreAdder add_node) {
+  auto& aset = state.asets[asetID];
+  if (!aset.pending_reductions) return;
+  assertx(state.num_pending_requirements);
+  --state.num_pending_requirements;
+  FTRACE(4, "    pending reductions for {}: {}\n",
+         asetID, aset.pending_reductions);
+  aset.lower_bound = std::max(aset.lower_bound - aset.pending_reductions, 0);
+  aset.unsupported_refs = std::min(aset.unsupported_refs, aset.lower_bound);
+  aset.pending_reductions = 0;
+  add_node(asetID, NReq{1});
+}
+
+void observe_pending_requirements(RCState& state, PreAdder add_node) {
+  if (!state.num_pending_requirements) return;
+  for (auto id = uint32_t{0}; id < state.asets.size(); ++id) {
+    observe_pending_requirements(state, id, add_node);
+  }
 }
 
 /*
@@ -1771,8 +1778,10 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
   aset.upper_bound = kInfReferences;
   if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
+  if (aset.pending_reductions) --state.num_pending_requirements;
   aset.lower_bound = 0;
   aset.unsupported_refs = 0;
+  aset.pending_reductions = 0;
   bitset_for_each_set(
     aset.memory_support,
     [&](size_t id) { state.support_map[id] = -1; }
@@ -1783,7 +1792,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
 
 void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    pessimize_all\n");
-  observe_unbalanced_decrefs(env, state, add_node);
+  observe_pending_requirements(state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     pessimize_one(env, state, asetID, add_node);
   }
@@ -1839,7 +1848,7 @@ void observe(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
 
 void observe_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_all\n");
-  observe_unbalanced_decrefs(env, state, add_node);
+  observe_pending_requirements(state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     add_node(asetID, NReq{kInfReferences});
   }
@@ -1903,7 +1912,7 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
     }
   } else {
     FTRACE(4, "    adding unbalanced decref: {}\n", asetID);
-    state.unbalanced_decrefs.push_back(asetID);
+    add_unbalanced_decref(env, state, asetID);
   }
 }
 
@@ -1956,7 +1965,7 @@ bool reduce_support_bit(Env& env,
      */
     if (!may_decref) return false;
     FTRACE(4, "    adding unbalanced decref: {}\n", current_set);
-    state.unbalanced_decrefs.push_back(current_set);
+    add_unbalanced_decref(env, state, current_set);
   }
   aset.memory_support.reset(locID);
   state.support_map[locID] = -1;
@@ -2086,7 +2095,7 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
                  const CallEffects& e, PreAdder add_node) {
   // The call can affect any unsupported_refs
-  observe_unbalanced_decrefs(env, state, add_node);
+  observe_pending_requirements(state, add_node);
   kill_unsupported_refs(state);
   pessimize_upper_bound_all_asets(env, state);
 
@@ -2172,7 +2181,7 @@ void analyze_mem_effects(Env& env,
 
     [&] (const GeneralEffects& x) {
       if (inst.is(CallBuiltin)) {
-        observe_unbalanced_decrefs(env, state, add_node);
+        observe_pending_requirements(state, add_node);
         kill_unsupported_refs(state, add_node);
         pessimize_upper_bound_all_asets(env, state);
       }
@@ -2196,7 +2205,7 @@ void analyze_mem_effects(Env& env,
       // refcounts, so we don't need to reduce lower bounds.
       auto const may_decref = !inst.is(LeaveInlineFrame, EnterInlineFrame);
       if (may_decref && (x.stores != AEmpty || x.inout != AEmpty)) {
-        observe_unbalanced_decrefs(env, state, add_node);
+        observe_pending_requirements(state, add_node);
       }
       reduce_support(env, state, x.stores, may_decref, add_node);
       reduce_support(env, state, x.inout, may_decref, add_node);
@@ -2310,7 +2319,7 @@ void rc_analyze_inst(Env& env,
     propagate(inst.taken());
     return;
   case IncRef:
-    observe_unbalanced_decrefs(env, state, add_node);
+    observe_pending_requirements(state, add_node);
     if_aset(env, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
 
@@ -2392,7 +2401,7 @@ void rc_analyze_inst(Env& env,
     return;
   default:
     if (!irrelevant_inst(inst)) {
-      observe_unbalanced_decrefs(env, state, add_node);
+      observe_pending_requirements(state, add_node);
     }
     break;
   }
@@ -2889,14 +2898,8 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
           continue;
         }
         if (state.asets[id].lower_bound >= 2) {
-          // take account of any unbalanced_decrefs that might mean
-          // that the lower bound is less than we think.
-          auto lb = state.asets[id].lower_bound;
-          for (auto const asetID : state.unbalanced_decrefs) {
-            for (auto may_id : penv.env.asets[asetID].may_alias) {
-              if (may_id == id && lb != kInfReferences) lb--;
-            }
-          }
+          auto const lb = state.asets[id].lower_bound -
+                          state.asets[id].pending_reductions;
           if (lb >= 2) {
             FTRACE(2, "    ** decnz:  {}\n", inst);
             if (inst.is(DecReleaseCheck)) {

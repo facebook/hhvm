@@ -1,0 +1,17 @@
+Reentrant warning handler
+compile warning
+bool(true)
+bool(false)
+Throwing warning handler
+compile warning
+bool(true)
+Suppressed warning
+bool(false)
+bool(true)
+bool(true)
+Independent regex options
+bool(true)
+bool(false)
+Independent regex encodings
+bool(true)
+bool(true)

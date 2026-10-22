@@ -32,6 +32,7 @@
 #include "hphp/util/rds-local.h"
 
 #include <map>
+#include <memory>
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -150,7 +151,8 @@ static php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 // globals
-using RegexCache = std::map<std::string, php_mb_regex_t *>;
+using CachedRegex = std::unique_ptr<php_mb_regex_t, decltype(&onig_free)>;
+using RegexCache = std::multimap<std::string, CachedRegex>;
 
 struct MBGlobals final : RequestEventHandler {
   mbfl_no_language language;
@@ -294,10 +296,6 @@ struct MBGlobals final : RequestEventHandler {
     if (search_regs != nullptr) {
       onig_region_free(search_regs, 1);
       search_regs = (OnigRegion *)nullptr;
-    }
-    for (RegexCache::const_iterator it = ht_rc.begin(); it != ht_rc.end();
-         ++it) {
-      onig_free(it->second);
     }
     ht_rc.clear();
   }
@@ -3328,27 +3326,23 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const OptString& pattern,
 
   std::string spattern = std::string(pattern.data(), pattern.size());
   RegexCache &cache = MBSTRG(ht_rc);
-  RegexCache::const_iterator it =
-    cache.find(spattern);
-  if (it != cache.end()) {
-    rc = it->second;
+  auto const range = cache.equal_range(spattern);
+  for (auto it = range.first; it != range.second; ++it) {
+    auto const re = it->second.get();
+    if (onig_get_options(re) == options && onig_get_encoding(re) == enc &&
+        onig_get_syntax(re) == syntax) {
+      return re;
+    }
   }
 
-  if (!rc || onig_get_options(rc) != options || onig_get_encoding(rc) != enc ||
-      onig_get_syntax(rc) != syntax) {
-    if (rc) {
-      onig_free(rc);
-      rc = nullptr;
-    }
-    if ((err_code = onig_new(&rc, (OnigUChar *)pattern.data(),
-                             (OnigUChar *)(pattern.data() + pattern.size()),
-                             options,enc, syntax, &err_info)) != ONIG_NORMAL) {
-      onig_error_code_to_str(err_str, err_code, &err_info);
-      raise_warning("mbregex compile err: %s", err_str);
-      return nullptr;
-    }
-    MBSTRG(ht_rc)[spattern] = rc;
+  if ((err_code = onig_new(&rc, (OnigUChar *)pattern.data(),
+                           (OnigUChar *)(pattern.data() + pattern.size()),
+                           options, enc, syntax, &err_info)) != ONIG_NORMAL) {
+    onig_error_code_to_str(err_str, err_code, &err_info);
+    raise_warning("mbregex compile err: %s", err_str);
+    return nullptr;
   }
+  cache.emplace(std::move(spattern), CachedRegex{rc, onig_free});
   return rc;
 }
 

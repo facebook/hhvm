@@ -2323,12 +2323,13 @@ void rc_analyze_inst(Env& env,
     propagate(inst.taken());
     return;
   case IncRef:
-    observe_pending_requirements(state, add_node);
     if_aset(env, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
 
       // IncRef on TUncounted has no effects.
       if (aset.lower_bound == kInfReferences) return;
+
+      observe_pending_requirements(state, asetID, add_node);
 
       if (!aset.lower_bound) {
         /*
@@ -2348,8 +2349,15 @@ void rc_analyze_inst(Env& env,
          * Either set's bound or their combined supported credit can prove it
          * stays live. Dec/inc PRE raises counts, so the pre-increment bound of
          * one already satisfies the requirement in that direction.
+         *
+         * A later DecRefNZ on an alias may rely on this increment, so observe
+         * its earlier pending requirement before adding the new reference.
+         * A pre-increment bound of two makes this barrier unnecessary when
+         * the values alias; when they differ, this increment cannot supply
+         * the NZ guarantee. Later DecRefs apply their own pending reductions.
          */
         for (auto const mayAliasID : env.asets[asetID].may_alias) {
+          observe_pending_requirements(state, mayAliasID, add_node);
           add_node(mayAliasID, NReq{1}, asetID);
         }
       }

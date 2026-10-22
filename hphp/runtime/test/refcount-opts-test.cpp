@@ -1210,9 +1210,8 @@ TEST(RefcountOpts, PendingDecrefsBeforeIncRef) {
       // An aliasing IncRef d may provide the reference that makes the final
       // DecRefNZ safe after DecRefNZ b. A disjoint increment cannot do that and
       // should not force observation of a's pending decrements.
-      // TODO: An incref of a disjoint type cannot invalidate a's NZ guarantee.
-      EXPECT_EQ(IncRef, inc->op());
-      EXPECT_EQ(DecRefNZ, dec->op());
+      EXPECT_EQ(alias ? IncRef : Nop, inc->op());
+      EXPECT_EQ(alias ? DecRefNZ : Nop, dec->op());
     }
   }
 }
@@ -1266,15 +1265,15 @@ TEST(RefcountOpts, PendingReductionsAcrossSharedInc) {
     // With a == b != d and one initial reference to a, its final ordinary
     // decrement must release. Removing its pair would instead require b's NZ
     // decrement to release. The lower bound for d cannot prove a is shared.
-    // TODO: With a final NZ decrement, use d's bound to keep a's requirement
-    // deferred across IncRef d and cancel the original pair safely. This needs
-    // effective-bound handling of later decrements: d's bound alone must not
-    // allow removing the ordinary release in the other case.
+    // With a final NZ decrement, cancel a's pair: d's bound keeps a alive
+    // if they alias, and otherwise IncRef d cannot supply a's NZ guarantee.
+    // The ordinary endpoint must still apply a's pending reduction before
+    // using its bound; d's bound alone cannot justify removing a's release.
     // TODO: For an ordinary endpoint, cancellation could instead change b's
     // single NZ decrement on each path to DecRef to preserve the release.
     for (auto const middle : middles) EXPECT_EQ(DecRefNZ, middle->op());
-    for (auto const inc : incs) EXPECT_EQ(IncRef, inc->op());
-    EXPECT_EQ(nz ? DecRefNZ : DecRef, dec->op());
+    for (auto const inc : incs) EXPECT_EQ(nz ? Nop : IncRef, inc->op());
+    EXPECT_EQ(nz ? Nop : DecRef, dec->op());
   }
 }
 

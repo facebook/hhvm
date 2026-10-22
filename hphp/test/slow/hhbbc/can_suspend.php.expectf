@@ -15,6 +15,12 @@ Function (persistent) (can_async_eager_ret) (eager-only) (leaf) eager_leaf
 %A
 Function (persistent) (can_async_eager_ret) (eager-only) eager_chain
 %A
+%w%d: WHResult
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) eager_stored
+%A
+%w%d: WHResult
+%A
 Function (persistent) (can_async_eager_ret) suspending_leaf
 %A
 Function (persistent) (can_async_eager_ret) suspending_chain
@@ -33,6 +39,32 @@ Function (persistent) (can_async_eager_ret) (eager-only) eager_all
 %A
 Function (persistent) (can_async_eager_ret) suspending_all
 %A
+Function (persistent) (can_async_eager_ret) (eager-only) eager_concurrent
+%A
+%w%d: PopL L:%d
+%w// line %d
+%w%d: AssertRATL L:%d Obj<=HH\Awaitable
+%w%d: PushL L:%d
+%w%d: WHResult
+%A
+%w%d: WHResult
+%A
+Function (persistent) (can_async_eager_ret) mixed_concurrent
+%A
+%w%d: AwaitAll L:%d+2
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) caught_eager_failure
+%A
+%w%d: WHResult
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) catch_direct_eager_failure
+%A
+%w%d: WHResult
+%A
+Function (persistent) (can_async_eager_ret) mixed_concurrent_failure
+%A
+%w%d: AwaitAll L:%d+2
+%A
 Function (persistent) (can_async_eager_ret) (eager-only) eager_map
 %A
 Function (persistent) (can_async_eager_ret) suspending_map
@@ -47,11 +79,27 @@ Function (persistent) (can_async_eager_ret) catch_eager_memo_throw
 %A
 int(2)
 int(3)
+int(71)
 int(10)
 int(11)
 int(12)
 eager all done
 suspending all done
+vec(2) {
+  int(21)
+  int(31)
+}
+vec(3) {
+  int(41)
+  int(51)
+  int(61)
+}
+string(13) "eager failure"
+string(20) "direct eager failure"
+vec(2) {
+  bool(true)
+  bool(true)
+}
 vec(2) {
   int(2)
   int(3)

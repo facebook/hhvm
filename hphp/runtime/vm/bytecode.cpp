@@ -2115,7 +2115,6 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
   // value must be removed from the stack, or the unwinder would try to free it
   // if the hook throws---but the event hook routine decrefs the return value
   // in that case if necessary.
-  // in that case if necessary.
   fp->setLocalsDecRefd();
   frame_free_locals_inl(
     fp,

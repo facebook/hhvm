@@ -5817,9 +5817,15 @@ void in(ISS& env, const bc::WHResult&) {
 }
 
 void in(ISS& env, const bc::Await&) {
-  auto const wh = popC(env);
-  env.flags.canSuspend |= wait_handle_can_suspend(wh);
-  pushTypeFromWH(env, std::move(wh));
+  auto const& wh = topC(env);
+  if (wh.subtypeOf(BObj) &&
+      is_specialized_wait_handle(wh) &&
+      !wait_handle_can_suspend(wh)) {
+    return reduce(env, bc::WHResult {});
+  }
+  auto value = popC(env);
+  env.flags.canSuspend |= wait_handle_can_suspend(value);
+  pushTypeFromWH(env, std::move(value));
 }
 
 void in(ISS& env, const bc::AwaitAll& op) {
@@ -5829,6 +5835,42 @@ void in(ISS& env, const bc::AwaitAll& op) {
       env,
       bc::AwaitAll {LocalRange {equiv, op.locrange.count}}
     );
+  }
+
+  auto const end = op.locrange.first + op.locrange.count;
+
+  CompactVector<bool> eager;
+  eager.reserve(op.locrange.count);
+  auto anyEager = false;
+  for (auto loc = op.locrange.first; loc < end; ++loc) {
+    auto const ty = to_cell(peekLocRaw(env, loc));
+    auto const isWaitHandle =
+      ty.subtypeOf(BOptObj) && is_specialized_wait_handle(ty);
+    auto const isEager =
+      ty.subtypeOf(BInitNull) ||
+      (isWaitHandle && !wait_handle_can_suspend(ty));
+    eager.emplace_back(isEager);
+    anyEager |= isEager;
+  }
+
+  if (anyEager) {
+    auto const nonEagerCount = std::count(eager.begin(), eager.end(), false);
+    if (!nonEagerCount) return reduce(env, bc::Null {});
+
+    // AwaitAll uses a contiguous local range, so remove eager members at the
+    // ends without changing local identity across a suspension point. Eager
+    // members within the remaining range are already excluded from the
+    // ConcurrentWaitHandle by the runtime.
+    uint32_t first = 0;
+    while (eager[first]) ++first;
+    auto last = safe_cast<uint32_t>(eager.size());
+    while (eager[last - 1]) --last;
+    if (first || last != eager.size()) {
+      return reduce(env, bc::AwaitAll { LocalRange {
+        op.locrange.first + first,
+        last - first
+      }});
+    }
   }
 
   for (uint32_t i = 0; i < op.locrange.count; ++i) {

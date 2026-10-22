@@ -2692,6 +2692,13 @@ SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
   return decRefImpl(env, inst);
 }
 
+SSATmp* simplifyDecReleaseCheck(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->type() <= TUncounted) {
+    return gen(env, Jmp, inst->taken());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->type().maybe(TCounted)) {
@@ -4223,6 +4230,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(KeysetIterEnd)
       X(DecRef)
       X(DecRefNZ)
+      X(DecReleaseCheck)
       X(DefLabel)
       X(DivDbl)
       X(DivInt)

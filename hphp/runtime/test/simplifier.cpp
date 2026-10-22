@@ -92,6 +92,38 @@ TEST(Simplifier, CondJmp) {
   }
 }
 
+TEST(Simplifier, DecReleaseCheckUncounted) {
+  IRUnit unit{test_context};
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
+
+  for (auto const type : {TInt, TStaticStr, TUncounted}) {
+    auto const value = unit.gen(Conjure, bcctx, type)->dst();
+    auto const taken = unit.defBlock();
+    auto const inst = unit.gen(DecReleaseCheck, bcctx, DecRefData{}, taken,
+                               value);
+    inst->setNext(unit.defBlock());
+
+    auto const result = simplify(unit, inst);
+    EXPECT_SINGLE_OP(result, Jmp);
+    EXPECT_EQ(taken, result.instrs[0]->taken());
+  }
+}
+
+TEST(Simplifier, DecReleaseCheckMaybeCounted) {
+  IRUnit unit{test_context};
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
+
+  for (auto const type : {TObj, TStr, TInt | TObj, TCell}) {
+    auto const value = unit.gen(Conjure, bcctx, type)->dst();
+    auto const inst = unit.gen(DecReleaseCheck, bcctx, DecRefData{},
+                               unit.defBlock(), value);
+    inst->setNext(unit.defBlock());
+
+    auto const result = simplify(unit, inst);
+    EXPECT_NO_CHANGE(result);
+  }
+}
+
 TEST(Simplifier, Count) {
   IRUnit unit{test_context};
   auto const dummy = BCContext { BCMarker::Dummy(), 0 };

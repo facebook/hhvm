@@ -600,63 +600,39 @@ void cgReleaseShallow(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-template<class Then, class Else>
-void ifThenElseRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc,
-    Then thenBlock, Else elseBlock) {
+void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const loc = srcLoc(env, inst, 0);
+  auto const ty = inst->src(0)->type();
+  auto const taken = label(env, inst->taken());
   assertx(ty <= TCell);
 
-  if (!ty.maybe(TCounted)) {
-    elseBlock(v);
+  if (ty <= TUncounted) {
+    v << jmp{taken};
     return;
   }
 
-  if (ty.isKnownDataType()) {
-    assertx(isRefcountedType(ty.toDataType()));
-    thenBlock(v);
-    return;
+  if (!(ty <= (TCounted | TPersistent))) {
+    auto const sf = v.makeReg();
+    auto const cc = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
+    ifThen(v, ccNegate(cc), sf, taken,
+           tag_from_string("decreleasecheck-is-dt-refcounted"));
   }
 
-  auto const sf = v.makeReg();
-  auto const cond = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
-  ifThenElse(v, vtaken, cond, sf, thenBlock, elseBlock,
-      tag_from_string("refcount-check"));
-}
-
-void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
-  auto const base = srcLoc(env, inst, 0).reg(0);
-  auto const ty = inst->src(0)->type();
-
-  auto const refcountedTypeImpl = [&](Vout& v) {
-    auto const sf = emitCmpRefCount(v, OneReference, base);
-    ifThenElse(
-      v, vcold(env), CC_NE, sf,
-      [&](Vout& v) {
-        ifThenElse(v,v, CC_NL, sf,
-            [&](Vout& v) {
-              emitDecRef(v, base, TRAP_REASON);
-              v << jmp{label(env, inst->taken())};
-            },
-            [&](Vout& v) {
-              v << jmp{label(env, inst->taken())};
-            },
-            false,
-            tag_from_string("decref-non-persistent"));
-      },
-      [&](Vout& v) {
-        v << jmp{label(env, inst->next())};
-      },
-      true,
-      tag_from_string("decref-is-one")
-    );
- };
-
- auto const notRefcountedTypeImpl = [&](Vout& v){
-  v << jmp{label(env, inst->taken())};
- };
-
- ifThenElseRefCountedType(
-     vmain(env), vcold(env), ty, srcLoc(env, inst, 0),
-     refcountedTypeImpl, notRefcountedTypeImpl);
+  auto const sf = emitCmpRefCount(v, OneReference, loc.reg(0));
+  unlikelyIfThen(
+    v, vcold(env), CC_NE, sf,
+    [&](Vout& v) {
+      if (ty.maybe(TPersistent)) {
+        ifThen(v, CC_L, sf, taken,
+               tag_from_string("decreleasecheck-is-persistent"));
+      }
+      emitDecRef(v, loc.reg(0), TRAP_REASON);
+      v << jmp{taken};
+    },
+    tag_from_string("decreleasecheck-is-one")
+  );
+  v << jmp{label(env, inst->next())};
 }
 
 void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {

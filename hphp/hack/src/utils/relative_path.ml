@@ -223,6 +223,25 @@ let strip_root_if_possible s =
 
 let from_root ~(suffix : string) : t = (Root, suffix)
 
+let from_root_opt ~(suffix : string) : t option =
+  let suffix = String.rstrip suffix ~drop:(Char.equal '/') in
+  if
+    String.is_empty suffix
+    || String.is_prefix suffix ~prefix:"/"
+    || List.mem (String.split suffix ~on:'/') ".." ~equal:String.equal
+  then
+    None
+  else
+    Some (from_root ~suffix)
+
+(* Whether [path] is [dir] or lies under it. *)
+let is_within ~(dir : t) (path : t) =
+  equal_prefix (prefix dir) (prefix path)
+  &&
+  let dir = suffix dir in
+  let path = suffix path in
+  String.equal path dir || String.is_prefix path ~prefix:(dir ^ "/")
+
 let relativize_set prefix m =
   S_set.fold (fun k a -> Set.add a (create prefix k)) m Set.empty
 

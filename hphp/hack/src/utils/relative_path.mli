@@ -52,6 +52,15 @@ val create_detect_prefix : string -> t
     `create_detect_prefix` instead. *)
 val from_root : suffix:string -> t
 
+(** [from_root_opt ~suffix] is [from_root ~suffix] with the slashes at the end
+    of [suffix] dropped, or [None] when what remains is empty, absolute, or
+    has a [..] component. *)
+val from_root_opt : suffix:string -> t option
+
+(** [is_within ~dir path] is whether [path] is [dir] or lies under it. Paths
+    with different prefixes are never within one another. *)
+val is_within : dir:t -> t -> bool
+
 val prefix : t -> prefix
 
 val suffix : t -> string

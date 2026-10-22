@@ -1337,12 +1337,14 @@ TEST(RefcountOpts, AliasIncBeforePartialPREWithoutPendingDecrefs) {
         // For disjoint values, IncRef d cannot supply a's final NZ guarantee.
         // TODO: In safe partial cases, insert DecRefNZ a on the empty edge: the
         // original NZ guarantee or d's entry reference rules out releasing.
-        // FIXME[CRASH]: An aliasing increment must block anticipation even without
-        // pending decrefs when entryInc is false and the bound can be below two.
-        EXPECT_EQ(Nop, inc->op());
-        EXPECT_EQ(Nop, dec->op());
+        auto const blocked = alias && partial && !entryInc;
+        EXPECT_EQ(blocked ? IncRef : Nop, inc->op());
+        EXPECT_EQ(blocked ? DecRefNZ : Nop, dec->op());
         if (otherInc) {
           EXPECT_EQ(Nop, otherInc->op());
+        } else if (blocked) {
+          ASSERT_EQ(1, env.right->instrs().size());
+          EXPECT_EQ(Jmp, env.right->front().op());
         } else {
           ASSERT_EQ(2, env.right->instrs().size());
           EXPECT_EQ(DecRef, env.right->front().op());
@@ -1709,12 +1711,17 @@ TEST(RefcountOpts, PartialPREAcrossAliasIncBounds) {
     // reference, so compensation could release before IncRef d.
     // TODO: For k = 0, cancel the join increment and final decrement instead.
     EXPECT_EQ(IncRef, joinInc->op());
-    // FIXME[CRASH]: Do not count a repeated load's unsupported credit twice.
-    EXPECT_EQ(Nop, inc->op());
-    EXPECT_EQ(Nop, dec->op());
-    ASSERT_EQ(2, env.right->instrs().size());
-    EXPECT_EQ(DecRef, env.right->front().op());
-    EXPECT_EQ(a->dst(), env.right->front().src(0));
+    auto const blocked = local == 0;
+    EXPECT_EQ(blocked ? IncRef : Nop, inc->op());
+    EXPECT_EQ(blocked ? DecRefNZ : Nop, dec->op());
+    if (blocked) {
+      ASSERT_EQ(1, env.right->instrs().size());
+      EXPECT_EQ(Jmp, env.right->front().op());
+    } else {
+      ASSERT_EQ(2, env.right->instrs().size());
+      EXPECT_EQ(DecRef, env.right->front().op());
+      EXPECT_EQ(a->dst(), env.right->front().src(0));
+    }
   }
 }
 
@@ -2615,12 +2622,9 @@ TEST(RefcountOpts, PreservePhiAliasBeforeIncrement) {
     // reference must survive until IncRef q, which supplies the NZ guarantee.
     // Unlike dropping the last release in the phi tests above, a compensating
     // ordinary DecRef here frees p == q before the increment and CountVec.
-    // FIXME[CRASH]: Compensation frees the sole reference before IncRef q.
-    EXPECT_EQ(Nop, inc->op());
-    ASSERT_EQ(2, right->instrs().size());
-    EXPECT_EQ(DecRef, right->front().op());
-    EXPECT_EQ(p, right->front().src(0));
-    EXPECT_EQ(Jmp, right->back().op());
+    EXPECT_EQ(IncRef, inc->op());
+    ASSERT_EQ(1, right->instrs().size());
+    EXPECT_EQ(Jmp, right->front().op());
     EXPECT_TRUE(checkCfg(env.unit));
   }
 }

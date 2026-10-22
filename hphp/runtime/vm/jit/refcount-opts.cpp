@@ -553,7 +553,7 @@ void remove_helper(IRUnit& unit, IRInstruction* inst) {
   switch (inst->op()) {
   case IncRef:
   case DecRef:
-  case DecRefNZ: 
+  case DecRefNZ:
   case DecReleaseCheck: {
     inst->setOpcode(DbgAssertRefCount);
     inst->clearExtra();
@@ -981,7 +981,8 @@ struct PreAdder {
     }
     info->setAvlAnt(iter, !info->incDec);
   }
-  void operator()(ASetID asetID, const NReq& n) const {
+  void operator()(ASetID asetID, const NReq& n,
+                  ASetID aliasID = -1) const {
     if (!info) return;
     /*
      * An NReq requires that the refcount at this point in the code be
@@ -991,7 +992,20 @@ struct PreAdder {
      * we might even be able to ignore NReqs unless n.level==INT_MAX
      * in that case - but that requires some investigation.
      */
-    auto const lb = info->state.asets[asetID].lower_bound;
+    auto const& aset = info->state.asets[asetID];
+    auto lb = int64_t{aset.lower_bound};
+    if (aliasID != -1) {
+      assertx(aliasID != asetID);
+      auto const& alias = info->state.asets[aliasID];
+      // If the optional aliasID is given, we are assuming that the asetID and
+      // aliasID alias each other. Either bound or their independent supported
+      // credits can satisfy the requirement. Unsupported credits may overlap
+      // support in the other set, so only the supported components can be
+      // added.
+      auto const supported = int64_t{aset.lower_bound} - aset.unsupported_refs +
+        alias.lower_bound - alias.unsupported_refs;
+      lb = std::max({lb, int64_t{alias.lower_bound}, supported});
+    }
     if (lb - (info->incDec ? 1 : 0) >= n.level) return;
     FTRACE(4, "     altLoc: {}\n", asetID);
     info->blkInfo.altLoc.set(asetID);
@@ -1577,7 +1591,7 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
 
   if (dst.lower_bound != lower_bound) {
     /*
-     * If there's a cycle, we will still converge to 0, 
+     * If there's a cycle, we will still converge to 0,
      * albeit rather slowly - after going through lower_bound iterations.
      * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
      */
@@ -1591,7 +1605,7 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
 
   if (dst.upper_bound != upper_bound) {
     /*
-     * If there's a cycle, we will still converge to kMaxReferences, 
+     * If there's a cycle, we will still converge to kMaxReferences,
      * albeit rather slowly - after going through kMaxReferences iterations.
      * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
      */
@@ -1849,7 +1863,7 @@ void may_incref(Env& env, RCState& state, ASetID asetID) {
   increase_upper_bound(env, state, asetID);
   for (auto may_id : env.asets[asetID].may_alias) {
     increase_upper_bound(env, state, may_id);
-  }  
+  }
 }
 
 void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
@@ -1860,13 +1874,13 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   add_node(asetID, NReq{1});
   FTRACE(3, "    {} lb: {}({})\n",
          asetID, aset.lower_bound, aset.unsupported_refs);
-  
+
   if (balanced) {
     /*
      * The intention here is to reduce just the assumed reference of may-alias sets by 1
      * However, we don't distinguish which of the unsupported references are assumed
      * Therefore, we conservatively decrease the unsupported reference by 1
-     */ 
+     */
     FTRACE(4, "    adding balanced decref: {}\n", asetID);
     if (!state.has_unsupported_refs) return;
     for (auto may_id : env.asets[asetID].may_alias) {
@@ -2286,13 +2300,24 @@ void rc_analyze_inst(Env& env,
         /*
          * We incref aset so there must be a ref to it, otherwise the input program is malformed.
          * Therefore, we assume aset has atleast a single reference.
-         * This is a special unsupported ref because it may already be accounted for, 
+         * This is a special unsupported ref because it may already be accounted for,
          * by the supported component of the aset's may-aliases.
          */
         FTRACE(3, "    {} unsupported_refs += 1\n", asetID);
         assertx(!aset.unsupported_refs);
         aset.lower_bound = aset.unsupported_refs = 1;
         state.has_unsupported_refs = true;
+      }
+      if (aset.lower_bound < 2) {
+        /*
+         * Inc/dec PRE compensation must not release an alias before this IncRef.
+         * Either set's bound or their combined supported credit can prove it
+         * stays live. Dec/inc PRE raises counts, so the pre-increment bound of
+         * one already satisfies the requirement in that direction.
+         */
+        for (auto const mayAliasID : env.asets[asetID].may_alias) {
+          add_node(mayAliasID, NReq{1}, asetID);
+        }
       }
       add_node(asetID, NInc{&inst});
       may_incref(env, state, asetID);
@@ -2312,7 +2337,7 @@ void rc_analyze_inst(Env& env,
           /*
            * We DecRefNZ aset so there must be at least 2 refs to it, otherwise the input program is malformed.
            * Therefore, we add 2 assumed references to aset.
-           * These are special unsupported refs because they may already be accounted for, 
+           * These are special unsupported refs because they may already be accounted for,
            * by the supported component of the aset's may-aliases.
            */
 
@@ -2329,11 +2354,11 @@ void rc_analyze_inst(Env& env,
         /*
          * We only modify upper bound for guaranteed counted asets.
          * For asets that could be persistent, the upper bound must be kMaxReferences.
-         * However, this invariant may be temporarily broken at the moment. 
+         * However, this invariant may be temporarily broken at the moment.
          * One situation is if we are currently within a loop body
          * and the Deflabel block corresponding to the loop beginning hasn't been merged
          * with all of its ancestors because some of them are yet to be processed.
-         * It's possible that it has only been merged 
+         * It's possible that it has only been merged
          * with the ancestors that provide counted values (upper_bound <= kMaxReferences)
          * but not with those that provide uncounted values (upper_bound == kMaxReferences).
          */
@@ -2395,7 +2420,7 @@ void rc_analyze_inst(Env& env,
    */
   for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
 
-    // The instruction might incref any of the args arbitrary number of times. 
+    // The instruction might incref any of the args arbitrary number of times.
     if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
       pessimize_upper_bound_one_aset(env, state, asetID);
     });
@@ -2434,7 +2459,7 @@ void rc_analyze_inst(Env& env,
       if (inst.producesNewReference() && inst.dst()->type().subtypeOfAny(TCounted)) {
         aset.upper_bound = 1;
       }
-      FTRACE(3, "    {} produced: lb {} ub {}\n", 
+      FTRACE(3, "    {} produced: lb {} ub {}\n",
         asetID, aset.lower_bound, aset.upper_bound
       );
     });

@@ -1,0 +1,8 @@
+int(0)
+completed: hello
+vec(1) refcount(2){
+completed: hello
+vec(1) refcount(2){
+int(0)
+caught: Object of class InvalidCompletion could not be converted to string
+vec(1) refcount(2){

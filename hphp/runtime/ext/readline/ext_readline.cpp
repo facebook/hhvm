@@ -22,6 +22,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/rds-local.h"
 
+#include <folly/ScopeGuard.h>
+
 #ifdef USE_EDITLINE
 #include <editline/readline.h>
 #else
@@ -33,7 +35,7 @@ namespace HPHP {
 
 struct ReadlineVars {
   Variant completion;
-  Array array;
+  ArrayIter* iterator{nullptr};
 };
 
 RDS_LOCAL(ReadlineVars, s_readline);
@@ -68,11 +70,8 @@ static bool HHVM_FUNCTION(readline_clear_history) {
 /* This function is called repeatedly by rl_completion_matches. The first
  * invocation has state = 0, subsequent ones have state != 0. A return value of
  * nullptr indicates that all possible completions have been returned. */
-static char* _readline_command_generator(const char* text, int state) {
-  static ArrayIter iter;
-  if (state == 0) {
-    iter = s_readline->array.begin();
-  }
+static char* _readline_command_generator(const char* text, int /*state*/) {
+  auto& iter = *s_readline->iterator;
   auto text_str = OptString(text);
   while (iter) {
     auto value = tvCastToString(iter.secondVal());
@@ -94,8 +93,11 @@ static char** readline_completion_cb(const char* text, int start, int end) {
       s_readline->completion,
       make_vec_array(text, start, end));
   if (completion.isArray()) {
-    s_readline->array = completion.asArrRef();
-    if (s_readline->array.length() > 0) {
+    if (!completion.asArrRef().empty()) {
+      ArrayIter iter(completion.asArrRef());
+      auto const previous = s_readline->iterator;
+      s_readline->iterator = &iter;
+      SCOPE_EXIT { s_readline->iterator = previous; };
       matches = rl_completion_matches(text, _readline_command_generator);
     } else {
       // readline frees this using free(), so we must use malloc() and not new
@@ -104,7 +106,6 @@ static char** readline_completion_cb(const char* text, int start, int end) {
       matches[1] = "\0";
     }
   }
-  s_readline->array.clear();
   return matches;
 }
 
@@ -282,7 +283,7 @@ static struct ReadlineExtension final : Extension {
     void requestShutdown() override {
       if (!s_readline.isNull()) {
         s_readline->completion.releaseForSweep();
-        s_readline->array.detach();
+        assertx(s_readline->iterator == nullptr);
       }
     }
 } s_readline_extension;

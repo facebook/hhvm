@@ -33,6 +33,15 @@ function is_vec_or_dict_(mixed $x): void {
   }
 }
 
+function wildcard_memory_delta(mixed $v, mixed $d, mixed $t): int {
+  $before = memory_get_usage();
+  for ($i = 0; $i < 10000; $i++) {
+    if (!($v is vec<_>) || !($d is dict<_, _>) || !($t is (vec<_>, int))) {
+      echo "wrong\n";
+    }
+  }
+  return memory_get_usage() - $before;
+}
 
 <<__EntryPoint>>
 function main_is_expression_hack_array() :mixed{
@@ -85,4 +94,10 @@ is_vec_or_dict_(vec[]);
 is_vec_or_dict_(vec[]);
 is_vec_or_dict_(dict[]);
 is_vec_or_dict_(keyset[]);
+
+echo "---\n";
+
+$t = tuple(vec[], 1);
+wildcard_memory_delta(vec[], dict[], $t);
+echo wildcard_memory_delta(vec[], dict[], $t) < 100000 ? "no leak\n" : "leak\n";
 }

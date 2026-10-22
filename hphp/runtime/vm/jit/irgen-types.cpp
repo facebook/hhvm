@@ -1243,7 +1243,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
     shouldDecRef = maybe_resolved != ts;
   }
   if (op == TypeStructResolveOp::Resolve && invalidType) {
-    shouldDecRef = true;
+    shouldDecRef = typeStructureCouldBeNonStatic(ts);
     return resolveTypeStructImpl(
       env, typeStructureCouldBeNonStatic(ts), true, 1, true);
   }
@@ -1252,7 +1252,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
     return nullptr;
   }
   if (op == TypeStructResolveOp::Resolve && partial) {
-    shouldDecRef = true;
+    shouldDecRef = typeStructureCouldBeNonStatic(ts);
     return resolveTypeStructImpl(
       env, typeStructureCouldBeNonStatic(ts), true, 1, true);
   }
@@ -1301,6 +1301,7 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind 
     push(env, result);
     decRef(env, c, DecRefProfileId::IsTypeStructCc);
     decRef(env, a, DecRefProfileId::IsTypeStructCa);
+    if (shouldDecRef) decRef(env, tc, DecRefProfileId::IsTypeStructCTc);
   };
 
   if (kind == TypeStructEnforceKind::Shallow) {

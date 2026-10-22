@@ -74,13 +74,25 @@ async function eager_concurrent(): Awaitable<(int, int)> {
   return tuple($first, $second);
 }
 
+// The eager handle is intentionally interior, so trimming it requires DCE to
+// remap the compiler temporaries.
 async function mixed_concurrent(): Awaitable<(int, int, int)> {
   concurrent {
-    $eager = await eager_leaf(50);
     $first = await suspending_leaf(40);
+    $eager = await eager_leaf(50);
     $last = await suspending_leaf(60);
   }
   return tuple($first, $eager, $last);
+}
+
+// Preserve coverage for the direct prefix and suffix trimming path.
+async function edge_eager_concurrent(): Awaitable<(int, int, int)> {
+  concurrent {
+    $first = await eager_leaf(80);
+    $middle = await suspending_leaf(90);
+    $last = await eager_leaf(100);
+  }
+  return tuple($first, $middle, $last);
 }
 
 final class CompletionState {
@@ -123,14 +135,14 @@ async function catch_direct_eager_failure(): Awaitable<string> {
   return 'unexpected success';
 }
 
-// Removing the eager failure from AwaitAll must still let both pending
-// siblings finish before WHResult rethrows it.
+// Removing the interior eager failure from AwaitAll must still let both
+// pending siblings finish before WHResult rethrows it.
 async function mixed_concurrent_failure(): Awaitable<(bool, bool)> {
   $state = new CompletionState();
   try {
     concurrent {
-      await eager_failure();
       await mark_after_suspend($state, true);
+      await eager_failure();
       await mark_after_suspend($state, false);
     }
   } catch (Exception $_) {
@@ -192,6 +204,7 @@ function main(): void {
   echo "suspending all done\n";
   var_dump(HH\Asio\join(eager_concurrent()));
   var_dump(HH\Asio\join(mixed_concurrent()));
+  var_dump(HH\Asio\join(edge_eager_concurrent()));
   var_dump(HH\Asio\join(caught_eager_failure()));
   var_dump(HH\Asio\join(catch_direct_eager_failure()));
   var_dump(HH\Asio\join(mixed_concurrent_failure()));

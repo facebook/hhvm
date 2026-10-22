@@ -53,6 +53,10 @@ Function (persistent) (can_async_eager_ret) mixed_concurrent
 %A
 %w%d: AwaitAll L:%d+2
 %A
+Function (persistent) (can_async_eager_ret) edge_eager_concurrent
+%A
+%w%d: AwaitAll L:%d+1
+%A
 Function (persistent) (can_async_eager_ret) (eager-only) caught_eager_failure
 %A
 %w%d: WHResult
@@ -93,6 +97,11 @@ vec(3) {
   int(41)
   int(51)
   int(61)
+}
+vec(3) {
+  int(81)
+  int(91)
+  int(101)
 }
 string(13) "eager failure"
 string(20) "direct eager failure"

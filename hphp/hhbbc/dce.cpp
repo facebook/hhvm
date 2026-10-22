@@ -336,6 +336,16 @@ struct LocalRemappingIndex {
   // slots.  This is for keeping local ranges intact for bytecodes that take
   // such immediates.
   std::bitset<kMaxTrackedLocals> pinnedLocals{};
+
+  struct AwaitAllCandidate {
+    LocalRange range;
+    std::bitset<kMaxTrackedLocals> eager;
+  };
+
+  // AwaitAll normally pins its whole local range. If eager wait handles are
+  // interspersed with suspending ones, remember enough information to
+  // compact the suspending handles into a contiguous prefix after DCE.
+  std::map<InstrId, AwaitAllCandidate> awaitAllCandidates;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1635,6 +1645,37 @@ void dce(Env& env, const bc::AssertRATL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATStk& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Await& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AwaitAll& op) {
+  if (auto const index = env.dceState.remappingIndex) {
+    index->awaitAllCandidates.erase(env.id);
+    auto eager = std::bitset<kMaxTrackedLocals>{};
+    auto const first = op.locrange.first;
+    auto const end = first + op.locrange.count;
+    auto anyEager = false;
+    auto anyNonEager = false;
+
+    if (end <= index->localInterference.size()) {
+      for (auto loc = first; loc < end; ++loc) {
+        auto const ty = to_cell(locRaw(env, loc));
+        auto const isWaitHandle =
+          ty.subtypeOf(BOptObj) && is_specialized_wait_handle(ty);
+        auto const isEager =
+          ty.subtypeOf(BInitNull) ||
+          (isWaitHandle && !wait_handle_can_suspend(ty));
+        eager[loc] = isEager;
+        anyEager |= isEager;
+        anyNonEager |= !isEager;
+      }
+
+      // Eager ends are handled directly by the interpreter. What remains
+      // useful here is a mixed range with eager handles in the middle.
+      if (anyEager && anyNonEager && !eager[first] && !eager[end - 1]) {
+        index->awaitAllCandidates.insert_or_assign(
+          env.id,
+          LocalRemappingIndex::AwaitAllCandidate { op.locrange, eager }
+        );
+      }
+    }
+  }
   pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
@@ -2494,45 +2535,47 @@ void remove_unused_local_names(
   }
 }
 
-// Take a vector mapping local ids to new local ids, and apply it to the
-// function passed in via ainfo.
-void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
-                     std::vector<LocalId>&& remapping) {
+void apply_remapping(Bytecode& o,
+                     const std::vector<LocalId>& remapping,
+                     const std::vector<LocalRange>* permutedRanges = nullptr) {
   auto const maxRemappedLocals = remapping.size();
-  // During Global DCE we are for the most part free to modify the BCs since
-  // we have frozen the index, and are no longer performing context sensitive
-  // interps.
-  // Walk the bytecode modifying the local usage according to the mapping.
-  for (auto const bid : ainfo.rpoBlocks) {
-    FTRACE(2, "Remapping block #{}\n", bid);
 
-    auto const blk = func.blocks()[bid].mutate();
-    for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
-      auto& o = blk->hhbcs[idx];
+  auto const fixupLoc = [&](LocalId& id) {
+    if (0 <= id && id < maxRemappedLocals) {
+      id = remapping[id];
+    }
+  };
 
-      auto const fixupLoc = [&](LocalId& id) {
-        if (0 <= id && id < maxRemappedLocals) {
-          id = remapping[id];
-        }
-      };
+  auto const fixupMKey = [&](MKey& mk) {
+    switch (mk.mcode) {
+      case MemberCode::MEL:
+      case MemberCode::MPL:
+        fixupLoc(mk.local.id);
+        break;
+      default:
+        break;
+    }
+  };
 
-      auto const fixupMKey = [&](MKey& mk) {
-        switch (mk.mcode) {
-          case MemberCode::MEL:
-          case MemberCode::MPL:
-            fixupLoc(mk.local.id);
-            break;
-          default:
-            break;
-        }
-      };
-
-      auto const fixupLAR = [&](const LocalRange& lr) {
-        // LAR are pinned.
-        if (lr.first < maxRemappedLocals) {
-          assertx(lr.first == remapping[lr.first]);
-        }
-      };
+  auto const fixupLAR = [&](const LocalRange& lr) {
+    auto const canPermute =
+      permutedRanges && o.op == Op::AwaitAll &&
+      std::find(permutedRanges->begin(), permutedRanges->end(), lr) !=
+        permutedRanges->end();
+    for (auto i = uint32_t{0}; i < lr.count; ++i) {
+      auto const loc = lr.first + i;
+      if (loc >= maxRemappedLocals) continue;
+      if (canPermute) {
+        assertx(
+          remapping[loc] >= lr.first &&
+          remapping[loc] < lr.first + lr.count
+        );
+      } else {
+        // LAR are pinned during ordinary local coalescing.
+        assertx(loc == remapping[loc]);
+      }
+    }
+  };
 
 #define IMM_BLA(n)
 #define IMM_SLA(n)
@@ -2577,8 +2620,8 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
       }
       FOLLY_PUSH_WARNING
       FOLLY_CLANG_DISABLE_WARNING("-Wunused-value")
-      switch (o.op) { OPCODES }
-      FOLLY_POP_WARNING
+  switch (o.op) { OPCODES }
+  FOLLY_POP_WARNING
 #undef O
 
 #undef IMM_BLA
@@ -2610,7 +2653,21 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
 #undef IMM_FOUR
 #undef IMM_FIVE
 #undef IMM_SIX
-    }
+}
+
+// Take a vector mapping local ids to new local ids, and apply it to the
+// function passed in via ainfo.
+void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
+                     std::vector<LocalId>&& remapping) {
+  // During Global DCE we are for the most part free to modify the BCs since
+  // we have frozen the index, and are no longer performing context sensitive
+  // interps.
+  // Walk the bytecode modifying the local usage according to the mapping.
+  for (auto const bid : ainfo.rpoBlocks) {
+    FTRACE(2, "Remapping block #{}\n", bid);
+
+    auto const blk = func.blocks()[bid].mutate();
+    for (auto& op : blk->hhbcs) apply_remapping(op, remapping);
   }
 }
 
@@ -2706,6 +2763,109 @@ void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
   if (!identityMapping) {
     apply_remapping(ainfo, func, std::move(remapping));
   }
+}
+
+Optional<LocalRange> local_range(const Bytecode& op) {
+  switch (op.op) {
+    case Op::AwaitAll:     return op.AwaitAll.locrange;
+    case Op::MemoGet:      return op.MemoGet.locrange;
+    case Op::MemoGetEager: return op.MemoGetEager.locrange;
+    case Op::MemoSet:      return op.MemoSet.locrange;
+    case Op::MemoSetEager: return op.MemoSetEager.locrange;
+    default:               return std::nullopt;
+  }
+}
+
+bool ranges_overlap(LocalRange a, LocalRange b) {
+  if (!a.count || !b.count) return false;
+  return a.first < b.first + b.count && b.first < a.first + a.count;
+}
+
+bool await_all_range_is_unique(php::WideFunc& func, LocalRange candidate) {
+  auto matches = uint32_t{0};
+  for (auto const bid : func.blockRange()) {
+    auto const block = func.blocks()[bid].get();
+    for (auto const& op : block->hhbcs) {
+      auto const range = local_range(op);
+      if (!range || !ranges_overlap(candidate, *range)) continue;
+      // Reordering another range could change memo-key or dependency order.
+      if (op.op != Op::AwaitAll || *range != candidate) return false;
+      ++matches;
+    }
+  }
+  return matches == 1;
+}
+
+bool compact_await_all_locals(
+    php::WideFunc& func,
+    const std::map<InstrId, LocalRemappingIndex::AwaitAllCandidate>&
+      candidates) {
+  // Match ordinary local remapping's restriction around closure captures.
+  if (func->isClosureBody) return false;
+
+  auto const firstRegular =
+    func->params.size() + static_cast<uint32_t>(func->isReified);
+  auto const maxRemappedLocals = std::min(
+    (size_t)func->locals.size(),
+    (size_t)kMaxTrackedLocals
+  );
+  std::vector<LocalId> remapping(maxRemappedLocals);
+  for (auto i = uint32_t{0}; i < maxRemappedLocals; ++i) remapping[i] = i;
+  std::vector<LocalRange> permutedRanges;
+
+  for (auto const& entry : candidates) {
+    auto const& candidate = entry.second;
+    auto const range = candidate.range;
+    auto const end = range.first + range.count;
+    if (range.first < firstRegular || end > maxRemappedLocals) continue;
+    if (!range.count || candidate.eager[range.first] ||
+        candidate.eager[end - 1]) {
+      continue;
+    }
+
+    auto safe = true;
+    for (auto loc = range.first; loc < end; ++loc) {
+      auto const& local = func->locals[loc];
+      // Keep the permutation to compiler temporaries. Named and special
+      // locals have identity beyond their explicit bytecode operands.
+      if (local.killed || local.name || is_volatile_local(func, loc)) {
+        safe = false;
+        break;
+      }
+    }
+    if (!safe || !await_all_range_is_unique(func, range)) continue;
+
+    auto next = range.first;
+    for (auto loc = range.first; loc < end; ++loc) {
+      if (!candidate.eager[loc]) remapping[loc] = next++;
+    }
+    assertx(next > range.first && next < end);
+    FTRACE(
+      2,
+      "Compacting AwaitAll range L:{}+{} to a suspending prefix of {}\n",
+      range.first,
+      range.count,
+      next - range.first
+    );
+    for (auto loc = range.first; loc < end; ++loc) {
+      if (candidate.eager[loc]) remapping[loc] = next++;
+    }
+    assertx(next == end);
+    permutedRanges.emplace_back(range);
+  }
+
+  if (permutedRanges.empty()) return false;
+
+  for (auto const bid : func.blockRange()) {
+    auto const block = func.blocks()[bid].mutate();
+    for (auto& op : block->hhbcs) {
+      apply_remapping(op, remapping, &permutedRanges);
+    }
+  }
+
+  // The next analysis pass sees eager handles in suffixes and lets the
+  // existing AwaitAll reduction remove them from the ranges.
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3101,7 +3261,10 @@ bool global_dce(const IIndex& index, const FuncAnalysis& ai,
 
   dce_perform(func, actionMap);
   remove_unused_local_names(func, usedLocalNames);
+  auto const awaitAllCandidates =
+    std::move(localRemappingIndex.awaitAllCandidates);
   remap_locals(ai, func, std::move(localRemappingIndex));
+  didAddOpts |= compact_await_all_locals(func, awaitAllCandidates);
   return didAddOpts;
 }
 

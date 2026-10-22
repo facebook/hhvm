@@ -232,6 +232,7 @@ struct MBGlobals final : RequestEventHandler {
   }
 
   void requestInit() override {
+    search_re = nullptr;
     current_language = language;
     current_internal_encoding = internal_encoding;
     current_http_output_encoding = http_output_encoding;
@@ -288,6 +289,7 @@ struct MBGlobals final : RequestEventHandler {
 
     search_str.clear();
     search_pos = 0;
+    search_re = nullptr;
 
     if (search_regs != nullptr) {
       onig_region_free(search_regs, 1);

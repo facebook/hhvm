@@ -6,72 +6,28 @@
  *
  *)
 
-module Dir_move : sig
-  (** A directory moved on disk, which can be put back. *)
-  type t
+(** How long a move waits for the server to see the files at their new place. *)
+val default_wait_seconds : float
 
-  (** [move ~source ~target] renames the directory [source] to [target], both
-      absolute, and makes the parents of [target] that are missing. [target] must
-      not exist. When it fails it removes the parents it made, and [Error] says
-      why, and also what it could not remove. *)
-  val move : source:string -> target:string -> (t, string) result
+(** [move_into ~wait_seconds ~options ~parent ~output_json ~isolation_query
+    ~status] moves the directory [options.seed_dir], repo-relative, into
+    [parent] under its own name, if nothing outside references into it and the
+    move introduces no errors, and otherwise leaves it where it was. It prints
+    what came of it, as JSON when [output_json] is set, and gives the exit
+    status: zero only when the directory moved.
 
-  (** [undo t] renames the directory back and removes the directories [move]
-      made, except any that is no longer empty. A step that is already done is
-      skipped, so undoing twice is harmless. Raises if it cannot undo the move
-      completely, as when something other than an empty directory is where the
-      directory was. *)
-  val undo : t -> unit
-end
+    [isolation_query options] is the server's answer to the isolation query for
+    [options.seed_dir]: how many Hack files it holds, and whether any file
+    outside references into it. [status ()] is the server's current errors.
 
-module Move_error : sig
-  (** A diagnostic with severity error, in the file it was reported in. *)
-  type t = {
-    code: int;
-    file: Relative_path.t;
-    line: int;
-    message: string;
-  }
-
-  (** The errors in the server's status. Warnings are left out. *)
-  val of_status : Server_command_types.Server_status.t -> t list
-
-  (** [introduced ~source ~target ~baseline ~after] is what is in [after] and not
-      in [baseline], where [after] was reported once the directory [source] had
-      moved to [target]. It is named as it was before the move: a file under
-      [target] as the file under [source], and [target] in a message as [source]. *)
-  val introduced :
-    source:Relative_path.t ->
-    target:Relative_path.t ->
-    baseline:t list ->
-    after:t list ->
-    t list
-
-  (** Whether the two have the same errors, in any order. *)
-  val same : t list -> t list -> bool
-end
-
-module Output : sig
-  (** What came of trying to move a directory. *)
-  type outcome =
-    | Refused of string
-    | Blocked of string list
-        (** Every file outside the directory that references into it. *)
-    | Not_moved of {
-        errors: Move_error.t list;
-            (** What the move introduced, in the original paths. *)
-        baseline_restored: bool;
-            (** Whether the errors after the revert are the ones from before the
-                move. *)
-      }
-    | Moved of { files: int }
-
-  (** [print_outcome ~source ~target ~output_json outcome] prints [outcome] of
-      moving [source] to [target], as one line of JSON when [output_json] is set
-      and as text otherwise. *)
-  val print_outcome :
-    source:string -> target:string -> output_json:bool -> outcome -> unit
-
-  (** Zero only when the directory moved. *)
-  val exit_status : outcome -> Exit_status.t
-end
+    The server gets up to [wait_seconds] after each move to know the files.
+    Source control is not told. Raises if an undo cannot be completed. *)
+val move_into :
+  wait_seconds:float ->
+  options:Server_isolation_types.options ->
+  parent:string ->
+  output_json:bool ->
+  isolation_query:
+    (Server_isolation_types.options -> Server_isolation_types.result Lwt.t) ->
+  status:(unit -> Server_command_types.Server_status.t Lwt.t) ->
+  Exit_status.t Lwt.t

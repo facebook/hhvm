@@ -824,7 +824,8 @@ let query r options =
     | None ->
       let (movability, sizes) =
         match mode with
-        | Server_isolation_types.Check_movability ->
+        | Server_isolation_types.Check_movability
+        | Server_isolation_types.Move_to _ ->
           let (verdict, sizes) = movability_of_seeds r seeds in
           (Some verdict, sizes)
         | Server_isolation_types.Grow ->

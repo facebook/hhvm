@@ -35,15 +35,19 @@ type mode =
   | Measure
   | Grow
   | Check_movability
+  | Move_to of string
 
 let is_grow = function
   | Grow -> true
   | Measure
-  | Check_movability ->
+  | Check_movability
+  | Move_to _ ->
     false
 
 let is_check_movability = function
-  | Check_movability -> true
+  | Check_movability
+  | Move_to _ ->
+    true
   | Measure
   | Grow ->
     false

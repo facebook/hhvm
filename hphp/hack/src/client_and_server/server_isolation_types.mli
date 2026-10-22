@@ -62,6 +62,10 @@ type mode =
   | Check_movability
       (** Ask whether the starting files, taken together, can move as they
           stand, naming what blocks it if not. *)
+  | Move_to of string
+      (** Move the seed directory into this directory, under its own name, if it
+          can move and the move introduces no errors. The client does the
+          moving, and asks the server the [Check_movability] question. *)
 
 (** Whether the mode grows clusters. *)
 val is_grow : mode -> bool

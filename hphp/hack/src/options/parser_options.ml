@@ -20,7 +20,6 @@ type t = {
   disable_xhp_children_declarations: bool;
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
-  disallow_static_constants_in_default_func_args: bool;
   auto_namespace_map: (string * string) list;
   everything_sdt: bool;
   include_enum_member_values: bool;
@@ -43,6 +42,7 @@ type t = {
   enable_intrinsics_extension: bool;
   expression_tree_shape_no_unwrap: bool;
   allow_intish_shape_keys: bool;
+  disallow_late_bound_defaults: bool;
 }
 [@@deriving show, eq]
 
@@ -59,7 +59,6 @@ let default =
     disable_xhp_children_declarations = false;
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
-    disallow_static_constants_in_default_func_args = false;
     auto_namespace_map = [];
     everything_sdt = false;
     include_enum_member_values = false;
@@ -82,6 +81,7 @@ let default =
     enable_intrinsics_extension = false;
     expression_tree_shape_no_unwrap = false;
     allow_intish_shape_keys = false;
+    disallow_late_bound_defaults = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
@@ -116,7 +116,7 @@ let to_rust_ffi_t po =
     po.allow_unstable_features,
     po.interpret_soft_types_as_like_types,
     po.is_systemlib,
-    po.disallow_static_constants_in_default_func_args,
+    false (* unused slot *),
     po.use_legacy_experimental_feature_config,
     po.experimental_features,
     po.consider_unspecified_experimental_features_released,

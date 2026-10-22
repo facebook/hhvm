@@ -38,7 +38,6 @@ type t = {
   allow_unstable_features: bool;
   enable_xhp_class_modifier: bool;
   ignore_missing_json: bool;
-  disallow_static_constants_in_default_func_args: bool;
 }
 
 let make
@@ -68,8 +67,7 @@ let make
     disable_xhp_element_mangling
     allow_unstable_features
     enable_xhp_class_modifier
-    ignore_missing_json
-    disallow_static_constants_in_default_func_args =
+    ignore_missing_json =
   {
     full_fidelity_json_parse_tree;
     full_fidelity_json;
@@ -98,7 +96,6 @@ let make
     allow_unstable_features;
     enable_xhp_class_modifier;
     ignore_missing_json;
-    disallow_static_constants_in_default_func_args;
   }
 
 let parse_args () =
@@ -148,7 +145,6 @@ let parse_args () =
   let allow_unstable_features = ref false in
   let enable_xhp_class_modifier = ref false in
   let ignore_missing_json = ref false in
-  let disallow_static_constants_in_default_func_arg = ref false in
   let options =
     [
       (* modes *)
@@ -257,9 +253,6 @@ No errors are filtered out."
       ( "--ignore-missing-json",
         Arg.Set ignore_missing_json,
         "Ignore missing nodes in JSON output" );
-      ( "--disallow-static-constants-in-default-func-args",
-        Arg.Set disallow_static_constants_in_default_func_arg,
-        "Disallow `static::*` in default arguments for functions" );
     ]
   in
   Arg.parse options push_file usage;
@@ -307,7 +300,6 @@ No errors are filtered out."
     !allow_unstable_features
     !enable_xhp_class_modifier
     !ignore_missing_json
-    !disallow_static_constants_in_default_func_arg
 
 let to_parser_options (args : t) : Parser_options.t =
   {
@@ -318,8 +310,6 @@ let to_parser_options (args : t) : Parser_options.t =
     disable_xhp_element_mangling = args.disable_xhp_element_mangling;
     allow_unstable_features = args.allow_unstable_features;
     enable_xhp_class_modifier = args.enable_xhp_class_modifier;
-    disallow_static_constants_in_default_func_args =
-      args.disallow_static_constants_in_default_func_args;
   }
 
 let to_parser_env _args ~leak_rust_tree ~mode =

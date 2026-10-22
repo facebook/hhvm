@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a3cdb1233eb304120aa0ff11ae4cbecc>>
+// @generated SignedSource<<995d8c4b014d0a1cdd034ca1256fb92a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -60,7 +60,6 @@ pub struct ParserOptions {
     pub interpret_soft_types_as_like_types: bool,
     /// Enable features used to typecheck systemlib
     pub is_systemlib: bool,
-    pub disallow_static_constants_in_default_func_args: bool,
     /// Namespace aliasing map
     pub auto_namespace_map: Vec<(String, String)>,
     /// All classes are implcitly marked <<__SupportDynamicType>>
@@ -114,6 +113,9 @@ pub struct ParserOptions {
     pub expression_tree_shape_no_unwrap: bool,
     /// Allow int-like string literals as shape keys in the typechecker.
     pub allow_intish_shape_keys: bool,
+    /// Disallow late-bound class references in default values: `static` in parameter and XHP
+    /// attribute defaults, and `self` or `parent` in a trait's parameter defaults.
+    pub disallow_late_bound_defaults: bool,
 }
 
 #[derive(

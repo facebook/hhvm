@@ -44,8 +44,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(8)).unwrap();
         let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(9)).unwrap();
         let tco_is_systemlib = bool::from_ocaml(*ocaml_opts.add(10)).unwrap();
-        let po_disallow_static_constants_in_default_func_args =
-            bool::from_ocaml(*ocaml_opts.add(11)).unwrap();
+        // Slot 11 is unused.
         let use_legacy_experimental_feature_config = bool::from_ocaml(*ocaml_opts.add(12)).unwrap();
         let po_experimental_features =
             oxidized::s_map::SMap::<experimental_features::FeatureStatus>::from_ocaml(
@@ -64,8 +63,6 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
         parser_options.allow_unstable_features = po_allow_unstable_features;
         parser_options.interpret_soft_types_as_like_types = po_interpret_soft_types_as_like_types;
         parser_options.is_systemlib = tco_is_systemlib;
-        parser_options.disallow_static_constants_in_default_func_args =
-            po_disallow_static_constants_in_default_func_args;
         parser_options.use_legacy_experimental_feature_config =
             use_legacy_experimental_feature_config;
         parser_options.experimental_features = po_experimental_features;

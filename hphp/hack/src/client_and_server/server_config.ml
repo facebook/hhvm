@@ -374,11 +374,6 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
             Config_keys.Hhconfig.interpret_soft_types_as_like_types
             config
           >?? po_opt.interpret_soft_types_as_like_types;
-        disallow_static_constants_in_default_func_args =
-          bool_opt
-            Config_keys.Hhconfig.disallow_static_constants_in_default_func_args
-            config
-          >?? po_opt.disallow_static_constants_in_default_func_args;
         auto_namespace_map =
           prepare_auto_namespace_map config >?? po_opt.auto_namespace_map;
         everything_sdt =
@@ -431,6 +426,9 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
         allow_intish_shape_keys =
           bool_opt Config_keys.Hhconfig.allow_intish_shape_keys config
           >?? po_opt.allow_intish_shape_keys;
+        disallow_late_bound_defaults =
+          bool_opt Config_keys.Hhconfig.disallow_late_bound_defaults config
+          >?? po_opt.disallow_late_bound_defaults;
       }
   in
   Global_options.set

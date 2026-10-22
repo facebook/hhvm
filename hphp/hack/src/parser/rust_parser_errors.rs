@@ -1192,11 +1192,15 @@ fn is_foreach_in_for(for_initializer: S<'_>) -> bool {
     }
 }
 
-/// What `check_constant_expression` accepts as constant.
-#[derive(Clone, Copy)]
-struct ConstantRules {
-    /// Consider static bound accesses like `static::class` and `static::FOO` to be constant for this check.
-    static_allowed: bool,
+/// Which late-bound class references `check_constant_expression` accepts, most permissive first.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum LateBoundRule {
+    /// Accept `static::FOO`, `static::class` and `nameof static`.
+    Allowed,
+    /// Reject `static`.
+    NoStatic,
+    /// Reject `static`, plus `self` and `parent` in a trait, which resolve against the using class.
+    NoLateBound,
 }
 
 fn is_good_scope_resolution_qualifier(node: S<'_>, static_allowed: bool) -> bool {
@@ -4907,17 +4911,17 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn check_constant_expression_ban_static(&mut self, node: S<'a>) {
-        let rules = ConstantRules {
-            static_allowed: false,
-        };
-        self.check_constant_expression(node, rules)
+        self.check_constant_expression(node, LateBoundRule::NoStatic)
     }
 
-    fn check_constant_expression_allow_static(&mut self, node: S<'a>) {
-        let rules = ConstantRules {
-            static_allowed: true,
-        };
-        self.check_constant_expression(node, rules)
+    /// Whether `name`, as in `name::FOO` or `nameof name`, is `static`, or `self` or `parent` in a
+    /// trait. Case-insensitive, as the lowerer resolves `nameof Self` and `nameof Parent`.
+    fn is_late_bound_class_name(&self, name: S<'a>) -> bool {
+        let text = self.text(name);
+        text.eq_ignore_ascii_case(sn::classes::STATIC)
+            || (self.active_classish_kind() == Some(TokenKind::Trait)
+                && (text.eq_ignore_ascii_case(sn::classes::SELF)
+                    || text.eq_ignore_ascii_case(sn::classes::PARENT)))
     }
 
     /// Checks whether this expression is valid in a constant position, such as a property initializer.
@@ -4929,8 +4933,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     /// foo() // not allowed
     /// ```
     ///
-    /// `rules` sets which class references, like `static::class`, are considered constant.
-    fn check_constant_expression(&mut self, node: S<'a>, rules: ConstantRules) {
+    /// `rule` sets which late-bound class references, like `static::class`, are considered constant.
+    fn check_constant_expression(&mut self, node: S<'a>, rule: LateBoundRule) {
         // __FUNCTION_CREDENTIAL__ emits an object,
         // so it cannot be used in a constant expression
         let not_function_credential = |self_: &Self, token: &PositionedToken<'a>| {
@@ -4984,14 +4988,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if let Token(token) = &x.children {
                 if is_namey(self_, token) {
                     return syntax_to_list_no_separators(initializer)
-                        .for_each(|x| self_.check_constant_expression(x, rules));
+                        .for_each(|x| self_.check_constant_expression(x, rule));
                 }
             };
             default(self_)
         };
 
         let check_collection_members = |self_: &mut Self, x| {
-            syntax_to_list_no_separators(x).for_each(|x| self_.check_constant_expression(x, rules))
+            syntax_to_list_no_separators(x).for_each(|x| self_.check_constant_expression(x, rule))
         };
         match &node.children {
             Missing | QualifiedName(_) => {}
@@ -5010,7 +5014,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     use TokenKind::*;
                     match token.kind() {
                         Exclamation | Plus | Minus | Tilde => {
-                            self.check_constant_expression(&x.operand, rules)
+                            self.check_constant_expression(&x.operand, rule)
                         }
                         _ => default(self),
                     }
@@ -5018,7 +5022,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     default(self)
                 }
             }
-            UpcastExpression(x) => self.check_constant_expression(&x.left_operand, rules),
+            UpcastExpression(x) => self.check_constant_expression(&x.left_operand, rule),
             BinaryExpression(x) => {
                 if let Token(token) = &x.operator.children {
                     use TokenKind::*;
@@ -5047,8 +5051,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         | LessThanEqual
                         | LessThanEqualGreaterThan
                         | QuestionColon => {
-                            self.check_constant_expression(&x.left_operand, rules);
-                            self.check_constant_expression(&x.right_operand, rules);
+                            self.check_constant_expression(&x.left_operand, rule);
+                            self.check_constant_expression(&x.right_operand, rule);
                         }
                         _ => default(self),
                     }
@@ -5057,12 +5061,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             ConditionalExpression(x) => {
-                self.check_constant_expression(&x.test, rules);
-                self.check_constant_expression(&x.consequence, rules);
-                self.check_constant_expression(&x.alternative, rules);
+                self.check_constant_expression(&x.test, rule);
+                self.check_constant_expression(&x.consequence, rule);
+                self.check_constant_expression(&x.alternative, rule);
             }
-            SimpleInitializer(x) => self.check_constant_expression(&x.value, rules),
-            ParenthesizedExpression(x) => self.check_constant_expression(&x.expression, rules),
+            SimpleInitializer(x) => self.check_constant_expression(&x.value, rule),
+            ParenthesizedExpression(x) => self.check_constant_expression(&x.expression, rule),
             CollectionLiteralExpression(x) => {
                 if let SimpleTypeSpecifier(y) = &x.name.children {
                     check_type_specifier(self, &y.specifier, &x.initializers)
@@ -5081,20 +5085,24 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DictionaryIntrinsicExpression(x) => check_collection_members(self, &x.members),
             ShapeExpression(x) => check_collection_members(self, &x.fields),
             ElementInitializer(x) => {
-                self.check_constant_expression(&x.key, rules);
-                self.check_constant_expression(&x.value, rules);
+                self.check_constant_expression(&x.key, rule);
+                self.check_constant_expression(&x.value, rule);
             }
             FieldInitializer(x) => {
-                self.check_constant_expression(&x.name, rules);
-                self.check_constant_expression(&x.value, rules);
+                self.check_constant_expression(&x.name, rule);
+                self.check_constant_expression(&x.value, rule);
             }
-            ShapeSplatExpression(x) => self.check_constant_expression(&x.expression, rules),
+            ShapeSplatExpression(x) => self.check_constant_expression(&x.expression, rule),
             // Allow `ClassName::foo` in a constant, but don't allow `parent::class` and
-            // only allow `static::foo` when `rules.static_allowed` is set.
+            // only allow late-bound qualifiers like `static::foo` as `rule` permits.
             ScopeResolutionExpression(x)
-                if is_good_scope_resolution_qualifier(&x.qualifier, rules.static_allowed)
-                    && is_good_scope_resolution_name(&x.name)
-                    && !is_parent_class_access(&x.qualifier, &x.name) => {}
+                if is_good_scope_resolution_qualifier(
+                    &x.qualifier,
+                    rule == LateBoundRule::Allowed,
+                ) && is_good_scope_resolution_name(&x.name)
+                    && !is_parent_class_access(&x.qualifier, &x.name)
+                    && !(rule == LateBoundRule::NoLateBound
+                        && self.is_late_bound_class_name(&x.qualifier)) => {}
             NameofExpression(x) => match x.target.children {
                 // Match behavior for ScopeResolution expression when rhs is ::class
                 QualifiedName(_) => {}
@@ -5105,7 +5113,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     // always name tokens.
                     let txt = self.token_text(&t);
                     if txt == sn::classes::PARENT
-                        || (!rules.static_allowed && txt == sn::classes::STATIC)
+                        || (rule != LateBoundRule::Allowed && txt == sn::classes::STATIC)
+                        || (rule == LateBoundRule::NoLateBound
+                            && self.is_late_bound_class_name(&x.target))
                     {
                         default(self)
                     }
@@ -5116,7 +5126,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let mut check_receiver_and_arguments = |receiver| {
                     if is_whitelisted_function(self, receiver) {
                         for node in syntax_to_list_no_separators(&x.argument_list) {
-                            self.check_constant_expression(node, rules)
+                            self.check_constant_expression(node, rule)
                         }
                     } else {
                         default(self)
@@ -5140,7 +5150,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             PrefixedStringExpression(x) => {
                 // Allow prefixed strings (e.g., re'/foo/') in constant expressions
-                self.check_constant_expression(&x.str, rules)
+                self.check_constant_expression(&x.str, rule)
             }
             _ => default(self),
         }
@@ -5728,15 +5738,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.env.context.active_callable.map(|node| &node.children),
                 Some(AnonymousFunction(_) | LambdaExpression(_))
             );
-            let rules = ConstantRules {
+            let rule = if self.env.parser_options.disallow_late_bound_defaults {
+                LateBoundRule::NoLateBound
+            } else if in_lambda {
                 // Lambda defaults never allow `static`.
-                static_allowed: !in_lambda
-                    && !self
-                        .env
-                        .parser_options
-                        .disallow_static_constants_in_default_func_args,
+                LateBoundRule::NoStatic
+            } else {
+                LateBoundRule::Allowed
             };
-            self.check_constant_expression(&x.default_value, rules)
+            self.check_constant_expression(&x.default_value, rule)
         }
     }
 
@@ -6011,10 +6021,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             XHPEnumType(_) | XHPExpression(_) => self.xhp_errors(node),
             PropertyDeclarator(x) => self.check_constant_expression_ban_static(&x.initializer),
             XHPClassAttribute(x) => {
-                // TODO(hgoldstein) I suspect that this is a bug: why would we
-                // allow `static::_` in XHP properties but not in normal class
-                // properties ...
-                self.check_constant_expression_allow_static(&x.initializer);
+                // `static` here resolves against whichever class first builds the cached attribute
+                // declaration, but existing code relies on it, so only the option rejects it.
+                let rule = if self.env.parser_options.disallow_late_bound_defaults {
+                    LateBoundRule::NoStatic
+                } else {
+                    LateBoundRule::Allowed
+                };
+                self.check_constant_expression(&x.initializer, rule);
             }
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {

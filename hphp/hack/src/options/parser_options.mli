@@ -27,7 +27,6 @@ type t = {
       (** Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax *)
   interpret_soft_types_as_like_types: bool;  (** <<__Soft>> T -> ~T *)
   is_systemlib: bool;  (** Enable features used to typecheck systemlib *)
-  disallow_static_constants_in_default_func_args: bool;
   auto_namespace_map: (string * string) list;  (** Namespace aliasing map *)
   everything_sdt: bool;
       (** All classes are implcitly marked <<__SupportDynamicType>> *)
@@ -79,6 +78,9 @@ type t = {
           typechecks. *)
   allow_intish_shape_keys: bool;
       (** Allow int-like string literals as shape keys in the typechecker. *)
+  disallow_late_bound_defaults: bool;
+      (** Disallow late-bound class references in default values: `static` in parameter and XHP
+          attribute defaults, and `self` or `parent` in a trait's parameter defaults. *)
 }
 [@@deriving show, eq]
 

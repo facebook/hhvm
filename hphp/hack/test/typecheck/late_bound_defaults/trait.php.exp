@@ -1,0 +1,90 @@
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:12:41
+10 |   const string Y = 't';
+11 | 
+12 |   public function selfConst(string $s = self::Y): void {}
+   |                                         ^^^^^^^ [1]
+13 |   public function selfClass(string $s = self::class): void {}
+14 |   public function nameofSelf(string $s = nameof self): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:13:41
+11 | 
+12 |   public function selfConst(string $s = self::Y): void {}
+13 |   public function selfClass(string $s = self::class): void {}
+   |                                         ^^^^^^^^^^^ [1]
+14 |   public function nameofSelf(string $s = nameof self): void {}
+15 |   public function nameofSelfUpper(string $s = nameof Self): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:14:42
+12 |   public function selfConst(string $s = self::Y): void {}
+13 |   public function selfClass(string $s = self::class): void {}
+14 |   public function nameofSelf(string $s = nameof self): void {}
+   |                                          ^^^^^^^^^^^ [1]
+15 |   public function nameofSelfUpper(string $s = nameof Self): void {}
+16 |   public function parentConst(string $s = parent::X): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:15:47
+13 |   public function selfClass(string $s = self::class): void {}
+14 |   public function nameofSelf(string $s = nameof self): void {}
+15 |   public function nameofSelfUpper(string $s = nameof Self): void {}
+   |                                               ^^^^^^^^^^^ [1]
+16 |   public function parentConst(string $s = parent::X): void {}
+17 |   public function nameofParentUpper(string $s = nameof Parent): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:16:43
+14 |   public function nameofSelf(string $s = nameof self): void {}
+15 |   public function nameofSelfUpper(string $s = nameof Self): void {}
+16 |   public function parentConst(string $s = parent::X): void {}
+   |                                           ^^^^^^^^^ [1]
+17 |   public function nameofParentUpper(string $s = nameof Parent): void {}
+18 |   public function staticConst(string $s = static::Y): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:17:49
+15 |   public function nameofSelfUpper(string $s = nameof Self): void {}
+16 |   public function parentConst(string $s = parent::X): void {}
+17 |   public function nameofParentUpper(string $s = nameof Parent): void {}
+   |                                                 ^^^^^^^^^^^^^ [1]
+18 |   public function staticConst(string $s = static::Y): void {}
+19 |   public function lambda(): void {
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:18:43
+16 |   public function parentConst(string $s = parent::X): void {}
+17 |   public function nameofParentUpper(string $s = nameof Parent): void {}
+18 |   public function staticConst(string $s = static::Y): void {}
+   |                                           ^^^^^^^^^ [1]
+19 |   public function lambda(): void {
+20 |     $f = (string $s = self::Y) ==> $s;
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:20:23
+18 |   public function staticConst(string $s = static::Y): void {}
+19 |   public function lambda(): void {
+20 |     $f = (string $s = self::Y) ==> $s;
+   |                       ^^^^^^^ [1]
+21 |   }
+22 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+trait.php:23:35
+21 |   }
+22 | 
+23 |   attribute string static_const = static::Y;
+   |                                   ^^^^^^^^^ [1]
+24 | }
+
+9 errors found

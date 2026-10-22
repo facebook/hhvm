@@ -1,0 +1,140 @@
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:8:43
+ 6 | 
+ 7 | class C extends A {
+ 8 |   public function staticConst(string $s = static::X): void {}
+   |                                           ^^^^^^^^^ [1]
+ 9 |   public function staticClass(string $s = static::class): void {}
+10 |   public function nameofStatic(string $s = nameof static): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:9:43
+ 7 | class C extends A {
+ 8 |   public function staticConst(string $s = static::X): void {}
+ 9 |   public function staticClass(string $s = static::class): void {}
+   |                                           ^^^^^^^^^^^^^ [1]
+10 |   public function nameofStatic(string $s = nameof static): void {}
+11 |   public function parentClass(string $s = parent::class): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:10:44
+ 8 |   public function staticConst(string $s = static::X): void {}
+ 9 |   public function staticClass(string $s = static::class): void {}
+10 |   public function nameofStatic(string $s = nameof static): void {}
+   |                                            ^^^^^^^^^^^^^ [1]
+11 |   public function parentClass(string $s = parent::class): void {}
+12 |   public function nameofParent(string $s = nameof parent): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:11:43
+ 9 |   public function staticClass(string $s = static::class): void {}
+10 |   public function nameofStatic(string $s = nameof static): void {}
+11 |   public function parentClass(string $s = parent::class): void {}
+   |                                           ^^^^^^^^^^^^^ [1]
+12 |   public function nameofParent(string $s = nameof parent): void {}
+13 |   public function nested(
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:12:44
+10 |   public function nameofStatic(string $s = nameof static): void {}
+11 |   public function parentClass(string $s = parent::class): void {}
+12 |   public function nameofParent(string $s = nameof parent): void {}
+   |                                            ^^^^^^^^^^^^^ [1]
+13 |   public function nested(
+14 |     vec<string> $v = vec[static::X],
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:14:26
+12 |   public function nameofParent(string $s = nameof parent): void {}
+13 |   public function nested(
+14 |     vec<string> $v = vec[static::X],
+   |                          ^^^^^^^^^ [1]
+15 |     shape('a' => string) $s = shape('a' => nameof static),
+16 |   ): void {}
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:15:44
+13 |   public function nested(
+14 |     vec<string> $v = vec[static::X],
+15 |     shape('a' => string) $s = shape('a' => nameof static),
+   |                                            ^^^^^^^^^^^^^ [1]
+16 |   ): void {}
+17 |   public function lambda(): void {
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:18:23
+16 |   ): void {}
+17 |   public function lambda(): void {
+18 |     $f = (string $s = static::X) ==> $s;
+   |                       ^^^^^^^^^ [1]
+19 |     $g = (string $s = nameof static) ==> $s;
+20 |   }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:19:23
+17 |   public function lambda(): void {
+18 |     $f = (string $s = static::X) ==> $s;
+19 |     $g = (string $s = nameof static) ==> $s;
+   |                       ^^^^^^^^^^^^^ [1]
+20 |   }
+21 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:26:43
+24 |   const string X = 'i';
+25 | 
+26 |   public function staticConst(string $s = static::X): void;
+   |                                           ^^^^^^^^^ [1]
+27 | }
+28 | 
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:31:27
+29 | class :x extends A {
+30 |   attribute
+31 |     string static_const = static::X,
+   |                           ^^^^^^^^^ [1]
+32 |     string static_class = static::class,
+33 |     string nameof_static = nameof static,
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:32:27
+30 |   attribute
+31 |     string static_const = static::X,
+32 |     string static_class = static::class,
+   |                           ^^^^^^^^^^^^^ [1]
+33 |     string nameof_static = nameof static,
+34 |     vec<string> nested = vec[static::X];
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:33:28
+31 |     string static_const = static::X,
+32 |     string static_class = static::class,
+33 |     string nameof_static = nameof static,
+   |                            ^^^^^^^^^^^^^ [1]
+34 |     vec<string> nested = vec[static::X];
+35 | }
+
+error: Parsing[1002] Expected constant expression for initializer [1]
+
+banned.php:34:30
+32 |     string static_class = static::class,
+33 |     string nameof_static = nameof static,
+34 |     vec<string> nested = vec[static::X];
+   |                              ^^^^^^^^^ [1]
+35 | }
+
+14 errors found

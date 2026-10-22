@@ -834,8 +834,6 @@ let parse_options () =
         hhvm_compat_mode = default.hhvm_compat_mode;
         hhi_mode = default.hhi_mode;
         codegen = default.codegen;
-        disallow_static_constants_in_default_func_args =
-          default.disallow_static_constants_in_default_func_args;
         stack_size = default.stack_size;
         unwrap_concurrent = default.unwrap_concurrent;
         no_parser_readonly_check = default.no_parser_readonly_check;
@@ -875,6 +873,7 @@ let parse_options () =
         expression_tree_shape_no_unwrap =
           default.expression_tree_shape_no_unwrap;
         allow_intish_shape_keys = default.allow_intish_shape_keys;
+        disallow_late_bound_defaults = default.disallow_late_bound_defaults;
       }
   in
 

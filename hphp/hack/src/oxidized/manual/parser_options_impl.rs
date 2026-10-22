@@ -21,7 +21,6 @@ impl Default for ParserOptions {
             disable_xhp_children_declarations: false,
             interpret_soft_types_as_like_types: false,
             is_systemlib: false,
-            disallow_static_constants_in_default_func_args: false,
             auto_namespace_map: vec![],
             everything_sdt: false,
             include_enum_member_values: false,
@@ -44,6 +43,7 @@ impl Default for ParserOptions {
             enable_intrinsics_extension: false,
             expression_tree_shape_no_unwrap: false,
             allow_intish_shape_keys: false,
+            disallow_late_bound_defaults: false,
         }
     }
 }

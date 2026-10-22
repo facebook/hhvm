@@ -296,8 +296,6 @@ impl HhConfig {
                 "include_const_shape_key_values",
                 default.include_const_shape_key_values,
             )?,
-            disallow_static_constants_in_default_func_args: default
-                .disallow_static_constants_in_default_func_args,
             unwrap_concurrent: default.unwrap_concurrent,
             stack_size: default.stack_size,
             use_legacy_experimental_feature_config: false,
@@ -332,6 +330,10 @@ impl HhConfig {
             )?,
             allow_intish_shape_keys: hhconfig
                 .get_bool_or("allow_intish_shape_keys", default.allow_intish_shape_keys)?,
+            disallow_late_bound_defaults: hhconfig.get_bool_or(
+                "disallow_late_bound_defaults",
+                default.disallow_late_bound_defaults,
+            )?,
         };
         let rollouts = SavedStateRollouts::make(
             current_rolled_out_flag_idx,

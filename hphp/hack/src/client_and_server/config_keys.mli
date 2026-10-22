@@ -42,9 +42,9 @@ module Hhconfig : sig
 
   val disable_xhp_element_mangling : string
 
-  val disallow_non_annotated_memoize : string
+  val disallow_late_bound_defaults : string
 
-  val disallow_static_constants_in_default_func_args : string
+  val disallow_non_annotated_memoize : string
 
   val enable_experimental_stx_features : string
 

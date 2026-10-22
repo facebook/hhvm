@@ -5,7 +5,7 @@
 #include "hphp/util/compatibility.h"
 
 #include <fmt/format.h>
-#include <folly/Chrono.h>
+#include <chrono>
 
 #include <fcntl.h>
 
@@ -42,7 +42,7 @@ FileAwait::FileAwait(
       // Folly internally converts everything to milliseconds, so might as well
       // do the same
       m_timeoutHandler.scheduleTimeout(
-        folly::chrono::ceil<std::chrono::milliseconds>(timeout));
+        std::chrono::ceil<std::chrono::milliseconds>(timeout));
     }
     FileAwait::fdToFileAwaits()[m_fd].insert(this);
   });

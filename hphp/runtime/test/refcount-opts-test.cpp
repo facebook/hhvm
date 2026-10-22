@@ -393,13 +393,10 @@ TEST(RefcountOpts, PreserveLivePhiSource) {
     // source and result are the same array and the two decrements consume both
     // references. Changing alias sets at the phi must not hide that consumption.
     // TODO: Cancel both pairs with a releasing compensation on the left edge.
-    // FIXME[LEAK]: Both decrements disappear without a compensating left-edge
-    // decrement, leaking the allocation reference on the aliasing edge.
-    // See PreservePhiAliasBeforeIncrement for the corresponding crash case.
     EXPECT_EQ(Nop, sourceInc->op());
     EXPECT_EQ(reverse ? Nop : IncRef, otherInc->op());
     EXPECT_EQ(Nop, dec->op());
-    EXPECT_EQ(reverse ? Nop : DecRef, release->op());
+    EXPECT_EQ(DecRef, release->op());
     auto releases = 0;
     for (auto const& inst : *env.left) {
       if (!inst.is(DecRef, DecRefNZ)) continue;
@@ -416,7 +413,7 @@ TEST(RefcountOpts, PreserveLivePhiSource) {
       EXPECT_EQ(source, inst.src(0));
       ++compensations;
     }
-    EXPECT_EQ(0, compensations);
+    EXPECT_EQ(reverse ? 1 : 0, compensations);
   }
 }
 
@@ -494,10 +491,8 @@ TEST(RefcountOpts, DoNotDuplicatePhiSupport) {
     // reference for q. On the distinct b/c edge, q owns c's only reference.
     // The identical-column optimization must not hide the first-edge aliasing
     // when the columns differ on the other edge.
-    // FIXME[LEAK]: With identical columns, both releases disappear, leaking a/b.
-    // PreservePhiAliasBeforeIncrement also exercises partial PRE with two phis.
     EXPECT_EQ(Nop, dec->op());
-    EXPECT_EQ(distinct ? DecRef : Nop, release->op());
+    EXPECT_EQ(DecRef, release->op());
   }
 }
 
@@ -924,13 +919,12 @@ TEST(RefcountOpts, NontransitiveMayAliasDecrefs) {
       // final decrement is NZ. Otherwise cancellation can make b release.
       // TODO: Also cancel c's overlapping ordinary-final pair by changing
       // the single remaining DecRefNZ b to DecRef.
-      // FIXME[LEAK]: The overlapping ordinary-final case loses its release;
-      // the last NZ decrement reaches zero without freeing c.
+      // TODO: Preserve c's supported references when b cannot alias c.
       // TODO: Revisit the observed pairs after folding the COW checks.
       EXPECT_EQ(IncRef, incA->op());
       EXPECT_EQ(DecRefNZ, decA->op());
-      EXPECT_EQ(Nop, incC->op());
-      EXPECT_EQ(Nop, decC->op());
+      EXPECT_EQ(nz ? Nop : IncRef, incC->op());
+      EXPECT_EQ(nz ? Nop : DecRef, decC->op());
       EXPECT_EQ(CheckArrayCOW, cow->op());
     }
   }
@@ -1001,13 +995,12 @@ TEST(RefcountOpts, MergeConditionalPendingDecrefTypes) {
       // On the Dict edge with d == a == c, DecRef c can release.
       // TODO: Also cancel c's overlapping pair by changing the Dict-edge
       // DecRefNZ d to DecRef. The Vec-edge decrement stays NZ.
-      // FIXME[LEAK]: On the overlapping Dict edge, the last NZ decrement
-      // reaches zero after c's releasing decrement has been removed.
+      // TODO: Preserve c's credit when both incoming types are disjoint.
       // TODO: Revisit the observed pairs after folding the COW checks.
       EXPECT_EQ(IncRef, incA->op());
       EXPECT_EQ(DecRefNZ, decA->op());
-      EXPECT_EQ(Nop, incC->op());
-      EXPECT_EQ(Nop, decC->op());
+      EXPECT_EQ(IncRef, incC->op());
+      EXPECT_EQ(DecRef, decC->op());
       EXPECT_TRUE(checkCfg(unit));
     }
   }
@@ -1123,13 +1116,12 @@ TEST(RefcountOpts, CancelAcrossConsecutiveDecrefs) {
         // a's pair and change the middle to DecRef. For multiple NZ middles,
         // weigh the added release checks against the pair being removed;
         // retaining the pair can be cheaper.
-        // FIXME[LEAK]: NZ middles reach zero without releasing when the final
-        // ordinary decrement and its increment are incorrectly removed.
         // TODO: Cancel across releasing decrefs with only decrementing effects.
         // TODO: Also cancel when every decrement is ordinary; moving a release
         // earlier within a decrement-only sequence is safe.
-        EXPECT_EQ(middleNZ ? Nop : IncRef, inc->op());
-        EXPECT_EQ(middleNZ ? Nop : (finalNZ ? DecRefNZ : DecRef), dec->op());
+        EXPECT_EQ(middleNZ && finalNZ ? Nop : IncRef, inc->op());
+        EXPECT_EQ(middleNZ && finalNZ ? Nop : (finalNZ ? DecRefNZ : DecRef),
+                  dec->op());
       }
     }
   }
@@ -2084,15 +2076,14 @@ TEST(RefcountOpts, ChainConditionalPendingDecrefTypes) {
     // its own retained increment pays for its decrement; b cannot consume
     // that dict credit.
     // With b:Vec|Dict, b == a == d == c can make the final decrement release.
-    // FIXME[LEAK]: When b aliases c, the last NZ decrement reaches zero
-    // without releasing after c's ordinary decrement is removed.
+    // TODO: Preserve c's credit through both bridges when b cannot alias c.
     // TODO: Revisit the observed pairs after folding the COW checks.
     EXPECT_EQ(IncRef, incA->op());
     EXPECT_EQ(IncRef, incD->op());
     EXPECT_EQ(DecRefNZ, decA->op());
     EXPECT_EQ(DecRefNZ, decD->op());
-    EXPECT_EQ(Nop, incC->op());
-    EXPECT_EQ(Nop, decC->op());
+    EXPECT_EQ(IncRef, incC->op());
+    EXPECT_EQ(DecRef, decC->op());
     EXPECT_TRUE(checkCfg(unit));
   }
 }

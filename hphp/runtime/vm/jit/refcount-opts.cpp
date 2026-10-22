@@ -1732,10 +1732,9 @@ void add_unbalanced_decref(Env& env, RCState& state, ASetID asetID) {
   }
 }
 
-void observe_pending_requirements(RCState& state, ASetID asetID,
-                                  PreAdder add_node) {
+bool apply_pending_reductions(RCState& state, ASetID asetID) {
   auto& aset = state.asets[asetID];
-  if (!aset.pending_reductions) return;
+  if (!aset.pending_reductions) return false;
   assertx(state.num_pending_requirements);
   --state.num_pending_requirements;
   FTRACE(4, "    pending reductions for {}: {}\n",
@@ -1743,7 +1742,12 @@ void observe_pending_requirements(RCState& state, ASetID asetID,
   aset.lower_bound = std::max(aset.lower_bound - aset.pending_reductions, 0);
   aset.unsupported_refs = std::min(aset.unsupported_refs, aset.lower_bound);
   aset.pending_reductions = 0;
-  add_node(asetID, NReq{1});
+  return true;
+}
+
+void observe_pending_requirements(RCState& state, ASetID asetID,
+                                  PreAdder add_node) {
+  if (apply_pending_reductions(state, asetID)) add_node(asetID, NReq{1});
 }
 
 void observe_pending_requirements(RCState& state, PreAdder add_node) {
@@ -2361,6 +2365,7 @@ void rc_analyze_inst(Env& env,
     {
       auto old_lb = int32_t{0};
       if_aset(env, inst.src(0), [&] (ASetID asetID) {
+        apply_pending_reductions(state, asetID);
         auto& aset = state.asets[asetID];
         auto src_type = inst.src(0)->type();
         if (inst.op() == DecRefNZ && aset.lower_bound < 2) {

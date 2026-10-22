@@ -36,6 +36,14 @@ namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
+Type arrLikeElemTypeBound(Type arr) {
+  assertx(arr <= TArrLike);
+  if (arr <= TStatic) return TPrimitiveInit | TStatic;
+  if (arr <= TPersistent) return TPrimitiveInit | TPersistent;
+  return TInitCell;
+}
+
 std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
   assertx(arr <= TVec);
   assertx(idx <= TInt);
@@ -64,8 +72,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     return {type, false};
   }
 
-  // Array-likes always contain initialized cells.
-  auto type = arr <= TUncounted ? TUncountedInit : TInitCell;
+  auto type = arrLikeElemTypeBound(arr);
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -134,10 +141,7 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     return {type, false};
   }
 
-  // Array-likes always contain initialized cells.
-  auto const type = arr <= TUncounted ? TUncountedInit : TInitCell;
-
-  return {type, false};
+  return {arrLikeElemTypeBound(arr), false};
 }
 
 std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
@@ -175,10 +179,9 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
     return {type, false};
   }
 
-  // Keysets always contain strings or integers. We can further constrain this
-  // if we know the idx type, as the key is always the value.
-  auto const type = arr <= TUncounted ? TUncountedInit : TInitCell;
-  return {type & idx, false};
+  // Equal string keys may have different countness from the stored value.
+  auto const type = idx.maybe(TStr) ? idx | TStr : idx;
+  return {arrLikeElemTypeBound(arr) & type, false};
 }
 
 std::pair<Type, bool> vecFirstLastValueType(Type arr,
@@ -193,7 +196,7 @@ std::pair<Type, bool> vecFirstLastValueType(Type arr,
     return {Type::cns(val->nvGetVal(pos)), true};
   }
 
-  auto type = arr <= TUncounted ? TUncountedInit : TInitCell;
+  auto type = arrLikeElemTypeBound(arr);
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -255,7 +258,7 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
     return {Type::cns(tv), true};
   }
 
-  auto const type = arr <= TUncounted ? TUncountedInit : TInitCell;
+  auto const type = arrLikeElemTypeBound(arr);
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -276,8 +279,7 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
     return {Type::cns(val->nvGetVal(pos)), true};
   }
 
-  auto type = TStr | TInt;
-  if (arr <= TUncounted) type &= TUncountedInit;
+  auto const type = (TStr | TInt) & arrLikeElemTypeBound(arr);
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -313,7 +315,7 @@ Type dictPosType(Type arr, Type pos, bool isKey, const Class* ctx) {
     return type;
   }
 
-  auto type = arr <= TUncounted ? TUncountedInit : TInitCell;
+  auto type = arrLikeElemTypeBound(arr);
   if (isKey) type &= (TInt | TStr);
 
   auto const arrTy = arr.arrSpec().type();
@@ -370,8 +372,7 @@ Type keysetPosType(Type arr, Type pos, const Class* ctx) {
     return type;
   }
 
-  auto type = TStr | TInt;
-  if (arr <= TUncounted) type &= TUncountedInit;
+  auto type = (TStr | TInt) & arrLikeElemTypeBound(arr);
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return type;

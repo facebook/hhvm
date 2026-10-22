@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
@@ -299,6 +300,54 @@ TEST(Type, ToString) {
   auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToConst);
   EXPECT_EQ("PtrToConst<TV: 0xba5eba11>", ptrCns.toString());
   EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());
+}
+
+TEST(Type, ArrayElementCountness) {
+  struct {
+    Type arr;
+    Type value;
+    Type key;
+  } const cases[] = {
+    {TStaticVec, TPrimitiveInit | TStatic, TInt},
+    {TStaticDict, TPrimitiveInit | TStatic, TInt | TStaticStr},
+    {TStaticKeyset, TInt | TStaticStr, TInt | TStaticStr},
+    {TPersistentVec, TUncountedInit, TInt},
+    {TPersistentDict, TUncountedInit, TInt | TPersistentStr},
+    {TPersistentKeyset, TInt | TPersistentStr, TInt | TPersistentStr},
+    {TSharedVec, TUncountedInit, TInt},
+    {TSharedDict, TUncountedInit, TInt | TPersistentStr},
+    {TSharedKeyset, TInt | TPersistentStr, TInt | TPersistentStr},
+    {TVec, TInitCell, TInt},
+    {TDict, TInitCell, TInt | TStr},
+    {TKeyset, TInt | TStr, TInt | TStr},
+  };
+
+  for (auto const& test : cases) {
+    SCOPED_TRACE(test.arr.toString());
+    auto const idx = test.arr <= TVec ? TInt : TInt | TStr;
+    EXPECT_EQ(test.value, arrLikeElemType(test.arr, idx, nullptr).first);
+    EXPECT_EQ(test.value, arrLikePosType(test.arr, TInt, false, nullptr));
+    EXPECT_EQ(test.key, arrLikePosType(test.arr, TInt, true, nullptr));
+    for (auto const isFirst : {false, true}) {
+      EXPECT_EQ(test.value,
+                arrLikeFirstLastType(test.arr, isFirst, false, nullptr).first);
+      EXPECT_EQ(test.key,
+                arrLikeFirstLastType(test.arr, isFirst, true, nullptr).first);
+    }
+  }
+}
+
+TEST(Type, KeysetLookupStringCountness) {
+  for (auto const key : {TStaticStr, TSharedStr, TCountedStr, TStr}) {
+    SCOPED_TRACE(key.toString());
+    EXPECT_EQ(TStaticStr,
+              arrLikeElemType(TStaticKeyset, key, nullptr).first);
+    EXPECT_EQ(TPersistentStr,
+              arrLikeElemType(TSharedKeyset, key, nullptr).first);
+    EXPECT_EQ(TStr, arrLikeElemType(TKeyset, key, nullptr).first);
+  }
+  auto const idx = Type::cns(42);
+  EXPECT_EQ(idx, arrLikeElemType(TStaticKeyset, idx, nullptr).first);
 }
 
 TEST(Type, Ptr) {

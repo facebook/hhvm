@@ -674,7 +674,8 @@ void load_ini_settings(const folly::dynamic& ini) {
 
   UNUSED int count = 0;
   for (auto& [name, opt] : ini.items()) {
-    if (!opt.isObject() || !opt.count("local_value")) {
+    if (!name.isString() || !opt.isObject() || !opt.count("local_value") ||
+        !opt.count("access") || !opt["access"].isInt()) {
       Logger::Warning("CLI server received a malformed INI setting value");
       continue;
     }
@@ -951,11 +952,11 @@ void runInContext(CLIContext&& ctx,
   };
 
   init(shared->cwd, argv);
+  SCOPE_EXIT { teardown(); };
+
   load_ini_settings(shared->ini);
   auto env = init_cli_globals(argv.size() - 1, &argv[0],
                               shared->ini, &envp[0]);
-
-  SCOPE_EXIT { teardown(); };
 
   MonitorThread monitor(data->client);
   CliStdoutHook stdout_hook(fileno(data->out));

@@ -493,6 +493,22 @@ class TestFreshInit(common_tests.CommonTests):
             clusters,
         )
 
+    def test_isolation_move_to_refuses_a_missing_seed_dir(self) -> None:
+        self.test_driver.start_hh_server(changed_files=[], args=["--no-load"])
+        stdout, _, retcode = self.test_driver.run_check(
+            options=[
+                "--find-isolatable-clusters",
+                "--isolation-seed-dir",
+                "no_such_dir",
+                "--isolation-move-to",
+                "move_dest",
+                "--json",
+            ],
+        )
+        input_error_exit_code = 10
+        self.assertEqual(input_error_exit_code, retcode, stdout)
+        self.assertIsNotNone(json.loads(stdout)["refused"])
+
     def test_remove_dead_fixmes(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(

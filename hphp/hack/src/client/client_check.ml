@@ -1117,6 +1117,44 @@ let main_internal
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
   | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS
+      ({
+         Server_isolation_types.mode = Server_isolation_types.Move_to parent;
+         _;
+       } as options) ->
+    let error_filter =
+      Filter_diagnostics.Filter.make
+        ~default_all:local_config.Server_local_config.warnings_default_all
+        ~generated_files:
+          (List.map
+             ~f:Str.regexp
+             (Server_config.warnings_generated_files config))
+        args.warning_switches
+    in
+    let isolation_query options =
+      let%lwt (result, _telemetry) =
+        rpc args (Server_command_types.FIND_ISOLATABLE_CLUSTERS options)
+      in
+      Lwt.return result
+    in
+    let status () =
+      let%lwt (status, _telemetry) =
+        rpc
+          args
+          (Server_command_types.STATUS { max_errors = None; error_filter })
+      in
+      Lwt.return status
+    in
+    let%lwt exit_status =
+      Client_isolation_move.move_into
+        ~wait_seconds:Client_isolation_move.default_wait_seconds
+        ~options
+        ~parent
+        ~output_json:args.output_json
+        ~isolation_query
+        ~status
+    in
+    Lwt.return (exit_status, Telemetry.create ())
+  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS
       (options : Server_isolation_types.options) ->
     (* Clusters are written by the server, never returned: there can be
        hundreds of thousands. With [--json] and no file of the caller's own,

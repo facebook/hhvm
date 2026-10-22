@@ -1850,3 +1850,82 @@ class ClientConnectionDeferralTest(TestCase[EdenfsWatcherTestDriver]):
         self.assert_client_errors(client, ["file.php"])
         # Completion must not depend on the state ending naturally.
         self.assertTrue(is_asserted())
+
+
+class IsolationMoveToTests(TestCase[EdenfsWatcherTestDriver]):
+    """Runs `--isolation-move-to` against an Eden-backed repo.
+
+    Only the EdenFS file watcher reports a renamed directory to the server as
+    changes to the files under it.
+    """
+
+    @classmethod
+    def get_test_driver(cls) -> EdenfsWatcherTestDriver:
+        return EdenfsWatcherTestDriver()
+
+    def write_files(self, files: dict[str, str]) -> None:
+        for filename, contents in files.items():
+            path = os.path.join(self.test_driver.repo_dir, filename)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                f.write(contents)
+
+    def move_to(self, seed_dir: str, parent: str) -> Tuple[int, dict[str, object]]:
+        stdout, _, retcode = self.test_driver.run_check(
+            options=[
+                "--find-isolatable-clusters",
+                "--isolation-seed-dir",
+                seed_dir,
+                "--isolation-move-to",
+                parent,
+                "--json",
+            ],
+        )
+        return (retcode, json.loads(stdout))
+
+    def exists(self, path: str) -> bool:
+        return os.path.exists(os.path.join(self.test_driver.repo_dir, path))
+
+    def test_a_directory_is_moved_into_the_parent(self) -> None:
+        self.write_files(
+            {
+                "move_src/helper.php": "<?hh\nfunction move_helper(): void {}\n",
+                "move_src/user.php": (
+                    "<?hh\nfunction move_user(): void {\n  move_helper();\n}\n"
+                ),
+            }
+        )
+        self.test_driver.start_hh_server()
+
+        retcode, result = self.move_to("move_src", "move_dest")
+
+        self.assertEqual(0, retcode, result)
+        self.assertEqual("move_src", result["source"])
+        self.assertEqual("move_dest/move_src", result["target"])
+        self.assertTrue(result["moved"])
+        self.assertEqual(2, result["files"])
+        self.assertFalse(self.exists("move_src"))
+        self.assertTrue(self.exists("move_dest/move_src/helper.php"))
+        self.assertTrue(self.exists("move_dest/move_src/user.php"))
+
+    def test_a_blocked_directory_is_left_alone(self) -> None:
+        self.write_files(
+            {
+                "blocked_src/helper.php": (
+                    "<?hh\nfunction blocked_helper(): void {}\n"
+                ),
+                "blocked_user.php": (
+                    "<?hh\nfunction blocked_user(): void {\n  blocked_helper();\n}\n"
+                ),
+            }
+        )
+        self.test_driver.start_hh_server()
+
+        retcode, result = self.move_to("blocked_src", "blocked_dest")
+
+        type_error_exit_code = 2
+        self.assertEqual(type_error_exit_code, retcode, result)
+        self.assertFalse(result["moved"])
+        self.assertEqual(["blocked_user.php"], result["blockers"])
+        self.assertTrue(self.exists("blocked_src/helper.php"))
+        self.assertFalse(self.exists("blocked_dest"))

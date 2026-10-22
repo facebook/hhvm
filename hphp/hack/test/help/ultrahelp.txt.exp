@@ -86,6 +86,7 @@ Options:
   --dump-config                        Output configuration
   --error-format <format>              Error formatting style (default: highlighted); valid formats: agent, extended, raw, context, highlighted, plain, plain_highlighted
   --isolation-movable                  ask whether the starting files can move as they stand, naming the files that block it; reads the dependency graph only, so a typecheck can still object
+  --isolation-move-to                  <dir> move the directory named by --isolation-seed-dir into <dir>, under its own name, if it can move and the move introduces no errors; otherwise leave it where it was. Moves the files on disk and nothing else. The server should run with --config edenfs_file_watcher_enabled=true, or it may not see the move
   --isolation-grow                     grow a bigger cluster around each starting file, instead of reporting its smallest isolatable set
   --isolation-output                   <file> write clusters to <file> as JSON lines as they are found, and print only the summary
   --isolation-seed-framework           <class> start from every subclass of <class> — an entry-point family — instead of scanning for seeds

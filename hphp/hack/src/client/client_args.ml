@@ -307,6 +307,7 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
   let output_json = ref false in
   let isolation_grow = ref false in
   let isolation_movable = ref false in
+  let isolation_move_to = ref None in
   let isolation_output = ref None in
   let isolation_seed_framework = ref None in
   let isolation_seed_list = ref None in
@@ -324,12 +325,15 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
     Server_isolation_types.
       {
         mode =
-          (if !isolation_movable then
-            Check_movability
-          else if !isolation_grow then
-            Grow
-          else
-            Measure);
+          (match !isolation_move_to with
+          | Some target -> Move_to target
+          | None ->
+            if !isolation_movable then
+              Check_movability
+            else if !isolation_grow then
+              Grow
+            else
+              Measure);
         clusters_destination =
           (match !isolation_output with
           | Some path -> To_file path
@@ -586,6 +590,10 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
       ( "--isolation-movable",
         Arg.Set isolation_movable,
         " ask whether the starting files can move as they stand, naming the files that block it; reads the dependency graph only, so a typecheck can still object",
+        (Arg_non_user_facing, Help_options) );
+      ( "--isolation-move-to",
+        Arg.String (fun s -> isolation_move_to := Some s),
+        " <dir> move the directory named by --isolation-seed-dir into <dir>, under its own name, if it can move and the move introduces no errors; otherwise leave it where it was. Moves the files on disk and nothing else. The server should run with --config edenfs_file_watcher_enabled=true, or it may not see the move",
         (Arg_non_user_facing, Help_options) );
       ( "--isolation-grow",
         Arg.Set isolation_grow,
@@ -1330,6 +1338,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
              (List.filter_map
                 [
                   ("--isolation-movable", !isolation_movable);
+                  ("--isolation-move-to", Option.is_some !isolation_move_to);
                   ("--isolation-grow", !isolation_grow);
                 ]
                 ~f:(fun (flag, given) ->

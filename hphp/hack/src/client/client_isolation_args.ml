@@ -91,6 +91,21 @@ let check
       (Printf.sprintf
          "%s each answer a different question; pass one"
          (String.concat ~sep:" and " mode_flags_given));
+  (* A move is of one directory, which a list of files or a framework is not,
+     and it is said before the movability rules below because it is the flag
+     the caller spelled. *)
+  (match mode with
+  | Server_isolation_types.Move_to target
+    when String.is_empty (String.strip target) ->
+    reject "--isolation-move-to needs the directory to move into"
+  | Server_isolation_types.Move_to _ when Option.is_none seed_dir ->
+    reject
+      "--isolation-move-to moves the directory named by --isolation-seed-dir; a seed list or a framework has no directory to move"
+  | Server_isolation_types.Move_to _
+  | Server_isolation_types.Measure
+  | Server_isolation_types.Grow
+  | Server_isolation_types.Check_movability ->
+    ());
   (* Movability asks about one named set of files. Everything that would
      change which files that is, or what happens to them afterwards, asks a
      different question — and answering a different question from the one the

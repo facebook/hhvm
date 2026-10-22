@@ -23,3 +23,30 @@ module Dir_move : sig
       directory was. *)
   val undo : t -> unit
 end
+
+module Move_error : sig
+  (** A diagnostic with severity error, in the file it was reported in. *)
+  type t = {
+    code: int;
+    file: Relative_path.t;
+    line: int;
+    message: string;
+  }
+
+  (** The errors in the server's status. Warnings are left out. *)
+  val of_status : Server_command_types.Server_status.t -> t list
+
+  (** [introduced ~source ~target ~baseline ~after] is what is in [after] and not
+      in [baseline], where [after] was reported once the directory [source] had
+      moved to [target]. It is named as it was before the move: a file under
+      [target] as the file under [source], and [target] in a message as [source]. *)
+  val introduced :
+    source:Relative_path.t ->
+    target:Relative_path.t ->
+    baseline:t list ->
+    after:t list ->
+    t list
+
+  (** Whether the two have the same errors, in any order. *)
+  val same : t list -> t list -> bool
+end

@@ -8,6 +8,29 @@
 
 open Hh_prelude
 
+(** The paths the move deals in: directories and files relative to the root. *)
+module Paths = struct
+  (** [file] as the server reports it, an absolute path, relative to the root when
+      it is under it. *)
+  let relative_to_root file =
+    match Relative_path.strip_root_if_possible file with
+    | Some suffix -> Relative_path.from_root ~suffix
+    | None -> Relative_path.create Relative_path.Dummy file
+
+  (** [file], named as it was before [source] moved to [target]. *)
+  let original_path ~source ~target file =
+    if Relative_path.is_within ~dir:target file then
+      let below_target =
+        String.chop_prefix_exn
+          (Relative_path.suffix file)
+          ~prefix:(Relative_path.suffix target)
+      in
+      Relative_path.from_root
+        ~suffix:(Relative_path.suffix source ^ below_target)
+    else
+      file
+end
+
 module Dir_move = struct
   (** What a move has done to the disk, newest first, so that undoing it is
       reading it from the front. *)
@@ -85,4 +108,91 @@ module Dir_move = struct
       | () -> Error reason
       | exception Failure undo_failure ->
         Error (Printf.sprintf "%s; %s" reason undo_failure))
+end
+
+module Move_error = struct
+  type t = {
+    code: int;
+    file: Relative_path.t;
+    line: int;
+    message: string;
+  }
+
+  let of_status (status : Server_command_types.Server_status.t) =
+    List.filter_map
+      status.Server_command_types.Server_status.error_list
+      ~f:(fun diagnostic ->
+        match diagnostic.User_diagnostic.severity with
+        | User_diagnostic.Warning _ -> None
+        | User_diagnostic.Err ->
+          let (pos, message) = diagnostic.User_diagnostic.claim in
+          Some
+            {
+              code = diagnostic.User_diagnostic.code;
+              file = Paths.relative_to_root (Pos.filename pos);
+              line = Pos.line pos;
+              message;
+            })
+
+  let key { code; file; line; message } =
+    Printf.sprintf
+      "%d\000%s\000%d\000%s"
+      code
+      (Relative_path.storage_to_string file)
+      line
+      message
+
+  let keys errors = Set.of_list (module String) (List.map errors ~f:key)
+
+  let same a b = Set.equal (keys a) (keys b)
+
+  (** [message] with the path [from] named [into], wherever [from] is not part
+      of a longer name: [a/b] is in [see a/b/c] and not in [see a/b_c]. *)
+  let rename_path message ~from ~into =
+    let is_name_char c =
+      Char.is_alphanum c
+      || Char.equal c '_'
+      || Char.equal c '-'
+      || Char.equal c '.'
+    in
+    let length = String.length message in
+    let n = String.length from in
+    let is_path_at i =
+      i + n <= length
+      && String.equal (String.sub message ~pos:i ~len:n) from
+      && (i = 0 || not (is_name_char (String.get message (i - 1))))
+      && (i + n = length || not (is_name_char (String.get message (i + n))))
+    in
+    let buffer = Buffer.create length in
+    let rec go i =
+      if i < length then
+        if is_path_at i then begin
+          Buffer.add_string buffer into;
+          go (i + n)
+        end else begin
+          Buffer.add_char buffer (String.get message i);
+          go (i + 1)
+        end
+    in
+    go 0;
+    Buffer.contents buffer
+
+  let introduced ~source ~target ~baseline ~after =
+    let known = keys baseline in
+    List.filter_map after ~f:(fun error ->
+        let error =
+          {
+            error with
+            file = Paths.original_path ~source ~target error.file;
+            message =
+              rename_path
+                error.message
+                ~from:(Relative_path.suffix target)
+                ~into:(Relative_path.suffix source);
+          }
+        in
+        if Set.mem known (key error) then
+          None
+        else
+          Some error)
 end

@@ -331,7 +331,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdFuncRequiredCoeffects:
   case FuncHasAttr:
   case ClassHasAttr:
-  case LdTVFromRDS:
   case StructDictSlot:
   case StructDictElemAddr:
   case StructDictSlotInPos:

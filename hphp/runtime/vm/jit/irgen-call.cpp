@@ -502,7 +502,12 @@ void callProfiledFunc(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
 
 bool hasConstParamMemoCache(IRGS& env, const Func* callee, SSATmp* objOrClass,
                             const std::vector<Type>& inputTypes) {
-  if (!callee->isMemoizeWrapper() || !callee->isNoICMemoize()) {
+  // The RDS key is just the callee and its arguments, so a cache keyed by the
+  // implicit context can't use it. A hit skips the call, which would also skip
+  // an intercept.
+  if (!callee->isMemoizeWrapper() ||
+      callee->isKeyedByImplicitContextMemoize() ||
+      callee->isInterceptable()) {
     return false;
   }
   if (callee->userAttributes().contains(PackedStringPtr(s_attr_Deprecated.get()))) {
@@ -532,7 +537,10 @@ rds::Link<TypedValue, rds::Mode::Normal>
 constParamCacheLink(IRGS& env, const Func* callee, SSATmp* cls,
                     bool asyncEagerReturn,
                     const std::vector<Type>& inputTypes) {
-  auto const clsVal = cls ? cls->clsVal() : nullptr;
+  // Match the memo cache this shadows, and so the key clear_static_memoization
+  // and clear_lsb_memoization clear: only LSB caches are per class.
+  auto const clsVal =
+    cls && callee->isMemoizeWrapperLSB() ? cls->clsVal() : nullptr;
   auto arr = Array::CreateVec();
   for (auto const& t : inputTypes) {
     auto const tvOpt = t.tv();
@@ -711,7 +719,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (env.irb->inUnreachableState()) return;
 
     auto const inputTypes = funcEntryTypes(env, callee, posArgc);
-    auto const numInputs = posArgc + callee->numNamedParams()
+    auto const numInputs = callee->numParams()
       + (callee->hasReifiedGenerics() ? 1 : 0)
       + (callee->hasCoeffectsLocal() ? 1 : 0);
 
@@ -747,13 +755,15 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
         env,
         [&] (Block* taken) {
           gen(env, CheckRDSInitialized, taken, RDSHandleData { data });
+          auto const cached = gen(env, LdTVFromRDS, data, TCell);
+          return gen(env, CheckType, TInitCell, taken, cached);
         },
-        [&] {
+        [&] (SSATmp* cached) {
           for (auto i = 0; i < numInputs; ++i) {
             popDecRef(env, static_cast<DecRefProfileId>(i));
           }
           for (auto i = 0; i < kNumActRecCells; ++i) popU(env);
-          auto const retVal = gen(env, LdTVFromRDS, data, retType);
+          auto const retVal = gen(env, AssertType, retType, cached);
           gen(env, IncRef, retVal);
           return retVal;
         },

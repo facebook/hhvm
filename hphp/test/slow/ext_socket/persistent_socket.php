@@ -127,20 +127,20 @@ $contexts = vec[null, $context, $context];
 $servers = vec[];
 $ports = vec[];
 foreach ($schemes as $i => $scheme) {
-  $server = null;
-  $port = 0;
-  while (!$server) {
-    $port = rand(50000, 65535);
-    $errno = null;
-    $errstr = null;
-    $server = stream_socket_server(
-      "$scheme://127.0.0.1:$port",
-      inout $errno,
-      inout $errstr,
-      STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,
-      $contexts[$i]
-    );
+  $errno = null;
+  $errstr = null;
+  $server = stream_socket_server(
+    "$scheme://127.0.0.1:0",
+    inout $errno,
+    inout $errstr,
+    STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,
+    $contexts[$i]
+  );
+  if ($server === false) {
+    throw new Exception("Couldn't bind server: $errstr ($errno)");
   }
+  $name = stream_socket_get_name($server, false);
+  $port = explode(":", $name)[1];
   $servers[] = $server;
   $ports[] = $port;
 }

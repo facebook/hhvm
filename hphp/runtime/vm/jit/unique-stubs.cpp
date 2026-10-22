@@ -91,6 +91,34 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Synthetic return addresses enter after a nop included in the symbol range.
+struct StubEmission {
+  explicit StubEmission(TCA address) : start(address), entry(address) {}
+  StubEmission(TCA start, TCA entry) : start(start), entry(entry) {}
+
+  TCA start;
+  TCA entry;
+};
+
+/*
+ * Profilers and debuggers resolve a saved return address at RIP - 1
+ * to identify the function containing the call instruction. When a frame's
+ * return address is set directly to a unique stub's entry point, RIP - 1 would
+ * instead fall outside that stub.
+ *
+ * Emit a nop to cover that address. The stub's entry point must be immediately
+ * after the nop, while its reported symbol range must start at the address
+ * returned here, including the nop. An unrelocated fallthru emits a real nop on
+ * both x64 and ARM; an ordinary vasm nop can be removed by optimization.
+ */
+TCA emitSavedReturnAddressPadding(CodeBlock& cb, DataBlock& data) {
+  auto const start = vwrap(cb, data, [] (Vout& v) {
+    v << fallthru{};
+  }, nullptr, false /* relocate */);
+  assertx(cb.frontier() > start);
+  return start;
+}
+
 void alignJmpTarget(CodeBlock& cb) {
   if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
@@ -187,9 +215,12 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   return ARCH_SWITCH_CALL(emitFreeLocalsHelpers, cb, data, us);
 }
 
-TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const char* /* name*/) {
+StubEmission emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
+                            const char* /* name*/) {
   alignJmpTarget(cb);
-  return ARCH_SWITCH_CALL(emitCallToExit, cb, data, us);
+  auto const start = emitSavedReturnAddressPadding(cb, data);
+  auto const entry = ARCH_SWITCH_CALL(emitCallToExit, cb, data, us);
+  return {start, entry};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -752,10 +783,11 @@ void loadGenFrame(Vout& v, Vreg d) {
   v << lea{gen[arOff], d};
 }
 
-TCA emitInterpRet(CodeBlock& cb, DataBlock& data, const char* name) {
+StubEmission emitInterpRet(CodeBlock& cb, DataBlock& data, const char* name) {
   alignCacheLine(cb);
+  auto const start = emitSavedReturnAddressPadding(cb, data);
 
-  auto const start = vwrap(cb, data, [] (Vout& v) {
+  auto const entry = vwrap(cb, data, [] (Vout& v) {
     // Load ActRec::m_callOffAndFlags.
     auto const callOffAndFlags = v.makeReg();
     v << loadl{rvmsp()[-kArRetOff + AROFF(m_callOffAndFlags)], callOffAndFlags};
@@ -777,14 +809,15 @@ TCA emitInterpRet(CodeBlock& cb, DataBlock& data, const char* name) {
     loadReturnRegs(v);  // spurious load if we're not returning
     v << jmpr{ret, php_return_regs()};
   }, name);
-  return start;
+  return {start, entry};
 }
 
 template<bool async>
-TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data, const char* name) {
+StubEmission emitInterpGenRet(CodeBlock& cb, DataBlock& data, const char* name) {
   alignJmpTarget(cb);
+  auto const start = emitSavedReturnAddressPadding(cb, data);
 
-  auto const start = vwrap(cb, data, [] (Vout& v) {
+  auto const entry = vwrap(cb, data, [] (Vout& v) {
     // Load ActRec::m_callOffAndFlags.
     auto const calleeFP = v.makeReg();
     auto const callOffAndFlags = v.makeReg();
@@ -808,7 +841,7 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data, const char* name) {
     loadReturnRegs(v);  // spurious load if we're not returning
     v << jmpr{ret, php_return_regs()};
   }, name);
-  return start;
+  return {start, entry};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1519,9 +1552,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
     auto const& v = (v_in);                                        \
     tc::TransLocMaker maker{v};                                    \
     maker.markStart();                                             \
-    auto const start = (stub)();                                   \
-    add(name, code, start, v, maker.markEnd().loc(), dbg);         \
-    return start;                                                  \
+    auto const emitted = StubEmission{(stub)()};                   \
+    add(name, code, emitted.start, v, maker.markEnd().loc(), dbg);  \
+    return emitted.entry;                                        \
   }()
 
 #define ADD(name, v, stub, ...) name = EMIT(#name, v, [&] { return stub(__VA_ARGS__, #name); })

@@ -207,11 +207,6 @@ void assert_tc_saved_rip(void* sp) {
 TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   X64Assembler a(cb);
 
-  // Emit a byte of padding. This is a kind of hacky way to avoid
-  // hitting an assert in recordGdbStub when we call it with stub - 1
-  // as the start address.
-  a.emitNop(1);
-
   auto const start = a.frontier();
   if (Cfg::HHIR::GenerateAsserts) {
     always_assert(rarg(0) != rret(0) &&
@@ -247,11 +242,6 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
     a.jmp(reg::rax);
   }
 
-  // On a backtrace, gdb tries to locate the calling frame at address
-  // returnRIP-1. However, for the first VM frame, there is no code at
-  // returnRIP-1, since the AR was set up manually. For this frame,
-  // record the tracelet address as starting from this callToExit-1,
-  // so gdb does not barf.
   return start;
 }
 

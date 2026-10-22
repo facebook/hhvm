@@ -540,7 +540,7 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   // The function has no args. Check if it's effect free and returns
   // a literal.
-  auto [retTy, effectFree] = env.index.lookup_return_type(
+  auto [retTy, effectFree, _] = env.index.lookup_return_type(
     env.ctx,
     &env.collect.methods,
     rfunc,
@@ -758,6 +758,10 @@ void killIterEquivs(ISS& env, LocalId l, LocalId key = NoLocalId) {
       i,
       []  (DeadIter) {},
       [&] (LiveIter& iter) {
+        if (iter.setValueBase == l) {
+          iter.setValueBase = NoLocalId;
+          iter.setValueType = TBottom;
+        }
         if (iter.keyLocal == l) iter.keyLocal = NoLocalId;
         if (iter.baseLocal == l) {
           iter.baseUpdated = true;
@@ -779,6 +783,8 @@ void killAllIterEquivs(ISS& env) {
         iter.baseUpdated = true;
         iter.baseLocal = NoLocalId;
         iter.keyLocal = NoLocalId;
+        iter.setValueBase = NoLocalId;
+        iter.setValueType = TBottom;
       }
     );
   }

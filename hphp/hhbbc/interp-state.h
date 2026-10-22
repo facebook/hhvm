@@ -76,6 +76,13 @@ struct LiveIter {
   BlockId initBlock       = NoBlockId;
   // Set whenever we see any mutation, even "safe" ones that don't affect keys.
   bool baseUpdated        = false;
+  // The local whose values we can prove are exhaustively overwritten by this
+  // iterator. Cleared permanently by any update other than IterSetValue on the
+  // current key.
+  LocalId setValueBase    = NoLocalId;
+  // If every path through the current iteration overwrote its value, this is
+  // the type of the final value. Bottom means no exhaustive write is known.
+  Type setValueType       = TBottom;
 };
 using Iter = std::variant<DeadIter, LiveIter>;
 

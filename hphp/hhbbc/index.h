@@ -1416,13 +1416,15 @@ struct Index {
   bool func_depends_on_arg(const php::Func* func, size_t arg) const;
 
   /*
-   * Return type knowledge. The type and whether it's effect-free.
+   * Return type knowledge, whether the function is effect-free, and whether
+   * an async invocation can suspend before producing its result.
    */
   struct ReturnType {
     Type t;
     bool effectFree{false};
+    bool canSuspend{true};
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(t)(effectFree);
+      sd(t)(effectFree)(canSuspend);
     }
   };
 

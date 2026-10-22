@@ -185,9 +185,11 @@ void dump_class_state(std::ostream& out,
 void dump_func_state(std::ostream& out,
                      const IIndex& index,
                      const php::Func& f) {
-  auto const [retTy, effectFree] = index.lookup_return_type_raw(&f).first;
+  auto const [retTy, effectFree, canSuspend] =
+    index.lookup_return_type_raw(&f).first;
   out << func_fullname(f) << "() :: " << show(retTy);
   if (effectFree) out << " (effect-free)";
+  out << " (can-suspend: " << (canSuspend ? "yes" : "no") << ")";
   if (f.attrs & AttrNoOverride) out << " (no-override)";
   out << '\n';
 }

@@ -1,0 +1,7 @@
+dict(1) {
+  ["outer"]=>
+  dict(1) {
+    ["kind"]=>
+    string(5) "value"
+  }
+}

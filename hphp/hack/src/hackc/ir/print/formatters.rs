@@ -96,6 +96,8 @@ impl Display for FmtAttr {
 
         let is_class = ctx == AttrContext::Class;
         let is_func = ctx == AttrContext::Function;
+        let is_func_or_method = is_func || ctx == AttrContext::Method;
+        let is_property = ctx == AttrContext::Property;
 
         #[rustfmt::skip]
         FmtSep::new(
@@ -108,6 +110,7 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrDeepInit, "deep_init"),
                 get_bit(&mut attr, Attr::AttrDynamicallyCallable, "dynamically_callable"),
                 get_bit(&mut attr, Attr::AttrDynamicallyReferenced, "dynamically_referenced"),
+                flag_get_bit(is_func_or_method, &mut attr, Attr::AttrEagerOnly, "eager_only"),
                 get_bit(&mut attr, Attr::AttrEnumClass, "enum_class"),
                 get_bit(&mut attr, Attr::AttrFinal, "final"),
                 get_bit(&mut attr, Attr::AttrForbidDynamicProps, "no_dynamic_props"),
@@ -121,7 +124,12 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrIsReadonly, "readonly"),
                 get_bit(&mut attr, Attr::AttrLSB, "lsb"),
                 get_bit(&mut attr, Attr::AttrLateInit, "late_init"),
-                get_bit(&mut attr, Attr::AttrNoBadRedeclare, "no_bad_redeclare"),
+                flag_get_bit(
+                    is_property,
+                    &mut attr,
+                    Attr::AttrNoBadRedeclare,
+                    "no_bad_redeclare",
+                ),
                 get_bit(&mut attr, Attr::AttrNoImplicitNullable, "no_implicit_null"),
                 get_bit(&mut attr, Attr::AttrNoInjection, "no_injection"),
                 get_bit(&mut attr, Attr::AttrNoOverride, "no_override"),

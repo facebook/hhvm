@@ -70,6 +70,16 @@ constexpr trep kNonSupportBits = BCell & ~kSupportBits;
 
 //////////////////////////////////////////////////////////////////////
 
+bool canSuspendSubtype(bool a, bool b) {
+  return !a || b;
+}
+
+bool intersectCanSuspend(bool a, bool b) {
+  return a && b;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // HHBBC consumes a LOT of memory, and much of it is used by Types.
 // We keep the type representation compact; don't expand it accidentally.
 static_assert(CheckSize<DCls, 8>(), "");
@@ -2235,9 +2245,13 @@ Type Type::unctxHelper(Type t, bool& changed) {
     }
     break;
   case DataTag::WaitHandle: {
+    auto const clsChanged = t.m_data.dwh->cls.isCtx();
+    if (clsChanged) t.m_data.dwh.mutate()->cls.setCtx(false);
+    bool innerChanged;
     auto const& inner = t.m_data.dwh->inner;
-    auto ty = unctxHelper(inner, changed);
-    if (changed) t.m_data.dwh.mutate()->inner = std::move(ty);
+    auto ty = unctxHelper(inner, innerChanged);
+    if (innerChanged) t.m_data.dwh.mutate()->inner = std::move(ty);
+    changed = clsChanged || innerChanged;
     break;
   }
   case DataTag::Cls:
@@ -2538,9 +2552,10 @@ bool Type::equivImpl(const Type& o) const {
   case DataTag::Obj:
     return m_data.dobj.same(o.m_data.dobj, contextSensitive);
   case DataTag::WaitHandle:
-    return m_data.dwh->inner.equivImpl<contextSensitive>(
-      o.m_data.dwh->inner
-    );
+    return
+      m_data.dwh->cls.same(o.m_data.dwh->cls, contextSensitive) &&
+      m_data.dwh->canSuspend == o.m_data.dwh->canSuspend &&
+      m_data.dwh->inner.equivImpl<contextSensitive>(o.m_data.dwh->inner);
   case DataTag::Cls:
     return m_data.dcls.same(o.m_data.dcls, contextSensitive);
   case DataTag::ArrLikePacked:
@@ -2627,7 +2642,11 @@ size_t Type::hash() const {
           );
         }
         case DataTag::WaitHandle:
-          return m_data.dwh->inner.hash();
+          return folly::hash::hash_combine(
+            m_data.dwh->cls.smallestCls().hash(),
+            m_data.dwh->inner.hash(),
+            m_data.dwh->canSuspend
+          );
         case DataTag::Cls: {
           if (m_data.dcls.isExact() || m_data.dcls.isSub()) {
             return folly::hash::hash_combine(
@@ -2730,16 +2749,21 @@ bool Type::subtypeOfImpl(const Type& o) const {
 
     if (is_specialized_wait_handle(*this)) {
       if (is_specialized_wait_handle(o)) {
-        assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
-        return m_data.dwh->inner.subtypeOfImpl<contextSensitive>(
-          o.m_data.dwh->inner
-        );
+        return
+          subtypeCls<contextSensitive>(m_data.dwh->cls, o.m_data.dwh->cls) &&
+          canSuspendSubtype(
+            m_data.dwh->canSuspend,
+            o.m_data.dwh->canSuspend
+          ) &&
+          m_data.dwh->inner.subtypeOfImpl<contextSensitive>(
+            o.m_data.dwh->inner
+          );
       }
       return subtypeCls<contextSensitive>(m_data.dwh->cls, o.m_data.dobj);
     } else if (is_specialized_wait_handle(o)) {
-      if (!subtypeCls<contextSensitive>(m_data.dobj, o.m_data.dwh->cls)) return false;
-      if (subtypeCls<contextSensitive>(o.m_data.dwh->cls, m_data.dobj)) return false;
-      return true;
+      // Every materialized DWaitHandle contains information which DObj does
+      // not carry (the inner type, eagerness, or both).
+      return false;
     } else {
       return subtypeCls<contextSensitive>(m_data.dobj, o.m_data.dobj);
     }
@@ -2847,8 +2871,7 @@ bool Type::couldBe(const Type& o) const {
 
     if (is_specialized_wait_handle(*this)) {
       if (is_specialized_wait_handle(o)) {
-        assertx(m_data.dwh->cls.same(o.m_data.dwh->cls));
-        return true;
+        return couldBeCls(m_data.dwh->cls, o.m_data.dwh->cls);
       }
       return couldBeCls(m_data.dwh->cls, o.m_data.dobj);
     } else if (is_specialized_wait_handle(o)) {
@@ -3071,17 +3094,15 @@ bool Type::checkInvariants() const {
     assertx(couldBe(BObj));
     assertx(subtypeOf(BObj | kNonSupportBits));
     assertx(!m_data.dwh.isNull());
-    // We need to know something relevant about the inner type if we
-    // have a specialization.
-    assertx(m_data.dwh->inner.strictSubtypeOf(BInitCell));
-    assertx(!m_data.dwh->cls.containsNonRegular());
-    assertx(m_data.dwh->cls.isSub());
-    assertx(!m_data.dwh->cls.isCtx());
+    // We need to know something relevant about the inner type or whether the
+    // wait handle is guaranteed to be finished if we have a specialization.
     assertx(
-      m_data.dwh->cls.cls().name()->tsame(s_Awaitable.get())
+      m_data.dwh->inner.strictSubtypeOf(BInitCell) ||
+      !m_data.dwh->canSuspend
     );
-    assertx(m_data.dwh->cls.cls().isSerialized() ||
-            m_data.dwh->cls.cls().isComplete());
+    assertx(!m_data.dwh->cls.containsNonRegular());
+    // DWaitHandle class refinements are only produced by intersecting the
+    // canonical HH\\Awaitable specialization with a DObj.
     break;
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
@@ -3261,26 +3282,40 @@ bool Type::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////
 
-Type wait_handle(Type inner) {
+Type Type::specializeWaitHandle(Type obj,
+                                Type inner,
+                                bool canSuspend) {
+  assertx(obj.m_dataTag == DataTag::Obj);
+  if (!inner.strictSubtypeOf(BInitCell) && canSuspend) {
+    return obj;
+  }
+  auto ret = Type { obj.bits(), obj.m_legacyMark };
+  construct(
+    ret.m_data.dwh,
+    copy_ptr<DWaitHandle>(
+      std::move(obj.m_data.dobj),
+      std::move(inner),
+      canSuspend
+    )
+  );
+  ret.m_dataTag = DataTag::WaitHandle;
+  assertx(ret.checkInvariants());
+  return ret;
+}
+
+Type wait_handle(Type inner, bool canSuspend) {
   assertx(inner.subtypeOf(BInitCell));
   auto const wh = res::Class::get(s_Awaitable.get());
   assertx(wh.isComplete());
   assertx(wh.couldBeOverriddenByRegular());
-  auto t = Type { BObj, LegacyMark::Bottom };
-
-  auto dcls = DCls::MakeSub(wh, false);
-  if (!inner.strictSubtypeOf(BInitCell)) {
-    construct(t.m_data.dobj, std::move(dcls));
-    t.m_dataTag = DataTag::Obj;
-  } else {
-    construct(
-      t.m_data.dwh,
-      copy_ptr<DWaitHandle>(std::move(dcls), std::move(inner))
-    );
-    t.m_dataTag = DataTag::WaitHandle;
-  }
-  assertx(t.checkInvariants());
-  return t;
+  auto obj = Type { BObj, LegacyMark::Bottom };
+  construct(obj.m_data.dobj, DCls::MakeSub(wh, false));
+  obj.m_dataTag = DataTag::Obj;
+  return Type::specializeWaitHandle(
+    std::move(obj),
+    std::move(inner),
+    canSuspend
+  );
 }
 
 bool is_specialized_wait_handle(const Type& t) {
@@ -3290,6 +3325,22 @@ bool is_specialized_wait_handle(const Type& t) {
 Type wait_handle_inner(const Type& t) {
   assertx(is_specialized_wait_handle(t));
   return t.m_data.dwh->inner;
+}
+
+bool wait_handle_can_suspend(const Type& t) {
+  if (!t.couldBe(BObj)) return false;
+  if (!is_specialized_wait_handle(t)) return true;
+  return t.m_data.dwh->canSuspend;
+}
+
+Type set_wait_handle_can_suspend(Type t, bool canSuspend) {
+  if (!is_specialized_wait_handle(t)) return t;
+  t.m_data.dwh.mutate()->canSuspend = canSuspend;
+  if (!t.m_data.dwh->inner.strictSubtypeOf(BInitCell) && canSuspend) {
+    return demote_wait_handle(std::move(t));
+  }
+  assertx(t.checkInvariants());
+  return t;
 }
 
 // Turn a DWaitHandle into the matching DObj specialization (IE,
@@ -3783,9 +3834,9 @@ Type return_with_context(Type t, Type context) {
 
   if (context.is(BBottom)) return unctx(t);
 
-  if (t.m_dataTag == DataTag::Obj && t.m_data.dobj.isCtx()) {
+  if (is_specialized_obj(t) && dobj_of(t).isCtx()) {
     if (!context.subtypeOf(BObj)) context = toobj(context);
-    if (context.m_dataTag == DataTag::Obj) {
+    if (is_specialized_obj(context)) {
       auto const& d = dobj_of(context);
       if (d.isExact() && d.cls().couldBeMocked()) {
         context = subObj(d.cls());
@@ -3816,6 +3867,7 @@ Type return_with_context(Type t, Type context) {
 
 Type setctx(Type t, bool to) {
   if (t.m_dataTag == DataTag::Obj) t.m_data.dobj.setCtx(to);
+  if (is_specialized_wait_handle(t)) t.m_data.dwh.mutate()->cls.setCtx(to);
   if (is_specialized_cls(t))       t.m_data.dcls.setCtx(to);
   return t;
 }
@@ -4684,17 +4736,21 @@ Type intersection_of(Type a, Type b) {
     return std::move(dst);
   };
 
-  // Try to determine if the given wait-handle and given specialized
-  // object are a subtype of either. If so, return the (reused) more
-  // specific type. Return std::nullopt if neither are.
-  auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
-    // The order of checks is important here. If the obj is the
-    // Awaitable object, then both subtype checks will pass (because
-    // they're equal), but we should reuse the wait-handle in that
-    // case, so check that first.
-    if (subtypeCls<true>(wh.m_data.dwh->cls, obj.m_data.dobj)) return reuse(wh);
-    if (subtypeCls<true>(obj.m_data.dobj, wh.m_data.dwh->cls)) return reuse(obj);
-    return std::nullopt;
+  // Intersect the class constraints independently, then reattach the
+  // wait-handle facts when the result can represent both specializations.
+  auto const whAndObj = [&] (Type wh, Type obj) {
+    auto inner = wh.m_data.dwh->inner;
+    auto const canSuspend = wh.m_data.dwh->canSuspend;
+    auto cls = intersection_of(
+      demote_wait_handle(std::move(wh)),
+      std::move(obj)
+    );
+    if (cls.m_dataTag != DataTag::Obj) return cls;
+    return Type::specializeWaitHandle(
+      std::move(cls),
+      std::move(inner),
+      canSuspend
+    );
   };
 
   // If both sides have matching specialized data, check if the
@@ -4711,43 +4767,41 @@ Type intersection_of(Type a, Type b) {
   // specializations determines the priority of which specializations
   // to keep when there's a mismatch.
 
-  // For WaitHandles, first check if one is potentially a subtype of
-  // the other (even if one is a TObj). If not, demote the wait handle
-  // to an object specialization and fall into the below object
-  // specialization checks.
+  // For wait handles, intersect the class specialization independently from
+  // the result type and eagerness. This lets an eager wait handle retain a
+  // narrower concrete Awaitable class.
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
       assertx(couldBe(isect, BObj));
-      assertx(a.m_data.dwh->cls.same(b.m_data.dwh->cls));
-      if (a.m_data.dwh->inner.subtypeOf(b.m_data.dwh->inner)) {
-        return reuse(a);
-      }
-      if (b.m_data.dwh->inner.subtypeOf(a.m_data.dwh->inner)) {
-        return reuse(b);
-      }
+      auto const canSuspend = intersectCanSuspend(
+        a.m_data.dwh->canSuspend,
+        b.m_data.dwh->canSuspend
+      );
       auto i = intersection_of(
         a.m_data.dwh->inner,
         b.m_data.dwh->inner
       );
-      if (i.strictSubtypeOf(BInitCell)) {
-        a.m_data.dwh.mutate()->inner = std::move(i);
-        return reuse(a);
-      }
-      a = demote_wait_handle(std::move(a));
-      return reuse(a);
+      auto cls = intersection_of(
+        demote_wait_handle(std::move(a)),
+        demote_wait_handle(std::move(b))
+      );
+      if (cls.m_dataTag != DataTag::Obj) return cls;
+      return Type::specializeWaitHandle(
+        std::move(cls),
+        std::move(i),
+        canSuspend
+      );
     }
     if (is_specialized_obj(b)) {
       assertx(couldBe(isect, BObj));
-      if (auto const t = whAndObj(a, b)) return *t;
-      a = demote_wait_handle(std::move(a));
+      return whAndObj(std::move(a), std::move(b));
     } else if (couldBe(isect, BObj)) {
       return reuse(a);
     }
   } else if (is_specialized_wait_handle(b)) {
     if (is_specialized_obj(a)) {
       assertx(couldBe(isect, BObj));
-      if (auto const t = whAndObj(b, a)) return *t;
-      b = demote_wait_handle(std::move(b));
+      return whAndObj(std::move(b), std::move(a));
     } else if (couldBe(isect, BObj)) {
       return reuse(b);
     }
@@ -5121,7 +5175,11 @@ Type union_of(Type a, Type b) {
     // they're equal), but we should reuse obj in that case, so check
     // that first.
     if (subtypeCls<true>(wh.m_data.dwh->cls, obj.m_data.dobj)) return reuse(obj);
-    if (subtypeCls<true>(obj.m_data.dobj, wh.m_data.dwh->cls)) return reuse(wh);
+    if (subtypeCls<true>(obj.m_data.dobj, wh.m_data.dwh->cls)) {
+      // The object specialization has neither an inner type nor eagerness
+      // information, so it cannot retain the DWaitHandle specialization.
+      return std::nullopt;
+    }
     return std::nullopt;
   };
 
@@ -5141,18 +5199,21 @@ Type union_of(Type a, Type b) {
   // handle to a DObj and use that.
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
-      assertx(a.m_data.dwh->cls.same(b.m_data.dwh->cls));
       auto const& atype = a.m_data.dwh->inner;
       auto const& btype = b.m_data.dwh->inner;
-      if (atype.subtypeOf(btype)) return reuse(b);
-      if (btype.subtypeOf(atype)) return reuse(a);
+      auto const canSuspend =
+        a.m_data.dwh->canSuspend || b.m_data.dwh->canSuspend;
       auto u = union_of(atype, btype);
-      if (!u.strictSubtypeOf(BInitCell)) {
-        a = demote_wait_handle(std::move(a));
-      } else {
-        a.m_data.dwh.mutate()->inner = std::move(u);
-      }
-      return reuse(a);
+      auto cls = union_of(
+        demote_wait_handle(std::move(a)),
+        demote_wait_handle(std::move(b))
+      );
+      if (cls.m_dataTag != DataTag::Obj) return cls;
+      return Type::specializeWaitHandle(
+        std::move(cls),
+        std::move(u),
+        canSuspend
+      );
     }
     if (is_specialized_obj(b)) {
       if (auto const t = whAndObj(a, b)) return *t;
@@ -5521,9 +5582,14 @@ void widen_type_impl(Type& t, uint32_t depth) {
     case DataTag::ArrLikeVal:
       return;
 
-    case DataTag::WaitHandle:
-      widen_type_impl(t.m_data.dwh.mutate()->inner, depth + 1);
+    case DataTag::WaitHandle: {
+      auto wh = t.m_data.dwh.mutate();
+      widen_type_impl(wh->inner, depth + 1);
+      if (!wh->inner.strictSubtypeOf(BInitCell) && wh->canSuspend) {
+        t = demote_wait_handle(std::move(t));
+      }
       return;
+    }
 
     case DataTag::ArrLikePacked: {
       if (checkDepth()) return;
@@ -5677,9 +5743,10 @@ Type loosen_staticness(Type t) {
       break;
 
     case DataTag::WaitHandle: {
-      auto& inner = t.m_data.dwh.mutate()->inner;
+      auto wh = t.m_data.dwh.mutate();
+      auto& inner = wh->inner;
       auto loosened = loosen_staticness(std::move(inner));
-      if (!loosened.strictSubtypeOf(BInitCell)) {
+      if (!loosened.strictSubtypeOf(BInitCell) && wh->canSuspend) {
         return demote_wait_handle(t);
       }
       inner = std::move(loosened);
@@ -5848,9 +5915,10 @@ Type loosen_likeness_recursively(Type t) {
     break;
 
   case DataTag::WaitHandle: {
-    auto& inner = t.m_data.dwh.mutate()->inner;
+    auto wh = t.m_data.dwh.mutate();
+    auto& inner = wh->inner;
     auto loosened = loosen_likeness_recursively(inner);
-    if (!loosened.strictSubtypeOf(BInitCell)) {
+    if (!loosened.strictSubtypeOf(BInitCell) && wh->canSuspend) {
       return demote_wait_handle(std::move(t));
     }
     inner = std::move(loosened);
@@ -6551,15 +6619,17 @@ void unserialize_classes_impl(const IIndex& index,
       // These can never contain objects or classes.
       break;
     case DataTag::WaitHandle: {
+      auto cls = unserialize_classes(
+        index,
+        demote_wait_handle(t)
+      );
+      if (cls.m_dataTag != DataTag::Obj) {
+        parent() = std::move(cls);
+        break;
+      }
       WaitHandleCOWer next{parent, *t.m_data.dwh};
       unserialize_classes_impl(index, next.get().inner, next);
-      auto const& dcls = next.get().cls;
-      if (dcls.cls().isSerialized()) {
-        auto const u = dcls.cls().unserialize(index);
-        assertx(u.has_value());
-        next.getAndCOW().cls.setCls(*u);
-      }
-      assertx(!dcls.isIsect());
+      next.getAndCOW().cls = std::move(cls.m_data.dobj);
       break;
     }
     case DataTag::ArrLikePacked: {
@@ -6694,12 +6764,11 @@ void serialize_classes_impl(const Type& t, COWer& parent) {
       // These can never contain objects or classes.
       break;
     case DataTag::WaitHandle: {
+      auto cls = serialize_classes(demote_wait_handle(t));
+      assertx(cls.m_dataTag == DataTag::Obj);
       WaitHandleCOWer next{parent, *t.m_data.dwh};
       serialize_classes_impl(next.get().inner, next);
-      auto const& dcls = next.get().cls;
-      assertx(dcls.isExact() || dcls.isSub());
-      auto const u = dcls.cls().serialize();
-      next.getAndCOW().cls.setCls(u);
+      next.getAndCOW().cls = std::move(cls.m_data.dobj);
       break;
     }
     case DataTag::ArrLikePacked: {
@@ -7274,6 +7343,33 @@ std::pair<Type, bool> array_like_elem_impl(const Type& arr, const Type& key) {
     );
   }
   return r;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type array_like_set_values(Type base, Type key, Type value) {
+  assertx(base.subtypeOf(BVec) || base.subtypeOf(BDict));
+  assertx(base.couldBe(BVecN | BDictN));
+  assertx(key.subtypeOf(BArrKey));
+  assertx(IMPLIES(base.subtypeOf(BDict), !key.is(BBottom)));
+  assertx(value.subtypeOf(BInitCell));
+  assertx(!value.is(BBottom));
+
+  auto constraint = base.subtypeOf(BVec)
+    ? packedn_impl(
+        base.bits() & BVecN,
+        base.m_legacyMark,
+        std::move(value)
+      )
+    : mapn_impl(
+        base.bits() & BDictN,
+        base.m_legacyMark,
+        std::move(key),
+        std::move(value)
+      );
+  auto refined = intersection_of(std::move(base), std::move(constraint));
+  assertx(!refined.is(BBottom));
+  return refined;
 }
 
 //////////////////////////////////////////////////////////////////////

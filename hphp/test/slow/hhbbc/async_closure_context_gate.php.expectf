@@ -1,0 +1,10 @@
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) gate_async_eager_closure
+%A
+Function (persistent) (can_async_eager_ret) gate_sync_closure
+%A
+Function (persistent) (can_async_eager_ret) gate_skipped_suspending_closure
+%A
+int(10)
+int(13)
+int(16)

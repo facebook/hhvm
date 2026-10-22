@@ -89,6 +89,17 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           auto const initBlock = (diter.initBlock != siter.initBlock)
             ? NoBlockId
             : diter.initBlock;
+          auto const setValueBase = diter.setValueBase != siter.setValueBase
+            ? NoLocalId
+            : diter.setValueBase;
+          auto setValueType = [&] {
+            if (setValueBase == NoLocalId ||
+                diter.setValueType.is(BBottom) ||
+                siter.setValueType.is(BBottom)) {
+              return TBottom;
+            }
+            return join(diter.setValueType, siter.setValueType);
+          }();
           auto const changed =
             !equal(key, diter.types.key) ||
             !equal(value, diter.types.value) ||
@@ -98,7 +109,9 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
             keyLocal != diter.keyLocal ||
             baseLocal != diter.baseLocal ||
             baseUpdated != diter.baseUpdated ||
-            initBlock != diter.initBlock;
+            initBlock != diter.initBlock ||
+            setValueBase != diter.setValueBase ||
+            !equal(setValueType, diter.setValueType);
           diter.types =
             IterTypes {
               std::move(key),
@@ -111,6 +124,8 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           diter.baseLocal = baseLocal;
           diter.keyLocal = keyLocal;
           diter.initBlock = initBlock;
+          diter.setValueBase = setValueBase;
+          diter.setValueType = std::move(setValueType);
           return changed;
         }
       );
@@ -142,6 +157,13 @@ std::string show(const php::Func& f, const Iter& iter) {
         str += fmt::format(" (key={})", local_string(f, ti.keyLocal));
       }
       if (ti.baseUpdated) str += fmt::format(" (updated)");
+      if (!ti.setValueType.is(BBottom)) {
+        str += fmt::format(
+          " (set-value={} {})",
+          local_string(f, ti.setValueBase),
+          show(ti.setValueType)
+        );
+      }
       return str;
     }
   );

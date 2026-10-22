@@ -547,6 +547,7 @@ void rewind(ISS& env, const Bytecode& bc) {
   ITRACE(2, "(rewind: {}\n", show(*env.ctx.func, bc));
   env.state.stack.rewind(numPop(bc), numPush(bc));
   env.flags.usedParams.reset();
+  env.flags.canSuspend = false;
 }
 
 /*
@@ -584,6 +585,7 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
     if (bcs.size()) {
       auto ef = !env.flags.reduced || env.flags.effectFree;
       auto usedParams = env.flags.usedParams;
+      auto canSuspend = env.flags.canSuspend;
       Trace::Indent _;
       for (auto const& bc : bcs) {
         assertx(
@@ -592,11 +594,13 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
         );
         interpStep(env, bc);
         usedParams |= env.flags.usedParams;
+        canSuspend |= env.flags.canSuspend;
         if (!env.flags.effectFree) ef = false;
         if (env.state.unreachable || env.flags.jmpDest != NoBlockId) break;
       }
       env.flags.effectFree = ef;
       env.flags.usedParams = usedParams;
+      env.flags.canSuspend = canSuspend;
     } else if (!env.flags.reduced) {
       effect_free(env);
     }
@@ -612,11 +616,13 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
   assertx(!env.flags.canConstProp);
   assertx(!env.flags.effectFree);
   assertx(env.flags.usedParams.none());
+  assertx(!env.flags.canSuspend);
 
   env.flags.wasPEI          = false;
   env.flags.canConstProp    = true;
   env.flags.effectFree      = true;
   env.flags.usedParams.reset();
+  env.flags.canSuspend      = false;
 
   for (auto const& bc : bcs) {
     assertx(env.flags.jmpDest == NoBlockId &&
@@ -626,12 +632,14 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
     auto const canConstProp = env.flags.canConstProp;
     auto const effectFree = env.flags.effectFree;
     auto const usedParams = env.flags.usedParams;
+    auto const canSuspend = env.flags.canSuspend;
 
     ITRACE(3, "    (impl {}\n", show(*env.ctx.func, bc));
     env.flags.wasPEI          = true;
     env.flags.canConstProp    = false;
     env.flags.effectFree      = false;
     env.flags.usedParams.reset();
+    env.flags.canSuspend      = false;
     default_dispatch(env, bc);
 
     if (env.flags.canConstProp) {
@@ -653,6 +661,7 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
     env.flags.canConstProp &= canConstProp;
     env.flags.effectFree &= effectFree;
     env.flags.usedParams |= usedParams;
+    env.flags.canSuspend |= canSuspend;
     if (env.state.unreachable || env.flags.jmpDest != NoBlockId) break;
   }
 }
@@ -2287,6 +2296,7 @@ void in(ISS& env, const bc::RetCSuspended&) {
   always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
 
   auto const type = popC(env);
+  env.flags.canSuspend = true;
   auto const retTy = is_specialized_wait_handle(type) ? wait_handle_inner(type) : TInitCell;
   doRet(env, retTy, retTy.is(BBottom));
 }
@@ -2306,6 +2316,7 @@ void in(ISS& env, const bc::ChainFaults&) {
 void in(ISS& env, const bc::NativeImpl&) {
   auto const& func = env.ctx.func;
   assertx(func->isNative);
+  assertx(!func->isAsync);
 
   killLocals(env);
   return doRet(
@@ -4073,7 +4084,8 @@ FoldResult fcallTryFold(
   };
   if (env.collect.unfoldableFuncs.contains(calleeCtx)) return NotFolded{};
 
-  auto [foldableReturnType, effectFree] = env.index.lookup_foldable_return_type(
+  auto [foldableReturnType, effectFree, _] =
+    env.index.lookup_foldable_return_type(
     env.ctx,
     calleeCtx
   );
@@ -4104,6 +4116,7 @@ Type typeFromWH(Type t) {
 
 void pushCallReturnType(ISS& env,
                         Type ty,
+                        bool canSuspend,
                         const FCallArgs& fca,
                         bool nullsafe,
                         const std::vector<Type>& inOuts,
@@ -4148,6 +4161,7 @@ void pushCallReturnType(ISS& env,
     return;
   }
   if (fca.asyncEagerTarget() != NoBlockId) {
+    env.flags.canSuspend |= canSuspend;
     assertx(!ty.is(BBottom));
     push(env, typeFromWH(ty));
     assertx(!topC(env).subtypeOf(BBottom));
@@ -4178,6 +4192,17 @@ void pushCallReturnType(ISS& env,
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
+Optional<bool> awaitAllCanSuspend(const res::Func& func,
+                                  const CompactVector<Type>& args) {
+  if (args.empty()) return std::nullopt;
+  auto const name = func.name();
+  if (name != "HH\\AwaitAllWaitHandle::fromVec" &&
+      name != "HH\\AwaitAllWaitHandle::fromDict") {
+    return std::nullopt;
+  }
+  return wait_handle_can_suspend(iter_types(args[0]).value);
+}
+
 template<typename FCallWithFCA>
 void fcallKnownImpl(
   ISS& env,
@@ -4193,7 +4218,7 @@ void fcallKnownImpl(
   assertx(!std::holds_alternative<Folded>(folded));
 
   auto const numArgs = fca.numArgs();
-  auto [returnType, _] = [&] {
+  auto returnInfo = [&] {
     CompactVector<Type> args(numArgs);
     auto const firstArgPos = numExtraInputs + fca.numInputs() - 1;
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
@@ -4202,12 +4227,26 @@ void fcallKnownImpl(
 
     auto const* argNames = fca.namedArgNames();
 
-    return fca.hasUnpack()
+    auto ret = fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, &env.collect.methods, func)
       : env.index.lookup_return_type(
           env.ctx, &env.collect.methods, args, argNames, context, func
         );
+    if (func.supportsAsyncEagerReturn() == TriBool::Yes &&
+        !ret.canSuspend) {
+      ret.t = set_wait_handle_can_suspend(
+        std::move(ret.t),
+        false
+      );
+    }
+    if (!fca.hasUnpack()) {
+      if (auto const canSuspend = awaitAllCanSuspend(func, args)) {
+        ret.t = wait_handle(TInitNull, *canSuspend);
+      }
+    }
+    return ret;
   }();
+  auto returnType = std::move(returnInfo.t);
 
   // If there's a caller/callee inout mismatch, then the call will
   // always fail.
@@ -4245,6 +4284,7 @@ void fcallKnownImpl(
   pushCallReturnType(
     env,
     std::move(returnType),
+    returnInfo.canSuspend,
     fca,
     nullsafe,
     inOuts,
@@ -4263,6 +4303,7 @@ void fcallUnknownImpl(ISS& env,
   popU(env);
   popCU(env);
   if (fca.asyncEagerTarget() != NoBlockId) {
+    env.flags.canSuspend = true;
     assertx(numRets == 1);
     assertx(!retTy.is(BBottom));
     push(env, retTy);
@@ -5172,14 +5213,24 @@ void in(ISS& env, const bc::IterGetValue& op) {
 void in(ISS& env, const bc::IterSetValue& op) {
   assertx(!iterIsDead(env, op.ita.iterId));
   auto const& li = std::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  auto const eligible = li.setValueBase == op.loc2;
   auto const base = locAsCell(env, op.loc2);
   auto const key = intersection_of(li.types.key, TArrKey);
-  auto const set = array_like_set(base, key, popC(env));
+  auto value = popC(env);
+  auto const set = array_like_set(base, key, value);
   // Safe to ignore set.second, as IterSetValue is guaranteed to never throw.
   nothrow(env);
   // This will kill base local iter equivalence and stop BaseConst optimization,
   // but we don't care, as all IterSetValue loops are already optimized.
   setLoc(env, op.loc2, set.first, NoLocalId);
+  auto& updated = std::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  if (eligible) {
+    updated.setValueBase = op.loc2;
+    updated.setValueType = std::move(value);
+  } else {
+    updated.setValueBase = NoLocalId;
+    updated.setValueType = TBottom;
+  }
 }
 
 void in(ISS& env, const bc::IterInit& op) {
@@ -5195,10 +5246,12 @@ void in(ISS& env, const bc::IterInit& op) {
   }();
   auto const base = locAsCell(env, baseLoc);
   auto ity = iter_types(base);
+  auto const setValueBase =
+    base.subtypeOf(BVec) || base.subtypeOf(BDict) ? baseLoc : NoLocalId;
 
   auto const fallthrough = [&] {
     setIter(env, ita.iterId, LiveIter { ity, sourceLoc, NoLocalId, env.bid,
-                                        false });
+                                        false, setValueBase });
   };
 
   assertx(iterIsDead(env, ita.iterId));
@@ -5235,6 +5288,9 @@ void in(ISS& env, const bc::IterNext& op) {
   auto const ita = op.ita;
 
   auto noThrow = false;
+  auto setValueBase = NoLocalId;
+  auto setValueType = TBottom;
+  auto setValueKey = TBottom;
   auto const noTaken = match<bool>(
     env.state.iters[ita.iterId],
     [&] (DeadIter)           {
@@ -5244,6 +5300,9 @@ void in(ISS& env, const bc::IterNext& op) {
     [&] (const LiveIter& ti) {
       if (!ti.types.mayThrowOnGetOrNext) noThrow = true;
       if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
+      setValueBase = ti.setValueBase;
+      setValueType = ti.setValueType;
+      setValueKey = ti.types.key;
       switch (ti.types.count) {
         case IterTypes::Count::Single:
         case IterTypes::Count::ZeroOrOne:
@@ -5258,7 +5317,7 @@ void in(ISS& env, const bc::IterNext& op) {
     }
   );
 
-  if (noTaken && noThrow && will_reduce(env)) {
+  if (noTaken && noThrow && setValueType.is(BBottom) && will_reduce(env)) {
     auto const iterId = safe_cast<IterId>(ita.iterId);
     reduce(env, bc::IterFree { iterId });
   }
@@ -5267,14 +5326,37 @@ void in(ISS& env, const bc::IterNext& op) {
 
   if (noThrow) nothrow(env);
 
+  auto const refineSetValues = [&] {
+    if (setValueType.is(BBottom) || setValueBase != op.loc2) return;
+    auto const base = peekLocRaw(env, setValueBase);
+    refineLocHelper(
+      env,
+      setValueBase,
+      array_like_set_values(
+        base,
+        intersection_of(setValueKey, TArrKey),
+        setValueType
+      )
+    );
+  };
+
   if (noTaken) {
     jmp_nevertaken(env);
+    refineSetValues();
     freeIter(env, ita.iterId);
     return;
   }
 
-  env.propagate(op.target3, &env.state);
+  auto taken = env.state;
+  auto& takenIter = std::get<LiveIter>(taken.iters[ita.iterId]);
+  if (takenIter.setValueBase != op.loc2 ||
+      takenIter.setValueType.is(BBottom)) {
+    takenIter.setValueBase = NoLocalId;
+  }
+  takenIter.setValueType = TBottom;
+  env.propagate(op.target3, &taken);
 
+  refineSetValues();
   freeIter(env, ita.iterId);
 }
 
@@ -5735,7 +5817,9 @@ void in(ISS& env, const bc::WHResult&) {
 }
 
 void in(ISS& env, const bc::Await&) {
-  pushTypeFromWH(env, popC(env));
+  auto const wh = popC(env);
+  env.flags.canSuspend |= wait_handle_can_suspend(wh);
+  pushTypeFromWH(env, std::move(wh));
 }
 
 void in(ISS& env, const bc::AwaitAll& op) {
@@ -5748,13 +5832,16 @@ void in(ISS& env, const bc::AwaitAll& op) {
   }
 
   for (uint32_t i = 0; i < op.locrange.count; ++i) {
-    mayReadLocal(env, op.locrange.first + i);
+    auto const loc = op.locrange.first + i;
+    mayReadLocal(env, loc);
+    env.flags.canSuspend |= wait_handle_can_suspend(locAsCell(env, loc));
   }
 
   push(env, TInitNull);
 }
 
 void in(ISS& env, const bc::AwaitLowPri& /*op*/) {
+  env.flags.canSuspend = true;
   push(env, TInitNull);
 }
 
@@ -5892,8 +5979,13 @@ void implArrayMarkLegacy(ISS& env, bool legacy) {
     }
   }
 
-  // TODO(kshaunak): We could add some type info here.
-  push(env, TInitCell);
+  // Changing the legacy mark can change array staticness and, recursively,
+  // nested array types. Preserve everything which cannot be affected, but
+  // conservatively drop specialization for vecs and dicts.
+  auto result = value;
+  if (value.couldBe(BVec)) result |= TVec;
+  if (value.couldBe(BDict)) result |= TDict;
+  push(env, std::move(result));
 }
 }
 
@@ -6525,6 +6617,7 @@ RunFlags run(Interp& interp, const State& in,
       size = retryOffset + retryBcs.size();
       idx = 0;
       ret.usedParams.reset();
+      ret.canSuspend = false;
       rollback();
       continue;
     }
@@ -6537,6 +6630,7 @@ RunFlags run(Interp& interp, const State& in,
     auto const& flags = env.flags;
 
     ret.usedParams |= flags.usedParams;
+    ret.canSuspend |= flags.canSuspend;
 
     if (flags.wasPEI) ret.noThrow = false;
 

@@ -100,6 +100,8 @@ namespace HPHP {
      a parent, or if it is, the type-hints of the two properties are           \
      equivalent (and therefore requires no runtime check). */                  \
   ATTR(NoBadRedeclare, 10)               /*       |    X     |         */      \
+  /* Indicates that this async function cannot suspend. */                     \
+  ATTR(EagerOnly, 10)                    /*       |          |    X    */      \
   /* Indicates that a function can be used with fb_intercept2. */              \
   ATTR(Interceptable, 11)                /*       |          |    X    */      \
                                          /*       |          |         */      \

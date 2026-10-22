@@ -689,7 +689,11 @@ std::string show(const Type& t) {
     case DataTag::WaitHandle:
       return impl(
         BObj,
-        fmt::format("=WaitH<{}>", show(t.m_data.dwh->inner))
+        fmt::format(
+          "=WaitH<{}{}>",
+          show(t.m_data.dwh->inner),
+          t.m_data.dwh->canSuspend ? "" : ",eager"
+        )
       );
     case DataTag::Cls:
       return impl(BCls, show(t.m_data.dcls, false));

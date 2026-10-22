@@ -1085,6 +1085,11 @@ public:
   bool supportsAsyncEagerReturn() const;
 
   /*
+   * Is this async function guaranteed not to suspend?
+   */
+  bool isEagerOnly() const;
+
+  /*
    * Is this func allowed to be called dynamically?
    */
   bool isDynamicallyCallable() const;

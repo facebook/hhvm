@@ -74,6 +74,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrDynamicallyCallable,      F,       "dyn_callable");         \
   X(AttrLSB,                      P,       "lsb");                  \
   X(AttrNoBadRedeclare,           P,       "no_bad_redeclare");     \
+  X(AttrEagerOnly,                F,       "eager_only");           \
   X(AttrSystemInitialValue,       P,       "sys_initial_val");      \
   X(AttrNoImplicitNullable,       P,       "no_implicit_null");     \
   X(AttrInitialSatisfiesTC,       P,       "initial_satisfies_tc"); \

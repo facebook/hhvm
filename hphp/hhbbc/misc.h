@@ -99,6 +99,14 @@ constexpr const BlockId NoBlockId = -1;
 using ExnNodeId = uint32_t;
 constexpr const ExnNodeId NoExnNodeId = -1;
 
+/*
+ * Interprocedural can-suspend facts form a two-point lattice. True is the
+ * conservative state and can only be refined to false.
+ */
+inline bool canSuspendUpdateAllowed(bool candidate, bool current) {
+  return current || !candidate;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 inline bool double_equals(double a, double b) {

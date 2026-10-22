@@ -532,10 +532,12 @@ struct Type {
   static constexpr trep kLegacyMarkBits = BVec | BDict;
 
 private:
+  static Type specializeWaitHandle(Type, Type, bool);
+
   friend Optional<int64_t> arr_size(const Type& t);
   friend ArrayCat categorize_array(const Type& t);
   friend CompactVector<LSString> get_string_keys(const Type& t);
-  friend Type wait_handle(Type);
+  friend Type wait_handle(Type, bool);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type&);
   friend bool is_specialized_array_like_arrval(const Type&);
@@ -552,6 +554,8 @@ private:
   friend bool is_specialized_int(const Type&);
   friend bool is_specialized_double(const Type&);
   friend Type wait_handle_inner(const Type&);
+  friend bool wait_handle_can_suspend(const Type&);
+  friend Type set_wait_handle_can_suspend(Type, bool);
   friend Type sval(SString);
   friend Type sval_nonstatic(SString);
   friend Type sval_counted(SString);
@@ -627,6 +631,7 @@ private:
 
   friend bool array_like_set_can_be_undone(const Type&, const Type&);
   friend Type undo_array_like_set(Type, const Type&);
+  friend Type array_like_set_values(Type, Type, Type);
 
   friend Type vec_val(SArray);
   friend Type vec_empty();
@@ -801,16 +806,22 @@ struct MapElem {
  */
 struct DWaitHandle {
   DWaitHandle() = default;
-  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
-  // it around lets us demote to a DCls without having the Index
-  // available.
-  DWaitHandle(DCls cls, Type inner)
+  // cls is HH\\Awaitable or a subtype. Keeping it here preserves class
+  // refinements when intersecting a wait handle with an object type and lets
+  // us demote to a DCls without having the Index available.
+  DWaitHandle(DCls cls, Type inner, bool canSuspend)
     : cls{std::move(cls)}
-    , inner{std::move(inner)} {}
+    , inner{std::move(inner)}
+    , canSuspend{canSuspend} {}
   DCls cls;
   Type inner;
+  // False means the wait handle is known to be finished. True conservatively
+  // means awaiting it may suspend.
+  bool canSuspend{true};
 
-  template <typename SerDe> void serde(SerDe& sd) { sd(inner)(cls); }
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(inner)(cls)(canSuspend);
+  }
 };
 
 struct DArrLikePacked {
@@ -869,9 +880,10 @@ HHBBC_TYPE_PREDEFINED(X)
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return WaitH<T> for a type t.
+ * Return WaitH<T> for a type t. canSuspend may be false to indicate that the
+ * wait handle is guaranteed to be finished.
  */
-Type wait_handle(Type t);
+Type wait_handle(Type t, bool canSuspend = true);
 
 /*
  * Return T from a WaitH<T>.
@@ -879,6 +891,18 @@ Type wait_handle(Type t);
  * Pre: is_specialized_wait_handle(t);
  */
 Type wait_handle_inner(const Type& t);
+
+/*
+ * Return whether awaiting t may suspend. This returns false only when every
+ * object represented by t is a wait handle known to be finished. Non-object
+ * components are ignored because awaiting them throws synchronously.
+ */
+bool wait_handle_can_suspend(const Type& t);
+
+/*
+ * Refine the suspension state carried by a specialized wait handle.
+ */
+Type set_wait_handle_can_suspend(Type t, bool canSuspend);
 
 /*
  * Create Types that represent constant values.
@@ -1486,6 +1510,12 @@ std::pair<Type,bool> array_like_elem(const Type& arr, const Type& key);
 std::pair<Type,bool> array_like_set(Type arr,
                                     const Type& key,
                                     const Type& val);
+
+/*
+ * Refine a non-empty Vec or Dict after every existing position's value has
+ * been overwritten. Preserve the base's keys, shape, and legacy mark.
+ */
+Type array_like_set_values(Type base, Type key, Type value);
 
 /*
  * Perform a newelem operation on an array-like type.  Returns an

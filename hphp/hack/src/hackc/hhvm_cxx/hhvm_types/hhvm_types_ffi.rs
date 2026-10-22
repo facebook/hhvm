@@ -36,6 +36,7 @@ pub mod ffi {
         AttrNoInjection = 0x200,
         AttrInitialSatisfiesTC = 0x200,
         AttrNoBadRedeclare = 0x400,
+        AttrEagerOnly = 0x400,
         AttrInterceptable = 0x800,
         AttrSealed = 0x800,
         AttrLateInit = 0x800,

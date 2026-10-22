@@ -144,6 +144,32 @@ bool has_dep(Dep m, Dep t) {
   return static_cast<uintptr_t>(m) & static_cast<uintptr_t>(t);
 }
 
+bool isExactClosure(const Type& t) {
+  if (!t.subtypeOf(BObj) || !is_specialized_obj(t)) return false;
+  auto const& dobj = dobj_of(t);
+  return dobj.isExact() && is_closure_name(dobj.cls().name());
+}
+
+bool hasAsyncEagerClosureArg(const IIndex& index,
+                             Context caller,
+                             MethodsInfo* methods,
+                             const CallContext& ctx) {
+  return std::any_of(
+    ctx.args.begin(),
+    ctx.args.end(),
+    [&] (const Type& arg) {
+      if (!isExactClosure(arg)) return false;
+      auto closure = index.resolve_method(caller, arg, s_invoke.get());
+      if (closure.supportsAsyncEagerReturn() != TriBool::Yes) return false;
+      return !index.lookup_return_type(
+        caller,
+        methods,
+        std::move(closure)
+      ).canSuspend;
+    }
+  );
+}
+
 /*
  * Maps functions to contexts that depend on information about that
  * function, with information about the type of dependency.
@@ -389,6 +415,11 @@ struct InferredFuncInfo {
   bool effectFree{false};
 
   /*
+   * Whether an async invocation can suspend before producing its result.
+   */
+  bool canSuspend{true};
+
+  /*
    * Bitset representing which parameters definitely don't affect the
    * result of the function, assuming it produces one. Note that the
    * parameter type verification does not count as a use in this
@@ -621,6 +652,11 @@ struct res::Func::FuncInfo {
   bool effectFree{false};
 
   /*
+   * Whether an async invocation can suspend before producing its result.
+   */
+  bool canSuspend{true};
+
+  /*
    * Bitset representing which parameters definitely don't affect the
    * result of the function, assuming it produces one. Note that
    * the parameter type verification does not count as a use in this context.
@@ -723,6 +759,7 @@ template <typename SerDe> void InferredFuncInfo::serde(SerDe& sd) {
     (retParam)
     (returnRefinements)
     (effectFree)
+    (canSuspend)
     (unusedParams)
     ;
 }
@@ -8705,6 +8742,7 @@ Type adjust_closure_context(const IIndex& index, const CallContext& ctx) {
 
 Index::ReturnType context_sensitive_return_type(IndexData& data,
                                                 const Context& ctx,
+                                                MethodsInfo* methods,
                                                 CallContext callCtx,
                                                 Index::ReturnType returnType) {
   constexpr auto max_interp_nexting_level = 2;
@@ -8760,6 +8798,16 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
       return true;
     }
 
+    if (finfo->func->isAsync &&
+        hasAsyncEagerClosureArg(
+          IndexAdaptor { *data.m_index },
+          ctx,
+          methods,
+          callCtx
+        )) {
+      return true;
+    }
+
     if (!options.ContextSensitiveInterp) return false;
 
     if (callCtx.args.size() < finfo->func->params.size()) return true;
@@ -8806,7 +8854,8 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
     );
     return Index::ReturnType{
       return_with_context(std::move(fa.inferredReturn), adjustedCtx),
-      fa.effectFree
+      fa.effectFree,
+      fa.canSuspend
     };
   }();
 
@@ -8825,7 +8874,8 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
 
   auto ret = Index::ReturnType{
     intersection_of(std::move(returnType.t), std::move(contextType.t)),
-    returnType.effectFree && contextType.effectFree
+    returnType.effectFree && contextType.effectFree,
+    returnType.canSuspend && contextType.canSuspend
   };
 
   if (!interp_nesting_level) {
@@ -8833,10 +8883,24 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
   }
 
   ContextRetTyMap::accessor acc;
-  if (data.contextualReturnTypes.insert(acc, callCtx) ||
-      ret.t.strictSubtypeOf(acc->second.t) ||
-      (ret.effectFree && !acc->second.effectFree)) {
+  if (data.contextualReturnTypes.insert(acc, callCtx)) {
     acc->second = ret;
+  } else {
+    if (ret.t.strictSubtypeOf(acc->second.t)) {
+      acc->second.t = ret.t;
+    }
+    if (ret.effectFree) acc->second.effectFree = true;
+    if (ret.canSuspend != acc->second.canSuspend) {
+      always_assert_flog(
+        canSuspendUpdateAllowed(ret.canSuspend, acc->second.canSuspend),
+        "Context-sensitive canSuspend changed incompatibly for {} "
+        "({} to {}).\n",
+        func_fullname(*callCtx.callee),
+        acc->second.canSuspend ? "yes" : "no",
+        ret.canSuspend ? "yes" : "no"
+      );
+      acc->second.canSuspend = ret.canSuspend;
+    }
   }
 
   return ret;
@@ -8845,6 +8909,7 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
 //////////////////////////////////////////////////////////////////////
 
 Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
+                                                MethodsInfo* methods,
                                                 const CallContext& callCtx,
                                                 Index::ReturnType returnType) {
   constexpr size_t maxNestingLevel = 2;
@@ -8928,6 +8993,16 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
       }
     }
 
+    if (func.isAsync &&
+        hasAsyncEagerClosureArg(
+          AnalysisIndexAdaptor { data.index },
+          caller,
+          methods,
+          callCtx
+        )) {
+      return true;
+    }
+
     if (!options.ContextSensitiveInterp) return false;
 
     auto const numParams = func.params.size();
@@ -8972,7 +9047,8 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
     );
     return R{
       return_with_context(std::move(fa.inferredReturn), std::move(adjustedCtx)),
-      fa.effectFree
+      fa.effectFree,
+      fa.canSuspend
     };
   }();
 
@@ -9014,6 +9090,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
 
   contextType.t &= returnType.t;
   contextType.effectFree |= returnType.effectFree;
+  contextType.canSuspend &= returnType.canSuspend;
   return contextType;
 }
 
@@ -18827,6 +18904,7 @@ void remote_func_info_to_local(IndexData& index,
   finfo->returnRefinements = rfinfo.inferred.returnRefinements;
   finfo->retParam = rfinfo.inferred.retParam;
   finfo->effectFree = rfinfo.inferred.effectFree;
+  finfo->canSuspend = rfinfo.inferred.canSuspend;
   finfo->unusedParams = rfinfo.inferred.unusedParams;
 }
 
@@ -21369,29 +21447,47 @@ Index::ReturnType Index::lookup_return_type(Context ctx,
       [&] {
         auto ret = TBottom;
         auto effectFree = true;
+        auto canSuspend = false;
         for (auto const pf : fam->possibleFuncs()) {
           if (regularOnly && !pf.inRegular()) continue;
           auto const finfo = func_info(*m_data, pf.ptr());
           if (!finfo->func) return R{ TInitCell, false };
           ret |= finfo->returnTy;
           effectFree &= finfo->effectFree;
-          if (!ret.strictSubtypeOf(BInitCell) && !effectFree) break;
+          canSuspend |= finfo->canSuspend;
+          if (!ret.strictSubtypeOf(BInitCell) &&
+              !effectFree &&
+              canSuspend) {
+            break;
+          }
         }
-        return R{ std::move(ret), effectFree };
+        return R{ std::move(ret), effectFree, canSuspend };
       }
     );
-    return R{ unctx(std::move(ty.t)), ty.effectFree };
+    return R{
+      unctx(std::move(ty.t)),
+      ty.effectFree,
+      ty.canSuspend
+    };
   };
   auto const meth = [&] (const php::Func* func) {
     if (methods) {
       if (auto ret = methods->lookupReturnType(*func)) {
-        return R{ unctx(std::move(ret->t)), ret->effectFree };
+        return R{
+          unctx(std::move(ret->t)),
+          ret->effectFree,
+          ret->canSuspend
+        };
       }
     }
     add_dependency(*m_data, func, ctx, dep);
     auto const finfo = func_info(*m_data, func);
     if (!finfo->func) return R{ TInitCell, false };
-    return R{ unctx(finfo->returnTy), finfo->effectFree };
+    return R{
+      unctx(finfo->returnTy),
+      finfo->effectFree,
+      finfo->canSuspend
+    };
   };
 
   return match<R>(
@@ -21400,7 +21496,11 @@ Index::ReturnType Index::lookup_return_type(Context ctx,
     [&] (res::Func::MethodName) { return R{ TInitCell, false }; },
     [&] (res::Func::Fun f) {
       add_dependency(*m_data, f.finfo->func, ctx, dep);
-      return R{ unctx(f.finfo->returnTy), f.finfo->effectFree };
+      return R{
+        unctx(f.finfo->returnTy),
+        f.finfo->effectFree,
+        f.finfo->canSuspend
+      };
     },
     [&] (res::Func::Method m)          { return meth(m.finfo->func); },
     [&] (res::Func::MethodFamily fam)  {
@@ -21412,12 +21512,14 @@ Index::ReturnType Index::lookup_return_type(Context ctx,
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
       auto anyEffectFree = false;
+      auto canSuspend = true;
       for (auto const ff : i.families) {
-        auto const [t, e] = funcFamily(ff, i.regularOnly);
+        auto const [t, e, c] = funcFamily(ff, i.regularOnly);
         ty &= t;
         if (e) anyEffectFree = true;
+        canSuspend &= c;
       }
-      return R{ std::move(ty), anyEffectFree };
+      return R{ std::move(ty), anyEffectFree, canSuspend };
     },
     [&] (res::Func::Fun2)             -> R { always_assert(false); },
     [&] (res::Func::Method2)          -> R { always_assert(false); },
@@ -21442,20 +21544,27 @@ Index::ReturnType Index::lookup_return_type(Context caller,
       [&] {
         auto ty = TBottom;
         auto effectFree = true;
+        auto canSuspend = false;
         for (auto const pf : fam->possibleFuncs()) {
           if (regularOnly && !pf.inRegular()) continue;
           auto const finfo = func_info(*m_data, pf.ptr());
           if (!finfo->func) return R{ TInitCell, false };
           ty |= finfo->returnTy;
           effectFree &= finfo->effectFree;
-          if (!ty.strictSubtypeOf(BInitCell) && !effectFree) break;
+          canSuspend |= finfo->canSuspend;
+          if (!ty.strictSubtypeOf(BInitCell) &&
+              !effectFree &&
+              canSuspend) {
+            break;
+          }
         }
-        return R{ std::move(ty), effectFree };
+        return R{ std::move(ty), effectFree, canSuspend };
       }
     );
     return R{
       return_with_context(std::move(ret.t), context),
-      ret.effectFree
+      ret.effectFree,
+      ret.canSuspend
     };
   };
   auto const meth = [&] (const php::Func* func) {
@@ -21469,12 +21578,17 @@ Index::ReturnType Index::lookup_return_type(Context caller,
         }
       }
       add_dependency(*m_data, func, caller, dep);
-      return R{ finfo->returnTy, finfo->effectFree };
+      return R{
+        finfo->returnTy,
+        finfo->effectFree,
+        finfo->canSuspend
+      };
     }();
 
     return context_sensitive_return_type(
       *m_data,
       caller,
+      methods,
       { finfo->func, args, copy_arg_names(argNames), context },
       std::move(returnType)
     );
@@ -21493,8 +21607,13 @@ Index::ReturnType Index::lookup_return_type(Context caller,
       return context_sensitive_return_type(
         *m_data,
         caller,
+        methods,
         { f.finfo->func, args, copy_arg_names(argNames), context },
-        R{ f.finfo->returnTy, f.finfo->effectFree }
+        R{
+          f.finfo->returnTy,
+          f.finfo->effectFree,
+          f.finfo->canSuspend
+        }
       );
     },
     [&] (res::Func::Method m)          { return meth(m.finfo->func); },
@@ -21507,12 +21626,14 @@ Index::ReturnType Index::lookup_return_type(Context caller,
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
       auto anyEffectFree = false;
+      auto canSuspend = true;
       for (auto const ff : i.families) {
-        auto const [t, e] = funcFamily(ff, i.regularOnly);
+        auto const [t, e, c] = funcFamily(ff, i.regularOnly);
         ty &= t;
         if (e) anyEffectFree = true;
+        canSuspend &= c;
       }
-      return R{ std::move(ty), anyEffectFree };
+      return R{ std::move(ty), anyEffectFree, canSuspend };
     },
     [&] (res::Func::Fun2)             -> R { always_assert(false); },
     [&] (res::Func::Method2)          -> R { always_assert(false); },
@@ -21528,7 +21649,7 @@ Index::lookup_return_type_raw(const php::Func* f) const {
   if (it->func) {
     assertx(it->func == f);
     return {
-      ReturnType{ it->returnTy, it->effectFree },
+      ReturnType{ it->returnTy, it->effectFree, it->canSuspend },
       it->returnRefinements
     };
   }
@@ -22091,6 +22212,21 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     dep = Dep::InlineDepthLimit | Dep::ReturnTy;
   }
 
+  always_assert_flog(
+    canSuspendUpdateAllowed(fa.canSuspend, finfo->canSuspend),
+    "Index canSuspend changed incompatibly in {} {} ({} to {}).\n",
+    func->unit,
+    func_fullname(*func),
+    finfo->canSuspend ? "yes" : "no",
+    fa.canSuspend ? "yes" : "no"
+  );
+
+  if (finfo->canSuspend != fa.canSuspend) {
+    finfo->canSuspend = fa.canSuspend;
+    resetFuncFamilies = true;
+    dep = dep | Dep::ReturnTy;
+  }
+
   if (dep != Dep{}) {
     find_deps(*m_data, func, dep, deps);
     if (resetFuncFamilies) {
@@ -22498,6 +22634,7 @@ AnalysisIndex::return_type_for_func(const php::Func& func) const {
   auto const& finfo = func_info(*m_data, func);
   auto const inferred = unserialize_type(finfo.inferred.returnTy);
   auto effectFree = finfo.inferred.effectFree;
+  auto canSuspend = finfo.inferred.canSuspend;
   auto ret = inferred;
 
   if (auto const rinfo = retained_for_context(*m_data)) {
@@ -22507,6 +22644,10 @@ AnalysisIndex::return_type_for_func(const php::Func& func) const {
       better = ret.strictSubtypeOf(inferred);
       if (!effectFree && info->effectFree) {
         effectFree = true;
+        better = true;
+      }
+      if (canSuspend && !info->canSuspend) {
+        canSuspend = false;
         better = true;
       }
     }
@@ -22522,10 +22663,11 @@ AnalysisIndex::return_type_for_func(const php::Func& func) const {
       auto& info = rinfo->retain(finfo);
       info.returnTy = serialize_type(ret);
       info.effectFree = effectFree;
+      info.canSuspend = canSuspend;
     }
   }
 
-  return R{ std::move(ret), effectFree };
+  return R{ std::move(ret), effectFree, canSuspend };
 }
 
 ClsConstInfo
@@ -28133,7 +28275,11 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
   using R = Index::ReturnType;
 
   auto const remove = [] (R ret) {
-    return R { unctx(std::move(ret.t)), ret.effectFree };
+    return R {
+      unctx(std::move(ret.t)),
+      ret.effectFree,
+      ret.canSuspend
+    };
   };
 
   auto const fromFInfo = [&] (const FuncInfo2& finfo) {
@@ -28191,6 +28337,7 @@ AnalysisIndex::lookup_return_type(MethodsInfo* methods,
   auto const contextual = [&] (const FuncInfo2& finfo, R ret) {
     return context_sensitive_return_type(
       *m_data,
+      methods,
       { finfo.func, args, copy_arg_names(argNames), context },
       std::move(ret)
     );
@@ -28365,7 +28512,8 @@ AnalysisIndex::lookup_return_type_raw(const php::Func& f) const {
   return std::make_pair(
     Index::ReturnType{
       unserialize_type(finfo.inferred.returnTy),
-      finfo.inferred.effectFree
+      finfo.inferred.effectFree,
+      finfo.inferred.canSuspend
     },
     finfo.inferred.returnRefinements
   );
@@ -29567,6 +29715,20 @@ void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
 
   if (finfo.inferred.effectFree != fa.effectFree) {
     finfo.inferred.effectFree = fa.effectFree;
+    changes |= AnalysisDeps::Type::RetType;
+  }
+
+  always_assert_flog(
+    canSuspendUpdateAllowed(fa.canSuspend, finfo.inferred.canSuspend),
+    "Index canSuspend changed incompatibly in {} {} ({} to {}).\n",
+    func.unit,
+    func_fullname(func),
+    finfo.inferred.canSuspend ? "yes" : "no",
+    fa.canSuspend ? "yes" : "no"
+  );
+
+  if (finfo.inferred.canSuspend != fa.canSuspend) {
+    finfo.inferred.canSuspend = fa.canSuspend;
     changes |= AnalysisDeps::Type::RetType;
   }
 

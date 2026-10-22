@@ -69,6 +69,7 @@ struct RunFlags {
    */
   std::bitset<64> usedParams;
 
+  bool canSuspend{false};
   bool noThrow{true};
 };
 
@@ -146,6 +147,12 @@ struct StepFlags {
    * See FuncAnalysisResult for details.
    */
   std::bitset<64> usedParams;
+
+  /*
+   * Whether this instruction can cause the containing async function to
+   * suspend. Sequential instructions are combined with logical-or.
+   */
+  bool canSuspend{false};
 
   /*
    * If this is not none, the interpreter executed a return on this

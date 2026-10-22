@@ -1009,7 +1009,7 @@ void emit_finish_func(EmitUnitState& state, UnitEmitter& ue, FuncEmitter& fe,
   for (auto& name : func.staticCoeffects) fe.staticCoeffects.push_back(name);
   for (auto& rule : func.coeffectRules)   fe.coeffectRules.push_back(rule);
 
-  auto const [retTy, _] = state.index.lookup_return_type_raw(&func).first;
+  auto const retTy = state.index.lookup_return_type_raw(&func).first.t;
   if (!retTy.subtypeOf(BBottom)) {
     fe.repoReturnType = make_repo_type(retTy);
   }
@@ -1059,11 +1059,14 @@ void renumber_locals(php::Func& func) {
   }
 }
 
-void emit_init_func(UnitEmitter& ue, FuncEmitter& fe, const php::Func& func) {
+void emit_init_func(UnitEmitter& ue,
+                    FuncEmitter& fe,
+                    const php::Func& func,
+                    Attr attrs) {
   fe.init(
     std::get<0>(func.srcInfo.loc),
     std::get<1>(func.srcInfo.loc),
-    func.attrs | (func.sampleDynamicCalls ? AttrDynamicallyCallable : AttrNone),
+    attrs | (func.sampleDynamicCalls ? AttrDynamicallyCallable : AttrNone),
     func.srcInfo.docComment,
     ue.isSystemLib()
   );
@@ -1073,8 +1076,17 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
                FuncEmitter& fe, php::Func& f) {
   FTRACE(2,  "    func {}\n", f.name->data());
   assertx(f.attrs & AttrPersistent);
+  auto attrs = f.attrs;
+  attrSetter(
+    attrs,
+    f.isAsync &&
+      !f.isGenerator &&
+      !(f.attrs & AttrAbstract) &&
+      !state.index.lookup_return_type_raw(&f).first.canSuspend,
+    AttrEagerOnly
+  );
   renumber_locals(f);
-  emit_init_func(ue, fe, f);
+  emit_init_func(ue, fe, f, attrs);
   auto func = php::WideFunc::mut(&f);
   auto const info = emit_bytecode(state, ue, fe, func);
   emit_finish_func(state, ue, fe, func, info);

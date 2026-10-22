@@ -95,6 +95,12 @@ struct FuncAnalysisResult {
   bool effectFree{false};
 
   /*
+   * Whether an async invocation of this function can suspend before
+   * producing its result. This is refined from true to false.
+   */
+  bool canSuspend{true};
+
+  /*
    * Flag to indicate whether the analysis should be repeated after the
    * function's bytecode was updated. The analysis must have made progress
    * irreversibly reducing the bytecode.

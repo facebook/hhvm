@@ -722,8 +722,10 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->unit        = unit->filename;
   ret->cls         = cls;
 
-  ret->attrs       = static_cast<Attr>((fe.attrs & ~AttrNoOverride & ~AttrInterceptable) |
-                                       AttrPersistent);
+  ret->attrs       = static_cast<Attr>(
+    (fe.attrs & ~AttrNoOverride & ~AttrInterceptable & ~AttrEagerOnly) |
+    AttrPersistent
+  );
 
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType.get(ue);

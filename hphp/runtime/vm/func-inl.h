@@ -778,6 +778,10 @@ inline bool Func::supportsAsyncEagerReturn() const {
   return m_attrs & AttrSupportsAsyncEagerReturn;
 }
 
+inline bool Func::isEagerOnly() const {
+  return m_attrs & AttrEagerOnly;
+}
+
 inline bool Func::isDynamicallyCallable() const {
   return m_attrs & AttrDynamicallyCallable;
 }

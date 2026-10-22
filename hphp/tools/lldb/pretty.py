@@ -444,6 +444,7 @@ _FUNC_ATTRS: typing.List[typing.Tuple[int, str]] = [
     (0x80, "SupportsAsyncEagerReturn"),
     (0x100, "Trait"),
     (0x200, "NoInjection"),
+    (0x400, "EagerOnly"),
     (0x800, "Interceptable"),
     (0x1000, "SplatParam"),
     (0x2000, "NoOverride"),

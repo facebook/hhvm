@@ -337,7 +337,10 @@ AnalysisContext adjust_closure_context(const IIndex& index,
   return ctx;
 }
 
-Type fixup_return_type(const IIndex& index, const php::Func& func, Type ty) {
+Type fixup_return_type(const IIndex& index,
+                       const php::Func& func,
+                       Type ty,
+                       bool canSuspend) {
   if (func.isGenerator) {
     if (func.isAsync) {
       // Async generators always return AsyncGenerator object.
@@ -349,7 +352,7 @@ Type fixup_return_type(const IIndex& index, const php::Func& func, Type ty) {
   } else if (func.isAsync) {
     // Async functions always return WaitH<T>, where T is the type returned
     // internally.
-    return wait_handle(std::move(ty));
+    return wait_handle(std::move(ty), canSuspend);
   } else {
     return ty;
   }
@@ -445,6 +448,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
   DEBUG_ONLY auto interp_counter = uint32_t{0};
 
   hphp_fast_map<BlockId, BlockUpdateInfo> blockUpdates;
+  ai.canSuspend = false;
 
   /*
    * Iterate until a fixed point.
@@ -543,6 +547,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
       }
 
       ai.usedParams |= flags.usedParams;
+      ai.canSuspend |= flags.canSuspend;
       ai.bdata[bid].noThrow = flags.noThrow;
     }
 
@@ -562,7 +567,12 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
     ai.blockUpdates.emplace_back(elm.first, std::move(elm.second));
   }
   ai.inferredReturn =
-    fixup_return_type(index, *ctx.func, std::move(ai.inferredReturn));
+    fixup_return_type(
+      index,
+      *ctx.func,
+      std::move(ai.inferredReturn),
+      ai.canSuspend
+    );
 
   if (collect.props.hasInitialValues()) {
     for (size_t i = 0, size = ctx.cls->properties.size(); i < size; ++i) {
@@ -605,7 +615,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
         state_string(*ctx.func, bd.stateIn, collect));
     }
     ret += sep + bsep;
-    ret += fmt::format("{}{}: Inferred return type: {}{}\n",
+    ret += fmt::format("{}{}: Inferred return type: {}{} (can-suspend: {})\n",
       show(ctx),
       [&] () -> std::string {
         using namespace folly::gen;
@@ -622,7 +632,8 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
         );
       }(),
       show(ai.inferredReturn),
-      ai.effectFree ? " (effect-free)" : "");
+      ai.effectFree ? " (effect-free)" : "",
+      ai.canSuspend ? "yes" : "no");
     ret += bsep;
     return ret;
   }());
@@ -1442,7 +1453,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
 
       auto const oldTypeIt = work.returnTypes.find(f);
       assertx(oldTypeIt != work.returnTypes.end());
-      auto& [oldType, oldEffectFree] = oldTypeIt->second;
+      auto& oldInfo = oldTypeIt->second;
+      auto& oldType = oldInfo.t;
+      auto& oldEffectFree = oldInfo.effectFree;
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldType)) {
@@ -1482,6 +1495,21 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
           f->unit,
           func_fullname(*f)
         );
+      }
+
+      if (results.canSuspend != oldInfo.canSuspend) {
+        always_assert_flog(
+          canSuspendUpdateAllowed(results.canSuspend, oldInfo.canSuspend),
+          "Index canSuspend invariant violated in {} {}.\n"
+          "    Went from {} to {}\n",
+          f->unit,
+          func_fullname(*f),
+          oldInfo.canSuspend ? "yes" : "no",
+          results.canSuspend ? "yes" : "no"
+        );
+        oldInfo.canSuspend = results.canSuspend;
+        work.worklist.scheduleForReturnType(*f);
+        changed.emplace(f);
       }
 
       for (auto const& [clo, useVars] : results.closureUseTypes) {
@@ -1542,7 +1570,9 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
       auto returnTypeIt = work.returnTypes.find(f);
       assertx(returnTypeIt != work.returnTypes.end());
 
-      auto& [oldReturn, oldEffectFree] = returnTypeIt->second;
+      auto& oldInfo = returnTypeIt->second;
+      auto& oldReturn = oldInfo.t;
+      auto& oldEffectFree = oldInfo.effectFree;
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldReturn)) {
@@ -1582,6 +1612,21 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
           f->unit,
           func_fullname(*f)
         );
+      }
+
+      if (results.canSuspend != oldInfo.canSuspend) {
+        always_assert_flog(
+          canSuspendUpdateAllowed(results.canSuspend, oldInfo.canSuspend),
+          "Index canSuspend invariant violated in {} {}.\n"
+          "    Went from {} to {}\n",
+          f->unit,
+          func_fullname(*f),
+          oldInfo.canSuspend ? "yes" : "no",
+          results.canSuspend ? "yes" : "no"
+        );
+        oldInfo.canSuspend = results.canSuspend;
+        work.worklist.scheduleForReturnType(*f);
+        changed.emplace(f);
       }
 
       for (auto const& [clo, useVars] : results.closureUseTypes) {

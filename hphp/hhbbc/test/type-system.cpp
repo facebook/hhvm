@@ -82,6 +82,8 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Awaitable("HH\\Awaitable");
+const StaticString s_AwaitableChild("HH\\AwaitableChild");
+const StaticString s_AwaitableChild2("HH\\AwaitableChild2");
 
 const StaticString s_test("test");
 const StaticString s_C("C");
@@ -1868,9 +1870,6 @@ void test_basic_operators(const std::vector<Type>& types) {
 
   auto const isCtxful = [] (const Type& t1, const Type& t2) {
     if (is_specialized_obj(t1) && is_specialized_obj(t2)) {
-      if (is_specialized_wait_handle(t1) || is_specialized_wait_handle(t2)) {
-        return false;
-      }
       return dobj_of(t1).isCtx() != dobj_of(t2).isCtx();
     }
     if (!is_specialized_cls(t1) || !is_specialized_cls(t2)) return false;
@@ -5310,6 +5309,111 @@ TEST(Type, WaitH) {
   );
   EXPECT_TRUE(wait_handle(TInt).couldBe(wait_handle(TStr)));
 
+  auto const eagerWH = wait_handle(TInitCell, false);
+  EXPECT_TRUE(is_specialized_wait_handle(eagerWH));
+  EXPECT_EQ(wait_handle_inner(eagerWH), TInitCell);
+  EXPECT_FALSE(wait_handle_can_suspend(eagerWH));
+  EXPECT_TRUE(wait_handle_can_suspend(wait_handle(TInitCell)));
+  EXPECT_TRUE(eagerWH.subtypeOf(wait_handle(TInitCell)));
+  EXPECT_FALSE(wait_handle(TInitCell).subtypeOf(eagerWH));
+
+  auto const eagerInt = wait_handle(TInt, false);
+  auto const eagerStr = wait_handle(TStr, false);
+  auto const unknownInt = wait_handle(TInt);
+  EXPECT_EQ(set_wait_handle_can_suspend(unknownInt, false), eagerInt);
+  EXPECT_EQ(set_wait_handle_can_suspend(eagerInt, true), unknownInt);
+  EXPECT_EQ(set_wait_handle_can_suspend(eagerWH, true), twhobj);
+  EXPECT_TRUE(wait_handle_can_suspend(union_of(eagerInt, unknownInt)));
+  EXPECT_FALSE(wait_handle_can_suspend(intersection_of(eagerInt, unknownInt)));
+
+  EXPECT_EQ(
+    union_of(eagerInt, eagerStr),
+    wait_handle(TArrKey, false)
+  );
+  EXPECT_EQ(
+    intersection_of(eagerInt, eagerStr),
+    wait_handle(TBottom, false)
+  );
+  EXPECT_EQ(union_of(eagerWH, unknownInt), twhobj);
+  EXPECT_EQ(intersection_of(eagerWH, unknownInt), eagerInt);
+
+  EXPECT_EQ(union_of(eagerInt, twhobj), twhobj);
+  EXPECT_EQ(intersection_of(eagerInt, twhobj), eagerInt);
+
+  auto const eagerOrInt = union_of(eagerInt, TInt);
+  EXPECT_FALSE(is_specialized_wait_handle(eagerOrInt));
+  EXPECT_TRUE(wait_handle_can_suspend(eagerOrInt));
+
+  auto const eagerOrVec = union_of(eagerInt, TVec);
+  EXPECT_FALSE(is_specialized_wait_handle(eagerOrVec));
+  EXPECT_TRUE(wait_handle_can_suspend(eagerOrVec));
+
+  auto const awaitableChild = index.resolve_class(s_AwaitableChild.get());
+  ASSERT_TRUE(awaitableChild && awaitableChild->isComplete());
+  auto const exactAwaitableChild = objExact(*awaitableChild);
+  EXPECT_TRUE(exactAwaitableChild.subtypeOf(twhobj));
+  EXPECT_FALSE(exactAwaitableChild.subtypeOf(eagerWH));
+  EXPECT_TRUE(
+    wait_handle_can_suspend(union_of(exactAwaitableChild, eagerWH))
+  );
+  auto const eagerAwaitableChild =
+    intersection_of(eagerWH, exactAwaitableChild);
+  EXPECT_TRUE(is_specialized_wait_handle(eagerAwaitableChild));
+  EXPECT_FALSE(wait_handle_can_suspend(eagerAwaitableChild));
+  EXPECT_EQ(wait_handle_inner(eagerAwaitableChild), TInitCell);
+  EXPECT_TRUE(eagerAwaitableChild.subtypeOf(eagerWH));
+  EXPECT_TRUE(eagerAwaitableChild.subtypeOf(exactAwaitableChild));
+  auto const ctxEagerAwaitableChild = setctx(eagerAwaitableChild, true);
+  EXPECT_TRUE(dobj_of(ctxEagerAwaitableChild).isCtx());
+  EXPECT_TRUE(unctx(ctxEagerAwaitableChild).equal(eagerAwaitableChild));
+  EXPECT_TRUE(
+    return_with_context(ctxEagerAwaitableChild, exactAwaitableChild)
+      .equal(eagerAwaitableChild)
+  );
+
+  auto const awaitableChild2 = index.resolve_class(s_AwaitableChild2.get());
+  ASSERT_TRUE(awaitableChild2 && awaitableChild2->isComplete());
+  auto const exactAwaitableChild2 = objExact(*awaitableChild2);
+  auto const eagerAwaitableChild2 =
+    intersection_of(eagerWH, exactAwaitableChild2);
+  EXPECT_EQ(
+    union_of(eagerAwaitableChild, eagerAwaitableChild2),
+    eagerWH
+  );
+  EXPECT_EQ(
+    intersection_of(eagerAwaitableChild, eagerAwaitableChild2),
+    TBottom
+  );
+
+  auto const clsX2 = index.resolve_class(s_X2.get());
+  ASSERT_TRUE(clsX2 && clsX2->isComplete());
+  auto const subX2 = subObj(*clsX2);
+  auto const exactX2 = objExact(*clsX2);
+  EXPECT_EQ(intersection_of(eagerInt, subX2), TBottom);
+  EXPECT_EQ(union_of(eagerInt, exactX2), TObj);
+
+  const std::vector<Type> eagerTypes{
+    eagerWH,
+    eagerInt,
+    eagerStr,
+    unknownInt,
+    wait_handle(TStr),
+    opt(eagerInt),
+    eagerOrInt,
+    eagerOrVec,
+    twhobj,
+    exactAwaitableChild,
+    exactAwaitableChild2,
+    eagerAwaitableChild,
+    eagerAwaitableChild2,
+    ctxEagerAwaitableChild,
+    subX2,
+    exactX2,
+    TObj,
+    TInt,
+    TVec,
+  };
+  test_basic_operators(eagerTypes);
 }
 
 TEST(Type, FromHNIConstraint) {

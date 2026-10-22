@@ -100,6 +100,8 @@ module Hhconfig : sig
 
   val disable_class_sub_classname_method_override : string
 
+  val disable_class_sub_classname_typedef : string
+
   val disable_eqeq_refinement : string
 
   val disable_physical_equality : string

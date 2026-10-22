@@ -1,0 +1,2 @@
+--config 'class_sub_classname=true'
+--config 'disable_class_sub_classname_typedef=true'

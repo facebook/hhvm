@@ -71,6 +71,7 @@ val sub_type_or_fail :
 val sub_type_i :
   env ->
   ?is_coeffect:bool ->
+  ?class_sub_classname:bool ->
   internal_type ->
   internal_type ->
   Typing_error.Reasons_callback.t option ->

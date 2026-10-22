@@ -12592,6 +12592,7 @@ and Subtype_tell : sig
   val sub_type_i :
     env ->
     ?is_coeffect:bool ->
+    ?class_sub_classname:bool ->
     internal_type ->
     internal_type ->
     Typing_error.Reasons_callback.t option ->
@@ -12690,13 +12691,19 @@ end = struct
 
   (* -- sub_type_i entry point ---------------------------------------------- *)
 
-  let sub_type_i env ?(is_coeffect = false) ty_sub ty_super on_error =
+  let sub_type_i
+      env
+      ?(is_coeffect = false)
+      ?(class_sub_classname = should_cls_sub_cn env)
+      ty_sub
+      ty_super
+      on_error =
     let subtype_env =
       Subtype_env.create
         ~log_level:2
         ~is_coeffect
         ~is_dynamic_aware:false
-        ~class_sub_classname:(should_cls_sub_cn env)
+        ~class_sub_classname
         on_error
     in
     let old_env = env in

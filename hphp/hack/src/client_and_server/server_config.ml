@@ -607,6 +607,8 @@ let load_config (config : Config_file_common.t) (options : Global_options.t) :
       (bool_opt
          Config_keys.Hhconfig.disable_class_sub_classname_method_override
          config)
+    ?disable_class_sub_classname_typedef:
+      (bool_opt Config_keys.Hhconfig.disable_class_sub_classname_typedef config)
     ?class_class_type:(bool_opt Config_keys.Hhconfig.class_class_type config)
     ?needs_concrete_abstract_type_const_check:
       (bool_opt

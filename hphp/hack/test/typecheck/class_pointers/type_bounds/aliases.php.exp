@@ -1,0 +1,70 @@
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `arraykey` [2]
+-> But got `class<T>` [3]
+
+aliases.php:7:9
+5 | class C {}
+6 | 
+7 | newtype AsArraykey<T> as arraykey = class<T>;
+  |         ^^^^^^^^^^ [1]
+  |                          ^^^^^^^^ [2]
+  |                                     ^^^^^^^^ [3]
+8 | newtype AsString<T> as string = class<T>;
+9 | newtype AsClassname<T> as classname<T> = class<T>;
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `string` [2]
+-> But got `class<T>` [3]
+
+aliases.php:8:9
+ 6 | 
+ 7 | newtype AsArraykey<T> as arraykey = class<T>;
+ 8 | newtype AsString<T> as string = class<T>;
+   |         ^^^^^^^^ [1]
+   |                        ^^^^^^ [2]
+   |                                 ^^^^^^^^ [3]
+ 9 | newtype AsClassname<T> as classname<T> = class<T>;
+10 | newtype SuperClass super class<C> = string;
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `classname<T>` [2]
+-> But got `class<T>` [3]
+
+aliases.php:9:9
+ 7 | newtype AsArraykey<T> as arraykey = class<T>;
+ 8 | newtype AsString<T> as string = class<T>;
+ 9 | newtype AsClassname<T> as classname<T> = class<T>;
+   |         ^^^^^^^^^^^ [1]
+   |                           ^^^^^^^^^^^^ [2]
+   |                                          ^^^^^^^^ [3]
+10 | newtype SuperClass super class<C> = string;
+11 | 
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `string` [2]
+-> But got `class<C>` [3]
+
+aliases.php:10:9
+ 8 | newtype AsString<T> as string = class<T>;
+ 9 | newtype AsClassname<T> as classname<T> = class<T>;
+10 | newtype SuperClass super class<C> = string;
+   |         ^^^^^^^^^^ [1]
+   |                          ^^^^^^^^ [3]
+   |                                     ^^^^^^ [2]
+11 | 
+12 | newtype ValidClass<T> as class<T> = class<T>;
+
+error: Typing[4332] Invalid constraint on `newtype` [1]
+-> Expected `arraykey` [2]
+-> But got `class<C>` [3]
+
+aliases.php:15:11
+13 | newtype ValidArraykey as arraykey = int;
+14 | 
+15 | case type BadCase as arraykey = class<C>;
+   |           ^^^^^^^ [1]
+   |                      ^^^^^^^^ [2]
+   |                                 ^^^^^^^^ [3]
+16 | case type ValidCase as arraykey = int;
+
+5 errors found

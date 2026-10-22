@@ -62,6 +62,7 @@ let sub_type_against_expected_type x = !sub_type_against_expected_type_ref x
 type sub_type_i =
   env ->
   ?is_coeffect:bool ->
+  ?class_sub_classname:bool ->
   internal_type ->
   internal_type ->
   Typing_error.Reasons_callback.t option ->
@@ -69,7 +70,8 @@ type sub_type_i =
 
 let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
 
-let sub_type_i env ?(is_coeffect = false) x = !sub_type_i_ref env ~is_coeffect x
+let sub_type_i env ?(is_coeffect = false) ?class_sub_classname x =
+  !sub_type_i_ref env ~is_coeffect ?class_sub_classname x
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 

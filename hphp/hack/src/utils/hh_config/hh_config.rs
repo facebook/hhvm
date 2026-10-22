@@ -602,6 +602,10 @@ impl HhConfig {
                 "disable_class_sub_classname_method_override",
                 default.disable_class_sub_classname_method_override,
             )?,
+            disable_class_sub_classname_typedef: hhconfig.get_bool_or(
+                "disable_class_sub_classname_typedef",
+                default.disable_class_sub_classname_typedef,
+            )?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             needs_concrete_abstract_type_const_check: hhconfig.get_bool_or(
                 "needs_concrete_abstract_type_const_check",

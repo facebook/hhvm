@@ -193,6 +193,7 @@ type t = {
   tco_enabled_unstable_features: S_set.t;
   class_sub_classname: bool;
   disable_class_sub_classname_method_override: bool;
+  disable_class_sub_classname_typedef: bool;
   class_class_type: bool;
   needs_concrete_abstract_type_const_check: bool;
   needs_concrete_class_call_check: int;
@@ -311,6 +312,7 @@ let default =
     tco_enabled_unstable_features = S_set.empty;
     class_sub_classname = true;
     disable_class_sub_classname_method_override = false;
+    disable_class_sub_classname_typedef = false;
     class_class_type = true;
     needs_concrete_abstract_type_const_check = false;
     needs_concrete_class_call_check = 0;
@@ -426,6 +428,7 @@ let set
     ?tco_enabled_unstable_features
     ?class_sub_classname
     ?disable_class_sub_classname_method_override
+    ?disable_class_sub_classname_typedef
     ?class_class_type
     ?needs_concrete_abstract_type_const_check
     ?needs_concrete_class_call_check
@@ -727,6 +730,10 @@ let set
       setting
         disable_class_sub_classname_method_override
         options.disable_class_sub_classname_method_override;
+    disable_class_sub_classname_typedef =
+      setting
+        disable_class_sub_classname_typedef
+        options.disable_class_sub_classname_typedef;
     class_class_type = setting class_class_type options.class_class_type;
     needs_concrete_abstract_type_const_check =
       setting

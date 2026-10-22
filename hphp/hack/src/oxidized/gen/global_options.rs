@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d434af74ff606cbdf13a1890ae936db5>>
+// @generated SignedSource<<946f167ee0228d47deaaa0bf238b1a05>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -399,6 +399,8 @@ pub struct GlobalOptions {
     pub class_sub_classname: bool,
     /// Disable class<T> <: classname<T> rewrites in method override checks.
     pub disable_class_sub_classname_method_override: bool,
+    /// Disable class<T> <: classname<T> rewrites in type-alias and type-constant bound checks.
+    pub disable_class_sub_classname_typedef: bool,
     /// When true, C::class : class<C>
     pub class_class_type: bool,
     /// When true, error on abstract type constants resolved through `this::` in reified type arguments or `type_structure(static::class, ...)` where `static` might refer to an abstract class (Typing[4529]).

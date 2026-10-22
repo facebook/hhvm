@@ -45,13 +45,15 @@ let log_sub_type env p ty_sub ty_super =
           ]))
 
 let sub_type_i_apply_reason_callback
-    ?(is_coeffect = false) p env ty_sub ty_super callback =
+    ?(is_coeffect = false) ?class_sub_classname p env ty_sub ty_super callback =
   log_sub_type env p ty_sub ty_super;
-  Typing_utils.sub_type_i ~is_coeffect env ty_sub ty_super @@ Some callback
+  Typing_utils.sub_type_i ~is_coeffect ?class_sub_classname env ty_sub ty_super
+  @@ Some callback
 
 (** see .mli **)
 let sub_type_i
     ?(is_coeffect = false)
+    ?class_sub_classname
     p
     ur
     env
@@ -60,6 +62,7 @@ let sub_type_i
     (on_error : Typing_error.Callback.t) =
   sub_type_i_apply_reason_callback
     ~is_coeffect
+    ?class_sub_classname
     p
     env
     ty_sub
@@ -79,8 +82,15 @@ let sub_type_i_w_err_prefix
     ty_super
     (Typing_error.Reasons_callback.Prefix err_prefix)
 
-let sub_type p ur env ty_sub ty_super on_error =
-  sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
+let sub_type ?class_sub_classname p ur env ty_sub ty_super on_error =
+  sub_type_i
+    ?class_sub_classname
+    p
+    ur
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
+    on_error
 
 let sub_type_w_err_prefix
     ?(is_coeffect = false)
@@ -97,12 +107,20 @@ let sub_type_w_err_prefix
     (LoclType ty_super)
     err_prefix
 
-let sub_type_decl ?(is_coeffect = false) ~on_error p ur env ty_sub ty_super =
+let sub_type_decl
+    ?(is_coeffect = false)
+    ?class_sub_classname
+    ~on_error
+    p
+    ur
+    env
+    ty_sub
+    ty_super =
   let localize_no_subst = Typing_utils.localize_no_subst ~ignore_errors:true in
   let ((env, ty_err1), ty_super) = localize_no_subst env ty_super in
   let ((env, ty_err2), ty_sub) = localize_no_subst env ty_sub in
   let (env, ty_err3) =
-    Typing_utils.sub_type env ~is_coeffect ty_sub ty_super
+    Typing_utils.sub_type env ~is_coeffect ?class_sub_classname ty_sub ty_super
     @@ Some
          (Typing_error.Reasons_callback.prepend_reason
             on_error

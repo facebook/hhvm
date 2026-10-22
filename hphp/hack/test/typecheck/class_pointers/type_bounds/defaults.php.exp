@@ -1,0 +1,57 @@
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `arraykey` [2]
+-> But got `class<C>` [3]
+
+defaults.php:8:23
+ 6 | 
+ 7 | abstract class Defaults {
+ 8 |   abstract const type AsArraykey as arraykey = class<C>;
+   |                       ^^^^^^^^^^ [1]
+   |                                     ^^^^^^^^ [2]
+   |                                                ^^^^^^^^ [3]
+ 9 |   abstract const type AsString as string = class<C>;
+10 |   abstract const type AsClassname as classname<C> = class<C>;
+
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `string` [2]
+-> But got `class<C>` [3]
+
+defaults.php:9:23
+ 7 | abstract class Defaults {
+ 8 |   abstract const type AsArraykey as arraykey = class<C>;
+ 9 |   abstract const type AsString as string = class<C>;
+   |                       ^^^^^^^^ [1]
+   |                                   ^^^^^^ [2]
+   |                                            ^^^^^^^^ [3]
+10 |   abstract const type AsClassname as classname<C> = class<C>;
+11 |   abstract const type SuperClass super class<C> = string;
+
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `classname<C>` [2]
+-> But got `class<C>` [3]
+
+defaults.php:10:23
+ 8 |   abstract const type AsArraykey as arraykey = class<C>;
+ 9 |   abstract const type AsString as string = class<C>;
+10 |   abstract const type AsClassname as classname<C> = class<C>;
+   |                       ^^^^^^^^^^^ [1]
+   |                                      ^^^^^^^^^^^^ [2]
+   |                                                     ^^^^^^^^ [3]
+11 |   abstract const type SuperClass super class<C> = string;
+12 | 
+
+error: Typing[4110] Unable to satisfy constraint on this type constant [1]
+-> Expected `string` [2]
+-> But got `class<C>` [3]
+
+defaults.php:11:23
+ 9 |   abstract const type AsString as string = class<C>;
+10 |   abstract const type AsClassname as classname<C> = class<C>;
+11 |   abstract const type SuperClass super class<C> = string;
+   |                       ^^^^^^^^^^ [1]
+   |                                        ^^^^^^^^ [3]
+   |                                                   ^^^^^^ [2]
+12 | 
+13 |   abstract const type ValidClass as class<C> = class<C>;
+
+4 errors found

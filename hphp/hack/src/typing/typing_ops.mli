@@ -9,6 +9,7 @@
 (** Add constraint or check that ty_sub is subtype of ty_super in envs *)
 val sub_type_i :
   ?is_coeffect:bool ->
+  ?class_sub_classname:bool ->
   Pos.t ->
   Typing_reason.ureason ->
   Typing_env_types.env ->
@@ -18,6 +19,7 @@ val sub_type_i :
   Typing_env_types.env * Typing_error.t option
 
 val sub_type :
+  ?class_sub_classname:bool ->
   Pos.t ->
   Typing_reason.ureason ->
   Typing_env_types.env ->
@@ -39,6 +41,7 @@ val sub_type_w_err_prefix :
 
 val sub_type_decl :
   ?is_coeffect:bool ->
+  ?class_sub_classname:bool ->
   on_error:Typing_error.Reasons_callback.t ->
   Pos_or_decl.t ->
   Typing_reason.ureason ->

@@ -45,6 +45,7 @@ val sub_type_against_expected_type : sub_type_against_expected_type
 type sub_type_i =
   Typing_env_types.env ->
   ?is_coeffect:bool ->
+  ?class_sub_classname:bool ->
   Typing_defs_constraints.internal_type ->
   Typing_defs_constraints.internal_type ->
   Typing_error.Reasons_callback.t option ->

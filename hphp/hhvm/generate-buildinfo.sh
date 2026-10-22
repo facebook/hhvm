@@ -60,24 +60,6 @@ if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
       "${SHA1SUM[@]}" |
       cut -b-40
     )
-
-    # ROAR profiles are only valid for the ROAR release that produced them.
-    roar_links=()
-    for l in "$root"/third-party2/llvm-fb/*roar/*; do
-      if [ -L "$l" ]; then
-        roar_links+=("${l#"$root"/} $(readlink "$l")")
-      fi
-    done
-    if [ "${#roar_links[@]}" -gt 0 ]; then
-      HHVM_REPO_SCHEMA=$(
-        {
-          echo -n "${HHVM_REPO_SCHEMA}"
-          printf '%s\n' "${roar_links[@]}" | LC_ALL=C sort
-        } |
-        "${SHA1SUM[@]}" |
-        cut -b-40
-      )
-    fi
 fi
 
 ################################################################################

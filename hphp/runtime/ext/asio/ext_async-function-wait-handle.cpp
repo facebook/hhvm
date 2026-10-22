@@ -118,6 +118,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   assertx(fp);
   assertx(!isResumed(fp));
   assertx(fp->func()->isAsyncFunction());
+  assertx(!fp->func()->isEagerOnly());
 
   if constexpr (lowPri) {
     assertx(!child);
@@ -149,6 +150,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
 
 void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
                                              c_WaitableWaitHandle* child) {
+  assertx(!fp->func()->isEagerOnly());
   frame_afwh(fp)->prepareChild(child);
 }
 
@@ -224,6 +226,7 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
 void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
   assertx(child);
+  assertx(!actRec()->func()->isEagerOnly());
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
   assertx(*ImplicitContext::activeCtx);

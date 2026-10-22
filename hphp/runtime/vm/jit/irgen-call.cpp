@@ -361,6 +361,28 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
     callee = nullptr;
   }
 
+  auto const handleEagerReturn = [&] {
+    auto const ty = callee
+      ? awaitedCallReturnType(callee, true /* mayIntercept */)
+      : TInitCell;
+    push(env, gen(env, AssertType, ty, retVal));
+    auto const absAEOffset = bcOff(env) + asyncEagerOffset;
+    if (unlikely) {
+      gen(env, Jmp, makeExit(env, SrcKey{curSrcKey(env), absAEOffset}));
+    } else {
+      insertIntrCheck(SrcKey{curSrcKey(env), absAEOffset});
+      jmpImpl(env, absAEOffset);
+    }
+  };
+
+  if (callee &&
+      callee->isEagerOnly() &&
+      !callee->isInterceptable() &&
+      !callee->isMemoizeImpl()) {
+    handleEagerReturn();
+    return;
+  }
+
   ifThenElse(
     env,
     [&] (Block* taken) {
@@ -368,19 +390,7 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
       auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
       gen(env, JmpZero, taken, tst);
     },
-    [&] {
-      auto const ty = callee
-        ? awaitedCallReturnType(callee, true /* mayIntercept */)
-        : TInitCell;
-      push(env, gen(env, AssertType, ty, retVal));
-      auto const absAEOffset = bcOff(env) + asyncEagerOffset;
-      if (unlikely) {
-        gen(env, Jmp, makeExit(env, SrcKey{curSrcKey(env), absAEOffset}));
-      } else {
-        insertIntrCheck(SrcKey{curSrcKey(env), absAEOffset});
-        jmpImpl(env, absAEOffset);
-      }
-    },
+    handleEagerReturn,
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const ty = callee

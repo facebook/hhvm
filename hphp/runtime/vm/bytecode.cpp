@@ -2076,10 +2076,13 @@ OPTBLD_INLINE JitResumeAddr jitReturnPost(JitReturn retInfo) {
   return JitResumeAddr::none();
 }
 
-OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff) {
+OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff,
+                                  bool asyncEagerReturn = false) {
   vmfp() = sfp;
   pc = LIKELY(sfp != nullptr)
-    ? skipCall(sfp->func()->entry() + callOff)
+    ? asyncEagerReturn
+      ? asyncEagerReturnTarget(sfp->func(), callOff)
+      : skipCall(sfp->func()->entry() + callOff)
     : nullptr;
 }
 
@@ -2093,8 +2096,12 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
   // Grab info from callee's ActRec.
   auto const fp = vmfp();
   auto const func = fp->func();
+  assertx(!suspended || !func->isEagerOnly());
   auto const sfp = fp->sfp();
   auto const jitReturn = jitReturnPre(fp);
+  auto const asyncEagerReturn =
+    !suspended && func->isAsyncFunction() && fp->isAsyncEagerReturn();
+  assertx(IMPLIES(asyncEagerReturn, sfp));
 
   // Get the return value.
   TypedValue retval = *vmStack().topTV();
@@ -2119,9 +2126,11 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
 
   if (LIKELY(!isResumed(fp))) {
     // If in an eagerly executed async function, wrap the return value into
-    // succeeded StaticWaitHandle. Async eager return requests are currently
-    // not respected, as we don't have a way to obtain the async eager offset.
-    if (UNLIKELY(func->isAsyncFunction()) && !suspended) {
+    // succeeded StaticWaitHandle, unless the caller requested an async eager
+    // return.
+    if (UNLIKELY(func->isAsyncFunction()) &&
+        !suspended &&
+        !asyncEagerReturn) {
       auto const& retvalCell = *tvAssertPlausible(&retval);
       // Heads up that we're assuming CreateSucceeded can't throw, or we won't
       // decref the return value.  (It can't right now.)
@@ -2134,9 +2143,8 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
     vmStack().ret();
     *vmStack().topTV() = retval;
     assertx(vmStack().topTV() == fp->retSlot());
-    // In case async eager return was requested by the caller, pretend that
-    // we did not finish eagerly as we already boxed the value.
-    vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
+    vmStack().topTV()->m_aux.u_asyncEagerReturnFlag =
+      asyncEagerReturn ? static_cast<uint32_t>(-1) : 0;
   } else if (func->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assertx(!sfp);
@@ -2168,7 +2176,7 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
   }
 
   // Return control to the caller.
-  returnToCaller(pc, sfp, jitReturn.callOff);
+  returnToCaller(pc, sfp, jitReturn.callOff, asyncEagerReturn);
 
   return jitReturnPost(jitReturn);
 }
@@ -4943,6 +4951,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
   }
 
   if (!func->isGenerator()) {  // Async function.
+    assertx(!func->isEagerOnly());
     // Create the AsyncFunctionWaitHandle object. Create takes care of
     // copying local variables and iterators.
     auto waitHandle = c_AsyncFunctionWaitHandle::Create<lowPri>(
@@ -5013,6 +5022,7 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
+    assertx(!func->isEagerOnly());
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);

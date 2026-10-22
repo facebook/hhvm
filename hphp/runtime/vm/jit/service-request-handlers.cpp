@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 
-#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -441,19 +439,15 @@ TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
          vmfp()->func()->fullName()->data(), callOffset, isAER ? "a" : "");
 
   // Reconstruct PC so that the subsequent logic have clean reg state.
-  vmpc() = skipCall(vmfp()->func()->at(callOffset));
+  auto const callPC = vmfp()->func()->at(callOffset);
+  vmpc() = skipCall(callPC);
   vmJitReturnAddr() = nullptr;
 
   if (isAER) {
-    // When returning to the interpreted FCall, the execution continues at
-    // the next opcode, not honoring the request for async eager return.
-    // If the callee returned eagerly, we need to wrap the result into
-    // StaticWaitHandle.
     assertx(tvIsPlausible(vmsp()[0]));
     assertx(vmsp()[0].m_aux.u_asyncEagerReturnFlag + 1 < 2);
     if (vmsp()[0].m_aux.u_asyncEagerReturnFlag) {
-      auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(vmsp()[0]);
-      vmsp()[0] = make_tv<KindOfObject>(waitHandle);
+      vmpc() = asyncEagerReturnTarget(vmfp()->func(), callOffset);
     }
   }
 

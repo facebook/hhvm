@@ -1,0 +1,22 @@
+%A
+Function (persistent) (can_async_eager_ret) jit_apply
+%A
+Function (persistent) (can_async_eager_ret) interp_apply
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) (leaf) interp_eager_leaf
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) jit_calls_interp_eager
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) jit_callee_to_jit_caller
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) interp_callee_to_interp_caller
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) interp_callee_to_jit_caller
+%A
+Function (persistent) (can_async_eager_ret) (eager-only) jit_callee_to_interp_caller
+%A
+JIT -> JIT: ok 0x1122334455667788
+Interpreter -> Interpreter: ok 0x2233445566778899
+Interpreter -> JIT: ok 0x33445566778899aa
+JIT -> Interpreter: ok 0x445566778899aabb
+Eager-only Interpreter -> JIT: ok 0x5566778899aabbcc

@@ -39,6 +39,12 @@ Function (persistent) (can_async_eager_ret) suspending_map
 %A
 Function (persistent) (can_async_eager_ret) (eager-only) eager_dict_map
 %A
+Function (persistent) (can_async_eager_ret) (eager-only) eager_memo_throws$memoize_impl
+%A
+Function (persistent) (can_async_eager_ret) (memoize_wrapper) eager_memo_throws
+%A
+Function (persistent) (can_async_eager_ret) catch_eager_memo_throw
+%A
 int(2)
 int(3)
 int(10)
@@ -60,4 +66,5 @@ dict(2) {
   [2]=>
   int(7)
 }
+string(4) "memo"
 int(13)

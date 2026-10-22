@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/member-key.h"
@@ -1135,6 +1136,16 @@ bool instrAllowsFallThru(Op opcode) {
 PC skipCall(PC callPC) {
   assertx(instrMayVMCall(peek_op(callPC)));
   return callPC + instrLen(callPC);
+}
+
+PC asyncEagerReturnTarget(const Func* caller, Offset callOff) {
+  auto const callPC = caller->at(callOff);
+  auto decodePC = callPC;
+  auto const op = decode_op(decodePC);
+  assertx(isFCall(op));
+  auto const fca = decodeFCallArgs(op, decodePC, caller->unit());
+  assertx(fca.asyncEagerOffset != kInvalidOffset);
+  return callPC + fca.asyncEagerOffset;
 }
 
 ImmVector getImmVector(PC opcode) {

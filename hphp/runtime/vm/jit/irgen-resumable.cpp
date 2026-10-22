@@ -177,6 +177,7 @@ template <bool lowPri>
 void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
                 Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
+  assertx(!curFunc(env)->isEagerOnly());
   assertx(resumeMode(env) != ResumeMode::Async);
   // FIXME(T88328140): ifThenElse() emits unreachable code with bad state
   // assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
@@ -275,6 +276,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
 void implAwaitR(IRGS& env, SSATmp* child, Offset suspendOffset,
                 Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
+  assertx(!curFunc(env)->isEagerOnly());
   assertx(resumeMode(env) == ResumeMode::Async);
   // FIXME(T88328140): ifThenElse() emits unreachable code with bad state
   // assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
@@ -514,7 +516,7 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
 }
 
 template<class T>
-void implAwait(IRGS& env, T handleNotFinished) {
+void implAwait(IRGS& env, bool eagerOnly, T handleNotFinished) {
   // Side exit if not an Awaitable. In most conditions IsWaitHandle check
   // will be optimized out.
   auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
@@ -531,13 +533,19 @@ void implAwait(IRGS& env, T handleNotFinished) {
   auto const state = gen(env, LdWHState, child);
   assertx(c_Awaitable::STATE_SUCCEEDED == 0);
   assertx(c_Awaitable::STATE_FAILED == 1);
+  if (eagerOnly && Cfg::HHIR::GenerateAsserts) {
+    auto const finished = gen(env, LteInt, state, cns(env, 1));
+    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), finished);
+  }
 
-  if (childIsSWH || !likelySuspended(child)) {
+  if (childIsSWH || eagerOnly || !likelySuspended(child)) {
     ifThenElse(env,
       [&] (Block* taken) { gen(env, JmpNZero, taken, state); },
       [&] { implAwaitSucceeded(env, child); },
       [&] {
-        if (childIsSWH) return implAwaitFailed(env, child, exitSlow);
+        if (childIsSWH || eagerOnly) {
+          return implAwaitFailed(env, child, exitSlow);
+        }
         ifThenElse(env,
           [&] (Block* taken) {
             gen(env, JmpZero, taken, gen(env, EqInt, state, cns(env, 1)));
@@ -577,7 +585,7 @@ void implAwait(IRGS& env, T handleNotFinished) {
 }
 
 void emitWHResult(IRGS& env) {
-  implAwait(env, [&] (SSATmp*, Block* exit) {
+  implAwait(env, false, [&] (SSATmp*, Block* exit) {
     gen(env, Jmp, exit);
   });
 }
@@ -586,7 +594,8 @@ void emitAwait(IRGS& env) {
   assertx(curFunc(env)->isAsync());
   assertx(spOffBCFromStackBase(env) == spOffEmpty(env) + 1);
 
-  implAwait(env, [&] (SSATmp* child, Block* exit) {
+  implAwait(env, curFunc(env)->isEagerOnly(),
+            [&] (SSATmp* child, Block* exit) {
     // Work in progress: fast path not supported yet
     if (curFunc(env)->isAsyncGenerator() &&
         resumeMode(env) == ResumeMode::Async) {
@@ -602,7 +611,7 @@ void emitAwait(IRGS& env) {
     } else {
       implAwaitE<false>(env, child, bcOff(env), nextBcOff(env));
     }
-  });
+            });
 }
 
 void emitAwaitAll(IRGS& env, LocalRange locals) {
@@ -641,6 +650,15 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
     }
     return cnt;
   }();
+
+  if (curFunc(env)->isEagerOnly()) {
+    assertx(!suspendInJitNotSupported);
+    if (Cfg::HHIR::GenerateAsserts) {
+      gen(env, JmpNZero, makeUnreachable(env, ASSERT_REASON), cnt);
+    }
+    push(env, cns(env, TInitNull));
+    return;
+  }
 
   if (suspendInJitNotSupported) {
     // Side-exit if CountWHNotDone was non-zero.
@@ -698,6 +716,11 @@ void emitAwaitLowPri(IRGS& env) {
 
   if (!Cfg::Eval::EnableLowPriorityAwaitables) {
     push(env, cns(env, TInitNull));
+    return;
+  }
+
+  if (curFunc(env)->isEagerOnly()) {
+    gen(env, Unreachable, ASSERT_REASON);
     return;
   }
 

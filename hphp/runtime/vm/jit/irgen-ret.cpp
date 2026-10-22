@@ -278,6 +278,11 @@ void emitRetCSuspended(IRGS& env) {
   assertx(curFunc(env)->isAsyncFunction());
   assertx(resumeMode(env) == ResumeMode::None);
 
+  if (curFunc(env)->isEagerOnly()) {
+    gen(env, Unreachable, ASSERT_REASON);
+    return;
+  }
+
   if (isInlining(env)) {
     suspendFromInlined(env, pop(env, DataTypeGeneric));
   } else {

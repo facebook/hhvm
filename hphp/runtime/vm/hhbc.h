@@ -432,6 +432,7 @@ bool hasImmVector(Op opcode);
 int instrLen(PC opcode);
 
 PC skipCall(PC pc);
+PC asyncEagerReturnTarget(const Func* caller, Offset callOff);
 
 /*
  * The returned struct has normalized variable-sized immediates. u must be

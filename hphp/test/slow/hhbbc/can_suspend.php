@@ -87,6 +87,20 @@ async function eager_dict_map(
   );
 }
 
+<<__Memoize>>
+async function eager_memo_throws(): Awaitable<int> {
+  throw new Exception('memo');
+}
+
+async function catch_eager_memo_throw(): Awaitable<string> {
+  try {
+    await eager_memo_throws();
+    return 'unexpected';
+  } catch (Exception $exception) {
+    return $exception->getMessage();
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
   var_dump(HH\Asio\join(eager_leaf(1)));
@@ -101,5 +115,6 @@ function main(): void {
   var_dump(HH\Asio\join(eager_map(vec[1, 2])));
   var_dump(HH\Asio\join(suspending_map()));
   var_dump(HH\Asio\join(eager_dict_map(dict[3 => 1, 2 => 3])));
+  var_dump(HH\Asio\join(catch_eager_memo_throw()));
   var_dump(HH\Asio\join(suspending_chain(12)));
 }

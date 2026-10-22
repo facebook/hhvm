@@ -48,6 +48,9 @@ async function main() {
   HH\SimpleLock\unlock('sync');
   fb_end_user_func_async($func);
 
+  await HH\SimpleLock\lock('thread_lock1');
+  HH\SimpleLock\unlock('thread_lock1');
+
   HH\SimpleLock\unlock('main_lock2');
   await HH\SimpleLock\lock('end_lock');
 

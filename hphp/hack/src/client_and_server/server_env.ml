@@ -321,6 +321,12 @@ type init_env = {
 }
 [@@deriving show]
 
+type type_check_testing_hooks = {
+  after_indexing: unit -> unit;
+  before_file_checks: Relative_path.t list -> unit;
+  after_file_check: Relative_path.t -> unit;
+}
+
 (** In addition to this environment, many functions are storing and
     updating ASTs, NASTs, and types in a shared space
     (see respectively Parser_heap, Naming_table, Typing_env).
@@ -386,6 +392,7 @@ type env = {
     genv ->
     env ->
     (Unix.file_descr * env Multi_threaded_call.interrupt_handler) list;
+  type_check_testing_hooks: type_check_testing_hooks option; [@opaque]
   nonpersistent_client_pending_command_needs_full_check:
     ((env -> env) * string * Client_provider.client) option;
       [@opaque]

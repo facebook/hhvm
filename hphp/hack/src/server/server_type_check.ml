@@ -381,6 +381,7 @@ let do_type_checking
                   during_init && Server_env.discard_warnings env)
                genv
                env)
+          ~type_check_testing_hooks:env.type_check_testing_hooks
           ~warnings_saved_state:
             Server_env.(env.init_env.mergebase_warning_hashes)
       in
@@ -499,6 +500,9 @@ let quantile ~index ~count : Relative_path.Set.t -> Relative_path.Set.t =
   in
   pop_quantiles index files |> Relative_path.Set.of_list
 
+let invoke_testing_hook_after_indexing hooks =
+  Option.iter hooks ~f:(fun hooks -> hooks.Server_env.after_indexing ())
+
 let type_check_core
     ?agent_session_id
     (genv : genv)
@@ -577,6 +581,7 @@ let type_check_core
   let (env, defs_per_file_parsed) =
     indexing genv env files_to_parse cgroup_steps
   in
+  invoke_testing_hook_after_indexing env.type_check_testing_hooks;
 
   let hs = Shared_mem.SMTelemetry.heap_size () in
   let telemetry =

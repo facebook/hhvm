@@ -79,6 +79,7 @@ val go_with_interrupt :
   longlived_workers:bool ->
   hh_distc_config:distc_config ->
   check_info:Typing_service_types.check_info ->
+  type_check_testing_hooks:Server_env.type_check_testing_hooks option ->
   warnings_saved_state:Warnings_saved_state.t option ->
   ('env * result) job_result
 

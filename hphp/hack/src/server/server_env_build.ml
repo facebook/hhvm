@@ -61,6 +61,7 @@ let make_env ~init_id ~deps_mode ?diagnostics config : Server_env.env =
     changed_files = Relative_path.Set.empty;
     prechecked_files = Prechecked_files_disabled;
     interrupt_handlers = (fun _ _ -> []);
+    type_check_testing_hooks = None;
     nonpersistent_client_pending_command_needs_full_check = None;
     why_needs_server_type_check = ("init", "");
     init_env =

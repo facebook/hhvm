@@ -102,6 +102,7 @@ let test () =
       ~hh_distc_config:None
       ~warnings_saved_state:None
       ~check_info
+      ~type_check_testing_hooks:None
   in
   (* Assert that we got the errors in bar2 only... *)
   Test.assert_diagnostics diagnostics expected_errors;

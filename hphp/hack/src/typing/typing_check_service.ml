@@ -481,9 +481,16 @@ type workitem_accumulator = {
   stats: Hack_event_logger.ProfileTypeCheck.stats;
 }
 
+let invoke_testing_hook_after_file_check hooks ~deferred_workitems file =
+  (* A deferred check queues declaration work and a retry of this file, so it
+     has not completed and must not invoke the completion hook. *)
+  if List.is_empty deferred_workitems then
+    Option.iter hooks ~f:(fun hooks -> hooks.Server_env.after_file_check file)
+
 let process_one_workitem
     ~ctx
     ~(check_info : check_info)
+    ~(type_check_testing_hooks : Server_env.type_check_testing_hooks option)
     ~batch_info
     ~memory_cap
     ~longlived_workers
@@ -598,7 +605,7 @@ let process_one_workitem
 
   (match fn with
   | Declare _ -> ()
-  | Check _ ->
+  | Check checked_file ->
     Hack_event_logger.ProfileTypeCheck.process_workitem
       ~batch_info
       ~workitem_index:(ProcessFilesTally.count tally)
@@ -610,7 +617,11 @@ let process_one_workitem
       ~workitem_ends_under_cap
       ~workitem_start_stats:stats
       ~workitem_end_stats
-      ~workitem_end_second_stats);
+      ~workitem_end_second_stats;
+    invoke_testing_hook_after_file_check
+      type_check_testing_hooks
+      ~deferred_workitems
+      checked_file.path);
 
   ( { TypingProgress.deferred_workitems; continue = workitem_ends_under_cap },
     { diagnostics; map_reduce_data; tally; stats = final_stats } )
@@ -623,6 +634,7 @@ let process_workitems
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
+    ~(type_check_testing_hooks : Server_env.type_check_testing_hooks option)
     ~(worker_id : string)
     ~(batch_number : int)
     ~(typecheck_info : Hack_event_logger.ProfileTypeCheck.typecheck_info) :
@@ -660,6 +672,7 @@ let process_workitems
     @@ process_one_workitem
          ~ctx
          ~check_info
+         ~type_check_testing_hooks
          ~batch_info
          ~memory_cap
          ~longlived_workers
@@ -698,6 +711,7 @@ let load_and_process_workitems
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
+    ~(type_check_testing_hooks : Server_env.type_check_testing_hooks option)
     ~(worker_id : string)
     ~(batch_number : int)
     ~(typecheck_info : Hack_event_logger.ProfileTypeCheck.typecheck_info) :
@@ -719,6 +733,7 @@ let load_and_process_workitems
     ~memory_cap
     ~longlived_workers
     ~check_info
+    ~type_check_testing_hooks
     ~worker_id
     ~batch_number
     ~typecheck_info
@@ -1195,6 +1210,7 @@ let process_in_parallel
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
+    ~(type_check_testing_hooks : Server_env.type_check_testing_hooks option)
     ~warnings_saved_state
     ~(typecheck_info : Hack_event_logger.ProfileTypeCheck.typecheck_info) :
     _
@@ -1224,6 +1240,7 @@ let process_in_parallel
         ~memory_cap
         ~longlived_workers
         ~check_info
+        ~type_check_testing_hooks
         ~typecheck_info
         ~worker_id
         ~batch_number:
@@ -1345,6 +1362,16 @@ type result = {
   time_first_error: seconds_since_epoch option;
 }
 
+let invoke_testing_hook_before_file_checks hooks ~workers ~hh_distc_config files
+    =
+  if
+    Option.is_some hooks
+    && (Option.is_some workers || Option.is_some hh_distc_config)
+  then
+    failwith
+      "Typechecking test hooks require workers=None and hh_distc_config=None";
+  Option.iter hooks ~f:(fun hooks -> hooks.Server_env.before_file_checks files)
+
 let go_with_interrupt
     (ctx : Provider_context.t)
     (workers : Multi_worker.worker list option)
@@ -1355,7 +1382,13 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(hh_distc_config : distc_config)
     ~(check_info : check_info)
+    ~(type_check_testing_hooks : Server_env.type_check_testing_hooks option)
     ~warnings_saved_state : (_ * result) job_result =
+  invoke_testing_hook_before_file_checks
+    type_check_testing_hooks
+    ~workers
+    ~hh_distc_config
+    fnl;
   let typecheck_info =
     Hack_event_logger.ProfileTypeCheck.get_typecheck_info
       ~init_id:check_info.init_id
@@ -1485,6 +1518,7 @@ let go_with_interrupt
         ~memory_cap:(Some 500 (* megabytes *))
         ~longlived_workers
         ~check_info
+        ~type_check_testing_hooks
         ~warnings_saved_state
         ~typecheck_info
     )
@@ -1526,6 +1560,7 @@ let go
       ~longlived_workers
       ~hh_distc_config
       ~check_info
+      ~type_check_testing_hooks:None
       ~warnings_saved_state
   in
   assert (Option.is_none unfinished_and_reason);

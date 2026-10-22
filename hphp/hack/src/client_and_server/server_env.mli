@@ -194,6 +194,19 @@ module RecheckLoopStats : sig
   val record_result_sent_ts : t -> seconds_since_epoch option -> t
 end
 
+(** Only to be used for testing. The functions in this record are called at predefined stages of
+    type-checking, allowing to communicate with a test environment. The idea is to observe what the
+    type-checker is doing and trigger actions (e.g., changing files on disk). *)
+type type_check_testing_hooks = {
+  after_indexing: unit -> unit;
+      (** Called from [Server_type_check.type_check_core] after [indexing] *)
+  before_file_checks: Relative_path.t list -> unit;
+      (** Called at entry to [Typing_check_service.go_with_interrupt] with its input file list in
+          order. *)
+  after_file_check: Relative_path.t -> unit;
+      (** Called from [Typing_check_service.process_one_workitem] after a [Check] completes. *)
+}
+
 (** The environment constantly maintained by the server.
     In addition to this environment, many functions are storing and
     updating ASTs, NASTs, and types in a shared space
@@ -263,6 +276,8 @@ type env = {
     genv ->
     env ->
     (Unix.file_descr * env Multi_threaded_call.interrupt_handler) list;
+  type_check_testing_hooks: type_check_testing_hooks option; [@opaque]
+      (** Should be [None] unless running tests. See [type_check_testing_hooks]. *)
   nonpersistent_client_pending_command_needs_full_check:
     ((env -> env) * string * Client_provider.client) option;
       [@opaque]

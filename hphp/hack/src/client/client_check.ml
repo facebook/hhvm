@@ -1116,7 +1116,7 @@ let main_internal
     end else
       List.iter responses ~f:(Printf.printf "%s\n");
     Lwt.return (Exit_status.No_error, telemetry)
-  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS
+  | Client_env.MODE_ISOLATION
       ({
          Server_isolation_types.mode = Server_isolation_types.Move_to parent;
          _;
@@ -1154,8 +1154,7 @@ let main_internal
         ~status
     in
     Lwt.return (exit_status, Telemetry.create ())
-  | Client_env.MODE_FIND_ISOLATABLE_CLUSTERS
-      (options : Server_isolation_types.options) ->
+  | Client_env.MODE_ISOLATION (options : Server_isolation_types.options) ->
     (* Clusters are written by the server, never returned: there can be
        hundreds of thousands. With [--json] and no file of the caller's own,
        they go to a temporary one that is printed and removed here, so stdout

@@ -1873,7 +1873,7 @@ class IsolationMoveToTests(TestCase[EdenfsWatcherTestDriver]):
     def move_to(self, seed_dir: str, parent: str) -> Tuple[int, dict[str, object]]:
         stdout, _, retcode = self.test_driver.run_check(
             options=[
-                "--find-isolatable-clusters",
+                "--isolation",
                 "--isolation-seed-dir",
                 seed_dir,
                 "--isolation-move-to",

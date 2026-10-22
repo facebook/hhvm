@@ -186,14 +186,14 @@ class TestValidateIsolation(TestCase[common_tests.CommonTestDriver]):
         # Reads the dependency graph rather than the decl heaps, so it is the
         # probe for edges leaking out of the typecheck validation runs.
         clusters_before, _, _ = self.test_driver.run_check(
-            options=["--find-isolatable-clusters", "--json"]
+            options=["--isolation", "--json"]
         )
 
         first = validate()
 
         after = errors_from_a_recheck()
         clusters_after, _, _ = self.test_driver.run_check(
-            options=["--find-isolatable-clusters", "--json"]
+            options=["--isolation", "--json"]
         )
         # The arity error is the point: it is reported off the rebuilt decl of
         # the very file validation took away and put back.

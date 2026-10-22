@@ -112,7 +112,7 @@ class TestFreshInit(common_tests.CommonTests):
                 self.assertTrue(stderr.startswith("Invalid JSON input:"), stderr)
                 self.assertEqual(input_error_exit_code, retcode)
 
-    def test_find_isolatable_clusters(self) -> None:
+    def test_isolation(self) -> None:
         files = {
             "isolation_seed.php": (
                 "<?hh\nfunction isolation_seed(): void {\n  isolation_seed();\n}\n"
@@ -227,7 +227,7 @@ class TestFreshInit(common_tests.CommonTests):
         )
         output, _ = self.test_driver.check_cmd(
             expected_output=None,
-            options=["--find-isolatable-clusters", "--isolation-grow"],
+            options=["--isolation", "--isolation-grow"],
         )
         lines = output.splitlines()
 
@@ -261,7 +261,7 @@ class TestFreshInit(common_tests.CommonTests):
         json_output, _ = self.test_driver.check_cmd(
             expected_output=None,
             options=[
-                "--find-isolatable-clusters",
+                "--isolation",
                 "--isolation-grow",
                 "--json",
             ],
@@ -343,7 +343,7 @@ class TestFreshInit(common_tests.CommonTests):
         # apart, rather than merely reading the flag back out.
         measured_output, _ = self.test_driver.check_cmd(
             expected_output=None,
-            options=["--find-isolatable-clusters", "--json"],
+            options=["--isolation", "--json"],
         )
         (_, measured_doc) = parse_isolation_json(measured_output)
         measured = measured_doc["summary"]
@@ -375,7 +375,7 @@ class TestFreshInit(common_tests.CommonTests):
 
         output, _ = self.test_driver.check_cmd(
             expected_output=None,
-            options=["--find-isolatable-clusters", "--isolation-grow"],
+            options=["--isolation", "--isolation-grow"],
         )
         lines = output.splitlines()
         self.assertEqual(2, len(lines))
@@ -423,7 +423,7 @@ class TestFreshInit(common_tests.CommonTests):
         json_output, _ = self.test_driver.check_cmd(
             expected_output=None,
             options=[
-                "--find-isolatable-clusters",
+                "--isolation",
                 "--isolation-grow",
                 "--isolation-seed-list",
                 seed_list,
@@ -474,7 +474,7 @@ class TestFreshInit(common_tests.CommonTests):
         json_output, _ = self.test_driver.check_cmd(
             expected_output=None,
             options=[
-                "--find-isolatable-clusters",
+                "--isolation",
                 "--isolation-grow",
                 "--isolation-max-cluster-size",
                 "3",
@@ -497,7 +497,7 @@ class TestFreshInit(common_tests.CommonTests):
         self.test_driver.start_hh_server(changed_files=[], args=["--no-load"])
         stdout, _, retcode = self.test_driver.run_check(
             options=[
-                "--find-isolatable-clusters",
+                "--isolation",
                 "--isolation-seed-dir",
                 "no_such_dir",
                 "--isolation-move-to",

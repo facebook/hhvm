@@ -581,10 +581,8 @@ let parse_check_args cmd ~from_default : Client_env.client_check_env =
         Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x)),
         " finds references of the provided class name",
         (Arg_user_facing, Help_modes) );
-      ( "--find-isolatable-clusters",
-        Arg.Unit
-          (fun () ->
-            set_mode (MODE_FIND_ISOLATABLE_CLUSTERS (isolation_options ()))),
+      ( "--isolation",
+        Arg.Unit (fun () -> set_mode (MODE_ISOLATION (isolation_options ()))),
         " find clusters of files that can be isolated from the codebase",
         (Arg_non_user_facing, Help_modes) );
       ( "--isolation-movable",
@@ -1329,7 +1327,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   let mode =
     (* Isolation options are meaningless for every other mode. *)
     match Option.value !mode ~default:MODE_STATUS with
-    | MODE_FIND_ISOLATABLE_CLUSTERS _ ->
+    | MODE_ISOLATION _ ->
       let options = isolation_options () in
       (match
          Client_isolation_args.validate
@@ -1350,7 +1348,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
        with
       | Ok () -> ()
       | Error message -> Die.bad_args ~message ~usage:None);
-      MODE_FIND_ISOLATABLE_CLUSTERS options
+      MODE_ISOLATION options
     | mode -> mode
   in
   (* fixups *)

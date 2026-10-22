@@ -2916,7 +2916,7 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
       }
       if (inst.is(CheckArrayCOW)) {
         auto const id = penv.env.asetMap[inst.src(0)];
-        if (id > 0 && state.asets[id].upper_bound == 1) {
+        if (id >= 0 && state.asets[id].upper_bound == 1) {
           FTRACE(2, "    convert inst to AssertType:  {}\n", inst);
           assertx(inst.src(0)->type().subtypeOfAny(TCounted));
           auto inst_block = inst.block();

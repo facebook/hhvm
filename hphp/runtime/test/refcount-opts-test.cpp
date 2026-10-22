@@ -1774,9 +1774,8 @@ TEST(RefcountOpts, FoldArrayCOWBounds) {
       // Expected: one reference selects unique and preserves the refined SSA
       // destination; two select copy, making that destination's use unreachable.
       // An unknown Vec may be unique, shared, or static, so retain its check.
-      // TODO: Include alias set zero in the uniqueness optimization.
       // TODO: Select copy when the lower bound proves at least two references.
-      auto const folded = refs == 1 && !firstSet;
+      auto const folded = refs == 1;
       EXPECT_EQ(folded ? AssertType : CheckArrayCOW, cow->op());
       if (folded) {
         EXPECT_EQ(Jmp, unit.entry()->back().op());

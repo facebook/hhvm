@@ -10,9 +10,12 @@
 import json
 import os
 import os.path
-import unittest
+import time
 
 from watchman.integration.lib import WatchmanTestCase
+
+
+IDLE_REAP_AGE_SECONDS = 10
 
 
 @WatchmanTestCase.expand_matrix
@@ -20,10 +23,15 @@ class TestAgeOutWatch(WatchmanTestCase.WatchmanTestCase):
     def makeRootAndConfig(self):
         root = self.mkdtemp()
         with open(os.path.join(root, ".watchmanconfig"), "w") as f:
-            f.write(json.dumps({"idle_reap_age_seconds": 3}))
+            f.write(json.dumps({"idle_reap_age_seconds": IDLE_REAP_AGE_SECONDS}))
         return root
 
-    @unittest.skip("This test is fundamentally flaky")
+    def assertNotReaped(self, root) -> None:
+        time.sleep(IDLE_REAP_AGE_SECONDS * 2)
+        self.assertTrue(
+            self.rootIsWatched(root), "%s should not have been reaped" % root
+        )
+
     def test_watchReap(self) -> None:
         root = self.makeRootAndConfig()
         self.watchmanCommand("watch", root)
@@ -31,19 +39,15 @@ class TestAgeOutWatch(WatchmanTestCase.WatchmanTestCase):
         # make sure that we don't reap when there are registered triggers
         self.watchmanCommand("trigger", root, {"name": "t", "command": ["true"]})
 
-        self.assertWaitFor(
-            lambda: self.rootIsWatched(root),
-            message="%s was not watched by watchman-wait" % root,
-        )
-
-        self.watchmanCommand("trigger-del", root, "t")
+        self.assertNotReaped(root)
 
         # Make sure that we don't reap while we hold a subscription
         self.watchmanCommand("subscribe", root, "s", {"fields": ["name"]})
+        self.watchmanCommand("trigger-del", root, "t")
 
         # subscription won't stick in cli mode
         if self.transport != "cli":
-            self.assertWaitFor(lambda: self.rootIsWatched(root))
+            self.assertNotReaped(root)
 
             # let's verify that we can safely reap two roots at once without
             # causing a deadlock
